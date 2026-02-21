@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import Sidebar from '@/components/layout/Sidebar'
-import TopBar from '@/components/layout/TopBar'
+import Sidebar from '@/components/layout/TopBar/Sidebar/Sidebar'
+import TopBar from '@/components/layout/TopBar/TopBar'
 
 export default async function DashboardLayout({
   children,
