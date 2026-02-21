@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { QrCode, Search, Users, Clock, Crown } from 'lucide-react'
 import clsx from 'clsx'
 import type { Database } from '@/lib/supabase/database.types'
-import QRModal from '@/components/guests/QrModal'
+import QrModal from '@/components/guests/QrModal'
 
 type Guest = Database['public']['Tables']['guests']['Row']
 
@@ -212,7 +212,7 @@ export default function GuestTable({ guests, eventId }: { guests: Guest[]; event
       </div>
 
       {selectedQR && (
-        <QRModal guest={selectedQR} onClose={() => setSelectedQR(null)} />
+        <QrModal guest={selectedQR} onClose={() => setSelectedQR(null)} />
       )}
     </>
   )

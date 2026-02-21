@@ -5,7 +5,7 @@ import { QrCode, Search, Users, Clock, Crown, Plus, ChevronDown } from 'lucide-r
 import clsx from 'clsx'
 import Link from 'next/link'
 import type { Database } from '@/lib/supabase/database.types'
-import QRModal from '@/components/guests/QrModal'
+import QrModal from '@/components/guests/QrModal'
 
 type Guest = Database['public']['Tables']['guests']['Row']
 type Event = { id: string; title: string; status: string }
@@ -287,7 +287,7 @@ export default function GuestsPageClient({
       </div>
 
       {selectedQR && (
-        <QRModal guest={selectedQR} onClose={() => setSelectedQR(null)} />
+        <QrModal guest={selectedQR} onClose={() => setSelectedQR(null)} />
       )}
     </div>
   )
