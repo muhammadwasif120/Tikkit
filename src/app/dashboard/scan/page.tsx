@@ -201,14 +201,12 @@ export default function ScannerPage() {
       </div>
 
       {/* Camera view */}
-      {scanning && (
-        <div className="card">
+        <div className={scanning ? 'card' : 'hidden'}>
           <div id="qr-reader" className="rounded-lg overflow-hidden" />
           <p className="text-xs text-center text-gray-500 mt-3">
             Point camera at guest QR code
           </p>
         </div>
-      )}
 
       {/* Result */}
       {result && (
