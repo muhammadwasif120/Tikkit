@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, Plus, Upload, FileSpreadsheet, X, Check, AlertCircle, Download } from 'lucide-react'
@@ -18,7 +18,8 @@ type ImportRow = {
   error?: string
 }
 
-export default function AddGuestPage({ params }: { params: { id: string } }) {
+export default function AddGuestPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params)
   const router = useRouter()
   const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -50,7 +51,7 @@ export default function AddGuestPage({ params }: { params: { id: string } }) {
     setError(null)
 
     const { error } = await supabase.from('guests').insert({
-      event_id: params.id,
+      event_id: resolvedParams.id,
       full_name: form.full_name,
       email: form.email || null,
       phone: form.phone || null,
@@ -66,7 +67,7 @@ export default function AddGuestPage({ params }: { params: { id: string } }) {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push(`/dashboard/events/${params.id}`)
+      router.push(`/dashboard/events/${resolvedParams.id}`)
       router.refresh()
     }
   }
@@ -77,7 +78,7 @@ export default function AddGuestPage({ params }: { params: { id: string } }) {
     setError(null)
 
     const { error } = await supabase.from('guests').insert({
-      event_id: params.id,
+      event_id: resolvedParams.id,
       full_name: form.full_name,
       email: form.email || null,
       phone: form.phone || null,
@@ -167,9 +168,9 @@ export default function AddGuestPage({ params }: { params: { id: string } }) {
     const validRows = importRows.filter(r => r.status === 'ready')
     if (!validRows.length) return
     setImporting(true)
-    const inserts = validRows.map(row => ({ event_id: params.id, full_name: row.full_name, email: row.email || null, phone: row.phone || null, gender: (row.gender as 'male' | 'female' | 'other' | 'prefer_not_to_say') || null, is_vip: row.is_vip ?? false, plus_one: row.plus_one ?? false, plus_one_name: row.plus_one_name || null, status: 'invited' as const }))
+    const inserts = validRows.map(row => ({ event_id: resolvedParams.id, full_name: row.full_name, email: row.email || null, phone: row.phone || null, gender: (row.gender as 'male' | 'female' | 'other' | 'prefer_not_to_say') || null, is_vip: row.is_vip ?? false, plus_one: row.plus_one ?? false, plus_one_name: row.plus_one_name || null, status: 'invited' as const }))
     const { error } = await supabase.from('guests').insert(inserts)
-    if (error) { setError(error.message) } else { setImportDone(true); setTimeout(() => { router.push(`/dashboard/events/${params.id}`); router.refresh() }, 1500) }
+    if (error) { setError(error.message) } else { setImportDone(true); setTimeout(() => { router.push(`/dashboard/events/${resolvedParams.id}`); router.refresh() }, 1500) }
     setImporting(false)
   }
 
@@ -187,7 +188,7 @@ export default function AddGuestPage({ params }: { params: { id: string } }) {
   return (
     <div className="max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href={`/dashboard/events/${params.id}`} className="text-gray-400 hover:text-white transition-colors">
+        <Link href={`/dashboard/events/${resolvedParams.id}`} className="text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
@@ -269,7 +270,7 @@ export default function AddGuestPage({ params }: { params: { id: string } }) {
           {error && <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">{error}</div>}
 
           <div className="flex items-center gap-3 justify-end">
-            <Link href={`/dashboard/events/${params.id}`} className="btn-secondary">Cancel</Link>
+            <Link href={`/dashboard/events/${resolvedParams.id}`} className="btn-secondary">Cancel</Link>
             <button type="button" onClick={handleAddAnother} disabled={loading || !form.full_name} className="btn-secondary">
               <Plus className="w-4 h-4" /> Save & Add Another
             </button>
