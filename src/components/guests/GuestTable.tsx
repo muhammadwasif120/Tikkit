@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { QrCode, Search, Users, Clock, Crown } from 'lucide-react'
 import clsx from 'clsx'
 import type { Database } from '@/lib/supabase/database.types'
-import QRModal from '@/components/guests/QRModal'
+import QRModal from '@/components/guests/QrModal'
 
 type Guest = Database['public']['Tables']['guests']['Row']
 
