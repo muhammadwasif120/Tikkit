@@ -1,14 +1,15 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { BarChart3, Crown, CheckCircle, RefreshCw, Star, Users, Mail, Download, X, Send, ChevronDown, TrendingUp, Clock } from 'lucide-react'
+import { BarChart3, Crown, CheckCircle, RefreshCw, Star, Users, Mail, Download, X, Send, ChevronDown, TrendingUp, Clock, DollarSign } from 'lucide-react'
 import clsx from 'clsx'
+import FinanceTab from '@/components/analytics/FinanceTab'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Guest = Database['public']['Tables']['guests']['Row']
-type Event = { id: string; title: string; capacity: number; status: string; date_start: string }
+type Event = { id: string; title: string; capacity: number; status: string; date_start: string; ticket_price: number; budget: number }
 type ScanLog = { event_id: string; scan_type: string; scanned_at: string }
-type Tab = 'overview' | 'audience'
+type Tab = 'overview' | 'audience' | 'finance'
 
 type AudienceGuest = {
   email: string
@@ -34,10 +35,12 @@ export default function AnalyticsClient({
   events,
   guests,
   scanLogs,
+  discountCodes,
 }: {
   events: Event[]
   guests: Guest[]
   scanLogs: ScanLog[]
+  discountCodes: any[]
 }) {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [selectedEventId, setSelectedEventId] = useState<string>(events[0]?.id ?? '')
@@ -190,6 +193,7 @@ export default function AnalyticsClient({
         {[
           { key: 'overview' as Tab, label: 'Overview', icon: BarChart3 },
           { key: 'audience' as Tab, label: 'Audience', icon: Users },
+          { key: 'finance' as Tab, label: 'Finance', icon: DollarSign },
         ].map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             className={clsx('flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all',
@@ -418,6 +422,16 @@ export default function AnalyticsClient({
             </div>
           ))}
         </div>
+      )}
+
+
+      {/* FINANCE TAB */}
+      {activeTab === 'finance' && (
+        <FinanceTab
+          events={events}
+          guests={guests as any}
+          discountCodes={discountCodes}
+        />
       )}
 
       {/* EMAIL MODAL */}

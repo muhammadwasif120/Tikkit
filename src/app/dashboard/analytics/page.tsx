@@ -7,7 +7,7 @@ export default async function AnalyticsPage() {
 
   const { data: events } = await supabase
     .from('events')
-    .select('id, title, capacity, status, date_start')
+    .select('id, title, capacity, status, date_start, ticket_price, budget')
     .eq('organizer_id', user!.id)
 
   const eventIds = events?.map(e => e.id) ?? []
@@ -22,11 +22,17 @@ export default async function AnalyticsPage() {
     .select('event_id, scan_type, scanned_at')
     .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
 
+  const { data: discountCodes } = await supabase
+    .from('discount_codes')
+    .select('*')
+    .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
+
   return (
     <AnalyticsClient
       events={events ?? []}
       guests={guests ?? []}
       scanLogs={scanLogs ?? []}
+      discountCodes={discountCodes ?? []}
     />
   )
 }
