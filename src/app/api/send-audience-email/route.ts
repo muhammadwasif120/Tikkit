@@ -27,7 +27,7 @@ export async function POST(req: Request) {
         const personalised = body.replace(/\{name\}/g, firstName)
 
         return resend.emails.send({
-          from: 'Tikkit <noreply@yourdomain.com>',
+          from: 'Tikkit <onboarding@resend.dev>',
           to: recipient.email,
           subject,
           html: `
