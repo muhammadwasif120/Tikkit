@@ -1,9 +1,12 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Html5Qrcode } from 'html5-qrcode'
-import { CheckCircle, XCircle, ScanLine, AlertCircle } from 'lucide-react'
+import { CheckCircle, XCircle, ScanLine, X, LogIn, LogOut, Crown, Wifi, Camera, Hash } from 'lucide-react'
+import { notifyEntryScan, notifyExitScan } from '@/app/actions/scanNotificationActions'
+
+const OVERLAY_DURATION = 8000
 
 type ScanResult = {
   success: boolean
@@ -11,6 +14,114 @@ type ScanResult = {
   guestName?: string
   isVip?: boolean
   scanType?: 'entry' | 'exit'
+  email?: string
+  ticketType?: string
+  checkedInAt?: string
+}
+
+function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: () => void }) {
+  useEffect(() => {
+    const timer = setTimeout(onClose, OVERLAY_DURATION)
+    return () => clearTimeout(timer)
+  }, [onClose])
+
+  const isSuccess = result.success
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
+      <div className={`relative w-full max-w-sm rounded-2xl border shadow-2xl overflow-hidden animate-slide-up ${
+        isSuccess ? 'bg-[#0a1a0a] border-green-500/40' : 'bg-[#1a0a0a] border-red-500/40'
+      }`}>
+        <div className={`h-1 w-full ${isSuccess ? 'bg-green-500' : 'bg-red-500'}`} />
+        <div className="p-6">
+          <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+          <div className="flex items-center gap-3 mb-5">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+              isSuccess ? 'bg-green-500/20' : 'bg-red-500/20'
+            }`}>
+              {isSuccess
+                ? <CheckCircle className="w-6 h-6 text-green-400" />
+                : <XCircle className="w-6 h-6 text-red-400" />
+              }
+            </div>
+            <div>
+              <p className={`font-semibold ${isSuccess ? 'text-green-400' : 'text-red-400'}`}>
+                {result.message}
+              </p>
+              {result.scanType && (
+                <div className="flex items-center gap-1 mt-0.5">
+                  {result.scanType === 'entry'
+                    ? <LogIn className="w-3 h-3 text-gray-500" />
+                    : <LogOut className="w-3 h-3 text-gray-500" />
+                  }
+                  <span className="text-xs text-gray-500 capitalize">{result.scanType}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          {result.guestName && (
+            <>
+              <div className="h-px bg-white/8 mb-5" />
+              <div className="space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5 uppercase tracking-wider">Guest</p>
+                    <p className="text-xl font-bold text-white leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                      {result.guestName}
+                    </p>
+                  </div>
+                  {result.isVip && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-500/15 border border-yellow-500/30 shrink-0 mt-1">
+                      <Crown className="w-3.5 h-3.5 text-yellow-400" />
+                      <span className="text-xs font-bold text-yellow-400 tracking-wide">VIP</span>
+                    </div>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {result.email && (
+                    <div className="col-span-2 bg-white/5 rounded-lg px-3 py-2">
+                      <p className="text-xs text-gray-500 mb-0.5">Email</p>
+                      <p className="text-sm text-gray-200 truncate">{result.email}</p>
+                    </div>
+                  )}
+                  {result.ticketType && (
+                    <div className="bg-white/5 rounded-lg px-3 py-2">
+                      <p className="text-xs text-gray-500 mb-0.5">Ticket</p>
+                      <p className="text-sm text-gray-200 capitalize">{result.ticketType.replace(/_/g, ' ')}</p>
+                    </div>
+                  )}
+                  {result.checkedInAt && (
+                    <div className="bg-white/5 rounded-lg px-3 py-2">
+                      <p className="text-xs text-gray-500 mb-0.5">
+                        {result.scanType === 'exit' ? 'Checked Out' : 'Checked In'}
+                      </p>
+                      <p className="text-sm text-gray-200">
+                        {new Date(result.checkedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+          <div className="mt-5 h-0.5 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full ${isSuccess ? 'bg-green-500' : 'bg-red-500'}`}
+              style={{ animation: `shrink ${OVERLAY_DURATION}ms linear forwards` }}
+            />
+          </div>
+        </div>
+      </div>
+      <style jsx>{`
+        @keyframes shrink {
+          from { width: 100%; }
+          to { width: 0%; }
+        }
+      `}</style>
+    </div>
+  )
 }
 
 export default function ScannerPage() {
@@ -21,8 +132,16 @@ export default function ScannerPage() {
   const [eventId, setEventId] = useState<string>('')
   const [events, setEvents] = useState<Array<{ id: string; title: string }>>([])
   const [scanType, setScanType] = useState<'entry' | 'exit'>('entry')
-  const [lastScan, setLastScan] = useState<string>('')
+  const [scanCount, setScanCount] = useState(0)
+  const [pendingStart, setPendingStart] = useState(false)
+
   const cooldownRef = useRef(false)
+  const lastScanRef = useRef('')
+  const eventIdRef = useRef(eventId)
+  const scanTypeRef = useRef(scanType)
+
+  useEffect(() => { eventIdRef.current = eventId }, [eventId])
+  useEffect(() => { scanTypeRef.current = scanType }, [scanType])
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -40,96 +159,134 @@ export default function ScannerPage() {
     loadEvents()
   }, [])
 
-  const startScanner = async () => {
-    if (!eventId) return
-    setScanning(true)
+  const resetForNextScan = useCallback(() => {
     setResult(null)
+    lastScanRef.current = ''
+    cooldownRef.current = false
+  }, [])
 
-    const scanner = new Html5Qrcode('qr-reader')
-    scannerRef.current = scanner
+  const handleScan = useCallback(async (qrCode: string) => {
+    if (cooldownRef.current) return
+    if (qrCode === lastScanRef.current) return
 
-    try {
-      await scanner.start(
-        { facingMode: 'environment' },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        handleScan,
-        () => {}
-      )
-    } catch {
-      setScanning(false)
-      setResult({ success: false, message: 'Camera access denied or unavailable.' })
+    cooldownRef.current = true
+    lastScanRef.current = qrCode
+
+    const { data: { user } } = await supabase.auth.getUser()
+    const currentEventId = eventIdRef.current
+    const currentScanType = scanTypeRef.current
+
+    const { data: guest } = await supabase
+      .from('guests')
+      .select('*')
+      .eq('qr_code', qrCode)
+      .eq('event_id', currentEventId)
+      .single()
+
+    if (!guest) {
+      setResult({ success: false, message: 'QR code not found for this event.' })
+      setTimeout(resetForNextScan, OVERLAY_DURATION)
+      return
     }
+
+    if (guest.status === 'cancelled') {
+      setResult({
+        success: false,
+        message: 'Ticket cancelled.',
+        guestName: guest.full_name,
+        isVip: guest.is_vip,
+        email: guest.email,
+      })
+      setTimeout(resetForNextScan, OVERLAY_DURATION)
+      return
+    }
+
+    if (currentScanType === 'entry' && guest.status === 'checked_in') {
+      setResult({
+        success: false,
+        message: 'Already checked in.',
+        guestName: guest.full_name,
+        isVip: guest.is_vip,
+        email: guest.email,
+        checkedInAt: guest.checked_in_at,
+        scanType: currentScanType,
+      })
+      setTimeout(resetForNextScan, OVERLAY_DURATION)
+      return
+    }
+
+    const newStatus = currentScanType === 'entry' ? 'checked_in' : 'checked_out'
+    const timeField  = currentScanType === 'entry' ? 'checked_in_at' : 'checked_out_at'
+    const now = new Date().toISOString()
+
+    await supabase.from('guests').update({ status: newStatus, [timeField]: now }).eq('id', guest.id)
+    await supabase.from('scan_logs').insert({
+      event_id:   currentEventId,
+      guest_id:   guest.id,
+      scanned_by: user?.id,
+      scan_type:  currentScanType,
+    })
+
+    // Fire-and-forget — don't await so the scan result shows instantly
+    if (currentScanType === 'entry') {
+      notifyEntryScan(currentEventId, guest.full_name, guest.is_vip ?? false)
+    } else {
+      notifyExitScan(currentEventId, guest.full_name)
+    }
+
+    setScanCount((c) => c + 1)
+    setResult({
+      success:     true,
+      message:     currentScanType === 'entry' ? 'Entry granted ✓' : 'Exit recorded ✓',
+      guestName:   guest.full_name,
+      isVip:       guest.is_vip,
+      email:       guest.email,
+      ticketType:  guest.ticket_type,
+      checkedInAt: now,
+      scanType:    currentScanType,
+    })
+
+    setTimeout(resetForNextScan, OVERLAY_DURATION)
+  }, [supabase, resetForNextScan])
+
+  const startScanner = () => {
+    if (!eventId) return
+    setResult(null)
+    setScanCount(0)
+    cooldownRef.current = false
+    lastScanRef.current = ''
+    setScanning(true)
+    setPendingStart(true)
   }
+
+  useEffect(() => {
+    if (!pendingStart) return
+    setPendingStart(false)
+
+    const initScanner = async () => {
+      const scanner = new Html5Qrcode('qr-reader')
+      scannerRef.current = scanner
+      try {
+        await scanner.start(
+          { facingMode: 'environment' },
+          { fps: 10, qrbox: { width: 240, height: 240 } },
+          handleScan,
+          () => {}
+        )
+      } catch {
+        setScanning(false)
+        setResult({ success: false, message: 'Camera access denied or unavailable.' })
+      }
+    }
+
+    initScanner()
+  }, [pendingStart, handleScan])
 
   const stopScanner = async () => {
     if (scannerRef.current?.isScanning) {
       await scannerRef.current.stop()
     }
     setScanning(false)
-  }
-
-  const handleScan = async (qrCode: string) => {
-    if (cooldownRef.current || qrCode === lastScan) return
-    cooldownRef.current = true
-    setLastScan(qrCode)
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    // Find guest
-    const { data: guest } = await supabase
-      .from('guests')
-      .select('*')
-      .eq('qr_code', qrCode)
-      .eq('event_id', eventId)
-      .single()
-
-    if (!guest) {
-      setResult({ success: false, message: 'QR code not found for this event.' })
-      setTimeout(() => { cooldownRef.current = false }, 3000)
-      return
-    }
-
-    if (guest.status === 'cancelled') {
-      setResult({ success: false, message: `${guest.full_name} — ticket cancelled.`, guestName: guest.full_name })
-      setTimeout(() => { cooldownRef.current = false }, 3000)
-      return
-    }
-
-    if (scanType === 'entry' && guest.status === 'checked_in') {
-      setResult({ success: false, message: `${guest.full_name} — already checked in.`, guestName: guest.full_name })
-      setTimeout(() => { cooldownRef.current = false }, 3000)
-      return
-    }
-
-    // Update guest status
-    const newStatus = scanType === 'entry' ? 'checked_in' : 'checked_out'
-    const timeField = scanType === 'entry' ? 'checked_in_at' : 'checked_out_at'
-
-    await supabase.from('guests').update({
-      status: newStatus,
-      [timeField]: new Date().toISOString(),
-    }).eq('id', guest.id)
-
-    // Log scan
-    await supabase.from('scan_logs').insert({
-      event_id: eventId,
-      guest_id: guest.id,
-      scanned_by: user?.id,
-      scan_type: scanType,
-    })
-
-    setResult({
-      success: true,
-      message: scanType === 'entry' ? 'Entry granted ✓' : 'Exit recorded ✓',
-      guestName: guest.full_name,
-      isVip: guest.is_vip,
-      scanType,
-    })
-
-    setTimeout(() => {
-      setResult(null)
-      cooldownRef.current = false
-    }, 3000)
   }
 
   useEffect(() => {
@@ -140,97 +297,141 @@ export default function ScannerPage() {
     }
   }, [])
 
+  const selectedEvent = events.find((e) => e.id === eventId)
+
   return (
-    <div className="max-w-lg space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          QR Scanner
-        </h2>
-        <p className="text-gray-400 text-sm mt-1">Scan guest QR codes for entry and exit</p>
-      </div>
+    <>
+      {result && <ScanResultOverlay result={result} onClose={resetForNextScan} />}
 
-      {/* Config */}
-      <div className="card space-y-4">
+      <div className="max-w-lg space-y-6">
         <div>
-          <label className="label">Select Event</label>
-          <select
-            className="input"
-            value={eventId}
-            onChange={(e) => setEventId(e.target.value)}
-            disabled={scanning}
-          >
-            {events.map((e) => (
-              <option key={e.id} value={e.id}>{e.title}</option>
-            ))}
-          </select>
+          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            QR Scanner
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">Scan guest QR codes for entry and exit</p>
         </div>
 
-        <div>
-          <label className="label">Scan Type</label>
-          <div className="grid grid-cols-2 gap-3">
-            {(['entry', 'exit'] as const).map((type) => (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setScanType(type)}
-                disabled={scanning}
-                className={`p-3 rounded-lg border text-sm font-medium capitalize transition-all ${
-                  scanType === type
-                    ? type === 'entry'
-                      ? 'border-green-500 bg-green-500/10 text-green-400'
-                      : 'border-brand-yellow bg-brand-yellow/10 text-brand-yellow'
-                    : 'border-white/10 bg-brand-charcoal-light text-gray-400 hover:border-white/20'
-                }`}
-              >
-                {type}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {!scanning ? (
-          <button onClick={startScanner} disabled={!eventId} className="btn-primary w-full justify-center">
-            <ScanLine className="w-4 h-4" />
-            Start Scanner
-          </button>
-        ) : (
-          <button onClick={stopScanner} className="btn-danger w-full justify-center">
-            Stop Scanner
-          </button>
-        )}
-      </div>
-
-      {/* Camera view */}
-        <div className={scanning ? 'card' : 'hidden'}>
-          <div id="qr-reader" className="rounded-lg overflow-hidden" />
-          <p className="text-xs text-center text-gray-500 mt-3">
-            Point camera at guest QR code
-          </p>
-        </div>
-
-      {/* Result */}
-      {result && (
-        <div className={`card animate-slide-up flex items-start gap-4 ${
-          result.success ? 'border-green-500/30 bg-green-500/5' : 'border-red-500/30 bg-red-500/5'
-        }`}>
-          {result.success ? (
-            <CheckCircle className="w-6 h-6 text-green-400 shrink-0 mt-0.5" />
-          ) : (
-            <XCircle className="w-6 h-6 text-red-400 shrink-0 mt-0.5" />
-          )}
+        <div className="card space-y-4">
           <div>
-            {result.guestName && (
-              <p className="font-semibold text-white mb-0.5">
-                {result.guestName}
-                {result.isVip && <span className="badge-yellow ml-2">VIP</span>}
-              </p>
-            )}
-            <p className={`text-sm ${result.success ? 'text-green-400' : 'text-red-400'}`}>
-              {result.message}
-            </p>
+            <label className="label">Select Event</label>
+            <select
+              className="input"
+              value={eventId}
+              onChange={(e) => setEventId(e.target.value)}
+              disabled={scanning}
+            >
+              {events.map((e) => (
+                <option key={e.id} value={e.id}>{e.title}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="label">Scan Type</label>
+            <div className="grid grid-cols-2 gap-3">
+              {(['entry', 'exit'] as const).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setScanType(type)}
+                  disabled={scanning}
+                  className={`p-3 rounded-lg border text-sm font-medium capitalize transition-all flex items-center justify-center gap-2 ${
+                    scanType === type
+                      ? type === 'entry'
+                        ? 'border-green-500 bg-green-500/10 text-green-400'
+                        : 'border-brand-yellow bg-brand-yellow/10 text-brand-yellow'
+                      : 'border-white/10 bg-brand-charcoal-light text-gray-400 hover:border-white/20'
+                  }`}
+                >
+                  {type === 'entry' ? <LogIn className="w-3.5 h-3.5" /> : <LogOut className="w-3.5 h-3.5" />}
+                  {type}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {!scanning ? (
+            <button onClick={startScanner} disabled={!eventId} className="btn-primary w-full justify-center">
+              <Camera className="w-4 h-4" />
+              Start Scanner
+            </button>
+          ) : (
+            <button onClick={stopScanner} className="btn-danger w-full justify-center">
+              Stop Scanner
+            </button>
+          )}
+        </div>
+
+        {/* Camera view — always in DOM so Html5Qrcode can find the element */}
+        <div className={`card overflow-hidden p-0 ${!scanning ? 'hidden' : ''}`}>
+          <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs text-green-400 font-medium">Live</span>
+              <span className="text-xs text-gray-600">·</span>
+              <span className="text-xs text-gray-400 capitalize">{scanType}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              {scanCount > 0 && (
+                <div className="flex items-center gap-1 text-xs text-gray-400">
+                  <Hash className="w-3 h-3" />
+                  {scanCount} scanned
+                </div>
+              )}
+              <div className="flex items-center gap-1 text-xs text-gray-500">
+                <Wifi className="w-3 h-3" />
+                <span className="truncate max-w-[120px]">{selectedEvent?.title}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="relative bg-black">
+            <div id="qr-reader" className="w-full" />
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="relative w-52 h-52">
+                <span className="absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 border-white/70 rounded-tl-sm" />
+                <span className="absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-white/70 rounded-tr-sm" />
+                <span className="absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 border-white/70 rounded-bl-sm" />
+                <span className="absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-white/70 rounded-br-sm" />
+                <div
+                  className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-green-400 to-transparent"
+                  style={{ animation: 'scanline 2s ease-in-out infinite' }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="px-4 py-3 flex items-center justify-center gap-2">
+            <ScanLine className="w-3.5 h-3.5 text-gray-500" />
+            <p className="text-xs text-gray-500">Align QR code within the frame</p>
           </div>
         </div>
-      )}
-    </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes scanline {
+          0%, 100% { top: 6px; opacity: 0.3; }
+          50% { top: calc(100% - 6px); opacity: 1; }
+        }
+        #qr-reader__header_message,
+        #qr-reader__status_span,
+        #qr-reader__dashboard,
+        #qr-reader img,
+        #qr-reader select,
+        #qr-reader button {
+          display: none !important;
+        }
+        #qr-reader video {
+          width: 100% !important;
+          border-radius: 0 !important;
+          display: block !important;
+        }
+        #qr-reader {
+          border: none !important;
+          padding: 0 !important;
+          background: black !important;
+        }
+      `}</style>
+    </>
   )
 }

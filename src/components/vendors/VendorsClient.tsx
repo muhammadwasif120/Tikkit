@@ -7,6 +7,7 @@ import {
   DollarSign, Calendar, AlertCircle, CheckCircle, Clock,
   Edit2, Trash2, Link as LinkIcon
 } from 'lucide-react'
+import { notifyVendorPaymentDue } from '@/app/actions/vendorNotificationActions'
 import clsx from 'clsx'
 
 type Vendor = {
@@ -40,10 +41,10 @@ const CATEGORIES = [
 ]
 
 const statusConfig = {
-  pending: { label: 'Pending', color: 'text-[#FFC745]', bg: 'bg-[#FFC74520]', border: 'border-[#FFC74533]', icon: Clock },
-  paid: { label: 'Paid', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20', icon: CheckCircle },
-  overdue: { label: 'Overdue', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: AlertCircle },
-  cancelled: { label: 'Cancelled', color: 'text-gray-500', bg: 'bg-white/5', border: 'border-white/10', icon: X },
+  pending:   { label: 'Pending',   color: 'text-[#FFC745]',  bg: 'bg-[#FFC74520]',  border: 'border-[#FFC74533]',  icon: Clock },
+  paid:      { label: 'Paid',      color: 'text-green-400',  bg: 'bg-green-500/10', border: 'border-green-500/20', icon: CheckCircle },
+  overdue:   { label: 'Overdue',   color: 'text-red-400',    bg: 'bg-red-500/10',   border: 'border-red-500/20',   icon: AlertCircle },
+  cancelled: { label: 'Cancelled', color: 'text-gray-500',   bg: 'bg-white/5',      border: 'border-white/10',     icon: X },
 }
 
 const formatCurrency = (amount: number) =>
@@ -80,7 +81,8 @@ export default function VendorsClient({
   const [invoiceModal, setInvoiceModal] = useState(false)
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
   const [invoiceForm, setInvoiceForm] = useState({
-    vendor_id: '', event_id: '', amount: '', description: '', due_date: '', status: 'pending' as Invoice['status'],
+    vendor_id: '', event_id: '', amount: '', description: '', due_date: '',
+    status: 'pending' as Invoice['status'],
   })
   const [invoiceSaving, setInvoiceSaving] = useState(false)
 
@@ -143,21 +145,45 @@ export default function VendorsClient({
   const saveInvoice = async () => {
     if (!invoiceForm.vendor_id || !invoiceForm.amount) return
     setInvoiceSaving(true)
+
     const payload = {
-      vendor_id: invoiceForm.vendor_id,
-      event_id: invoiceForm.event_id || null,
-      amount: parseFloat(invoiceForm.amount),
+      vendor_id:   invoiceForm.vendor_id,
+      event_id:    invoiceForm.event_id || null,
+      amount:      parseFloat(invoiceForm.amount),
       description: invoiceForm.description || null,
-      due_date: invoiceForm.due_date || null,
-      status: invoiceForm.status,
+      due_date:    invoiceForm.due_date || null,
+      status:      invoiceForm.status,
     }
+
     if (editingInvoice) {
       const { data } = await supabase.from('vendor_invoices').update(payload).eq('id', editingInvoice.id).select().single()
-      if (data) setInvoices(prev => prev.map(i => i.id === data.id ? data : i))
+      if (data) {
+        setInvoices(prev => prev.map(i => i.id === data.id ? data : i))
+
+        // Notify if status changed to pending or overdue
+        if ((data.status === 'pending' || data.status === 'overdue') &&
+            data.status !== editingInvoice.status) {
+          const vendor = vendors.find(v => v.id === data.vendor_id)
+          if (vendor) {
+            await notifyVendorPaymentDue(data.event_id, vendor.name, data.amount)
+          }
+        }
+      }
     } else {
       const { data } = await supabase.from('vendor_invoices').insert(payload).select().single()
-      if (data) setInvoices(prev => [...prev, data])
+      if (data) {
+        setInvoices(prev => [...prev, data])
+
+        // Notify on new pending or overdue invoice
+        if (data.status === 'pending' || data.status === 'overdue') {
+          const vendor = vendors.find(v => v.id === data.vendor_id)
+          if (vendor) {
+            await notifyVendorPaymentDue(data.event_id, vendor.name, data.amount)
+          }
+        }
+      }
     }
+
     setInvoiceSaving(false)
     setInvoiceModal(false)
   }
@@ -187,7 +213,7 @@ export default function VendorsClient({
 
   // Finance summary
   const totalPending = invoices.filter(i => i.status === 'pending').reduce((s, i) => s + i.amount, 0)
-  const totalPaid = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.amount, 0)
+  const totalPaid    = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + i.amount, 0)
   const totalOverdue = invoices.filter(i => i.status === 'overdue').reduce((s, i) => s + i.amount, 0)
 
   return (
@@ -208,8 +234,8 @@ export default function VendorsClient({
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: 'Pending', value: totalPending, color: 'text-[#FFC745]', icon: Clock },
-          { label: 'Paid', value: totalPaid, color: 'text-green-400', icon: CheckCircle },
-          { label: 'Overdue', value: totalOverdue, color: 'text-red-400', icon: AlertCircle },
+          { label: 'Paid',    value: totalPaid,    color: 'text-green-400',  icon: CheckCircle },
+          { label: 'Overdue', value: totalOverdue, color: 'text-red-400',    icon: AlertCircle },
         ].map(s => (
           <div key={s.label} className="stat-card">
             <div className="flex items-center gap-2 mb-1">
@@ -226,7 +252,7 @@ export default function VendorsClient({
       {/* Tabs */}
       <div className="flex items-center gap-1 bg-brand-charcoal-light rounded-lg p-1 w-fit">
         {[
-          { key: 'vendors' as Tab, label: 'Vendors', icon: Building2 },
+          { key: 'vendors'  as Tab, label: 'Vendors',  icon: Building2 },
           { key: 'invoices' as Tab, label: 'Invoices', icon: FileText },
         ].map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
@@ -241,7 +267,6 @@ export default function VendorsClient({
       {/* VENDORS TAB */}
       {activeTab === 'vendors' && (
         <div className="space-y-4 animate-fade-in">
-          {/* Category filter */}
           <div className="relative w-fit">
             <select className="input pr-10 appearance-none" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
               <option value="all">All Categories</option>
@@ -281,7 +306,7 @@ export default function VendorsClient({
                               <Tag className="w-2.5 h-2.5" /> {vendor.category}
                             </span>
                           </div>
-                          {vendor.contact_name && <p className="text-sm text-gray-400 mt-0.5">{vendor.contact_name}</p>}
+                          {vendor.contact_name  && <p className="text-sm text-gray-400 mt-0.5">{vendor.contact_name}</p>}
                           {vendor.contact_email && <p className="text-xs text-gray-600">{vendor.contact_email}</p>}
                           {vendor.contact_phone && <p className="text-xs text-gray-600">{vendor.contact_phone}</p>}
                           {linkedEvents.length > 0 && (
@@ -372,7 +397,7 @@ export default function VendorsClient({
                 <tbody>
                   {filteredInvoices.map(invoice => {
                     const vendor = vendors.find(v => v.id === invoice.vendor_id)
-                    const event = events.find(e => e.id === invoice.event_id)
+                    const event  = events.find(e => e.id === invoice.event_id)
                     const s = statusConfig[invoice.status]
                     return (
                       <tr key={invoice.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
@@ -432,7 +457,6 @@ export default function VendorsClient({
                 <label className="label">Vendor Name *</label>
                 <input type="text" className="input" placeholder="Acme Catering Co." value={vendorForm.name} onChange={e => setVendorForm(p => ({ ...p, name: e.target.value }))} />
               </div>
-
               <div>
                 <label className="label">Category</label>
                 <div className="relative">
@@ -442,7 +466,6 @@ export default function VendorsClient({
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="label">Contact Name</label>
@@ -453,12 +476,10 @@ export default function VendorsClient({
                   <input type="tel" className="input" placeholder="+92 300 0000000" value={vendorForm.contact_phone} onChange={e => setVendorForm(p => ({ ...p, contact_phone: e.target.value }))} />
                 </div>
               </div>
-
               <div>
                 <label className="label">Contact Email</label>
                 <input type="email" className="input" placeholder="vendor@example.com" value={vendorForm.contact_email} onChange={e => setVendorForm(p => ({ ...p, contact_email: e.target.value }))} />
               </div>
-
               <div>
                 <label className="label">Link to Events</label>
                 <div className="space-y-1 max-h-32 overflow-y-auto">
@@ -480,7 +501,6 @@ export default function VendorsClient({
                   ))}
                 </div>
               </div>
-
               <div>
                 <label className="label">Notes</label>
                 <textarea className="input resize-none min-h-16" placeholder="Any notes about this vendor..." value={vendorForm.notes} onChange={e => setVendorForm(p => ({ ...p, notes: e.target.value }))} />
@@ -521,7 +541,6 @@ export default function VendorsClient({
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
               </div>
-
               <div>
                 <label className="label">Link to Event (optional)</label>
                 <div className="relative">
@@ -532,7 +551,6 @@ export default function VendorsClient({
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
               </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="label">Amount (PKR) *</label>
@@ -546,12 +564,10 @@ export default function VendorsClient({
                   <input type="date" className="input" value={invoiceForm.due_date} onChange={e => setInvoiceForm(p => ({ ...p, due_date: e.target.value }))} />
                 </div>
               </div>
-
               <div>
                 <label className="label">Description</label>
                 <input type="text" className="input" placeholder="Sound equipment rental for event" value={invoiceForm.description} onChange={e => setInvoiceForm(p => ({ ...p, description: e.target.value }))} />
               </div>
-
               <div>
                 <label className="label">Status</label>
                 <div className="grid grid-cols-2 gap-2">

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { MoreHorizontal, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react'
+import { notifyEventGoingLive, notifyEventEnded } from '@/app/actions/eventNotificationActions'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Event = Database['public']['Tables']['events']['Row']
@@ -16,8 +17,17 @@ export default function EventActions({ event }: { event: Event }) {
 
   const updateStatus = async (status: Event['status']) => {
     setLoading(true)
+
     await supabase.from('events').update({ status }).eq('id', event.id)
     setOpen(false)
+
+    // Fire notifications based on the new status
+    if (status === 'published') {
+      await notifyEventGoingLive(event.id, event.title)
+    } else if (status === 'cancelled') {
+      await notifyEventEnded(event.id, event.title)
+    }
+
     router.refresh()
     setLoading(false)
   }

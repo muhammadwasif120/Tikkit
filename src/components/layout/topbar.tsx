@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
-import { Bell } from 'lucide-react'
+import NotificationBell from '@/components/NotificationBell'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -37,9 +37,8 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
       </h1>
 
       <div className="flex items-center gap-3">
-        <button className="relative p-2 text-gray-400 hover:text-white transition-colors">
-          <Bell className="w-4 h-4" />
-        </button>
+        {/* Real-time notification bell */}
+        <NotificationBell />
 
         <div className="h-4 w-px bg-white/10" />
 
