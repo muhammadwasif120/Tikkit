@@ -154,7 +154,6 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
   const eventIdRef = useRef(eventId)
   useEffect(() => { eventIdRef.current = eventId }, [eventId])
 
-  // Load guest list when event changes
   useEffect(() => {
     if (!eventId || activeTab !== 'guestlist') return
     const load = async () => {
@@ -183,7 +182,6 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
     lastScanRef.current = qrCode
 
     const currentEventId = eventIdRef.current
-
     const { data: guest } = await supabase
       .from('guests')
       .select('*')
@@ -214,15 +212,12 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
     }
 
     const now = new Date().toISOString()
-    await supabase.from('guests')
-      .update({ status: 'checked_in', checked_in_at: now })
-      .eq('id', guest.id)
-
+    await supabase.from('guests').update({ status: 'checked_in', checked_in_at: now }).eq('id', guest.id)
     await supabase.from('scan_logs').insert({
-      event_id:   currentEventId,
-      guest_id:   guest.id,
-      scanned_by: null, // staff have no auth user
-      scan_type:  'entry',
+      event_id: currentEventId,
+      guest_id: guest.id,
+      scanned_by: null,
+      scan_type: 'entry',
     })
 
     setScanCount(c => c + 1)
@@ -288,159 +283,163 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
     <>
       {result && <ScanResultOverlay result={result} onClose={resetForNextScan} />}
 
-      <div className="max-w-lg mx-auto space-y-5">
-        {/* Welcome bar */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              {invite.label}
-            </h2>
-            <p className="text-gray-500 text-xs mt-0.5 capitalize">{invite.role} access</p>
+      <div className="flex-1 overflow-y-auto p-6">
+      <div className="max-w-2xl mx-auto space-y-6">
+
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                {invite.label}
+              </h2>
+              <p className="text-gray-400 text-sm mt-1 capitalize">{invite.role} access</p>
+            </div>
+            {scanCount > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
+                <Hash className="w-3 h-3 text-green-400" />
+                <span className="text-xs font-semibold text-green-400">{scanCount} scanned</span>
+              </div>
+            )}
           </div>
-          {scanCount > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
-              <Hash className="w-3 h-3 text-green-400" />
-              <span className="text-xs font-semibold text-green-400">{scanCount} scanned</span>
+
+          {/* Event selector */}
+          <div className="card">
+            <label className="label">Select Event</label>
+            <div className="relative">
+              <select className="input appearance-none pr-10" value={eventId}
+                onChange={e => { setEventId(e.target.value); stopScanner() }} disabled={scanning}>
+                {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex items-center gap-1 bg-brand-charcoal-light rounded-lg p-1 border border-white/5">
+            {[
+              { key: 'scanner' as const, label: 'Scanner', icon: ScanLine },
+              { key: 'guestlist' as const, label: 'Guest List', icon: Users },
+            ].map(tab => (
+              <button key={tab.key}
+                onClick={() => { setActiveTab(tab.key); if (tab.key !== 'scanner') stopScanner() }}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all ${
+                  activeTab === tab.key ? 'bg-[#1E5EFF] text-white' : 'text-gray-400 hover:text-white'
+                }`}>
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Scanner tab */}
+          {activeTab === 'scanner' && (
+            <div className="space-y-4">
+              {!scanning ? (
+                <div className="card text-center py-12 space-y-4">
+                  <div className="w-16 h-16 rounded-2xl bg-[#1E5EFF15] border border-[#1E5EFF20] flex items-center justify-center mx-auto">
+                    <ScanLine className="w-8 h-8 text-[#1E5EFF]" />
+                  </div>
+                  <div>
+                    <p className="text-white font-semibold text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                      Entry Scanner
+                    </p>
+                    <p className="text-gray-500 text-sm mt-1">Scan guest QR codes to check them in</p>
+                  </div>
+                  <button onClick={startScanner} disabled={!eventId} className="btn-primary mx-auto">
+                    <Camera className="w-4 h-4" /> Start Scanner
+                  </button>
+                </div>
+              ) : (
+                <div className="card overflow-hidden p-0">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                      <span className="text-xs text-green-400 font-medium">Live</span>
+                      <span className="text-xs text-gray-600">·</span>
+                      <span className="text-xs text-gray-400">Entry</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      {scanCount > 0 && (
+                        <div className="flex items-center gap-1 text-xs text-gray-400">
+                          <Hash className="w-3 h-3" />{scanCount} scanned
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <Wifi className="w-3 h-3" />
+                        <span className="truncate max-w-[120px]">{selectedEvent?.title}</span>
+                      </div>
+                      <button onClick={stopScanner} className="text-xs text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded border border-red-500/30 hover:bg-red-500/10">
+                        Stop
+                      </button>
+                    </div>
+                  </div>
+                  <div className="relative bg-black">
+                    <div id="staff-qr-reader" className="w-full" />
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                      <div className="relative w-52 h-52">
+                        <span className="absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 border-white/70 rounded-tl-sm" />
+                        <span className="absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-white/70 rounded-tr-sm" />
+                        <span className="absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 border-white/70 rounded-bl-sm" />
+                        <span className="absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-white/70 rounded-br-sm" />
+                        <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-green-400 to-transparent"
+                          style={{ animation: 'scanline 2s ease-in-out infinite' }} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="px-4 py-3 flex items-center justify-center gap-2">
+                    <ScanLine className="w-3.5 h-3.5 text-gray-500" />
+                    <p className="text-xs text-gray-500">Align QR code within the frame</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-        </div>
 
-        {/* Event selector */}
-        <div className="card">
-          <label className="label">Event</label>
-          <div className="relative">
-            <select className="input appearance-none pr-10" value={eventId}
-              onChange={e => { setEventId(e.target.value); stopScanner() }} disabled={scanning}>
-              {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex items-center gap-1 bg-brand-charcoal-light rounded-lg p-1">
-          {[
-            { key: 'scanner' as const, label: 'Scanner', icon: ScanLine },
-            { key: 'guestlist' as const, label: 'Guest List', icon: Users },
-          ].map(tab => (
-            <button key={tab.key}
-              onClick={() => { setActiveTab(tab.key); if (tab.key !== 'scanner') stopScanner() }}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all ${
-                activeTab === tab.key ? 'bg-[#1E5EFF] text-white' : 'text-gray-400 hover:text-white'
-              }`}>
-              <tab.icon className="w-4 h-4" />
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Scanner tab */}
-        {activeTab === 'scanner' && (
-          <div className="space-y-4">
-            {!scanning ? (
-              <div className="card text-center py-8 space-y-4">
-                <div className="w-16 h-16 rounded-2xl bg-[#1E5EFF15] border border-[#1E5EFF20] flex items-center justify-center mx-auto">
-                  <ScanLine className="w-8 h-8 text-[#1E5EFF]" />
+          {/* Guest list tab */}
+          {activeTab === 'guestlist' && (
+            <div className="card space-y-3">
+              {guestsLoading ? (
+                <div className="py-12 text-center">
+                  <div className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin mx-auto" />
                 </div>
-                <div>
-                  <p className="text-white font-semibold" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                    Entry Scanner
-                  </p>
-                  <p className="text-gray-500 text-xs mt-1">Scan guest QR codes to check them in</p>
+              ) : guests.length === 0 ? (
+                <div className="py-12 text-center">
+                  <Users className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                  <p className="text-sm text-gray-500">No guests for this event</p>
                 </div>
-                <button onClick={startScanner} disabled={!eventId} className="btn-primary w-full justify-center">
-                  <Camera className="w-4 h-4" /> Start Scanner
-                </button>
-              </div>
-            ) : (
-              <div className="card overflow-hidden p-0">
-                <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                    <span className="text-xs text-green-400 font-medium">Live</span>
-                    <span className="text-xs text-gray-600">·</span>
-                    <span className="text-xs text-gray-400">Entry</span>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between text-xs text-gray-500 px-1">
+                    <span>{guests.length} guests</span>
+                    <span>{guests.filter(g => g.status === 'checked_in').length} checked in</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    {scanCount > 0 && (
-                      <div className="flex items-center gap-1 text-xs text-gray-400">
-                        <Hash className="w-3 h-3" />{scanCount} scanned
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <Wifi className="w-3 h-3" />
-                      <span className="truncate max-w-[120px]">{selectedEvent?.title}</span>
-                    </div>
-                    <button onClick={stopScanner} className="text-xs text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded border border-red-500/30 hover:bg-red-500/10">
-                      Stop
-                    </button>
-                  </div>
-                </div>
-                <div className="relative bg-black">
-                  <div id="staff-qr-reader" className="w-full" />
-                  <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                    <div className="relative w-52 h-52">
-                      <span className="absolute top-0 left-0 w-7 h-7 border-t-2 border-l-2 border-white/70 rounded-tl-sm" />
-                      <span className="absolute top-0 right-0 w-7 h-7 border-t-2 border-r-2 border-white/70 rounded-tr-sm" />
-                      <span className="absolute bottom-0 left-0 w-7 h-7 border-b-2 border-l-2 border-white/70 rounded-bl-sm" />
-                      <span className="absolute bottom-0 right-0 w-7 h-7 border-b-2 border-r-2 border-white/70 rounded-br-sm" />
-                      <div className="absolute left-2 right-2 h-0.5 bg-gradient-to-r from-transparent via-green-400 to-transparent"
-                        style={{ animation: 'scanline 2s ease-in-out infinite' }} />
-                    </div>
-                  </div>
-                </div>
-                <div className="px-4 py-3 flex items-center justify-center gap-2">
-                  <ScanLine className="w-3.5 h-3.5 text-gray-500" />
-                  <p className="text-xs text-gray-500">Align QR code within the frame</p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Guest list tab */}
-        {activeTab === 'guestlist' && (
-          <div className="card space-y-3">
-            {guestsLoading ? (
-              <div className="py-8 text-center">
-                <div className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin mx-auto" />
-              </div>
-            ) : guests.length === 0 ? (
-              <div className="py-8 text-center">
-                <Users className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No guests for this event</p>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between text-xs text-gray-500 px-1">
-                  <span>{guests.length} guests</span>
-                  <span>{guests.filter(g => g.status === 'checked_in').length} checked in</span>
-                </div>
-                <div className="space-y-2">
-                  {guests.map(g => (
-                    <div key={g.id} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-[#1E5EFF15] border border-[#1E5EFF20] flex items-center justify-center shrink-0">
-                          <span className="text-xs font-bold text-[#1E5EFF]">{g.full_name.charAt(0).toUpperCase()}</span>
-                        </div>
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5">
-                            <p className="text-sm font-medium text-white truncate">{g.full_name}</p>
-                            {g.is_vip && <Crown className="w-3 h-3 text-yellow-400 shrink-0" />}
+                  <div className="space-y-2">
+                    {guests.map(g => (
+                      <div key={g.id} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-8 h-8 rounded-full bg-[#1E5EFF15] border border-[#1E5EFF20] flex items-center justify-center shrink-0">
+                            <span className="text-xs font-bold text-[#1E5EFF]">{g.full_name.charAt(0).toUpperCase()}</span>
                           </div>
-                          <p className="text-xs text-gray-500 truncate">{g.email}</p>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-sm font-medium text-white truncate">{g.full_name}</p>
+                              {g.is_vip && <Crown className="w-3 h-3 text-yellow-400 shrink-0" />}
+                            </div>
+                            <p className="text-xs text-gray-500 truncate">{g.email}</p>
+                          </div>
                         </div>
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border capitalize shrink-0 ml-2 ${statusColor[g.status] ?? 'text-gray-400 bg-white/5 border-white/10'}`}>
+                          {g.status.replace('_', ' ')}
+                        </span>
                       </div>
-                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border capitalize shrink-0 ml-2 ${statusColor[g.status] ?? 'text-gray-400 bg-white/5 border-white/10'}`}>
-                        {g.status.replace('_', ' ')}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        )}
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+      </div>
       </div>
 
       <style jsx>{`
