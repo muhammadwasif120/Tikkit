@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { MoreHorizontal, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react'
 import { notifyEventGoingLive, notifyEventEnded } from '@/app/actions/eventNotificationActions'
+import { dismissEventLiveNotification } from '@/app/actions/approvalDismissAction'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Event = Database['public']['Tables']['events']['Row']
@@ -27,12 +28,13 @@ export default function EventActions({ event }: { event: Event }) {
       if (status === 'published') {
         await notifyEventGoingLive(user.id, event.id, event.title)
       } else if (status === 'cancelled') {
-        // Fetch attendee count client-side so server action stays header-free
         const { count } = await supabase
           .from('guests')
           .select('*', { count: 'exact', head: true })
           .eq('event_id', event.id)
           .eq('status', 'checked_in')
+        // Dismiss the "event is live" notification and fire the ended notification
+        await dismissEventLiveNotification(event.id)
         await notifyEventEnded(user.id, event.id, event.title, count ?? 0)
       }
     }

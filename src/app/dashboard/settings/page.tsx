@@ -3,10 +3,14 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  User, Lock, Users, Bell, Save, Plus, Trash2, Check,
+  User, Lock, Users, Bell, Save, Check,
   Eye, EyeOff, UserPlus, UserMinus, LogIn, LogOut,
-  CreditCard, Zap, Flag,
+  CreditCard, Zap, Flag, Plus, Trash2, Link2,
+  Copy, ExternalLink, Shield, Crown, AlertCircle,
+  Clock, RefreshCw,
 } from 'lucide-react'
+import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInvite } from '@/app/actions/teamActions'
+import clsx from 'clsx'
 
 type Profile = {
   id: string
@@ -16,21 +20,46 @@ type Profile = {
   avatar_url: string | null
 }
 
-type TeamMember = {
+type TeamInvite = {
   id: string
-  full_name: string
-  email: string
-  role: string
+  label: string
+  role: 'staff' | 'organizer'
+  token: string
+  expires_at: string | null
+  revoked: boolean
+  created_at: string
 }
 
 const notifConfig: Record<string, { label: string; description: string; icon: React.ElementType; color: string }> = {
-  guest_signup:        { label: 'Guest signs up',         description: 'When a new guest registers for your event',         icon: UserPlus,   color: 'text-green-400' },
-  guest_cancellation:  { label: 'Guest cancels',          description: 'When a guest cancels their registration',           icon: UserMinus,  color: 'text-red-400' },
-  entry_scan:          { label: 'Guest checks in',        description: 'When a QR code is scanned for entry',               icon: LogIn,      color: 'text-blue-400' },
-  exit_scan:           { label: 'Guest checks out',       description: 'When a QR code is scanned for exit',                icon: LogOut,     color: 'text-gray-400' },
-  vendor_payment_due:  { label: 'Vendor payment due',     description: 'When a vendor invoice is created or overdue',       icon: CreditCard, color: 'text-yellow-400' },
-  event_going_live:    { label: 'Event goes live',        description: 'When you publish an event',                         icon: Zap,        color: 'text-purple-400' },
-  event_ended:         { label: 'Event ends',             description: 'When an event is cancelled or concluded',           icon: Flag,       color: 'text-orange-400' },
+  guest_signup:        { label: 'Guest signs up',     description: 'When a new guest registers for your event',   icon: UserPlus,   color: 'text-green-400' },
+  guest_cancellation:  { label: 'Guest cancels',      description: 'When a guest cancels their registration',     icon: UserMinus,  color: 'text-red-400' },
+  entry_scan:          { label: 'Guest checks in',    description: 'When a QR code is scanned for entry',         icon: LogIn,      color: 'text-blue-400' },
+  exit_scan:           { label: 'Guest checks out',   description: 'When a QR code is scanned for exit',          icon: LogOut,     color: 'text-gray-400' },
+  vendor_payment_due:  { label: 'Vendor payment due', description: 'When a vendor invoice is created or overdue', icon: CreditCard, color: 'text-yellow-400' },
+  event_going_live:    { label: 'Event goes live',    description: 'When you publish an event',                   icon: Zap,        color: 'text-purple-400' },
+  event_ended:         { label: 'Event ends',         description: 'When an event is cancelled or concluded',     icon: Flag,       color: 'text-orange-400' },
+}
+
+const EXPIRY_OPTIONS = [
+  { value: '24h', label: '24 hours' },
+  { value: '7d',  label: '7 days' },
+  { value: '30d', label: '30 days' },
+  { value: null,  label: 'Never expires' },
+]
+
+function getRoleConfig(role: string) {
+  if (role === 'organizer') return { label: 'Organizer', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20', icon: Crown }
+  return { label: 'Staff', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: Shield }
+}
+
+function isExpired(invite: TeamInvite) {
+  return !!invite.expires_at && new Date(invite.expires_at) < new Date()
+}
+
+function InviteStatus({ invite }: { invite: TeamInvite }) {
+  if (invite.revoked) return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400">Revoked</span>
+  if (isExpired(invite)) return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-500/10 border border-gray-500/20 text-gray-400">Expired</span>
+  return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400">Active</span>
 }
 
 export default function SettingsPage() {
@@ -51,22 +80,17 @@ export default function SettingsPage() {
   const [passwordSaved, setPasswordSaved] = useState(false)
 
   // Team
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
-  const [inviteEmail, setInviteEmail] = useState('')
+  const [invites, setInvites] = useState<TeamInvite[]>([])
+  const [inviteLabel, setInviteLabel] = useState('')
   const [inviteRole, setInviteRole] = useState<'staff' | 'organizer'>('staff')
-  const [inviting, setInviting] = useState(false)
-  const [inviteError, setInviteError] = useState<string | null>(null)
-  const [inviteSent, setInviteSent] = useState(false)
+  const [inviteExpiry, setInviteExpiry] = useState<string | null>('7d')
+  const [creating, setCreating] = useState(false)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  // Notifications — all enabled by default except exit_scan
+  // Notifications
   const [notifications, setNotifications] = useState({
-    guest_signup:       true,
-    guest_cancellation: true,
-    entry_scan:         true,
-    exit_scan:          false,
-    vendor_payment_due: true,
-    event_going_live:   true,
-    event_ended:        true,
+    guest_signup: true, guest_cancellation: true, entry_scan: true,
+    exit_scan: false, vendor_payment_due: true, event_going_live: true, event_ended: true,
   })
   const [notifSaved, setNotifSaved] = useState(false)
 
@@ -75,24 +99,15 @@ export default function SettingsPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: prof } = await supabase
-        .from('profiles')
+      const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      if (prof) { setProfile(prof); setFullName(prof.full_name) }
+
+      const { data: inv } = await supabase
+        .from('team_invites')
         .select('*')
-        .eq('id', user.id)
-        .single()
-
-      if (prof) {
-        setProfile(prof)
-        setFullName(prof.full_name)
-      }
-
-      const { data: team } = await supabase
-        .from('profiles')
-        .select('*')
-        .neq('id', user.id)
-        .in('role', ['staff', 'organizer'])
-
-      setTeamMembers(team ?? [])
+        .eq('organizer_id', user.id)
+        .order('created_at', { ascending: false })
+      setInvites(inv ?? [])
     }
     loadData()
   }, [])
@@ -113,31 +128,58 @@ export default function SettingsPage() {
     setPasswordSaving(true)
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     setPasswordSaving(false)
-    if (error) {
-      setPasswordError(error.message)
-    } else {
-      setPasswordSaved(true)
-      setNewPassword('')
-      setConfirmPassword('')
-      setTimeout(() => setPasswordSaved(false), 3000)
-    }
+    if (error) { setPasswordError(error.message) }
+    else { setPasswordSaved(true); setNewPassword(''); setConfirmPassword(''); setTimeout(() => setPasswordSaved(false), 3000) }
   }
 
-  const sendInvite = async () => {
-    setInviteError(null)
-    if (!inviteEmail) return
-    setInviting(true)
-    await new Promise(r => setTimeout(r, 1000))
-    setInviting(false)
-    setInviteSent(true)
-    setInviteEmail('')
-    setTimeout(() => setInviteSent(false), 3000)
+  const createInvite = async () => {
+    if (!inviteLabel.trim()) return
+    setCreating(true)
+    try {
+      const invite = await createTeamInvite(inviteLabel.trim(), inviteRole, inviteExpiry)
+      setInvites(prev => [invite, ...prev])
+      setInviteLabel('')
+    } catch (e) {
+      console.error(e)
+    }
+    setCreating(false)
+  }
+
+  const copyLink = (invite: TeamInvite) => {
+    const url = `${window.location.origin}/staff/${invite.token}`
+    navigator.clipboard.writeText(url)
+    setCopiedId(invite.id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  const shareWhatsApp = (invite: TeamInvite) => {
+    const url = `${window.location.origin}/staff/${invite.token}`
+    const text = `You've been invited to Tikkit as ${invite.role} (${invite.label}). Access your dashboard here: ${url}`
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+  }
+
+  const handleRevoke = async (invite: TeamInvite) => {
+    await revokeTeamInvite(invite.id)
+    setInvites(prev => prev.map(i => i.id === invite.id ? { ...i, revoked: true } : i))
+  }
+
+  const handleReactivate = async (invite: TeamInvite) => {
+    await reactivateTeamInvite(invite.id)
+    setInvites(prev => prev.map(i => i.id === invite.id ? { ...i, revoked: false } : i))
+  }
+
+  const handleDelete = async (id: string) => {
+    await deleteTeamInvite(id)
+    setInvites(prev => prev.filter(i => i.id !== id))
   }
 
   const saveNotifications = () => {
     setNotifSaved(true)
     setTimeout(() => setNotifSaved(false), 3000)
   }
+
+  const activeInvites  = invites.filter(i => !i.revoked && !isExpired(i))
+  const inactiveInvites = invites.filter(i => i.revoked || isExpired(i))
 
   return (
     <div className="max-w-2xl space-y-8">
@@ -166,7 +208,7 @@ export default function SettingsPage() {
         </div>
         <div>
           <label className="label">Full Name</label>
-          <input type="text" className="input" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+          <input type="text" className="input" value={fullName} onChange={e => setFullName(e.target.value)} />
         </div>
         <div>
           <label className="label">Email Address</label>
@@ -191,13 +233,8 @@ export default function SettingsPage() {
         <div>
           <label className="label">New Password</label>
           <div className="relative">
-            <input
-              type={showNewPassword ? 'text' : 'password'}
-              className="input pr-10"
-              placeholder="Min. 8 characters"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
+            <input type={showNewPassword ? 'text' : 'password'} className="input pr-10"
+              placeholder="Min. 8 characters" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
             <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
               {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -206,7 +243,8 @@ export default function SettingsPage() {
         </div>
         <div>
           <label className="label">Confirm New Password</label>
-          <input type="password" className="input" placeholder="Repeat new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
+          <input type="password" className="input" placeholder="Repeat new password"
+            value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
         </div>
         {passwordError && (
           <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">{passwordError}</div>
@@ -218,50 +256,161 @@ export default function SettingsPage() {
         </div>
       </div>
 
-      {/* Team Members */}
+      {/* Team */}
       <div className="card space-y-5">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
             <Users className="w-4 h-4 text-purple-400" />
           </div>
-          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Team Members</h3>
+          <div>
+            <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Team Access</h3>
+          </div>
         </div>
-        {teamMembers.length > 0 ? (
-          <div className="space-y-2">
-            {teamMembers.map((member) => (
-              <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-purple-400">{member.full_name?.charAt(0)?.toUpperCase()}</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{member.full_name}</p>
-                    <p className="text-xs text-gray-500">{member.email}</p>
-                  </div>
+
+        {/* Role legend */}
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { role: 'staff', desc: 'QR scanner + guest list only' },
+            { role: 'organizer', desc: 'Full dashboard access' },
+          ].map(({ role, desc }) => {
+            const cfg = getRoleConfig(role)
+            return (
+              <div key={role} className={clsx('p-3 rounded-lg border', cfg.bg, cfg.border)}>
+                <div className="flex items-center gap-2 mb-1">
+                  <cfg.icon className={clsx('w-3.5 h-3.5', cfg.color)} />
+                  <span className={clsx('text-xs font-semibold capitalize', cfg.color)}>{cfg.label}</span>
                 </div>
-                <span className="badge-gray capitalize">{member.role}</span>
+                <p className="text-xs text-gray-500">{desc}</p>
               </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-sm text-gray-500">No team members yet.</p>
-        )}
+            )
+          })}
+        </div>
+
+        {/* Create invite */}
         <div className="border-t border-white/5 pt-4 space-y-3">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Invite Member</p>
-          <div className="flex gap-2">
-            <input type="email" className="input flex-1" placeholder="colleague@example.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
-            <select className="input w-32" value={inviteRole} onChange={(e) => setInviteRole(e.target.value as 'staff' | 'organizer')}>
-              <option value="staff">Staff</option>
-              <option value="organizer">Organizer</option>
-            </select>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Create Invite Link</p>
+          <div>
+            <label className="label">Label</label>
+            <input type="text" className="input" placeholder="e.g. Ali - Door Security"
+              value={inviteLabel} onChange={e => setInviteLabel(e.target.value)} />
+            <p className="text-xs text-gray-600 mt-1">A name to identify who this link is for</p>
           </div>
-          {inviteError && <p className="text-sm text-red-400">{inviteError}</p>}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="label">Role</label>
+              <select className="input" value={inviteRole} onChange={e => setInviteRole(e.target.value as 'staff' | 'organizer')}>
+                <option value="staff">Staff</option>
+                <option value="organizer">Organizer</option>
+              </select>
+            </div>
+            <div>
+              <label className="label">Link Expiry</label>
+              <select className="input" value={inviteExpiry ?? ''} onChange={e => setInviteExpiry(e.target.value || null)}>
+                {EXPIRY_OPTIONS.map(o => (
+                  <option key={o.value ?? 'never'} value={o.value ?? ''}>{o.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
           <div className="flex justify-end">
-            <button onClick={sendInvite} disabled={inviting || !inviteEmail} className="btn-primary">
-              {inviteSent ? <><Check className="w-4 h-4" /> Invite Sent</> : <><Plus className="w-4 h-4" /> {inviting ? 'Sending...' : 'Send Invite'}</>}
+            <button onClick={createInvite} disabled={creating || !inviteLabel.trim()} className="btn-primary">
+              {creating ? 'Creating...' : <><Link2 className="w-4 h-4" /> Generate Link</>}
             </button>
           </div>
         </div>
+
+        {/* Active invites */}
+        {activeInvites.length > 0 && (
+          <div className="border-t border-white/5 pt-4 space-y-2">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Active Links</p>
+            {activeInvites.map(invite => {
+              const cfg = getRoleConfig(invite.role)
+              return (
+                <div key={invite.id} className="p-3 rounded-lg bg-brand-charcoal-light border border-white/5 space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
+                      <p className="text-sm font-medium text-white truncate">{invite.label}</p>
+                      <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
+                        {invite.role}
+                      </span>
+                    </div>
+                    <InviteStatus invite={invite} />
+                  </div>
+                  {invite.expires_at && (
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <Clock className="w-3 h-3" />
+                      Expires {new Date(invite.expires_at).toLocaleDateString('en-PK', { dateStyle: 'medium' })}
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 pt-1">
+                    <button onClick={() => copyLink(invite)}
+                      className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all',
+                        copiedId === invite.id
+                          ? 'text-green-400 border-green-500/30 bg-green-500/10'
+                          : 'text-gray-400 border-white/10 hover:text-white hover:border-white/20 bg-white/3')}>
+                      {copiedId === invite.id ? <><Check className="w-3 h-3" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy Link</>}
+                    </button>
+                    <button onClick={() => shareWhatsApp(invite)}
+                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-green-600/30 bg-green-600/10 text-green-400 hover:bg-green-600/20 transition-colors">
+                      <ExternalLink className="w-3 h-3" /> WhatsApp
+                    </button>
+                    <a href={`/staff/${invite.token}`} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-white/20 bg-white/3 transition-colors">
+                      <ExternalLink className="w-3 h-3" /> Preview
+                    </a>
+                    <button onClick={() => handleRevoke(invite)}
+                      className="ml-auto flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors">
+                      <AlertCircle className="w-3 h-3" /> Revoke
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Revoked/expired invites */}
+        {inactiveInvites.length > 0 && (
+          <div className="border-t border-white/5 pt-4 space-y-2">
+            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Inactive Links</p>
+            {inactiveInvites.map(invite => {
+              const cfg = getRoleConfig(invite.role)
+              return (
+                <div key={invite.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-brand-charcoal-light border border-white/5 opacity-60">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
+                    <p className="text-sm text-white truncate">{invite.label}</p>
+                    <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
+                      {invite.role}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <InviteStatus invite={invite} />
+                    {invite.revoked && (
+                      <button onClick={() => handleReactivate(invite)} title="Reactivate"
+                        className="p-1.5 text-gray-500 hover:text-green-400 transition-colors">
+                        <RefreshCw className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <button onClick={() => handleDelete(invite.id)} title="Delete"
+                      className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {invites.length === 0 && (
+          <div className="text-center py-4">
+            <Link2 className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+            <p className="text-sm text-gray-500">No invite links yet</p>
+            <p className="text-xs text-gray-600 mt-0.5">Create a link above to give someone access</p>
+          </div>
+        )}
       </div>
 
       {/* Notifications */}
@@ -272,7 +421,6 @@ export default function SettingsPage() {
           </div>
           <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Notification Preferences</h3>
         </div>
-
         <div className="space-y-2">
           {Object.entries(notifConfig).map(([key, config]) => {
             const Icon = config.icon
@@ -280,7 +428,7 @@ export default function SettingsPage() {
             return (
               <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
                 <div className="flex items-center gap-3">
-                  <div className={`w-7 h-7 rounded-md bg-white/5 flex items-center justify-center shrink-0`}>
+                  <div className="w-7 h-7 rounded-md bg-white/5 flex items-center justify-center shrink-0">
                     <Icon className={`w-3.5 h-3.5 ${config.color}`} />
                   </div>
                   <div>
@@ -288,18 +436,15 @@ export default function SettingsPage() {
                     <p className="text-xs text-gray-500 mt-0.5">{config.description}</p>
                   </div>
                 </div>
-                <button
-                  type="button"
+                <button type="button"
                   onClick={() => setNotifications(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
-                  className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}
-                >
+                  className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
                   <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
                 </button>
               </div>
             )
           })}
         </div>
-
         <div className="flex justify-end">
           <button onClick={saveNotifications} className="btn-primary">
             {notifSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Preferences</>}
