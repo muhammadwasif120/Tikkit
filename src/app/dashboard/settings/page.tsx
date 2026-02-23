@@ -7,7 +7,7 @@ import {
   Eye, EyeOff, UserPlus, UserMinus, LogIn, LogOut,
   CreditCard, Zap, Flag, Plus, Trash2, Link2,
   Copy, ExternalLink, Shield, Crown, AlertCircle,
-  Clock, RefreshCw,
+  Clock, RefreshCw, ChevronDown, Phone, Building2,
 } from 'lucide-react'
 import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInvite } from '@/app/actions/teamActions'
 import clsx from 'clsx'
@@ -18,6 +18,8 @@ type Profile = {
   email: string
   role: string
   avatar_url: string | null
+  phone_number: string | null
+  company_name: string | null
 }
 
 type TeamInvite = {
@@ -68,12 +70,17 @@ export default function SettingsPage() {
   // Profile
   const [profile, setProfile] = useState<Profile | null>(null)
   const [fullName, setFullName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [companyName, setCompanyName] = useState('')
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
 
-  // Password
+  // Password (expandable under profile)
+  const [passwordOpen, setPasswordOpen] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [passwordSaving, setPasswordSaving] = useState(false)
   const [passwordError, setPasswordError] = useState<string | null>(null)
@@ -100,7 +107,12 @@ export default function SettingsPage() {
       if (!user) return
 
       const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-      if (prof) { setProfile(prof); setFullName(prof.full_name) }
+      if (prof) {
+        setProfile(prof)
+        setFullName(prof.full_name ?? '')
+        setPhoneNumber(prof.phone_number ?? '')
+        setCompanyName(prof.company_name ?? '')
+      }
 
       const { data: inv } = await supabase
         .from('team_invites')
@@ -115,7 +127,11 @@ export default function SettingsPage() {
   const saveProfile = async () => {
     if (!profile) return
     setProfileSaving(true)
-    await supabase.from('profiles').update({ full_name: fullName }).eq('id', profile.id)
+    await supabase.from('profiles').update({
+      full_name: fullName,
+      phone_number: phoneNumber || null,
+      company_name: companyName || null,
+    }).eq('id', profile.id)
     setProfileSaving(false)
     setProfileSaved(true)
     setTimeout(() => setProfileSaved(false), 3000)
@@ -123,13 +139,43 @@ export default function SettingsPage() {
 
   const savePassword = async () => {
     setPasswordError(null)
-    if (newPassword !== confirmPassword) { setPasswordError('Passwords do not match.'); return }
+    if (!currentPassword) { setPasswordError('Please enter your current password.'); return }
+    if (newPassword !== confirmPassword) { setPasswordError('New passwords do not match.'); return }
     if (newPassword.length < 8) { setPasswordError('Password must be at least 8 characters.'); return }
+    if (newPassword === currentPassword) { setPasswordError('New password must be different from current password.'); return }
+
     setPasswordSaving(true)
+
+    // Re-authenticate with current password first
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user?.email) { setPasswordError('Could not verify your account.'); setPasswordSaving(false); return }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: currentPassword,
+    })
+
+    if (signInError) {
+      setPasswordError('Current password is incorrect.')
+      setPasswordSaving(false)
+      return
+    }
+
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     setPasswordSaving(false)
-    if (error) { setPasswordError(error.message) }
-    else { setPasswordSaved(true); setNewPassword(''); setConfirmPassword(''); setTimeout(() => setPasswordSaved(false), 3000) }
+
+    if (error) {
+      setPasswordError(error.message)
+    } else {
+      setPasswordSaved(true)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setTimeout(() => {
+        setPasswordSaved(false)
+        setPasswordOpen(false)
+      }, 2000)
+    }
   }
 
   const createInvite = async () => {
@@ -139,9 +185,7 @@ export default function SettingsPage() {
       const invite = await createTeamInvite(inviteLabel.trim(), inviteRole, inviteExpiry)
       setInvites(prev => [invite, ...prev])
       setInviteLabel('')
-    } catch (e) {
-      console.error(e)
-    }
+    } catch (e) { console.error(e) }
     setCreating(false)
   }
 
@@ -158,27 +202,13 @@ export default function SettingsPage() {
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
 
-  const handleRevoke = async (invite: TeamInvite) => {
-    await revokeTeamInvite(invite.id)
-    setInvites(prev => prev.map(i => i.id === invite.id ? { ...i, revoked: true } : i))
-  }
+  const handleRevoke      = async (invite: TeamInvite) => { await revokeTeamInvite(invite.id); setInvites(prev => prev.map(i => i.id === invite.id ? { ...i, revoked: true } : i)) }
+  const handleReactivate  = async (invite: TeamInvite) => { await reactivateTeamInvite(invite.id); setInvites(prev => prev.map(i => i.id === invite.id ? { ...i, revoked: false } : i)) }
+  const handleDelete      = async (id: string) => { await deleteTeamInvite(id); setInvites(prev => prev.filter(i => i.id !== id)) }
 
-  const handleReactivate = async (invite: TeamInvite) => {
-    await reactivateTeamInvite(invite.id)
-    setInvites(prev => prev.map(i => i.id === invite.id ? { ...i, revoked: false } : i))
-  }
+  const saveNotifications = () => { setNotifSaved(true); setTimeout(() => setNotifSaved(false), 3000) }
 
-  const handleDelete = async (id: string) => {
-    await deleteTeamInvite(id)
-    setInvites(prev => prev.filter(i => i.id !== id))
-  }
-
-  const saveNotifications = () => {
-    setNotifSaved(true)
-    setTimeout(() => setNotifSaved(false), 3000)
-  }
-
-  const activeInvites  = invites.filter(i => !i.revoked && !isExpired(i))
+  const activeInvites   = invites.filter(i => !i.revoked && !isExpired(i))
   const inactiveInvites = invites.filter(i => i.revoked || isExpired(i))
 
   return (
@@ -188,7 +218,7 @@ export default function SettingsPage() {
         <p className="text-gray-400 text-sm mt-1">Manage your account and preferences</p>
       </div>
 
-      {/* Profile */}
+      {/* Profile + Password */}
       <div className="card space-y-5">
         <div className="flex items-center gap-3 mb-1">
           <div className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center">
@@ -196,6 +226,8 @@ export default function SettingsPage() {
           </div>
           <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Profile</h3>
         </div>
+
+        {/* Avatar row */}
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-[#1E5EFF20] border-2 border-[#1E5EFF33] flex items-center justify-center shrink-0">
             <span className="text-2xl font-bold text-[#1E5EFF]">{fullName?.charAt(0)?.toUpperCase() ?? 'U'}</span>
@@ -206,53 +238,136 @@ export default function SettingsPage() {
             <p className="text-xs text-gray-500">{profile?.email}</p>
           </div>
         </div>
-        <div>
-          <label className="label">Full Name</label>
-          <input type="text" className="input" value={fullName} onChange={e => setFullName(e.target.value)} />
+
+        {/* Fields */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="col-span-2">
+            <label className="label">Full Name</label>
+            <input type="text" className="input" value={fullName} onChange={e => setFullName(e.target.value)} />
+          </div>
+          <div className="col-span-2">
+            <label className="label">Email Address</label>
+            <input type="email" className="input opacity-50 cursor-not-allowed" value={profile?.email ?? ''} disabled />
+            <p className="text-xs text-gray-600 mt-1">Email cannot be changed here</p>
+          </div>
+          <div>
+            <label className="label">Phone Number</label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              <input
+                type="tel"
+                className="input pl-9"
+                placeholder="+92 300 0000000"
+                value={phoneNumber}
+                onChange={e => setPhoneNumber(e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="label">Company / Organization</label>
+            <div className="relative">
+              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              <input
+                type="text"
+                className="input pl-9"
+                placeholder="e.g. Acme Events"
+                value={companyName}
+                onChange={e => setCompanyName(e.target.value)}
+              />
+            </div>
+            <p className="text-xs text-gray-600 mt-1">Used in guest emails and communications</p>
+          </div>
         </div>
-        <div>
-          <label className="label">Email Address</label>
-          <input type="email" className="input opacity-50 cursor-not-allowed" value={profile?.email ?? ''} disabled />
-          <p className="text-xs text-gray-600 mt-1">Email cannot be changed here</p>
-        </div>
+
         <div className="flex justify-end">
           <button onClick={saveProfile} disabled={profileSaving} className="btn-primary">
             {profileSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> {profileSaving ? 'Saving...' : 'Save Profile'}</>}
           </button>
         </div>
-      </div>
 
-      {/* Password */}
-      <div className="card space-y-5">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-[#FFC74520] flex items-center justify-center">
-            <Lock className="w-4 h-4 text-[#FFC745]" />
-          </div>
-          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Change Password</h3>
-        </div>
-        <div>
-          <label className="label">New Password</label>
-          <div className="relative">
-            <input type={showNewPassword ? 'text' : 'password'} className="input pr-10"
-              placeholder="Min. 8 characters" value={newPassword} onChange={e => setNewPassword(e.target.value)} />
-            <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
-              {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
-        <div>
-          <label className="label">Confirm New Password</label>
-          <input type="password" className="input" placeholder="Repeat new password"
-            value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
-        </div>
-        {passwordError && (
-          <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">{passwordError}</div>
-        )}
-        <div className="flex justify-end">
-          <button onClick={savePassword} disabled={passwordSaving || !newPassword} className="btn-primary">
-            {passwordSaved ? <><Check className="w-4 h-4" /> Updated</> : <><Lock className="w-4 h-4" /> {passwordSaving ? 'Updating...' : 'Update Password'}</>}
+        {/* Change Password — expandable */}
+        <div className="border-t border-white/5 pt-4">
+          <button
+            type="button"
+            onClick={() => { setPasswordOpen(!passwordOpen); setPasswordError(null); setPasswordSaved(false) }}
+            className="w-full flex items-center justify-between group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-md bg-[#FFC74520] flex items-center justify-center">
+                <Lock className="w-3.5 h-3.5 text-[#FFC745]" />
+              </div>
+              <span className="text-sm font-medium text-white">Change Password</span>
+            </div>
+            <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', passwordOpen && 'rotate-180')} />
           </button>
+
+          {passwordOpen && (
+            <div className="mt-4 space-y-4">
+              {/* Current password */}
+              <div>
+                <label className="label">Current Password</label>
+                <div className="relative">
+                  <input
+                    type={showCurrentPassword ? 'text' : 'password'}
+                    className="input pr-10"
+                    placeholder="Enter your current password"
+                    value={currentPassword}
+                    onChange={e => setCurrentPassword(e.target.value)}
+                  />
+                  <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
+                    {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* New password */}
+              <div>
+                <label className="label">New Password</label>
+                <div className="relative">
+                  <input
+                    type={showNewPassword ? 'text' : 'password'}
+                    className="input pr-10"
+                    placeholder="Min. 8 characters"
+                    value={newPassword}
+                    onChange={e => setNewPassword(e.target.value)}
+                  />
+                  <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
+                    {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm password */}
+              <div>
+                <label className="label">Confirm New Password</label>
+                <input
+                  type="password"
+                  className="input"
+                  placeholder="Repeat new password"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                />
+              </div>
+
+              {passwordError && (
+                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">{passwordError}</div>
+              )}
+
+              <div className="flex justify-end">
+                <button
+                  onClick={savePassword}
+                  disabled={passwordSaving || !currentPassword || !newPassword}
+                  className="btn-primary"
+                >
+                  {passwordSaved
+                    ? <><Check className="w-4 h-4" /> Updated</>
+                    : <><Lock className="w-4 h-4" /> {passwordSaving ? 'Updating...' : 'Update Password'}</>}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -262,15 +377,12 @@ export default function SettingsPage() {
           <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
             <Users className="w-4 h-4 text-purple-400" />
           </div>
-          <div>
-            <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Team Access</h3>
-          </div>
+          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Team Access</h3>
         </div>
 
-        {/* Role legend */}
         <div className="grid grid-cols-2 gap-3">
           {[
-            { role: 'staff', desc: 'QR scanner + guest list only' },
+            { role: 'staff',     desc: 'QR scanner + guest list only' },
             { role: 'organizer', desc: 'Full dashboard access' },
           ].map(({ role, desc }) => {
             const cfg = getRoleConfig(role)
@@ -286,7 +398,6 @@ export default function SettingsPage() {
           })}
         </div>
 
-        {/* Create invite */}
         <div className="border-t border-white/5 pt-4 space-y-3">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Create Invite Link</p>
           <div>
@@ -319,7 +430,6 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Active invites */}
         {activeInvites.length > 0 && (
           <div className="border-t border-white/5 pt-4 space-y-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Active Links</p>
@@ -370,7 +480,6 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {/* Revoked/expired invites */}
         {inactiveInvites.length > 0 && (
           <div className="border-t border-white/5 pt-4 space-y-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Inactive Links</p>
@@ -438,8 +547,8 @@ export default function SettingsPage() {
                 </div>
                 <button type="button"
                   onClick={() => setNotifications(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
-                  className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/20'}`}>
+                  <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
               </div>
             )

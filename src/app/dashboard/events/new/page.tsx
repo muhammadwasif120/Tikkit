@@ -139,8 +139,8 @@ export default function NewEventPage() {
               <p className="text-xs text-gray-500">Hide venue until confirmed guests receive it</p>
             </div>
             <button type="button" onClick={() => update('secret_venue', !form.secret_venue)}
-              className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${form.secret_venue ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
-              <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.secret_venue ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${form.secret_venue ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
+              <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.secret_venue ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
           </div>
         </div>
@@ -175,8 +175,8 @@ export default function NewEventPage() {
               <p className="text-xs text-gray-500">Only invited guests can see this event</p>
             </div>
             <button type="button" onClick={() => update('is_private', !form.is_private)}
-              className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${form.is_private ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
-              <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.is_private ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${form.is_private ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
+              <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.is_private ? 'translate-x-5' : 'translate-x-0'}`} />
             </button>
           </div>
         </div>
@@ -252,8 +252,8 @@ export default function NewEventPage() {
                   <p className="text-xs text-gray-500">Guests must show ID at the door</p>
                 </div>
                 <button type="button" onClick={() => update('require_id_verification', !form.require_id_verification)}
-                  className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${form.require_id_verification ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.require_id_verification ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${form.require_id_verification ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
+                  <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.require_id_verification ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
               </div>
 
@@ -263,8 +263,8 @@ export default function NewEventPage() {
                   <p className="text-xs text-gray-500">Guests need a code to complete registration</p>
                 </div>
                 <button type="button" onClick={() => update('require_reference_code', !form.require_reference_code)}
-                  className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${form.require_reference_code ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
-                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.require_reference_code ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${form.require_reference_code ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
+                  <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${form.require_reference_code ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
               </div>
 
