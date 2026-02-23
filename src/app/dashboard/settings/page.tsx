@@ -75,6 +75,11 @@ export default function SettingsPage() {
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
 
+  // Profile expand/collapse
+  const [profileOpen, setProfileOpen] = useState(false)
+  const [teamOpen, setTeamOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
+
   // Password (expandable under profile)
   const [passwordOpen, setPasswordOpen] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
@@ -220,70 +225,73 @@ export default function SettingsPage() {
 
       {/* Profile + Password */}
       <div className="card space-y-5">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center">
-            <User className="w-4 h-4 text-brand-blue" />
-          </div>
-          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Profile</h3>
-        </div>
-
-        {/* Avatar row */}
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-[#1E5EFF20] border-2 border-[#1E5EFF33] flex items-center justify-center shrink-0">
-            <span className="text-2xl font-bold text-[#1E5EFF]">{fullName?.charAt(0)?.toUpperCase() ?? 'U'}</span>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-white">{fullName}</p>
-            <p className="text-xs text-gray-500 capitalize mt-0.5">{profile?.role}</p>
-            <p className="text-xs text-gray-500">{profile?.email}</p>
-          </div>
-        </div>
-
-        {/* Fields */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="col-span-2">
-            <label className="label">Full Name</label>
-            <input type="text" className="input" value={fullName} onChange={e => setFullName(e.target.value)} />
-          </div>
-          <div className="col-span-2">
-            <label className="label">Email Address</label>
-            <input type="email" className="input opacity-50 cursor-not-allowed" value={profile?.email ?? ''} disabled />
-            <p className="text-xs text-gray-600 mt-1">Email cannot be changed here</p>
-          </div>
-          <div>
-            <label className="label">Phone Number</label>
-            <div className="relative">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-              <input
-                type="tel"
-                className="input pl-9"
-                placeholder="+92 300 0000000"
-                value={phoneNumber}
-                onChange={e => setPhoneNumber(e.target.value)}
-              />
+        {/* Profile row — always visible, click to expand */}
+        <button
+          type="button"
+          onClick={() => setProfileOpen(!profileOpen)}
+          className="w-full flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#1E5EFF20] border-2 border-[#1E5EFF33] flex items-center justify-center shrink-0">
+              <span className="text-base font-bold text-[#1E5EFF]">{fullName?.charAt(0)?.toUpperCase() ?? 'U'}</span>
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-white">{fullName || 'Your Name'}</p>
+              <p className="text-xs text-gray-500">{profile?.email}</p>
+              {companyName && <p className="text-xs text-gray-600 mt-0.5">{companyName}</p>}
             </div>
           </div>
-          <div>
-            <label className="label">Company / Organization</label>
-            <div className="relative">
-              <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-              <input
-                type="text"
-                className="input pl-9"
-                placeholder="e.g. Acme Events"
-                value={companyName}
-                onChange={e => setCompanyName(e.target.value)}
-              />
-            </div>
-            <p className="text-xs text-gray-600 mt-1">Used in guest emails and communications</p>
-          </div>
-        </div>
+          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', profileOpen && 'rotate-180')} />
+        </button>
 
-        <div className="flex justify-end">
-          <button onClick={saveProfile} disabled={profileSaving} className="btn-primary">
-            {profileSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> {profileSaving ? 'Saving...' : 'Save Profile'}</>}
-          </button>
-        </div>
+        {/* Expandable edit form */}
+        {profileOpen && (
+          <div className="border-t border-white/5 pt-4 space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <label className="label">Full Name</label>
+                <input type="text" className="input" value={fullName} onChange={e => setFullName(e.target.value)} />
+              </div>
+              <div className="col-span-2">
+                <label className="label">Email Address</label>
+                <input type="email" className="input opacity-50 cursor-not-allowed" value={profile?.email ?? ''} disabled />
+                <p className="text-xs text-gray-600 mt-1">Email cannot be changed here</p>
+              </div>
+              <div>
+                <label className="label">Phone Number</label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  <input
+                    type="tel"
+                    className="input pl-9"
+                    placeholder="+92 300 0000000"
+                    value={phoneNumber}
+                    onChange={e => setPhoneNumber(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="label">Company / Organization</label>
+                <div className="relative">
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  <input
+                    type="text"
+                    className="input pl-9"
+                    placeholder="e.g. Acme Events"
+                    value={companyName}
+                    onChange={e => setCompanyName(e.target.value)}
+                  />
+                </div>
+                <p className="text-xs text-gray-600 mt-1">Used in guest emails and communications</p>
+              </div>
+            </div>
+            <div className="flex justify-end">
+              <button onClick={saveProfile} disabled={profileSaving} className="btn-primary">
+                {profileSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> {profileSaving ? 'Saving...' : 'Save Profile'}</>}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Change Password — expandable */}
         <div className="border-t border-white/5 pt-4">
@@ -373,12 +381,29 @@ export default function SettingsPage() {
 
       {/* Team */}
       <div className="card space-y-5">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-            <Users className="w-4 h-4 text-purple-400" />
+        <button
+          type="button"
+          onClick={() => setTeamOpen(!teamOpen)}
+          className="w-full flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0">
+              <Users className="w-4 h-4 text-purple-400" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Team Access</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {activeInvites.length > 0
+                  ? `${activeInvites.length} active link${activeInvites.length !== 1 ? 's' : ''}`
+                  : 'No active invite links'}
+              </p>
+            </div>
           </div>
-          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Team Access</h3>
-        </div>
+          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', teamOpen && 'rotate-180')} />
+        </button>
+
+        {teamOpen && (
+          <div className="border-t border-white/5 pt-4 space-y-5">
 
         <div className="grid grid-cols-2 gap-3">
           {[
@@ -520,16 +545,34 @@ export default function SettingsPage() {
             <p className="text-xs text-gray-600 mt-0.5">Create a link above to give someone access</p>
           </div>
         )}
+
+          </div>
+        )}
       </div>
 
       {/* Notifications */}
       <div className="card space-y-5">
-        <div className="flex items-center gap-3 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
-            <Bell className="w-4 h-4 text-green-400" />
+        <button
+          type="button"
+          onClick={() => setNotifOpen(!notifOpen)}
+          className="w-full flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+              <Bell className="w-4 h-4 text-green-400" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Notification Preferences</p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {Object.values(notifications).filter(Boolean).length} of {Object.values(notifications).length} enabled
+              </p>
+            </div>
           </div>
-          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Notification Preferences</h3>
-        </div>
+          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', notifOpen && 'rotate-180')} />
+        </button>
+
+        {notifOpen && (
+          <div className="border-t border-white/5 pt-4 space-y-5">
         <div className="space-y-2">
           {Object.entries(notifConfig).map(([key, config]) => {
             const Icon = config.icon
@@ -559,6 +602,9 @@ export default function SettingsPage() {
             {notifSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Preferences</>}
           </button>
         </div>
+
+          </div>
+        )}
       </div>
     </div>
   )
