@@ -8,6 +8,7 @@ import {
   Edit2, Trash2, Link as LinkIcon
 } from 'lucide-react'
 import { notifyVendorPaymentDue } from '@/app/actions/vendorNotificationActions'
+import { dismissVendorPaymentNotification } from '@/app/actions/approvalDismissAction'
 import clsx from 'clsx'
 
 type Vendor = {
@@ -159,27 +160,21 @@ export default function VendorsClient({
       const { data } = await supabase.from('vendor_invoices').update(payload).eq('id', editingInvoice.id).select().single()
       if (data) {
         setInvoices(prev => prev.map(i => i.id === data.id ? data : i))
-
         // Notify if status changed to pending or overdue
         if ((data.status === 'pending' || data.status === 'overdue') &&
             data.status !== editingInvoice.status) {
           const vendor = vendors.find(v => v.id === data.vendor_id)
-          if (vendor) {
-            await notifyVendorPaymentDue(data.event_id, vendor.name, data.amount)
-          }
+          if (vendor) await notifyVendorPaymentDue(userId, data.event_id, vendor.name, data.amount)
         }
       }
     } else {
       const { data } = await supabase.from('vendor_invoices').insert(payload).select().single()
       if (data) {
         setInvoices(prev => [...prev, data])
-
         // Notify on new pending or overdue invoice
         if (data.status === 'pending' || data.status === 'overdue') {
           const vendor = vendors.find(v => v.id === data.vendor_id)
-          if (vendor) {
-            await notifyVendorPaymentDue(data.event_id, vendor.name, data.amount)
-          }
+          if (vendor) await notifyVendorPaymentDue(userId, data.event_id, vendor.name, data.amount)
         }
       }
     }
@@ -192,7 +187,12 @@ export default function VendorsClient({
     const { data } = await supabase.from('vendor_invoices')
       .update({ status: 'paid', paid_at: new Date().toISOString() })
       .eq('id', invoice.id).select().single()
-    if (data) setInvoices(prev => prev.map(i => i.id === data.id ? data : i))
+    if (data) {
+      setInvoices(prev => prev.map(i => i.id === data.id ? data : i))
+      // Dismiss the payment due notification now that it's been paid
+      const vendor = vendors.find(v => v.id === invoice.vendor_id)
+      if (vendor) await dismissVendorPaymentNotification(invoice.event_id, vendor.name)
+    }
   }
 
   const deleteInvoice = async (id: string) => {
@@ -415,7 +415,7 @@ export default function VendorsClient({
                         </td>
                         <td className="table-cell">
                           <div className="flex items-center gap-1">
-                            {invoice.status === 'pending' && (
+                            {(invoice.status === 'pending' || invoice.status === 'overdue') && (
                               <button onClick={() => markPaid(invoice)} title="Mark Paid"
                                 className="p-1.5 text-gray-500 hover:text-green-400 transition-colors">
                                 <Check className="w-3.5 h-3.5" />

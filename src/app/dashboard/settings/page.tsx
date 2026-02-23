@@ -3,16 +3,9 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  User,
-  Lock,
-  Users,
-  Bell,
-  Save,
-  Plus,
-  Trash2,
-  Check,
-  Eye,
-  EyeOff,
+  User, Lock, Users, Bell, Save, Plus, Trash2, Check,
+  Eye, EyeOff, UserPlus, UserMinus, LogIn, LogOut,
+  CreditCard, Zap, Flag,
 } from 'lucide-react'
 
 type Profile = {
@@ -30,6 +23,16 @@ type TeamMember = {
   role: string
 }
 
+const notifConfig: Record<string, { label: string; description: string; icon: React.ElementType; color: string }> = {
+  guest_signup:        { label: 'Guest signs up',         description: 'When a new guest registers for your event',         icon: UserPlus,   color: 'text-green-400' },
+  guest_cancellation:  { label: 'Guest cancels',          description: 'When a guest cancels their registration',           icon: UserMinus,  color: 'text-red-400' },
+  entry_scan:          { label: 'Guest checks in',        description: 'When a QR code is scanned for entry',               icon: LogIn,      color: 'text-blue-400' },
+  exit_scan:           { label: 'Guest checks out',       description: 'When a QR code is scanned for exit',                icon: LogOut,     color: 'text-gray-400' },
+  vendor_payment_due:  { label: 'Vendor payment due',     description: 'When a vendor invoice is created or overdue',       icon: CreditCard, color: 'text-yellow-400' },
+  event_going_live:    { label: 'Event goes live',        description: 'When you publish an event',                         icon: Zap,        color: 'text-purple-400' },
+  event_ended:         { label: 'Event ends',             description: 'When an event is cancelled or concluded',           icon: Flag,       color: 'text-orange-400' },
+}
+
 export default function SettingsPage() {
   const supabase = createClient()
 
@@ -40,7 +43,6 @@ export default function SettingsPage() {
   const [profileSaved, setProfileSaved] = useState(false)
 
   // Password
-  const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [showNewPassword, setShowNewPassword] = useState(false)
@@ -56,13 +58,15 @@ export default function SettingsPage() {
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [inviteSent, setInviteSent] = useState(false)
 
-  // Notifications
+  // Notifications — all enabled by default except exit_scan
   const [notifications, setNotifications] = useState({
-    new_guest: true,
-    capacity_alert: true,
-    waitlist_update: true,
-    vendor_invoice: false,
-    event_reminder: true,
+    guest_signup:       true,
+    guest_cancellation: true,
+    entry_scan:         true,
+    exit_scan:          false,
+    vendor_payment_due: true,
+    event_going_live:   true,
+    event_ended:        true,
   })
   const [notifSaved, setNotifSaved] = useState(false)
 
@@ -96,10 +100,7 @@ export default function SettingsPage() {
   const saveProfile = async () => {
     if (!profile) return
     setProfileSaving(true)
-    await supabase
-      .from('profiles')
-      .update({ full_name: fullName })
-      .eq('id', profile.id)
+    await supabase.from('profiles').update({ full_name: fullName }).eq('id', profile.id)
     setProfileSaving(false)
     setProfileSaved(true)
     setTimeout(() => setProfileSaved(false), 3000)
@@ -107,14 +108,8 @@ export default function SettingsPage() {
 
   const savePassword = async () => {
     setPasswordError(null)
-    if (newPassword !== confirmPassword) {
-      setPasswordError('New passwords do not match.')
-      return
-    }
-    if (newPassword.length < 8) {
-      setPasswordError('Password must be at least 8 characters.')
-      return
-    }
+    if (newPassword !== confirmPassword) { setPasswordError('Passwords do not match.'); return }
+    if (newPassword.length < 8) { setPasswordError('Password must be at least 8 characters.'); return }
     setPasswordSaving(true)
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     setPasswordSaving(false)
@@ -124,7 +119,6 @@ export default function SettingsPage() {
       setPasswordSaved(true)
       setNewPassword('')
       setConfirmPassword('')
-      setCurrentPassword('')
       setTimeout(() => setPasswordSaved(false), 3000)
     }
   }
@@ -133,9 +127,6 @@ export default function SettingsPage() {
     setInviteError(null)
     if (!inviteEmail) return
     setInviting(true)
-
-    // In a real app this would send an invite email via Supabase Admin API
-    // For now we simulate the invite
     await new Promise(r => setTimeout(r, 1000))
     setInviting(false)
     setInviteSent(true)
@@ -144,25 +135,14 @@ export default function SettingsPage() {
   }
 
   const saveNotifications = () => {
-    // In production save to a user_preferences table
     setNotifSaved(true)
     setTimeout(() => setNotifSaved(false), 3000)
-  }
-
-  const notifLabels: Record<string, string> = {
-    new_guest: 'New guest registers',
-    capacity_alert: 'Event nearing capacity',
-    waitlist_update: 'Waitlist movement',
-    vendor_invoice: 'Vendor invoice due',
-    event_reminder: 'Event day reminder',
   }
 
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          Settings
-        </h2>
+        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Settings</h2>
         <p className="text-gray-400 text-sm mt-1">Manage your account and preferences</p>
       </div>
 
@@ -172,17 +152,11 @@ export default function SettingsPage() {
           <div className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center">
             <User className="w-4 h-4 text-brand-blue" />
           </div>
-          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Profile
-          </h3>
+          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Profile</h3>
         </div>
-
-        {/* Avatar */}
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-full bg-[#1E5EFF20] border-2 border-[#1E5EFF33] flex items-center justify-center shrink-0">
-            <span className="text-2xl font-bold text-[#1E5EFF]">
-              {fullName?.charAt(0)?.toUpperCase() ?? 'U'}
-            </span>
+            <span className="text-2xl font-bold text-[#1E5EFF]">{fullName?.charAt(0)?.toUpperCase() ?? 'U'}</span>
           </div>
           <div>
             <p className="text-sm font-medium text-white">{fullName}</p>
@@ -190,35 +164,18 @@ export default function SettingsPage() {
             <p className="text-xs text-gray-500">{profile?.email}</p>
           </div>
         </div>
-
         <div>
           <label className="label">Full Name</label>
-          <input
-            type="text"
-            className="input"
-            value={fullName}
-            onChange={(e) => setFullName(e.target.value)}
-          />
+          <input type="text" className="input" value={fullName} onChange={(e) => setFullName(e.target.value)} />
         </div>
-
         <div>
           <label className="label">Email Address</label>
-          <input
-            type="email"
-            className="input opacity-50 cursor-not-allowed"
-            value={profile?.email ?? ''}
-            disabled
-          />
+          <input type="email" className="input opacity-50 cursor-not-allowed" value={profile?.email ?? ''} disabled />
           <p className="text-xs text-gray-600 mt-1">Email cannot be changed here</p>
         </div>
-
         <div className="flex justify-end">
           <button onClick={saveProfile} disabled={profileSaving} className="btn-primary">
-            {profileSaved ? (
-              <><Check className="w-4 h-4" /> Saved</>
-            ) : (
-              <><Save className="w-4 h-4" /> {profileSaving ? 'Saving...' : 'Save Profile'}</>
-            )}
+            {profileSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> {profileSaving ? 'Saving...' : 'Save Profile'}</>}
           </button>
         </div>
       </div>
@@ -229,11 +186,8 @@ export default function SettingsPage() {
           <div className="w-8 h-8 rounded-lg bg-[#FFC74520] flex items-center justify-center">
             <Lock className="w-4 h-4 text-[#FFC745]" />
           </div>
-          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Change Password
-          </h3>
+          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Change Password</h3>
         </div>
-
         <div>
           <label className="label">New Password</label>
           <div className="relative">
@@ -244,40 +198,22 @@ export default function SettingsPage() {
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
             />
-            <button
-              type="button"
-              onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
-            >
+            <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
               {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
         </div>
-
         <div>
           <label className="label">Confirm New Password</label>
-          <input
-            type="password"
-            className="input"
-            placeholder="Repeat new password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-          />
+          <input type="password" className="input" placeholder="Repeat new password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
         </div>
-
         {passwordError && (
-          <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">
-            {passwordError}
-          </div>
+          <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">{passwordError}</div>
         )}
-
         <div className="flex justify-end">
           <button onClick={savePassword} disabled={passwordSaving || !newPassword} className="btn-primary">
-            {passwordSaved ? (
-              <><Check className="w-4 h-4" /> Updated</>
-            ) : (
-              <><Lock className="w-4 h-4" /> {passwordSaving ? 'Updating...' : 'Update Password'}</>
-            )}
+            {passwordSaved ? <><Check className="w-4 h-4" /> Updated</> : <><Lock className="w-4 h-4" /> {passwordSaving ? 'Updating...' : 'Update Password'}</>}
           </button>
         </div>
       </div>
@@ -288,72 +224,41 @@ export default function SettingsPage() {
           <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
             <Users className="w-4 h-4 text-purple-400" />
           </div>
-          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Team Members
-          </h3>
+          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Team Members</h3>
         </div>
-
-        {/* Existing members */}
         {teamMembers.length > 0 ? (
           <div className="space-y-2">
             {teamMembers.map((member) => (
-              <div
-                key={member.id}
-                className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5"
-              >
+              <div key={member.id} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-full bg-purple-500/10 border border-purple-500/20 flex items-center justify-center">
-                    <span className="text-xs font-semibold text-purple-400">
-                      {member.full_name?.charAt(0)?.toUpperCase()}
-                    </span>
+                    <span className="text-xs font-semibold text-purple-400">{member.full_name?.charAt(0)?.toUpperCase()}</span>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">{member.full_name}</p>
                     <p className="text-xs text-gray-500">{member.email}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="badge-gray capitalize">{member.role}</span>
-                </div>
+                <span className="badge-gray capitalize">{member.role}</span>
               </div>
             ))}
           </div>
         ) : (
           <p className="text-sm text-gray-500">No team members yet.</p>
         )}
-
-        {/* Invite */}
         <div className="border-t border-white/5 pt-4 space-y-3">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Invite Member</p>
           <div className="flex gap-2">
-            <input
-              type="email"
-              className="input flex-1"
-              placeholder="colleague@example.com"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-            />
-            <select
-              className="input w-32"
-              value={inviteRole}
-              onChange={(e) => setInviteRole(e.target.value as 'staff' | 'organizer')}
-            >
+            <input type="email" className="input flex-1" placeholder="colleague@example.com" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
+            <select className="input w-32" value={inviteRole} onChange={(e) => setInviteRole(e.target.value as 'staff' | 'organizer')}>
               <option value="staff">Staff</option>
               <option value="organizer">Organizer</option>
             </select>
           </div>
-
-          {inviteError && (
-            <p className="text-sm text-red-400">{inviteError}</p>
-          )}
-
+          {inviteError && <p className="text-sm text-red-400">{inviteError}</p>}
           <div className="flex justify-end">
             <button onClick={sendInvite} disabled={inviting || !inviteEmail} className="btn-primary">
-              {inviteSent ? (
-                <><Check className="w-4 h-4" /> Invite Sent</>
-              ) : (
-                <><Plus className="w-4 h-4" /> {inviting ? 'Sending...' : 'Send Invite'}</>
-              )}
+              {inviteSent ? <><Check className="w-4 h-4" /> Invite Sent</> : <><Plus className="w-4 h-4" /> {inviting ? 'Sending...' : 'Send Invite'}</>}
             </button>
           </div>
         </div>
@@ -365,42 +270,39 @@ export default function SettingsPage() {
           <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
             <Bell className="w-4 h-4 text-green-400" />
           </div>
-          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Notification Preferences
-          </h3>
+          <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Notification Preferences</h3>
         </div>
 
-        <div className="space-y-3">
-          {Object.entries(notifications).map(([key, value]) => (
-            <div
-              key={key}
-              className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5"
-            >
-              <p className="text-sm text-white">{notifLabels[key]}</p>
-              <button
-                type="button"
-                onClick={() => setNotifications(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
-                className={`relative w-10 h-5 rounded-full transition-colors ${
-                  value ? 'bg-[#1E5EFF]' : 'bg-white/10'
-                }`}
-              >
-                <span
-                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                    value ? 'translate-x-5' : 'translate-x-0.5'
-                  }`}
-                />
-              </button>
-            </div>
-          ))}
+        <div className="space-y-2">
+          {Object.entries(notifConfig).map(([key, config]) => {
+            const Icon = config.icon
+            const enabled = notifications[key as keyof typeof notifications]
+            return (
+              <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                <div className="flex items-center gap-3">
+                  <div className={`w-7 h-7 rounded-md bg-white/5 flex items-center justify-center shrink-0`}>
+                    <Icon className={`w-3.5 h-3.5 ${config.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-white">{config.label}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{config.description}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setNotifications(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
+                  className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}
+                >
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
+              </div>
+            )
+          })}
         </div>
 
         <div className="flex justify-end">
           <button onClick={saveNotifications} className="btn-primary">
-            {notifSaved ? (
-              <><Check className="w-4 h-4" /> Saved</>
-            ) : (
-              <><Save className="w-4 h-4" /> Save Preferences</>
-            )}
+            {notifSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Preferences</>}
           </button>
         </div>
       </div>

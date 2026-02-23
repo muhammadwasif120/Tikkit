@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Html5Qrcode } from 'html5-qrcode'
 import { CheckCircle, XCircle, ScanLine, X, LogIn, LogOut, Crown, Wifi, Camera, Hash } from 'lucide-react'
-import { notifyEntryScan, notifyExitScan } from '@/app/actions/scanNotificationActions'
+
 
 const OVERLAY_DURATION = 8000
 
@@ -227,11 +227,21 @@ export default function ScannerPage() {
       scan_type:  currentScanType,
     })
 
-    // Fire-and-forget — don't await so the scan result shows instantly
-    if (currentScanType === 'entry') {
-      notifyEntryScan(currentEventId, guest.full_name, guest.is_vip ?? false)
-    } else {
-      notifyExitScan(currentEventId, guest.full_name)
+    // Write notification directly via authenticated client
+    if (user) {
+      const isVip = guest.is_vip ?? false
+      supabase.from('notifications').insert({
+        user_id:  user.id,
+        event_id: currentEventId,
+        type:     currentScanType === 'entry' ? 'entry_scan' : 'exit_scan',
+        title:    currentScanType === 'entry'
+                    ? (isVip ? '⭐ VIP arrived' : 'Guest checked in')
+                    : 'Guest checked out',
+        body:     currentScanType === 'entry'
+                    ? `${guest.full_name} has entered the event`
+                    : `${guest.full_name} has left the event`,
+        metadata: { guestName: guest.full_name, isVip },
+      })
     }
 
     setScanCount((c) => c + 1)

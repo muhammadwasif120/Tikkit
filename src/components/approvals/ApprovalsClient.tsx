@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Check, X, ChevronDown, Clock, CheckCircle, XCircle, Users, ExternalLink, Copy } from 'lucide-react'
 import { notifyGuestApproved, notifyGuestRejected } from '@/app/actions/approvalNotificationActions'
+import { dismissInterestNotification } from '@/app/actions/approvalDismissAction'
 import clsx from 'clsx'
 
 type Registration = {
@@ -27,9 +28,9 @@ type Event = {
 }
 
 const statusConfig = {
-  pending:  { label: 'Pending',  color: 'text-[#FFC745]',  bg: 'bg-[#FFC74515]',    border: 'border-[#FFC74530]',    icon: Clock },
-  approved: { label: 'Approved', color: 'text-green-400',  bg: 'bg-green-500/10',   border: 'border-green-500/20',   icon: CheckCircle },
-  rejected: { label: 'Rejected', color: 'text-red-400',    bg: 'bg-red-500/10',     border: 'border-red-500/20',     icon: XCircle },
+  pending:  { label: 'Pending',  color: 'text-[#FFC745]',  bg: 'bg-[#FFC74515]',  border: 'border-[#FFC74530]',  icon: Clock },
+  approved: { label: 'Approved', color: 'text-green-400',  bg: 'bg-green-500/10', border: 'border-green-500/20', icon: CheckCircle },
+  rejected: { label: 'Rejected', color: 'text-red-400',    bg: 'bg-red-500/10',   border: 'border-red-500/20',   icon: XCircle },
 }
 
 export default function ApprovalsClient({
@@ -71,7 +72,6 @@ export default function ApprovalsClient({
       return
     }
 
-    // Send approval email
     await fetch('/api/send-approval-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -86,7 +86,8 @@ export default function ApprovalsClient({
       }),
     })
 
-    // Notify organiser
+    // Dismiss the "expressed interest" notification and fire approved notification
+    await dismissInterestNotification(reg.event_id, reg.full_name)
     await notifyGuestApproved(reg.event_id, reg.full_name, event?.title ?? '')
 
     setRegistrations(prev => prev.map(r => r.id === reg.id ? { ...r, status: 'approved' } : r))
@@ -102,7 +103,6 @@ export default function ApprovalsClient({
       .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
       .eq('id', reg.id)
 
-    // Send rejection email
     await fetch('/api/send-approval-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -114,7 +114,8 @@ export default function ApprovalsClient({
       }),
     })
 
-    // Notify organiser
+    // Dismiss the "expressed interest" notification and fire rejected notification
+    await dismissInterestNotification(reg.event_id, reg.full_name)
     await notifyGuestRejected(reg.event_id, reg.full_name, event?.title ?? '')
 
     setRegistrations(prev => prev.map(r => r.id === reg.id ? { ...r, status: 'rejected' } : r))
@@ -167,8 +168,7 @@ export default function ApprovalsClient({
                 >
                   {copied === event.id
                     ? <><Check className="w-3 h-3" /> Copied!</>
-                    : <><Copy className="w-3 h-3" /> Copy Link</>
-                  }
+                    : <><Copy className="w-3 h-3" /> Copy Link</>}
                 </button>
                 <a
                   href={`/register/${event.id}`}

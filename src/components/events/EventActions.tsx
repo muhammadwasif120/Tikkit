@@ -21,11 +21,20 @@ export default function EventActions({ event }: { event: Event }) {
     await supabase.from('events').update({ status }).eq('id', event.id)
     setOpen(false)
 
-    // Fire notifications based on the new status
-    if (status === 'published') {
-      await notifyEventGoingLive(event.id, event.title)
-    } else if (status === 'cancelled') {
-      await notifyEventEnded(event.id, event.title)
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (user) {
+      if (status === 'published') {
+        await notifyEventGoingLive(user.id, event.id, event.title)
+      } else if (status === 'cancelled') {
+        // Fetch attendee count client-side so server action stays header-free
+        const { count } = await supabase
+          .from('guests')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .eq('status', 'checked_in')
+        await notifyEventEnded(user.id, event.id, event.title, count ?? 0)
+      }
     }
 
     router.refresh()

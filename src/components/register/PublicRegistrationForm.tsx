@@ -72,6 +72,14 @@ export default function PublicRegistrationForm({ event }: { event: Event }) {
       })
     }
 
+    // Notify the organizer via RPC (works without an authenticated session)
+    await supabase.rpc('notify_guest_signup', {
+      p_event_id:    event.id,
+      p_guest_name:  form.full_name,
+      p_event_title: event.title,
+      p_is_interest: !isOpen,
+    })
+
     setDone(true)
     setLoading(false)
   }
@@ -83,7 +91,7 @@ export default function PublicRegistrationForm({ event }: { event: Event }) {
           <Check className="w-6 h-6 text-green-400" />
         </div>
         <h2 className="text-white font-bold text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          {isOpen ? 'You\'re registered!' : 'Interest submitted!'}
+          {isOpen ? "You're registered!" : 'Interest submitted!'}
         </h2>
         <p className="text-gray-400 text-sm">
           {isOpen
