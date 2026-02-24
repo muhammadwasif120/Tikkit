@@ -1,11 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
-import { CalendarDays, MapPin, Users, ArrowLeft, ExternalLink } from 'lucide-react'
+import { CalendarDays, MapPin, Users, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import EventActions from '@/components/events/EventActions'
 import GuestTable from '@/components/guests/GuestTable'
+import EventPaymentSetup from '@/components/events/EventPaymentSetup'
 
 const statusBadge: Record<string, string> = {
   draft: 'badge-gray',
@@ -37,6 +38,22 @@ export default async function EventDetailPage({ params }: { params: { id: string
     .from('ticket_types')
     .select('*')
     .eq('event_id', event.id)
+
+  // Payment accounts — all saved by organizer
+  const { data: allPaymentAccounts } = await supabase
+    .from('payment_accounts')
+    .select('*')
+    .eq('organizer_id', user!.id)
+    .eq('is_active', true)
+    .order('created_at', { ascending: false })
+
+  // Which accounts are already linked to this event
+  const { data: linkedEPA } = await supabase
+    .from('event_payment_accounts')
+    .select('payment_account_id')
+    .eq('event_id', event.id)
+
+  const linkedAccountIds = (linkedEPA ?? []).map((r: any) => r.payment_account_id)
 
   const checkedIn = guests?.filter(g => g.status === 'checked_in').length ?? 0
   const total = guests?.length ?? 0
@@ -99,10 +116,10 @@ export default async function EventDetailPage({ params }: { params: { id: string
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Guests', value: total },
-          { label: 'Checked In', value: checkedIn },
-          { label: 'Ticket Types', value: ticketTypes?.length ?? 0 },
-          { label: 'Waitlisted', value: guests?.filter(g => g.waitlist).length ?? 0 },
+          { label: 'Total Guests',  value: total },
+          { label: 'Checked In',    value: checkedIn },
+          { label: 'Ticket Types',  value: ticketTypes?.length ?? 0 },
+          { label: 'Waitlisted',    value: guests?.filter(g => g.waitlist).length ?? 0 },
         ].map((s) => (
           <div key={s.label} className="card text-center py-4">
             <p className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
@@ -112,6 +129,16 @@ export default async function EventDetailPage({ params }: { params: { id: string
           </div>
         ))}
       </div>
+
+      {/* Payment Setup — only shown for paid events or if organizer wants to configure */}
+      {event.registration_mode !== 'invite_only' && (
+        <EventPaymentSetup
+          eventId={event.id}
+          ticketPrice={event.ticket_price ?? 0}
+          allAccounts={allPaymentAccounts ?? []}
+          linkedAccountIds={linkedAccountIds}
+        />
+      )}
 
       {/* Guest table */}
       <div className="card">

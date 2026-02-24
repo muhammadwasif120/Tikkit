@@ -10,6 +10,9 @@ import {
   Clock, RefreshCw, ChevronDown, Phone, Building2,
 } from 'lucide-react'
 import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInvite } from '@/app/actions/teamActions'
+import { getPaymentAccounts } from '@/app/actions/paymentAccountActions'
+import type { PaymentAccount } from '@/app/actions/paymentAccountActions'
+import PaymentAccountsSection from '@/components/settings/PaymentAccountsSection'
 import clsx from 'clsx'
 
 type Profile = {
@@ -75,10 +78,11 @@ export default function SettingsPage() {
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
 
-  // Profile expand/collapse
+  // Section expand/collapse
   const [profileOpen, setProfileOpen] = useState(false)
   const [teamOpen, setTeamOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
+  const [paymentOpen, setPaymentOpen] = useState(false)
 
   // Password (expandable under profile)
   const [passwordOpen, setPasswordOpen] = useState(false)
@@ -90,6 +94,9 @@ export default function SettingsPage() {
   const [passwordSaving, setPasswordSaving] = useState(false)
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [passwordSaved, setPasswordSaved] = useState(false)
+
+  // Payment accounts
+  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([])
 
   // Team
   const [invites, setInvites] = useState<TeamInvite[]>([])
@@ -125,6 +132,9 @@ export default function SettingsPage() {
         .eq('organizer_id', user.id)
         .order('created_at', { ascending: false })
       setInvites(inv ?? [])
+
+      const accounts = await getPaymentAccounts()
+      setPaymentAccounts(accounts)
     }
     loadData()
   }, [])
@@ -151,7 +161,6 @@ export default function SettingsPage() {
 
     setPasswordSaving(true)
 
-    // Re-authenticate with current password first
     const { data: { user } } = await supabase.auth.getUser()
     if (!user?.email) { setPasswordError('Could not verify your account.'); setPasswordSaving(false); return }
 
@@ -311,7 +320,6 @@ export default function SettingsPage() {
 
           {passwordOpen && (
             <div className="mt-4 space-y-4">
-              {/* Current password */}
               <div>
                 <label className="label">Current Password</label>
                 <div className="relative">
@@ -329,7 +337,6 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* New password */}
               <div>
                 <label className="label">New Password</label>
                 <div className="relative">
@@ -347,7 +354,6 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Confirm password */}
               <div>
                 <label className="label">Confirm New Password</label>
                 <input
@@ -379,6 +385,13 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* Payment Accounts */}
+      <PaymentAccountsSection
+        initialAccounts={paymentAccounts}
+        open={paymentOpen}
+        onToggle={() => setPaymentOpen(!paymentOpen)}
+      />
+
       {/* Team */}
       <div className="card space-y-5">
         <button
@@ -405,146 +418,146 @@ export default function SettingsPage() {
         {teamOpen && (
           <div className="border-t border-white/5 pt-4 space-y-5">
 
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { role: 'staff',     desc: 'QR scanner + guest list only' },
-            { role: 'organizer', desc: 'Full dashboard access' },
-          ].map(({ role, desc }) => {
-            const cfg = getRoleConfig(role)
-            return (
-              <div key={role} className={clsx('p-3 rounded-lg border', cfg.bg, cfg.border)}>
-                <div className="flex items-center gap-2 mb-1">
-                  <cfg.icon className={clsx('w-3.5 h-3.5', cfg.color)} />
-                  <span className={clsx('text-xs font-semibold capitalize', cfg.color)}>{cfg.label}</span>
-                </div>
-                <p className="text-xs text-gray-500">{desc}</p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { role: 'staff',     desc: 'QR scanner + guest list only' },
+                { role: 'organizer', desc: 'Full dashboard access' },
+              ].map(({ role, desc }) => {
+                const cfg = getRoleConfig(role)
+                return (
+                  <div key={role} className={clsx('p-3 rounded-lg border', cfg.bg, cfg.border)}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <cfg.icon className={clsx('w-3.5 h-3.5', cfg.color)} />
+                      <span className={clsx('text-xs font-semibold capitalize', cfg.color)}>{cfg.label}</span>
+                    </div>
+                    <p className="text-xs text-gray-500">{desc}</p>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div className="border-t border-white/5 pt-4 space-y-3">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Create Invite Link</p>
+              <div>
+                <label className="label">Label</label>
+                <input type="text" className="input" placeholder="e.g. Ali - Door Security"
+                  value={inviteLabel} onChange={e => setInviteLabel(e.target.value)} />
+                <p className="text-xs text-gray-600 mt-1">A name to identify who this link is for</p>
               </div>
-            )
-          })}
-        </div>
-
-        <div className="border-t border-white/5 pt-4 space-y-3">
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Create Invite Link</p>
-          <div>
-            <label className="label">Label</label>
-            <input type="text" className="input" placeholder="e.g. Ali - Door Security"
-              value={inviteLabel} onChange={e => setInviteLabel(e.target.value)} />
-            <p className="text-xs text-gray-600 mt-1">A name to identify who this link is for</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label">Role</label>
-              <select className="input" value={inviteRole} onChange={e => setInviteRole(e.target.value as 'staff' | 'organizer')}>
-                <option value="staff">Staff</option>
-                <option value="organizer">Organizer</option>
-              </select>
-            </div>
-            <div>
-              <label className="label">Link Expiry</label>
-              <select className="input" value={inviteExpiry ?? ''} onChange={e => setInviteExpiry(e.target.value || null)}>
-                {EXPIRY_OPTIONS.map(o => (
-                  <option key={o.value ?? 'never'} value={o.value ?? ''}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <div className="flex justify-end">
-            <button onClick={createInvite} disabled={creating || !inviteLabel.trim()} className="btn-primary">
-              {creating ? 'Creating...' : <><Link2 className="w-4 h-4" /> Generate Link</>}
-            </button>
-          </div>
-        </div>
-
-        {activeInvites.length > 0 && (
-          <div className="border-t border-white/5 pt-4 space-y-2">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Active Links</p>
-            {activeInvites.map(invite => {
-              const cfg = getRoleConfig(invite.role)
-              return (
-                <div key={invite.id} className="p-3 rounded-lg bg-brand-charcoal-light border border-white/5 space-y-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
-                      <p className="text-sm font-medium text-white truncate">{invite.label}</p>
-                      <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
-                        {invite.role}
-                      </span>
-                    </div>
-                    <InviteStatus invite={invite} />
-                  </div>
-                  {invite.expires_at && (
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <Clock className="w-3 h-3" />
-                      Expires {new Date(invite.expires_at).toLocaleDateString('en-PK', { dateStyle: 'medium' })}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 pt-1">
-                    <button onClick={() => copyLink(invite)}
-                      className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all',
-                        copiedId === invite.id
-                          ? 'text-green-400 border-green-500/30 bg-green-500/10'
-                          : 'text-gray-400 border-white/10 hover:text-white hover:border-white/20 bg-white/3')}>
-                      {copiedId === invite.id ? <><Check className="w-3 h-3" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy Link</>}
-                    </button>
-                    <button onClick={() => shareWhatsApp(invite)}
-                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-green-600/30 bg-green-600/10 text-green-400 hover:bg-green-600/20 transition-colors">
-                      <ExternalLink className="w-3 h-3" /> WhatsApp
-                    </button>
-                    <a href={`/staff/${invite.token}`} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-white/20 bg-white/3 transition-colors">
-                      <ExternalLink className="w-3 h-3" /> Preview
-                    </a>
-                    <button onClick={() => handleRevoke(invite)}
-                      className="ml-auto flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors">
-                      <AlertCircle className="w-3 h-3" /> Revoke
-                    </button>
-                  </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="label">Role</label>
+                  <select className="input" value={inviteRole} onChange={e => setInviteRole(e.target.value as 'staff' | 'organizer')}>
+                    <option value="staff">Staff</option>
+                    <option value="organizer">Organizer</option>
+                  </select>
                 </div>
-              )
-            })}
-          </div>
-        )}
-
-        {inactiveInvites.length > 0 && (
-          <div className="border-t border-white/5 pt-4 space-y-2">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Inactive Links</p>
-            {inactiveInvites.map(invite => {
-              const cfg = getRoleConfig(invite.role)
-              return (
-                <div key={invite.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-brand-charcoal-light border border-white/5 opacity-60">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
-                    <p className="text-sm text-white truncate">{invite.label}</p>
-                    <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
-                      {invite.role}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <InviteStatus invite={invite} />
-                    {invite.revoked && (
-                      <button onClick={() => handleReactivate(invite)} title="Reactivate"
-                        className="p-1.5 text-gray-500 hover:text-green-400 transition-colors">
-                        <RefreshCw className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                    <button onClick={() => handleDelete(invite.id)} title="Delete"
-                      className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                <div>
+                  <label className="label">Link Expiry</label>
+                  <select className="input" value={inviteExpiry ?? ''} onChange={e => setInviteExpiry(e.target.value || null)}>
+                    {EXPIRY_OPTIONS.map(o => (
+                      <option key={o.value ?? 'never'} value={o.value ?? ''}>{o.label}</option>
+                    ))}
+                  </select>
                 </div>
-              )
-            })}
-          </div>
-        )}
+              </div>
+              <div className="flex justify-end">
+                <button onClick={createInvite} disabled={creating || !inviteLabel.trim()} className="btn-primary">
+                  {creating ? 'Creating...' : <><Link2 className="w-4 h-4" /> Generate Link</>}
+                </button>
+              </div>
+            </div>
 
-        {invites.length === 0 && (
-          <div className="text-center py-4">
-            <Link2 className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-            <p className="text-sm text-gray-500">No invite links yet</p>
-            <p className="text-xs text-gray-600 mt-0.5">Create a link above to give someone access</p>
-          </div>
-        )}
+            {activeInvites.length > 0 && (
+              <div className="border-t border-white/5 pt-4 space-y-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Active Links</p>
+                {activeInvites.map(invite => {
+                  const cfg = getRoleConfig(invite.role)
+                  return (
+                    <div key={invite.id} className="p-3 rounded-lg bg-brand-charcoal-light border border-white/5 space-y-2">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
+                          <p className="text-sm font-medium text-white truncate">{invite.label}</p>
+                          <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
+                            {invite.role}
+                          </span>
+                        </div>
+                        <InviteStatus invite={invite} />
+                      </div>
+                      {invite.expires_at && (
+                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                          <Clock className="w-3 h-3" />
+                          Expires {new Date(invite.expires_at).toLocaleDateString('en-PK', { dateStyle: 'medium' })}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button onClick={() => copyLink(invite)}
+                          className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all',
+                            copiedId === invite.id
+                              ? 'text-green-400 border-green-500/30 bg-green-500/10'
+                              : 'text-gray-400 border-white/10 hover:text-white hover:border-white/20 bg-white/3')}>
+                          {copiedId === invite.id ? <><Check className="w-3 h-3" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy Link</>}
+                        </button>
+                        <button onClick={() => shareWhatsApp(invite)}
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-green-600/30 bg-green-600/10 text-green-400 hover:bg-green-600/20 transition-colors">
+                          <ExternalLink className="w-3 h-3" /> WhatsApp
+                        </button>
+                        <a href={`/staff/${invite.token}`} target="_blank" rel="noopener noreferrer"
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-white/20 bg-white/3 transition-colors">
+                          <ExternalLink className="w-3 h-3" /> Preview
+                        </a>
+                        <button onClick={() => handleRevoke(invite)}
+                          className="ml-auto flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 transition-colors">
+                          <AlertCircle className="w-3 h-3" /> Revoke
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {inactiveInvites.length > 0 && (
+              <div className="border-t border-white/5 pt-4 space-y-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Inactive Links</p>
+                {inactiveInvites.map(invite => {
+                  const cfg = getRoleConfig(invite.role)
+                  return (
+                    <div key={invite.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-brand-charcoal-light border border-white/5 opacity-60">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
+                        <p className="text-sm text-white truncate">{invite.label}</p>
+                        <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
+                          {invite.role}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <InviteStatus invite={invite} />
+                        {invite.revoked && (
+                          <button onClick={() => handleReactivate(invite)} title="Reactivate"
+                            className="p-1.5 text-gray-500 hover:text-green-400 transition-colors">
+                            <RefreshCw className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button onClick={() => handleDelete(invite.id)} title="Delete"
+                          className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {invites.length === 0 && (
+              <div className="text-center py-4">
+                <Link2 className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">No invite links yet</p>
+                <p className="text-xs text-gray-600 mt-0.5">Create a link above to give someone access</p>
+              </div>
+            )}
 
           </div>
         )}
@@ -573,36 +586,35 @@ export default function SettingsPage() {
 
         {notifOpen && (
           <div className="border-t border-white/5 pt-4 space-y-5">
-        <div className="space-y-2">
-          {Object.entries(notifConfig).map(([key, config]) => {
-            const Icon = config.icon
-            const enabled = notifications[key as keyof typeof notifications]
-            return (
-              <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
-                <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-md bg-white/5 flex items-center justify-center shrink-0">
-                    <Icon className={`w-3.5 h-3.5 ${config.color}`} />
+            <div className="space-y-2">
+              {Object.entries(notifConfig).map(([key, config]) => {
+                const Icon = config.icon
+                const enabled = notifications[key as keyof typeof notifications]
+                return (
+                  <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded-md bg-white/5 flex items-center justify-center shrink-0">
+                        <Icon className={`w-3.5 h-3.5 ${config.color}`} />
+                      </div>
+                      <div>
+                        <p className="text-sm text-white">{config.label}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{config.description}</p>
+                      </div>
+                    </div>
+                    <button type="button"
+                      onClick={() => setNotifications(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
+                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/20'}`}>
+                      <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                    </button>
                   </div>
-                  <div>
-                    <p className="text-sm text-white">{config.label}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{config.description}</p>
-                  </div>
-                </div>
-                <button type="button"
-                  onClick={() => setNotifications(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
-                  className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/20'}`}>
-                  <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
-                </button>
-              </div>
-            )
-          })}
-        </div>
-        <div className="flex justify-end">
-          <button onClick={saveNotifications} className="btn-primary">
-            {notifSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Preferences</>}
-          </button>
-        </div>
-
+                )
+              })}
+            </div>
+            <div className="flex justify-end">
+              <button onClick={saveNotifications} className="btn-primary">
+                {notifSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Preferences</>}
+              </button>
+            </div>
           </div>
         )}
       </div>
