@@ -1,22 +1,29 @@
 'use client'
 
 import { usePathname } from 'next/navigation'
+import { Menu } from 'lucide-react'
 import NotificationBell from '@/components/NotificationBell'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
 const pageTitles: Record<string, string> = {
-  '/dashboard': 'Dashboard',
-  '/dashboard/events': 'Events',
-  '/dashboard/guests': 'Guests',
-  '/dashboard/scan': 'Scanner',
-  '/dashboard/vendors': 'Vendors',
-  '/dashboard/analytics': 'Analytics',
-  '/dashboard/settings': 'Settings',
+  '/dashboard':            'Dashboard',
+  '/dashboard/events':     'Events',
+  '/dashboard/guests':     'Guests',
+  '/dashboard/approvals':  'Approvals',
+  '/dashboard/scan':       'Scanner',
+  '/dashboard/vendors':    'Vendors',
+  '/dashboard/analytics':  'Analytics',
+  '/dashboard/settings':   'Settings',
 }
 
-export default function TopBar({ profile }: { profile: Profile | null }) {
+type Props = {
+  profile: Profile | null
+  onMenuClick: () => void
+}
+
+export default function TopBar({ profile, onMenuClick }: Props) {
   const pathname = usePathname()
 
   const getTitle = () => {
@@ -28,20 +35,28 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
   }
 
   return (
-    <header className="h-16 bg-brand-charcoal border-b border-white/5 flex items-center justify-between px-6 shrink-0">
-      <h1
-        className="text-base font-semibold text-white"
-        style={{ fontFamily: 'Poppins, sans-serif' }}
-      >
-        {getTitle()}
-      </h1>
+    <header className="h-16 bg-brand-charcoal border-b border-white/5 flex items-center justify-between px-4 md:px-6 shrink-0">
+      <div className="flex items-center gap-3">
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden text-gray-400 hover:text-white transition-colors p-1 -ml-1"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
+        <h1
+          className="text-base font-semibold text-white"
+          style={{ fontFamily: 'Poppins, sans-serif' }}
+        >
+          {getTitle()}
+        </h1>
+      </div>
 
       <div className="flex items-center gap-3">
-        {/* Real-time notification bell */}
         <NotificationBell />
-
         <div className="h-4 w-px bg-white/10" />
-
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-full bg-brand-blue/20 border border-brand-blue/30 flex items-center justify-center">
             <span className="text-xs font-semibold text-brand-blue">
