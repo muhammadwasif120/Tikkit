@@ -1,11 +1,11 @@
 import { createClient } from '@/lib/supabase/server'
-import PassesClient from '@/components/guest/PassesClient'
 import { redirect } from 'next/navigation'
+import PassesClient from '@/components/guest/PassesClient'
 
 export default async function PassesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/guest/login')
+  if (!user) redirect('/guest-login')
 
   const { data: passes } = await supabase
     .from('event_passes')
@@ -13,5 +13,11 @@ export default async function PassesPage() {
     .eq('guest_id', user.id)
     .order('issued_at', { ascending: false })
 
-  return <PassesClient passes={passes ?? []} />
+  const { data: guestProfile } = await supabase
+    .from('guest_profiles')
+    .select('credit_score, total_attended')
+    .eq('id', user.id)
+    .single()
+
+  return <PassesClient passes={passes ?? []} stats={guestProfile} />
 }
