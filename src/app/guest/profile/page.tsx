@@ -5,7 +5,7 @@ import GuestProfileClient from '@/components/guest/GuestProfileClient'
 export default async function GuestProfilePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/guest-login')
+  if (!user) redirect('/auth/login')
 
   const [profileRes, guestRes, passCountRes] = await Promise.all([
     supabase.from('profiles').select('full_name, email, phone_number').eq('id', user.id).single(),

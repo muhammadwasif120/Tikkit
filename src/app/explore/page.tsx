@@ -6,7 +6,7 @@ export default async function ExplorePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/guest-login')
+  if (!user) redirect('/auth/login')
 
   // Public upcoming events
   const { data: events } = await supabase

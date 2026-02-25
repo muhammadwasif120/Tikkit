@@ -5,7 +5,7 @@ import GuestNotificationsClient from '@/components/guest/GuestNotificationsClien
 export default async function GuestNotificationsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/guest-login')
+  if (!user) redirect('/auth/login')
 
   // Fetch all registrations as notification items
   const { data: registrations } = await supabase

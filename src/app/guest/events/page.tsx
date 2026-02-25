@@ -5,7 +5,7 @@ import MyEventsClient from '@/components/guest/MyEventsClient'
 export default async function MyEventsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/guest-login')
+  if (!user) redirect('/auth/login')
 
   const { data: registrations } = await supabase
     .from('public_registrations')

@@ -239,7 +239,7 @@ export default function GuestProfileClient({ userId, userEmail, profile, guestPr
 
   const signOut = async () => {
     await supabase.auth.signOut()
-    router.push('/guest-login')
+    router.push('/auth/login')
   }
 
   return (

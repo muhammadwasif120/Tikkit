@@ -1,4 +1,95 @@
-// Add this to paymentAccountActions.ts — replaces the existing approvePaymentSubmission function
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+
+export async function getPaymentAccounts() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { data, error } = await supabase
+    .from('payment_accounts')
+    .select('*')
+    .eq('organizer_id', user.id)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data ?? []
+}
+
+export async function createPaymentAccount(account: {
+  account_name: string
+  bank_name: string
+  account_number: string
+  account_title: string
+  is_default?: boolean
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  // If setting as default, unset all others first
+  if (account.is_default) {
+    await supabase
+      .from('payment_accounts')
+      .update({ is_default: false })
+      .eq('organizer_id', user.id)
+  }
+
+  const { data, error } = await supabase
+    .from('payment_accounts')
+    .insert({ ...account, organizer_id: user.id })
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function updatePaymentAccount(id: string, updates: {
+  account_name?: string
+  bank_name?: string
+  account_number?: string
+  account_title?: string
+  is_default?: boolean
+}) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  // If setting as default, unset all others first
+  if (updates.is_default) {
+    await supabase
+      .from('payment_accounts')
+      .update({ is_default: false })
+      .eq('organizer_id', user.id)
+  }
+
+  const { data, error } = await supabase
+    .from('payment_accounts')
+    .update(updates)
+    .eq('id', id)
+    .eq('organizer_id', user.id) // safety: can only update own accounts
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export async function deletePaymentAccount(id: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  const { error } = await supabase
+    .from('payment_accounts')
+    .delete()
+    .eq('id', id)
+    .eq('organizer_id', user.id) // safety: can only delete own accounts
+
+  if (error) throw error
+}
 
 export async function approvePaymentSubmission(submissionId: string, registrationId: string) {
   const supabase = await createClient()
@@ -29,12 +120,12 @@ export async function approvePaymentSubmission(submissionId: string, registratio
   if (reg) {
     // 4. Create guest record (payment is now confirmed)
     await supabase.from('guests').insert({
-      event_id: reg.event_id,
-      name: reg.full_name,
-      email: reg.email,
-      phone: reg.phone,
-      status: 'registered',
-      source: 'public_registration',
+      event_id:        reg.event_id,
+      name:            reg.full_name,
+      email:           reg.email,
+      phone:           reg.phone,
+      status:          'registered',
+      source:          'public_registration',
       registration_id: reg.id,
     })
 
@@ -44,11 +135,11 @@ export async function approvePaymentSubmission(submissionId: string, registratio
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        type: 'payment_confirmed',
-        name: reg.full_name,
-        email: reg.email,
-        eventTitle: event?.title,
-        organizer: event?.organizer?.company_name ?? event?.organizer?.full_name,
+        type:          'payment_confirmed',
+        name:          reg.full_name,
+        email:         reg.email,
+        eventTitle:    event?.title,
+        organizer:     event?.organizer?.company_name ?? event?.organizer?.full_name,
         referenceCode: event?.require_reference_code ? event?.reference_code : null,
       }),
     })
@@ -86,11 +177,11 @@ export async function rejectPaymentSubmission(submissionId: string, registration
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        type: 'payment_rejected',
-        name: reg.full_name,
-        email: reg.email,
+        type:       'payment_rejected',
+        name:       reg.full_name,
+        email:      reg.email,
         eventTitle: (reg.event as any)?.title,
-        notes: notes ?? null,
+        notes:      notes ?? null,
       }),
     })
   }

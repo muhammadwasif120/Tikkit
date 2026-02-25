@@ -6,7 +6,7 @@ export default async function GuestLayout({ children }: { children: React.ReactN
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/guest-login')
+  if (!user) redirect('/auth/login')
 
   const { data: profile } = await supabase
     .from('profiles')

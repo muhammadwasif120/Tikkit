@@ -5,7 +5,7 @@ import TicketsClient from '@/components/guest/TicketsClient'
 export default async function TicketsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/guest-login')
+  if (!user) redirect('/auth/login')
 
   // Get all approved registrations
   const { data: registrations } = await supabase

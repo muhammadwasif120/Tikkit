@@ -5,7 +5,7 @@ import PassesClient from '@/components/guest/PassesClient'
 export default async function PassesPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/guest-login')
+  if (!user) redirect('/auth/login')
 
   const { data: passes } = await supabase
     .from('event_passes')

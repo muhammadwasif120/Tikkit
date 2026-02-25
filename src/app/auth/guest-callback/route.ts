@@ -33,5 +33,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/guest-login?error=auth_failed`)
+  return NextResponse.redirect(`${origin}/auth/login?error=auth_failed`)
 }

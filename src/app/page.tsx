@@ -599,7 +599,7 @@ export default function LandingPage() {
 
         <div className="nav-actions">
           <Link href="/auth/login" className="btn-ghost">Log in</Link>
-          <Link href="/auth/register" className="btn-primary">
+          <Link href="/auth/login" className="btn-primary">
             Get started <ArrowRight size={14} />
           </Link>
         </div>
@@ -627,7 +627,7 @@ export default function LandingPage() {
         <a href="#how-it-works" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>How it works</a>
         <a href="#pricing" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
         <div className="mobile-actions">
-          <Link href="/auth/register" className="btn-primary-full">Get started free</Link>
+          <Link href="/auth/login" className="btn-primary-full">Get started free</Link>
           <Link href="/auth/login" className="btn-outline-full">Log in</Link>
         </div>
       </div>
@@ -659,7 +659,7 @@ export default function LandingPage() {
           </p>
 
           <div className="hero-cta">
-            <Link href="/auth/register" className="btn-primary-lg">
+            <Link href="/auth/login" className="btn-primary-lg">
               Start for free <ArrowRight size={16} />
             </Link>
             <Link href="/auth/login" className="btn-outline-lg">
@@ -795,7 +795,7 @@ export default function LandingPage() {
             Create your first event in two minutes. It's free.
           </p>
           <div className="cta-actions">
-            <Link href="/auth/register" className="btn-primary-lg">
+            <Link href="/auth/login" className="btn-primary-lg">
               Create your first event <ArrowRight size={16} />
             </Link>
             <Link href="/auth/login" className="btn-outline-lg">
@@ -818,7 +818,7 @@ export default function LandingPage() {
           <p className="footer-copy">© {new Date().getFullYear()} Tikkit. Built in Pakistan 🇵🇰</p>
           <div style={{ display: 'flex', gap: 24 }}>
             <Link href="/auth/login" style={{ color: 'var(--subtle)', fontSize: 13, textDecoration: 'none' }}>Log in</Link>
-            <Link href="/auth/register" style={{ color: 'var(--subtle)', fontSize: 13, textDecoration: 'none' }}>Sign up</Link>
+            <Link href="/auth/login" style={{ color: 'var(--subtle)', fontSize: 13, textDecoration: 'none' }}>Sign up</Link>
           </div>
         </div>
       </footer>
