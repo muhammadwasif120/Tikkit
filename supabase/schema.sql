@@ -14,7 +14,7 @@ CREATE TABLE profiles (
   full_name TEXT NOT NULL,
   email TEXT NOT NULL,
   avatar_url TEXT,
-  role TEXT NOT NULL DEFAULT 'organizer' CHECK (role IN ('organizer', 'staff', 'admin')),
+  role TEXT NOT NULL DEFAULT 'organizer' CHECK (role IN ('organizer', 'staff', 'admin', 'guest')),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -83,6 +83,39 @@ CREATE TABLE guests (
   checked_in_at TIMESTAMPTZ,
   checked_out_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- GUEST PROFILES (for authenticated guest users)
+-- ============================================================
+CREATE TABLE guest_profiles (
+  id UUID PRIMARY KEY REFERENCES profiles(id) ON DELETE CASCADE,
+  company_name TEXT,
+  phone TEXT,
+  bio TEXT,
+  ratings_given INTEGER DEFAULT 0,
+  social_credits INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- PUBLIC REGISTRATIONS (guest self-registrations for events)
+-- ============================================================
+CREATE TABLE public_registrations (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  email TEXT NOT NULL,
+  full_name TEXT NOT NULL,
+  phone TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'checked_in')),
+  payment_status TEXT NOT NULL DEFAULT 'not_required' CHECK (payment_status IN ('not_required', 'pending', 'confirmed')),
+  registration_notes TEXT,
+  reviewed_at TIMESTAMPTZ,
+  checked_in_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(event_id, email)
 );
 
 -- ============================================================
@@ -178,6 +211,9 @@ CREATE INDEX idx_scan_logs_event ON scan_logs(event_id);
 CREATE INDEX idx_scan_logs_guest ON scan_logs(guest_id);
 CREATE INDEX idx_vendor_invoices_vendor ON vendor_invoices(vendor_id);
 CREATE INDEX idx_vendor_invoices_event ON vendor_invoices(event_id);
+CREATE INDEX idx_guest_profiles_id ON guest_profiles(id);
+CREATE INDEX idx_public_registrations_event ON public_registrations(event_id);
+CREATE INDEX idx_public_registrations_email ON public_registrations(email);
 
 -- ============================================================
 -- UPDATED_AT TRIGGER
@@ -206,6 +242,8 @@ ALTER TABLE vendors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE vendor_invoices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE discount_codes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE waitlist ENABLE ROW LEVEL SECURITY;
+ALTER TABLE guest_profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public_registrations ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: users can read/update their own profile
 CREATE POLICY "profiles_self" ON profiles
@@ -258,3 +296,19 @@ CREATE POLICY "waitlist_organizer" ON waitlist
   FOR ALL USING (
     event_id IN (SELECT id FROM events WHERE organizer_id = auth.uid())
   );
+
+-- Guest profiles: users can read/update their own
+CREATE POLICY "guest_profiles_self" ON guest_profiles
+  FOR ALL USING (auth.uid() = id);
+
+-- Public registrations: guests can read/create/update their own, organizer can see all for their events
+CREATE POLICY "public_registrations_guest_self" ON public_registrations
+  FOR SELECT USING (email = current_user_email() OR auth.uid() IN (SELECT organizer_id FROM events WHERE id = event_id));
+
+CREATE POLICY "public_registrations_organizer" ON public_registrations
+  FOR ALL USING (
+    event_id IN (SELECT id FROM events WHERE organizer_id = auth.uid())
+  );
+
+CREATE POLICY "public_registrations_insert" ON public_registrations
+  FOR INSERT WITH CHECK (true);

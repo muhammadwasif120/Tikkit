@@ -3,144 +3,139 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Ticket, Mail, Lock, Eye, EyeOff, User, ArrowRight, ChevronLeft, AlertCircle, Sparkles } from 'lucide-react'
+import { Ticket, Mail, Lock, Eye, EyeOff, User, ArrowRight, AlertCircle, Sparkles } from 'lucide-react'
 
 type Mode    = null | 'organizer' | 'attendee'
 type SubMode = 'login' | 'signup'
 
-// ── Input ─────────────────────────────────────────────────────────────────────
-function InputField({ icon: Icon, type, placeholder, value, onChange, rightEl }: {
-  icon: typeof Mail; type: string; placeholder: string
-  value: string; onChange: (v: string) => void; rightEl?: React.ReactNode
+function Field({ Icon, type, placeholder, value, onChange, end }: {
+  Icon: typeof Mail; type: string; placeholder: string
+  value: string; onChange: (v: string) => void; end?: React.ReactNode
 }) {
-  const [focused, setFocused] = useState(false)
+  const [focus, setFocus] = useState(false)
   return (
     <div style={{ position: 'relative' }}>
-      <Icon size={18} color="#4B5563" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
+      <Icon size={16} color={focus ? '#94A3B8' : '#475569'} style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', transition: 'color .15s', zIndex: 1 }} />
       <input
         type={type} placeholder={placeholder} value={value}
         onChange={e => onChange(e.target.value)}
-        onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+        onFocus={() => setFocus(true)} onBlur={() => setFocus(false)}
         style={{
-          width: '100%', padding: '15px 16px 15px 46px',
-          background: focused ? 'rgba(255,255,255,0.07)' : 'rgba(255,255,255,0.04)',
-          border: `1.5px solid ${focused ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)'}`,
-          borderRadius: 14, color: 'white', fontSize: 15, outline: 'none',
-          boxSizing: 'border-box' as const, transition: 'all 0.15s', fontFamily: 'inherit',
+          display: 'block', width: '100%',
+          padding: end ? '14px 44px 14px 42px' : '14px 16px 14px 42px',
+          background: focus ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+          border: `1px solid ${focus ? 'rgba(148,163,184,0.3)' : 'rgba(255,255,255,0.07)'}`,
+          borderRadius: 12, color: '#F1F5F9', fontSize: 15, outline: 'none',
+          boxSizing: 'border-box' as const, fontFamily: 'inherit', transition: 'background .15s, border-color .15s',
         }}
       />
-      {rightEl && <div style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)' }}>{rightEl}</div>}
+      {end && <span style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)' }}>{end}</span>}
     </div>
   )
 }
 
-// ── Auth Form ─────────────────────────────────────────────────────────────────
-function AuthForm({ mode, onBack }: { mode: 'organizer' | 'attendee'; onBack: () => void }) {
-  const supabase     = createClient()
-  const router       = useRouter()
-  const isOrg        = mode === 'organizer'
-  const accent       = isOrg ? '#4F8AFF' : '#FFC745'
-  const badgeBg      = isOrg ? 'rgba(30,94,255,0.15)' : 'rgba(255,199,69,0.12)'
-  const btnBg        = isOrg ? '#2563EB' : '#FFC745'
-  const btnText      = isOrg ? 'white' : '#000'
-  const expectedRole = isOrg ? 'organizer' : 'guest'
+function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
+  const supabase = createClient()
+  const router   = useRouter()
+  const isOrg    = mode === 'organizer'
+  const accent   = isOrg ? '#60A5FA' : '#FCD34D'
+  const btnBg    = isOrg ? '#2563EB' : '#F59E0B'
+  const btnClr   = isOrg ? '#fff'    : '#000'
+  const expRole  = isOrg ? 'organizer' : 'guest'
 
-  const [tab,      setTab]      = useState<SubMode>('login')
-  const [name,     setName]     = useState('')
-  const [email,    setEmail]    = useState('')
-  const [password, setPassword] = useState('')
-  const [showPw,   setShowPw]   = useState(false)
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState<string | null>(null)
+  const [tab,   setTab]   = useState<SubMode>('login')
+  const [name,  setName]  = useState('')
+  const [email, setEmail] = useState('')
+  const [pw,    setPw]    = useState('')
+  const [show,  setShow]  = useState(false)
+  const [busy,  setBusy]  = useState(false)
+  const [err,   setErr]   = useState<string | null>(null)
 
-  const resetForm = (t: SubMode) => { setError(null); setName(''); setEmail(''); setPassword(''); setTab(t) }
+  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setTab(t) }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setError(null); setLoading(true)
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault(); setErr(null); setBusy(true)
     if (tab === 'signup') {
-      if (!name.trim())        { setError('Please enter your name'); setLoading(false); return }
-      if (password.length < 8) { setError('Password must be at least 8 characters'); setLoading(false); return }
-      const { data, error: err } = await supabase.auth.signUp({ email: email.toLowerCase().trim(), password, options: { data: { full_name: name.trim() } } })
-      if (err) { setError(err.message.toLowerCase().includes('already') ? 'Email already registered. Try signing in.' : err.message); setLoading(false); return }
+      if (!name.trim())  { setErr('Enter your name'); setBusy(false); return }
+      if (pw.length < 8) { setErr('Password must be at least 8 characters'); setBusy(false); return }
+      const { data, error } = await supabase.auth.signUp({ email: email.trim().toLowerCase(), password: pw, options: { data: { full_name: name.trim() } } })
+      if (error) { setErr(error.message.toLowerCase().includes('already') ? 'Email already registered — sign in instead.' : error.message); setBusy(false); return }
       if (data.user) {
-        await supabase.from('profiles').upsert({ id: data.user.id, email: email.toLowerCase().trim(), full_name: name.trim(), role: isOrg ? 'organizer' : 'guest' }, { onConflict: 'id' })
+        await supabase.from('profiles').upsert({ id: data.user.id, email: email.trim().toLowerCase(), full_name: name.trim(), role: isOrg ? 'organizer' : 'guest' }, { onConflict: 'id' })
         if (!isOrg) await supabase.from('guest_profiles').upsert({ id: data.user.id }, { onConflict: 'id', ignoreDuplicates: true })
         router.push(isOrg ? '/dashboard' : '/explore')
       }
     } else {
-      const { data, error: err } = await supabase.auth.signInWithPassword({ email: email.toLowerCase().trim(), password })
-      if (err) { setError('Incorrect email or password'); setLoading(false); return }
+      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password: pw })
+      if (error) { setErr('Wrong email or password'); setBusy(false); return }
       if (data.user) {
-        let actualRole = expectedRole
-        const { data: profile } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
-        if (profile?.role) actualRole = profile.role
-        else { const { data: r } = await supabase.rpc('get_my_role'); if (r) actualRole = r }
-        if (actualRole !== expectedRole) {
+        let role = expRole
+        const { data: p } = await supabase.from('profiles').select('role').eq('id', data.user.id).single()
+        if (p?.role) role = p.role
+        else { const { data: r } = await supabase.rpc('get_my_role'); if (r) role = r }
+        if (role !== expRole) {
           await supabase.auth.signOut()
-          setError(isOrg ? 'This is an Attendee account — use "Join The Scene".' : 'This is an Organizer account — use "Run The Scene".')
-          setLoading(false); return
+          setErr(isOrg ? 'That\'s an attendee account — use "Join The Scene".' : 'That\'s an organizer account — use "Run The Scene".')
+          setBusy(false); return
         }
-        router.push(actualRole === 'guest' ? '/explore' : '/dashboard')
+        router.push(role === 'guest' ? '/explore' : '/dashboard')
       }
     }
-    setLoading(false)
+    setBusy(false)
   }
 
-  const disabled = loading || !email.trim() || !password
-  const perks = isOrg
-    ? ['Create & manage events', 'Guest approvals & check-in', 'Payment collection', 'Analytics & reporting']
-    : ['Discover & register for events', 'Earn Social Credits at every event', 'Collect digital souvenir passes']
+  const off = busy || !email.trim() || !pw
 
   return (
-    <div style={{ animation: 'slideUp 0.22s ease' }}>
-      <button onClick={onBack} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none', cursor: 'pointer', padding: '0 0 24px', color: '#6B7280', fontSize: 14, fontFamily: 'inherit' }}>
-        <ChevronLeft size={16} /><span>Back</span>
+    <div>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', fontSize: 13, padding: '0 0 28px', display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit' }}>
+        ← Back
       </button>
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 14px', background: badgeBg, borderRadius: 30, marginBottom: 20 }}>
-        {isOrg ? <Ticket size={13} color={accent} /> : <Sparkles size={13} color={accent} />}
-        <span style={{ color: accent, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{isOrg ? 'Organizer Access' : 'Guest Pass'}</span>
+      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 13px', background: isOrg ? 'rgba(37,99,235,0.15)' : 'rgba(245,158,11,0.12)', borderRadius: 99, marginBottom: 16 }}>
+        {isOrg ? <Ticket size={12} color={accent} /> : <Sparkles size={12} color={accent} />}
+        <span style={{ color: accent, fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>{isOrg ? 'Organizer Access' : 'Guest Pass'}</span>
       </div>
-      <h2 style={{ color: 'white', fontSize: 30, fontWeight: 800, margin: '0 0 8px', letterSpacing: '-0.5px', lineHeight: 1.15 }}>
-        {tab === 'login' ? (isOrg ? 'Welcome back' : 'Join the scene') : (isOrg ? 'Run The Scene' : 'Join The Scene')}
-      </h2>
-      <p style={{ color: '#6B7280', fontSize: 15, margin: '0 0 28px', lineHeight: 1.6 }}>
-        {tab === 'login' ? 'Sign in to your account.' : isOrg ? 'Create your organizer account.' : 'Sign up — no hassle, just good events.'}
+      <h1 style={{ color: '#F8FAFC', fontSize: 30, fontWeight: 800, margin: '0 0 8px', letterSpacing: '-.6px', lineHeight: 1.15, fontFamily: "'Syne', sans-serif" }}>
+        {tab === 'login' ? (isOrg ? 'Welcome back' : 'Join the scene') : (isOrg ? 'Run the scene' : 'Join the scene')}
+      </h1>
+      <p style={{ color: '#64748B', fontSize: 15, margin: '0 0 28px', lineHeight: 1.6 }}>
+        {tab === 'login' ? 'Sign in to your account.' : isOrg ? 'Create your organizer account.' : 'Create your free account.'}
       </p>
-      <div style={{ display: 'flex', gap: 3, padding: 4, background: 'rgba(255,255,255,0.04)', borderRadius: 14, marginBottom: 20 }}>
-        {(['login', 'signup'] as const).map(t => (
-          <button key={t} onClick={() => resetForm(t)} style={{ flex: 1, padding: '10px', borderRadius: 10, border: 'none', cursor: 'pointer', background: tab === t ? 'rgba(255,255,255,0.09)' : 'transparent', color: tab === t ? 'white' : '#4B5563', fontSize: 14, fontWeight: tab === t ? 700 : 500, transition: 'all 0.15s', fontFamily: 'inherit' }}>
+      <div style={{ display: 'flex', padding: 3, background: 'rgba(255,255,255,0.04)', borderRadius: 12, marginBottom: 22, gap: 3 }}>
+        {(['login','signup'] as SubMode[]).map(t => (
+          <button key={t} onClick={() => reset(t)} style={{ flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer', borderRadius: 9, background: tab === t ? 'rgba(255,255,255,0.08)' : 'transparent', color: tab === t ? '#F1F5F9' : '#475569', fontSize: 14, fontWeight: tab === t ? 700 : 500, transition: 'all .15s', fontFamily: 'inherit' }}>
             {t === 'login' ? 'Sign In' : 'Sign Up'}
           </button>
         ))}
       </div>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {tab === 'signup' && <InputField icon={User} type="text" placeholder={isOrg ? 'Your name or company' : 'Your full name'} value={name} onChange={setName} />}
-        <InputField icon={Mail} type="email" placeholder="your@email.com" value={email} onChange={setEmail} />
-        <InputField icon={Lock} type={showPw ? 'text' : 'password'} placeholder="Password" value={password} onChange={setPassword}
-          rightEl={<button type="button" onClick={() => setShowPw(!showPw)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: '#4B5563' }}>{showPw ? <EyeOff size={17} /> : <Eye size={17} />}</button>} />
-        {tab === 'login' && <div style={{ textAlign: 'right' }}><a href="/auth/reset-password" style={{ color: '#4B5563', fontSize: 13, textDecoration: 'none' }}>Forgot password?</a></div>}
-        {error && (
-          <div style={{ padding: '12px 16px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <AlertCircle size={16} color="#FCA5A5" style={{ flexShrink: 0, marginTop: 1 }} />
-            <span style={{ color: '#FCA5A5', fontSize: 13, lineHeight: 1.5 }}>{error}</span>
+      <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+        {tab === 'signup' && <Field Icon={User} type="text" placeholder="Full name" value={name} onChange={setName} />}
+        <Field Icon={Mail} type="email" placeholder="your@email.com" value={email} onChange={setEmail} />
+        <Field Icon={Lock} type={show ? 'text' : 'password'} placeholder="Password" value={pw} onChange={setPw}
+          end={<button type="button" onClick={() => setShow(!show)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 2, display: 'flex' }}>{show ? <EyeOff size={16}/> : <Eye size={16}/>}</button>} />
+        {tab === 'login' && <div style={{ textAlign: 'right' }}><a href="/auth/reset-password" style={{ color: '#475569', fontSize: 13, textDecoration: 'none' }}>Forgot password?</a></div>}
+        {err && (
+          <div style={{ display: 'flex', gap: 10, padding: '11px 14px', background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.15)', borderRadius: 11 }}>
+            <AlertCircle size={15} color="#F87171" style={{ flexShrink: 0, marginTop: 1 }} />
+            <span style={{ color: '#FCA5A5', fontSize: 13, lineHeight: 1.5 }}>{err}</span>
           </div>
         )}
-        <button type="submit" disabled={disabled} style={{ width: '100%', padding: '15px', background: disabled ? 'rgba(255,255,255,0.06)' : btnBg, color: disabled ? '#374151' : btnText, border: 'none', borderRadius: 14, fontSize: 15, fontWeight: 700, cursor: disabled ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s', fontFamily: 'inherit', marginTop: 4, boxShadow: disabled ? 'none' : isOrg ? '0 0 28px rgba(37,99,235,0.35)' : '0 0 28px rgba(255,199,69,0.2)' }}>
-          {loading ? 'Please wait…' : tab === 'login' ? <><span>Sign In</span><ArrowRight size={16} /></> : <><span>Create Account</span><ArrowRight size={16} /></>}
+        <button type="submit" disabled={off} style={{ marginTop: 4, padding: '14px', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, background: off ? 'rgba(255,255,255,0.05)' : btnBg, color: off ? '#334155' : btnClr, cursor: off ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: 'inherit', transition: 'all .2s', boxShadow: off ? 'none' : isOrg ? '0 0 24px rgba(37,99,235,.4)' : '0 0 24px rgba(245,158,11,.3)' }}>
+          {busy ? 'Please wait…' : tab === 'login' ? <><span>Sign In</span><ArrowRight size={16}/></> : <><span>Create Account</span><ArrowRight size={16}/></>}
         </button>
-        <p style={{ textAlign: 'center', color: '#4B5563', fontSize: 14, margin: '6px 0 0' }}>
-          {tab === 'login' ? "Don't have an account? " : 'Already have an account? '}
-          <button type="button" onClick={() => resetForm(tab === 'login' ? 'signup' : 'login')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: accent, fontWeight: 700, fontSize: 14, padding: 0, fontFamily: 'inherit' }}>
+        <p style={{ textAlign: 'center', color: '#475569', fontSize: 14, margin: '4px 0 0' }}>
+          {tab === 'login' ? "Don't have an account? " : 'Already registered? '}
+          <button type="button" onClick={() => reset(tab === 'login' ? 'signup' : 'login')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: accent, fontWeight: 700, fontSize: 14, padding: 0, fontFamily: 'inherit' }}>
             {tab === 'login' ? 'Sign up' : 'Sign in'}
           </button>
         </p>
       </form>
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginTop: 28, paddingTop: 22 }}>
-        <p style={{ color: '#374151', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>What you get</p>
-        {perks.map(p => (
-          <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: accent, flexShrink: 0 }} />
-            <span style={{ color: '#9CA3AF', fontSize: 14 }}>{p}</span>
+      <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <p style={{ color: '#334155', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>What you get</p>
+        {(isOrg ? ['Create & manage events','Guest approvals & check-in','Payment collection','Analytics & reporting'] : ['Discover & register for events','Earn Social Credits at every event','Collect digital souvenir passes']).map(p => (
+          <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 10 }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: accent, flexShrink: 0 }} />
+            <span style={{ color: '#94A3B8', fontSize: 14 }}>{p}</span>
           </div>
         ))}
       </div>
@@ -148,116 +143,171 @@ function AuthForm({ mode, onBack }: { mode: 'organizer' | 'attendee'; onBack: ()
   )
 }
 
-// ── Main ──────────────────────────────────────────────────────────────────────
+function Card({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClick }: {
+  badge: string; badgeIcon: React.ReactNode; accent: string; glowClr: string
+  title: string; sub: string; perks: string[]; onClick: () => void
+}) {
+  const [hov, setHov] = useState(false)
+  return (
+    <button onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', flex: '1 1 0', minWidth: 0 }}>
+      <div className="card-inner" style={{
+        height: '100%', boxSizing: 'border-box' as const,
+        background: hov ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.03)',
+        border: `1px solid ${hov ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)'}`,
+        borderRadius: 20, position: 'relative', overflow: 'hidden',
+        transform: hov ? 'translateY(-3px)' : 'none',
+        transition: 'all .2s',
+        boxShadow: hov ? '0 20px 60px rgba(0,0,0,.4)' : '0 4px 24px rgba(0,0,0,.2)',
+      }}>
+        <div style={{ position: 'absolute', top: -60, left: -40, width: 200, height: 200, borderRadius: '50%', background: glowClr, filter: 'blur(60px)', opacity: hov ? .28 : .14, transition: 'opacity .3s', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 14px', background: `${accent}22`, borderRadius: 99, marginBottom: 24 }}>
+            {badgeIcon}
+            <span style={{ color: accent, fontSize: 11, fontWeight: 700, letterSpacing: '.09em', textTransform: 'uppercase' }}>{badge}</span>
+          </div>
+          <h2 className="card-title" style={{ color: '#F8FAFC', fontWeight: 800, margin: '0 0 14px', letterSpacing: '-.5px', lineHeight: 1.2, fontFamily: "'Syne', sans-serif" }}>{title}</h2>
+          <p style={{ color: '#64748B', fontSize: 15, margin: '0 0 28px', lineHeight: 1.7 }}>{sub}</p>
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 22 }} />
+          <p style={{ color: '#334155', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>What you get</p>
+          {perks.map(p => (
+            <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 12 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: accent, flexShrink: 0 }} />
+              <span style={{ color: '#94A3B8', fontSize: 14, lineHeight: 1.5 }}>{p}</span>
+            </div>
+          ))}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 28, color: accent, fontSize: 14, fontWeight: 600 }}>
+            <span>Get started</span><ArrowRight size={14}/>
+          </div>
+        </div>
+      </div>
+    </button>
+  )
+}
+
 export default function AuthPage() {
   const [mode, setMode] = useState<Mode>(null)
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; }
-        body { margin: 0; background: #080A0F; }
-        ::placeholder { color: #374151 !important; }
-        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 100px #111318 inset !important; -webkit-text-fill-color: white !important; }
-        @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
-        @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        html, body { margin: 0; background: #060810; }
+        ::placeholder { color: #334155 !important; }
+        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 100px #0d1117 inset !important; -webkit-text-fill-color: #F1F5F9 !important; }
+        @keyframes fade { from{opacity:0} to{opacity:1} }
+        @keyframes up   { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+        .page {
+          min-height: 100svh;
+          background: radial-gradient(ellipse 90% 55% at 50% -5%, rgba(14,30,80,.85) 0%, #060810 65%);
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          padding: 48px clamp(24px, 5vw, 80px);
+          font-family: 'DM Sans', -apple-system, sans-serif;
+          animation: fade .35s ease both;
+        }
+
+        .content-wrap {
+          width: 100%;
+          margin: 0 auto;
+          transition: max-width .3s ease;
+        }
+        .content-wrap.picker { max-width: 1200px; }
+        .content-wrap.form   { max-width: 480px; }
+
+        .cards {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+          align-items: stretch;
+        }
+
+        .card-inner {
+          padding: clamp(28px, 3vw, 44px) clamp(24px, 2.5vw, 40px);
+        }
+
+        .card-title {
+          font-size: clamp(26px, 2.4vw, 36px);
+        }
+
+        .fbox {
+          background: rgba(255,255,255,0.025);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 22px;
+          padding: 40px 36px;
+          animation: up .25s ease both;
+        }
+
+        /* Mobile */
+        @media (max-width: 640px) {
+          .page  { padding: 28px 16px; }
+          .content-wrap.picker { max-width: 480px; }
+          .cards {
+            grid-template-columns: 1fr;
+            gap: 16px;
+          }
+          .fbox  { padding: 28px 20px; }
+          .card-title { font-size: 28px; }
+        }
+
+        /* Large desktop */
+        @media (min-width: 1440px) {
+          .content-wrap.picker { max-width: 1320px; }
+          .cards { gap: 28px; }
+        }
       `}</style>
 
-      <div style={{
-        minHeight: '100svh',
-        background: 'radial-gradient(ellipse at 30% 0%, rgba(10,18,50,0.95) 0%, #080A0F 60%)',
-        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        padding: '40px 20px', fontFamily: "'Inter', -apple-system, sans-serif",
-        animation: 'fadeIn 0.3s ease',
-      }}>
-        {/* Grid texture */}
-        <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px)', backgroundSize: '48px 48px' }} />
+      <div className="page">
+        {/* Subtle grid */}
+        <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px)', backgroundSize: '48px 48px', pointerEvents: 'none', zIndex: 0 }} />
 
-        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: mode ? 460 : 980 }}>
+        <div className={`content-wrap ${mode ? 'form' : 'picker'}`} style={{ position: 'relative', zIndex: 1 }}>
 
           {/* Logo */}
-          <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-              <div style={{ width: 48, height: 48, background: '#2563EB', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 28px rgba(37,99,235,0.45)' }}>
+              <div style={{ width: 48, height: 48, background: 'linear-gradient(135deg,#2563EB,#1D4ED8)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 32px rgba(37,99,235,.5),inset 0 1px 0 rgba(255,255,255,.15)' }}>
                 <Ticket size={22} color="white" strokeWidth={2.5} />
               </div>
-              <span style={{ color: 'white', fontSize: 28, fontWeight: 800, letterSpacing: '-0.5px' }}>Tikkit</span>
+              <span style={{ color: '#F8FAFC', fontSize: 26, fontWeight: 800, letterSpacing: '-.5px', fontFamily: "'Syne',sans-serif" }}>Tikkit</span>
             </a>
           </div>
 
+          {/* Heading for role picker */}
+          {!mode && (
+            <div style={{ textAlign: 'center', marginBottom: 36, animation: 'up .3s ease both' }}>
+              <h1 style={{ color: '#F8FAFC', fontSize: 'clamp(28px, 3vw, 40px)', fontWeight: 800, margin: '0 0 10px', letterSpacing: '-.8px', lineHeight: 1.15, fontFamily: "'Syne', sans-serif" }}>
+                How will you use Tikkit?
+              </h1>
+              <p style={{ color: '#64748B', fontSize: 16, margin: 0, lineHeight: 1.6 }}>
+                Choose your path to get started.
+              </p>
+            </div>
+          )}
+
           {!mode ? (
-            /* ── Cards ── */
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, animation: 'slideUp 0.28s ease' }}>
-
-              {/* Organizer */}
-              {[
-                {
-                  m: 'organizer' as Mode,
-                  badge: 'Organizer Access', accent: '#4F8AFF',
-                  badgeBg: 'rgba(30,94,255,0.15)', glow: 'rgba(30,94,255,0.5)',
-                  title: 'Run The\nScene',
-                  sub: 'Create events, manage your guest list, and collect payments — all in one place.',
-                  perks: ['Create & manage events', 'Guest approvals & check-in', 'Payment collection', 'Analytics & reporting'],
-                  icon: <Ticket size={13} color="#4F8AFF" />,
-                },
-                {
-                  m: 'attendee' as Mode,
-                  badge: 'Guest Pass', accent: '#FFC745',
-                  badgeBg: 'rgba(255,199,69,0.12)', glow: 'rgba(255,199,69,0.4)',
-                  title: 'Join The\nScene',
-                  sub: 'Discover events, register instantly, and collect digital passes from every show.',
-                  perks: ['Discover & register for events', 'Earn Social Credits at every event', 'Collect digital souvenir passes'],
-                  icon: <Sparkles size={13} color="#FFC745" />,
-                },
-              ].map(({ m, badge, accent, badgeBg, glow, title, sub, perks, icon }) => (
-                <button key={badge} onClick={() => setMode(m)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
-                  <div
-                    style={{ padding: '40px 36px', background: 'rgba(255,255,255,0.03)', border: '1.5px solid rgba(255,255,255,0.08)', borderRadius: 22, position: 'relative', overflow: 'hidden', transition: 'all 0.2s', height: '100%' }}
-                    onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.05)'; el.style.borderColor = 'rgba(255,255,255,0.14)'; el.style.transform = 'translateY(-3px)' }}
-                    onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'rgba(255,255,255,0.03)'; el.style.borderColor = 'rgba(255,255,255,0.08)'; el.style.transform = 'none' }}
-                  >
-                    {/* Glow */}
-                    <div style={{ position: 'absolute', top: -50, left: -50, width: 160, height: 160, background: glow, borderRadius: '50%', filter: 'blur(55px)', opacity: 0.2, pointerEvents: 'none' }} />
-
-                    <div style={{ position: 'relative' }}>
-                      {/* Badge */}
-                      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '7px 14px', background: badgeBg, borderRadius: 30, marginBottom: 20 }}>
-                        {icon}
-                        <span style={{ color: accent, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>{badge}</span>
-                      </div>
-
-                      {/* Title — whitespace preserved to match screenshot line breaks */}
-                      <h2 style={{ color: 'white', fontSize: 30, fontWeight: 800, margin: '0 0 14px', letterSpacing: '-0.5px', lineHeight: 1.15, whiteSpace: 'pre-line' }}>
-                        {title}
-                      </h2>
-
-                      <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px', lineHeight: 1.7 }}>{sub}</p>
-
-                      {/* Divider */}
-                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)', marginBottom: 20 }} />
-
-                      <p style={{ color: '#374151', fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>What you get</p>
-
-                      {perks.map(p => (
-                        <div key={p} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 11 }}>
-                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: accent, flexShrink: 0, marginTop: 5 }} />
-                          <span style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.5 }}>{p}</span>
-                        </div>
-                      ))}
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 24, color: accent, fontSize: 14, fontWeight: 600 }}>
-                        <span>Get started</span><ArrowRight size={15} />
-                      </div>
-                    </div>
-                  </div>
-                </button>
-              ))}
+            <div className="cards" style={{ animation: 'up .3s ease both' }}>
+              <Card
+                badge="Organizer Access" badgeIcon={<Ticket size={12} color="#60A5FA" />}
+                accent="#60A5FA" glowClr="rgba(37,99,235,.8)"
+                title="Run The Scene"
+                sub="Create events, manage your guest list, and collect payments — all in one place."
+                perks={['Create & manage events', 'Guest approvals & check-in', 'Payment collection', 'Analytics & reporting']}
+                onClick={() => setMode('organizer')}
+              />
+              <Card
+                badge="Guest Pass" badgeIcon={<Sparkles size={12} color="#FCD34D" />}
+                accent="#FCD34D" glowClr="rgba(245,158,11,.6)"
+                title="Join The Scene"
+                sub="Discover events, register instantly, and collect digital passes from every show you attend."
+                perks={['Discover & register for events', 'Earn Social Credits at every event', 'Collect digital souvenir passes']}
+                onClick={() => setMode('attendee')}
+              />
             </div>
           ) : (
-            /* ── Auth form ── */
-            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1.5px solid rgba(255,255,255,0.08)', borderRadius: 22, padding: '36px 32px', animation: 'slideUp 0.22s ease' }}>
-              <AuthForm mode={mode} onBack={() => setMode(null)} />
+            <div className="fbox">
+              <AuthPanel mode={mode} onBack={() => setMode(null)} />
             </div>
           )}
         </div>

@@ -15,7 +15,7 @@ export interface Database {
           full_name: string
           email: string
           avatar_url: string | null
-          role: 'organizer' | 'staff' | 'admin'
+          role: 'organizer' | 'staff' | 'admin' | 'guest'
           created_at: string
           updated_at: string
         }
@@ -24,7 +24,7 @@ export interface Database {
           full_name: string
           email: string
           avatar_url?: string | null
-          role?: 'organizer' | 'staff' | 'admin'
+          role?: 'organizer' | 'staff' | 'admin' | 'guest'
           created_at?: string
           updated_at?: string
         }
@@ -32,7 +32,7 @@ export interface Database {
           full_name?: string
           email?: string
           avatar_url?: string | null
-          role?: 'organizer' | 'staff' | 'admin'
+          role?: 'organizer' | 'staff' | 'admin' | 'guest'
           updated_at?: string
         }
       }
@@ -333,6 +333,74 @@ export interface Database {
           notified?: boolean
           notified_at?: string | null
           converted_to_guest?: boolean
+        }
+      }
+      guest_profiles: {
+        Row: {
+          id: string
+          company_name: string | null
+          phone: string | null
+          bio: string | null
+          ratings_given: number
+          social_credits: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          company_name?: string | null
+          phone?: string | null
+          bio?: string | null
+          ratings_given?: number
+          social_credits?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string | null
+          phone?: string | null
+          bio?: string | null
+          ratings_given?: number
+          social_credits?: number
+          updated_at?: string
+        }
+      }
+      public_registrations: {
+        Row: {
+          id: string
+          event_id: string
+          email: string
+          full_name: string
+          phone: string | null
+          status: 'pending' | 'approved' | 'rejected' | 'checked_in'
+          payment_status: 'not_required' | 'pending' | 'confirmed'
+          registration_notes: string | null
+          reviewed_at: string | null
+          checked_in_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          event_id: string
+          email: string
+          full_name: string
+          phone?: string | null
+          status?: 'pending' | 'approved' | 'rejected' | 'checked_in'
+          payment_status?: 'not_required' | 'pending' | 'confirmed'
+          registration_notes?: string | null
+          reviewed_at?: string | null
+          checked_in_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          status?: 'pending' | 'approved' | 'rejected' | 'checked_in'
+          payment_status?: 'not_required' | 'pending' | 'confirmed'
+          registration_notes?: string | null
+          reviewed_at?: string | null
+          checked_in_at?: string | null
+          updated_at?: string
         }
       }
     }
