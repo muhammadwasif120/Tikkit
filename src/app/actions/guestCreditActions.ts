@@ -13,22 +13,12 @@ const P = {
   NO_SHOW:    -20,
 } as const
 
-// ─── Tier config ──────────────────────────────────────────────────────────────
-export function getCreditTier(score: number) {
-  if (score >= 1000) return { label: 'Elite',    color: '#FFC745', bg: 'rgba(255,199,69,0.15)',  border: 'rgba(255,199,69,0.3)'  }
-  if (score >= 500)  return { label: 'VIP',      color: '#A855F7', bg: 'rgba(168,85,247,0.15)', border: 'rgba(168,85,247,0.3)' }
-  if (score >= 200)  return { label: 'Regular',  color: '#1E5EFF', bg: 'rgba(30,94,255,0.15)',  border: 'rgba(30,94,255,0.3)'  }
-  if (score >= 50)   return { label: 'Rising',   color: '#22C55E', bg: 'rgba(34,197,94,0.15)',  border: 'rgba(34,197,94,0.3)'  }
-  return               { label: 'Newcomer', color: '#6B7280', bg: 'rgba(107,114,128,0.15)', border: 'rgba(107,114,128,0.3)' }
-}
-
-// ─── Create or fetch guest profile on first login ─────────────────────────────
+// ─── Ensure guest profile exists on first login ───────────────────────────────
 export async function ensureGuestProfile() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  // Check existing
   const { data: existing } = await supabase
     .from('guest_profiles')
     .select('id')
@@ -37,7 +27,6 @@ export async function ensureGuestProfile() {
 
   if (existing) return existing
 
-  // Upsert into profiles (role = guest)
   await supabase.from('profiles').upsert({
     id:        user.id,
     email:     user.email!,
@@ -45,7 +34,6 @@ export async function ensureGuestProfile() {
     role:      'guest',
   }, { onConflict: 'id' })
 
-  // Create guest_profile
   const { data: newProfile } = await supabase
     .from('guest_profiles')
     .insert({ id: user.id })
@@ -56,11 +44,9 @@ export async function ensureGuestProfile() {
 }
 
 // ─── Award credits on exit scan ───────────────────────────────────────────────
-// Called from the QR scanner server action when scan_type = 'exit'
 export async function awardExitScanCredits(guestRecordId: string, eventId: string) {
   const supabase = await createClient()
 
-  // 1. Get guest record — uses full_name (correct column from schema)
   const { data: guest } = await supabase
     .from('guests')
     .select('id, email, is_vip, guest_profile_id, ticket_price_paid')
@@ -69,7 +55,6 @@ export async function awardExitScanCredits(guestRecordId: string, eventId: strin
 
   if (!guest) return { success: false, reason: 'guest not found' }
 
-  // 2. Resolve guest_profile_id by email if not already linked
   let profileId = guest.guest_profile_id
 
   if (!profileId && guest.email) {
@@ -88,7 +73,6 @@ export async function awardExitScanCredits(guestRecordId: string, eventId: strin
 
   if (!profileId) return { success: false, reason: 'no guest account linked' }
 
-  // 3. Fetch current profile stats
   const { data: profile } = await supabase
     .from('guest_profiles')
     .select('credit_score, total_attended, total_vip_events, attendance_streak, longest_streak')
@@ -97,7 +81,6 @@ export async function awardExitScanCredits(guestRecordId: string, eventId: strin
 
   if (!profile) return { success: false, reason: 'profile not found' }
 
-  // 4. Calculate rewards
   const isFirstEvent = profile.total_attended === 0
   const newAttended  = profile.total_attended + 1
   const newStreak    = profile.attendance_streak + 1
@@ -116,13 +99,19 @@ export async function awardExitScanCredits(guestRecordId: string, eventId: strin
     totalPoints += P.FIRST_EVENT
     txns.push({ type: 'first_event', points: P.FIRST_EVENT, note: 'First event ever — welcome to Tikkit!' })
   }
-  if (newStreak === 3)         txns.push({ type: 'streak_bonus', points: P.STREAK_3,  note: '3-event streak 🔥' }), totalPoints += P.STREAK_3
-  else if (newStreak === 5)    txns.push({ type: 'streak_bonus', points: P.STREAK_5,  note: '5-event streak 🔥' }), totalPoints += P.STREAK_5
-  else if (newStreak % 10 === 0 && newStreak > 0) txns.push({ type: 'streak_bonus', points: P.STREAK_10, note: `${newStreak}-event streak milestone!` }), totalPoints += P.STREAK_10
+  if (newStreak === 3) {
+    txns.push({ type: 'streak_bonus', points: P.STREAK_3, note: '3-event streak 🔥' })
+    totalPoints += P.STREAK_3
+  } else if (newStreak === 5) {
+    txns.push({ type: 'streak_bonus', points: P.STREAK_5, note: '5-event streak 🔥' })
+    totalPoints += P.STREAK_5
+  } else if (newStreak % 10 === 0 && newStreak > 0) {
+    txns.push({ type: 'streak_bonus', points: P.STREAK_10, note: `${newStreak}-event streak milestone!` })
+    totalPoints += P.STREAK_10
+  }
 
   const newScore = profile.credit_score + totalPoints
 
-  // 5. Update profile
   await supabase.from('guest_profiles').update({
     credit_score:      newScore,
     total_attended:    newAttended,
@@ -132,7 +121,6 @@ export async function awardExitScanCredits(guestRecordId: string, eventId: strin
     updated_at:        new Date().toISOString(),
   }).eq('id', profileId)
 
-  // 6. Insert transaction log
   let runningBalance = profile.credit_score
   for (const tx of txns) {
     runningBalance += tx.points
@@ -147,7 +135,6 @@ export async function awardExitScanCredits(guestRecordId: string, eventId: strin
     })
   }
 
-  // 7. Issue collectible pass
   await issueEventPass(profileId, guestRecordId, eventId, isVip, guest.ticket_price_paid)
 
   return { success: true, pointsAwarded: totalPoints, newScore, passes: txns }
@@ -186,21 +173,20 @@ async function issueEventPass(
     .eq('event_id', eventId)
 
   await supabase.from('event_passes').insert({
-    guest_id:         profileId,
-    event_id:         eventId,
-    guest_record_id:  guestRecordId,
-    event_title:      event.title,
-    event_date:       event.date_start,
-    venue_name:       event.venue_name ?? null,
-    cover_image_url:  event.cover_image_url ?? null,
-    was_vip:          isVip,
+    guest_id:          profileId,
+    event_id:          eventId,
+    guest_record_id:   guestRecordId,
+    event_title:       event.title,
+    event_date:        event.date_start,
+    venue_name:        event.venue_name ?? null,
+    cover_image_url:   event.cover_image_url ?? null,
+    was_vip:           isVip,
     ticket_price_paid: ticketPricePaid ?? 0,
-    pass_number:      (count ?? 0) + 1,
+    pass_number:       (count ?? 0) + 1,
   })
 }
 
 // ─── No-show deductions ───────────────────────────────────────────────────────
-// Call when event is marked completed — deducts points from no-shows
 export async function processNoShows(eventId: string) {
   const supabase = await createClient()
 
@@ -249,6 +235,19 @@ export async function processNoShows(eventId: string) {
 }
 
 // ─── Data fetchers ────────────────────────────────────────────────────────────
+export async function getCreditScore(userId?: string) {
+  const supabase = await createClient()
+  const uid = userId ?? (await supabase.auth.getUser()).data.user?.id
+  if (!uid) return 0
+
+  const { data } = await supabase
+    .from('credit_transactions')
+    .select('points')
+    .eq('guest_id', uid)
+
+  return (data ?? []).reduce((sum, tx) => sum + (tx.points ?? 0), 0)
+}
+
 export async function getGuestProfile(userId?: string) {
   const supabase = await createClient()
   const uid = userId ?? (await supabase.auth.getUser()).data.user?.id

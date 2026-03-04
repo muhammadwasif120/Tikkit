@@ -7,27 +7,38 @@ export default async function TicketsPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  // Get all approved registrations
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name')
+    .eq('id', user.id)
+    .single()
+
   const { data: registrations } = await supabase
     .from('public_registrations')
-    .select('id, event_id, status, payment_status, payment_token, event:events(id, title, date_start, date_end, venue_name, secret_venue, cover_image_url, ticket_price, status as event_status)')
+    .select(`
+      id, status, check_in_time,
+      event:events (
+        id, title, date_start, venue_name, secret_venue, venue_reveal_at, cover_image_url
+      )
+    `)
     .eq('email', user.email!)
-    .eq('status', 'approved')
-    .not('payment_status', 'eq', 'pending') // exclude ones awaiting payment
+    .in('status', ['confirmed', 'registered', 'approved'])
     .order('created_at', { ascending: false })
 
-  // Get corresponding guest records (QR codes)
-  const eventIds = (registrations ?? []).map((r: any) => r.event_id)
-  const { data: guests } = eventIds.length
-    ? await supabase
-        .from('guests')
-        .select('event_id, qr_code, status, is_vip, checked_in_at, checked_out_at')
-        .eq('email', user.email!)
-        .in('event_id', eventIds)
-    : { data: [] }
+  const tickets = (registrations ?? []).map((reg: any) => ({
+    registrationId: reg.id,
+    eventId:        reg.event?.id ?? '',
+    eventTitle:     reg.event?.title ?? 'Event',
+    eventDate:      reg.event?.date_start ?? new Date().toISOString(),
+    eventVenue:     reg.event?.venue_name ?? null,
+    secretVenue:    reg.event?.secret_venue ?? false,
+    venueRevealAt:  reg.event?.venue_reveal_at ?? null,
+    guestName:      profile?.full_name ?? user.email ?? 'Guest',
+    ticketCode:     `TIKKIT-${reg.id.replace(/-/g, '').slice(0, 16).toUpperCase()}`,
+    status:         reg.status as 'confirmed' | 'registered',
+    checkedIn:      !!reg.check_in_time,
+    checkInTime:    reg.check_in_time ?? null,
+  }))
 
-  const guestMap: Record<string, any> = {}
-  for (const g of guests ?? []) guestMap[g.event_id] = g
-
-  return <TicketsClient registrations={registrations ?? []} guestMap={guestMap} />
+  return <TicketsClient tickets={tickets} />
 }

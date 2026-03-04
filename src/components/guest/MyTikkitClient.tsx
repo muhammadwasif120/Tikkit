@@ -1,0 +1,425 @@
+'use client'
+
+import { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
+import {
+  Ticket, Clock, CheckCircle, AlertCircle, Lock,
+  MapPin, Calendar, Upload, X, FileImage, Loader,
+  ChevronDown, ChevronUp, Award, Zap
+} from 'lucide-react'
+import QRCode from 'qrcode'
+import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
+import { getCreditTier } from '@/lib/creditUtils'
+
+/* ─── Types ──────────────────────────────────────────────────────── */
+type EventInfo = {
+  id: string; title: string
+  date_start: string; date_end: string | null
+  venue_name: string | null; secret_venue: boolean
+  venue_reveal_at: string | null; cover_image_url: string | null
+  ticket_price: number | null; registration_mode: string
+}
+type Pass = {
+  id: string; pass_type: string; issued_at: string
+  event_title: string; was_vip: boolean
+}
+type Registration = {
+  id: string; status: string
+  payment_screenshot_url: string | null
+  created_at: string
+  event: EventInfo | null
+  pass: Pass | null
+}
+
+/* ─── Helpers ────────────────────────────────────────────────────── */
+const GRADIENTS = [
+  'linear-gradient(135deg,#0F2027,#2C5364)',
+  'linear-gradient(135deg,#1a1a2e,#0f3460)',
+  'linear-gradient(135deg,#200122,#6f0000)',
+  'linear-gradient(135deg,#0d0d0d,#1a3a1a)',
+  'linear-gradient(135deg,#1f0033,#2d0050)',
+  'linear-gradient(135deg,#001233,#023e8a)',
+]
+function grad(id: string) { return GRADIENTS[id.charCodeAt(0) % GRADIENTS.length] }
+
+function fmtDate(iso: string) {
+  const d = new Date(iso)
+  const today = new Date(); const tmrw = new Date(); tmrw.setDate(today.getDate() + 1)
+  if (d.toDateString() === today.toDateString()) return 'Today'
+  if (d.toDateString() === tmrw.toDateString()) return 'Tomorrow'
+  return d.toLocaleDateString('en-PK', { weekday: 'short', day: 'numeric', month: 'short' })
+}
+function fmtTime(iso: string) {
+  return new Date(iso).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', hour12: true })
+}
+function msUntil(iso: string) { return new Date(iso).getTime() - Date.now() }
+function fmtCountdown(ms: number) {
+  if (ms <= 0) return null
+  const h = Math.floor(ms / 3600000)
+  const m = Math.floor((ms % 3600000) / 60000)
+  const s = Math.floor((ms % 60000) / 1000)
+  if (h > 48) return `${Math.floor(h/24)}d ${h%24}h`
+  if (h > 0) return `${h}h ${m}m`
+  return `${m}m ${s}s`
+}
+
+/* ─── Status config ──────────────────────────────────────────────── */
+const STATUS: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  registered:      { label: 'Registered',      color: '#10B981', bg: 'rgba(16,185,129,0.1)',   border: 'rgba(16,185,129,0.2)'   },
+  eoi_submitted:   { label: 'Pending Review',  color: '#EAB308', bg: 'rgba(234,179,8,0.1)',    border: 'rgba(234,179,8,0.2)'    },
+  eoi_approved:    { label: 'Pay Now',         color: '#EF4444', bg: 'rgba(239,68,68,0.1)',    border: 'rgba(239,68,68,0.2)'    },
+  payment_pending: { label: 'Verifying',       color: '#818CF8', bg: 'rgba(129,140,248,0.1)',  border: 'rgba(129,140,248,0.2)'  },
+  confirmed:       { label: 'Confirmed',       color: '#10B981', bg: 'rgba(16,185,129,0.1)',   border: 'rgba(16,185,129,0.2)'   },
+  rejected:        { label: 'Not Approved',    color: '#4B5563', bg: 'rgba(75,85,99,0.1)',     border: 'rgba(75,85,99,0.15)'    },
+  attended:        { label: 'Attended',        color: '#818CF8', bg: 'rgba(129,140,248,0.1)',  border: 'rgba(129,140,248,0.2)'  },
+}
+
+/* ─── Confetti ───────────────────────────────────────────────────── */
+function Confetti({ active }: { active: boolean }) {
+  if (!active) return null
+  const colors = ['#1E5EFF','#FFC745','#EF4444','#10B981','#A855F7','#fff']
+  return (
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
+      {Array.from({ length: 60 }).map((_, i) => (
+        <div key={i} style={{
+          position: 'absolute', left: `${Math.random()*100}%`, top: '-8px',
+          width: `${5+Math.random()*7}px`, height: `${5+Math.random()*7}px`,
+          borderRadius: Math.random()>.5?'50%':'2px',
+          background: colors[Math.floor(Math.random()*colors.length)],
+          animation: `confettiFall ${1.5+Math.random()*2}s ease-in forwards`,
+          animationDelay: `${Math.random()*0.6}s`,
+        }} />
+      ))}
+    </div>
+  )
+}
+
+/* ─── QR display ─────────────────────────────────────────────────── */
+function QRDisplay({ registrationId, eventDate, guestName }: { registrationId: string; eventDate: string; guestName: string }) {
+  const [qrSrc, setQrSrc] = useState('')
+  const [bright, setBright] = useState(false)
+  const [ms, setMs] = useState(msUntil(eventDate))
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [unlocked, setUnlocked] = useState(ms <= 3600000)
+  const prevUnlocked = useRef(unlocked)
+  const ticketCode = `TIKKIT-${registrationId.replace(/-/g,'').slice(0,16).toUpperCase()}`
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      const newMs = msUntil(eventDate)
+      setMs(newMs)
+      if (newMs <= 3600000 && !prevUnlocked.current) {
+        prevUnlocked.current = true
+        setUnlocked(true)
+        setShowConfetti(true)
+        setTimeout(() => setShowConfetti(false), 3000)
+      }
+    }, 1000)
+    return () => clearInterval(t)
+  }, [eventDate])
+
+  useEffect(() => {
+    if (unlocked) {
+      QRCode.toDataURL(ticketCode, { width: 200, margin: 2, color: { dark: '#080A10', light: '#FFFFFF' }, errorCorrectionLevel: 'H' })
+        .then(setQrSrc)
+    }
+  }, [unlocked, ticketCode])
+
+  return (
+    <>
+      <Confetti active={showConfetti} />
+      <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
+        {unlocked ? (
+          <>
+            <div onClick={() => setBright(b => !b)} style={{ display: 'inline-block', padding: 10, borderRadius: 14, background: bright ? 'white' : '#F9FAFB', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', transition: 'background 0.2s' }}>
+              {qrSrc
+                ? <img src={qrSrc} alt="QR" style={{ width: 180, height: 180, display: 'block', borderRadius: 8 }} />
+                : <div style={{ width: 180, height: 180, background: '#E5E7EB', borderRadius: 8 }} />
+              }
+            </div>
+            <p style={{ color: '#4B5563', fontSize: 11, marginTop: 8 }}>Tap to boost brightness · Show at entry</p>
+            <p style={{ color: '#1F2937', fontSize: 10, fontFamily: 'monospace', marginTop: 4 }}>{ticketCode.slice(0,20)}</p>
+          </>
+        ) : (
+          <div>
+            <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', animation: 'pulse 2.5s ease infinite' }}>
+              <Lock size={26} color="#374151" />
+            </div>
+            <p style={{ color: '#6B7280', fontSize: 13, fontWeight: 600, margin: '0 0 6px' }}>QR unlocks 1 hour before</p>
+            {ms > 0 && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 12, background: 'rgba(129,140,248,0.08)', border: '1px solid rgba(129,140,248,0.15)' }}>
+                <Clock size={11} color="#818CF8" />
+                <span style={{ color: '#818CF8', fontSize: 13, fontWeight: 800, fontFamily: "'Clash Display', sans-serif" }}>{fmtCountdown(ms)}</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  )
+}
+
+/* ─── Payment Sheet ──────────────────────────────────────────────── */
+function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose: () => void; onSuccess: () => void }) {
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const ref = useRef<HTMLInputElement>(null)
+
+  const handleFile = (f: File) => {
+    if (!f.type.startsWith('image/')) { setErr('Please upload an image'); return }
+    if (f.size > 8*1024*1024) { setErr('Max 8MB'); return }
+    setErr(null); setFile(f)
+    const r = new FileReader(); r.onload = e => setPreview(e.target?.result as string); r.readAsDataURL(f)
+  }
+  const handleSubmit = async () => {
+    if (!file) return
+    setBusy(true); setErr(null)
+    try {
+      const fd = new FormData()
+      fd.append('registrationId', reg.id)
+      fd.append('screenshot', file)
+      const res = await submitPaymentScreenshot(fd)
+      if (res?.error) { setErr(res.error); return }
+      onSuccess()
+    } catch { setErr('Upload failed. Try again.') }
+    finally { setBusy(false) }
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
+      <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 20px 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '88vh', overflowY: 'auto' }}>
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 16px' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h3 style={{ color: 'white', fontSize: 17, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>Submit Payment</h3>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}><X size={15} /></button>
+        </div>
+        {reg.event?.ticket_price && reg.event.ticket_price > 0 && (
+          <div style={{ padding: '11px 14px', background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 12, marginBottom: 16 }}>
+            <p style={{ color: '#6B7280', fontSize: 11, margin: '0 0 2px' }}>Amount due</p>
+            <p style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>PKR {reg.event.ticket_price.toLocaleString('en-PK')}</p>
+          </div>
+        )}
+        <div onClick={() => ref.current?.click()} style={{ border: `2px dashed ${preview ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 16, padding: preview ? 0 : '28px 20px', textAlign: 'center', cursor: 'pointer', marginBottom: 14, overflow: 'hidden' }}>
+          {preview
+            ? <div style={{ position: 'relative' }}><img src={preview} style={{ width: '100%', maxHeight: 240, objectFit: 'cover', display: 'block', borderRadius: 14 }} /><button onClick={e => { e.stopPropagation(); setFile(null); setPreview(null) }} style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: 8, padding: 6, cursor: 'pointer', color: 'white', display: 'flex' }}><X size={13} /></button></div>
+            : <><FileImage size={28} color="#374151" style={{ marginBottom: 8 }} /><p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Tap to upload payment screenshot</p></>
+          }
+        </div>
+        <input ref={ref} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+        {err && <div style={{ padding: '9px 12px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 10, marginBottom: 12, color: '#FCA5A5', fontSize: 13 }}>{err}</div>}
+        <button onClick={handleSubmit} disabled={!file||busy} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: !file||busy ? 'rgba(255,255,255,0.06)' : '#1E5EFF', color: !file||busy ? '#374151' : 'white', fontSize: 15, fontWeight: 700, cursor: !file||busy ? 'not-allowed' : 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          {busy ? <><Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />Uploading…</> : <><Upload size={15} />Submit Screenshot</>}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Pass chip ──────────────────────────────────────────────────── */
+const PASS_CFG: Record<string, { emoji: string; color: string; bg: string }> = {
+  attendance:  { emoji: '🎫', color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)' },
+  early_bird:  { emoji: '🐦', color: '#34D399', bg: 'rgba(52,211,153,0.1)'  },
+  vip:         { emoji: '👑', color: '#FFC745', bg: 'rgba(255,199,69,0.1)'  },
+  first_timer: { emoji: '🌟', color: '#60A5FA', bg: 'rgba(96,165,250,0.1)'  },
+  streak_3:    { emoji: '🔥', color: '#F97316', bg: 'rgba(249,115,22,0.1)'  },
+  streak_5:    { emoji: '⚡', color: '#A855F7', bg: 'rgba(168,85,247,0.1)'  },
+}
+
+/* ─── Registration Card ──────────────────────────────────────────── */
+function RegCard({ reg, guestName, creditScore, onPay }: {
+  reg: Registration; guestName: string; creditScore: number; onPay: (r: Registration) => void
+}) {
+  const [expanded, setExpanded] = useState(false)
+  const ev = reg.event
+  if (!ev) return null
+
+  const isPast = new Date(ev.date_start) < new Date()
+  const st = STATUS[reg.status] ?? STATUS.registered
+  const isConfirmed = ['confirmed', 'registered'].includes(reg.status)
+  const isPayNow = reg.status === 'eoi_approved'
+  const pass = reg.pass
+  const passCfg = pass ? (PASS_CFG[pass.pass_type] ?? PASS_CFG.attendance) : null
+
+  // Secret venue reveal countdown
+  const [venueMs, setVenueMs] = useState(ev.venue_reveal_at ? msUntil(ev.venue_reveal_at) : null)
+  useEffect(() => {
+    if (!ev.venue_reveal_at) return
+    const t = setInterval(() => setVenueMs(msUntil(ev.venue_reveal_at!)), 1000)
+    return () => clearInterval(t)
+  }, [ev.venue_reveal_at])
+
+  return (
+    <div style={{ background: '#0E1018', border: `1px solid ${isPast ? 'rgba(255,255,255,0.04)' : st.border}`, borderRadius: 20, overflow: 'hidden', opacity: isPast && !pass ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+      {/* Cover */}
+      <div style={{ height: 100, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : grad(ev.id), position: 'relative' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(14,16,24,1) 0%, rgba(14,16,24,0.1) 100%)' }} />
+
+        {/* Pass badge if earned */}
+        {pass && passCfg && (
+          <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', border: `1px solid ${passCfg.color}30` }}>
+            <span style={{ fontSize: 14 }}>{passCfg.emoji}</span>
+            <span style={{ color: passCfg.color, fontSize: 10, fontWeight: 700 }}>Pass Earned</span>
+          </div>
+        )}
+
+        {/* Status pill */}
+        <div style={{ position: 'absolute', top: 10, right: 10 }}>
+          <span style={{ padding: '4px 10px', borderRadius: 20, background: st.bg, border: `1px solid ${st.border}`, color: st.color, fontSize: 10, fontWeight: 800 }}>
+            {st.label}
+          </span>
+        </div>
+
+        {/* Title */}
+        <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14 }}>
+          <h3 style={{ color: 'white', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+            {ev.title}
+          </h3>
+        </div>
+      </div>
+
+      {/* Info row */}
+      <div style={{ padding: '10px 14px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#6B7280', fontSize: 11 }}>
+            <Calendar size={10} />{fmtDate(ev.date_start)} · {fmtTime(ev.date_start)}
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#6B7280', fontSize: 11 }}>
+            <MapPin size={10} />
+            {ev.secret_venue
+              ? venueMs !== null && venueMs > 0
+                ? <span style={{ color: '#FFC745' }}><Lock size={9} style={{ display: 'inline', marginRight: 3 }} />Reveals in {fmtCountdown(venueMs)}</span>
+                : <span style={{ color: '#10B981' }}>{ev.venue_name ?? 'Venue revealed'}</span>
+              : ev.venue_name ?? 'TBA'
+            }
+          </span>
+        </div>
+
+        {/* Expand toggle for QR */}
+        {isConfirmed && !isPast && (
+          <button onClick={() => setExpanded(e => !e)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 10, background: expanded ? 'rgba(30,94,255,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${expanded ? 'rgba(30,94,255,0.3)' : 'rgba(255,255,255,0.07)'}`, cursor: 'pointer', color: expanded ? '#818CF8' : '#6B7280', fontSize: 11, fontWeight: 700, fontFamily: "'Cabinet Grotesk', sans-serif", transition: 'all 0.15s' }}>
+            <Ticket size={11} />
+            {expanded ? 'Hide' : 'QR'}
+            {expanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+          </button>
+        )}
+
+        {/* Pay Now button */}
+        {isPayNow && (
+          <button onClick={() => onPay(reg)} style={{ padding: '6px 14px', borderRadius: 10, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif" }}>
+            💳 Pay Now
+          </button>
+        )}
+      </div>
+
+      {/* QR expanded */}
+      {expanded && isConfirmed && !isPast && (
+        <QRDisplay registrationId={reg.id} eventDate={ev.date_start} guestName={guestName} />
+      )}
+
+      {/* Pass details for past events */}
+      {isPast && pass && passCfg && (
+        <div style={{ padding: '10px 14px 14px', borderTop: '1px solid rgba(255,255,255,0.04)', marginTop: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 12, background: passCfg.bg, border: `1px solid ${passCfg.color}25` }}>
+            <span style={{ fontSize: 20 }}>{passCfg.emoji}</span>
+            <div>
+              <p style={{ color: passCfg.color, fontSize: 12, fontWeight: 700, margin: '0 0 1px' }}>Collectible Pass</p>
+              <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{pass.pass_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom padding */}
+      {!expanded && !isPast && <div style={{ height: 14 }} />}
+    </div>
+  )
+}
+
+/* ─── Main ───────────────────────────────────────────────────────── */
+export default function MyTikkitClient({ registrations, guestName, creditScore }: {
+  registrations: Registration[]; guestName: string; creditScore: number
+}) {
+  const [payTarget, setPayTarget] = useState<Registration | null>(null)
+  const [successMsg, setSuccessMsg] = useState(false)
+  const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming')
+
+  const upcoming = registrations.filter(r => r.event && new Date(r.event.date_start) >= new Date() && r.status !== 'rejected')
+  const past = registrations.filter(r => r.event && new Date(r.event.date_start) < new Date())
+
+  const tier = getCreditTier(creditScore)
+
+  const current = tab === 'upcoming' ? upcoming : past
+
+  return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes confettiFall { 0%{transform:translateY(0) rotate(0deg);opacity:1} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+      `}</style>
+
+      {successMsg && (
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 999, padding: '11px 20px', background: '#10B981', borderRadius: 14, color: 'white', fontSize: 14, fontWeight: 700, boxShadow: '0 8px 24px rgba(16,185,129,0.4)', animation: 'fadeUp 0.3s ease', whiteSpace: 'nowrap' }}>
+          ✓ Screenshot submitted!
+        </div>
+      )}
+
+      {/* Credit chip */}
+      <div style={{ padding: '14px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.5px' }}>My Tikkit</h2>
+        <Link href="/guest/profile" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 20, background: tier.bg, border: `1px solid ${tier.border}`, textDecoration: 'none' }}>
+          <Zap size={11} color={tier.color} />
+          <span style={{ color: tier.color, fontSize: 11, fontWeight: 800 }}>{creditScore} · {tier.label}</span>
+        </Link>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 0, padding: '14px 16px 0' }}>
+        {(['upcoming', 'past'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", borderBottom: `2px solid ${tab === t ? '#1E5EFF' : 'rgba(255,255,255,0.06)'}`, color: tab === t ? 'white' : '#4B5563', fontSize: 13, fontWeight: tab === t ? 700 : 500, transition: 'all 0.15s' }}>
+            {t === 'upcoming' ? `Upcoming${upcoming.length > 0 ? ` (${upcoming.length})` : ''}` : `Past${past.length > 0 ? ` (${past.length})` : ''}`}
+          </button>
+        ))}
+      </div>
+
+      {/* Cards */}
+      <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {current.length > 0
+          ? current.map(r => (
+              <RegCard key={r.id} reg={r} guestName={guestName} creditScore={creditScore} onPay={setPayTarget} />
+            ))
+          : (
+            <div style={{ padding: '64px 0', textAlign: 'center', animation: 'fadeUp 0.3s ease' }}>
+              {tab === 'upcoming'
+                ? <>
+                    <div style={{ fontSize: 40, marginBottom: 14, opacity: 0.2 }}>🎟</div>
+                    <p style={{ color: '#374151', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: "'Clash Display', sans-serif" }}>No upcoming events</p>
+                    <p style={{ color: '#1F2937', fontSize: 13, margin: '0 0 20px' }}>Register for events to see them here.</p>
+                    <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
+                      Explore Events
+                    </Link>
+                  </>
+                : <>
+                    <div style={{ fontSize: 40, marginBottom: 14, opacity: 0.2 }}>🏆</div>
+                    <p style={{ color: '#374151', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: "'Clash Display', sans-serif" }}>No past events yet</p>
+                    <p style={{ color: '#1F2937', fontSize: 13, margin: 0 }}>Events you've attended will appear here with your collectible passes.</p>
+                  </>
+              }
+            </div>
+          )
+        }
+      </div>
+      <div style={{ height: 20 }} />
+
+      {payTarget && (
+        <PaymentSheet reg={payTarget} onClose={() => setPayTarget(null)} onSuccess={() => { setPayTarget(null); setSuccessMsg(true); setTimeout(() => setSuccessMsg(false), 3000) }} />
+      )}
+    </>
+  )
+}

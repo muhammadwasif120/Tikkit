@@ -156,3 +156,17 @@ body {
   pointer-events: none;
   border-radius: inherit;
 }
+/* Tikkit font variables */
+:root {
+  --font-display: var(--font-syne), 'Syne', sans-serif;
+  --font-body:    var(--font-dm-sans), 'DM Sans', sans-serif;
+}
+
+:root {
+  --font-display: 'Clash Display', sans-serif;
+  --font-body:    'Cabinet Grotesk', sans-serif;
+}
+
+body {
+  font-family: 'Cabinet Grotesk', sans-serif;
+}

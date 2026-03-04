@@ -1,23 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
-import { Calendar, MapPin, Clock, CheckCircle, AlertCircle, XCircle, Ticket, ChevronRight, QrCode, Star } from 'lucide-react'
+import {
+  Calendar, MapPin, Clock, Upload, X, CheckCircle,
+  AlertCircle, ChevronRight, Ticket, FileImage, Loader
+} from 'lucide-react'
+import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
 
-type Event = {
+/* ─── Types ──────────────────────────────────────────────────────── */
+type EventInfo = {
   id: string; title: string; date_start: string; date_end: string | null
-  venue_name: string | null; secret_venue: boolean; cover_image_url: string | null
-  ticket_price: number; registration_mode: string; status: string
-  organizer: { full_name: string; company_name: string | null } | null
+  venue_name: string | null; secret_venue: boolean
+  cover_image_url: string | null; ticket_price: number | null
 }
-
 type Registration = {
-  id: string; event_id: string; status: string; payment_status: string
-  payment_token: string; created_at: string; event: Event | null
+  id: string; status: string; created_at: string
+  payment_screenshot_url: string | null
+  event: EventInfo | null
 }
 
-type QREntry = { qr_code: string; status: string; is_vip: boolean }
-
+/* ─── Helpers ────────────────────────────────────────────────────── */
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-PK', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 }
@@ -26,216 +29,319 @@ function fmtTime(iso: string) {
 }
 function isPast(iso: string) { return new Date(iso) < new Date() }
 
-function StatusBadge({ status, paymentStatus }: { status: string; paymentStatus: string }) {
-  let label = '', color = '', bg = '', Icon = Clock
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; icon: React.ReactNode; info: string }> = {
+  eoi_submitted: {
+    label: 'Interest Submitted', color: '#EAB308', bg: 'rgba(234,179,8,0.1)', border: 'rgba(234,179,8,0.2)',
+    icon: <Clock size={13} />,
+    info: 'Your application is being reviewed by the organizer.',
+  },
+  eoi_approved: {
+    label: 'Approved — Pay Now', color: '#EF4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.2)',
+    icon: <AlertCircle size={13} />,
+    info: 'You\'ve been approved! Upload your payment screenshot to confirm your spot.',
+  },
+  payment_pending: {
+    label: 'Payment Verifying', color: '#818CF8', bg: 'rgba(129,140,248,0.1)', border: 'rgba(129,140,248,0.2)',
+    icon: <Loader size={13} />,
+    info: 'Your payment is being verified by the organizer.',
+  },
+  confirmed: {
+    label: 'Confirmed ✓', color: '#10B981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)',
+    icon: <CheckCircle size={13} />,
+    info: 'You\'re all set! Your QR ticket is in the Tickets tab.',
+  },
+  registered: {
+    label: 'Registered ✓', color: '#10B981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)',
+    icon: <CheckCircle size={13} />,
+    info: 'You\'re registered. Your QR ticket is in the Tickets tab.',
+  },
+  waitlisted: {
+    label: 'Waitlisted', color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)', border: 'rgba(156,163,175,0.2)',
+    icon: <Clock size={13} />,
+    info: 'You\'re on the waitlist. We\'ll notify you if a spot opens up.',
+  },
+  rejected: {
+    label: 'Not Approved', color: '#EF4444', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.15)',
+    icon: <X size={13} />,
+    info: 'Your application was not approved for this event.',
+  },
+}
 
-  if (status === 'rejected') { label = 'Declined'; color = '#EF4444'; bg = 'rgba(239,68,68,0.12)'; Icon = XCircle }
-  else if (status === 'pending') { label = 'Under Review'; color = '#6B7280'; bg = 'rgba(107,114,128,0.12)'; Icon = Clock }
-  else if (status === 'approved' && paymentStatus === 'pending') { label = 'Payment Due'; color = '#FFC745'; bg = 'rgba(255,199,69,0.12)'; Icon = AlertCircle }
-  else if (status === 'approved' && paymentStatus === 'submitted') { label = 'Payment Reviewing'; color = '#F97316'; bg = 'rgba(249,115,22,0.12)'; Icon = Clock }
-  else if (status === 'approved') { label = 'Confirmed'; color = '#22C55E'; bg = 'rgba(34,197,94,0.12)'; Icon = CheckCircle }
+/* ─── Payment Sheet ──────────────────────────────────────────────── */
+function PaymentSheet({ registration, onClose, onSuccess }: {
+  registration: Registration
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [file, setFile] = useState<File | null>(null)
+  const [preview, setPreview] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const event = registration.event!
+
+  const handleFile = (f: File) => {
+    if (!f.type.startsWith('image/')) { setErr('Please upload an image file'); return }
+    if (f.size > 8 * 1024 * 1024) { setErr('File must be under 8MB'); return }
+    setErr(null)
+    setFile(f)
+    const reader = new FileReader()
+    reader.onload = e => setPreview(e.target?.result as string)
+    reader.readAsDataURL(f)
+  }
+
+  const handleSubmit = async () => {
+    if (!file) return
+    setBusy(true)
+    setErr(null)
+    try {
+      const fd = new FormData()
+      fd.append('registrationId', registration.id)
+      fd.append('screenshot', file)
+      const res = await submitPaymentScreenshot(fd)
+      if (res?.error) { setErr(res.error); return }
+      onSuccess()
+    } catch (e) {
+      setErr('Upload failed. Please try again.')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', background: bg, borderRadius: 20 }}>
-      <Icon size={11} color={color} />
-      <span style={{ color, fontSize: 11, fontWeight: 700 }}>{label}</span>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+      {/* Backdrop */}
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
+      {/* Sheet */}
+      <div style={{
+        position: 'relative', background: '#13151E',
+        borderRadius: '24px 24px 0 0', padding: '24px 20px 40px',
+        border: '1px solid rgba(255,255,255,0.08)',
+        animation: 'slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+        maxHeight: '90vh', overflowY: 'auto',
+      }}>
+        {/* Handle */}
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)', margin: '0 auto 20px' }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+          <div>
+            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 4px', fontFamily: "'Clash Display', sans-serif" }}>Submit Payment</h3>
+            <p style={{ color: '#4B5563', fontSize: 13, margin: 0 }}>{event.title}</p>
+          </div>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#9CA3AF' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        {event.ticket_price && event.ticket_price > 0 && (
+          <div style={{ padding: '12px 14px', background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 14, marginBottom: 20 }}>
+            <p style={{ color: '#818CF8', fontSize: 13, margin: '0 0 2px', fontWeight: 600 }}>Amount to pay</p>
+            <p style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>
+              PKR {event.ticket_price.toLocaleString('en-PK')}
+            </p>
+          </div>
+        )}
+
+        {/* Upload area */}
+        <div
+          onClick={() => inputRef.current?.click()}
+          style={{
+            border: `2px dashed ${preview ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.1)'}`,
+            borderRadius: 18, padding: preview ? 0 : '32px 20px',
+            textAlign: 'center', cursor: 'pointer', marginBottom: 16,
+            overflow: 'hidden', transition: 'border-color 0.2s',
+            background: preview ? 'transparent' : 'rgba(255,255,255,0.02)',
+          }}
+        >
+          {preview ? (
+            <div style={{ position: 'relative' }}>
+              <img src={preview} alt="Payment screenshot" style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block', borderRadius: 16 }} />
+              <div style={{ position: 'absolute', top: 8, right: 8 }}>
+                <button onClick={e => { e.stopPropagation(); setFile(null); setPreview(null) }} style={{ background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: 8, padding: 6, cursor: 'pointer', color: 'white', display: 'flex' }}>
+                  <X size={14} />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <FileImage size={32} color="#374151" style={{ marginBottom: 10 }} />
+              <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: '0 0 4px' }}>Upload payment screenshot</p>
+              <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>Tap to choose · JPG, PNG, HEIC · Max 8MB</p>
+            </>
+          )}
+        </div>
+        <input ref={inputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
+
+        {err && (
+          <div style={{ display: 'flex', gap: 8, padding: '10px 13px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12, marginBottom: 14 }}>
+            <AlertCircle size={14} color="#F87171" style={{ flexShrink: 0, marginTop: 1 }} />
+            <span style={{ color: '#FCA5A5', fontSize: 13 }}>{err}</span>
+          </div>
+        )}
+
+        <button
+          onClick={handleSubmit}
+          disabled={!file || busy}
+          style={{
+            width: '100%', padding: '14px', border: 'none', borderRadius: 14,
+            background: !file || busy ? 'rgba(255,255,255,0.06)' : '#1E5EFF',
+            color: !file || busy ? '#374151' : 'white',
+            fontSize: 15, fontWeight: 700, cursor: !file || busy ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            fontFamily: "'Cabinet Grotesk', sans-serif", transition: 'all 0.2s',
+          }}
+        >
+          {busy ? <><Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> Uploading…</> : <><Upload size={16} /> Submit Screenshot</>}
+        </button>
+      </div>
     </div>
   )
 }
 
-function RegistrationCard({ reg, qr, userEmail }: { reg: Registration; qr?: QREntry; userEmail: string }) {
-  const [showQR, setShowQR] = useState(false)
+/* ─── Registration Card ──────────────────────────────────────────── */
+function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) => void }) {
   const event = reg.event
   if (!event) return null
-
-  const eventPast = event.date_end ? isPast(event.date_end) : isPast(event.date_start)
-  const isApproved = reg.status === 'approved'
-  const needsPayment = isApproved && reg.payment_status === 'pending'
-  const paymentUrl = `/register/${event.id}?step=2&token=${reg.payment_token}`
-  const organiser = event.organizer?.company_name ?? event.organizer?.full_name
+  const cfg = STATUS_CONFIG[reg.status] ?? STATUS_CONFIG.registered
+  const past = isPast(event.date_start)
 
   return (
-    <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden', marginBottom: 12 }}>
-      {/* Cover */}
-      <div style={{ position: 'relative', height: 120 }}>
-        {event.cover_image_url ? (
-          <img src={event.cover_image_url} alt={event.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        ) : (
-          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0D1A3A, #0A0C12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Ticket size={28} color="rgba(30,94,255,0.2)" />
-          </div>
-        )}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(19,21,30,1) 0%, transparent 60%)' }} />
-        {qr?.is_vip && (
-          <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', background: 'rgba(255,199,69,0.9)', borderRadius: 20 }}>
-            <Star size={10} color="#000" fill="#000" />
-            <span style={{ fontSize: 10, fontWeight: 800, color: '#000' }}>VIP</span>
-          </div>
-        )}
-        {eventPast && (
-          <div style={{ position: 'absolute', top: 10, left: 10, padding: '3px 8px', background: 'rgba(0,0,0,0.6)', borderRadius: 20, backdropFilter: 'blur(8px)' }}>
-            <span style={{ color: '#6B7280', fontSize: 10, fontWeight: 600 }}>Event Ended</span>
-          </div>
-        )}
-      </div>
-
-      <div style={{ padding: '14px 16px' }}>
-        {/* Title + status */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
-          <h3 style={{ color: 'white', fontSize: 15, fontWeight: 700, fontFamily: 'Poppins, sans-serif', margin: 0, lineHeight: 1.3, flex: 1 }}>
+    <div style={{
+      background: '#13151E', border: `1px solid ${past ? 'rgba(255,255,255,0.04)' : cfg.border}`,
+      borderRadius: 20, overflow: 'hidden', opacity: past ? 0.6 : 1,
+      animation: 'fadeSlideIn 0.3s ease forwards',
+    }}>
+      {/* Cover strip */}
+      <div style={{ height: 90, position: 'relative', background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : 'linear-gradient(135deg,#1E3A5F,#0A0C12)' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(19,21,30,1) 0%, rgba(19,21,30,0.2) 100%)' }} />
+        <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+          <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.3px' }}>
             {event.title}
           </h3>
-          <StatusBadge status={reg.status} paymentStatus={reg.payment_status} />
-        </div>
-
-        {/* Details */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Calendar size={12} color="#4B5563" />
-            <span style={{ color: '#6B7280', fontSize: 12 }}>{fmtDate(event.date_start)} · {fmtTime(event.date_start)}</span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <MapPin size={12} color="#4B5563" />
-            <span style={{ color: '#6B7280', fontSize: 12 }}>{event.secret_venue ? (isApproved ? (event.venue_name ?? 'TBC') : '📍 Revealed on approval') : (event.venue_name ?? 'TBC')}</span>
-          </div>
-        </div>
-
-        {/* CTAs */}
-        <div style={{ display: 'flex', gap: 8 }}>
-          {/* Payment due */}
-          {needsPayment && (
-            <Link href={paymentUrl} style={{ flex: 1, textDecoration: 'none' }}>
-              <div style={{ padding: '10px 14px', background: '#FFC745', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                <AlertCircle size={14} color="#000" />
-                <span style={{ color: '#000', fontSize: 13, fontWeight: 700 }}>Complete Payment</span>
-              </div>
-            </Link>
-          )}
-
-          {/* QR code button */}
-          {isApproved && qr && !eventPast && reg.payment_status !== 'pending' && (
-            <button
-              onClick={() => setShowQR(true)}
-              style={{ flex: 1, padding: '10px 14px', background: 'rgba(30,94,255,0.12)', border: '1px solid rgba(30,94,255,0.25)', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-            >
-              <QrCode size={14} color="#4F8AFF" />
-              <span style={{ color: '#4F8AFF', fontSize: 13, fontWeight: 700 }}>Show QR</span>
-            </button>
-          )}
-
-          {/* Passes collectible hint */}
-          {eventPast && isApproved && (
-            <Link href="/guest/passes" style={{ flex: 1, textDecoration: 'none' }}>
-              <div style={{ padding: '10px 14px', background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.2)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                <Star size={14} color="#A855F7" />
-                <span style={{ color: '#A855F7', fontSize: 13, fontWeight: 700 }}>View Pass</span>
-              </div>
-            </Link>
-          )}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color, fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 8 }}>
+            {cfg.icon} {cfg.label}
+          </span>
         </div>
       </div>
 
-      {/* QR Modal */}
-      {showQR && qr && (
-        <div
-          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(12px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
-          onClick={() => setShowQR(false)}
-        >
-          <div style={{ background: '#13151E', borderRadius: 20, padding: '28px 24px', width: '100%', maxWidth: 340, textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-            <p style={{ color: '#6B7280', fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 4px' }}>Your Entry Pass</p>
-            <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, fontFamily: 'Poppins, sans-serif', margin: '0 0 20px' }}>{event.title}</h3>
-
-            {/* QR Code — using a public QR API */}
-            <div style={{ background: 'white', borderRadius: 14, padding: 16, display: 'inline-block', marginBottom: 16 }}>
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qr.qr_code}`}
-                alt="QR Code"
-                style={{ width: 200, height: 200, display: 'block' }}
-              />
-            </div>
-
-            {qr.is_vip && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 12, padding: '6px 14px', background: 'rgba(255,199,69,0.12)', border: '1px solid rgba(255,199,69,0.25)', borderRadius: 20, width: 'fit-content', margin: '0 auto 16px' }}>
-                <Star size={12} color="#FFC745" fill="#FFC745" />
-                <span style={{ color: '#FFC745', fontSize: 12, fontWeight: 700 }}>VIP Access</span>
-              </div>
-            )}
-
-            <p style={{ color: '#374151', fontSize: 12, margin: '0 0 16px', lineHeight: 1.5 }}>
-              Show this at the door for entry.<br />
-              Tap anywhere to close.
-            </p>
-
-            <div style={{ padding: '10px', background: 'rgba(255,255,255,0.03)', borderRadius: 10 }}>
-              <p style={{ color: '#374151', fontSize: 11, margin: 0, fontFamily: 'monospace', letterSpacing: '0.05em' }}>{qr.qr_code.slice(0, 20)}...</p>
-            </div>
-          </div>
+      <div style={{ padding: '12px 14px' }}>
+        {/* Event info */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 10 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 12 }}>
+            <Calendar size={11} color="#1E5EFF" />
+            {fmtDate(event.date_start)} · {fmtTime(event.date_start)}
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 12 }}>
+            <MapPin size={11} color="#1E5EFF" />
+            {event.secret_venue ? <span style={{ color: '#FFC745' }}>Secret venue</span> : (event.venue_name ?? 'TBA')}
+          </span>
         </div>
-      )}
+
+        {/* Status info blurb */}
+        <div style={{ padding: '8px 10px', background: cfg.bg, border: `1px solid ${cfg.border}`, borderRadius: 10, marginBottom: 12 }}>
+          <p style={{ color: cfg.color, fontSize: 12, margin: 0, lineHeight: 1.4 }}>{cfg.info}</p>
+        </div>
+
+        {/* Actions */}
+        <div style={{ display: 'flex', gap: 8 }}>
+          {reg.status === 'eoi_approved' && (
+            <button
+              onClick={() => onPay(reg)}
+              style={{ flex: 1, padding: '10px', border: 'none', borderRadius: 12, background: '#EF4444', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif' " }}
+            >
+              💳 Pay Now
+            </button>
+          )}
+          {(reg.status === 'confirmed' || reg.status === 'registered') && (
+            <Link href="/guest/tickets" style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'rgba(30,94,255,0.15)', border: '1px solid rgba(30,94,255,0.25)', color: '#818CF8', fontSize: 13, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+              <Ticket size={13} /> View Ticket
+            </Link>
+          )}
+          {reg.status === 'payment_pending' && reg.payment_screenshot_url && (
+            <div style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'rgba(129,140,248,0.08)', border: '1px solid rgba(129,140,248,0.15)', color: '#818CF8', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+              <CheckCircle size={13} /> Screenshot sent
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
 
-const TABS = ['All', 'Upcoming', 'Pending', 'Past'] as const
-type Tab = typeof TABS[number]
+/* ─── Main ───────────────────────────────────────────────────────── */
+export default function MyEventsClient({ registrations }: { registrations: Registration[] }) {
+  const [filter, setFilter] = useState<'all' | 'active' | 'pending' | 'past'>('all')
+  const [payTarget, setPayTarget] = useState<Registration | null>(null)
+  const [successMsg, setSuccessMsg] = useState(false)
 
-export default function MyEventsClient({
-  registrations, qrMap, userEmail,
-}: {
-  registrations: Registration[]
-  qrMap: Record<string, QREntry>
-  userEmail: string
-}) {
-  const [tab, setTab] = useState<Tab>('All')
-
-  const filtered = registrations.filter(reg => {
-    if (!reg.event) return false
-    const past = reg.event.date_end ? isPast(reg.event.date_end) : isPast(reg.event.date_start)
-    if (tab === 'Upcoming') return !past && reg.status !== 'rejected'
-    if (tab === 'Pending')  return reg.status === 'pending' || (reg.status === 'approved' && reg.payment_status === 'pending')
-    if (tab === 'Past')     return past
+  const filtered = registrations.filter(r => {
+    if (!r.event) return false
+    const past = isPast(r.event.date_start)
+    if (filter === 'active') return ['confirmed', 'registered'].includes(r.status) && !past
+    if (filter === 'pending') return ['eoi_submitted', 'eoi_approved', 'payment_pending'].includes(r.status)
+    if (filter === 'past') return past
     return true
   })
 
+  const tabs: { key: typeof filter; label: string }[] = [
+    { key: 'all', label: 'All' },
+    { key: 'active', label: 'Active' },
+    { key: 'pending', label: 'Pending' },
+    { key: 'past', label: 'Past' },
+  ]
+
   return (
-    <div style={{ padding: '20px 18px 8px' }}>
-      {/* Header */}
-      <h1 style={{ color: 'white', fontSize: 24, fontWeight: 800, fontFamily: 'Poppins, sans-serif', letterSpacing: '-0.5px', margin: '0 0 16px' }}>
-        My Events
-      </h1>
+    <>
+      <style>{`
+        @keyframes fadeSlideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+      `}</style>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 20, overflowX: 'auto', scrollbarWidth: 'none' }}>
-        {TABS.map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{
-            padding: '7px 16px', borderRadius: 20, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-            background: tab === t ? '#1E5EFF' : 'rgba(255,255,255,0.06)',
-            color: tab === t ? 'white' : '#6B7280', fontSize: 13, fontWeight: 600, transition: 'all 0.15s',
-          }}>{t}</button>
-        ))}
-      </div>
+      {successMsg && (
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 999, padding: '12px 20px', background: '#10B981', borderRadius: 14, color: 'white', fontSize: 14, fontWeight: 700, boxShadow: '0 8px 24px rgba(16,185,129,0.4)', animation: 'fadeSlideIn 0.3s ease' }}>
+          ✓ Payment screenshot submitted!
+        </div>
+      )}
 
-      {/* Cards */}
-      {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0' }}>
-          <Ticket size={32} color="#1F2937" style={{ marginBottom: 12 }} />
-          <p style={{ color: '#374151', fontSize: 15, fontWeight: 600, margin: '0 0 6px' }}>
-            {tab === 'All' ? 'No events yet' : `No ${tab.toLowerCase()} events`}
-          </p>
-          <p style={{ color: '#1F2937', fontSize: 13, margin: '0 0 20px' }}>
-            {tab === 'All' ? 'Register for an event to see it here' : ''}
-          </p>
-          {tab === 'All' && (
-            <Link href="/explore" style={{ display: 'inline-block', padding: '10px 20px', background: '#1E5EFF', color: 'white', borderRadius: 12, textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
+      <div style={{ padding: '12px 16px 0' }}>
+        {/* Filter tabs */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none' }}>
+          {tabs.map(t => (
+            <button key={t.key} onClick={() => setFilter(t.key)} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: 20, border: `1px solid ${filter === t.key ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`, background: filter === t.key ? 'rgba(30,94,255,0.15)' : '#13151E', color: filter === t.key ? '#818CF8' : '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", transition: 'all 0.15s' }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Cards */}
+        {filtered.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {filtered.map(r => <RegCard key={r.id} reg={r} onPay={setPayTarget} />)}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '64px 0', color: '#4B5563' }}>
+            <Calendar size={40} style={{ opacity: 0.2, marginBottom: 14 }} />
+            <p style={{ fontSize: 15, fontWeight: 600, color: '#6B7280', margin: '0 0 8px' }}>No events here</p>
+            <p style={{ fontSize: 13, margin: '0 0 24px' }}>Events you register for will appear here.</p>
+            <Link href="/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
               Explore Events
             </Link>
-          )}
-        </div>
-      ) : (
-        filtered.map(reg => (
-          <RegistrationCard key={reg.id} reg={reg} qr={qrMap[reg.event_id]} userEmail={userEmail} />
-        ))
+          </div>
+        )}
+      </div>
+
+      {payTarget && (
+        <PaymentSheet
+          registration={payTarget}
+          onClose={() => setPayTarget(null)}
+          onSuccess={() => {
+            setPayTarget(null)
+            setSuccessMsg(true)
+            setTimeout(() => setSuccessMsg(false), 3000)
+          }}
+        />
       )}
-    </div>
+    </>
   )
 }

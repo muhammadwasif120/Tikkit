@@ -1,226 +1,257 @@
 'use client'
 
-import { Zap, TrendingUp, TrendingDown, Star, Award, Target, Flame } from 'lucide-react'
+import { useState } from 'react'
+import { Zap, TrendingUp, TrendingDown, Award, Shield, ChevronRight, Info } from 'lucide-react'
 
-type Profile = {
-  credit_score: number
-  total_attended: number
-  total_no_shows: number
-  total_vip_events: number
-  attendance_streak: number
-  longest_streak: number
-} | null
-
+/* ─── Types ──────────────────────────────────────────── */
 type Transaction = {
   id: string
+  amount: number
   type: string
-  points: number
-  balance_after: number
-  note: string | null
+  reason: string
   created_at: string
   event: { title: string; date_start: string } | null
 }
 
-function getTier(score: number) {
-  if (score >= 1000) return { label: 'Elite',    color: '#FFC745', glow: 'rgba(255,199,69,0.2)',  next: null,  nextScore: null }
-  if (score >= 500)  return { label: 'VIP',      color: '#A855F7', glow: 'rgba(168,85,247,0.2)', next: 'Elite', nextScore: 1000 }
-  if (score >= 200)  return { label: 'Regular',  color: '#1E5EFF', glow: 'rgba(30,94,255,0.2)',  next: 'VIP', nextScore: 500 }
-  if (score >= 50)   return { label: 'Rising',   color: '#22C55E', glow: 'rgba(34,197,94,0.2)',  next: 'Regular', nextScore: 200 }
-  return               { label: 'Newcomer', color: '#6B7280', glow: 'rgba(107,114,128,0.2)', next: 'Rising', nextScore: 50 }
+type TierInfo = {
+  name: string
+  emoji: string
+  color: string
+  minScore: number
+  maxScore: number | null
+  perks: string[]
 }
 
-const TX_CONFIG: Record<string, { icon: typeof Zap; label: string; color: string }> = {
-  exit_scan:         { icon: Zap,          label: 'Event attended',     color: '#22C55E' },
-  vip_bonus:         { icon: Star,         label: 'VIP bonus',          color: '#FFC745' },
-  first_event:       { icon: Award,        label: 'First event!',       color: '#4F8AFF' },
-  streak_bonus:      { icon: Flame,        label: 'Streak bonus',       color: '#F97316' },
-  no_show_deduction: { icon: TrendingDown, label: 'No-show deduction',  color: '#EF4444' },
-  admin_adjustment:  { icon: Target,       label: 'Adjustment',         color: '#6B7280' },
+/* ─── Tier config ────────────────────────────────────── */
+const TIERS: TierInfo[] = [
+  { name: 'Scout',    emoji: '🌱', color: '#9CA3AF', minScore: 0,    maxScore: 99,   perks: ['Basic access to public events', 'Collect attendance passes'] },
+  { name: 'Regular',  emoji: '⭐', color: '#60A5FA', minScore: 100,  maxScore: 299,  perks: ['Priority waitlist placement', 'Early event notifications'] },
+  { name: 'Insider',  emoji: '🔥', color: '#F97316', minScore: 300,  maxScore: 599,  perks: ['Early access to private events', 'Exclusive Insider badge'] },
+  { name: 'Elite',    emoji: '💎', color: '#A855F7', minScore: 600,  maxScore: 999,  perks: ['Direct invites from organizers', 'VIP pass eligibility'] },
+  { name: 'Legend',   emoji: '⚡', color: '#EAB308', minScore: 1000, maxScore: null, perks: ['Auto-approved for all events', 'Lifetime platinum status'] },
+]
+
+function getTier(score: number): TierInfo {
+  return [...TIERS].reverse().find(t => score >= t.minScore) ?? TIERS[0]
 }
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })
+function getNextTier(score: number): TierInfo | null {
+  return TIERS.find(t => score < t.minScore) ?? null
 }
 
-export default function CreditsClient({ profile, transactions }: { profile: Profile; transactions: Transaction[] }) {
-  const score = profile?.credit_score ?? 0
+/* ─── Transaction row ────────────────────────────────── */
+function TxRow({ tx }: { tx: Transaction }) {
+  const isPositive = tx.amount > 0
+  const fmtDate = (iso: string) =>
+    new Date(iso).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' })
+  const fmtTime = (iso: string) =>
+    new Date(iso).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', hour12: true })
+
+  const typeLabel: Record<string, string> = {
+    exit_scan:        'Exit Scan',
+    attendance_bonus: 'Attendance',
+    no_show_penalty:  'No-show',
+    manual_adjustment:'Adjustment',
+    pass_bonus:       'Pass Bonus',
+  }
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      padding: '12px 0',
+      borderBottom: '1px solid rgba(255,255,255,0.04)',
+    }}>
+      <div style={{
+        width: 38, height: 38, borderRadius: 12, flexShrink: 0,
+        background: isPositive ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {isPositive
+          ? <TrendingUp size={16} color="#10B981" />
+          : <TrendingDown size={16} color="#EF4444" />
+        }
+      </div>
+      <div style={{ flex: 1 }}>
+        <p style={{ color: 'white', fontSize: 13, fontWeight: 600, margin: '0 0 2px' }}>
+          {typeLabel[tx.type] ?? tx.type}
+        </p>
+        <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>
+          {tx.event?.title ?? tx.reason}
+          {tx.event && ` · ${fmtDate(tx.event.date_start)}`}
+        </p>
+      </div>
+      <div style={{ textAlign: 'right' }}>
+        <p style={{
+          color: isPositive ? '#10B981' : '#EF4444',
+          fontSize: 14, fontWeight: 800, margin: '0 0 2px',
+          fontFamily: "'Clash Display', sans-serif",
+        }}>
+          {isPositive ? '+' : ''}{tx.amount}
+        </p>
+        <p style={{ color: '#4B5563', fontSize: 10, margin: 0 }}>{fmtTime(tx.created_at)}</p>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Main ───────────────────────────────────────────── */
+export default function CreditsClient({
+  score,
+  transactions,
+}: {
+  score: number
+  transactions: Transaction[]
+}) {
+  const [showTiers, setShowTiers] = useState(false)
   const tier = getTier(score)
-
-  // Progress to next tier
-  const prevScore = score >= 1000 ? 500 : score >= 500 ? 200 : score >= 200 ? 50 : 0
-  const progress = tier.nextScore
-    ? Math.min(100, ((score - prevScore) / (tier.nextScore - prevScore)) * 100)
+  const nextTier = getNextTier(score)
+  const progressPct = nextTier
+    ? Math.min(100, ((score - tier.minScore) / (nextTier.minScore - tier.minScore)) * 100)
     : 100
 
   return (
-    <div style={{ padding: '20px 18px 8px', fontFamily: "'Inter', sans-serif" }}>
-      {/* Header */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-          <Zap size={13} color="#4F8AFF" />
-          <span style={{ color: '#4F8AFF', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em' }}>SOCIAL CREDITS</span>
-        </div>
-        <h1 style={{ color: 'white', fontSize: 26, fontWeight: 800, fontFamily: 'Poppins, sans-serif', letterSpacing: '-0.6px', margin: 0 }}>
-          Your Score
-        </h1>
-      </div>
-
+    <div style={{ padding: '16px' }}>
       {/* Score card */}
       <div style={{
-        background: '#13151E',
-        border: `1px solid ${tier.color}33`,
-        borderRadius: 20, padding: '24px',
-        marginBottom: 16, position: 'relative', overflow: 'hidden',
+        background: `linear-gradient(135deg, ${tier.color}20 0%, #13151E 100%)`,
+        border: `1px solid ${tier.color}30`,
+        borderRadius: 20, padding: '24px 20px', marginBottom: 12,
+        position: 'relative', overflow: 'hidden',
       }}>
-        {/* Glow blob */}
-        <div style={{
-          position: 'absolute', top: -40, right: -40, width: 160, height: 160,
-          background: tier.glow, borderRadius: '50%', filter: 'blur(50px)', pointerEvents: 'none',
-        }} />
-
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          {/* Tier badge */}
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-            padding: '4px 12px', borderRadius: 20,
-            background: `${tier.color}18`, border: `1px solid ${tier.color}40`,
-            marginBottom: 12,
-          }}>
-            <Star size={11} color={tier.color} fill={score >= 500 ? tier.color : 'none'} />
-            <span style={{ color: tier.color, fontSize: 12, fontWeight: 700 }}>{tier.label}</span>
-          </div>
-
-          {/* Score number */}
-          <div style={{ marginBottom: 16 }}>
-            <span style={{
-              fontSize: 52, fontWeight: 900, color: 'white',
-              fontFamily: 'Poppins, sans-serif', letterSpacing: '-2px', lineHeight: 1,
+        <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: `${tier.color}08` }} />
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div>
+            <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', margin: '0 0 4px' }}>
+              Credit Score
+            </p>
+            <p style={{
+              color: 'white', fontSize: 48, fontWeight: 900,
+              fontFamily: "'Clash Display', sans-serif",
+              margin: 0, letterSpacing: '-2px', lineHeight: 1,
             }}>
               {score.toLocaleString()}
-            </span>
-            <span style={{ color: '#4B5563', fontSize: 16, fontWeight: 600, marginLeft: 6 }}>pts</span>
+            </p>
           </div>
-
-          {/* Progress to next tier */}
-          {tier.nextScore && (
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ color: '#4B5563', fontSize: 12 }}>Progress to {tier.next}</span>
-                <span style={{ color: '#6B7280', fontSize: 12 }}>
-                  {(tier.nextScore - score).toLocaleString()} pts to go
-                </span>
-              </div>
-              <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{
-                  height: '100%', borderRadius: 3,
-                  width: `${progress}%`,
-                  background: `linear-gradient(90deg, ${tier.color}80, ${tier.color})`,
-                  transition: 'width 0.6s ease',
-                }} />
-              </div>
-            </div>
-          )}
-          {!tier.nextScore && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <Star size={13} color="#FFC745" fill="#FFC745" />
-              <span style={{ color: '#FFC745', fontSize: 13, fontWeight: 600 }}>Maximum tier achieved</span>
-            </div>
-          )}
+          <div style={{ textAlign: 'right' }}>
+            <span style={{ fontSize: 32 }}>{tier.emoji}</span>
+            <p style={{ color: tier.color, fontSize: 13, fontWeight: 800, margin: '4px 0 0', letterSpacing: '-0.2px' }}>
+              {tier.name}
+            </p>
+          </div>
         </div>
+
+        {/* Progress bar */}
+        {nextTier && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+              <span style={{ color: '#6B7280', fontSize: 11 }}>{score} pts</span>
+              <span style={{ color: '#6B7280', fontSize: 11 }}>
+                {nextTier.minScore - score} to {nextTier.emoji} {nextTier.name}
+              </span>
+            </div>
+            <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', width: `${progressPct}%`,
+                background: `linear-gradient(90deg, ${tier.color}, ${nextTier.color})`,
+                borderRadius: 3, transition: 'width 0.6s ease',
+              }} />
+            </div>
+          </div>
+        )}
+        {!nextTier && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            padding: '8px 12px', borderRadius: 10,
+            background: `${tier.color}15`,
+          }}>
+            <span style={{ fontSize: 14 }}>⚡</span>
+            <span style={{ color: tier.color, fontSize: 12, fontWeight: 700 }}>Maximum tier reached!</span>
+          </div>
+        )}
       </div>
 
-      {/* Stats grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
-        {[
-          { label: 'Events Attended', value: profile?.total_attended ?? 0, icon: Zap, color: '#22C55E' },
-          { label: 'Current Streak', value: profile?.attendance_streak ?? 0, icon: Flame, suffix: '🔥', color: '#F97316' },
-          { label: 'VIP Events', value: profile?.total_vip_events ?? 0, icon: Star, color: '#FFC745' },
-          { label: 'No-shows', value: profile?.total_no_shows ?? 0, icon: TrendingDown, color: '#EF4444' },
-        ].map(({ label, value, icon: Icon, suffix, color }) => (
-          <div key={label} style={{
-            background: '#13151E', border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: 14, padding: '14px',
-          }}>
-            <Icon size={16} color={color} style={{ marginBottom: 8 }} />
-            <p style={{ color: 'white', fontSize: 22, fontWeight: 800, fontFamily: 'Poppins, sans-serif', margin: '0 0 2px', letterSpacing: '-0.5px' }}>
-              {value}{suffix}
-            </p>
-            <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>{label}</p>
+      {/* Perks for current tier */}
+      <div style={{
+        background: '#13151E', border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 16, padding: '14px', marginBottom: 12,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+            <Shield size={14} color={tier.color} />
+            <span style={{ color: 'white', fontSize: 13, fontWeight: 700 }}>Your Perks</span>
+          </div>
+          <button
+            onClick={() => setShowTiers(!showTiers)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              background: 'none', border: 'none', cursor: 'pointer',
+              color: '#1E5EFF', fontSize: 12, fontWeight: 600,
+            }}
+          >
+            All tiers <ChevronRight size={13} style={{ transform: showTiers ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+          </button>
+        </div>
+        {tier.perks.map(perk => (
+          <div key={perk} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 0' }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: tier.color, flexShrink: 0 }} />
+            <span style={{ color: '#9CA3AF', fontSize: 13 }}>{perk}</span>
           </div>
         ))}
       </div>
 
-      {/* How to earn */}
-      <div style={{
-        background: '#13151E', border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: 16, padding: '16px', marginBottom: 24,
-      }}>
-        <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>How to earn</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {[
-            { action: 'Exit scan at any event',   pts: '+50', color: '#22C55E' },
-            { action: 'VIP ticket + exit scan',    pts: '+100', color: '#FFC745' },
-            { action: 'First event ever',          pts: '+100', color: '#4F8AFF' },
-            { action: '3-event streak',            pts: '+25',  color: '#F97316' },
-            { action: '5-event streak',            pts: '+50',  color: '#F97316' },
-            { action: 'No-show (deduction)',       pts: '−20',  color: '#EF4444' },
-          ].map(({ action, pts, color }) => (
-            <div key={action} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#9CA3AF', fontSize: 13 }}>{action}</span>
-              <span style={{ color, fontSize: 13, fontWeight: 700 }}>{pts} pts</span>
-            </div>
-          ))}
+      {/* All tiers panel */}
+      {showTiers && (
+        <div style={{
+          background: '#13151E', border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 16, padding: '14px', marginBottom: 12,
+        }}>
+          <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', margin: '0 0 12px' }}>
+            All Tiers
+          </p>
+          {TIERS.map(t => {
+            const active = t.name === tier.name
+            const locked = score < t.minScore
+            return (
+              <div key={t.name} style={{
+                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0',
+                borderBottom: '1px solid rgba(255,255,255,0.04)',
+                opacity: locked ? 0.4 : 1,
+              }}>
+                <span style={{ fontSize: 20, width: 28, textAlign: 'center' }}>{t.emoji}</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                    <span style={{ color: active ? t.color : 'white', fontSize: 13, fontWeight: 700 }}>{t.name}</span>
+                    {active && (
+                      <span style={{ padding: '1px 6px', borderRadius: 20, background: `${t.color}20`, color: t.color, fontSize: 9, fontWeight: 700 }}>
+                        CURRENT
+                      </span>
+                    )}
+                  </div>
+                  <span style={{ color: '#4B5563', fontSize: 11 }}>
+                    {t.maxScore ? `${t.minScore}–${t.maxScore} pts` : `${t.minScore}+ pts`}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
         </div>
-      </div>
+      )}
 
       {/* Transaction history */}
-      <div>
-        <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>
-          Transaction history
+      <div style={{
+        background: '#13151E', border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 16, padding: '14px',
+      }}>
+        <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.8px', textTransform: 'uppercase', margin: '0 0 4px' }}>
+          History
         </p>
-
         {transactions.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <p style={{ color: '#374151', fontSize: 14, margin: 0 }}>No transactions yet — start attending events!</p>
+          <div style={{ padding: '30px 0', textAlign: 'center', color: '#4B5563' }}>
+            <Zap size={28} style={{ opacity: 0.3, marginBottom: 10 }} />
+            <p style={{ fontSize: 13, margin: 0 }}>No transactions yet</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {transactions.map(tx => {
-              const config = TX_CONFIG[tx.type] ?? TX_CONFIG.admin_adjustment
-              const Icon = config.icon
-              return (
-                <div key={tx.id} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '12px 14px', borderRadius: 12,
-                  background: 'rgba(255,255,255,0.02)',
-                  transition: 'background 0.15s',
-                }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                    background: `${config.color}15`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Icon size={16} color={config.color} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: '#E5E7EB', fontSize: 13, fontWeight: 600, margin: '0 0 2px' }}>{config.label}</p>
-                    {tx.event && (
-                      <p style={{ color: '#4B5563', fontSize: 12, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {tx.event.title}
-                      </p>
-                    )}
-                    <p style={{ color: '#374151', fontSize: 11, margin: '2px 0 0' }}>{formatDate(tx.created_at)}</p>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <p style={{ color: tx.points > 0 ? '#22C55E' : '#EF4444', fontSize: 15, fontWeight: 800, margin: '0 0 2px' }}>
-                      {tx.points > 0 ? '+' : ''}{tx.points}
-                    </p>
-                    <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>{tx.balance_after.toLocaleString()} pts</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+          transactions.map(tx => <TxRow key={tx.id} tx={tx} />)
         )}
       </div>
     </div>

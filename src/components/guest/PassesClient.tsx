@@ -1,190 +1,290 @@
 'use client'
 
-import { useState } from 'react'
-import { Award, Calendar, MapPin, Star, X, Zap } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Award, Calendar, Star, X, ChevronDown } from 'lucide-react'
 
+/* ─── Types ──────────────────────────────────────────────────────── */
 type Pass = {
-  id: string; event_title: string; event_date: string
-  venue_name: string | null; cover_image_url: string | null
-  was_vip: boolean; ticket_price_paid: number
-  pass_number: number | null; serial: string | null; issued_at: string
+  id: string
+  pass_type: string
+  issued_at: string
+  metadata: Record<string, any> | null
+  event: {
+    id: string; title: string
+    date_start: string; cover_image_url: string | null; tags: string[] | null
+  } | null
 }
 
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })
+/* ─── Config ─────────────────────────────────────────────────────── */
+const PASS_CONFIG: Record<string, { label: string; emoji: string; rarity: string; desc: string }> = {
+  attendance:   { label: 'Attendance Pass',    emoji: '🎫', rarity: 'Common',   desc: 'Attended this event' },
+  early_bird:   { label: 'Early Bird',         emoji: '🐦', rarity: 'Uncommon', desc: 'Registered in the first 24 hours' },
+  vip:          { label: 'VIP Pass',           emoji: '👑', rarity: 'Rare',     desc: 'Had VIP access at this event' },
+  first_timer:  { label: 'First Timer',        emoji: '🌟', rarity: 'Uncommon', desc: 'Your very first Tikkit event' },
+  streak_3:     { label: '3-Event Streak',     emoji: '🔥', rarity: 'Rare',     desc: '3 events in a row' },
+  streak_5:     { label: '5-Event Streak',     emoji: '⚡', rarity: 'Epic',     desc: '5 events in a row' },
+  perfect_score:{ label: 'Perfect Attendance', emoji: '💎', rarity: 'Legendary',desc: 'Never missed a registered event' },
+}
+const RARITY_CONFIG: Record<string, { color: string; bg: string; border: string; glow: string; order: number }> = {
+  Common:    { color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)', border: 'rgba(156,163,175,0.2)', glow: 'rgba(156,163,175,0)',    order: 0 },
+  Uncommon:  { color: '#34D399', bg: 'rgba(52,211,153,0.1)',  border: 'rgba(52,211,153,0.2)',  glow: 'rgba(52,211,153,0.1)',  order: 1 },
+  Rare:      { color: '#60A5FA', bg: 'rgba(96,165,250,0.1)',  border: 'rgba(96,165,250,0.25)', glow: 'rgba(96,165,250,0.15)', order: 2 },
+  Epic:      { color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.25)', glow: 'rgba(168,85,247,0.2)',  order: 3 },
+  Legendary: { color: '#FFC745', bg: 'rgba(255,199,69,0.12)', border: 'rgba(255,199,69,0.3)',  glow: 'rgba(255,199,69,0.25)', order: 4 },
 }
 
-function PassCard({ pass, onClick }: { pass: Pass; onClick: () => void }) {
+/* ─── Confetti ───────────────────────────────────────────────────── */
+function Confetti({ active, rarity }: { active: boolean; rarity: string }) {
+  if (!active) return null
+  const rarityClr = RARITY_CONFIG[rarity]?.color ?? '#FFC745'
+  const colors = [rarityClr, '#1E5EFF', '#FFFFFF', '#FFC745', '#EF4444']
   return (
-    <div onClick={onClick} style={{
-      background: '#13151E',
-      border: pass.was_vip ? '1px solid rgba(255,199,69,0.25)' : '1px solid rgba(255,255,255,0.06)',
-      borderRadius: 16, overflow: 'hidden', cursor: 'pointer',
-      transition: 'transform 0.15s',
-    }}
-      onMouseEnter={e => (e.currentTarget as HTMLElement).style.transform = 'scale(1.01)'}
-      onMouseLeave={e => (e.currentTarget as HTMLElement).style.transform = 'scale(1)'}
-    >
-      {pass.was_vip && <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #FFC745, transparent)' }} />}
-
-      {/* Cover */}
-      <div style={{ height: 100, position: 'relative', background: '#0F1117' }}>
-        {pass.cover_image_url ? (
-          <>
-            <img src={pass.cover_image_url} alt={pass.event_title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(19,21,30,0.9), transparent)' }} />
-          </>
-        ) : (
-          <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0D1A3A, #0A0C12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Award size={24} color="rgba(168,85,247,0.3)" />
-          </div>
-        )}
-        {pass.was_vip && (
-          <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', alignItems: 'center', gap: 3, padding: '3px 7px', background: 'rgba(255,199,69,0.9)', borderRadius: 20 }}>
-            <Star size={9} color="#000" fill="#000" />
-            <span style={{ fontSize: 9, fontWeight: 800, color: '#000' }}>VIP</span>
-          </div>
-        )}
-      </div>
-
-      <div style={{ padding: '10px 12px 12px' }}>
-        <h3 style={{ color: 'white', fontSize: 13, fontWeight: 700, fontFamily: 'Poppins, sans-serif', margin: '0 0 4px', lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as any }}>
-          {pass.event_title}
-        </h3>
-        <p style={{ color: '#4B5563', fontSize: 11, margin: '0 0 8px' }}>{fmtDate(pass.event_date)}</p>
-
-        {/* Stub divider */}
-        <div style={{ display: 'flex', alignItems: 'center', margin: '0 -12px 8px' }}>
-          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#080A0F', flexShrink: 0 }} />
-          <div style={{ flex: 1, borderTop: '1px dashed rgba(255,255,255,0.07)' }} />
-          <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#080A0F', flexShrink: 0 }} />
-        </div>
-
-        <p style={{ color: '#4F8AFF', fontSize: 11, fontWeight: 700, fontFamily: 'monospace', margin: 0, letterSpacing: '0.04em' }}>
-          {pass.serial ?? '—'}
-        </p>
-      </div>
+    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
+      {Array.from({ length: 80 }).map((_, i) => (
+        <div key={i} style={{
+          position: 'absolute',
+          left: `${Math.random() * 100}%`,
+          top: '-10px',
+          width: `${5 + Math.random() * 9}px`,
+          height: `${5 + Math.random() * 9}px`,
+          borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+          background: colors[Math.floor(Math.random() * colors.length)],
+          animation: `confettiFall ${1.5 + Math.random() * 2}s ease-in forwards`,
+          animationDelay: `${Math.random() * 0.6}s`,
+          transform: `rotate(${Math.random() * 360}deg)`,
+        }} />
+      ))}
     </div>
   )
 }
 
+/* ─── Pass Modal ─────────────────────────────────────────────────── */
 function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
-  return (
-    <div
-      style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-      onClick={onClose}
-    >
-      <div style={{ background: '#13151E', borderRadius: '24px 24px 0 0', border: '1px solid rgba(255,255,255,0.07)', width: '100%', maxWidth: 480, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-        {pass.was_vip && <div style={{ height: 2, background: 'linear-gradient(90deg, transparent, #FFC745, transparent)' }} />}
+  const cfg = PASS_CONFIG[pass.pass_type] ?? { label: pass.pass_type, emoji: '🎫', rarity: 'Common', desc: '' }
+  const rarity = RARITY_CONFIG[cfg.rarity] ?? RARITY_CONFIG.Common
+  const [confetti, setConfetti] = useState(false)
+  const [glow, setGlow] = useState(false)
 
-        {/* Cover */}
-        <div style={{ position: 'relative', height: 180 }}>
-          {pass.cover_image_url ? (
-            <>
-              <img src={pass.cover_image_url} alt={pass.event_title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(19,21,30,1) 0%, transparent 50%)' }} />
-            </>
-          ) : (
-            <div style={{ width: '100%', height: '100%', background: 'linear-gradient(135deg, #0D1A3A, #0A0C12)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Award size={48} color="rgba(168,85,247,0.2)" />
-            </div>
-          )}
-          <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <X size={16} color="white" />
+  useEffect(() => {
+    setTimeout(() => setGlow(true), 100)
+  }, [])
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+      <Confetti active={confetti} rarity={cfg.rarity} />
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }} />
+      <div style={{
+        position: 'relative', width: '100%', maxWidth: 480,
+        background: '#13151E', borderRadius: '28px 28px 0 0',
+        border: `1px solid ${rarity.border}`,
+        boxShadow: glow ? `0 -20px 80px ${rarity.glow}` : 'none',
+        animation: 'slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)',
+        transition: 'box-shadow 0.6s ease',
+        padding: '0 0 40px',
+        overflow: 'hidden',
+      }}>
+        {/* Cover or gradient header */}
+        <div style={{
+          height: 160, position: 'relative',
+          background: pass.event?.cover_image_url
+            ? `url(${pass.event.cover_image_url}) center/cover`
+            : `linear-gradient(135deg, ${rarity.bg.replace('0.1', '0.3')}, #080A10)`,
+        }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #13151E 0%, transparent 60%)' }} />
+          {/* Rarity shimmer */}
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(105deg, transparent 35%, ${rarity.glow} 50%, transparent 65%)`, animation: 'shimmer 2.5s infinite' }} />
+          {/* Close */}
+          <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'white', display: 'flex' }}>
+            <X size={16} />
           </button>
-          {pass.was_vip && (
-            <div style={{ position: 'absolute', top: 14, left: 14, display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', background: 'rgba(255,199,69,0.9)', borderRadius: 20 }}>
-              <Star size={11} color="#000" fill="#000" />
-              <span style={{ fontSize: 11, fontWeight: 800, color: '#000' }}>VIP</span>
-            </div>
-          )}
+          {/* Pass emoji */}
+          <div style={{
+            position: 'absolute', bottom: -32, left: '50%', transform: 'translateX(-50%)',
+            width: 72, height: 72, borderRadius: 22,
+            background: `linear-gradient(135deg, ${rarity.bg.replace('0.1','0.4')}, #13151E)`,
+            border: `2px solid ${rarity.border}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: 34, boxShadow: `0 0 30px ${rarity.glow}`,
+          }}>
+            {cfg.emoji}
+          </div>
         </div>
 
-        <div style={{ padding: '16px 20px 36px' }}>
-          <h2 style={{ color: 'white', fontSize: 20, fontWeight: 800, fontFamily: 'Poppins, sans-serif', letterSpacing: '-0.4px', margin: '0 0 12px' }}>
-            {pass.event_title}
+        <div style={{ padding: '44px 24px 0', textAlign: 'center' }}>
+          <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 20, background: rarity.bg, border: `1px solid ${rarity.border}`, color: rarity.color, fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', marginBottom: 8 }}>
+            {cfg.rarity}
+          </span>
+          <h2 style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: '0 0 6px', fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.5px' }}>
+            {cfg.label}
           </h2>
+          <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 20px' }}>{cfg.desc}</p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><Calendar size={14} color="#4B5563" /><span style={{ color: '#9CA3AF', fontSize: 14 }}>{fmtDate(pass.event_date)}</span></div>
-            {pass.venue_name && <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><MapPin size={14} color="#4B5563" /><span style={{ color: '#9CA3AF', fontSize: 14 }}>{pass.venue_name}</span></div>}
+          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '14px 16px', textAlign: 'left', marginBottom: 20 }}>
+            <p style={{ color: '#4B5563', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px' }}>Event</p>
+            <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: '0 0 8px' }}>{pass.event?.title ?? 'Unknown Event'}</p>
+            <p style={{ color: '#6B7280', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, margin: 0 }}>
+              <Calendar size={11} />
+              {pass.event?.date_start ? new Date(pass.event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
+            </p>
           </div>
 
-          {/* Stub divider */}
-          <div style={{ display: 'flex', alignItems: 'center', margin: '0 -20px 16px' }}>
-            <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#080A0F', flexShrink: 0 }} />
-            <div style={{ flex: 1, borderTop: '2px dashed rgba(255,255,255,0.06)' }} />
-            <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#080A0F', flexShrink: 0 }} />
-          </div>
+          <p style={{ color: '#374151', fontSize: 11, margin: '0 0 16px' }}>
+            Issued {new Date(pass.issued_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, marginBottom: 14 }}>
-            {[
-              { label: 'SERIAL', value: pass.serial ?? '—', mono: true },
-              { label: 'PASS NO.', value: pass.pass_number ? `#${pass.pass_number}` : '—' },
-              { label: 'ISSUED', value: fmtDate(pass.issued_at) },
-            ].map(({ label, value, mono }) => (
-              <div key={label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '10px 12px' }}>
-                <p style={{ color: '#374151', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', margin: '0 0 4px' }}>{label}</p>
-                <p style={{ color: '#E5E7EB', fontSize: 12, fontWeight: 600, margin: 0, fontFamily: mono ? 'monospace' : 'inherit' }}>{value}</p>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 12 }}>
-            <Zap size={15} color="#4F8AFF" />
-            <span style={{ color: '#4F8AFF', fontSize: 13 }}>
-              You earned <strong>{pass.was_vip ? '100' : '50'} Social Credits</strong> for this event
-            </span>
-          </div>
+          <button
+            onClick={() => { setConfetti(true); setTimeout(() => setConfetti(false), 3500) }}
+            style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: rarity.bg, border: `1px solid ${rarity.border}`, color: rarity.color, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif" }}
+          >
+            ✨ Celebrate this pass
+          </button>
         </div>
       </div>
     </div>
   )
 }
 
-export default function PassesClient({ passes, stats }: { passes: Pass[]; stats: { credit_score: number; total_attended: number } | null }) {
-  const [selected, setSelected] = useState<Pass | null>(null)
+/* ─── Pass Card ──────────────────────────────────────────────────── */
+function PassCard({ pass, index, onClick, isNew }: { pass: Pass; index: number; onClick: () => void; isNew: boolean }) {
+  const cfg = PASS_CONFIG[pass.pass_type] ?? { label: pass.pass_type, emoji: '🎫', rarity: 'Common', desc: '' }
+  const rarity = RARITY_CONFIG[cfg.rarity] ?? RARITY_CONFIG.Common
+  const [confetti, setConfetti] = useState(false)
+  const celebratedRef = useRef(false)
+
+  // Auto-confetti for new passes
+  useEffect(() => {
+    if (isNew && !celebratedRef.current) {
+      celebratedRef.current = true
+      const timer = setTimeout(() => {
+        setConfetti(true)
+        setTimeout(() => setConfetti(false), 3000)
+      }, index * 200)
+      return () => clearTimeout(timer)
+    }
+  }, [isNew, index])
 
   return (
-    <div style={{ padding: '20px 18px 8px' }}>
-      <h1 style={{ color: 'white', fontSize: 24, fontWeight: 800, fontFamily: 'Poppins, sans-serif', letterSpacing: '-0.5px', margin: '0 0 4px' }}>Passes</h1>
-      <p style={{ color: '#4B5563', fontSize: 14, margin: '0 0 20px' }}>
-        {passes.length > 0 ? `${passes.length} collectible pass${passes.length !== 1 ? 'es' : ''}` : 'Earn passes by attending events'}
-      </p>
+    <>
+      <Confetti active={confetti} rarity={cfg.rarity} />
+      <button
+        onClick={onClick}
+        style={{
+          background: '#13151E', border: `1px solid ${rarity.border}`,
+          borderRadius: 18, padding: 0, cursor: 'pointer', textAlign: 'left',
+          overflow: 'hidden', width: '100%',
+          boxShadow: `0 4px 20px ${rarity.glow}`,
+          animation: `fadeSlideIn 0.35s ease forwards`,
+          animationDelay: `${index * 60}ms`,
+          opacity: 0,
+          transition: 'transform 0.15s, box-shadow 0.15s',
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px ${rarity.glow}` }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 20px ${rarity.glow}` }}
+      >
+        {/* Mini cover */}
+        <div style={{ height: 70, background: pass.event?.cover_image_url ? `url(${pass.event.cover_image_url}) center/cover` : `linear-gradient(135deg, ${rarity.bg.replace('0.1','0.3')}, #080A10)`, position: 'relative' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #13151E 0%, transparent 70%)' }} />
+          {isNew && <div style={{ position: 'absolute', top: 8, right: 8, padding: '2px 7px', borderRadius: 20, background: '#EF4444', color: 'white', fontSize: 9, fontWeight: 700 }}>NEW</div>}
+        </div>
+        <div style={{ padding: '10px 12px 14px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            <span style={{ fontSize: 22 }}>{cfg.emoji}</span>
+            <span style={{ padding: '2px 7px', borderRadius: 20, background: rarity.bg, color: rarity.color, fontSize: 9, fontWeight: 700 }}>{cfg.rarity}</span>
+          </div>
+          <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 3px', fontFamily: "'Clash Display', sans-serif", lineHeight: 1.3 }}>{cfg.label}</p>
+          <p style={{ color: '#6B7280', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pass.event?.title ?? '—'}</p>
+        </div>
+      </button>
+    </>
+  )
+}
 
-      {/* Stats strip */}
-      {stats && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 24 }}>
-          <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px' }}>
-            <Zap size={16} color="#4F8AFF" style={{ marginBottom: 6 }} />
-            <p style={{ color: 'white', fontSize: 22, fontWeight: 800, fontFamily: 'Poppins, sans-serif', margin: '0 0 2px', letterSpacing: '-0.5px' }}>{stats.credit_score.toLocaleString()}</p>
-            <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>Social Credits</p>
-          </div>
-          <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px' }}>
-            <Award size={16} color="#A855F7" style={{ marginBottom: 6 }} />
-            <p style={{ color: 'white', fontSize: 22, fontWeight: 800, fontFamily: 'Poppins, sans-serif', margin: '0 0 2px', letterSpacing: '-0.5px' }}>{passes.length}</p>
-            <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>Events Attended</p>
-          </div>
-        </div>
-      )}
+/* ─── Main ───────────────────────────────────────────────────────── */
+export default function PassesClient({ passes, newPassIds = [] }: { passes: Pass[]; newPassIds?: string[] }) {
+  const [selected, setSelected] = useState<Pass | null>(null)
+  const [sort, setSort] = useState<'recent' | 'rarity'>('recent')
 
-      {passes.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 0' }}>
-          <div style={{ width: 60, height: 60, background: 'rgba(168,85,247,0.08)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-            <Award size={26} color="#A855F7" />
+  const sorted = [...passes].sort((a, b) => {
+    if (sort === 'rarity') {
+      const ra = RARITY_CONFIG[PASS_CONFIG[a.pass_type]?.rarity ?? 'Common']?.order ?? 0
+      const rb = RARITY_CONFIG[PASS_CONFIG[b.pass_type]?.rarity ?? 'Common']?.order ?? 0
+      return rb - ra
+    }
+    return new Date(b.issued_at).getTime() - new Date(a.issued_at).getTime()
+  })
+
+  const rarityCounts = passes.reduce((acc, p) => {
+    const r = PASS_CONFIG[p.pass_type]?.rarity ?? 'Common'
+    acc[r] = (acc[r] ?? 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
+  if (passes.length === 0) {
+    return (
+      <div style={{ padding: '80px 20px', textAlign: 'center' }}>
+        <Award size={48} color="#1E5EFF" style={{ opacity: 0.2, marginBottom: 16 }} />
+        <h3 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: "'Clash Display', sans-serif" }}>No passes yet</h3>
+        <p style={{ color: '#6B7280', fontSize: 14, margin: 0 }}>Attend events to collect digital passes. Each event you attend mints you a unique collectible.</p>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      <style>{`
+        @keyframes fadeSlideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(200%)} }
+        @keyframes confettiFall {
+          0%   { transform: translateY(0) rotate(0deg); opacity:1; }
+          100% { transform: translateY(110vh) rotate(720deg); opacity:0; }
+        }
+      `}</style>
+
+      <div style={{ padding: '16px' }}>
+        {/* Header stats */}
+        <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '14px 16px', marginBottom: 16 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+            <div>
+              <p style={{ color: '#6B7280', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 2px' }}>Total Passes</p>
+              <p style={{ color: 'white', fontSize: 28, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>{passes.length}</p>
+            </div>
+            <Award size={32} color="#1E5EFF" style={{ opacity: 0.3 }} />
           </div>
-          <p style={{ color: '#374151', fontSize: 15, fontWeight: 600, margin: '0 0 6px' }}>No passes yet</p>
-          <p style={{ color: '#1F2937', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
-            Attend an event and scan out at the exit<br />to earn your first collectible pass
-          </p>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {Object.entries(rarityCounts).map(([rarity, count]) => {
+              const rc = RARITY_CONFIG[rarity]
+              return (
+                <span key={rarity} style={{ padding: '2px 8px', borderRadius: 20, background: rc?.bg, border: `1px solid ${rc?.border}`, color: rc?.color, fontSize: 11, fontWeight: 700 }}>
+                  {count} {rarity}
+                </span>
+              )
+            })}
+          </div>
         </div>
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          {passes.map(pass => <PassCard key={pass.id} pass={pass} onClick={() => setSelected(pass)} />)}
+
+        {/* Sort toggle */}
+        <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
+          {(['recent', 'rarity'] as const).map(s => (
+            <button key={s} onClick={() => setSort(s)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sort === s ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`, background: sort === s ? 'rgba(30,94,255,0.15)' : '#13151E', color: sort === s ? '#818CF8' : '#6B7280', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", transition: 'all 0.15s', textTransform: 'capitalize' }}>
+              {s === 'recent' ? '🕐 Most Recent' : '⭐ By Rarity'}
+            </button>
+          ))}
         </div>
-      )}
+
+        {/* 2-col grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          {sorted.map((pass, i) => (
+            <PassCard
+              key={pass.id} pass={pass} index={i}
+              onClick={() => setSelected(pass)}
+              isNew={newPassIds.includes(pass.id)}
+            />
+          ))}
+        </div>
+      </div>
 
       {selected && <PassModal pass={selected} onClose={() => setSelected(null)} />}
-    </div>
+    </>
   )
 }
