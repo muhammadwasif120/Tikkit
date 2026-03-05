@@ -120,7 +120,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
       <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto' }}>
         {/* Handle */}
@@ -260,7 +260,7 @@ export default function EventDetailClient({
     if (regStatus === 'eoi_submitted') return { label: 'Interest Submitted', color: '#EAB308', disabled: true }
     if (regStatus === 'eoi_approved') return { label: 'Pay Now →', color: '#EF4444', disabled: false, href: '/guest/tikkit' }
     if (regStatus === 'payment_pending') return { label: 'Payment Verifying…', color: '#818CF8', disabled: true }
-    if (regStatus === 'confirmed' || regStatus === 'registered') return { label: 'View Ticket →', color: '#10B981', disabled: false, href: '/guest/tickets' }
+    if (regStatus === 'confirmed' || regStatus === 'registered') return { label: 'View Ticket →', color: '#10B981', disabled: false, href: '/guest/tikkit' }
     if (regStatus === 'rejected') return { label: 'Not Approved', color: '#4B5563', disabled: true }
     if (isFull) return { label: 'Sold Out', color: '#4B5563', disabled: true }
     if (isInviteOnly) return { label: 'Invite Only', color: '#4B5563', disabled: true }
@@ -279,7 +279,7 @@ export default function EventDetailClient({
         @keyframes fadeIn   { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
 
-      <div style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: "'DM Sans', sans-serif", paddingBottom: 120 }}>
+      <div style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: "'DM Sans', sans-serif", paddingBottom: 200 }}>
 
         {/* Hero */}
         <div style={{ position: 'relative', height: 280, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : gradient, overflow: 'hidden' }}>
@@ -395,7 +395,7 @@ export default function EventDetailClient({
       </div>
 
       {/* Fixed CTA */}
-      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '12px 16px 28px', background: 'linear-gradient(to top, #080A10 60%, transparent)', zIndex: 50 }}>
+      <div style={{ position: 'fixed', bottom: 76, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '12px 16px 12px', background: 'linear-gradient(to top, #080A10 60%, transparent)', zIndex: 50 }}>
         <button
           onClick={() => {
             if (!isLoggedIn) { router.push('/auth/login'); return }

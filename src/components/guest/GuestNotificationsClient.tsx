@@ -48,7 +48,7 @@ function getNotif(reg: Registration): { icon: typeof Bell; color: string; bg: st
     icon: CheckCircle, color: '#22C55E', bg: 'rgba(34,197,94,0.1)',
     title: 'You\'re In! 🎉',
     body: `Your spot at "${name}" is confirmed. Check your tickets for the QR code.`,
-    cta: { label: 'View Ticket', href: '/guest/tickets' },
+    cta: { label: 'View Ticket', href: '/guest/tikkit' },
   }
 
   return null

@@ -253,7 +253,7 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
             </button>
           )}
           {(reg.status === 'confirmed' || reg.status === 'registered') && (
-            <Link href="/guest/tickets" style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'rgba(30,94,255,0.15)', border: '1px solid rgba(30,94,255,0.25)', color: '#818CF8', fontSize: 13, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+            <Link href="/guest/tikkit" style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'rgba(30,94,255,0.15)', border: '1px solid rgba(30,94,255,0.25)', color: '#818CF8', fontSize: 13, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
               <Ticket size={13} /> View Ticket
             </Link>
           )}
