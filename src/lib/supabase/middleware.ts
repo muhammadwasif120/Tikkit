@@ -26,12 +26,13 @@ export async function updateSession(request: NextRequest) {
 
   // Public routes — always allow through
   const publicPaths = [
-    '/auth/login',
-    '/auth/callback',
-    '/auth/reset-password',
-    '/api',
-    '/',
-  ]
+  '/auth/login',
+  '/auth/callback',
+  '/auth/reset-password',
+  '/api',
+  '/events',
+  '/',
+]
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (isPublic) {

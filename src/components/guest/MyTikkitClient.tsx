@@ -24,7 +24,7 @@ type Pass = {
   event_title: string; was_vip: boolean
 }
 type Registration = {
-  id: string; status: string
+  id: string; status: string; payment_status?: string; payment_accounts?: any[]
   payment_screenshot_url: string | null
   created_at: string
   event: EventInfo | null
@@ -149,7 +149,7 @@ function QRDisplay({ registrationId, eventDate, guestName }: { registrationId: s
             {ms > 0 && (
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 12, background: 'rgba(129,140,248,0.08)', border: '1px solid rgba(129,140,248,0.15)' }}>
                 <Clock size={11} color="#818CF8" />
-                <span style={{ color: '#818CF8', fontSize: 13, fontWeight: 800, fontFamily: "'Clash Display', sans-serif" }}>{fmtCountdown(ms)}</span>
+                <span style={{ color: '#818CF8', fontSize: 13, fontWeight: 800, fontFamily: "'Syne', sans-serif" }}>{fmtCountdown(ms)}</span>
               </div>
             )}
           </div>
@@ -193,13 +193,25 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
       <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 20px 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '88vh', overflowY: 'auto' }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 16px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h3 style={{ color: 'white', fontSize: 17, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>Submit Payment</h3>
+          <h3 style={{ color: 'white', fontSize: 17, fontWeight: 900, margin: 0, fontFamily: "'Syne', sans-serif" }}>Submit Payment</h3>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}><X size={15} /></button>
         </div>
         {reg.event?.ticket_price && reg.event.ticket_price > 0 && (
-          <div style={{ padding: '11px 14px', background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 12, marginBottom: 16 }}>
+          <div style={{ padding: '11px 14px', background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 12, marginBottom: 12 }}>
             <p style={{ color: '#6B7280', fontSize: 11, margin: '0 0 2px' }}>Amount due</p>
             <p style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>PKR {reg.event.ticket_price.toLocaleString('en-PK')}</p>
+          </div>
+        )}
+        {reg.payment_accounts && reg.payment_accounts.length > 0 && (
+          <div style={{ marginBottom: 14 }}>
+            <p style={{ color: '#6B7280', fontSize: 11, margin: '0 0 8px', fontWeight: 600, letterSpacing: '0.5px' }}>SEND PAYMENT TO</p>
+            {reg.payment_accounts.map((acc: any) => (
+              <div key={acc.id} style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, marginBottom: 8 }}>
+                <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 3px', fontFamily: "'Clash Display', sans-serif" }}>{acc.label}</p>
+                <p style={{ color: '#9CA3AF', fontSize: 12, margin: '0 0 2px' }}>{acc.account_title} · {acc.account_number}</p>
+                {acc.instructions && <p style={{ color: '#6B7280', fontSize: 11, margin: 0, fontStyle: 'italic' }}>{acc.instructions}</p>}
+              </div>
+            ))}
           </div>
         )}
         <div onClick={() => ref.current?.click()} style={{ border: `2px dashed ${preview ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 16, padding: preview ? 0 : '28px 20px', textAlign: 'center', cursor: 'pointer', marginBottom: 14, overflow: 'hidden' }}>
@@ -210,7 +222,7 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
         </div>
         <input ref={ref} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
         {err && <div style={{ padding: '9px 12px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 10, marginBottom: 12, color: '#FCA5A5', fontSize: 13 }}>{err}</div>}
-        <button onClick={handleSubmit} disabled={!file||busy} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: !file||busy ? 'rgba(255,255,255,0.06)' : '#1E5EFF', color: !file||busy ? '#374151' : 'white', fontSize: 15, fontWeight: 700, cursor: !file||busy ? 'not-allowed' : 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+        <button onClick={handleSubmit} disabled={!file||busy} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: !file||busy ? 'rgba(255,255,255,0.06)' : '#1E5EFF', color: !file||busy ? '#374151' : 'white', fontSize: 15, fontWeight: 700, cursor: !file||busy ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
           {busy ? <><Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />Uploading…</> : <><Upload size={15} />Submit Screenshot</>}
         </button>
       </div>
@@ -237,9 +249,20 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
   if (!ev) return null
 
   const isPast = new Date(ev.date_start) < new Date()
-  const st = STATUS[reg.status] ?? STATUS.registered
-  const isConfirmed = ['confirmed', 'registered'].includes(reg.status)
-  const isPayNow = reg.status === 'eoi_approved'
+  const isPaidEvent = (ev.ticket_price ?? 0) > 0
+  const paymentStatus = (reg as any).payment_status ?? 'not_required'
+
+  // Payment flow states
+  const isPayNow     = reg.status === 'approved' && isPaidEvent && (paymentStatus === 'not_required' || paymentStatus === 'pending')
+  const isPayPending = reg.status === 'approved' && isPaidEvent && paymentStatus === 'submitted'
+  const isConfirmed  = ['confirmed', 'registered'].includes(reg.status)
+    || (reg.status === 'approved' && (!isPaidEvent || paymentStatus === 'confirmed'))
+
+  // Status override for paid events
+  const statusKey = isPayNow ? 'eoi_approved'
+    : isPayPending ? 'payment_pending'
+    : reg.status
+  const st = STATUS[statusKey] ?? STATUS.registered
   const pass = reg.pass
   const passCfg = pass ? (PASS_CFG[pass.pass_type] ?? PASS_CFG.attendance) : null
 
@@ -254,6 +277,7 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
   return (
     <div style={{ background: '#0E1018', border: `1px solid ${isPast ? 'rgba(255,255,255,0.04)' : st.border}`, borderRadius: 20, overflow: 'hidden', opacity: isPast && !pass ? 0.5 : 1, transition: 'opacity 0.2s' }}>
       {/* Cover */}
+      <Link href={`/guest/explore/${ev.id}`} style={{ textDecoration: "none", display: "block" }}>
       <div style={{ height: 100, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : grad(ev.id), position: 'relative' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(14,16,24,1) 0%, rgba(14,16,24,0.1) 100%)' }} />
 
@@ -274,11 +298,12 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
 
         {/* Title */}
         <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14 }}>
-          <h3 style={{ color: 'white', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+          <h3 style={{ color: 'white', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.3px', lineHeight: 1.2 }}>
             {ev.title}
           </h3>
         </div>
       </div>
+      </Link>
 
       {/* Info row */}
       <div style={{ padding: '10px 14px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -299,7 +324,7 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
 
         {/* Expand toggle for QR */}
         {isConfirmed && !isPast && (
-          <button onClick={() => setExpanded(e => !e)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 10, background: expanded ? 'rgba(30,94,255,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${expanded ? 'rgba(30,94,255,0.3)' : 'rgba(255,255,255,0.07)'}`, cursor: 'pointer', color: expanded ? '#818CF8' : '#6B7280', fontSize: 11, fontWeight: 700, fontFamily: "'Cabinet Grotesk', sans-serif", transition: 'all 0.15s' }}>
+          <button onClick={() => setExpanded(e => !e)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 10, background: expanded ? 'rgba(30,94,255,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${expanded ? 'rgba(30,94,255,0.3)' : 'rgba(255,255,255,0.07)'}`, cursor: 'pointer', color: expanded ? '#818CF8' : '#6B7280', fontSize: 11, fontWeight: 700, fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s' }}>
             <Ticket size={11} />
             {expanded ? 'Hide' : 'QR'}
             {expanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
@@ -311,6 +336,11 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
           <button onClick={() => onPay(reg)} style={{ padding: '6px 14px', borderRadius: 10, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif" }}>
             💳 Pay Now
           </button>
+        )}
+        {isPayPending && (
+          <div style={{ padding: '6px 12px', borderRadius: 10, background: 'rgba(129,140,248,0.1)', border: '1px solid rgba(129,140,248,0.2)', color: '#818CF8', fontSize: 11, fontWeight: 700 }}>
+            ⏳ Verifying
+          </div>
         )}
       </div>
 
@@ -372,7 +402,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore }
 
       {/* Credit chip */}
       <div style={{ padding: '14px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.5px' }}>My Tikkit</h2>
+        <h2 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.5px' }}>My Tikkit</h2>
         <Link href="/guest/profile" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 20, background: tier.bg, border: `1px solid ${tier.border}`, textDecoration: 'none' }}>
           <Zap size={11} color={tier.color} />
           <span style={{ color: tier.color, fontSize: 11, fontWeight: 800 }}>{creditScore} · {tier.label}</span>
@@ -382,7 +412,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore }
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, padding: '14px 16px 0' }}>
         {(['upcoming', 'past'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", borderBottom: `2px solid ${tab === t ? '#1E5EFF' : 'rgba(255,255,255,0.06)'}`, color: tab === t ? 'white' : '#4B5563', fontSize: 13, fontWeight: tab === t ? 700 : 500, transition: 'all 0.15s' }}>
+          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", borderBottom: `2px solid ${tab === t ? '#1E5EFF' : 'rgba(255,255,255,0.06)'}`, color: tab === t ? 'white' : '#4B5563', fontSize: 13, fontWeight: tab === t ? 700 : 500, transition: 'all 0.15s' }}>
             {t === 'upcoming' ? `Upcoming${upcoming.length > 0 ? ` (${upcoming.length})` : ''}` : `Past${past.length > 0 ? ` (${past.length})` : ''}`}
           </button>
         ))}
@@ -399,7 +429,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore }
               {tab === 'upcoming'
                 ? <>
                     <div style={{ fontSize: 40, marginBottom: 14, opacity: 0.2 }}>🎟</div>
-                    <p style={{ color: '#374151', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: "'Clash Display', sans-serif" }}>No upcoming events</p>
+                    <p style={{ color: '#374151', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: "'Syne', sans-serif" }}>No upcoming events</p>
                     <p style={{ color: '#1F2937', fontSize: 13, margin: '0 0 20px' }}>Register for events to see them here.</p>
                     <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
                       Explore Events
@@ -407,7 +437,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore }
                   </>
                 : <>
                     <div style={{ fontSize: 40, marginBottom: 14, opacity: 0.2 }}>🏆</div>
-                    <p style={{ color: '#374151', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: "'Clash Display', sans-serif" }}>No past events yet</p>
+                    <p style={{ color: '#374151', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: "'Syne', sans-serif" }}>No past events yet</p>
                     <p style={{ color: '#1F2937', fontSize: 13, margin: 0 }}>Events you've attended will appear here with your collectible passes.</p>
                   </>
               }

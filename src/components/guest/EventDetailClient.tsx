@@ -77,7 +77,7 @@ function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus
     <div style={{ margin: '16px 16px 0', padding: '13px 15px', borderRadius: 16, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
       <Icon size={18} color={s.color} style={{ flexShrink: 0, marginTop: 1 }} />
       <div>
-        <p style={{ color: s.color, fontSize: 13, fontWeight: 800, margin: '0 0 2px', fontFamily: "'Clash Display', sans-serif" }}>{s.label}</p>
+        <p style={{ color: s.color, fontSize: 13, fontWeight: 800, margin: '0 0 2px', fontFamily: "'Syne', sans-serif" }}>{s.label}</p>
         <p style={{ color: s.color, fontSize: 12, margin: 0, opacity: 0.75 }}>{s.sub}</p>
       </div>
     </div>
@@ -85,12 +85,10 @@ function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus
 }
 
 /* ─── Register Sheet ─────────────────────────────────────────────── */
-function RegisterSheet({ event, onClose, onSuccess, isEOI }: {
-  event: Event; onClose: () => void; onSuccess: (status: string) => void; isEOI: boolean
+function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
+  event: Event; onClose: () => void; onSuccess: (status: string) => void
+  isEOI: boolean; userProfile: { full_name: string; email: string } | null
 }) {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -98,15 +96,14 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI }: {
   const account = event.payment_accounts?.[0]
 
   const handleSubmit = async () => {
-    if (!name.trim()) { setErr('Name is required'); return }
-    if (!email.trim()) { setErr('Email is required'); return }
+    if (!userProfile?.email) { setErr('Profile email missing. Please update your profile.'); return }
     setBusy(true); setErr(null)
     try {
       const fd = new FormData()
       fd.append('eventId', event.id)
-      fd.append('name', name.trim())
-      fd.append('email', email.trim())
-      fd.append('phone', phone.trim())
+      fd.append('name', userProfile!.full_name)
+      fd.append('email', userProfile!.email)
+      fd.append('phone', '')
       fd.append('note', note.trim())
       const action = isEOI ? submitEOI : registerForEvent
       const res = await action(fd)
@@ -119,7 +116,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI }: {
   const inputStyle = {
     width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: 12, padding: '11px 13px', color: 'white', fontSize: 14,
-    fontFamily: "'Cabinet Grotesk', sans-serif", outline: 'none', boxSizing: 'border-box' as const,
+    fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' as const,
   }
 
   return (
@@ -132,7 +129,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI }: {
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
-            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: "'Clash Display', sans-serif" }}>
+            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: "'Syne', sans-serif" }}>
               {isEOI ? 'Express Interest' : 'Register'}
             </h3>
             <p style={{ color: '#4B5563', fontSize: 13, margin: 0 }}>{event.title}</p>
@@ -148,7 +145,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI }: {
             <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, margin: '0 0 8px', letterSpacing: '0.5px' }}>PAYMENT DETAILS</p>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
               <span style={{ color: '#6B7280', fontSize: 12 }}>Amount</span>
-              <span style={{ color: 'white', fontSize: 14, fontWeight: 800, fontFamily: "'Clash Display', sans-serif" }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
+              <span style={{ color: 'white', fontSize: 14, fontWeight: 800, fontFamily: "'Syne', sans-serif" }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
               <span style={{ color: '#6B7280', fontSize: 12 }}>Bank</span>
@@ -170,17 +167,14 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI }: {
 
         {/* Form */}
         <div style={{ padding: '16px 20px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <div>
-            <label style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Full Name *</label>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="Your name" style={inputStyle} />
-          </div>
-          <div>
-            <label style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Email *</label>
-            <input value={email} onChange={e => setEmail(e.target.value)} placeholder="your@email.com" type="email" style={inputStyle} />
-          </div>
-          <div>
-            <label style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Phone</label>
-            <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="+92 300 0000000" type="tel" style={inputStyle} />
+          {/* Profile card */}
+          <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
+            <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, margin: '0 0 6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Registering as</p>
+            <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: '0 0 2px', fontFamily: "'Clash Display', sans-serif" }}>{userProfile?.full_name || 'No name set'}</p>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{userProfile?.email}</p>
+            {!userProfile?.full_name && (
+              <p style={{ color: '#EAB308', fontSize: 11, margin: '6px 0 0' }}>⚠ Update your profile name before registering</p>
+            )}
           </div>
           {isEOI && (
             <div>
@@ -200,7 +194,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI }: {
           <button
             onClick={handleSubmit}
             disabled={busy}
-            style={{ width: '100%', padding: '14px', border: 'none', borderRadius: 14, background: busy ? 'rgba(255,255,255,0.06)' : (isEOI ? '#A855F7' : '#1E5EFF'), color: busy ? '#374151' : 'white', fontSize: 15, fontWeight: 800, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}>
+            style={{ width: '100%', padding: '14px', border: 'none', borderRadius: 14, background: busy ? 'rgba(255,255,255,0.06)' : (isEOI ? '#A855F7' : '#1E5EFF'), color: busy ? '#374151' : 'white', fontSize: 15, fontWeight: 800, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}>
             {busy
               ? <><Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> Please wait…</>
               : isEOI ? '✋ Submit Interest' : '🎟 Confirm Registration'
@@ -218,7 +212,7 @@ function SuccessOverlay({ isEOI, onClose }: { isEOI: boolean; onClose: () => voi
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
       <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '36px 28px', maxWidth: 320, width: '90%', textAlign: 'center', animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
         <div style={{ fontSize: 52, marginBottom: 16 }}>{isEOI ? '✋' : '🎟'}</div>
-        <h3 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: "'Clash Display', sans-serif" }}>
+        <h3 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: "'Syne', sans-serif" }}>
           {isEOI ? 'Interest Submitted!' : 'You\'re Registered!'}
         </h3>
         <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px', lineHeight: 1.5 }}>
@@ -226,7 +220,7 @@ function SuccessOverlay({ isEOI, onClose }: { isEOI: boolean; onClose: () => voi
             ? 'The organizer will review your application and notify you in-app.'
             : 'Head to the Tickets tab to see your QR code.'}
         </p>
-        <button onClick={onClose} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif" }}>
+        <button onClick={onClose} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
           Got it
         </button>
       </div>
@@ -236,9 +230,9 @@ function SuccessOverlay({ isEOI, onClose }: { isEOI: boolean; onClose: () => voi
 
 /* ─── Main ───────────────────────────────────────────────────────── */
 export default function EventDetailClient({
-  event, existingReg, isLoggedIn,
+  event, existingReg, isLoggedIn, userProfile = null,
 }: {
-  event: Event; existingReg: ExistingReg; isLoggedIn: boolean
+  event: Event; existingReg: ExistingReg; isLoggedIn: boolean; userProfile: { full_name: string; email: string } | null
 }) {
   const router = useRouter()
   const [showSheet, setShowSheet] = useState(false)
@@ -250,7 +244,7 @@ export default function EventDetailClient({
   const spotsLeft = event.capacity ? event.capacity - event.registered_count : null
   const isFull = spotsLeft !== null && spotsLeft <= 0
   const isPaid = (event.ticket_price ?? 0) > 0
-  const isEOI = event.registration_mode === 'eoi'
+  const isEOI = event.registration_mode === 'expression_of_interest'
   const isInviteOnly = event.registration_mode === 'invite_only'
   const days = daysUntil(event.date_start)
   const gradient = getGradient(event.id)
@@ -264,7 +258,7 @@ export default function EventDetailClient({
   const ctaLabel = () => {
     if (!isLoggedIn) return { label: 'Sign in to Register', color: '#1E5EFF', disabled: false }
     if (regStatus === 'eoi_submitted') return { label: 'Interest Submitted', color: '#EAB308', disabled: true }
-    if (regStatus === 'eoi_approved') return { label: 'Pay Now →', color: '#EF4444', disabled: false, href: '/guest/events' }
+    if (regStatus === 'eoi_approved') return { label: 'Pay Now →', color: '#EF4444', disabled: false, href: '/guest/tikkit' }
     if (regStatus === 'payment_pending') return { label: 'Payment Verifying…', color: '#818CF8', disabled: true }
     if (regStatus === 'confirmed' || regStatus === 'registered') return { label: 'View Ticket →', color: '#10B981', disabled: false, href: '/guest/tickets' }
     if (regStatus === 'rejected') return { label: 'Not Approved', color: '#4B5563', disabled: true }
@@ -285,7 +279,7 @@ export default function EventDetailClient({
         @keyframes fadeIn   { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
       `}</style>
 
-      <div style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: "'Cabinet Grotesk', sans-serif", paddingBottom: 120 }}>
+      <div style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: "'DM Sans', sans-serif", paddingBottom: 120 }}>
 
         {/* Hero */}
         <div style={{ position: 'relative', height: 280, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : gradient, overflow: 'hidden' }}>
@@ -328,7 +322,7 @@ export default function EventDetailClient({
 
           {/* Title + organiser */}
           <div style={{ marginBottom: 16 }}>
-            <h1 style={{ color: 'white', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.8px', lineHeight: 1.15 }}>
+            <h1 style={{ color: 'white', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: "'Syne', sans-serif", letterSpacing: '-0.8px', lineHeight: 1.15 }}>
               {event.title}
             </h1>
             <p style={{ color: '#4B5563', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>
@@ -347,7 +341,7 @@ export default function EventDetailClient({
                   {item.icon}
                   <span style={{ color: '#374151', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
                 </div>
-                <p style={{ color: item.label === 'Venue' && event.secret_venue ? '#FFC745' : 'white', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: "'Clash Display', sans-serif" }}>
+                <p style={{ color: item.label === 'Venue' && event.secret_venue ? '#FFC745' : 'white', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: "'Syne', sans-serif" }}>
                   {item.label === 'Venue' && event.secret_venue ? <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Lock size={11} />{item.value}</span> : item.value}
                 </p>
                 {item.sub && <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>{item.sub}</p>}
@@ -359,7 +353,7 @@ export default function EventDetailClient({
           {countdown > 0 && (
             <div style={{ background: '#0E1018', border: '1px solid rgba(129,140,248,0.15)', borderRadius: 14, padding: '14px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: '#4B5563', fontSize: 12, fontWeight: 600 }}>Event starts in</span>
-              <span style={{ color: '#818CF8', fontSize: 18, fontWeight: 900, fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.5px' }}>
+              <span style={{ color: '#818CF8', fontSize: 18, fontWeight: 900, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.5px' }}>
                 {fmtCountdown(countdown)}
               </span>
             </div>
@@ -369,7 +363,7 @@ export default function EventDetailClient({
           {isPaid && (
             <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '13px 15px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: '#4B5563', fontSize: 12, fontWeight: 600 }}>Ticket Price</span>
-              <span style={{ color: 'white', fontSize: 20, fontWeight: 900, fontFamily: "'Clash Display', sans-serif" }}>
+              <span style={{ color: 'white', fontSize: 20, fontWeight: 900, fontFamily: "'Syne', sans-serif" }}>
                 PKR {event.ticket_price!.toLocaleString('en-PK')}
               </span>
             </div>
@@ -378,7 +372,7 @@ export default function EventDetailClient({
           {/* Description */}
           {event.description && (
             <div style={{ marginBottom: 20 }}>
-              <h3 style={{ color: 'white', fontSize: 14, fontWeight: 800, margin: '0 0 8px', fontFamily: "'Clash Display', sans-serif" }}>About</h3>
+              <h3 style={{ color: 'white', fontSize: 14, fontWeight: 800, margin: '0 0 8px', fontFamily: "'Syne', sans-serif" }}>About</h3>
               <p style={{ color: '#6B7280', fontSize: 14, lineHeight: 1.7, margin: 0 }}>{event.description}</p>
             </div>
           )}
@@ -409,7 +403,7 @@ export default function EventDetailClient({
             if (!cta.disabled) setShowSheet(true)
           }}
           disabled={cta.disabled}
-          style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? '#374151' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}>
+          style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? '#374151' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: "'Syne', sans-serif", letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}>
           {cta.label}
         </button>
       </div>
@@ -417,7 +411,7 @@ export default function EventDetailClient({
       {/* Register / EOI sheet */}
       {showSheet && (
         <RegisterSheet
-          event={event} isEOI={isEOI}
+          event={event} isEOI={isEOI} userProfile={userProfile}
           onClose={() => setShowSheet(false)}
           onSuccess={status => { setShowSheet(false); setRegStatus(status); setShowSuccess(true) }}
         />

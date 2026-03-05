@@ -71,7 +71,7 @@ function HeroBanner({ event }: { event: Event }) {
   const organiser = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Tikkit'
 
   return (
-    <Link href={`/events/${event.id}`} style={{ textDecoration: 'none', display: 'block', margin: '14px 16px 0' }}>
+    <Link href={`/guest/explore/${event.id}`} style={{ textDecoration: 'none', display: 'block', margin: '14px 16px 0' }}>
       <div style={{
         borderRadius: 20, overflow: 'hidden', position: 'relative', height: 215,
         background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : getGradient(event.id),
@@ -138,14 +138,14 @@ function MyEventsStrip({ myEvents }: { myEvents: MyEvent[] }) {
           <div style={{ width: 3, height: 13, borderRadius: 2, background: '#FF6B35' }} />
           <span style={{ color: 'white', fontSize: 12, fontWeight: 800, fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.3px' }}>MY EVENTS</span>
         </div>
-        <Link href="/guest/events" style={{ color: '#818CF8', fontSize: 10, fontWeight: 800, textDecoration: 'none', letterSpacing: '0.5px' }}>SEE ALL →</Link>
+        <Link href="/guest/tikkit" style={{ color: '#818CF8', fontSize: 10, fontWeight: 800, textDecoration: 'none', letterSpacing: '0.5px' }}>SEE ALL →</Link>
       </div>
       <div style={{ display: 'flex', gap: 9, overflowX: 'auto', padding: '0 16px 2px', scrollbarWidth: 'none' }}>
         {myEvents.map((reg, i) => {
           const ev = reg.event; if (!ev) return null
           const dot = statusDot[reg.status] ?? '#9CA3AF'
           return (
-            <Link key={reg.id} href="/guest/events" style={{ textDecoration: 'none', flexShrink: 0, width: 120, opacity: 0, animation: 'revealUp 0.3s ease forwards', animationDelay: `${i * 50}ms` }}>
+            <Link key={reg.id} href="/guest/tikkit" style={{ textDecoration: 'none', flexShrink: 0, width: 120, opacity: 0, animation: 'revealUp 0.3s ease forwards', animationDelay: `${i * 50}ms` }}>
               <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ height: 64, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : getGradient(ev.id), position: 'relative' }}>
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent)' }} />
@@ -169,7 +169,7 @@ function EventRow({ event, index }: { event: Event; index: number }) {
   const organiser = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Tikkit'
   const spotsLeft = (event.capacity && event.registered_count !== undefined) ? event.capacity - event.registered_count : null
   const modeCfg: Record<string, { label: string; color: string }> = {
-    eoi:         { label: 'APPLY',       color: '#A855F7' },
+    expression_of_interest: { label: 'APPLY',       color: '#A855F7' },
     open:        { label: 'REGISTER',    color: '#1E5EFF' },
     invite_only: { label: 'INVITE ONLY', color: '#4B5563' },
   }
@@ -177,7 +177,7 @@ function EventRow({ event, index }: { event: Event; index: number }) {
   const isFull = spotsLeft !== null && spotsLeft <= 0
 
   return (
-    <Link href={`/events/${event.id}`} style={{ textDecoration: 'none', display: 'block', opacity: 0, animation: 'revealUp 0.35s ease forwards', animationDelay: `${index * 55}ms` }}>
+    <Link href={`/guest/explore/${event.id}`} style={{ textDecoration: 'none', display: 'block', opacity: 0, animation: 'revealUp 0.35s ease forwards', animationDelay: `${index * 55}ms` }}>
       <div style={{ display: 'flex', gap: 11, padding: '11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         {/* Date column */}
         <div style={{ flexShrink: 0, width: 42, textAlign: 'center', paddingTop: 1 }}>

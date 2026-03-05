@@ -15,14 +15,14 @@ const statusBadge: Record<string, string> = {
   completed: 'badge-blue',
 }
 
-export default async function EventDetailPage({ params }: { params: { id: string } }) {
+export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: event } = await supabase
     .from('events')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', (await params).id)
     .eq('organizer_id', user!.id)
     .single()
 

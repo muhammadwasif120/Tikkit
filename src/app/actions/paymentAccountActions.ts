@@ -186,3 +186,37 @@ export async function rejectPaymentSubmission(submissionId: string, registration
     })
   }
 }
+export type PaymentAccount = {
+  id: string
+  organizer_id: string
+  label: string
+  account_type: string
+  bank_name: string
+  account_title: string
+  account_number: string
+  account_name: string
+  is_default: boolean
+  created_at: string
+}
+
+export async function setEventPaymentAccounts(eventId: string, accountIds: string[]) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
+
+  // Delete existing links
+  await supabase
+    .from('event_payment_accounts')
+    .delete()
+    .eq('event_id', eventId)
+
+  // Insert new links
+  if (accountIds.length > 0) {
+    await supabase
+      .from('event_payment_accounts')
+      .insert(accountIds.map(id => ({ event_id: eventId, payment_account_id: id })))
+  }
+
+  const { revalidatePath } = await import('next/cache')
+  revalidatePath(`/dashboard/events/${eventId}`)
+}

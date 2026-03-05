@@ -77,7 +77,7 @@ export async function submitPaymentScreenshot(formData: FormData) {
     })
   }
 
-  revalidatePath('/guest/events')
+  revalidatePath('/guest/tikkit')
   return { success: true }
 }
 
@@ -116,15 +116,13 @@ export async function updateGuestProfile(formData: FormData) {
   const { error } = await supabase
     .from('guest_profiles')
     .upsert({
-      id: user.id,
-      full_name: full_name || null,
-      username: username || null,
-      phone: phone || null,
-      instagram_handle: instagram_handle || null,
-      bio: bio || null,
-      is_discoverable,
-      updated_at: new Date().toISOString(),
-    })
+  id: user.id,
+  username: username || null,
+  instagram_handle: instagram_handle || null,
+  bio: bio || null,
+  is_discoverable,
+  updated_at: new Date().toISOString(),
+  })
 
   if (error) {
     console.error('Profile update error:', error)
@@ -144,4 +142,16 @@ export async function signOut() {
   const supabase = await _createClient()
   await supabase.auth.signOut()
   _redirect('/auth/login')
+}
+// Add this to /src/app/actions/guestProfileActions.ts
+
+export async function sendPasswordReset() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user?.email) return { error: 'No email found' }
+  const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`,
+  })
+  if (error) return { error: error.message }
+  return { success: true }
 }

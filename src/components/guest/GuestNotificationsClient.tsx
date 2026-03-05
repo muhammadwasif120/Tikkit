@@ -35,7 +35,7 @@ function getNotif(reg: Registration): { icon: typeof Bell; color: string; bg: st
     icon: AlertCircle, color: '#FFC745', bg: 'rgba(255,199,69,0.1)',
     title: 'Payment Required',
     body: `You've been approved for "${name}". Complete payment to confirm your spot.`,
-    cta: { label: 'Pay Now', href: `/guest/events` },
+    cta: { label: 'Pay Now', href: `/guest/tikkit` },
   }
 
   if (reg.status === 'approved' && reg.payment_status === 'submitted') return {

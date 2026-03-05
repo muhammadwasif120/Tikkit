@@ -1,0 +1,46 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
+
+export async function POST(req: NextRequest) {
+  try {
+    const { registrationId } = await req.json()
+    if (!registrationId) return NextResponse.json({ error: 'registrationId required' }, { status: 400 })
+
+    const supabase = await createClient()
+
+    const { data: reg } = await supabase
+      .from('public_registrations')
+      .select('email, event:events(id, title)')
+      .eq('id', registrationId)
+      .single()
+
+    const { error } = await supabase
+      .from('public_registrations')
+      .update({ payment_status: 'confirmed', reviewed_at: new Date().toISOString() })
+      .eq('id', registrationId)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    if (reg?.email) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', reg.email)
+        .maybeSingle()
+
+      if (profile?.id) {
+        await supabase.from('notifications').insert({
+          user_id: profile.id,
+          type: 'payment_confirmed',
+          title: 'Payment Confirmed 🎟',
+          body: `Your payment for ${(reg.event as any)?.title} has been confirmed. Your ticket is ready!`,
+          data: { event_id: (reg.event as any)?.id, registration_id: registrationId },
+        } as any)
+      }
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}

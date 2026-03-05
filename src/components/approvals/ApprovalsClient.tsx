@@ -26,17 +26,9 @@ type Registration = {
   id_document_url: string | null
   reference_code_entered: string | null
   notes: string | null
+  payment_screenshot_url: string | null
   created_at: string
   reviewed_at: string | null
-  // payment_submissions joined via token or separate fetch
-  payment_submission?: {
-    id: string
-    screenshot_url: string
-    amount: number | null
-    submitted_at: string
-    status: string
-    notes: string | null
-  } | null
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -80,16 +72,21 @@ function RegistrationModal({
   const [imgZoom, setImgZoom]   = useState<string | null>(null)
 
   const canApprove = reg.status === 'pending' || (reg.status === 'approved' && reg.payment_status === 'submitted')
-  const isPaymentReview = reg.status === 'approved' && reg.payment_status === 'submitted'
+  const isPaymentReview = reg.payment_status === 'submitted'
 
   const handleApprove = async () => {
     setLoading('approve')
     try {
-      if (isPaymentReview && reg.payment_submission?.id) {
-        await approvePaymentSubmission(reg.payment_submission.id, reg.id)
+      if (isPaymentReview) {
+        const res = await fetch('/api/confirm-payment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ registrationId: reg.id }),
+        })
+        if (!res.ok) throw new Error(await res.text())
       } else {
         // EOI approval — no payment needed yet
-        const res = await fetch('/api/approvals/approve', {
+        const res = await fetch('/api/approve-registration', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ registrationId: reg.id }),
@@ -107,10 +104,15 @@ function RegistrationModal({
   const handleReject = async () => {
     setLoading('reject')
     try {
-      if (isPaymentReview && reg.payment_submission?.id) {
-        await rejectPaymentSubmission(reg.payment_submission.id, reg.id, rejectNote)
+      if (isPaymentReview) {
+        const res = await fetch('/api/reject-registration', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ registrationId: reg.id, notes: rejectNote }),
+        })
+        if (!res.ok) throw new Error(await res.text())
       } else {
-        const res = await fetch('/api/approvals/reject', {
+        const res = await fetch('/api/reject-registration', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ registrationId: reg.id, notes: rejectNote }),
@@ -205,23 +207,21 @@ function RegistrationModal({
         )}
 
         {/* Payment screenshot */}
-        {reg.payment_submission && (
+        {reg.payment_screenshot_url && (
           <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,199,69,0.15)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <CreditCard size={13} color="#FFC745" />
               <p style={{ color: '#FFC745', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>Payment Submission</p>
-              {reg.payment_submission.amount && (
-                <span style={{ color: '#E5E7EB', fontSize: 13, marginLeft: 'auto' }}>PKR {reg.payment_submission.amount.toLocaleString()}</span>
-              )}
+
             </div>
             <img
-              src={reg.payment_submission.screenshot_url}
+              src={reg.payment_screenshot_url}
               alt="Payment screenshot"
-              onClick={() => setImgZoom(reg.payment_submission!.screenshot_url)}
+              onClick={() => setImgZoom(reg.payment_screenshot_url!)}
               style={{ width: '100%', maxHeight: 240, objectFit: 'cover', borderRadius: 8, cursor: 'zoom-in', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 8 }}
             />
             <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>
-              Submitted {fmtDate(reg.payment_submission.submitted_at)} at {fmtTime(reg.payment_submission.submitted_at)}
+              Submitted — tap to zoom
             </p>
           </div>
         )}
@@ -342,6 +342,7 @@ export default function ApprovalsClient({
   const [selected, setSelected]           = useState<Registration | null>(null)
   const [filter, setFilter]               = useState<Filter>('All')
   const [search, setSearch]               = useState('')
+  const [eventFilter, setEventFilter]       = useState<string>('all')
 
   const eventMap = useMemo(() => {
     const m: Record<string, Event> = {}
@@ -367,6 +368,7 @@ export default function ApprovalsClient({
         if (filter === 'Declined')       return r.status === 'rejected'
         return true
       })
+      .filter(r => eventFilter === 'all' || r.event_id === eventFilter)
       .filter(r => {
         if (!search) return true
         const s = search.toLowerCase()
@@ -379,7 +381,7 @@ export default function ApprovalsClient({
           (r.status === 'approved' && r.payment_status === 'submitted') ? 1 : 0
         return priority(b) - priority(a) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       })
-  }, [registrations, filter, search])
+  }, [registrations, filter, search, eventFilter])
 
   const refresh = async () => {
     // Re-fetch by reloading the page data — simplest approach
@@ -403,6 +405,24 @@ export default function ApprovalsClient({
         </div>
         <p style={{ color: '#4B5563', fontSize: 14, margin: 0 }}>Review applications and payment submissions</p>
       </div>
+
+      {/* Event filter dropdown */}
+      {events.length > 1 && (
+        <div style={{ padding: '0 24px', marginBottom: 12 }}>
+          <select
+            value={eventFilter}
+            onChange={e => setEventFilter(e.target.value)}
+            style={{ width: '100%', background: '#1A1D2E', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '10px 14px', color: eventFilter === 'all' ? '#6B7280' : 'white', fontSize: 13, fontFamily: "'Cabinet Grotesk', sans-serif", outline: 'none', cursor: 'pointer' }}
+          >
+            <option value="all">All Events ({registrations.length})</option>
+            {events.map(e => (
+              <option key={e.id} value={e.id}>
+                {e.title} ({registrations.filter(r => r.event_id === e.id).length})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Search */}
       <div style={{ padding: '0 24px', marginBottom: 16 }}>
