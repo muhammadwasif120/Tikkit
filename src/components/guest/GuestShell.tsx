@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Compass, Ticket, User, Bell } from 'lucide-react'
+import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
 const tabs = [
   { href: '/guest/explore', label: 'Explore',   icon: Compass },
@@ -35,18 +36,7 @@ export default function GuestShell({
         style={{ padding: '14px 20px 12px' }}
       >
         {/* Wordmark */}
-        <span
-          className="text-[20px] font-black tracking-tight"
-          style={{
-            fontFamily: 'var(--font-display)',
-            background: 'linear-gradient(135deg, #fff 0%, #1E5EFF 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            letterSpacing: '-0.5px',
-          }}
-        >
-          tikkit
-        </span>
+        <TikkitXLogo size="md" variant="text-only" />
 
         {/* Notification bell */}
         <Link

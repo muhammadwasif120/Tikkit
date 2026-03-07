@@ -7,6 +7,7 @@ import {
   Building2, CheckCircle, ArrowRight, Zap, Shield,
   Bell, ClipboardCheck, Menu, X, MapPin, Calendar,
 } from 'lucide-react'
+import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
 // ─── Hooks ──────────────────────────────────────────────────────────────────
 
@@ -767,8 +768,7 @@ export default function LandingPage() {
       {/* ── Nav ── */}
       <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
         <Link href="/" className="nav-logo">
-          <div className="nav-logo-icon"><Ticket size={17} color="white" /></div>
-          <span className="nav-logo-text">Tikkit</span>
+          <TikkitXLogo size="md" />
         </Link>
         <div className="nav-links">
           <a href="#features" className="nav-link">Features</a>
@@ -788,8 +788,7 @@ export default function LandingPage() {
       <div className={`mmenu ${menuOpen ? 'open' : ''}`} role="dialog" aria-modal="true">
         <div className="mmenu-header">
           <div className="nav-logo">
-            <div className="nav-logo-icon"><Ticket size={17} color="white" /></div>
-            <span className="nav-logo-text">Tikkit</span>
+            <TikkitXLogo size="md" />
           </div>
           <button style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}
             onClick={() => setMenuOpen(false)} aria-label="Close menu">

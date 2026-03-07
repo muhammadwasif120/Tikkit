@@ -8,6 +8,7 @@ import {
   Zap, Shield, Bell, Search, Star, Clock, ChevronRight,
   ScanLine, TrendingUp, UserCheck, Package, X,
 } from 'lucide-react'
+import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
 // ─── Scroll hook ─────────────────────────────────────────────────────────────
 
@@ -800,11 +801,8 @@ export default function HowItWorksPage() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         transition: 'background 0.3s ease, border-color 0.3s ease',
       }}>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
-          <div style={{ width: 30, height: 30, borderRadius: 8, background: 'linear-gradient(135deg,#2B6FFF,#1448CC)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 14px rgba(30,94,255,0.35)' }}>
-            <Ticket size={14} color="white" />
-          </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 800, color: '#F0F2FF' }}>Tikkit</span>
+        <Link href="/" style={{ display: 'flex', textDecoration: 'none' }}>
+          <TikkitXLogo size="sm" />
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#6B7280', textDecoration: 'none', fontFamily: 'var(--font-body)' }}>

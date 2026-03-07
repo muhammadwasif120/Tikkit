@@ -6,6 +6,7 @@ import {
   LayoutDashboard, CalendarDays, Users, ScanLine,
   Building2, BarChart3, Settings, LogOut, Ticket, ClipboardCheck, X,
 } from 'lucide-react'
+import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import type { Database } from '@/lib/supabase/database.types'
@@ -54,19 +55,7 @@ export default function Sidebar({ profile, open, onClose }: Props) {
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-5 border-b border-white/[0.04] shrink-0">
         <div className="flex items-center gap-2.5">
-          <div style={{
-            width: 32, height: 32,
-            background: 'linear-gradient(135deg, #2B6FFF, #1448CC)',
-            borderRadius: 10,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 18px rgba(30,94,255,.35), inset 0 1px 0 rgba(255,255,255,.15)',
-            flexShrink: 0,
-          }}>
-            <Ticket size={16} color="white" strokeWidth={2.5} />
-          </div>
-          <span style={{ color: '#F0F2FF', fontSize: 20, fontWeight: 700, letterSpacing: '-0.75px', fontFamily: 'var(--font-display)' }}>
-            Tikkit
-          </span>
+          <TikkitXLogo size="md" />
         </div>
         {/* Close button — mobile only */}
         <button

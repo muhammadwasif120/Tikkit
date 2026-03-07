@@ -7,6 +7,7 @@ import {
   Ticket, Mail, Lock, Eye, EyeOff, User,
   ArrowRight, AlertCircle, Sparkles, ChevronLeft,
 } from 'lucide-react'
+import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
 type Mode    = null | 'organizer' | 'attendee'
 type SubMode = 'login' | 'signup'
@@ -523,22 +524,8 @@ export default function AuthPage() {
 
           {/* Logo */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
-            <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-              <div style={{
-                width: 48, height: 48,
-                background: 'linear-gradient(135deg, #2B6FFF, #1448CC)',
-                borderRadius: 14,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 0 32px rgba(30,94,255,.5), inset 0 1px 0 rgba(255,255,255,.15)',
-              }}>
-                <Ticket size={22} color="white" strokeWidth={2.5} />
-              </div>
-              <span style={{
-                color: '#F0F2FF', fontSize: 28, fontWeight: 700,
-                letterSpacing: '-1px', fontFamily: 'var(--font-display)',
-              }}>
-                Tikkit
-              </span>
+            <a href="/" style={{ display: 'inline-flex', textDecoration: 'none' }}>
+              <TikkitXLogo size="lg" />
             </a>
           </div>
 

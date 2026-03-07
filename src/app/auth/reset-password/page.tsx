@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Ticket, Eye, EyeOff, Lock, Check, AlertCircle, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
+import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
 function ResetPasswordForm() {
   const router   = useRouter()
@@ -133,19 +134,8 @@ function ResetPasswordForm() {
 
           {/* Logo */}
           <div style={{ textAlign: 'center', marginBottom: 36 }}>
-            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-              <div style={{
-                width: 44, height: 44,
-                background: 'linear-gradient(135deg, #2B6FFF, #1448CC)',
-                borderRadius: 13,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 0 28px rgba(30,94,255,.45), inset 0 1px 0 rgba(255,255,255,.15)',
-              }}>
-                <Ticket size={20} color="white" strokeWidth={2.5} />
-              </div>
-              <span style={{ color: '#F0F2FF', fontSize: 26, fontWeight: 700, letterSpacing: '-1px', fontFamily: 'var(--font-display)' }}>
-                Tikkit
-              </span>
+            <Link href="/" style={{ display: 'inline-flex', textDecoration: 'none' }}>
+              <TikkitXLogo size="lg" />
             </Link>
           </div>
 
