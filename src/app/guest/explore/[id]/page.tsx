@@ -1,9 +1,10 @@
+import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import EventDetailClient from '@/components/guest/EventDetailClient'
+import SkeletonEventDetail from '@/components/guest/SkeletonEventDetail'
 
-export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+async function EventData({ id }: { id: string }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -77,5 +78,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
       isLoggedIn={!!user}
       userProfile={userProfile}
     />
+  )
+}
+
+export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
+  return (
+    <Suspense fallback={<SkeletonEventDetail />}>
+      <EventData id={id} />
+    </Suspense>
   )
 }

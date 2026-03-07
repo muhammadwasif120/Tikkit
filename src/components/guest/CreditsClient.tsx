@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Zap, TrendingUp, TrendingDown, Award, Shield, ChevronRight, Info } from 'lucide-react'
+import { Zap, TrendingUp, TrendingDown, Award, Shield, ChevronRight, Info, Star, Flame, Gem } from 'lucide-react'
 
 /* ─── Types ──────────────────────────────────────────── */
 type Transaction = {
@@ -15,7 +15,6 @@ type Transaction = {
 
 type TierInfo = {
   name: string
-  emoji: string
   color: string
   minScore: number
   maxScore: number | null
@@ -24,12 +23,23 @@ type TierInfo = {
 
 /* ─── Tier config ────────────────────────────────────── */
 const TIERS: TierInfo[] = [
-  { name: 'Scout',    emoji: '🌱', color: '#9CA3AF', minScore: 0,    maxScore: 99,   perks: ['Basic access to public events', 'Collect attendance passes'] },
-  { name: 'Regular',  emoji: '⭐', color: '#60A5FA', minScore: 100,  maxScore: 299,  perks: ['Priority waitlist placement', 'Early event notifications'] },
-  { name: 'Insider',  emoji: '🔥', color: '#F97316', minScore: 300,  maxScore: 599,  perks: ['Early access to private events', 'Exclusive Insider badge'] },
-  { name: 'Elite',    emoji: '💎', color: '#A855F7', minScore: 600,  maxScore: 999,  perks: ['Direct invites from organizers', 'VIP pass eligibility'] },
-  { name: 'Legend',   emoji: '⚡', color: '#EAB308', minScore: 1000, maxScore: null, perks: ['Auto-approved for all events', 'Lifetime platinum status'] },
+  { name: 'Scout',    color: '#9CA3AF', minScore: 0,    maxScore: 99,   perks: ['Basic access to public events', 'Collect attendance passes'] },
+  { name: 'Regular',  color: '#60A5FA', minScore: 100,  maxScore: 299,  perks: ['Priority waitlist placement', 'Early event notifications'] },
+  { name: 'Insider',  color: '#F97316', minScore: 300,  maxScore: 599,  perks: ['Early access to private events', 'Exclusive Insider badge'] },
+  { name: 'Elite',    color: '#A855F7', minScore: 600,  maxScore: 999,  perks: ['Direct invites from organizers', 'VIP pass eligibility'] },
+  { name: 'Legend',   color: '#EAB308', minScore: 1000, maxScore: null, perks: ['Auto-approved for all events', 'Lifetime platinum status'] },
 ]
+
+function getTierIcon(name: string, size: number, color: string): React.ReactNode {
+  const map: Record<string, React.ReactNode> = {
+    Scout:   <Award size={size} color={color} style={{ opacity: 0.5 }} />,
+    Regular: <Star  size={size} color={color} />,
+    Insider: <Flame size={size} color={color} />,
+    Elite:   <Gem   size={size} color={color} />,
+    Legend:  <Zap   size={size} color={color} />,
+  }
+  return map[name] ?? <Award size={size} color={color} />
+}
 
 function getTier(score: number): TierInfo {
   return [...TIERS].reverse().find(t => score >= t.minScore) ?? TIERS[0]
@@ -84,7 +94,7 @@ function TxRow({ tx }: { tx: Transaction }) {
         <p style={{
           color: isPositive ? '#10B981' : '#EF4444',
           fontSize: 14, fontWeight: 800, margin: '0 0 2px',
-          fontFamily: "'Clash Display', sans-serif",
+          fontFamily: 'var(--font-display)',
         }}>
           {isPositive ? '+' : ''}{tx.amount}
         </p>
@@ -126,15 +136,17 @@ export default function CreditsClient({
             </p>
             <p style={{
               color: 'white', fontSize: 48, fontWeight: 900,
-              fontFamily: "'Clash Display', sans-serif",
+              fontFamily: 'var(--font-display)',
               margin: 0, letterSpacing: '-2px', lineHeight: 1,
             }}>
               {score.toLocaleString()}
             </p>
           </div>
-          <div style={{ textAlign: 'right' }}>
-            <span style={{ fontSize: 32 }}>{tier.emoji}</span>
-            <p style={{ color: tier.color, fontSize: 13, fontWeight: 800, margin: '4px 0 0', letterSpacing: '-0.2px' }}>
+          <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 14, background: `${tier.color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {getTierIcon(tier.name, 22, tier.color)}
+            </div>
+            <p style={{ color: tier.color, fontSize: 13, fontWeight: 800, margin: 0, letterSpacing: '-0.2px' }}>
               {tier.name}
             </p>
           </div>
@@ -146,7 +158,7 @@ export default function CreditsClient({
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ color: '#6B7280', fontSize: 11 }}>{score} pts</span>
               <span style={{ color: '#6B7280', fontSize: 11 }}>
-                {nextTier.minScore - score} to {nextTier.emoji} {nextTier.name}
+                {nextTier.minScore - score} pts to {nextTier.name}
               </span>
             </div>
             <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
@@ -164,7 +176,7 @@ export default function CreditsClient({
             padding: '8px 12px', borderRadius: 10,
             background: `${tier.color}15`,
           }}>
-            <span style={{ fontSize: 14 }}>⚡</span>
+            {getTierIcon(tier.name, 14, tier.color)}
             <span style={{ color: tier.color, fontSize: 12, fontWeight: 700 }}>Maximum tier reached!</span>
           </div>
         )}
@@ -217,7 +229,9 @@ export default function CreditsClient({
                 borderBottom: '1px solid rgba(255,255,255,0.04)',
                 opacity: locked ? 0.4 : 1,
               }}>
-                <span style={{ fontSize: 20, width: 28, textAlign: 'center' }}>{t.emoji}</span>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: `${t.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {getTierIcon(t.name, 13, t.color)}
+                </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                     <span style={{ color: active ? t.color : 'white', fontSize: 13, fontWeight: 700 }}>{t.name}</span>

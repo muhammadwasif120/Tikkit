@@ -5,11 +5,10 @@ import Link from 'next/link'
 import {
   Ticket, QrCode, Users, CreditCard, BarChart3,
   Building2, CheckCircle, ArrowRight, Zap, Shield,
-  Star, ChevronDown, ScanLine, Bell, ClipboardCheck,
-  Menu, X,
+  Bell, ClipboardCheck, Menu, X, MapPin, Calendar,
 } from 'lucide-react'
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
+// ─── Hooks ──────────────────────────────────────────────────────────────────
 
 function useInView(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null)
@@ -24,86 +23,96 @@ function useInView(threshold = 0.15) {
   return { ref, inView }
 }
 
+function useCountUp(target: number, inView: boolean, duration = 1400) {
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    if (!inView) return
+    const start = performance.now()
+    const tick = (now: number) => {
+      const p = Math.min((now - start) / duration, 1)
+      const eased = 1 - Math.pow(1 - p, 3)
+      setCount(Math.round(eased * target))
+      if (p < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }, [inView, target, duration])
+  return count
+}
+
 // ─── Data ───────────────────────────────────────────────────────────────────
 
 const features = [
-  {
-    icon: Users,
-    color: '#1E5EFF',
-    glow: 'rgba(30,94,255,0.3)',
-    title: 'Guest List Management',
-    desc: 'Add guests manually or let them self-register. Track RSVPs, gender ratios, waitlists and approvals — all in one place.',
-  },
-  {
-    icon: QrCode,
-    color: '#A855F7',
-    glow: 'rgba(168,85,247,0.3)',
-    title: 'QR Check-In',
-    desc: 'Every guest gets a unique QR code. Scan at the door for instant entry — no paper lists, no confusion, no drama.',
-  },
-  {
-    icon: CreditCard,
-    color: '#22C55E',
-    glow: 'rgba(34,197,94,0.3)',
-    title: 'Upfront Payment Collection',
-    desc: 'Collect ticket payments via JazzCash, EasyPaisa, or bank transfer before the event. Screenshot verification with one-tap approval.',
-  },
-  {
-    icon: ClipboardCheck,
-    color: '#F59E0B',
-    glow: 'rgba(245,158,11,0.3)',
-    title: 'Smart Approvals',
-    desc: 'Run expression-of-interest events — guests request a spot, you approve or decline. Full control over who walks through the door.',
-  },
-  {
-    icon: Building2,
-    color: '#EC4899',
-    glow: 'rgba(236,72,153,0.3)',
-    title: 'Vendor Payments',
-    desc: 'Track every vendor, invoice, and payment in one dashboard. Know exactly where your event budget is going, always.',
-  },
-  {
-    icon: Bell,
-    color: '#06B6D4',
-    glow: 'rgba(6,182,212,0.3)',
-    title: 'Realtime Notifications',
-    desc: 'Get notified the moment a guest signs up, checks in, or cancels. Stay on top of your event without refreshing a page.',
-  },
-  {
-    icon: Shield,
-    color: '#8B5CF6',
-    glow: 'rgba(139,92,246,0.3)',
-    title: 'Team Access Control',
-    desc: 'Invite staff with a shareable link. They get scanner access only — your data stays yours. Organizer links give full dashboard access.',
-  },
-  {
-    icon: BarChart3,
-    color: '#F97316',
-    glow: 'rgba(249,115,22,0.3)',
-    title: 'Analytics & Insights',
-    desc: 'Attendance rates, revenue breakdown, check-in timelines. Every number you need to run a better event next time.',
-  },
+  { icon: Users,         color: '#1E5EFF', glow: 'rgba(30,94,255,0.3)',   title: 'Guest Lists',           desc: 'Add guests manually or let them self-register. RSVPs, gender ratios, waitlists — all in one place.' },
+  { icon: QrCode,        color: '#A855F7', glow: 'rgba(168,85,247,0.3)',  title: 'QR Check-In',           desc: 'Every guest gets a unique QR code. Scan at the door — no paper lists, no confusion, no drama.' },
+  { icon: CreditCard,    color: '#22C55E', glow: 'rgba(34,197,94,0.3)',   title: 'Upfront Payments',      desc: 'Collect via JazzCash, EasyPaisa, or bank transfer. Screenshot verification with one-tap approval.' },
+  { icon: ClipboardCheck,color: '#F59E0B', glow: 'rgba(245,158,11,0.3)', title: 'Smart Approvals',       desc: 'Run expression-of-interest events. Guests apply, you decide who walks in. Full control, always.' },
+  { icon: Building2,     color: '#EC4899', glow: 'rgba(236,72,153,0.3)', title: 'Vendor Tracking',       desc: 'Every vendor, invoice, and payment in one dashboard. Know exactly where your budget is going.' },
+  { icon: Bell,          color: '#06B6D4', glow: 'rgba(6,182,212,0.3)',   title: 'Real-Time Alerts',      desc: 'Notified the moment a guest registers, checks in, or cancels. Stay across your event effortlessly.' },
+  { icon: Shield,        color: '#8B5CF6', glow: 'rgba(139,92,246,0.3)', title: 'Team Access',           desc: 'Invite staff via shareable link. Scanner-only access — your data and settings stay locked.' },
+  { icon: BarChart3,     color: '#F97316', glow: 'rgba(249,115,22,0.3)', title: 'Event Analytics',       desc: 'Attendance rates, revenue breakdown, check-in timelines. Every number to run a better next event.' },
 ]
 
 const eventTypes = [
-  { label: 'Private Parties', emoji: '🎉' },
-  { label: 'Corporate Events', emoji: '🏢' },
-  { label: 'Concerts', emoji: '🎵' },
-  { label: 'Weddings', emoji: '💍' },
-  { label: 'Brand Activations', emoji: '⚡' },
-  { label: 'Rooftop Nights', emoji: '🌙' },
-  { label: 'Art Shows', emoji: '🎨' },
-  { label: 'Networking Events', emoji: '🤝' },
+  'Private Parties', 'Corporate Events', 'Concerts', 'Weddings',
+  'Brand Activations', 'Rooftop Nights', 'Art Shows', 'Networking Events',
+  'Product Launches', 'Sports Nights', 'Fashion Shows', 'Pop-Up Markets',
 ]
 
 const steps = [
-  { n: '01', title: 'Create your event', desc: 'Set the date, venue, capacity, ticket price, and registration mode. Takes 2 minutes.' },
-  { n: '02', title: 'Share the link', desc: 'One link for guests to register. Collect payments upfront or approve applications manually.' },
-  { n: '03', title: 'Scan at the door', desc: 'Your team scans QR codes on their phones. Real-time check-in, zero chaos.' },
-  { n: '04', title: 'Review & repeat', desc: 'See who came, what you earned, how it went. Then do it better next time.' },
+  { n: '01', title: 'Create your event', desc: 'Set the date, venue, capacity, ticket price, and registration mode. Two minutes, done.' },
+  { n: '02', title: 'Share the link',    desc: 'One link for guests. Collect payments upfront or approve applications yourself.' },
+  { n: '03', title: 'Scan at the door',  desc: 'Your team scans QR codes on their phones. Real-time check-in, zero chaos at the door.' },
+  { n: '04', title: 'Review and repeat', desc: 'See who came, what you earned, how it went. Use the data to do it better next time.' },
 ]
 
-// ─── Components ─────────────────────────────────────────────────────────────
+const heroCards = [
+  { name: 'Rooftop Night Karachi', date: 'Sat 22 Mar', location: 'DHA Phase 5', count: 84,  color: '#1E5EFF', status: 'Live'   },
+  { name: 'Brand Launch — Lahore',  date: 'Fri 28 Mar', location: 'Gulberg III',  count: 127, color: '#22C55E', status: 'Open'   },
+]
+
+const whyList = [
+  'JazzCash & EasyPaisa built right in',
+  'Designed for private, boutique events',
+  'Works on every phone — no app download',
+  'Staff access via shareable links, no accounts',
+  'Built by people who throw events in Pakistan',
+]
+
+// ─── Sub-components ──────────────────────────────────────────────────────────
+
+function FloatingCard({
+  card, wrapClass, innerClass,
+}: { card: typeof heroCards[0]; wrapClass: string; innerClass: string }) {
+  return (
+    <div className={wrapClass}>
+      <div className={innerClass}>
+        <div className="fcard">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: card.color, boxShadow: `0 0 10px ${card.color}`, flexShrink: 0 }} />
+            <span style={{ fontSize: 11, fontWeight: 700, color: card.color, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>{card.status}</span>
+          </div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, color: '#F0F2FF', marginBottom: 6, lineHeight: 1.25 }}>{card.name}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#6B7280', marginBottom: 14 }}>
+            <Calendar size={11} /><span>{card.date}</span>
+            <span style={{ opacity: 0.4 }}>·</span>
+            <MapPin size={11} /><span>{card.location}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ display: 'flex' }}>
+                {[0, 1, 2, 3].map(i => (
+                  <div key={i} style={{ width: 22, height: 22, borderRadius: '50%', background: `hsl(${200 + i * 40},60%,55%)`, border: '2px solid #13151E', marginLeft: i > 0 ? -7 : 0 }} />
+                ))}
+              </div>
+              <span style={{ fontSize: 12, color: '#9CA3AF' }}>{card.count} going</span>
+            </div>
+            <QrCode size={18} color="rgba(255,255,255,0.18)" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function FeatureCard({ feature, index }: { feature: typeof features[0]; index: number }) {
   const { ref, inView } = useInView()
@@ -111,18 +120,20 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
   return (
     <div
       ref={ref}
-      className="feature-card"
+      className="feat-card"
       style={{
+        '--glow': feature.glow,
+        '--color': feature.color,
         opacity: inView ? 1 : 0,
-        transform: inView ? 'translateY(0)' : 'translateY(32px)',
-        transition: `opacity 0.6s ease ${index * 0.08}s, transform 0.6s ease ${index * 0.08}s`,
-      }}
+        transform: inView ? 'translateY(0) scale(1)' : 'translateY(28px) scale(0.97)',
+        transition: `opacity 0.55s ease ${index * 0.06}s, transform 0.55s ease ${index * 0.06}s`,
+      } as React.CSSProperties}
     >
-      <div className="feature-icon" style={{ background: `${feature.glow}`, boxShadow: `0 0 20px ${feature.glow}` }}>
-        <Icon className="w-5 h-5" style={{ color: feature.color }} />
+      <div className="feat-icon">
+        <Icon size={20} color={feature.color} />
       </div>
-      <h3 className="feature-title">{feature.title}</h3>
-      <p className="feature-desc">{feature.desc}</p>
+      <h3 className="feat-title">{feature.title}</h3>
+      <p className="feat-desc">{feature.desc}</p>
     </div>
   )
 }
@@ -136,526 +147,692 @@ function StepCard({ step, index }: { step: typeof steps[0]; index: number }) {
       style={{
         opacity: inView ? 1 : 0,
         transform: inView ? 'translateY(0)' : 'translateY(24px)',
-        transition: `opacity 0.5s ease ${index * 0.12}s, transform 0.5s ease ${index * 0.12}s`,
+        transition: `opacity 0.55s ease ${index * 0.1}s, transform 0.55s ease ${index * 0.1}s`,
       }}
     >
-      <span className="step-number">{step.n}</span>
+      <span className="step-num">{step.n}</span>
       <h3 className="step-title">{step.title}</h3>
       <p className="step-desc">{step.desc}</p>
     </div>
   )
 }
 
-// ─── Main ───────────────────────────────────────────────────────────────────
+function StatItem({ target, unit, label, prefix = '' }: { target: number; unit: string; label: string; prefix?: string }) {
+  const { ref, inView } = useInView(0.3)
+  const count = useCountUp(target, inView)
+  return (
+    <div ref={ref} className="stat-item">
+      <div className="stat-val">
+        {prefix && <span style={{ fontSize: '0.6em', marginRight: 2 }}>{prefix}</span>}
+        {count}
+        <span className="stat-unit">{unit}</span>
+      </div>
+      <p className="stat-label">{label}</p>
+    </div>
+  )
+}
+
+// ─── Main page ───────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
+    const fn = () => setScrolled(window.scrollY > 40)
+    window.addEventListener('scroll', fn, { passive: true })
+    return () => window.removeEventListener('scroll', fn)
   }, [])
 
   return (
     <>
       <style>{`
-        :root {
-          --blue: #1E5EFF;
-          --blue-dim: rgba(30,94,255,0.15);
-          --blue-glow: rgba(30,94,255,0.4);
-          --bg: #0A0C12;
-          --surface: #0F1117;
-          --card: #13151E;
-          --border: rgba(255,255,255,0.07);
-          --text: #F0F2FF;
-          --muted: #6B7280;
-          --subtle: #374151;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+        /* ── Reset & tokens ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
 
         body {
-          background: var(--bg);
-          color: var(--text);
-          font-family: 'Inter', -apple-system, sans-serif;
+          background: #080A10;
+          color: #F0F2FF;
+          font-family: var(--font-body);
           -webkit-font-smoothing: antialiased;
+          overflow-x: hidden;
+        }
+
+        :root {
+          --blue:      #1E5EFF;
+          --blue-dim:  rgba(30,94,255,0.12);
+          --blue-glow: rgba(30,94,255,0.45);
+          --gold:      #FFC745;
+          --gold-dim:  rgba(255,199,69,0.12);
+          --bg:        #080A10;
+          --surface:   #0C0E16;
+          --card:      #0F1119;
+          --border:    rgba(255,255,255,0.07);
+          --text:      #F0F2FF;
+          --muted:     #6B7280;
+          --subtle:    #374151;
+        }
+
+        /* ── Keyframes ── */
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(22px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes ticker {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+        @keyframes pulseDot {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50%      { opacity: 0.45; transform: scale(0.75); }
+        }
+        @keyframes scrollLine {
+          0%, 100% { transform: scaleY(0.3) translateY(-12px); opacity: 0.25; }
+          50%      { transform: scaleY(1)   translateY(0);     opacity: 1;    }
+        }
+        /* Floating cards */
+        @keyframes fcardFade  { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes float1 {
+          0%,100% { transform: translateY(0px); }
+          33%     { transform: translateY(-18px); }
+          66%     { transform: translateY(-8px); }
+        }
+        @keyframes float2 {
+          0%,100% { transform: translateY(-10px); }
+          40%     { transform: translateY(10px); }
+          70%     { transform: translateY(-20px); }
+        }
+        /* Gradient orbs */
+        @keyframes orbDrift {
+          0%,100% { transform: translate(0,0)       scale(1);    opacity: 0.18; }
+          33%     { transform: translate(50px,-40px) scale(1.12); opacity: 0.25; }
+          66%     { transform: translate(-30px,30px) scale(0.9);  opacity: 0.14; }
+        }
+        @keyframes orbDrift2 {
+          0%,100% { transform: translate(0,0)        scale(1);    opacity: 0.1; }
+          50%     { transform: translate(-60px,40px)  scale(1.15); opacity: 0.18; }
+        }
+        /* Scan line on QR feature */
+        @keyframes scanLine {
+          0%,100% { transform: translateY(0);    opacity: 0.55; }
+          50%     { transform: translateY(44px); opacity: 0.85; }
+        }
+        /* Gold shimmer on badge */
+        @keyframes goldSweep {
+          0%   { transform: translateX(-100%) skewX(-15deg); }
+          100% { transform: translateX(300%)  skewX(-15deg); }
+        }
+        /* CTA background shift */
+        @keyframes ctaBg {
+          0%,100% { background-position: 0% 50%; }
+          50%     { background-position: 100% 50%; }
+        }
+        /* Blob morph */
+        @keyframes blobMorph {
+          0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+          25%     { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+          50%     { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
+          75%     { border-radius: 60% 30% 60% 40% / 70% 40% 50% 60%; }
+        }
+
+        /* Respect reduced-motion */
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
         }
 
         /* ── Nav ── */
         .nav {
           position: fixed; top: 0; left: 0; right: 0; z-index: 100;
           display: flex; align-items: center; justify-content: space-between;
-          padding: 0 24px; height: 64px;
+          padding: 0 28px; height: 64px;
           transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
         }
         .nav.scrolled {
-          background: rgba(10,12,18,0.85);
-          backdrop-filter: blur(20px);
+          background: rgba(8,10,16,0.88);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
           border-bottom: 1px solid var(--border);
         }
         .nav-logo {
-          display: flex; align-items: center; gap: 10px; text-decoration: none;
+          display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer;
         }
         .nav-logo-icon {
-          width: 32px; height: 32px; background: var(--blue); border-radius: 8px;
+          width: 34px; height: 34px;
+          background: linear-gradient(135deg, #2B6FFF, #1448CC);
+          border-radius: 9px;
           display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 0 20px rgba(30,94,255,0.4);
         }
         .nav-logo-text {
-          font-size: 20px; font-weight: 800; color: var(--text);
-          font-family: 'Poppins', sans-serif; letter-spacing: -0.5px;
+          font-family: var(--font-display);
+          font-size: 21px; font-weight: 700; color: var(--text);
+          letter-spacing: -0.5px;
         }
-        .nav-links { display: flex; align-items: center; gap: 32px; }
+        .nav-links { display: flex; align-items: center; gap: 36px; }
         .nav-link {
           font-size: 14px; color: var(--muted); text-decoration: none;
-          transition: color 0.2s; font-weight: 500;
+          font-weight: 500; transition: color 0.2s; cursor: pointer;
         }
         .nav-link:hover { color: var(--text); }
-        .nav-actions { display: flex; align-items: center; gap: 10px; }
+        .nav-actions { display: flex; align-items: center; gap: 8px; }
         .btn-ghost {
           padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600;
-          color: var(--muted); text-decoration: none; transition: color 0.2s;
+          color: var(--muted); text-decoration: none; transition: color 0.2s; cursor: pointer;
         }
         .btn-ghost:hover { color: var(--text); }
-        .btn-primary {
-          padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 600;
+        .btn-nav {
+          padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 700;
           background: var(--blue); color: white; text-decoration: none;
-          transition: opacity 0.2s, transform 0.2s;
-          display: inline-flex; align-items: center; gap: 6px;
+          transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
+          display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+          box-shadow: 0 0 24px rgba(30,94,255,0.35);
         }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-primary-lg {
-          padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 700;
-          background: var(--blue); color: white; text-decoration: none;
-          transition: opacity 0.2s, transform 0.2s, box-shadow 0.2s;
-          display: inline-flex; align-items: center; gap: 8px;
-          box-shadow: 0 0 40px var(--blue-glow);
-        }
-        .btn-primary-lg:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 0 60px var(--blue-glow); }
-        .btn-outline-lg {
-          padding: 14px 28px; border-radius: 10px; font-size: 15px; font-weight: 600;
-          border: 1px solid var(--border); color: var(--muted); text-decoration: none;
-          transition: border-color 0.2s, color 0.2s;
-          display: inline-flex; align-items: center; gap: 8px;
-        }
-        .btn-outline-lg:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+        .btn-nav:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 0 36px rgba(30,94,255,0.5); }
         .nav-hamburger {
-          display: none; background: none; border: none; color: var(--muted);
-          cursor: pointer; padding: 4px;
+          display: none; background: none; border: none; color: var(--muted); cursor: pointer; padding: 4px;
         }
 
         /* ── Hero ── */
         .hero {
-          min-height: 100vh; display: flex; flex-direction: column;
-          align-items: center; justify-content: center;
+          min-height: 100vh;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
           padding: 120px 24px 80px; text-align: center; position: relative; overflow: hidden;
         }
-        .hero-bg {
-          position: absolute; inset: 0; pointer-events: none; overflow: hidden;
-        }
-        .hero-glow-1 {
-          position: absolute; top: -20%; left: 50%; transform: translateX(-50%);
-          width: 800px; height: 600px;
-          background: radial-gradient(ellipse, rgba(30,94,255,0.18) 0%, transparent 70%);
-        }
-        .hero-glow-2 {
-          position: absolute; top: 30%; left: 10%;
-          width: 400px; height: 400px;
-          background: radial-gradient(ellipse, rgba(168,85,247,0.08) 0%, transparent 70%);
-        }
-        .hero-glow-3 {
-          position: absolute; top: 20%; right: 5%;
-          width: 400px; height: 400px;
-          background: radial-gradient(ellipse, rgba(34,197,94,0.06) 0%, transparent 70%);
-        }
-        /* Animated grid */
+        /* Background layers */
         .hero-grid {
-          position: absolute; inset: 0;
+          position: absolute; inset: 0; pointer-events: none;
           background-image:
-            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-          background-size: 60px 60px;
-          mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 100%);
+            linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.022) 1px, transparent 1px);
+          background-size: 64px 64px;
+          mask-image: radial-gradient(ellipse 85% 65% at 50% 20%, black 0%, transparent 100%);
+          -webkit-mask-image: radial-gradient(ellipse 85% 65% at 50% 20%, black 0%, transparent 100%);
         }
+        .hero-orb-1 {
+          position: absolute; top: -15%; left: 50%; transform: translateX(-50%);
+          width: 900px; height: 700px; pointer-events: none;
+          background: radial-gradient(ellipse, rgba(30,94,255,0.2) 0%, transparent 68%);
+          animation: orbDrift 18s ease-in-out infinite;
+        }
+        .hero-orb-2 {
+          position: absolute; top: 30%; left: 5%;
+          width: 500px; height: 500px; pointer-events: none;
+          background: radial-gradient(ellipse, rgba(168,85,247,0.1) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: blobMorph 14s ease-in-out infinite, orbDrift2 20s ease-in-out infinite;
+        }
+        .hero-orb-3 {
+          position: absolute; top: 15%; right: 2%;
+          width: 480px; height: 480px; pointer-events: none;
+          background: radial-gradient(ellipse, rgba(34,197,94,0.07) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: blobMorph 11s ease-in-out 4s infinite, orbDrift 16s ease-in-out 6s infinite;
+        }
+        /* Floating card positions */
+        .fcard-wrap-1 {
+          position: absolute; left: calc(50% - 490px); top: 50%;
+          transform: translateY(-55%) rotate(-7deg);
+          animation: fcardFade 1s ease 0.6s both;
+        }
+        .fcard-inner-1 { animation: float1 8s ease-in-out 1.6s infinite; }
+        .fcard-wrap-2 {
+          position: absolute; right: calc(50% - 490px); top: 43%;
+          transform: translateY(-50%) rotate(6deg);
+          animation: fcardFade 1s ease 0.8s both;
+        }
+        .fcard-inner-2 { animation: float2 10s ease-in-out 1.8s infinite; }
+        .fcard {
+          width: 238px;
+          background: rgba(13,15,22,0.9);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 18px;
+          padding: 20px;
+          box-shadow: 0 24px 64px rgba(0,0,0,0.55), 0 1px 0 rgba(255,255,255,0.04) inset;
+          pointer-events: none;
+        }
+
+        /* Hero content */
+        .hero-content { position: relative; z-index: 2; }
         .hero-badge {
-          display: inline-flex; align-items: center; gap: 8px;
-          padding: 6px 14px; border-radius: 100px;
-          border: 1px solid rgba(30,94,255,0.3);
-          background: rgba(30,94,255,0.08);
-          font-size: 12px; font-weight: 600; color: #7BA7FF;
-          text-transform: uppercase; letter-spacing: 0.08em;
-          margin-bottom: 28px;
-          animation: fadeUp 0.8s ease both;
+          display: inline-flex; align-items: center; gap: 10px;
+          padding: 6px 16px; border-radius: 100px;
+          border: 1px solid rgba(255,199,69,0.25);
+          background: rgba(255,199,69,0.07);
+          font-size: 12px; font-weight: 700; color: #D4A017;
+          letter-spacing: 0.07em; text-transform: uppercase;
+          margin-bottom: 30px; position: relative; overflow: hidden;
+          animation: fadeUp 0.7s ease both;
         }
-        .hero-badge-dot {
-          width: 6px; height: 6px; border-radius: 50%;
-          background: #1E5EFF;
-          box-shadow: 0 0 8px #1E5EFF;
-          animation: pulse 2s infinite;
+        .hero-badge::after {
+          content: '';
+          position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+          background: linear-gradient(90deg, transparent, rgba(255,199,69,0.25), transparent);
+          animation: goldSweep 3.5s ease-in-out 1.5s infinite;
         }
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(0.85); }
+        .badge-dot {
+          width: 7px; height: 7px; border-radius: 50%;
+          background: var(--gold); box-shadow: 0 0 10px var(--gold);
+          animation: pulseDot 2s infinite; flex-shrink: 0;
         }
-        .hero-heading {
-          font-family: 'Poppins', sans-serif;
-          font-size: clamp(40px, 7vw, 80px);
-          font-weight: 800;
-          line-height: 1.05;
-          letter-spacing: -2px;
+        .hero-h1 {
+          font-family: var(--font-display);
+          font-size: clamp(44px, 7.5vw, 88px);
+          font-weight: 700;
+          line-height: 1.0;
+          letter-spacing: -3px;
           color: var(--text);
-          max-width: 900px;
-          animation: fadeUp 0.8s ease 0.1s both;
+          max-width: 840px;
+          animation: fadeUp 0.7s ease 0.1s both;
         }
-        .hero-heading .accent {
-          background: linear-gradient(135deg, #4F8AFF, #1E5EFF, #7C3AED);
+        .hero-h1 .accent {
+          background: linear-gradient(135deg, #5B8AFF 0%, #1E5EFF 50%, #8B5CF6 100%);
           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
           background-clip: text;
         }
         .hero-sub {
-          margin-top: 24px;
-          font-size: clamp(16px, 2vw, 20px);
-          color: var(--muted); max-width: 580px;
-          line-height: 1.7;
-          animation: fadeUp 0.8s ease 0.2s both;
+          margin-top: 26px;
+          font-size: clamp(16px, 2.2vw, 20px);
+          color: var(--muted); max-width: 560px;
+          line-height: 1.75; margin-left: auto; margin-right: auto;
+          animation: fadeUp 0.7s ease 0.2s both;
         }
-        .hero-sub .highlight { color: #9CA3AF; font-weight: 500; }
+        .hero-sub strong { color: #9CA3AF; font-weight: 500; }
         .hero-cta {
-          display: flex; gap: 12px; margin-top: 40px; flex-wrap: wrap; justify-content: center;
-          animation: fadeUp 0.8s ease 0.3s both;
+          display: flex; gap: 12px; margin-top: 44px;
+          flex-wrap: wrap; justify-content: center;
+          animation: fadeUp 0.7s ease 0.3s both;
         }
+        .btn-primary-lg {
+          padding: 15px 30px; border-radius: 12px; font-size: 15px; font-weight: 700;
+          background: var(--blue); color: white; text-decoration: none;
+          display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+          box-shadow: 0 0 40px var(--blue-glow);
+          transition: opacity 0.2s, transform 0.25s, box-shadow 0.25s;
+          font-family: var(--font-display);
+        }
+        .btn-primary-lg:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 0 60px var(--blue-glow); }
+        .btn-outline-lg {
+          padding: 15px 30px; border-radius: 12px; font-size: 15px; font-weight: 600;
+          border: 1px solid rgba(255,255,255,0.1); color: var(--muted); text-decoration: none;
+          display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+          transition: border-color 0.2s, color 0.2s, transform 0.2s;
+          font-family: var(--font-display);
+        }
+        .btn-outline-lg:hover { border-color: rgba(255,255,255,0.22); color: var(--text); transform: translateY(-1px); }
         .hero-scroll {
-          display: flex; flex-direction: column; align-items: center; gap: 8px;
-          margin-top: 80px; color: var(--subtle); font-size: 12px;
-          animation: fadeUp 0.8s ease 0.5s both;
+          display: flex; flex-direction: column; align-items: center; gap: 10px;
+          margin-top: 80px; color: var(--subtle); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+          animation: fadeUp 0.7s ease 0.5s both;
         }
         .hero-scroll-line {
-          width: 1px; height: 40px;
-          background: linear-gradient(transparent, var(--subtle));
-          animation: scrollLine 2s ease infinite;
-        }
-        @keyframes scrollLine {
-          0%, 100% { transform: scaleY(0.4) translateY(-20px); opacity: 0.3; }
-          50% { transform: scaleY(1) translateY(0); opacity: 1; }
+          width: 1px; height: 44px;
+          background: linear-gradient(transparent, rgba(30,94,255,0.5));
+          animation: scrollLine 2.2s ease-in-out infinite;
         }
 
-        /* ── Event types ticker ── */
-        .ticker-section {
-          padding: 40px 0; overflow: hidden;
-          border-top: 1px solid var(--border);
-          border-bottom: 1px solid var(--border);
-          background: linear-gradient(to right, var(--bg) 0%, transparent 10%, transparent 90%, var(--bg) 100%);
+        /* ── Ticker ── */
+        .ticker-wrap {
+          padding: 36px 0; overflow: hidden;
+          border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+          background: linear-gradient(to right, #080A10 0%, transparent 12%, transparent 88%, #080A10 100%);
           position: relative;
         }
         .ticker-track {
-          display: flex; gap: 12px;
-          animation: ticker 25s linear infinite;
-          width: max-content;
+          display: flex; gap: 10px; width: max-content;
+          animation: ticker 28s linear infinite;
         }
         .ticker-track:hover { animation-play-state: paused; }
-        @keyframes ticker {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
         .ticker-item {
           display: flex; align-items: center; gap: 8px;
-          padding: 8px 20px; border-radius: 100px;
-          border: 1px solid var(--border);
-          background: var(--card);
-          font-size: 14px; font-weight: 600; color: var(--muted);
+          padding: 8px 22px; border-radius: 100px;
+          border: 1px solid var(--border); background: var(--card);
+          font-size: 13px; font-weight: 600; color: var(--muted);
           white-space: nowrap; cursor: default;
-          transition: border-color 0.2s, color 0.2s;
+          transition: border-color 0.25s, color 0.25s, box-shadow 0.25s;
+          font-family: var(--font-display);
         }
-        .ticker-item:hover { border-color: rgba(255,255,255,0.15); color: var(--text); }
-
-        /* ── Sections ── */
-        .section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
-        .section-label {
-          font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
-          text-transform: uppercase; color: var(--blue);
-          margin-bottom: 16px;
-        }
-        .section-heading {
-          font-family: 'Poppins', sans-serif;
-          font-size: clamp(28px, 4vw, 48px);
-          font-weight: 800; letter-spacing: -1px;
-          color: var(--text); line-height: 1.1;
-          max-width: 640px;
-        }
-        .section-sub {
-          margin-top: 16px; font-size: 17px;
-          color: var(--muted); max-width: 520px; line-height: 1.7;
+        .ticker-item:hover { border-color: rgba(30,94,255,0.35); color: var(--text); box-shadow: 0 0 16px rgba(30,94,255,0.12); }
+        .ticker-dot {
+          width: 5px; height: 5px; border-radius: 50%;
+          background: var(--blue); opacity: 0.5; flex-shrink: 0;
         }
 
-        /* ── Features grid ── */
-        .features-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 16px; margin-top: 56px;
-        }
-        .feature-card {
-          padding: 28px; border-radius: 16px;
-          background: var(--card);
-          border: 1px solid var(--border);
-          transition: border-color 0.3s, transform 0.3s;
-          cursor: default;
-        }
-        .feature-card:hover {
-          border-color: rgba(255,255,255,0.12);
-          transform: translateY(-4px);
-        }
-        .feature-icon {
-          width: 44px; height: 44px; border-radius: 12px;
-          display: flex; align-items: center; justify-content: center;
-          margin-bottom: 20px;
-        }
-        .feature-title {
-          font-family: 'Poppins', sans-serif;
-          font-size: 16px; font-weight: 700;
-          color: var(--text); margin-bottom: 10px;
-        }
-        .feature-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
-
-        /* ── How it works ── */
-        .steps-grid {
-          display: grid; grid-template-columns: repeat(4, 1fr);
-          gap: 2px; margin-top: 56px; position: relative;
-        }
-        .step-card {
-          padding: 32px 28px;
-          background: var(--card); border: 1px solid var(--border);
-          position: relative; overflow: hidden;
-        }
-        .step-card:first-child { border-radius: 16px 0 0 16px; }
-        .step-card:last-child  { border-radius: 0 16px 16px 0; }
-        .step-number {
-          font-family: 'Poppins', sans-serif;
-          font-size: 48px; font-weight: 800;
-          color: rgba(30,94,255,0.12); line-height: 1;
-          display: block; margin-bottom: 24px;
-        }
-        .step-title {
-          font-family: 'Poppins', sans-serif;
-          font-size: 16px; font-weight: 700; color: var(--text);
-          margin-bottom: 10px;
-        }
-        .step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
-
-        /* ── Stats band ── */
+        /* ── Stats ── */
         .stats-band {
-          padding: 60px 24px;
-          background: var(--card);
-          border-top: 1px solid var(--border);
+          padding: 72px 24px;
+          background: linear-gradient(180deg, var(--surface) 0%, #080A10 100%);
           border-bottom: 1px solid var(--border);
+          position: relative;
+        }
+        .stats-band::before {
+          content: '';
+          position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+          width: 600px; height: 1px;
+          background: linear-gradient(to right, transparent, rgba(30,94,255,0.4), transparent);
         }
         .stats-inner {
           max-width: 900px; margin: 0 auto;
-          display: grid; grid-template-columns: repeat(3, 1fr);
-          gap: 48px; text-align: center;
+          display: grid; grid-template-columns: repeat(3,1fr); gap: 48px; text-align: center;
         }
-        .stat-value {
-          font-family: 'Poppins', sans-serif;
-          font-size: clamp(36px, 5vw, 56px); font-weight: 800;
-          color: var(--text); line-height: 1;
+        .stat-item { position: relative; }
+        .stat-item:not(:last-child)::after {
+          content: '';
+          position: absolute; right: -24px; top: 20%; bottom: 20%;
+          width: 1px; background: var(--border);
         }
-        .stat-value .unit { color: var(--blue); }
-        .stat-label { font-size: 14px; color: var(--muted); margin-top: 8px; }
+        .stat-val {
+          font-family: var(--font-display);
+          font-size: clamp(42px, 5.5vw, 64px); font-weight: 700;
+          color: var(--text); line-height: 1; letter-spacing: -2px;
+        }
+        .stat-unit { color: var(--blue); font-size: 0.55em; letter-spacing: 0; }
+        .stat-label { font-size: 14px; color: var(--muted); margin-top: 10px; line-height: 1.5; max-width: 220px; margin-left: auto; margin-right: auto; }
 
-        /* ── CTA section ── */
-        .cta-section {
-          padding: 120px 24px; text-align: center;
-          position: relative; overflow: hidden;
-        }
-        .cta-glow {
-          position: absolute; top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
-          width: 600px; height: 400px;
-          background: radial-gradient(ellipse, rgba(30,94,255,0.15) 0%, transparent 70%);
-          pointer-events: none;
-        }
-        .cta-heading {
-          font-family: 'Poppins', sans-serif;
-          font-size: clamp(32px, 5vw, 60px);
-          font-weight: 800; letter-spacing: -1.5px;
-          color: var(--text); max-width: 700px; margin: 0 auto;
-          line-height: 1.05;
-        }
-        .cta-sub {
-          margin-top: 20px; font-size: 18px;
-          color: var(--muted); max-width: 460px; margin: 20px auto 0;
-        }
-        .cta-actions {
-          display: flex; gap: 12px; justify-content: center;
-          flex-wrap: wrap; margin-top: 40px;
-        }
-        .cta-note {
-          margin-top: 16px; font-size: 13px; color: var(--subtle);
-        }
-
-        /* ── Footer ── */
-        .footer {
-          padding: 40px 24px;
-          border-top: 1px solid var(--border);
-          display: flex; align-items: center; justify-content: space-between;
-          flex-wrap: wrap; gap: 16px;
-          max-width: 1200px; margin: 0 auto;
-        }
-        .footer-brand {
+        /* ── Sections ── */
+        .section { padding: 100px 24px; max-width: 1200px; margin: 0 auto; }
+        .sec-label {
+          font-size: 11px; font-weight: 700; letter-spacing: 0.14em;
+          text-transform: uppercase; color: var(--blue); margin-bottom: 16px;
           display: flex; align-items: center; gap: 10px;
         }
+        .sec-label::before {
+          content: ''; width: 20px; height: 2px;
+          background: var(--blue); border-radius: 1px;
+        }
+        .sec-h2 {
+          font-family: var(--font-display);
+          font-size: clamp(30px, 4vw, 52px); font-weight: 700;
+          letter-spacing: -1.5px; color: var(--text); line-height: 1.05; max-width: 640px;
+        }
+        .sec-sub {
+          margin-top: 18px; font-size: 17px;
+          color: var(--muted); max-width: 520px; line-height: 1.75;
+        }
+
+        /* ── Features ── */
+        .feat-grid {
+          display: grid; grid-template-columns: repeat(4, 1fr);
+          gap: 1px; margin-top: 56px;
+          background: var(--border); border-radius: 20px; overflow: hidden;
+        }
+        .feat-card {
+          padding: 30px 26px; cursor: default;
+          background: var(--card);
+          transition: background 0.3s;
+          position: relative;
+        }
+        .feat-card:hover { background: #131620; }
+        .feat-card:hover .feat-icon { box-shadow: 0 0 28px var(--glow); }
+        .feat-card::after {
+          content: '';
+          position: absolute; inset: 0;
+          background: radial-gradient(ellipse 80% 60% at 50% 120%, var(--glow, transparent) 0%, transparent 60%);
+          opacity: 0; transition: opacity 0.4s;
+        }
+        .feat-card:hover::after { opacity: 1; }
+        .feat-icon {
+          width: 46px; height: 46px; border-radius: 13px;
+          display: flex; align-items: center; justify-content: center;
+          background: var(--glow); margin-bottom: 20px;
+          transition: box-shadow 0.3s;
+          position: relative; z-index: 1;
+        }
+        .feat-title {
+          font-family: var(--font-display);
+          font-size: 15px; font-weight: 700; color: var(--text);
+          margin-bottom: 10px; position: relative; z-index: 1;
+        }
+        .feat-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; position: relative; z-index: 1; }
+
+        /* ── Steps ── */
+        .steps-grid {
+          display: grid; grid-template-columns: repeat(4,1fr);
+          gap: 0; margin-top: 56px;
+          border: 1px solid var(--border); border-radius: 20px; overflow: hidden;
+          position: relative;
+        }
+        .step-card {
+          padding: 36px 28px;
+          background: var(--card);
+          border-right: 1px solid var(--border);
+          position: relative; overflow: hidden;
+          transition: background 0.3s;
+        }
+        .step-card:last-child { border-right: none; }
+        .step-card:hover { background: #131620; }
+        .step-card::before {
+          content: '';
+          position: absolute; top: 0; left: 0; right: 0; height: 2px;
+          background: linear-gradient(90deg, var(--blue), #8B5CF6);
+          transform: scaleX(0); transform-origin: left;
+          transition: transform 0.4s ease;
+        }
+        .step-card:hover::before { transform: scaleX(1); }
+        .step-num {
+          font-family: var(--font-display);
+          font-size: 52px; font-weight: 700;
+          color: rgba(30,94,255,0.1); line-height: 1;
+          display: block; margin-bottom: 24px;
+          transition: color 0.3s;
+        }
+        .step-card:hover .step-num { color: rgba(30,94,255,0.2); }
+        .step-title {
+          font-family: var(--font-display);
+          font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 10px;
+        }
+        .step-desc { font-size: 13.5px; color: var(--muted); line-height: 1.65; }
+
+        /* ── Why card ── */
+        .why-card {
+          padding: 64px; border-radius: 24px;
+          background: linear-gradient(135deg, rgba(30,94,255,0.07) 0%, rgba(124,58,237,0.04) 100%);
+          border: 1px solid rgba(30,94,255,0.14);
+          display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center;
+        }
+        .why-h2 {
+          font-family: var(--font-display);
+          font-size: clamp(24px, 3vw, 38px); font-weight: 700;
+          letter-spacing: -0.5px; color: var(--text); line-height: 1.15; margin-bottom: 18px;
+        }
+        .why-sub { color: var(--muted); line-height: 1.75; font-size: 16px; }
+        .why-list { display: flex; flex-direction: column; gap: 14px; }
+        .why-item { display: flex; align-items: center; gap: 12px; }
+        .why-text { color: #D1D5DB; font-size: 15px; }
+
+        /* ── CTA ── */
+        .cta-section {
+          padding: 130px 24px; text-align: center; position: relative; overflow: hidden;
+        }
+        .cta-bg {
+          position: absolute; inset: 0; pointer-events: none;
+          background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(30,94,255,0.12) 0%, transparent 70%);
+          animation: orbDrift 20s ease-in-out infinite;
+        }
+        .cta-bg-2 {
+          position: absolute; inset: 0; pointer-events: none;
+          background: radial-gradient(ellipse 40% 40% at 70% 40%, rgba(139,92,246,0.07) 0%, transparent 70%);
+        }
+        .cta-inner { position: relative; z-index: 1; }
+        .cta-badge {
+          display: inline-flex; align-items: center; gap: 8px;
+          padding: 6px 16px; border-radius: 100px;
+          border: 1px solid rgba(30,94,255,0.3); background: rgba(30,94,255,0.08);
+          font-size: 12px; font-weight: 700; color: #7BA7FF;
+          letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 28px;
+        }
+        .cta-h2 {
+          font-family: var(--font-display);
+          font-size: clamp(34px, 5.5vw, 66px); font-weight: 700;
+          letter-spacing: -2px; color: var(--text); max-width: 720px;
+          margin: 0 auto; line-height: 1.0;
+        }
+        .cta-h2 .gold { color: var(--gold); }
+        .cta-sub {
+          margin-top: 22px; font-size: 18px; color: var(--muted);
+          max-width: 440px; margin-left: auto; margin-right: auto; margin-top: 22px;
+        }
+        .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 44px; }
+        .cta-note { margin-top: 18px; font-size: 13px; color: var(--subtle); }
+
+        /* ── Footer ── */
+        .footer-inner {
+          max-width: 1200px; margin: 0 auto;
+          padding: 40px 24px;
+          display: flex; align-items: center; justify-content: space-between;
+          flex-wrap: wrap; gap: 16px;
+          border-top: 1px solid var(--border);
+        }
+        .footer-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .footer-icon {
           width: 28px; height: 28px; background: var(--blue); border-radius: 7px;
           display: flex; align-items: center; justify-content: center;
         }
-        .footer-text {
-          font-size: 15px; font-weight: 800; color: var(--text);
-          font-family: 'Poppins', sans-serif;
+        .footer-name {
+          font-family: var(--font-display);
+          font-size: 16px; font-weight: 700; color: var(--text);
         }
         .footer-copy { font-size: 13px; color: var(--subtle); }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-link { color: var(--subtle); font-size: 13px; text-decoration: none; transition: color 0.2s; cursor: pointer; }
+        .footer-link:hover { color: var(--muted); }
 
         /* ── Mobile menu ── */
-        .mobile-menu {
+        .mmenu {
           position: fixed; inset: 0; z-index: 200;
-          background: rgba(10,12,18,0.97);
-          backdrop-filter: blur(20px);
-          display: flex; flex-direction: column;
-          padding: 24px;
-          transform: translateX(100%);
-          transition: transform 0.3s ease;
+          background: rgba(8,10,16,0.97);
+          backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+          display: flex; flex-direction: column; padding: 24px;
+          transform: translateX(100%); transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
         }
-        .mobile-menu.open { transform: translateX(0); }
-        .mobile-menu-header {
-          display: flex; justify-content: space-between; align-items: center;
-          margin-bottom: 48px;
+        .mmenu.open { transform: translateX(0); }
+        .mmenu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 52px; }
+        .mmenu-link {
+          font-family: var(--font-display);
+          font-size: 26px; font-weight: 700; color: var(--muted);
+          text-decoration: none; padding: 14px 0;
+          border-bottom: 1px solid var(--border); transition: color 0.2s; display: block; cursor: pointer;
         }
-        .mobile-nav-link {
-          font-size: 24px; font-weight: 700; color: var(--muted);
-          text-decoration: none; font-family: 'Poppins', sans-serif;
-          padding: 12px 0; border-bottom: 1px solid var(--border);
-          transition: color 0.2s; display: block;
-        }
-        .mobile-nav-link:hover { color: var(--text); }
-        .mobile-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 40px; }
-        .btn-primary-full {
-          padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 700;
+        .mmenu-link:hover { color: var(--text); }
+        .mmenu-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 44px; }
+        .btn-full-primary {
+          padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 700;
+          font-family: var(--font-display);
           background: var(--blue); color: white; text-decoration: none;
           display: block; text-align: center;
-          box-shadow: 0 0 30px var(--blue-glow);
+          box-shadow: 0 0 32px var(--blue-glow); cursor: pointer;
         }
-        .btn-outline-full {
-          padding: 14px; border-radius: 10px; font-size: 16px; font-weight: 600;
+        .btn-full-outline {
+          padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600;
+          font-family: var(--font-display);
           border: 1px solid var(--border); color: var(--muted); text-decoration: none;
-          display: block; text-align: center;
-        }
-
-        /* ── Animations ── */
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
+          display: block; text-align: center; cursor: pointer;
         }
 
         /* ── Responsive ── */
+        @media (max-width: 1100px) {
+          .fcard-wrap-1, .fcard-wrap-2 { display: none; }
+        }
         @media (max-width: 1024px) {
-          .steps-grid { grid-template-columns: repeat(2, 1fr); }
-          .step-card:first-child { border-radius: 16px 0 0 0; }
-          .step-card:nth-child(2) { border-radius: 0 16px 0 0; }
-          .step-card:nth-child(3) { border-radius: 0 0 0 16px; }
-          .step-card:last-child  { border-radius: 0 0 16px 0; }
+          .feat-grid { grid-template-columns: repeat(2,1fr); }
+          .steps-grid { grid-template-columns: repeat(2,1fr); }
+          .step-card:nth-child(2) { border-right: none; }
+          .step-card:nth-child(3) { border-right: 1px solid var(--border); border-top: 1px solid var(--border); }
+          .step-card:last-child { border-top: 1px solid var(--border); }
         }
         @media (max-width: 768px) {
           .nav-links, .nav-actions { display: none; }
           .nav-hamburger { display: block; }
           .hero { padding: 100px 20px 60px; }
-          .hero-heading { letter-spacing: -1px; }
-          .stats-inner { grid-template-columns: 1fr; gap: 32px; }
+          .hero-h1 { letter-spacing: -1.5px; }
+          .stats-inner { grid-template-columns: 1fr; gap: 36px; }
+          .stat-item::after { display: none; }
+          .feat-grid { grid-template-columns: 1fr; }
           .steps-grid { grid-template-columns: 1fr; }
-          .step-card:first-child, .step-card:nth-child(2),
-          .step-card:nth-child(3), .step-card:last-child {
-            border-radius: 0;
-          }
-          .step-card:first-child { border-radius: 16px 16px 0 0; }
-          .step-card:last-child  { border-radius: 0 0 16px 16px; }
+          .step-card { border-right: none !important; border-top: 1px solid var(--border); }
+          .step-card:first-child { border-top: none; }
+          .why-card { grid-template-columns: 1fr !important; gap: 36px !important; padding: 36px !important; }
           .section { padding: 64px 20px; }
-          .features-grid { grid-template-columns: 1fr; }
-          .footer { flex-direction: column; text-align: center; }
+          .footer-inner { flex-direction: column; text-align: center; }
+          .footer-links { justify-content: center; }
         }
       `}</style>
 
       {/* ── Nav ── */}
       <nav className={`nav ${scrolled ? 'scrolled' : ''}`}>
         <Link href="/" className="nav-logo">
-          <div className="nav-logo-icon">
-            <Ticket size={16} color="white" />
-          </div>
+          <div className="nav-logo-icon"><Ticket size={17} color="white" /></div>
           <span className="nav-logo-text">Tikkit</span>
         </Link>
-
         <div className="nav-links">
           <a href="#features" className="nav-link">Features</a>
           <a href="#how-it-works" className="nav-link">How it works</a>
           <a href="#pricing" className="nav-link">Pricing</a>
         </div>
-
         <div className="nav-actions">
           <Link href="/auth/login" className="btn-ghost">Log in</Link>
-          <Link href="/auth/login" className="btn-primary">
-            Get started <ArrowRight size={14} />
-          </Link>
+          <Link href="/auth/login" className="btn-nav">Get started <ArrowRight size={14} /></Link>
         </div>
-
-        <button className="nav-hamburger" onClick={() => setMobileMenuOpen(true)}>
+        <button className="nav-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
           <Menu size={24} />
         </button>
       </nav>
 
-      {/* ── Mobile Menu ── */}
-      <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
-        <div className="mobile-menu-header">
+      {/* ── Mobile menu ── */}
+      <div className={`mmenu ${menuOpen ? 'open' : ''}`} role="dialog" aria-modal="true">
+        <div className="mmenu-header">
           <div className="nav-logo">
-            <div className="nav-logo-icon">
-              <Ticket size={16} color="white" />
-            </div>
+            <div className="nav-logo-icon"><Ticket size={17} color="white" /></div>
             <span className="nav-logo-text">Tikkit</span>
           </div>
           <button style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer' }}
-            onClick={() => setMobileMenuOpen(false)}>
+            onClick={() => setMenuOpen(false)} aria-label="Close menu">
             <X size={24} />
           </button>
         </div>
-        <a href="#features" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Features</a>
-        <a href="#how-it-works" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>How it works</a>
-        <a href="#pricing" className="mobile-nav-link" onClick={() => setMobileMenuOpen(false)}>Pricing</a>
-        <div className="mobile-actions">
-          <Link href="/auth/login" className="btn-primary-full">Get started free</Link>
-          <Link href="/auth/login" className="btn-outline-full">Log in</Link>
+        <a href="#features"     className="mmenu-link" onClick={() => setMenuOpen(false)}>Features</a>
+        <a href="#how-it-works" className="mmenu-link" onClick={() => setMenuOpen(false)}>How it works</a>
+        <a href="#pricing"      className="mmenu-link" onClick={() => setMenuOpen(false)}>Pricing</a>
+        <div className="mmenu-actions">
+          <Link href="/auth/login" className="btn-full-primary">Get started free</Link>
+          <Link href="/auth/login" className="btn-full-outline">Log in</Link>
         </div>
       </div>
 
       {/* ── Hero ── */}
       <section className="hero">
-        <div className="hero-bg">
-          <div className="hero-grid" />
-          <div className="hero-glow-1" />
-          <div className="hero-glow-2" />
-          <div className="hero-glow-3" />
-        </div>
+        {/* BG */}
+        <div className="hero-grid" aria-hidden="true" />
+        <div className="hero-orb-1" aria-hidden="true" />
+        <div className="hero-orb-2" aria-hidden="true" />
+        <div className="hero-orb-3" aria-hidden="true" />
 
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div className="hero-badge">
-            <div className="hero-badge-dot" />
-            Pakistan's first event management platform
+        {/* Floating event cards */}
+        <FloatingCard card={heroCards[0]} wrapClass="fcard-wrap-1" innerClass="fcard-inner-1" />
+        <FloatingCard card={heroCards[1]} wrapClass="fcard-wrap-2" innerClass="fcard-inner-2" />
+
+        {/* Main copy */}
+        <div className="hero-content">
+          <div className="hero-badge" aria-label="New">
+            <div className="badge-dot" aria-hidden="true" />
+            Made for organizers who take it seriously
           </div>
 
-          <h1 className="hero-heading">
+          <h1 className="hero-h1">
             Run events like<br />
             <span className="accent">you mean it.</span>
           </h1>
 
           <p className="hero-sub">
-            Guest lists. Ticket payments. QR check-in. Vendor tracking.{' '}
-            <span className="highlight">Tikkit</span> handles every moving part so you can
-            actually enjoy the event you planned.
+            Stop juggling WhatsApp threads, spreadsheets, and bank screenshots.
+            Tikkit handles <strong>guest lists, QR check-in, payments,</strong> and everything
+            in between — so you can actually enjoy the night.
           </p>
 
           <div className="hero-cta">
@@ -663,23 +840,24 @@ export default function LandingPage() {
               Start for free <ArrowRight size={16} />
             </Link>
             <Link href="/auth/login" className="btn-outline-lg">
-              Log in
+              See how it works
             </Link>
           </div>
 
-          <div className="hero-scroll">
+          <div className="hero-scroll" aria-hidden="true">
             <div className="hero-scroll-line" />
-            <span style={{ fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase' }}>scroll</span>
+            <span>scroll</span>
           </div>
         </div>
       </section>
 
-      {/* ── Event type ticker ── */}
-      <div className="ticker-section">
+      {/* ── Event types ticker ── */}
+      <div className="ticker-wrap" aria-hidden="true">
         <div className="ticker-track">
-          {[...eventTypes, ...eventTypes, ...eventTypes].map((type, i) => (
+          {[...eventTypes, ...eventTypes, ...eventTypes].map((label, i) => (
             <div key={i} className="ticker-item">
-              <span>{type.emoji}</span> {type.label}
+              <div className="ticker-dot" />
+              {label}
             </div>
           ))}
         </div>
@@ -688,111 +866,75 @@ export default function LandingPage() {
       {/* ── Stats ── */}
       <div className="stats-band">
         <div className="stats-inner">
-          <div>
-            <div className="stat-value">100<span className="unit">%</span></div>
-            <div className="stat-label">Built for the Pakistani market — PKR, local wallets, local needs</div>
-          </div>
-          <div>
-            <div className="stat-value">2<span className="unit">min</span></div>
-            <div className="stat-label">Average time to create and publish your first event</div>
-          </div>
-          <div>
-            <div className="stat-value">0<span className="unit"> chaos</span></div>
-            <div className="stat-label">At the door. QR scanning means no lists, no confusion</div>
-          </div>
+          <StatItem target={100} unit="%" label="Built for Pakistan — PKR, JazzCash, EasyPaisa, all native." />
+          <StatItem target={2}   unit="min" label="Average time to create and publish your first event." />
+          <StatItem target={0}   unit=" chaos" label="At the door. QR scanning means no lists, no confusion." />
         </div>
       </div>
 
       {/* ── Features ── */}
       <section className="section" id="features">
-        <div className="section-label">Everything you need</div>
-        <h2 className="section-heading">One platform. Every part of your event.</h2>
-        <p className="section-sub">
+        <div className="sec-label">The full toolkit</div>
+        <h2 className="sec-h2">One platform. Every part of your event.</h2>
+        <p className="sec-sub">
           Stop stitching together WhatsApp groups, spreadsheets, and bank transfers.
-          Tikkit is the single tool that covers it all.
+          Tikkit covers it all.
         </p>
-
-        <div className="features-grid">
+        <div className="feat-grid">
           {features.map((f, i) => <FeatureCard key={f.title} feature={f} index={i} />)}
         </div>
       </section>
 
       {/* ── How it works ── */}
       <section className="section" id="how-it-works" style={{ paddingTop: 0 }}>
-        <div className="section-label">The process</div>
-        <h2 className="section-heading">Zero learning curve. Maximum control.</h2>
-        <p className="section-sub">
-          From idea to check-in in four steps. No training required.
-        </p>
-
+        <div className="sec-label">How it flows</div>
+        <h2 className="sec-h2">Zero learning curve. Maximum control.</h2>
+        <p className="sec-sub">From idea to check-in in four steps. No training, no manual.</p>
         <div className="steps-grid">
           {steps.map((s, i) => <StepCard key={s.n} step={s} index={i} />)}
         </div>
       </section>
 
-      {/* ── Why Pakistan needs this ── */}
-      <section style={{ padding: '0 24px 100px', maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{
-          padding: '60px', borderRadius: '24px',
-          background: 'linear-gradient(135deg, rgba(30,94,255,0.08) 0%, rgba(124,58,237,0.05) 100%)',
-          border: '1px solid rgba(30,94,255,0.15)',
-          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center',
-        }}
-          className="why-card"
-        >
-          <style>{`
-            @media (max-width: 768px) {
-              .why-card { grid-template-columns: 1fr !important; gap: 32px !important; padding: 32px !important; }
-            }
-          `}</style>
+      {/* ── Why Tikkit ── */}
+      <section style={{ padding: '0 24px 100px', maxWidth: 1200, margin: '0 auto' }} id="pricing">
+        <div className="why-card">
           <div>
-            <div className="section-label">Why Tikkit</div>
-            <h2 style={{
-              fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(24px, 3vw, 36px)',
-              fontWeight: 800, letterSpacing: '-0.5px', color: 'var(--text)',
-              lineHeight: 1.15, marginBottom: 16,
-            }}>
-              Pakistan's event scene is booming. The tools haven't caught up. Until now.
+            <div className="sec-label">Why Tikkit</div>
+            <h2 className="why-h2">
+              Pakistan's event scene is booming. The tools haven't caught up.{' '}
+              <span style={{ color: 'var(--blue)' }}>Until now.</span>
             </h2>
-            <p style={{ color: 'var(--muted)', lineHeight: 1.75, fontSize: 16 }}>
-              From rooftop parties in DHA to corporate galas in Karachi,
-              event organizers have been managing hundreds of guests over WhatsApp
-              threads and Google Sheets. Tikkit ends that era.
+            <p className="why-sub">
+              From rooftop nights in DHA to corporate galas in Karachi, organizers have been
+              managing hundreds of guests over WhatsApp threads and Google Sheets. Tikkit ends that era.
             </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {[
-              { icon: CheckCircle, color: '#22C55E', text: 'JazzCash & EasyPaisa built right in' },
-              { icon: CheckCircle, color: '#22C55E', text: 'Designed for private, boutique events' },
-              { icon: CheckCircle, color: '#22C55E', text: 'Works on every phone, no app download' },
-              { icon: CheckCircle, color: '#22C55E', text: 'Staff access via shareable links — no accounts needed' },
-              { icon: CheckCircle, color: '#22C55E', text: 'Built by people who throw events in Pakistan' },
-            ].map((item, i) => {
-              const Icon = item.icon
-              return (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <Icon size={18} color={item.color} style={{ shrink: 0 }} />
-                  <span style={{ color: '#D1D5DB', fontSize: 15 }}>{item.text}</span>
-                </div>
-              )
-            })}
+          <div className="why-list">
+            {whyList.map((text, i) => (
+              <div key={i} className="why-item">
+                <CheckCircle size={18} color="#22C55E" style={{ flexShrink: 0 }} />
+                <span className="why-text">{text}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* ── CTA ── */}
-      <section className="cta-section" id="pricing">
-        <div className="cta-glow" />
-        <div style={{ position: 'relative', zIndex: 1 }}>
-          <div className="hero-badge" style={{ margin: '0 auto 24px' }}>
-            <Zap size={12} color="#1E5EFF" />
-            Free to start. No credit card.
+      <section className="cta-section">
+        <div className="cta-bg" aria-hidden="true" />
+        <div className="cta-bg-2" aria-hidden="true" />
+        <div className="cta-inner">
+          <div className="cta-badge">
+            <Zap size={12} color="#1E5EFF" aria-hidden="true" />
+            Free to start — no credit card
           </div>
-          <h2 className="cta-heading">
-            Your next event deserves better than a spreadsheet.
+          <h2 className="cta-h2">
+            Your next event deserves better than a{' '}
+            <span className="gold">spreadsheet.</span>
           </h2>
           <p className="cta-sub">
-            Create your first event in two minutes. It's free.
+            Create your first event in two minutes. It's free, and it actually works.
           </p>
           <div className="cta-actions">
             <Link href="/auth/login" className="btn-primary-lg">
@@ -802,23 +944,21 @@ export default function LandingPage() {
               Log in
             </Link>
           </div>
-          <p className="cta-note">No credit card required · Works on mobile · Made in Pakistan 🇵🇰</p>
+          <p className="cta-note">No credit card required · Works on every phone · Made in Pakistan 🇵🇰</p>
         </div>
       </section>
 
       {/* ── Footer ── */}
       <footer>
-        <div className="footer">
-          <div className="footer-brand">
-            <div className="footer-icon">
-              <Ticket size={14} color="white" />
-            </div>
-            <span className="footer-text">Tikkit</span>
-          </div>
+        <div className="footer-inner">
+          <Link href="/" className="footer-brand">
+            <div className="footer-icon"><Ticket size={14} color="white" /></div>
+            <span className="footer-name">Tikkit</span>
+          </Link>
           <p className="footer-copy">© {new Date().getFullYear()} Tikkit. Built in Pakistan 🇵🇰</p>
-          <div style={{ display: 'flex', gap: 24 }}>
-            <Link href="/auth/login" style={{ color: 'var(--subtle)', fontSize: 13, textDecoration: 'none' }}>Log in</Link>
-            <Link href="/auth/login" style={{ color: 'var(--subtle)', fontSize: 13, textDecoration: 'none' }}>Sign up</Link>
+          <div className="footer-links">
+            <Link href="/auth/login" className="footer-link">Log in</Link>
+            <Link href="/auth/login" className="footer-link">Sign up</Link>
           </div>
         </div>
       </footer>

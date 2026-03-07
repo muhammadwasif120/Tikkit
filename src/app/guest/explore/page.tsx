@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import ExploreClient from '@/components/guest/ExploreClient'
+import SkeletonExplore from '@/components/guest/SkeletonExplore'
 import { getPublicEvents } from '@/app/actions/guestCreditActions'
 
-export default async function ExplorePage() {
+async function ExploreData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -23,4 +25,12 @@ export default async function ExplorePage() {
   })() : []
 
   return <ExploreClient events={events} myEvents={myEvents} />
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={<SkeletonExplore />}>
+      <ExploreData />
+    </Suspense>
+  )
 }

@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, MapPin, Calendar, Users, Lock, Clock,
   CheckCircle, AlertCircle, ChevronRight, Upload,
-  FileImage, X, Loader, Share2, Heart, ExternalLink
+  FileImage, X, Loader, Share2, Heart, ExternalLink,
+  Ticket,
 } from 'lucide-react'
 import { registerForEvent, submitEOI } from '@/app/actions/eventRegistrationActions'
 
@@ -63,12 +64,12 @@ function daysUntil(iso: string) { return Math.ceil(msUntil(iso) / 86400000) }
 /* ─── Registration status banner ────────────────────────────────── */
 function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus: string | null }) {
   const cfg: Record<string, { label: string; sub: string; color: string; bg: string; border: string; icon: any }> = {
-    eoi_submitted:   { label: 'Interest Submitted',    sub: 'Waiting for organizer review', color: '#EAB308', bg: 'rgba(234,179,8,0.08)',   border: 'rgba(234,179,8,0.2)',   icon: Clock },
-    eoi_approved:    { label: 'Approved — Pay Now',    sub: 'Complete payment to confirm your spot', color: '#EF4444', bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.2)',  icon: AlertCircle },
-    payment_pending: { label: 'Payment Verifying',     sub: 'Screenshot received, awaiting confirmation', color: '#818CF8', bg: 'rgba(129,140,248,0.08)', border: 'rgba(129,140,248,0.2)', icon: Loader },
-    confirmed:       { label: 'You\'re Confirmed ✓',  sub: 'Check your QR code in the Tickets tab', color: '#10B981', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', icon: CheckCircle },
-    registered:      { label: 'Registered ✓',         sub: 'Your QR ticket is ready in the Tickets tab', color: '#10B981', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', icon: CheckCircle },
-    rejected:        { label: 'Not Approved',          sub: 'Your application was not approved', color: '#6B7280', bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.15)', icon: X },
+    eoi_submitted:   { label: 'Interest Submitted',    sub: 'Waiting for organizer review',                     color: '#EAB308', bg: 'rgba(234,179,8,0.08)',   border: 'rgba(234,179,8,0.2)',   icon: Clock        },
+    eoi_approved:    { label: 'Approved — Pay Now',    sub: 'Complete payment to confirm your spot',             color: '#EF4444', bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.2)',  icon: AlertCircle  },
+    payment_pending: { label: 'Payment Verifying',     sub: 'Screenshot received, awaiting confirmation',        color: '#818CF8', bg: 'rgba(129,140,248,0.08)', border: 'rgba(129,140,248,0.2)', icon: Loader      },
+    confirmed:       { label: "You're Confirmed",      sub: 'Check your QR code in the Tickets tab',            color: '#10B981', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', icon: CheckCircle  },
+    registered:      { label: 'Registered',            sub: 'Your QR ticket is ready in the Tickets tab',       color: '#10B981', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', icon: CheckCircle  },
+    rejected:        { label: 'Not Approved',          sub: 'Your application was not approved',                 color: '#6B7280', bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.15)', icon: X          },
   }
   const s = cfg[status]
   if (!s) return null
@@ -77,7 +78,7 @@ function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus
     <div style={{ margin: '16px 16px 0', padding: '13px 15px', borderRadius: 16, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
       <Icon size={18} color={s.color} style={{ flexShrink: 0, marginTop: 1 }} />
       <div>
-        <p style={{ color: s.color, fontSize: 13, fontWeight: 800, margin: '0 0 2px', fontFamily: "'Syne', sans-serif" }}>{s.label}</p>
+        <p style={{ color: s.color, fontSize: 13, fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>{s.label}</p>
         <p style={{ color: s.color, fontSize: 12, margin: 0, opacity: 0.75 }}>{s.sub}</p>
       </div>
     </div>
@@ -116,23 +117,23 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
   const inputStyle = {
     width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: 12, padding: '11px 13px', color: 'white', fontSize: 14,
-    fontFamily: "'DM Sans', sans-serif", outline: 'none', boxSizing: 'border-box' as const,
+    fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' as const,
   }
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
-      <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto' }}>
+      <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto' }}>
         {/* Handle */}
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 0' }} />
 
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
-            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: "'Syne', sans-serif" }}>
+            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>
               {isEOI ? 'Express Interest' : 'Register'}
             </h3>
-            <p style={{ color: '#4B5563', fontSize: 13, margin: 0 }}>{event.title}</p>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{event.title}</p>
           </div>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
             <X size={16} />
@@ -145,7 +146,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
             <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, margin: '0 0 8px', letterSpacing: '0.5px' }}>PAYMENT DETAILS</p>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
               <span style={{ color: '#6B7280', fontSize: 12 }}>Amount</span>
-              <span style={{ color: 'white', fontSize: 14, fontWeight: 800, fontFamily: "'Syne', sans-serif" }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
+              <span style={{ color: 'white', fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-display)' }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
               <span style={{ color: '#6B7280', fontSize: 12 }}>Bank</span>
@@ -159,8 +160,8 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
               <span style={{ color: '#6B7280', fontSize: 12 }}>Title</span>
               <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{account.account_title}</span>
             </div>
-            <p style={{ color: '#4B5563', fontSize: 11, margin: '10px 0 0', lineHeight: 1.5 }}>
-              {isEOI ? 'If approved, you\'ll be asked to submit your payment screenshot.' : 'Make payment and upload screenshot on the next step.'}
+            <p style={{ color: '#6B7280', fontSize: 11, margin: '10px 0 0', lineHeight: 1.5 }}>
+              {isEOI ? "If approved, you'll be asked to submit your payment screenshot." : 'Make payment and upload screenshot on the next step.'}
             </p>
           </div>
         )}
@@ -169,16 +170,19 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
         <div style={{ padding: '16px 20px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* Profile card */}
           <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
-            <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, margin: '0 0 6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Registering as</p>
-            <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: '0 0 2px', fontFamily: "'Clash Display', sans-serif" }}>{userProfile?.full_name || 'No name set'}</p>
+            <p style={{ color: '#6B7280', fontSize: 10, fontWeight: 700, margin: '0 0 6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Registering as</p>
+            <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>{userProfile?.full_name || 'No name set'}</p>
             <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{userProfile?.email}</p>
             {!userProfile?.full_name && (
-              <p style={{ color: '#EAB308', fontSize: 11, margin: '6px 0 0' }}>⚠ Update your profile name before registering</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#EAB308', fontSize: 11, margin: '6px 0 0' }}>
+                <AlertCircle size={11} />
+                Update your profile name before registering
+              </div>
             )}
           </div>
           {isEOI && (
             <div>
-              <label style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Why do you want to attend?</label>
+              <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Why do you want to attend?</label>
               <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Tell the organizer about yourself..." rows={3}
                 style={{ ...inputStyle, resize: 'none' }} />
             </div>
@@ -194,10 +198,12 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
           <button
             onClick={handleSubmit}
             disabled={busy}
-            style={{ width: '100%', padding: '14px', border: 'none', borderRadius: 14, background: busy ? 'rgba(255,255,255,0.06)' : (isEOI ? '#A855F7' : '#1E5EFF'), color: busy ? '#374151' : 'white', fontSize: 15, fontWeight: 800, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: "'DM Sans', sans-serif", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}>
+            style={{ width: '100%', padding: '14px', border: 'none', borderRadius: 14, background: busy ? 'rgba(255,255,255,0.06)' : (isEOI ? '#A855F7' : '#1E5EFF'), color: busy ? '#6B7280' : 'white', fontSize: 15, fontWeight: 800, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}>
             {busy
-              ? <><Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> Please wait…</>
-              : isEOI ? '✋ Submit Interest' : '🎟 Confirm Registration'
+              ? <><Loader size={16} className="animate-spin" /> Please wait…</>
+              : isEOI
+                ? <><Users size={16} /> Submit Interest</>
+                : <><Ticket size={16} /> Confirm Registration</>
             }
           </button>
         </div>
@@ -211,16 +217,21 @@ function SuccessOverlay({ isEOI, onClose }: { isEOI: boolean; onClose: () => voi
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
       <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '36px 28px', maxWidth: 320, width: '90%', textAlign: 'center', animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
-        <div style={{ fontSize: 52, marginBottom: 16 }}>{isEOI ? '✋' : '🎟'}</div>
-        <h3 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: "'Syne', sans-serif" }}>
-          {isEOI ? 'Interest Submitted!' : 'You\'re Registered!'}
+        <div style={{ width: 64, height: 64, borderRadius: 20, background: isEOI ? 'rgba(168,85,247,0.12)' : 'rgba(30,94,255,0.12)', border: `1px solid ${isEOI ? 'rgba(168,85,247,0.25)' : 'rgba(30,94,255,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+          {isEOI
+            ? <Users size={28} color="#A855F7" />
+            : <Ticket size={28} color="#1E5EFF" />
+          }
+        </div>
+        <h3 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>
+          {isEOI ? 'Interest Submitted!' : "You're Registered!"}
         </h3>
         <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px', lineHeight: 1.5 }}>
           {isEOI
             ? 'The organizer will review your application and notify you in-app.'
             : 'Head to the Tickets tab to see your QR code.'}
         </p>
-        <button onClick={onClose} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: "'DM Sans', sans-serif" }}>
+        <button onClick={onClose} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
           Got it
         </button>
       </div>
@@ -264,26 +275,18 @@ export default function EventDetailClient({
     if (regStatus === 'rejected') return { label: 'Not Approved', color: '#4B5563', disabled: true }
     if (isFull) return { label: 'Sold Out', color: '#4B5563', disabled: true }
     if (isInviteOnly) return { label: 'Invite Only', color: '#4B5563', disabled: true }
-    if (isEOI) return { label: '✋ Express Interest', color: '#A855F7', disabled: false }
-    return { label: '🎟 Register Now', color: '#1E5EFF', disabled: false }
+    if (isEOI) return { label: 'Express Interest', color: '#A855F7', disabled: false }
+    return { label: 'Register Now', color: '#1E5EFF', disabled: false }
   }
   const cta = ctaLabel()
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
-        @keyframes slideUp  { from{transform:translateY(100%)} to{transform:translateY(0)} }
-        @keyframes popIn    { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
-        @keyframes spin     { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-        @keyframes fadeIn   { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-      `}</style>
-
-      <div style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: "'DM Sans', sans-serif", paddingBottom: 200 }}>
+      <div style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: 'var(--font-body)', paddingBottom: 200 }}>
 
         {/* Hero */}
         <div style={{ position: 'relative', height: 280, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : gradient, overflow: 'hidden' }}>
-          {/* Noise */}
+          {/* Noise texture */}
           <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 40%, rgba(8,10,16,0.95) 100%)' }} />
 
@@ -302,7 +305,7 @@ export default function EventDetailClient({
             </div>
           </div>
 
-          {/* Tags + countdown */}
+          {/* Tags */}
           <div style={{ position: 'absolute', bottom: 16, left: 16, right: 16 }}>
             <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 8 }}>
               {(event.tags ?? []).map(tag => (
@@ -318,33 +321,36 @@ export default function EventDetailClient({
         {regStatus && <StatusBanner status={regStatus} paymentStatus={existingReg?.payment_status ?? null} />}
 
         {/* Main content */}
-        <div style={{ padding: '20px 16px 0', animation: 'fadeIn 0.4s ease' }}>
+        <div style={{ padding: '20px 16px 0', animation: 'revealUp 0.4s ease' }}>
 
           {/* Title + organiser */}
           <div style={{ marginBottom: 16 }}>
-            <h1 style={{ color: 'white', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: "'Syne', sans-serif", letterSpacing: '-0.8px', lineHeight: 1.15 }}>
+            <h1 style={{ color: 'white', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.8px', lineHeight: 1.15 }}>
               {event.title}
             </h1>
-            <p style={{ color: '#4B5563', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>
           </div>
 
           {/* Key info grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
             {[
-              { icon: <Calendar size={14} color="#818CF8" />, label: 'Date', value: `${days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d away`}` , sub: new Date(event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) },
-              { icon: <Clock size={14} color="#818CF8" />, label: 'Time', value: fmtTime(event.date_start), sub: event.date_end ? `until ${fmtTime(event.date_end)}` : '' },
-              { icon: <MapPin size={14} color="#818CF8" />, label: 'Venue', value: event.secret_venue ? 'Secret' : (event.venue_name ?? 'TBA'), sub: event.secret_venue ? 'Revealed before event' : (event.venue_address ?? '') },
-              { icon: <Users size={14} color="#818CF8" />, label: 'Capacity', value: event.capacity ? `${event.registered_count} / ${event.capacity}` : 'Unlimited', sub: spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 20 ? `${spotsLeft} spots left` : '' },
+              { icon: <Calendar size={14} color="#818CF8" />, label: 'Date',     value: `${days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d away`}`, sub: new Date(event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) },
+              { icon: <Clock    size={14} color="#818CF8" />, label: 'Time',     value: fmtTime(event.date_start), sub: event.date_end ? `until ${fmtTime(event.date_end)}` : '' },
+              { icon: <MapPin   size={14} color="#818CF8" />, label: 'Venue',    value: event.secret_venue ? 'Secret' : (event.venue_name ?? 'TBA'), sub: event.secret_venue ? 'Revealed before event' : (event.venue_address ?? '') },
+              { icon: <Users    size={14} color="#818CF8" />, label: 'Capacity', value: event.capacity ? `${event.registered_count} / ${event.capacity}` : 'Unlimited', sub: spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 20 ? `${spotsLeft} spots left` : '' },
             ].map((item, i) => (
               <div key={i} style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '12px 13px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
                   {item.icon}
-                  <span style={{ color: '#374151', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
+                  <span style={{ color: '#6B7280', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
                 </div>
-                <p style={{ color: item.label === 'Venue' && event.secret_venue ? '#FFC745' : 'white', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: "'Syne', sans-serif" }}>
-                  {item.label === 'Venue' && event.secret_venue ? <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Lock size={11} />{item.value}</span> : item.value}
+                <p style={{ color: item.label === 'Venue' && event.secret_venue ? '#FFC745' : 'white', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: 'var(--font-display)' }}>
+                  {item.label === 'Venue' && event.secret_venue
+                    ? <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Lock size={11} />{item.value}</span>
+                    : item.value
+                  }
                 </p>
-                {item.sub && <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>{item.sub}</p>}
+                {item.sub && <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>{item.sub}</p>}
               </div>
             ))}
           </div>
@@ -352,8 +358,8 @@ export default function EventDetailClient({
           {/* Countdown */}
           {countdown > 0 && (
             <div style={{ background: '#0E1018', border: '1px solid rgba(129,140,248,0.15)', borderRadius: 14, padding: '14px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#4B5563', fontSize: 12, fontWeight: 600 }}>Event starts in</span>
-              <span style={{ color: '#818CF8', fontSize: 18, fontWeight: 900, fontFamily: "'Syne', sans-serif", letterSpacing: '-0.5px' }}>
+              <span style={{ color: '#6B7280', fontSize: 12, fontWeight: 600 }}>Event starts in</span>
+              <span style={{ color: '#818CF8', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
                 {fmtCountdown(countdown)}
               </span>
             </div>
@@ -362,8 +368,8 @@ export default function EventDetailClient({
           {/* Price */}
           {isPaid && (
             <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '13px 15px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#4B5563', fontSize: 12, fontWeight: 600 }}>Ticket Price</span>
-              <span style={{ color: 'white', fontSize: 20, fontWeight: 900, fontFamily: "'Syne', sans-serif" }}>
+              <span style={{ color: '#6B7280', fontSize: 12, fontWeight: 600 }}>Ticket Price</span>
+              <span style={{ color: 'white', fontSize: 20, fontWeight: 900, fontFamily: 'var(--font-display)' }}>
                 PKR {event.ticket_price!.toLocaleString('en-PK')}
               </span>
             </div>
@@ -372,8 +378,8 @@ export default function EventDetailClient({
           {/* Description */}
           {event.description && (
             <div style={{ marginBottom: 20 }}>
-              <h3 style={{ color: 'white', fontSize: 14, fontWeight: 800, margin: '0 0 8px', fontFamily: "'Syne', sans-serif" }}>About</h3>
-              <p style={{ color: '#6B7280', fontSize: 14, lineHeight: 1.7, margin: 0 }}>{event.description}</p>
+              <h3 style={{ color: 'white', fontSize: 14, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>About</h3>
+              <p style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.7, margin: 0 }}>{event.description}</p>
             </div>
           )}
 
@@ -385,10 +391,10 @@ export default function EventDetailClient({
                 <MapPin size={16} color="#818CF8" />
                 <div>
                   <p style={{ color: 'white', fontSize: 13, fontWeight: 600, margin: '0 0 1px' }}>{event.venue_name}</p>
-                  <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{event.venue_address}</p>
+                  <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>{event.venue_address}</p>
                 </div>
               </div>
-              <ExternalLink size={14} color="#4B5563" />
+              <ExternalLink size={14} color="#6B7280" />
             </a>
           )}
         </div>
@@ -403,7 +409,7 @@ export default function EventDetailClient({
             if (!cta.disabled) setShowSheet(true)
           }}
           disabled={cta.disabled}
-          style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? '#374151' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: "'Syne', sans-serif", letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}>
+          style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? '#6B7280' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}>
           {cta.label}
         </button>
       </div>
