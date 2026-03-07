@@ -3,21 +3,30 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Ticket, Mail, Lock, Eye, EyeOff, User, ArrowRight, AlertCircle, Sparkles } from 'lucide-react'
+import {
+  Ticket, Mail, Lock, Eye, EyeOff, User,
+  ArrowRight, AlertCircle, Sparkles, ChevronLeft,
+} from 'lucide-react'
 
 type Mode    = null | 'organizer' | 'attendee'
 type SubMode = 'login' | 'signup'
 
-function Field({ Icon, type, placeholder, value, onChange, end }: {
+// ─── Field ───────────────────────────────────────────────────────────────────
+
+function Field({ Icon, type, placeholder, value, onChange, end, accent }: {
   Icon: typeof Mail; type: string; placeholder: string
-  value: string; onChange: (v: string) => void; end?: React.ReactNode
+  value: string; onChange: (v: string) => void
+  end?: React.ReactNode; accent?: string
 }) {
   const [focus, setFocus] = useState(false)
+  const borderColor = focus
+    ? (accent ? `${accent}55` : 'rgba(148,163,184,0.3)')
+    : 'rgba(255,255,255,0.07)'
   return (
     <div style={{ position: 'relative' }}>
       <Icon
         size={16}
-        color={focus ? '#94A3B8' : '#475569'}
+        color={focus ? (accent ?? '#9CA3AF') : '#374151'}
         style={{ position: 'absolute', left: 15, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', transition: 'color .15s', zIndex: 1 }}
       />
       <input
@@ -28,9 +37,9 @@ function Field({ Icon, type, placeholder, value, onChange, end }: {
           display: 'block', width: '100%',
           padding: end ? '14px 44px 14px 42px' : '14px 16px 14px 42px',
           background: focus ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
-          border: `1px solid ${focus ? 'rgba(148,163,184,0.3)' : 'rgba(255,255,255,0.07)'}`,
-          borderRadius: 12, color: '#F1F5F9', fontSize: 15, outline: 'none',
-          boxSizing: 'border-box' as const, fontFamily: 'inherit',
+          border: `1px solid ${borderColor}`,
+          borderRadius: 12, color: '#F0F2FF', fontSize: 15, outline: 'none',
+          boxSizing: 'border-box' as const, fontFamily: 'var(--font-body)',
           transition: 'background .15s, border-color .15s',
         }}
       />
@@ -43,13 +52,16 @@ function Field({ Icon, type, placeholder, value, onChange, end }: {
   )
 }
 
+// ─── AuthPanel ────────────────────────────────────────────────────────────────
+
 function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const supabase = createClient()
   const router   = useRouter()
   const isOrg    = mode === 'organizer'
-  const accent   = isOrg ? '#60A5FA' : '#FCD34D'
-  const btnBg    = isOrg ? '#2563EB' : '#F59E0B'
+  const accent   = isOrg ? '#1E5EFF' : '#FFC745'
+  const btnBg    = isOrg ? '#1E5EFF' : '#FFC745'
   const btnClr   = isOrg ? '#fff'    : '#000'
+  const btnGlow  = isOrg ? 'rgba(30,94,255,0.45)' : 'rgba(255,199,69,0.4)'
   const expRole  = isOrg ? 'organizer' : 'guest'
 
   const [tab,  setTab]  = useState<SubMode>('login')
@@ -66,7 +78,6 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
     e.preventDefault()
     setErr(null)
     setBusy(true)
-
     try {
       if (tab === 'signup') {
         if (!name.trim())  { setErr('Enter your name'); return }
@@ -75,12 +86,7 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim().toLowerCase(),
           password: pw,
-          options: {
-            data: {
-              full_name: name.trim(),
-              role: isOrg ? 'organizer' : 'guest',   // ← trigger reads this
-            },
-          },
+          options: { data: { full_name: name.trim(), role: isOrg ? 'organizer' : 'guest' } },
         })
 
         if (error) {
@@ -91,7 +97,6 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         }
 
         if (data.user) {
-          // Ensure guest_profiles row exists for attendees
           if (!isOrg) {
             await supabase
               .from('guest_profiles')
@@ -99,7 +104,6 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
           }
           router.push(isOrg ? '/dashboard' : '/explore')
         }
-
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim().toLowerCase(),
@@ -135,54 +139,93 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
 
   const disabled = busy || !email.trim() || !pw
 
+  const perks = isOrg
+    ? ['Create & manage events', 'Guest approvals & check-in', 'Payment collection', 'Analytics & reporting']
+    : ['Discover & register for events', 'Earn Social Credits at every event', 'Collect digital souvenir passes']
+
   return (
     <div>
+      {/* Back */}
       <button
         onClick={onBack}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', fontSize: 13, padding: '0 0 28px', display: 'flex', alignItems: 'center', gap: 5, fontFamily: 'inherit' }}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          color: '#4B5563', fontSize: 13, padding: '0 0 28px',
+          display: 'flex', alignItems: 'center', gap: 5,
+          fontFamily: 'var(--font-body)', transition: 'color .2s',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.color = '#9CA3AF')}
+        onMouseLeave={e => (e.currentTarget.style.color = '#4B5563')}
       >
-        ← Back
+        <ChevronLeft size={14} /> Back
       </button>
 
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '6px 13px', background: isOrg ? 'rgba(37,99,235,0.15)' : 'rgba(245,158,11,0.12)', borderRadius: 99, marginBottom: 16 }}>
-        {isOrg ? <Ticket size={12} color={accent} /> : <Sparkles size={12} color={accent} />}
-        <span style={{ color: accent, fontSize: 11, fontWeight: 700, letterSpacing: '.08em', textTransform: 'uppercase' }}>
+      {/* Mode badge */}
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 7,
+        padding: '5px 13px',
+        background: `${accent}15`,
+        border: `1px solid ${accent}30`,
+        borderRadius: 99, marginBottom: 18,
+      }}>
+        {isOrg ? <Ticket size={11} color={accent} /> : <Sparkles size={11} color={accent} />}
+        <span style={{
+          color: accent, fontSize: 11, fontWeight: 700,
+          letterSpacing: '.08em', textTransform: 'uppercase' as const,
+          fontFamily: 'var(--font-display)',
+        }}>
           {isOrg ? 'Organizer Access' : 'Guest Pass'}
         </span>
       </div>
 
-      <h1 style={{ color: '#F8FAFC', fontSize: 30, fontWeight: 800, margin: '0 0 8px', letterSpacing: '-.6px', lineHeight: 1.15, fontFamily: "'Syne', sans-serif" }}>
-        {tab === 'login'
-          ? (isOrg ? 'Welcome back' : 'Welcome back')
-          : (isOrg ? 'Run the scene' : 'Join the scene')}
+      {/* Heading */}
+      <h1 style={{
+        color: '#F0F2FF', fontSize: 32, fontWeight: 700,
+        margin: '0 0 8px', letterSpacing: '-1px', lineHeight: 1.1,
+        fontFamily: 'var(--font-display)',
+      }}>
+        {tab === 'login' ? 'Welcome back' : (isOrg ? 'Run the scene' : 'Join the scene')}
       </h1>
-      <p style={{ color: '#64748B', fontSize: 15, margin: '0 0 28px', lineHeight: 1.6 }}>
+      <p style={{ color: '#6B7280', fontSize: 15, margin: '0 0 28px', lineHeight: 1.65, fontFamily: 'var(--font-body)' }}>
         {tab === 'login'
           ? 'Sign in to your account.'
           : isOrg ? 'Create your organizer account.' : 'Create your free account.'}
       </p>
 
-      {/* Login / Signup toggle */}
-      <div style={{ display: 'flex', padding: 3, background: 'rgba(255,255,255,0.04)', borderRadius: 12, marginBottom: 22, gap: 3 }}>
+      {/* Sign In / Sign Up toggle */}
+      <div style={{
+        display: 'flex', padding: 3,
+        background: 'rgba(255,255,255,0.04)',
+        borderRadius: 12, marginBottom: 22, gap: 3,
+      }}>
         {(['login', 'signup'] as SubMode[]).map(t => (
           <button
             key={t} onClick={() => reset(t)}
-            style={{ flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer', borderRadius: 9, background: tab === t ? 'rgba(255,255,255,0.08)' : 'transparent', color: tab === t ? '#F1F5F9' : '#475569', fontSize: 14, fontWeight: tab === t ? 700 : 500, transition: 'all .15s', fontFamily: 'inherit' }}
+            style={{
+              flex: 1, padding: '10px 0', border: 'none', cursor: 'pointer',
+              borderRadius: 9,
+              background: tab === t ? 'rgba(255,255,255,0.08)' : 'transparent',
+              color: tab === t ? '#F0F2FF' : '#6B7280',
+              fontSize: 14, fontWeight: tab === t ? 700 : 500,
+              transition: 'all .15s', fontFamily: 'var(--font-display)',
+            }}
           >
             {t === 'login' ? 'Sign In' : 'Sign Up'}
           </button>
         ))}
       </div>
 
-      <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 11 }}>
+      {/* Form */}
+      <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {tab === 'signup' && (
-          <Field Icon={User} type="text" placeholder="Full name" value={name} onChange={setName} />
+          <Field Icon={User} type="text" placeholder="Full name" value={name} onChange={setName} accent={accent} />
         )}
-        <Field Icon={Mail} type="email" placeholder="your@email.com" value={email} onChange={setEmail} />
+        <Field Icon={Mail} type="email" placeholder="your@email.com" value={email} onChange={setEmail} accent={accent} />
         <Field
-          Icon={Lock} type={show ? 'text' : 'password'} placeholder="Password" value={pw} onChange={setPw}
+          Icon={Lock} type={show ? 'text' : 'password'} placeholder="Password" value={pw} onChange={setPw} accent={accent}
           end={
-            <button type="button" onClick={() => setShow(!show)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', padding: 2, display: 'flex' }}>
+            <button type="button" onClick={() => setShow(!show)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4B5563', padding: 2, display: 'flex' }}>
               {show ? <EyeOff size={16} /> : <Eye size={16} />}
             </button>
           }
@@ -190,7 +233,11 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
 
         {tab === 'login' && (
           <div style={{ textAlign: 'right' }}>
-            <a href="/auth/reset-password" style={{ color: '#475569', fontSize: 13, textDecoration: 'none' }}>
+            <a href="/auth/reset-password"
+              style={{ color: '#4B5563', fontSize: 13, textDecoration: 'none', fontFamily: 'var(--font-body)', transition: 'color .2s' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#9CA3AF')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#4B5563')}
+            >
               Forgot password?
             </a>
           </div>
@@ -203,9 +250,20 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
           </div>
         )}
 
+        {/* Submit */}
         <button
           type="submit" disabled={disabled}
-          style={{ marginTop: 4, padding: '14px', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700, background: disabled ? 'rgba(255,255,255,0.05)' : btnBg, color: disabled ? '#334155' : btnClr, cursor: disabled ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontFamily: 'inherit', transition: 'all .2s', boxShadow: disabled ? 'none' : isOrg ? '0 0 24px rgba(37,99,235,.4)' : '0 0 24px rgba(245,158,11,.3)' }}
+          style={{
+            marginTop: 4, padding: '15px', border: 'none', borderRadius: 12,
+            fontSize: 15, fontWeight: 700,
+            background: disabled ? 'rgba(255,255,255,0.05)' : btnBg,
+            color: disabled ? '#374151' : btnClr,
+            cursor: disabled ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            fontFamily: 'var(--font-display)',
+            transition: 'all .2s',
+            boxShadow: disabled ? 'none' : `0 0 36px ${btnGlow}`,
+          }}
         >
           {busy
             ? 'Please wait…'
@@ -214,29 +272,27 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
               : <><span>Create Account</span><ArrowRight size={16} /></>}
         </button>
 
-        <p style={{ textAlign: 'center', color: '#475569', fontSize: 14, margin: '4px 0 0' }}>
+        <p style={{ textAlign: 'center', color: '#6B7280', fontSize: 14, margin: '4px 0 0', fontFamily: 'var(--font-body)' }}>
           {tab === 'login' ? "Don't have an account? " : 'Already registered? '}
           <button
             type="button"
             onClick={() => reset(tab === 'login' ? 'signup' : 'login')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: accent, fontWeight: 700, fontSize: 14, padding: 0, fontFamily: 'inherit' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: accent, fontWeight: 700, fontSize: 14, padding: 0, fontFamily: 'var(--font-body)' }}
           >
             {tab === 'login' ? 'Sign up' : 'Sign in'}
           </button>
         </p>
       </form>
 
+      {/* Perks */}
       <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <p style={{ color: '#334155', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>
+        <p style={{ color: '#374151', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' as const, margin: '0 0 14px', fontFamily: 'var(--font-display)' }}>
           What you get
         </p>
-        {(isOrg
-          ? ['Create & manage events', 'Guest approvals & check-in', 'Payment collection', 'Analytics & reporting']
-          : ['Discover & register for events', 'Earn Social Credits at every event', 'Collect digital souvenir passes']
-        ).map(p => (
+        {perks.map(p => (
           <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 10 }}>
-            <div style={{ width: 6, height: 6, borderRadius: '50%', background: accent, flexShrink: 0 }} />
-            <span style={{ color: '#94A3B8', fontSize: 14 }}>{p}</span>
+            <div style={{ width: 5, height: 5, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}`, flexShrink: 0 }} />
+            <span style={{ color: '#9CA3AF', fontSize: 14, fontFamily: 'var(--font-body)' }}>{p}</span>
           </div>
         ))}
       </div>
@@ -244,7 +300,9 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   )
 }
 
-function Card({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClick }: {
+// ─── RoleCard ─────────────────────────────────────────────────────────────────
+
+function RoleCard({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClick }: {
   badge: string; badgeIcon: React.ReactNode; accent: string; glowClr: string
   title: string; sub: string; perks: string[]; onClick: () => void
 }) {
@@ -256,36 +314,82 @@ function Card({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClick }:
       onMouseLeave={() => setHov(false)}
       style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', flex: '1 1 0', minWidth: 0 }}
     >
-      <div className="card-inner" style={{
+      <div style={{
         height: '100%', boxSizing: 'border-box' as const,
-        background: hov ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${hov ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)'}`,
+        padding: 'clamp(28px,3vw,44px) clamp(24px,2.5vw,40px)',
+        background: hov ? 'rgba(255,255,255,0.04)' : 'rgba(13,15,22,0.95)',
+        border: `1px solid ${hov ? accent + '40' : 'rgba(255,255,255,0.08)'}`,
         borderRadius: 20, position: 'relative', overflow: 'hidden',
-        transform: hov ? 'translateY(-3px)' : 'none',
-        transition: 'all .2s',
-        boxShadow: hov ? '0 20px 60px rgba(0,0,0,.4)' : '0 4px 24px rgba(0,0,0,.2)',
+        transform: hov ? 'translateY(-4px)' : 'none',
+        transition: 'all .25s cubic-bezier(0.4,0,0.2,1)',
+        boxShadow: hov
+          ? `0 24px 64px rgba(0,0,0,.5), 0 0 48px ${glowClr}`
+          : '0 4px 24px rgba(0,0,0,.35)',
       }}>
-        <div style={{ position: 'absolute', top: -60, left: -40, width: 200, height: 200, borderRadius: '50%', background: glowClr, filter: 'blur(60px)', opacity: hov ? .28 : .14, transition: 'opacity .3s', pointerEvents: 'none' }} />
+        {/* Glow blob */}
+        <div style={{
+          position: 'absolute', top: -80, left: -60,
+          width: 300, height: 300, borderRadius: '50%',
+          background: glowClr, filter: 'blur(80px)',
+          opacity: hov ? .22 : .09, transition: 'opacity .3s',
+          pointerEvents: 'none',
+        }} />
+
         <div style={{ position: 'relative' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '7px 14px', background: `${accent}22`, borderRadius: 99, marginBottom: 24 }}>
+          {/* Badge */}
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 7,
+            padding: '5px 13px',
+            background: `${accent}15`,
+            border: `1px solid ${accent}30`,
+            borderRadius: 99, marginBottom: 24,
+          }}>
             {badgeIcon}
-            <span style={{ color: accent, fontSize: 11, fontWeight: 700, letterSpacing: '.09em', textTransform: 'uppercase' }}>{badge}</span>
+            <span style={{
+              color: accent, fontSize: 11, fontWeight: 700,
+              letterSpacing: '.08em', textTransform: 'uppercase' as const,
+              fontFamily: 'var(--font-display)',
+            }}>
+              {badge}
+            </span>
           </div>
-          <h2 className="card-title" style={{ color: '#F8FAFC', fontWeight: 800, margin: '0 0 14px', letterSpacing: '-.5px', lineHeight: 1.2, fontFamily: "'Syne', sans-serif" }}>
+
+          {/* Title */}
+          <h2 style={{
+            color: '#F0F2FF', fontWeight: 700,
+            margin: '0 0 14px', letterSpacing: '-1px', lineHeight: 1.15,
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(26px,2.4vw,38px)',
+          }}>
             {title}
           </h2>
-          <p style={{ color: '#64748B', fontSize: 15, margin: '0 0 28px', lineHeight: 1.7 }}>{sub}</p>
+
+          <p style={{ color: '#6B7280', fontSize: 15, margin: '0 0 28px', lineHeight: 1.7, fontFamily: 'var(--font-body)' }}>
+            {sub}
+          </p>
+
           <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 22 }} />
-          <p style={{ color: '#334155', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', margin: '0 0 14px' }}>
+
+          <p style={{
+            color: '#374151', fontSize: 11, fontWeight: 700,
+            letterSpacing: '.1em', textTransform: 'uppercase' as const,
+            margin: '0 0 14px', fontFamily: 'var(--font-display)',
+          }}>
             What you get
           </p>
           {perks.map(p => (
             <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 12 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: accent, flexShrink: 0 }} />
-              <span style={{ color: '#94A3B8', fontSize: 14, lineHeight: 1.5 }}>{p}</span>
+              <div style={{ width: 5, height: 5, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}`, flexShrink: 0 }} />
+              <span style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--font-body)' }}>{p}</span>
             </div>
           ))}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 28, color: accent, fontSize: 14, fontWeight: 600 }}>
+
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6, marginTop: 28,
+            color: accent, fontSize: 14, fontWeight: 600,
+            fontFamily: 'var(--font-display)',
+            transition: 'gap .2s',
+          }}>
             <span>Get started</span><ArrowRight size={14} />
           </div>
         </div>
@@ -294,92 +398,185 @@ function Card({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClick }:
   )
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function AuthPage() {
   const [mode, setMode] = useState<Mode>(null)
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap');
         *, *::before, *::after { box-sizing: border-box; }
-        html, body { margin: 0; background: #060810; }
-        ::placeholder { color: #334155 !important; }
-        input:-webkit-autofill { -webkit-box-shadow: 0 0 0 100px #0d1117 inset !important; -webkit-text-fill-color: #F1F5F9 !important; }
-        @keyframes fade { from{opacity:0} to{opacity:1} }
-        @keyframes up   { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-
-        .page {
-          min-height: 100svh;
-          background: radial-gradient(ellipse 90% 55% at 50% -5%, rgba(14,30,80,.85) 0%, #060810 65%);
-          display: flex; flex-direction: column; align-items: center; justify-content: center;
-          padding: 48px clamp(24px, 5vw, 80px);
-          font-family: 'DM Sans', -apple-system, sans-serif;
-          animation: fade .35s ease both;
+        html, body { margin: 0; background: #080A10; }
+        ::placeholder { color: #374151 !important; }
+        input:-webkit-autofill {
+          -webkit-box-shadow: 0 0 0 100px #0c0e16 inset !important;
+          -webkit-text-fill-color: #F0F2FF !important;
         }
-        .content-wrap { width: 100%; margin: 0 auto; transition: max-width .3s ease; }
-        .content-wrap.picker { max-width: 1200px; }
-        .content-wrap.form   { max-width: 480px; }
-        .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
-        .card-inner { padding: clamp(28px, 3vw, 44px) clamp(24px, 2.5vw, 40px); }
-        .card-title  { font-size: clamp(26px, 2.4vw, 36px); }
-        .fbox {
-          background: rgba(255,255,255,0.025);
+
+        @keyframes authFadeUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes authFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes orbDrift {
+          0%,100% { transform: translate(0,0)        scale(1);    opacity: .18; }
+          33%     { transform: translate(50px,-40px)  scale(1.1);  opacity: .25; }
+          66%     { transform: translate(-30px,30px)  scale(0.9);  opacity: .12; }
+        }
+        @keyframes orbDrift2 {
+          0%,100% { transform: translate(0,0)         scale(1);    opacity: .1; }
+          50%     { transform: translate(-60px,40px)   scale(1.15); opacity: .18; }
+        }
+        @keyframes blobMorph {
+          0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+          25%     { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+          50%     { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
+          75%     { border-radius: 60% 30% 60% 40% / 70% 40% 50% 60%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+
+        .auth-page {
+          min-height: 100svh;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          padding: 48px clamp(20px, 5vw, 80px);
+          font-family: var(--font-body);
+          position: relative; overflow: hidden;
+          animation: authFadeIn .35s ease both;
+        }
+        /* Grid overlay */
+        .auth-grid {
+          position: fixed; inset: 0; pointer-events: none; z-index: 0;
+          background-image:
+            linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+          background-size: 64px 64px;
+          mask-image: radial-gradient(ellipse 90% 80% at 50% 10%, black 0%, transparent 100%);
+          -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 10%, black 0%, transparent 100%);
+        }
+        /* Orbs */
+        .auth-orb-1 {
+          position: fixed; top: -20%; left: 50%; transform: translateX(-50%);
+          width: 800px; height: 600px; pointer-events: none; z-index: 0;
+          background: radial-gradient(ellipse, rgba(30,94,255,.18) 0%, transparent 68%);
+          animation: orbDrift 18s ease-in-out infinite;
+        }
+        .auth-orb-2 {
+          position: fixed; top: 25%; right: 5%;
+          width: 500px; height: 500px; pointer-events: none; z-index: 0;
+          background: radial-gradient(ellipse, rgba(139,92,246,.08) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: blobMorph 14s ease-in-out infinite, orbDrift2 20s ease-in-out infinite;
+        }
+        .auth-orb-3 {
+          position: fixed; bottom: 5%; left: 5%;
+          width: 400px; height: 400px; pointer-events: none; z-index: 0;
+          background: radial-gradient(ellipse, rgba(255,199,69,.06) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: blobMorph 11s ease-in-out 4s infinite;
+        }
+        /* Content wrapper */
+        .auth-content {
+          width: 100%; position: relative; z-index: 1;
+          transition: max-width .3s cubic-bezier(0.4,0,0.2,1);
+        }
+        .auth-content.picker { max-width: 1100px; }
+        .auth-content.form   { max-width: 480px; }
+        /* Cards */
+        .auth-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: stretch; }
+        /* Form box */
+        .auth-fbox {
+          background: rgba(13,15,22,0.92);
+          backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
           border: 1px solid rgba(255,255,255,0.08);
           border-radius: 22px; padding: 40px 36px;
-          animation: up .25s ease both;
+          animation: authFadeUp .25s ease both;
+          box-shadow: 0 24px 64px rgba(0,0,0,.5);
         }
+        /* Responsive */
         @media (max-width: 640px) {
-          .page { padding: 28px 16px; }
-          .content-wrap.picker { max-width: 480px; }
-          .cards { grid-template-columns: 1fr; gap: 16px; }
-          .fbox { padding: 28px 20px; }
-          .card-title { font-size: 28px; }
+          .auth-page { padding: 28px 16px; }
+          .auth-content.picker { max-width: 480px; }
+          .auth-cards { grid-template-columns: 1fr; gap: 14px; }
+          .auth-fbox { padding: 28px 20px; }
         }
         @media (min-width: 1440px) {
-          .content-wrap.picker { max-width: 1320px; }
-          .cards { gap: 28px; }
+          .auth-content.picker { max-width: 1280px; }
+          .auth-cards { gap: 24px; }
         }
       `}</style>
 
-      <div className="page">
-        <div style={{ position: 'fixed', inset: 0, backgroundImage: 'linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px)', backgroundSize: '48px 48px', pointerEvents: 'none', zIndex: 0 }} />
+      <div className="auth-page">
+        {/* Background layers */}
+        <div className="auth-grid"  aria-hidden="true" />
+        <div className="auth-orb-1" aria-hidden="true" />
+        <div className="auth-orb-2" aria-hidden="true" />
+        <div className="auth-orb-3" aria-hidden="true" />
 
-        <div className={`content-wrap ${mode ? 'form' : 'picker'}`} style={{ position: 'relative', zIndex: 1 }}>
+        <div className={`auth-content ${mode ? 'form' : 'picker'}`}>
 
           {/* Logo */}
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <a href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-              <div style={{ width: 48, height: 48, background: 'linear-gradient(135deg,#2563EB,#1D4ED8)', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 32px rgba(37,99,235,.5),inset 0 1px 0 rgba(255,255,255,.15)' }}>
+              <div style={{
+                width: 48, height: 48,
+                background: 'linear-gradient(135deg, #2B6FFF, #1448CC)',
+                borderRadius: 14,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 0 32px rgba(30,94,255,.5), inset 0 1px 0 rgba(255,255,255,.15)',
+              }}>
                 <Ticket size={22} color="white" strokeWidth={2.5} />
               </div>
-              <span style={{ color: '#F8FAFC', fontSize: 26, fontWeight: 800, letterSpacing: '-.5px', fontFamily: "'Syne',sans-serif" }}>Tikkit</span>
+              <span style={{
+                color: '#F0F2FF', fontSize: 28, fontWeight: 700,
+                letterSpacing: '-1px', fontFamily: 'var(--font-display)',
+              }}>
+                Tikkit
+              </span>
             </a>
           </div>
 
+          {/* Picker heading */}
           {!mode && (
-            <div style={{ textAlign: 'center', marginBottom: 36, animation: 'up .3s ease both' }}>
-              <h1 style={{ color: '#F8FAFC', fontSize: 'clamp(28px, 3vw, 40px)', fontWeight: 800, margin: '0 0 10px', letterSpacing: '-.8px', lineHeight: 1.15, fontFamily: "'Syne', sans-serif" }}>
+            <div style={{ textAlign: 'center', marginBottom: 36, animation: 'authFadeUp .3s ease both' }}>
+              <h1 style={{
+                color: '#F0F2FF',
+                fontSize: 'clamp(28px, 3vw, 46px)', fontWeight: 700,
+                margin: '0 0 10px', letterSpacing: '-1.5px', lineHeight: 1.1,
+                fontFamily: 'var(--font-display)',
+              }}>
                 How will you use Tikkit?
               </h1>
-              <p style={{ color: '#64748B', fontSize: 16, margin: 0, lineHeight: 1.6 }}>
+              <p style={{ color: '#6B7280', fontSize: 16, margin: 0, lineHeight: 1.65, fontFamily: 'var(--font-body)' }}>
                 Choose your path to get started.
               </p>
             </div>
           )}
 
+          {/* Cards or Form */}
           {!mode ? (
-            <div className="cards" style={{ animation: 'up .3s ease both' }}>
-              <Card
-                badge="Organizer Access" badgeIcon={<Ticket size={12} color="#60A5FA" />}
-                accent="#60A5FA" glowClr="rgba(37,99,235,.8)"
+            <div className="auth-cards" style={{ animation: 'authFadeUp .35s ease 0.05s both' }}>
+              <RoleCard
+                badge="Organizer Access"
+                badgeIcon={<Ticket size={11} color="#1E5EFF" />}
+                accent="#1E5EFF"
+                glowClr="rgba(30,94,255,0.35)"
                 title="Run The Scene"
                 sub="Create events, manage your guest list, and collect payments — all in one place."
                 perks={['Create & manage events', 'Guest approvals & check-in', 'Payment collection', 'Analytics & reporting']}
                 onClick={() => setMode('organizer')}
               />
-              <Card
-                badge="Guest Pass" badgeIcon={<Sparkles size={12} color="#FCD34D" />}
-                accent="#FCD34D" glowClr="rgba(245,158,11,.6)"
+              <RoleCard
+                badge="Guest Pass"
+                badgeIcon={<Sparkles size={11} color="#FFC745" />}
+                accent="#FFC745"
+                glowClr="rgba(255,199,69,0.25)"
                 title="Join The Scene"
                 sub="Discover events, register instantly, and collect digital passes from every show you attend."
                 perks={['Discover & register for events', 'Earn Social Credits at every event', 'Collect digital souvenir passes']}
@@ -387,7 +584,7 @@ export default function AuthPage() {
               />
             </div>
           ) : (
-            <div className="fbox">
+            <div className="auth-fbox">
               <AuthPanel mode={mode} onBack={() => setMode(null)} />
             </div>
           )}

@@ -1,268 +1,360 @@
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Ticket, Eye, EyeOff, Lock, Check, AlertCircle } from 'lucide-react'
+import { Ticket, Eye, EyeOff, Lock, Check, AlertCircle, ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 
 function ResetPasswordForm() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const router   = useRouter()
   const supabase = createClient()
 
-  const [password, setPassword] = useState('')
+  const [password,        setPassword]        = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
-  const [sessionReady, setSessionReady] = useState(false)
+  const [showPassword,    setShowPassword]    = useState(false)
+  const [showConfirm,     setShowConfirm]     = useState(false)
+  const [loading,         setLoading]         = useState(false)
+  const [error,           setError]           = useState<string | null>(null)
+  const [done,            setDone]            = useState(false)
+  const [sessionReady,    setSessionReady]    = useState(false)
 
   useEffect(() => {
-    // Supabase sends the user to this page with a hash fragment containing
-    // the access_token. The client SDK picks it up automatically on mount.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setSessionReady(true)
-      }
+      if (event === 'PASSWORD_RECOVERY') setSessionReady(true)
     })
     return () => subscription.unsubscribe()
   }, [])
 
+  const strengthLevel = password.length === 0 ? 0
+    : password.length < 6  ? 1
+    : password.length < 10 ? 2
+    : password.length < 14 ? 3 : 4
+
+  const strengthColor = ['transparent', '#EF4444', '#F59E0B', '#FFC745', '#22C55E'][strengthLevel]
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters.')
-      return
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match.')
-      return
-    }
-
+    if (password.length < 8)           { setError('Password must be at least 8 characters.'); return }
+    if (password !== confirmPassword)  { setError('Passwords do not match.'); return }
     setLoading(true)
     const { error: updateError } = await supabase.auth.updateUser({ password })
     setLoading(false)
-
-    if (updateError) {
-      setError(updateError.message)
-    } else {
-      setDone(true)
-      setTimeout(() => router.push('/auth/login'), 3000)
-    }
+    if (updateError) { setError(updateError.message) }
+    else { setDone(true); setTimeout(() => router.push('/auth/login'), 3000) }
   }
 
+  const inputStyle = (focused: boolean): React.CSSProperties => ({
+    display: 'block', width: '100%',
+    padding: '14px 44px 14px 16px',
+    background: focused ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+    border: `1px solid ${focused ? 'rgba(30,94,255,0.45)' : 'rgba(255,255,255,0.07)'}`,
+    borderRadius: 12, color: '#F0F2FF', fontSize: 15, outline: 'none',
+    boxSizing: 'border-box', fontFamily: 'var(--font-body)',
+    transition: 'background .15s, border-color .15s',
+  })
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#0A0C12',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px',
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    }}>
-      {/* Background glow */}
-      <div style={{
-        position: 'fixed', inset: 0, pointerEvents: 'none',
-        background: 'radial-gradient(ellipse 60% 40% at 50% 0%, rgba(30,94,255,0.12) 0%, transparent 70%)',
-      }} />
+    <>
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { margin: 0; background: #080A10; }
+        ::placeholder { color: #374151 !important; }
+        input:-webkit-autofill {
+          -webkit-box-shadow: 0 0 0 100px #0c0e16 inset !important;
+          -webkit-text-fill-color: #F0F2FF !important;
+        }
+        @keyframes rsFadeIn  { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes rsFadeUp  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes orbDrift {
+          0%,100% { transform: translate(0,0)       scale(1);    opacity: .18; }
+          33%     { transform: translate(50px,-40px) scale(1.1);  opacity: .25; }
+          66%     { transform: translate(-30px,30px) scale(0.9);  opacity: .12; }
+        }
+        @keyframes blobMorph {
+          0%,100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+          25%     { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+          50%     { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
+          75%     { border-radius: 60% 30% 60% 40% / 70% 40% 50% 60%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+        }
+        .rs-page {
+          min-height: 100svh;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          padding: 40px 24px; font-family: var(--font-body);
+          position: relative; overflow: hidden;
+          animation: rsFadeIn .35s ease both;
+        }
+        .rs-grid {
+          position: fixed; inset: 0; pointer-events: none; z-index: 0;
+          background-image:
+            linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+          background-size: 64px 64px;
+          mask-image: radial-gradient(ellipse 90% 80% at 50% 10%, black 0%, transparent 100%);
+          -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 10%, black 0%, transparent 100%);
+        }
+        .rs-orb-1 {
+          position: fixed; top: -20%; left: 50%; transform: translateX(-50%);
+          width: 700px; height: 550px; pointer-events: none; z-index: 0;
+          background: radial-gradient(ellipse, rgba(30,94,255,.15) 0%, transparent 68%);
+          animation: orbDrift 18s ease-in-out infinite;
+        }
+        .rs-orb-2 {
+          position: fixed; bottom: 10%; right: 5%;
+          width: 400px; height: 400px; pointer-events: none; z-index: 0;
+          background: radial-gradient(ellipse, rgba(139,92,246,.07) 0%, transparent 70%);
+          border-radius: 50%;
+          animation: blobMorph 14s ease-in-out infinite;
+        }
+        .rs-card {
+          background: rgba(13,15,22,0.92);
+          backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 22px; padding: 40px 36px;
+          box-shadow: 0 24px 64px rgba(0,0,0,.5);
+          animation: rsFadeUp .3s ease both;
+        }
+        @media (max-width: 480px) {
+          .rs-card { padding: 28px 20px; }
+          .rs-page { padding: 28px 16px; }
+        }
+      `}</style>
 
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '420px' }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-            <div style={{
-              width: '36px', height: '36px', background: '#1E5EFF', borderRadius: '10px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Ticket size={18} color="white" />
-            </div>
-            <span style={{ color: 'white', fontSize: '22px', fontWeight: 800, fontFamily: 'Poppins, sans-serif', letterSpacing: '-0.5px' }}>
-              Tikkit
-            </span>
-          </Link>
-        </div>
+      <div className="rs-page">
+        <div className="rs-grid"  aria-hidden="true" />
+        <div className="rs-orb-1" aria-hidden="true" />
+        <div className="rs-orb-2" aria-hidden="true" />
 
-        {/* Card */}
-        <div style={{
-          background: '#13151E',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: '16px',
-          padding: '36px',
-        }}>
-          {done ? (
-            /* Success state */
-            <div style={{ textAlign: 'center' }}>
+        <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: 440 }}>
+
+          {/* Logo */}
+          <div style={{ textAlign: 'center', marginBottom: 36 }}>
+            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
               <div style={{
-                width: '56px', height: '56px', background: 'rgba(34,197,94,0.15)',
-                borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 20px',
+                width: 44, height: 44,
+                background: 'linear-gradient(135deg, #2B6FFF, #1448CC)',
+                borderRadius: 13,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 0 28px rgba(30,94,255,.45), inset 0 1px 0 rgba(255,255,255,.15)',
               }}>
-                <Check size={24} color="#22C55E" />
+                <Ticket size={20} color="white" strokeWidth={2.5} />
               </div>
-              <h2 style={{ color: 'white', fontSize: '20px', fontWeight: 700, fontFamily: 'Poppins, sans-serif', margin: '0 0 8px' }}>
-                Password updated!
-              </h2>
-              <p style={{ color: '#6B7280', fontSize: '14px', margin: '0 0 24px', lineHeight: 1.6 }}>
-                Your password has been changed successfully. Redirecting you to login...
-              </p>
-              <Link href="/auth/login" style={{
-                display: 'block', padding: '12px', background: '#1E5EFF', color: 'white',
-                textDecoration: 'none', borderRadius: '10px', fontSize: '15px', fontWeight: 700, textAlign: 'center',
-              }}>
-                Go to Login
-              </Link>
-            </div>
-          ) : (
-            /* Form state */
-            <>
-              <div style={{ marginBottom: '28px' }}>
+              <span style={{ color: '#F0F2FF', fontSize: 26, fontWeight: 700, letterSpacing: '-1px', fontFamily: 'var(--font-display)' }}>
+                Tikkit
+              </span>
+            </Link>
+          </div>
+
+          {/* Card */}
+          <div className="rs-card">
+            {done ? (
+              /* ── Success ── */
+              <div style={{ textAlign: 'center' }}>
                 <div style={{
-                  width: '44px', height: '44px', background: 'rgba(30,94,255,0.15)',
-                  borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  marginBottom: '16px',
+                  width: 60, height: 60,
+                  background: 'rgba(34,197,94,0.12)',
+                  border: '1px solid rgba(34,197,94,0.2)',
+                  borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  margin: '0 auto 20px',
+                  boxShadow: '0 0 24px rgba(34,197,94,0.15)',
                 }}>
-                  <Lock size={20} color="#1E5EFF" />
+                  <Check size={26} color="#22C55E" />
                 </div>
-                <h2 style={{ color: 'white', fontSize: '22px', fontWeight: 800, fontFamily: 'Poppins, sans-serif', margin: '0 0 6px', letterSpacing: '-0.5px' }}>
-                  Set new password
+                <h2 style={{
+                  color: '#F0F2FF', fontSize: 24, fontWeight: 700,
+                  fontFamily: 'var(--font-display)', margin: '0 0 10px', letterSpacing: '-0.5px',
+                }}>
+                  Password updated
                 </h2>
-                <p style={{ color: '#6B7280', fontSize: '14px', margin: 0, lineHeight: 1.6 }}>
-                  Choose a strong password for your Tikkit account.
+                <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 28px', lineHeight: 1.65 }}>
+                  All done. Redirecting you to login in a moment…
                 </p>
+                <Link href="/auth/login" style={{
+                  display: 'block', padding: '14px',
+                  background: '#1E5EFF', color: 'white',
+                  textDecoration: 'none', borderRadius: 12,
+                  fontSize: 15, fontWeight: 700, textAlign: 'center',
+                  fontFamily: 'var(--font-display)',
+                  boxShadow: '0 0 32px rgba(30,94,255,0.45)',
+                }}>
+                  Go to Login
+                </Link>
               </div>
-
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {/* New password */}
-                <div>
-                  <label style={{ display: 'block', color: '#9CA3AF', fontSize: '12px', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    New Password
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      placeholder="Min. 8 characters"
-                      required
-                      style={{
-                        width: '100%', padding: '11px 42px 11px 14px',
-                        background: '#0F1117', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '10px', color: 'white', fontSize: '14px',
-                        outline: 'none', boxSizing: 'border-box',
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      style={{
-                        position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
-                        background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', padding: 0,
-                      }}
-                    >
-                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Confirm password */}
-                <div>
-                  <label style={{ display: 'block', color: '#9CA3AF', fontSize: '12px', fontWeight: 600, marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Confirm Password
-                  </label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type={showConfirm ? 'text' : 'password'}
-                      value={confirmPassword}
-                      onChange={e => setConfirmPassword(e.target.value)}
-                      placeholder="Repeat new password"
-                      required
-                      style={{
-                        width: '100%', padding: '11px 42px 11px 14px',
-                        background: '#0F1117', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '10px', color: 'white', fontSize: '14px',
-                        outline: 'none', boxSizing: 'border-box',
-                      }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirm(!showConfirm)}
-                      style={{
-                        position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
-                        background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', padding: 0,
-                      }}
-                    >
-                      {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Password strength hint */}
-                {password.length > 0 && (
-                  <div style={{ display: 'flex', gap: '4px' }}>
-                    {[1,2,3,4].map(i => (
-                      <div key={i} style={{
-                        flex: 1, height: '3px', borderRadius: '2px',
-                        background: password.length >= i * 3
-                          ? (password.length >= 10 ? '#22C55E' : password.length >= 6 ? '#FFC745' : '#EF4444')
-                          : 'rgba(255,255,255,0.1)',
-                        transition: 'background 0.3s',
-                      }} />
-                    ))}
-                  </div>
-                )}
-
-                {/* Error */}
-                {error && (
+            ) : (
+              /* ── Form ── */
+              <>
+                {/* Icon + heading */}
+                <div style={{ marginBottom: 28 }}>
                   <div style={{
-                    display: 'flex', alignItems: 'center', gap: '8px',
-                    padding: '12px 14px', background: 'rgba(239,68,68,0.1)',
-                    border: '1px solid rgba(239,68,68,0.2)', borderRadius: '8px',
+                    width: 46, height: 46,
+                    background: 'rgba(30,94,255,0.12)',
+                    border: '1px solid rgba(30,94,255,0.2)',
+                    borderRadius: 13,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginBottom: 18,
                   }}>
-                    <AlertCircle size={14} color="#EF4444" style={{ shrink: 0 }} />
-                    <span style={{ color: '#FCA5A5', fontSize: '13px' }}>{error}</span>
+                    <Lock size={20} color="#1E5EFF" />
                   </div>
-                )}
+                  <h2 style={{
+                    color: '#F0F2FF', fontSize: 26, fontWeight: 700,
+                    fontFamily: 'var(--font-display)', margin: '0 0 8px', letterSpacing: '-0.75px',
+                  }}>
+                    Set new password
+                  </h2>
+                  <p style={{ color: '#6B7280', fontSize: 14, margin: 0, lineHeight: 1.65 }}>
+                    Choose a strong password for your Tikkit account.
+                  </p>
+                </div>
 
-                <button
-                  type="submit"
-                  disabled={loading || !password || !confirmPassword}
-                  style={{
-                    width: '100%', padding: '13px',
-                    background: loading ? 'rgba(30,94,255,0.5)' : '#1E5EFF',
-                    color: 'white', border: 'none', borderRadius: '10px',
-                    fontSize: '15px', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer',
-                    marginTop: '4px', transition: 'opacity 0.2s',
-                    boxShadow: '0 0 30px rgba(30,94,255,0.3)',
-                  }}
-                >
-                  {loading ? 'Updating...' : 'Update Password'}
-                </button>
-              </form>
-            </>
-          )}
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {/* New password */}
+                  <PasswordField
+                    label="New Password"
+                    value={password}
+                    onChange={setPassword}
+                    show={showPassword}
+                    onToggle={() => setShowPassword(s => !s)}
+                    placeholder="Min. 8 characters"
+                  />
+
+                  {/* Strength bar */}
+                  {password.length > 0 && (
+                    <div style={{ display: 'flex', gap: 4, marginTop: -6 }}>
+                      {[1, 2, 3, 4].map(i => (
+                        <div key={i} style={{
+                          flex: 1, height: 3, borderRadius: 2,
+                          background: i <= strengthLevel ? strengthColor : 'rgba(255,255,255,0.08)',
+                          transition: 'background .3s',
+                        }} />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Confirm password */}
+                  <PasswordField
+                    label="Confirm Password"
+                    value={confirmPassword}
+                    onChange={setConfirmPassword}
+                    show={showConfirm}
+                    onToggle={() => setShowConfirm(s => !s)}
+                    placeholder="Repeat new password"
+                  />
+
+                  {/* Error */}
+                  {error && (
+                    <div style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 10,
+                      padding: '11px 14px',
+                      background: 'rgba(239,68,68,.08)',
+                      border: '1px solid rgba(239,68,68,.15)',
+                      borderRadius: 11,
+                    }}>
+                      <AlertCircle size={15} color="#F87171" style={{ flexShrink: 0, marginTop: 1 }} />
+                      <span style={{ color: '#FCA5A5', fontSize: 13, lineHeight: 1.5 }}>{error}</span>
+                    </div>
+                  )}
+
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={loading || !password || !confirmPassword}
+                    style={{
+                      marginTop: 4, width: '100%', padding: '15px',
+                      background: loading || !password || !confirmPassword
+                        ? 'rgba(255,255,255,0.05)'
+                        : '#1E5EFF',
+                      color: loading || !password || !confirmPassword ? '#374151' : 'white',
+                      border: 'none', borderRadius: 12,
+                      fontSize: 15, fontWeight: 700,
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                      fontFamily: 'var(--font-display)',
+                      transition: 'all .2s',
+                      boxShadow: loading || !password || !confirmPassword
+                        ? 'none'
+                        : '0 0 32px rgba(30,94,255,0.45)',
+                    }}
+                  >
+                    {loading ? 'Updating…' : 'Update Password'}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+
+          {/* Back to login */}
+          <p style={{ textAlign: 'center', marginTop: 20, color: '#4B5563', fontSize: 13 }}>
+            Remembered it?{' '}
+            <Link href="/auth/login" style={{ color: '#1E5EFF', textDecoration: 'none', fontWeight: 600 }}>
+              Back to login
+            </Link>
+          </p>
         </div>
+      </div>
+    </>
+  )
+}
 
-        <p style={{ textAlign: 'center', marginTop: '20px', color: '#4B5563', fontSize: '13px' }}>
-          Remembered it?{' '}
-          <Link href="/auth/login" style={{ color: '#6B8FFF', textDecoration: 'none', fontWeight: 600 }}>
-            Back to login
-          </Link>
-        </p>
+// ─── PasswordField ────────────────────────────────────────────────────────────
+
+function PasswordField({ label, value, onChange, show, onToggle, placeholder }: {
+  label: string; value: string; onChange: (v: string) => void
+  show: boolean; onToggle: () => void; placeholder: string
+}) {
+  const [focus, setFocus] = useState(false)
+  return (
+    <div>
+      <label style={{
+        display: 'block', color: '#6B7280', fontSize: 11, fontWeight: 700,
+        marginBottom: 7, textTransform: 'uppercase' as const, letterSpacing: '.08em',
+        fontFamily: 'var(--font-display)',
+      }}>
+        {label}
+      </label>
+      <div style={{ position: 'relative' }}>
+        <input
+          type={show ? 'text' : 'password'}
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder={placeholder}
+          required
+          onFocus={() => setFocus(true)}
+          onBlur={() => setFocus(false)}
+          style={{
+            display: 'block', width: '100%',
+            padding: '14px 44px 14px 16px',
+            background: focus ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+            border: `1px solid ${focus ? 'rgba(30,94,255,0.45)' : 'rgba(255,255,255,0.07)'}`,
+            borderRadius: 12, color: '#F0F2FF', fontSize: 15, outline: 'none',
+            boxSizing: 'border-box' as const, fontFamily: 'var(--font-body)',
+            transition: 'background .15s, border-color .15s',
+          }}
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          style={{
+            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', padding: 2,
+            display: 'flex',
+          }}
+        >
+          {show ? <EyeOff size={16} /> : <Eye size={16} />}
+        </button>
       </div>
     </div>
   )
 }
 
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0A0C12' }} />}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#080A10' }} />}>
       <ResetPasswordForm />
     </Suspense>
   )
