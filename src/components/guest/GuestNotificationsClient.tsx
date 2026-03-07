@@ -46,7 +46,7 @@ function getNotif(reg: Registration): { icon: typeof Bell; color: string; bg: st
 
   if (reg.status === 'approved' && (reg.payment_status === 'confirmed' || reg.payment_status === 'not_required')) return {
     icon: CheckCircle, color: '#22C55E', bg: 'rgba(34,197,94,0.1)',
-    title: 'You\'re In! 🎉',
+    title: "You're In!",
     body: `Your spot at "${name}" is confirmed. Check your tickets for the QR code.`,
     cta: { label: 'View Ticket', href: '/guest/tikkit' },
   }
@@ -58,18 +58,18 @@ export default function GuestNotificationsClient({ registrations }: { registrati
   const notifs = registrations.map(r => ({ reg: r, notif: getNotif(r) })).filter(n => n.notif !== null)
 
   return (
-    <div style={{ padding: '20px 18px 8px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
-      <h1 style={{ color: 'white', fontSize: 24, fontWeight: 800, fontFamily: 'Poppins, sans-serif', letterSpacing: '-0.5px', margin: '0 0 20px' }}>
+    <div style={{ padding: '20px 18px 8px', fontFamily: 'var(--font-body)' }}>
+      <h1 style={{ color: 'white', fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px', margin: '0 0 20px' }}>
         Notifications
       </h1>
 
       {notifs.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
           <div style={{ width: 56, height: 56, background: 'rgba(255,255,255,0.03)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-            <Bell size={22} color="#1F2937" />
+            <Bell size={22} color="#4B5563" />
           </div>
-          <p style={{ color: '#374151', fontSize: 15, fontWeight: 600, margin: '0 0 4px' }}>All caught up</p>
-          <p style={{ color: '#1F2937', fontSize: 13, margin: 0 }}>Notifications about your event applications will appear here</p>
+          <p style={{ color: '#6B7280', fontSize: 15, fontWeight: 600, margin: '0 0 4px' }}>All caught up</p>
+          <p style={{ color: '#4B5563', fontSize: 13, margin: 0 }}>Notifications about your event applications will appear here</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -87,7 +87,7 @@ export default function GuestNotificationsClient({ registrations }: { registrati
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
                     <p style={{ color: 'white', fontSize: 14, fontWeight: 700, margin: 0 }}>{notif.title}</p>
-                    <span style={{ color: '#374151', fontSize: 11, flexShrink: 0, marginLeft: 8 }}>{fmtRelative(reg.reviewed_at ?? reg.created_at)}</span>
+                    <span style={{ color: '#4B5563', fontSize: 11, flexShrink: 0, marginLeft: 8 }}>{fmtRelative(reg.reviewed_at ?? reg.created_at)}</span>
                   </div>
                   <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 8px', lineHeight: 1.5 }}>{notif.body}</p>
 
@@ -95,7 +95,7 @@ export default function GuestNotificationsClient({ registrations }: { registrati
                   {reg.event?.cover_image_url && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <img src={reg.event.cover_image_url} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover' }} />
-                      <span style={{ color: '#374151', fontSize: 12 }}>
+                      <span style={{ color: '#4B5563', fontSize: 12 }}>
                         {new Date(reg.event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     </div>

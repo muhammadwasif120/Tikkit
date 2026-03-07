@@ -14,17 +14,17 @@ type GuestProfile = {
 } | null
 
 function getTier(score: number) {
-  if (score >= 1000) return { label: 'Elite',    color: '#FFC745', emoji: '👑' }
-  if (score >= 500)  return { label: 'VIP',      color: '#A855F7', emoji: '💜' }
-  if (score >= 200)  return { label: 'Regular',  color: '#1E5EFF', emoji: '🔵' }
-  if (score >= 50)   return { label: 'Rising',   color: '#22C55E', emoji: '🟢' }
-  return               { label: 'Newcomer', color: '#6B7280', emoji: '⚪' }
+  if (score >= 1000) return { label: 'Elite',    color: '#FFC745' }
+  if (score >= 500)  return { label: 'VIP',      color: '#A855F7' }
+  if (score >= 200)  return { label: 'Regular',  color: '#1E5EFF' }
+  if (score >= 50)   return { label: 'Rising',   color: '#22C55E' }
+  return               { label: 'Newcomer', color: '#6B7280' }
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <p style={{ color: '#374151', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 8px', paddingLeft: 4 }}>{title}</p>
+      <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 8px', paddingLeft: 4 }}>{title}</p>
       <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden' }}>{children}</div>
     </div>
   )
@@ -50,7 +50,7 @@ function SettingsRow({ icon: Icon, label, value, onClick, danger = false, last =
         <p style={{ color: danger ? '#EF4444' : 'white', fontSize: 14, fontWeight: 500, margin: 0 }}>{label}</p>
         {value && <p style={{ color: '#4B5563', fontSize: 12, margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>}
       </div>
-      {onClick && <ChevronRight size={16} color={danger ? '#EF4444' : '#374151'} />}
+      {onClick && <ChevronRight size={16} color={danger ? '#EF4444' : '#4B5563'} />}
     </button>
   )
 }
@@ -243,21 +243,20 @@ export default function GuestProfileClient({ userId, userEmail, profile, guestPr
   }
 
   return (
-    <div style={{ padding: '20px 18px 8px', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div style={{ padding: '20px 18px 8px', fontFamily: 'var(--font-body)' }}>
       {/* Avatar + tier */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: `linear-gradient(135deg, ${tier.color}25, ${tier.color}08)`, border: `2px solid ${tier.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {guestProfile?.avatar_url ? (
             <img src={guestProfile.avatar_url} alt={displayName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
           ) : (
-            <span style={{ color: tier.color, fontSize: 22, fontWeight: 800, fontFamily: 'Poppins, sans-serif' }}>{initials}</span>
+            <span style={{ color: tier.color, fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-display)' }}>{initials}</span>
           )}
         </div>
         <div style={{ flex: 1 }}>
-          <h2 style={{ color: 'white', fontSize: 20, fontWeight: 800, fontFamily: 'Poppins, sans-serif', margin: '0 0 2px', letterSpacing: '-0.4px' }}>{displayName}</h2>
+          <h2 style={{ color: 'white', fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-display)', margin: '0 0 2px', letterSpacing: '-0.4px' }}>{displayName}</h2>
           {guestProfile?.username && <p style={{ color: '#4B5563', fontSize: 13, margin: '0 0 6px' }}>@{guestProfile.username}</p>}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', background: `${tier.color}15`, border: `1px solid ${tier.color}28`, borderRadius: 20 }}>
-            <span style={{ fontSize: 11 }}>{tier.emoji}</span>
             <span style={{ color: tier.color, fontSize: 11, fontWeight: 700 }}>{tier.label}</span>
           </div>
         </div>
@@ -271,10 +270,10 @@ export default function GuestProfileClient({ userId, userEmail, profile, guestPr
         {[
           { icon: Zap,   label: 'Credits',  value: score.toLocaleString(), color: tier.color },
           { icon: Award, label: 'Passes',   value: passCount,              color: '#A855F7'  },
-          { icon: Flame, label: 'Streak',   value: `${guestProfile?.attendance_streak ?? 0}🔥`, color: '#F97316' },
+          { icon: Flame, label: 'Streak',   value: guestProfile?.attendance_streak ?? 0,         color: '#F97316' },
         ].map(({ icon: Icon, label, value, color }) => (
           <div key={label} style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '12px', textAlign: 'center' }}>
-            <p style={{ color, fontSize: 18, fontWeight: 800, fontFamily: 'Poppins, sans-serif', margin: '0 0 2px', letterSpacing: '-0.3px' }}>{value}</p>
+            <p style={{ color, fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-display)', margin: '0 0 2px', letterSpacing: '-0.3px' }}>{value}</p>
             <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{label}</p>
           </div>
         ))}
@@ -295,7 +294,7 @@ export default function GuestProfileClient({ userId, userEmail, profile, guestPr
           ].map(({ label, value }) => (
             <div key={label} style={{ textAlign: 'center' }}>
               <p style={{ color: '#E5E7EB', fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{value}</p>
-              <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>{label}</p>
+              <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{label}</p>
             </div>
           ))}
         </div>

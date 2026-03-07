@@ -192,7 +192,7 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
             </span>
             {ticket.checkedIn && <CheckCircle size={13} color="#10B981" style={{ marginLeft: 'auto' }} />}
           </div>
-          <h2 style={{ color: 'white', fontSize: 19, fontWeight: 900, fontFamily: "'Clash Display', sans-serif", margin: '0 0 10px', letterSpacing: '-0.4px', lineHeight: 1.2 }}>
+          <h2 style={{ color: 'white', fontSize: 19, fontWeight: 900, fontFamily: 'var(--font-display)', margin: '0 0 10px', letterSpacing: '-0.4px', lineHeight: 1.2 }}>
             {ticket.eventTitle}
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -245,7 +245,7 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
                 }
               </div>
               <p style={{ color: '#4B5563', fontSize: 11, marginTop: 10 }}>
-                {ticket.checkedIn ? 'You\'re checked in 🎉' : 'Tap to boost brightness · Show at entry'}
+                {ticket.checkedIn ? "You're checked in ✓" : 'Tap to boost brightness · Show at entry'}
               </p>
             </>
           ) : (
@@ -258,9 +258,9 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
                 margin: '0 auto 16px',
                 animation: 'pulse 2.5s ease infinite',
               }}>
-                <Lock size={32} color="#374151" />
+                <Lock size={32} color="#4B5563" />
               </div>
-              <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: '0 0 4px', fontFamily: "'Clash Display', sans-serif" }}>
+              <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>
                 QR Locked
               </p>
               <p style={{ color: '#4B5563', fontSize: 13, margin: '0 0 16px' }}>
@@ -274,7 +274,7 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
                   background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.2)',
                 }}>
                   <Clock size={13} color="#818CF8" />
-                  <span style={{ color: '#818CF8', fontSize: 14, fontWeight: 800, fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.3px' }}>
+                  <span style={{ color: '#818CF8', fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
                     {fmtCountdown(timeLeft)}
                   </span>
                 </div>
@@ -286,11 +286,11 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
         {/* Footer */}
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <p style={{ color: '#374151', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ticket holder</p>
+            <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ticket holder</p>
             <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: 0 }}>{ticket.guestName}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ color: '#374151', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Code</p>
+            <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Code</p>
             <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 700, margin: 0, fontFamily: 'monospace' }}>
               {ticket.ticketCode.replace('TIKKIT-','').slice(0,8)}
             </p>
@@ -311,9 +311,9 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center' }}>
         <Ticket size={48} color="#1E5EFF" style={{ opacity: 0.25, marginBottom: 16 }} />
-        <h3 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: "'Clash Display', sans-serif" }}>No tickets yet</h3>
+        <h3 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No tickets yet</h3>
         <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px' }}>Register and get confirmed for events to see your tickets here.</p>
-        <a href="/explore" style={{ display: 'inline-block', padding: '12px 24px', borderRadius: 14, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
+        <a href="/guest/explore" style={{ display: 'inline-block', padding: '12px 24px', borderRadius: 14, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
           Explore Events
         </a>
       </div>
@@ -322,13 +322,6 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
 
   return (
     <>
-      <style>{`
-        @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-        @keyframes confettiFall {
-          0%   { transform: translateY(0) rotate(0deg); opacity:1; }
-          100% { transform: translateY(100vh) rotate(720deg); opacity:0; }
-        }
-      `}</style>
       <div style={{ padding: '16px' }}>
         {upcoming.length > 0 && (
           <>

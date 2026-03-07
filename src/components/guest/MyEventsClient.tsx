@@ -4,7 +4,8 @@ import { useState, useRef } from 'react'
 import Link from 'next/link'
 import {
   Calendar, MapPin, Clock, Upload, X, CheckCircle,
-  AlertCircle, ChevronRight, Ticket, FileImage, Loader
+  AlertCircle, ChevronRight, Ticket, FileImage, Loader,
+  CreditCard,
 } from 'lucide-react'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
 
@@ -38,7 +39,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
   eoi_approved: {
     label: 'Approved — Pay Now', color: '#EF4444', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.2)',
     icon: <AlertCircle size={13} />,
-    info: 'You\'ve been approved! Upload your payment screenshot to confirm your spot.',
+    info: "You've been approved! Upload your payment screenshot to confirm your spot.",
   },
   payment_pending: {
     label: 'Payment Verifying', color: '#818CF8', bg: 'rgba(129,140,248,0.1)', border: 'rgba(129,140,248,0.2)',
@@ -46,19 +47,19 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
     info: 'Your payment is being verified by the organizer.',
   },
   confirmed: {
-    label: 'Confirmed ✓', color: '#10B981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)',
+    label: 'Confirmed', color: '#10B981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)',
     icon: <CheckCircle size={13} />,
-    info: 'You\'re all set! Your QR ticket is in the Tickets tab.',
+    info: "You're all set! Your QR ticket is in the Tickets tab.",
   },
   registered: {
-    label: 'Registered ✓', color: '#10B981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)',
+    label: 'Registered', color: '#10B981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.2)',
     icon: <CheckCircle size={13} />,
-    info: 'You\'re registered. Your QR ticket is in the Tickets tab.',
+    info: "You're registered. Your QR ticket is in the Tickets tab.",
   },
   waitlisted: {
     label: 'Waitlisted', color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)', border: 'rgba(156,163,175,0.2)',
     icon: <Clock size={13} />,
-    info: 'You\'re on the waitlist. We\'ll notify you if a spot opens up.',
+    info: "You're on the waitlist. We'll notify you if a spot opens up.",
   },
   rejected: {
     label: 'Not Approved', color: '#EF4444', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.15)',
@@ -101,7 +102,7 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
       const res = await submitPaymentScreenshot(fd)
       if (res?.error) { setErr(res.error); return }
       onSuccess()
-    } catch (e) {
+    } catch {
       setErr('Upload failed. Please try again.')
     } finally {
       setBusy(false)
@@ -114,10 +115,10 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
       {/* Sheet */}
       <div style={{
-        position: 'relative', background: '#13151E',
+        position: 'relative', background: 'var(--guest-surface-2)',
         borderRadius: '24px 24px 0 0', padding: '24px 20px 40px',
         border: '1px solid rgba(255,255,255,0.08)',
-        animation: 'slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+        animation: 'sheetSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
         maxHeight: '90vh', overflowY: 'auto',
       }}>
         {/* Handle */}
@@ -125,10 +126,10 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
           <div>
-            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 4px', fontFamily: "'Clash Display', sans-serif" }}>Submit Payment</h3>
-            <p style={{ color: '#4B5563', fontSize: 13, margin: 0 }}>{event.title}</p>
+            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>Submit Payment</h3>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{event.title}</p>
           </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#9CA3AF' }}>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
             <X size={16} />
           </button>
         </div>
@@ -136,7 +137,7 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
         {event.ticket_price && event.ticket_price > 0 && (
           <div style={{ padding: '12px 14px', background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 14, marginBottom: 20 }}>
             <p style={{ color: '#818CF8', fontSize: 13, margin: '0 0 2px', fontWeight: 600 }}>Amount to pay</p>
-            <p style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>
+            <p style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)' }}>
               PKR {event.ticket_price.toLocaleString('en-PK')}
             </p>
           </div>
@@ -164,9 +165,9 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
             </div>
           ) : (
             <>
-              <FileImage size={32} color="#374151" style={{ marginBottom: 10 }} />
+              <FileImage size={32} color="#6B7280" style={{ marginBottom: 10 }} />
               <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: '0 0 4px' }}>Upload payment screenshot</p>
-              <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>Tap to choose · JPG, PNG, HEIC · Max 8MB</p>
+              <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>Tap to choose · JPG, PNG, HEIC · Max 8MB</p>
             </>
           )}
         </div>
@@ -185,13 +186,16 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
           style={{
             width: '100%', padding: '14px', border: 'none', borderRadius: 14,
             background: !file || busy ? 'rgba(255,255,255,0.06)' : '#1E5EFF',
-            color: !file || busy ? '#374151' : 'white',
+            color: !file || busy ? '#6B7280' : 'white',
             fontSize: 15, fontWeight: 700, cursor: !file || busy ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            fontFamily: "'Cabinet Grotesk', sans-serif", transition: 'all 0.2s',
+            fontFamily: 'var(--font-body)', transition: 'all 0.2s',
           }}
         >
-          {busy ? <><Loader size={16} style={{ animation: 'spin 1s linear infinite' }} /> Uploading…</> : <><Upload size={16} /> Submit Screenshot</>}
+          {busy
+            ? <><Loader size={16} className="animate-spin" /> Uploading…</>
+            : <><Upload size={16} /> Submit Screenshot</>
+          }
         </button>
       </div>
     </div>
@@ -207,15 +211,15 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
 
   return (
     <div style={{
-      background: '#13151E', border: `1px solid ${past ? 'rgba(255,255,255,0.04)' : cfg.border}`,
+      background: 'var(--guest-surface)', border: `1px solid ${past ? 'rgba(255,255,255,0.04)' : cfg.border}`,
       borderRadius: 20, overflow: 'hidden', opacity: past ? 0.6 : 1,
-      animation: 'fadeSlideIn 0.3s ease forwards',
+      animation: 'revealUp 0.3s ease forwards',
     }}>
       {/* Cover strip */}
       <div style={{ height: 90, position: 'relative', background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : 'linear-gradient(135deg,#1E3A5F,#0A0C12)' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(19,21,30,1) 0%, rgba(19,21,30,0.2) 100%)' }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(12,14,22,1) 0%, rgba(12,14,22,0.2) 100%)' }} />
         <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.3px' }}>
+          <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
             {event.title}
           </h3>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color, fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 8 }}>
@@ -247,9 +251,9 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
           {reg.status === 'eoi_approved' && (
             <button
               onClick={() => onPay(reg)}
-              style={{ flex: 1, padding: '10px', border: 'none', borderRadius: 12, background: '#EF4444', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif' " }}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', border: 'none', borderRadius: 12, background: '#EF4444', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
             >
-              💳 Pay Now
+              <CreditCard size={13} /> Pay Now
             </button>
           )}
           {(reg.status === 'confirmed' || reg.status === 'registered') && (
@@ -284,22 +288,16 @@ export default function MyEventsClient({ registrations }: { registrations: Regis
   })
 
   const tabs: { key: typeof filter; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'active', label: 'Active' },
+    { key: 'all',     label: 'All'     },
+    { key: 'active',  label: 'Active'  },
     { key: 'pending', label: 'Pending' },
-    { key: 'past', label: 'Past' },
+    { key: 'past',    label: 'Past'    },
   ]
 
   return (
     <>
-      <style>{`
-        @keyframes fadeSlideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-      `}</style>
-
       {successMsg && (
-        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 999, padding: '12px 20px', background: '#10B981', borderRadius: 14, color: 'white', fontSize: 14, fontWeight: 700, boxShadow: '0 8px 24px rgba(16,185,129,0.4)', animation: 'fadeSlideIn 0.3s ease' }}>
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 999, padding: '12px 20px', background: '#10B981', borderRadius: 14, color: 'white', fontSize: 14, fontWeight: 700, boxShadow: '0 8px 24px rgba(16,185,129,0.4)', animation: 'revealUp 0.3s ease', whiteSpace: 'nowrap' }}>
           ✓ Payment screenshot submitted!
         </div>
       )}
@@ -308,7 +306,18 @@ export default function MyEventsClient({ registrations }: { registrations: Regis
         {/* Filter tabs */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none' }}>
           {tabs.map(t => (
-            <button key={t.key} onClick={() => setFilter(t.key)} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: 20, border: `1px solid ${filter === t.key ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`, background: filter === t.key ? 'rgba(30,94,255,0.15)' : '#13151E', color: filter === t.key ? '#818CF8' : '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", transition: 'all 0.15s' }}>
+            <button
+              key={t.key}
+              onClick={() => setFilter(t.key)}
+              style={{
+                flexShrink: 0, padding: '7px 14px', borderRadius: 20,
+                border: `1px solid ${filter === t.key ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`,
+                background: filter === t.key ? 'rgba(30,94,255,0.15)' : 'var(--guest-surface)',
+                color: filter === t.key ? '#818CF8' : '#6B7280',
+                fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                fontFamily: 'var(--font-body)', transition: 'all 0.15s',
+              }}
+            >
               {t.label}
             </button>
           ))}
@@ -320,11 +329,11 @@ export default function MyEventsClient({ registrations }: { registrations: Regis
             {filtered.map(r => <RegCard key={r.id} reg={r} onPay={setPayTarget} />)}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '64px 0', color: '#4B5563' }}>
-            <Calendar size={40} style={{ opacity: 0.2, marginBottom: 14 }} />
-            <p style={{ fontSize: 15, fontWeight: 600, color: '#6B7280', margin: '0 0 8px' }}>No events here</p>
-            <p style={{ fontSize: 13, margin: '0 0 24px' }}>Events you register for will appear here.</p>
-            <Link href="/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
+          <div style={{ textAlign: 'center', padding: '64px 0', color: '#6B7280' }}>
+            <Calendar size={40} color="#4B5563" style={{ opacity: 0.3, marginBottom: 14 }} />
+            <p style={{ fontSize: 15, fontWeight: 600, color: '#9CA3AF', margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No events here</p>
+            <p style={{ fontSize: 13, margin: '0 0 24px', color: '#6B7280' }}>Events you register for will appear here.</p>
+            <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
               Explore Events
             </Link>
           </div>

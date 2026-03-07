@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { User, Edit3, Star, Zap, TrendingUp, TrendingDown, Award, LogOut, Bell, Shield, Instagram, ChevronRight, X, Check, AlertCircle, Flame } from 'lucide-react'
+import { User, Edit3, Star, Zap, TrendingUp, TrendingDown, Award, LogOut, Bell, Shield, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound } from 'lucide-react'
 import { updateGuestProfile, signOut, sendPasswordReset } from '@/app/actions/guestProfileActions'
 import { getCreditTier } from '@/lib/creditUtils'
 
@@ -65,7 +65,7 @@ function EditSheet({ profile, email, onClose, onSave }: {
   const inputStyle: React.CSSProperties = {
     width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
     borderRadius: 12, padding: '11px 13px', color: 'white', fontSize: 14,
-    fontFamily: "'Cabinet Grotesk', sans-serif", outline: 'none', boxSizing: 'border-box',
+    fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box',
   }
 
   const handleUsernameChange = (val: string) => {
@@ -99,7 +99,7 @@ function EditSheet({ profile, email, onClose, onSave }: {
       fd.append('is_discoverable', String(is_discoverable))
       const res = await updateGuestProfile(fd)
       if (res?.error) { setErr(res.error); return }
-      onSave({ full_name, username, phone, instagram_handle, bio, is_discoverable })
+      onSave({ full_name, username, instagram_handle, bio, is_discoverable })
       onClose()
     } catch { setErr('Failed to save. Try again.') }
     finally { setBusy(false) }
@@ -107,21 +107,22 @@ function EditSheet({ profile, email, onClose, onSave }: {
 
   const usernameColor = usernameState === 'available' ? '#10B981' : usernameState === 'taken' ? '#EF4444' : '#4B5563'
   const usernameIcon = usernameState === 'available' ? '✓' : usernameState === 'taken' ? '✗' : usernameState === 'checking' ? '…' : ''
+  const saveDisabled = busy || usernameState === 'taken' || usernameState === 'checking'
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
-      <div style={{ position: 'relative', background: '#13151E', borderRadius: '24px 24px 0 0', padding: '24px 20px 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div style={{ position: 'relative', background: '#13151E', borderRadius: '24px 24px 0 0', padding: '24px 20px 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)', margin: '0 auto 20px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>Edit Profile</h3>
+          <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Edit Profile</h3>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
         </div>
 
         {/* Locked identity fields */}
         <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, marginBottom: 16 }}>
-          <p style={{ color: '#374151', fontSize: 10, fontWeight: 700, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5 }}>
-            🔒 Identity — locked until OTP verified
+          <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5 }}>
+            <Lock size={11} /> Identity — locked until OTP verified
           </p>
           {[
             { label: 'Full Name', value: full_name || '—' },
@@ -148,10 +149,8 @@ function EditSheet({ profile, email, onClose, onSave }: {
           </div>
           {usernameState === 'taken' && <p style={{ color: '#EF4444', fontSize: 11, margin: '4px 0 0' }}>Username taken — try another</p>}
           {usernameState === 'available' && <p style={{ color: '#10B981', fontSize: 11, margin: '4px 0 0' }}>@{username} is available!</p>}
-          <p style={{ color: '#374151', fontSize: 11, margin: '4px 0 0' }}>Only letters, numbers, underscores. Max 20 chars.</p>
+          <p style={{ color: '#4B5563', fontSize: 11, margin: '4px 0 0' }}>Only letters, numbers, underscores. Max 20 chars.</p>
         </div>
-
-
 
         {/* Instagram */}
         <div style={{ marginBottom: 14 }}>
@@ -160,7 +159,7 @@ function EditSheet({ profile, email, onClose, onSave }: {
             <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#4B5563', fontSize: 14, pointerEvents: 'none' }}>@</span>
             <input value={instagram_handle} onChange={e => setInstagram(e.target.value.replace('@',''))} placeholder="yourhandle" style={{ ...inputStyle, paddingLeft: 26 }} />
           </div>
-          <p style={{ color: '#374151', fontSize: 11, margin: '4px 0 0' }}>Optional — helps organizers know you. Full OAuth connect coming soon.</p>
+          <p style={{ color: '#4B5563', fontSize: 11, margin: '4px 0 0' }}>Optional — helps organizers know you. Full OAuth connect coming soon.</p>
         </div>
 
         {/* Bio */}
@@ -187,14 +186,20 @@ function EditSheet({ profile, email, onClose, onSave }: {
             <span style={{ color: '#FCA5A5', fontSize: 13 }}>{err}</span>
           </div>
         )}
+
         {/* Change password */}
-        <button onClick={async () => { const r = await sendPasswordReset(); alert(r.error ? r.error : 'Password reset email sent!') }}
-          style={{ width: '100%', padding: '12px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, background: 'transparent', color: '#9CA3AF', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", marginBottom: 10 }}>
-          🔑 Change Password
+        <button
+          onClick={async () => { const r = await sendPasswordReset(); alert(r.error ? r.error : 'Password reset email sent!') }}
+          style={{ width: '100%', padding: '12px', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 14, background: 'transparent', color: '#9CA3AF', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', marginBottom: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+        >
+          <KeyRound size={14} /> Change Password
         </button>
 
-        <button onClick={handleSave} disabled={busy || usernameState === 'taken' || usernameState === 'checking'}
-          style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: busy || usernameState === 'taken' ? 'rgba(255,255,255,0.06)' : '#1E5EFF', color: busy || usernameState === 'taken' ? '#374151' : 'white', fontSize: 15, fontWeight: 700, cursor: busy || usernameState === 'taken' ? 'not-allowed' : 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif" }}>
+        <button
+          onClick={handleSave}
+          disabled={saveDisabled}
+          style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: saveDisabled ? 'rgba(255,255,255,0.06)' : '#1E5EFF', color: saveDisabled ? '#6B7280' : 'white', fontSize: 15, fontWeight: 700, cursor: saveDisabled ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)' }}
+        >
           {busy ? 'Saving…' : 'Save Changes'}
         </button>
       </div>
@@ -209,13 +214,11 @@ function CreditScoreCard({ score }: { score: number }) {
   const [animated, setAnimated] = useState(false)
   const prevScore = useRef(score)
 
-  // Milestones
   const MILESTONES = [100, 200, 500, 1000]
   const nextMilestone = MILESTONES.find(m => m > score)
   const progress = nextMilestone ? Math.min((score / nextMilestone) * 100, 100) : 100
 
   useEffect(() => {
-    // Check if just hit a milestone
     const hitMilestone = MILESTONES.some(m => prevScore.current < m && score >= m)
     if (hitMilestone) {
       setFireworks(true)
@@ -233,18 +236,21 @@ function CreditScoreCard({ score }: { score: number }) {
           <div>
             <p style={{ color: '#4B5563', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px' }}>Social Credits</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ color: 'white', fontSize: 48, fontWeight: 900, fontFamily: "'Syne', sans-serif", lineHeight: 1, letterSpacing: '-2px' }}>
+              <span style={{ color: 'white', fontSize: 48, fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 1, letterSpacing: '-2px' }}>
                 {score}
               </span>
-              <span style={{ color: '#374151', fontSize: 16, fontWeight: 600 }}>pts</span>
+              <span style={{ color: '#4B5563', fontSize: 16, fontWeight: 600 }}>pts</span>
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
             <span style={{ display: 'inline-block', padding: '5px 12px', borderRadius: 20, background: tier.bg, border: `1px solid ${tier.border}`, color: tier.color, fontSize: 12, fontWeight: 800 }}>
               {tier.label}
             </span>
-            <button onClick={() => { setFireworks(true); setTimeout(() => setFireworks(false), 4000) }} style={{ display: 'block', marginTop: 4, marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#374151', fontSize: 11 }}>
-              🎆 celebrate
+            <button
+              onClick={() => { setFireworks(true); setTimeout(() => setFireworks(false), 4000) }}
+              style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 4, marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#4B5563', fontSize: 11 }}
+            >
+              <Sparkles size={11} /> celebrate
             </button>
           </div>
         </div>
@@ -257,14 +263,16 @@ function CreditScoreCard({ score }: { score: number }) {
             <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
               <div style={{ height: '100%', width: animated ? `${progress}%` : '0%', background: `linear-gradient(90deg, ${tier.color}, ${tier.color}88)`, borderRadius: 3, transition: 'width 1.2s cubic-bezier(0.34,1.56,0.64,1)' }} />
             </div>
-            <p style={{ color: '#374151', fontSize: 11, margin: '6px 0 0', textAlign: 'center' }}>
+            <p style={{ color: '#4B5563', fontSize: 11, margin: '6px 0 0', textAlign: 'center' }}>
               {nextMilestone - score} pts to next tier
             </p>
           </div>
         )}
         {!nextMilestone && (
           <div style={{ textAlign: 'center', padding: '6px 0 0' }}>
-            <span style={{ color: tier.color, fontSize: 13, fontWeight: 700 }}>🏆 Max tier reached!</span>
+            <span style={{ color: tier.color, fontSize: 13, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <Award size={14} /> Max tier reached!
+            </span>
           </div>
         )}
       </div>
@@ -288,47 +296,45 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
     streak_bonus: 'Streak bonus', no_show_deduction: 'No-show', admin_adjustment: 'Adjustment',
   }
 
+  const stats: { label: string; value: number; color: string; icon: React.ReactNode }[] = [
+    { label: 'Attended',  value: profile.total_attended,     color: '#10B981', icon: null },
+    { label: 'Streak',    value: profile.attendance_streak,  color: '#FFC745', icon: <Flame size={14} color="#FFC745" /> },
+    { label: 'No-shows',  value: profile.total_no_shows,     color: '#EF4444', icon: null },
+  ]
+
   return (
     <>
-      <style>{`
-        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-        @keyframes fadeSlideIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes firework {
-          0%   { transform: translate(0,0) scale(1); opacity:1; }
-          100% { transform: translate(calc(cos(var(--angle)) * var(--dist)), calc(sin(var(--angle)) * var(--dist))) scale(0); opacity:0; }
-        }
-      `}</style>
-
       <div style={{ padding: '16px' }}>
         {/* Avatar + name card */}
         <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 22, padding: '20px', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 16 }}>
           {profile.avatar_url
             ? <img src={profile.avatar_url} alt="" style={{ width: 64, height: 64, borderRadius: 20, objectFit: 'cover', border: `2px solid ${tier.border}` }} />
-            : <div style={{ width: 64, height: 64, borderRadius: 20, background: `linear-gradient(135deg,${tier.bg.replace('0.1','0.5')},#080A10)`, border: `2px solid ${tier.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: tier.color, fontSize: 22, fontWeight: 900, fontFamily: "'Syne', sans-serif", flexShrink: 0 }}>
+            : <div style={{ width: 64, height: 64, borderRadius: 20, background: `linear-gradient(135deg,${tier.bg.replace('0.1','0.5')},#080A10)`, border: `2px solid ${tier.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: tier.color, fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-display)', flexShrink: 0 }}>
                 {initials}
               </div>
           }
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h2 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 2px', fontFamily: "'Syne', sans-serif", letterSpacing: '-0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <h2 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {profile.full_name ?? 'Tikkit User'}
             </h2>
             {profile.username && <p style={{ color: '#4B5563', fontSize: 13, margin: '0 0 6px' }}>@{profile.username}</p>}
             <span style={{ padding: '3px 9px', borderRadius: 20, background: tier.bg, border: `1px solid ${tier.border}`, color: tier.color, fontSize: 11, fontWeight: 700 }}>{tier.label}</span>
           </div>
-          <button onClick={() => setShowEdit(true)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '8px 12px', cursor: 'pointer', color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, fontFamily: "'DM Sans', sans-serif" }}>
+          <button
+            onClick={() => setShowEdit(true)}
+            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '8px 12px', cursor: 'pointer', color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, fontFamily: 'var(--font-body)' }}
+          >
             <Edit3 size={13} /> Edit
           </button>
         </div>
 
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
-          {[
-            { label: 'Attended', value: profile.total_attended, color: '#10B981' },
-            { label: 'Streak', value: profile.attendance_streak, color: '#FFC745', suffix: '🔥' },
-            { label: 'No-shows', value: profile.total_no_shows, color: '#EF4444' },
-          ].map(stat => (
+          {stats.map(stat => (
             <div key={stat.label} style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '14px 10px', textAlign: 'center' }}>
-              <p style={{ color: stat.color, fontSize: 24, fontWeight: 900, margin: '0 0 2px', fontFamily: "'Syne', sans-serif" }}>{stat.value}{stat.suffix ?? ''}</p>
+              <p style={{ color: stat.color, fontSize: 24, fontWeight: 900, margin: '0 0 2px', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
+                {stat.value}{stat.icon}
+              </p>
               <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{stat.label}</p>
             </div>
           ))}
@@ -342,7 +348,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
           <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, overflow: 'hidden', marginBottom: 14 }}>
             <button
               onClick={() => setShowTx(!showTx)}
-              style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: "'DM Sans', sans-serif" }}
+              style={{ width: '100%', padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'var(--font-body)' }}
             >
               <span style={{ color: 'white', fontSize: 14, fontWeight: 700 }}>Credit History</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -360,7 +366,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
                       </p>
                       <p style={{ color: '#4B5563', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.event?.title ?? tx.note ?? '—'}</p>
                     </div>
-                    <span style={{ color: tx.points > 0 ? '#10B981' : '#EF4444', fontSize: 14, fontWeight: 800, fontFamily: "'Syne', sans-serif", marginLeft: 12, flexShrink: 0 }}>
+                    <span style={{ color: tx.points > 0 ? '#10B981' : '#EF4444', fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-display)', marginLeft: 12, flexShrink: 0 }}>
                       {tx.points > 0 ? '+' : ''}{tx.points}
                     </span>
                   </div>
@@ -387,7 +393,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
           ))}
           <button
             onClick={() => signOut()}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: "'DM Sans', sans-serif", color: '#EF4444', fontSize: 14 }}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', color: '#EF4444', fontSize: 14 }}
           >
             <LogOut size={16} />
             <span style={{ flex: 1, textAlign: 'left' }}>Sign Out</span>

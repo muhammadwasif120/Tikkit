@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Award, Calendar, Star, X, ChevronDown } from 'lucide-react'
+import { Award, Calendar, Star, X, Ticket, Zap, Flame, Gem, Crown, Sparkles } from 'lucide-react'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type Pass = {
@@ -16,14 +16,14 @@ type Pass = {
 }
 
 /* ─── Config ─────────────────────────────────────────────────────── */
-const PASS_CONFIG: Record<string, { label: string; emoji: string; rarity: string; desc: string }> = {
-  attendance:   { label: 'Attendance Pass',    emoji: '🎫', rarity: 'Common',   desc: 'Attended this event' },
-  early_bird:   { label: 'Early Bird',         emoji: '🐦', rarity: 'Uncommon', desc: 'Registered in the first 24 hours' },
-  vip:          { label: 'VIP Pass',           emoji: '👑', rarity: 'Rare',     desc: 'Had VIP access at this event' },
-  first_timer:  { label: 'First Timer',        emoji: '🌟', rarity: 'Uncommon', desc: 'Your very first Tikkit event' },
-  streak_3:     { label: '3-Event Streak',     emoji: '🔥', rarity: 'Rare',     desc: '3 events in a row' },
-  streak_5:     { label: '5-Event Streak',     emoji: '⚡', rarity: 'Epic',     desc: '5 events in a row' },
-  perfect_score:{ label: 'Perfect Attendance', emoji: '💎', rarity: 'Legendary',desc: 'Never missed a registered event' },
+const PASS_CONFIG: Record<string, { label: string; rarity: string; desc: string }> = {
+  attendance:    { label: 'Attendance Pass',    rarity: 'Common',    desc: 'Attended this event' },
+  early_bird:    { label: 'Early Bird',         rarity: 'Uncommon',  desc: 'Registered in the first 24 hours' },
+  vip:           { label: 'VIP Pass',           rarity: 'Rare',      desc: 'Had VIP access at this event' },
+  first_timer:   { label: 'First Timer',        rarity: 'Uncommon',  desc: 'Your very first Tikkit event' },
+  streak_3:      { label: '3-Event Streak',     rarity: 'Rare',      desc: '3 events in a row' },
+  streak_5:      { label: '5-Event Streak',     rarity: 'Epic',      desc: '5 events in a row' },
+  perfect_score: { label: 'Perfect Attendance', rarity: 'Legendary', desc: 'Never missed a registered event' },
 }
 const RARITY_CONFIG: Record<string, { color: string; bg: string; border: string; glow: string; order: number }> = {
   Common:    { color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)', border: 'rgba(156,163,175,0.2)', glow: 'rgba(156,163,175,0)',    order: 0 },
@@ -31,6 +31,20 @@ const RARITY_CONFIG: Record<string, { color: string; bg: string; border: string;
   Rare:      { color: '#60A5FA', bg: 'rgba(96,165,250,0.1)',  border: 'rgba(96,165,250,0.25)', glow: 'rgba(96,165,250,0.15)', order: 2 },
   Epic:      { color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.25)', glow: 'rgba(168,85,247,0.2)',  order: 3 },
   Legendary: { color: '#FFC745', bg: 'rgba(255,199,69,0.12)', border: 'rgba(255,199,69,0.3)',  glow: 'rgba(255,199,69,0.25)', order: 4 },
+}
+
+/* ─── Pass icon helper ───────────────────────────────────────────── */
+function getPassIcon(type: string, size: number, color: string): React.ReactNode {
+  const map: Record<string, React.ReactNode> = {
+    attendance:    <Ticket size={size} color={color} />,
+    early_bird:    <Zap    size={size} color={color} />,
+    vip:           <Crown  size={size} color={color} />,
+    first_timer:   <Star   size={size} color={color} />,
+    streak_3:      <Flame  size={size} color={color} />,
+    streak_5:      <Zap    size={size} color={color} />,
+    perfect_score: <Gem    size={size} color={color} />,
+  }
+  return map[type] ?? <Ticket size={size} color={color} />
 }
 
 /* ─── Confetti ───────────────────────────────────────────────────── */
@@ -60,7 +74,7 @@ function Confetti({ active, rarity }: { active: boolean; rarity: string }) {
 
 /* ─── Pass Modal ─────────────────────────────────────────────────── */
 function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
-  const cfg = PASS_CONFIG[pass.pass_type] ?? { label: pass.pass_type, emoji: '🎫', rarity: 'Common', desc: '' }
+  const cfg = PASS_CONFIG[pass.pass_type] ?? { label: pass.pass_type, rarity: 'Common', desc: '' }
   const rarity = RARITY_CONFIG[cfg.rarity] ?? RARITY_CONFIG.Common
   const [confetti, setConfetti] = useState(false)
   const [glow, setGlow] = useState(false)
@@ -78,7 +92,7 @@ function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
         background: '#13151E', borderRadius: '28px 28px 0 0',
         border: `1px solid ${rarity.border}`,
         boxShadow: glow ? `0 -20px 80px ${rarity.glow}` : 'none',
-        animation: 'slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)',
+        animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)',
         transition: 'box-shadow 0.6s ease',
         padding: '0 0 40px',
         overflow: 'hidden',
@@ -91,22 +105,22 @@ function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
             : `linear-gradient(135deg, ${rarity.bg.replace('0.1', '0.3')}, #080A10)`,
         }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #13151E 0%, transparent 60%)' }} />
-          {/* Rarity shimmer */}
-          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(105deg, transparent 35%, ${rarity.glow} 50%, transparent 65%)`, animation: 'shimmer 2.5s infinite' }} />
+          {/* Rarity shimmer sweep */}
+          <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(105deg, transparent 35%, ${rarity.glow} 50%, transparent 65%)`, animation: 'shimmerSwipe 2.5s infinite', overflow: 'hidden' }} />
           {/* Close */}
           <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'white', display: 'flex' }}>
             <X size={16} />
           </button>
-          {/* Pass emoji */}
+          {/* Pass icon badge */}
           <div style={{
             position: 'absolute', bottom: -32, left: '50%', transform: 'translateX(-50%)',
             width: 72, height: 72, borderRadius: 22,
             background: `linear-gradient(135deg, ${rarity.bg.replace('0.1','0.4')}, #13151E)`,
             border: `2px solid ${rarity.border}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 34, boxShadow: `0 0 30px ${rarity.glow}`,
+            boxShadow: `0 0 30px ${rarity.glow}`,
           }}>
-            {cfg.emoji}
+            {getPassIcon(pass.pass_type, 30, rarity.color)}
           </div>
         </div>
 
@@ -114,7 +128,7 @@ function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
           <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 20, background: rarity.bg, border: `1px solid ${rarity.border}`, color: rarity.color, fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', marginBottom: 8 }}>
             {cfg.rarity}
           </span>
-          <h2 style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: '0 0 6px', fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.5px' }}>
+          <h2 style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
             {cfg.label}
           </h2>
           <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 20px' }}>{cfg.desc}</p>
@@ -128,15 +142,15 @@ function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
             </p>
           </div>
 
-          <p style={{ color: '#374151', fontSize: 11, margin: '0 0 16px' }}>
+          <p style={{ color: '#4B5563', fontSize: 11, margin: '0 0 16px' }}>
             Issued {new Date(pass.issued_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
 
           <button
             onClick={() => { setConfetti(true); setTimeout(() => setConfetti(false), 3500) }}
-            style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: rarity.bg, border: `1px solid ${rarity.border}`, color: rarity.color, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif" }}
+            style={{ width: '100%', padding: '13px', border: `1px solid ${rarity.border}`, borderRadius: 14, background: rarity.bg, color: rarity.color, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
           >
-            ✨ Celebrate this pass
+            <Sparkles size={14} /> Celebrate this pass
           </button>
         </div>
       </div>
@@ -146,12 +160,11 @@ function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
 
 /* ─── Pass Card ──────────────────────────────────────────────────── */
 function PassCard({ pass, index, onClick, isNew }: { pass: Pass; index: number; onClick: () => void; isNew: boolean }) {
-  const cfg = PASS_CONFIG[pass.pass_type] ?? { label: pass.pass_type, emoji: '🎫', rarity: 'Common', desc: '' }
+  const cfg = PASS_CONFIG[pass.pass_type] ?? { label: pass.pass_type, rarity: 'Common', desc: '' }
   const rarity = RARITY_CONFIG[cfg.rarity] ?? RARITY_CONFIG.Common
   const [confetti, setConfetti] = useState(false)
   const celebratedRef = useRef(false)
 
-  // Auto-confetti for new passes
   useEffect(() => {
     if (isNew && !celebratedRef.current) {
       celebratedRef.current = true
@@ -173,7 +186,7 @@ function PassCard({ pass, index, onClick, isNew }: { pass: Pass; index: number; 
           borderRadius: 18, padding: 0, cursor: 'pointer', textAlign: 'left',
           overflow: 'hidden', width: '100%',
           boxShadow: `0 4px 20px ${rarity.glow}`,
-          animation: `fadeSlideIn 0.35s ease forwards`,
+          animation: `revealUp 0.35s ease forwards`,
           animationDelay: `${index * 60}ms`,
           opacity: 0,
           transition: 'transform 0.15s, box-shadow 0.15s',
@@ -188,10 +201,12 @@ function PassCard({ pass, index, onClick, isNew }: { pass: Pass; index: number; 
         </div>
         <div style={{ padding: '10px 12px 14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <span style={{ fontSize: 22 }}>{cfg.emoji}</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 8, background: rarity.bg }}>
+              {getPassIcon(pass.pass_type, 14, rarity.color)}
+            </div>
             <span style={{ padding: '2px 7px', borderRadius: 20, background: rarity.bg, color: rarity.color, fontSize: 9, fontWeight: 700 }}>{cfg.rarity}</span>
           </div>
-          <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 3px', fontFamily: "'Clash Display', sans-serif", lineHeight: 1.3 }}>{cfg.label}</p>
+          <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 3px', fontFamily: 'var(--font-display)', lineHeight: 1.3 }}>{cfg.label}</p>
           <p style={{ color: '#6B7280', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pass.event?.title ?? '—'}</p>
         </div>
       </button>
@@ -223,7 +238,7 @@ export default function PassesClient({ passes, newPassIds = [] }: { passes: Pass
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center' }}>
         <Award size={48} color="#1E5EFF" style={{ opacity: 0.2, marginBottom: 16 }} />
-        <h3 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: "'Clash Display', sans-serif" }}>No passes yet</h3>
+        <h3 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No passes yet</h3>
         <p style={{ color: '#6B7280', fontSize: 14, margin: 0 }}>Attend events to collect digital passes. Each event you attend mints you a unique collectible.</p>
       </div>
     )
@@ -231,23 +246,13 @@ export default function PassesClient({ passes, newPassIds = [] }: { passes: Pass
 
   return (
     <>
-      <style>{`
-        @keyframes fadeSlideIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-        @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
-        @keyframes shimmer { 0%{transform:translateX(-100%)} 100%{transform:translateX(200%)} }
-        @keyframes confettiFall {
-          0%   { transform: translateY(0) rotate(0deg); opacity:1; }
-          100% { transform: translateY(110vh) rotate(720deg); opacity:0; }
-        }
-      `}</style>
-
       <div style={{ padding: '16px' }}>
         {/* Header stats */}
         <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '14px 16px', marginBottom: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div>
               <p style={{ color: '#6B7280', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 2px' }}>Total Passes</p>
-              <p style={{ color: 'white', fontSize: 28, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif" }}>{passes.length}</p>
+              <p style={{ color: 'white', fontSize: 28, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)' }}>{passes.length}</p>
             </div>
             <Award size={32} color="#1E5EFF" style={{ opacity: 0.3 }} />
           </div>
@@ -266,8 +271,12 @@ export default function PassesClient({ passes, newPassIds = [] }: { passes: Pass
         {/* Sort toggle */}
         <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
           {(['recent', 'rarity'] as const).map(s => (
-            <button key={s} onClick={() => setSort(s)} style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sort === s ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`, background: sort === s ? 'rgba(30,94,255,0.15)' : '#13151E', color: sort === s ? '#818CF8' : '#6B7280', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", transition: 'all 0.15s', textTransform: 'capitalize' }}>
-              {s === 'recent' ? '🕐 Most Recent' : '⭐ By Rarity'}
+            <button
+              key={s}
+              onClick={() => setSort(s)}
+              style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sort === s ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`, background: sort === s ? 'rgba(30,94,255,0.15)' : '#13151E', color: sort === s ? '#818CF8' : '#6B7280', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.15s', textTransform: 'capitalize' }}
+            >
+              {s === 'recent' ? 'Most Recent' : 'By Rarity'}
             </button>
           ))}
         </div>

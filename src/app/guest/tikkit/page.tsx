@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import MyTikkitClient from '@/components/guest/MyTikkitClient'
+import SkeletonTikkit from '@/components/guest/SkeletonTikkit'
 
-export default async function MyTikkitPage() {
+async function TikkitData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -65,5 +67,13 @@ export default async function MyTikkitPage() {
       guestName={profileRes.data?.full_name ?? user.email ?? 'Guest'}
       creditScore={guestProfileRes.data?.credit_score ?? 0}
     />
+  )
+}
+
+export default function MyTikkitPage() {
+  return (
+    <Suspense fallback={<SkeletonTikkit />}>
+      <TikkitData />
+    </Suspense>
   )
 }

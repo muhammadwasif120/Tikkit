@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { Search, MapPin, Clock, Lock, Flame, Zap, Star } from 'lucide-react'
+import { Search, MapPin, Clock, Lock, Flame, Zap, Star, CalendarDays } from 'lucide-react'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type Organizer = { full_name: string | null; company_name: string | null }
@@ -105,7 +105,7 @@ function HeroBanner({ event }: { event: Event }) {
               ))}
             </div>
           )}
-          <h2 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 7px', fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.6px', lineHeight: 1.1 }}>
+          <h2 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 7px', fontFamily: 'var(--font-display)', letterSpacing: '-0.6px', lineHeight: 1.1 }}>
             {event.title}
           </h2>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -136,7 +136,7 @@ function MyEventsStrip({ myEvents }: { myEvents: MyEvent[] }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', marginBottom: 11 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{ width: 3, height: 13, borderRadius: 2, background: '#FF6B35' }} />
-          <span style={{ color: 'white', fontSize: 12, fontWeight: 800, fontFamily: "'Clash Display', sans-serif", letterSpacing: '0.3px' }}>MY EVENTS</span>
+          <span style={{ color: 'white', fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>MY EVENTS</span>
         </div>
         <Link href="/guest/tikkit" style={{ color: '#818CF8', fontSize: 10, fontWeight: 800, textDecoration: 'none', letterSpacing: '0.5px' }}>SEE ALL →</Link>
       </div>
@@ -151,9 +151,9 @@ function MyEventsStrip({ myEvents }: { myEvents: MyEvent[] }) {
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent)' }} />
                   <div style={{ position: 'absolute', bottom: 5, right: 6, width: 6, height: 6, borderRadius: '50%', background: dot, boxShadow: `0 0 5px ${dot}` }} />
                 </div>
-                <div style={{ padding: '6px 8px 8px', background: '#0C0E16' }}>
-                  <p style={{ color: 'white', fontSize: 10, fontWeight: 700, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: "'Clash Display', sans-serif" }}>{ev.title}</p>
-                  <p style={{ color: '#374151', fontSize: 9, margin: 0, fontWeight: 600 }}>{fmtDay(ev.date_start)} · {fmtTime(ev.date_start)}</p>
+                <div style={{ padding: '6px 8px 8px', background: 'var(--guest-surface)' }}>
+                  <p style={{ color: 'white', fontSize: 10, fontWeight: 700, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>{ev.title}</p>
+                  <p style={{ color: '#6B7280', fontSize: 9, margin: 0, fontWeight: 600 }}>{fmtDay(ev.date_start)} · {fmtTime(ev.date_start)}</p>
                 </div>
               </div>
             </Link>
@@ -182,8 +182,8 @@ function EventRow({ event, index }: { event: Event; index: number }) {
         {/* Date column */}
         <div style={{ flexShrink: 0, width: 42, textAlign: 'center', paddingTop: 1 }}>
           <p style={{ color: '#818CF8', fontSize: 8, fontWeight: 800, margin: '0 0 1px', letterSpacing: '0.8px' }}>{fmtDay(event.date_start)}</p>
-          <p style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: "'Clash Display', sans-serif", lineHeight: 1 }}>{new Date(event.date_start).getDate()}</p>
-          <p style={{ color: '#374151', fontSize: 8, margin: '1px 0 0', fontWeight: 700, letterSpacing: '0.3px' }}>
+          <p style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{new Date(event.date_start).getDate()}</p>
+          <p style={{ color: '#6B7280', fontSize: 8, margin: '1px 0 0', fontWeight: 700, letterSpacing: '0.3px' }}>
             {new Date(event.date_start).toLocaleDateString('en-PK', { month: 'short' }).toUpperCase()}
           </p>
         </div>
@@ -191,7 +191,9 @@ function EventRow({ event, index }: { event: Event; index: number }) {
         {/* Thumbnail */}
         <div style={{ flexShrink: 0, width: 68, height: 68, borderRadius: 12, overflow: 'hidden', background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : getGradient(event.id), border: '1px solid rgba(255,255,255,0.06)', position: 'relative' }}>
           {!event.cover_image_url && (
-            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, opacity: 0.25 }}>🎪</div>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
+              <CalendarDays size={22} color="white" />
+            </div>
           )}
           {isFull && (
             <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -202,16 +204,16 @@ function EventRow({ event, index }: { event: Event; index: number }) {
 
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ color: 'white', fontSize: 13, fontWeight: 800, margin: '0 0 1px', fontFamily: "'Clash Display', sans-serif", letterSpacing: '-0.2px', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <h3 style={{ color: 'white', fontSize: 13, fontWeight: 800, margin: '0 0 1px', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {event.title}
           </h3>
-          <p style={{ color: '#2D3748', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic' }}>{organiser}</p>
+          <p style={{ color: '#6B7280', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic' }}>{organiser}</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#4B5563', fontSize: 10 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#9CA3AF', fontSize: 10 }}>
               <Clock size={9} />{fmtTime(event.date_start)}
             </span>
-            <span style={{ width: 2, height: 2, borderRadius: '50%', background: '#1F2937', flexShrink: 0 }} />
-            <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#4B5563', fontSize: 10 }}>
+            <span style={{ width: 2, height: 2, borderRadius: '50%', background: '#4B5563', flexShrink: 0 }} />
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#9CA3AF', fontSize: 10 }}>
               <MapPin size={9} />
               {event.secret_venue
                 ? <span style={{ color: '#FFC745', display: 'flex', alignItems: 'center', gap: 2 }}><Lock size={8} />Secret</span>
@@ -260,17 +262,33 @@ export default function ExploreClient({ events, myEvents }: { events: Event[]; m
 
   return (
     <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
-        @keyframes revealUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-      `}</style>
-
       {/* Search */}
       <div style={{ padding: '12px 16px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, background: focused ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.025)', border: `1px solid ${focused ? 'rgba(129,140,248,0.35)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 12, padding: '10px 13px', transition: 'all 0.2s' }}>
-          <Search size={14} color={focused ? '#818CF8' : '#2D3748'} style={{ flexShrink: 0, transition: 'color 0.2s' }} />
-          <input value={query} onChange={e => setQuery(e.target.value)} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} placeholder="Search events, venues, organizers..." style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'white', fontSize: 13, fontFamily: "'Cabinet Grotesk', sans-serif" }} />
-          {query && <button onClick={() => setQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#374151', padding: 0, fontSize: 16, lineHeight: 1 }}>×</button>}
+        <div className="guest-search">
+          <Search
+            size={14}
+            style={{ flexShrink: 0, color: focused ? '#818CF8' : '#4B5563', transition: 'color 0.2s' }}
+          />
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            placeholder="Search events, venues, organizers..."
+            style={{
+              flex: 1, background: 'none', border: 'none', outline: 'none',
+              color: 'white', fontSize: 13, fontFamily: 'var(--font-body)',
+            }}
+          />
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              className="cursor-pointer"
+              style={{ background: 'none', border: 'none', color: '#6B7280', padding: 0, fontSize: 18, lineHeight: 1 }}
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
 
@@ -280,7 +298,11 @@ export default function ExploreClient({ events, myEvents }: { events: Event[]; m
           {['All', ...allTags].map(tag => {
             const active = tag === 'All' ? !selectedTag : selectedTag === tag
             return (
-              <button key={tag} onClick={() => setSelectedTag(tag === 'All' ? null : tag)} style={{ flexShrink: 0, padding: '4px 10px', borderRadius: 7, border: `1px solid ${active ? 'rgba(129,140,248,0.45)' : 'rgba(255,255,255,0.06)'}`, background: active ? 'rgba(129,140,248,0.1)' : 'transparent', color: active ? '#818CF8' : '#374151', fontSize: 10, fontWeight: 800, cursor: 'pointer', fontFamily: "'Cabinet Grotesk', sans-serif", letterSpacing: '0.5px', transition: 'all 0.15s' }}>
+              <button
+                key={tag}
+                onClick={() => setSelectedTag(tag === 'All' ? null : tag)}
+                className={`guest-pill ${active ? 'guest-pill-active' : ''}`}
+              >
                 {tag.toUpperCase()}
               </button>
             )
@@ -296,7 +318,7 @@ export default function ExploreClient({ events, myEvents }: { events: Event[]; m
       {!isFiltering && (
         <div style={{ padding: '18px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.04)' }} />
-          <span style={{ color: '#1F2937', fontSize: 9, fontWeight: 900, letterSpacing: '2px' }}>ALL EVENTS</span>
+          <span style={{ color: '#6B7280', fontSize: 9, fontWeight: 900, letterSpacing: '2px', fontFamily: 'var(--font-display)' }}>ALL EVENTS</span>
           <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.04)' }} />
         </div>
       )}
@@ -304,12 +326,15 @@ export default function ExploreClient({ events, myEvents }: { events: Event[]; m
       {/* Results or grouped list */}
       {isFiltering ? (
         <div style={{ padding: '14px 16px 0' }}>
-          <p style={{ color: '#1F2937', fontSize: 10, fontWeight: 800, letterSpacing: '0.8px', margin: '0 0 2px' }}>
+          <p style={{ color: '#6B7280', fontSize: 10, fontWeight: 800, letterSpacing: '0.8px', margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>
             {filtered.length} RESULT{filtered.length !== 1 ? 'S' : ''}
           </p>
           {filtered.length > 0
             ? filtered.map((e, i) => <EventRow key={e.id} event={e} index={i} />)
-            : <div style={{ padding: '60px 0', textAlign: 'center' }}><Search size={32} style={{ opacity: 0.1, marginBottom: 12, color: 'white' }} /><p style={{ color: '#1F2937', fontSize: 13, margin: 0 }}>No events match "{query || selectedTag}"</p></div>
+            : <div style={{ padding: '60px 0', textAlign: 'center' }}>
+                <Search size={32} style={{ opacity: 0.15, marginBottom: 12, color: 'white', display: 'block', margin: '0 auto 12px' }} />
+                <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>No events match &ldquo;{query || selectedTag}&rdquo;</p>
+              </div>
           }
         </div>
       ) : (
@@ -318,8 +343,8 @@ export default function ExploreClient({ events, myEvents }: { events: Event[]; m
             <div key={group.key}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '14px 16px 0' }}>
                 {group.icon}
-                <span style={{ color: '#9CA3AF', fontSize: 10, fontWeight: 900, fontFamily: "'Clash Display', sans-serif", letterSpacing: '1px' }}>{group.label.toUpperCase()}</span>
-                <span style={{ color: '#1F2937', fontSize: 10, fontWeight: 700 }}>· {group.events.length}</span>
+                <span style={{ color: '#9CA3AF', fontSize: 10, fontWeight: 900, fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>{group.label.toUpperCase()}</span>
+                <span style={{ color: '#4B5563', fontSize: 10, fontWeight: 700 }}>· {group.events.length}</span>
               </div>
               <div style={{ padding: '0 16px' }}>
                 {group.events.map((e, i) => <EventRow key={e.id} event={e} index={i} />)}
@@ -328,8 +353,8 @@ export default function ExploreClient({ events, myEvents }: { events: Event[]; m
           ))}
           {groups.length === 0 && (
             <div style={{ padding: '80px 20px', textAlign: 'center' }}>
-              <div style={{ fontSize: 36, marginBottom: 14, opacity: 0.2 }}>🎪</div>
-              <p style={{ color: '#1F2937', fontSize: 13, fontWeight: 700, margin: 0 }}>No upcoming events</p>
+              <CalendarDays size={36} style={{ opacity: 0.12, marginBottom: 14, color: 'white', display: 'block', margin: '0 auto 14px' }} />
+              <p style={{ color: '#6B7280', fontSize: 13, fontWeight: 700, margin: 0 }}>No upcoming events</p>
             </div>
           )}
         </div>
