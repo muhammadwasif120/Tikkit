@@ -32,6 +32,7 @@ export async function updateSession(request: NextRequest) {
   '/api',
   '/events',
   '/',
+  '/how-it-works',
 ]
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 

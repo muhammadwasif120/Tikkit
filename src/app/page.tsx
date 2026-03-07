@@ -839,7 +839,7 @@ export default function LandingPage() {
             <Link href="/auth/login" className="btn-primary-lg">
               Start for free <ArrowRight size={16} />
             </Link>
-            <Link href="/auth/login" className="btn-outline-lg">
+            <Link href="/how-it-works" className="btn-outline-lg">
               See how it works
             </Link>
           </div>
