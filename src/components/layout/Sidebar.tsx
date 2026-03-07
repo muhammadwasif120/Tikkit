@@ -50,14 +50,21 @@ export default function Sidebar({ profile, open, onClose }: Props) {
   }
 
   const sidebarContent = (
-    <aside className="w-60 bg-brand-charcoal flex flex-col h-full">
+    <aside className="w-60 bg-brand-charcoal flex flex-col h-full border-r border-white/[0.04]">
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-white/5 shrink-0">
+      <div className="h-16 flex items-center justify-between px-5 border-b border-white/[0.04] shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 bg-brand-blue rounded-md flex items-center justify-center shrink-0">
-            <Ticket className="w-4 h-4 text-white" />
+          <div style={{
+            width: 32, height: 32,
+            background: 'linear-gradient(135deg, #2B6FFF, #1448CC)',
+            borderRadius: 10,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 18px rgba(30,94,255,.35), inset 0 1px 0 rgba(255,255,255,.15)',
+            flexShrink: 0,
+          }}>
+            <Ticket size={16} color="white" strokeWidth={2.5} />
           </div>
-          <span className="text-lg font-bold text-white tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <span style={{ color: '#F0F2FF', fontSize: 20, fontWeight: 700, letterSpacing: '-0.75px', fontFamily: 'var(--font-display)' }}>
             Tikkit
           </span>
         </div>
@@ -98,18 +105,23 @@ export default function Sidebar({ profile, open, onClose }: Props) {
       </nav>
 
       {/* Profile footer */}
-      <div className="p-3 border-t border-white/5 shrink-0">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-lg">
-          <div className="w-8 h-8 rounded-full bg-brand-blue/20 border border-brand-blue/30 flex items-center justify-center shrink-0">
-            <span className="text-xs font-semibold text-brand-blue">
+      <div className="p-3 border-t border-white/[0.04] shrink-0">
+        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+          <div style={{
+            width: 32, height: 32, borderRadius: '50%',
+            background: 'linear-gradient(135deg, rgba(30,94,255,0.25), rgba(30,94,255,0.1))',
+            border: '1px solid rgba(30,94,255,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#1E5EFF', fontFamily: 'var(--font-display)' }}>
               {profile?.full_name?.charAt(0)?.toUpperCase() ?? 'U'}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate">{profile?.full_name ?? 'Organizer'}</p>
+            <p className="text-sm font-medium text-white truncate" style={{ fontFamily: 'var(--font-display)' }}>{profile?.full_name ?? 'Organizer'}</p>
             <p className="text-xs text-gray-500 capitalize">{profile?.role}</p>
           </div>
-          <button onClick={handleSignOut} className="text-gray-500 hover:text-red-400 transition-colors" title="Sign out">
+          <button onClick={handleSignOut} className="text-gray-500 hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-red-500/5" title="Sign out">
             <LogOut className="w-4 h-4" />
           </button>
         </div>

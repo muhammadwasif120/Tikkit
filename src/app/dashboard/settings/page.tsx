@@ -228,7 +228,7 @@ export default function SettingsPage() {
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Settings</h2>
+        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Settings</h2>
         <p className="text-gray-400 text-sm mt-1">Manage your account and preferences</p>
       </div>
 
@@ -404,7 +404,7 @@ export default function SettingsPage() {
               <Users className="w-4 h-4 text-purple-400" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Team Access</p>
+              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Team Access</p>
               <p className="text-xs text-gray-500 mt-0.5">
                 {activeInvites.length > 0
                   ? `${activeInvites.length} active link${activeInvites.length !== 1 ? 's' : ''}`
@@ -575,7 +575,7 @@ export default function SettingsPage() {
               <Bell className="w-4 h-4 text-green-400" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Notification Preferences</p>
+              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Notification Preferences</p>
               <p className="text-xs text-gray-500 mt-0.5">
                 {Object.values(notifications).filter(Boolean).length} of {Object.values(notifications).length} enabled
               </p>

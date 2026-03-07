@@ -389,11 +389,11 @@ export default function ApprovalsClient({
   }
 
   return (
-    <div style={{ fontFamily: "'Inter', -apple-system, sans-serif", color: 'white' }}>
+    <div style={{ fontFamily: 'var(--font-body)', color: 'white' }}>
       {/* Header */}
       <div style={{ padding: '24px 24px 0', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: 0, fontFamily: 'Poppins, sans-serif', letterSpacing: '-0.4px' }}>Approvals</h1>
+          <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Approvals</h1>
           {counts['Pending'] + counts['Payment Review'] > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', background: 'rgba(255,199,69,0.12)', border: '1px solid rgba(255,199,69,0.25)', borderRadius: 20 }}>
               <AlertCircle size={13} color="#FFC745" />
@@ -412,7 +412,7 @@ export default function ApprovalsClient({
           <select
             value={eventFilter}
             onChange={e => setEventFilter(e.target.value)}
-            style={{ width: '100%', background: '#1A1D2E', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '10px 14px', color: eventFilter === 'all' ? '#6B7280' : 'white', fontSize: 13, fontFamily: "'Cabinet Grotesk', sans-serif", outline: 'none', cursor: 'pointer' }}
+            style={{ width: '100%', background: '#1A1D2E', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '10px 14px', color: eventFilter === 'all' ? '#6B7280' : 'white', fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none', cursor: 'pointer' }}
           >
             <option value="all">All Events ({registrations.length})</option>
             {events.map(e => (

@@ -35,7 +35,7 @@ export default function TopBar({ profile, onMenuClick }: Props) {
   }
 
   return (
-    <header className="h-16 bg-brand-charcoal border-b border-white/5 flex items-center justify-between px-4 md:px-6 shrink-0">
+    <header className="h-16 bg-brand-charcoal border-b border-white/[0.04] flex items-center justify-between px-4 md:px-6 shrink-0">
       <div className="flex items-center gap-3">
         {/* Hamburger — mobile only */}
         <button
@@ -48,7 +48,7 @@ export default function TopBar({ profile, onMenuClick }: Props) {
 
         <h1
           className="text-base font-semibold text-white"
-          style={{ fontFamily: 'Poppins, sans-serif' }}
+          style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}
         >
           {getTitle()}
         </h1>
@@ -58,12 +58,17 @@ export default function TopBar({ profile, onMenuClick }: Props) {
         <NotificationBell />
         <div className="h-4 w-px bg-white/10" />
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-brand-blue/20 border border-brand-blue/30 flex items-center justify-center">
-            <span className="text-xs font-semibold text-brand-blue">
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            background: 'linear-gradient(135deg, rgba(30,94,255,0.25), rgba(30,94,255,0.1))',
+            border: '1px solid rgba(30,94,255,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#1E5EFF', fontFamily: 'var(--font-display)' }}>
               {profile?.full_name?.charAt(0)?.toUpperCase() ?? 'U'}
             </span>
           </div>
-          <span className="text-sm text-gray-300 hidden md:block">{profile?.full_name}</span>
+          <span className="text-sm text-gray-300 hidden md:block" style={{ fontFamily: 'var(--font-body)' }}>{profile?.full_name}</span>
         </div>
       </div>
     </header>

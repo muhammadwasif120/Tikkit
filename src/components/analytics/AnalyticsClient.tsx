@@ -184,7 +184,7 @@ export default function AnalyticsClient({
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Analytics</h2>
+        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Analytics</h2>
         <p className="text-gray-400 text-sm mt-1">Performance metrics and audience intelligence</p>
       </div>
 
@@ -217,7 +217,7 @@ export default function AnalyticsClient({
               { label: 'Overall Show-Up Rate', value: totalGuests > 0 ? `${Math.round((totalCheckedIn / totalGuests) * 100)}%` : '—' },
             ].map((s) => (
               <div key={s.label} className="stat-card">
-                <p className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>{s.value}</p>
+                <p className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px' }}>{s.value}</p>
                 <p className="text-xs text-gray-500">{s.label}</p>
               </div>
             ))}
@@ -227,7 +227,7 @@ export default function AnalyticsClient({
           <div className="card">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
                   Arrival Heatmap
                 </h3>
                 <p className="text-xs text-gray-500 mt-0.5">When did the crowd show up?</p>
@@ -293,7 +293,7 @@ export default function AnalyticsClient({
 
           {/* Show-up rate per event */}
           <div className="card">
-            <h3 className="font-semibold text-white text-sm mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h3 className="font-semibold text-white text-sm mb-4" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
               Event Performance
             </h3>
             {eventStats.length === 0 ? (
@@ -371,7 +371,7 @@ export default function AnalyticsClient({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>{tier.label}</h3>
+                      <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>{tier.label}</h3>
                       <span className={clsx('px-2 py-0.5 rounded-full text-[10px] font-bold', tier.bgColor, tier.color)}>{tier.guests.length}</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">{tier.description}</p>
@@ -440,7 +440,7 @@ export default function AnalyticsClient({
           <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Email — {emailModal.tier.label}</h3>
+                <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Email — {emailModal.tier.label}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{selectedGuests.size} recipients selected</p>
               </div>
               <button onClick={() => setEmailModal(null)} className="text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>

@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { CalendarDays, Users, TicketIcon, TrendingUp } from 'lucide-react'
+import { CalendarDays, Users, TicketIcon, TrendingUp, ScanLine, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 
@@ -34,40 +34,51 @@ export default async function DashboardPage() {
       value: events.length,
       sub: `${publishedEvents} published`,
       icon: CalendarDays,
-      color: 'text-brand-blue',
-      bg: 'bg-brand-blue/10',
+      color: '#1E5EFF',
+      bg: 'rgba(30,94,255,0.1)',
+      border: 'rgba(30,94,255,0.15)',
     },
     {
       label: 'Total Guests',
       value: guests.length,
       sub: `${checkedIn} checked in`,
       icon: Users,
-      color: 'text-green-400',
-      bg: 'bg-green-500/10',
+      color: '#22C55E',
+      bg: 'rgba(34,197,94,0.1)',
+      border: 'rgba(34,197,94,0.15)',
     },
     {
       label: 'Ticket Types',
       value: '—',
       sub: 'Across all events',
       icon: TicketIcon,
-      color: 'text-brand-yellow',
-      bg: 'bg-brand-yellow/10',
+      color: '#FFC745',
+      bg: 'rgba(255,199,69,0.1)',
+      border: 'rgba(255,199,69,0.15)',
     },
     {
       label: 'Vendors',
       value: vendors.length,
       sub: 'Registered',
       icon: TrendingUp,
-      color: 'text-purple-400',
-      bg: 'bg-purple-500/10',
+      color: '#A78BFA',
+      bg: 'rgba(167,139,250,0.1)',
+      border: 'rgba(167,139,250,0.15)',
     },
+  ]
+
+  const quickActions = [
+    { href: '/dashboard/events/new', label: 'Create a new event',  desc: 'Set up public or private event', Icon: CalendarDays, color: '#1E5EFF',  bg: 'rgba(30,94,255,0.1)',   border: 'rgba(30,94,255,0.15)'  },
+    { href: '/dashboard/guests',    label: 'Manage guests',        desc: 'Invite guests and manage list',  Icon: Users,        color: '#22C55E',  bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.15)'  },
+    { href: '/dashboard/scan',      label: 'Open scanner',         desc: 'QR entry/exit scanning',         Icon: ScanLine,     color: '#FFC745',  bg: 'rgba(255,199,69,0.1)',  border: 'rgba(255,199,69,0.15)' },
+    { href: '/dashboard/vendors',   label: 'Add a vendor',         desc: 'Track vendors and invoices',     Icon: Building2,    color: '#A78BFA',  bg: 'rgba(167,139,250,0.1)', border: 'rgba(167,139,250,0.15)'},
   ]
 
   return (
     <div className="space-y-6 max-w-6xl">
       {/* Welcome */}
       <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
           Overview
         </h2>
         <p className="text-gray-400 text-sm mt-1">Here&apos;s what&apos;s happening across your events.</p>
@@ -76,26 +87,26 @@ export default async function DashboardPage() {
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="stat-card animate-slide-up">
+          <div key={stat.label} className="stat-card animate-slide-up" style={{ border: `1px solid ${stat.border}` }}>
             <div className="flex items-center justify-between mb-3">
-              <div className={`w-9 h-9 rounded-lg ${stat.bg} flex items-center justify-center`}>
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <stat.icon style={{ width: 16, height: 16, color: stat.color }} />
               </div>
             </div>
-            <p className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <p className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px' }}>
               {stat.value}
             </p>
-            <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{stat.label}</p>
             <p className="text-xs text-gray-600 mt-1">{stat.sub}</p>
           </div>
         ))}
       </div>
 
-      {/* Upcoming events */}
+      {/* Upcoming events + Quick actions */}
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
               Upcoming Events
             </h3>
             <Link href="/dashboard/events" className="text-xs text-brand-blue hover:text-brand-blue-light transition-colors">
@@ -112,7 +123,7 @@ export default async function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1">
               {upcomingEvents.map((event) => (
                 <Link
                   key={event.id}
@@ -136,22 +147,23 @@ export default async function DashboardPage() {
 
         {/* Quick actions */}
         <div className="card">
-          <h3 className="font-semibold text-white text-sm mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h3 className="font-semibold text-white text-sm mb-4" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
             Quick Actions
           </h3>
           <div className="space-y-2">
-            {[
-              { href: '/dashboard/events/new', label: 'Create a new event', desc: 'Set up public or private event', icon: '🎪' },
-              { href: '/dashboard/guests', label: 'Add guests', desc: 'Invite guests and manage list', icon: '👥' },
-              { href: '/dashboard/scan', label: 'Open scanner', desc: 'QR entry/exit scanning', icon: '📱' },
-              { href: '/dashboard/vendors', label: 'Add a vendor', desc: 'Track vendors and invoices', icon: '🤝' },
-            ].map((action) => (
+            {quickActions.map((action) => (
               <Link
                 key={action.href}
                 href={action.href}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/5 transition-colors group"
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06] transition-all group"
               >
-                <span className="text-xl">{action.icon}</span>
+                <div style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: action.bg, border: `1px solid ${action.border}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>
+                  <action.Icon style={{ width: 16, height: 16, color: action.color }} />
+                </div>
                 <div>
                   <p className="text-sm font-medium text-white group-hover:text-brand-blue transition-colors">
                     {action.label}

@@ -68,7 +68,7 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs text-gray-500 mb-0.5 uppercase tracking-wider">Guest</p>
-                    <p className="text-xl font-bold text-white leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                    <p className="text-xl font-bold text-white leading-tight" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
                       {result.guestName}
                     </p>
                   </div>
@@ -315,7 +315,7 @@ export default function ScannerPage() {
 
       <div className="max-w-lg space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
             QR Scanner
           </h2>
           <p className="text-gray-400 text-sm mt-1">Scan guest QR codes for entry and exit</p>

@@ -221,7 +221,7 @@ export default function VendorsClient({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Vendors</h2>
+          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Vendors</h2>
           <p className="text-gray-400 text-sm mt-1">{vendors.length} vendors · {invoices.length} invoices</p>
         </div>
         <button onClick={() => activeTab === 'vendors' ? openVendorModal() : openInvoiceModal()} className="btn-primary">
@@ -242,7 +242,7 @@ export default function VendorsClient({
               <s.icon className={clsx('w-4 h-4', s.color)} />
               <p className="text-xs text-gray-500">{s.label}</p>
             </div>
-            <p className={clsx('text-xl font-bold', s.color)} style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <p className={clsx('text-xl font-bold', s.color)} style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
               {formatCurrency(s.value)}
             </p>
           </div>
@@ -301,7 +301,7 @@ export default function VendorsClient({
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>{vendor.name}</h3>
+                            <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>{vendor.name}</h3>
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/5 text-gray-400 border border-white/10">
                               <Tag className="w-2.5 h-2.5" /> {vendor.category}
                             </span>
@@ -444,7 +444,7 @@ export default function VendorsClient({
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>
                 {editingVendor ? 'Edit Vendor' : 'Add Vendor'}
               </h3>
               <button onClick={() => setVendorModal(false)} className="text-gray-500 hover:text-white transition-colors">
@@ -522,7 +522,7 @@ export default function VendorsClient({
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="card w-full max-w-lg animate-slide-up">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>
                 {editingInvoice ? 'Edit Invoice' : 'New Invoice'}
               </h3>
               <button onClick={() => setInvoiceModal(false)} className="text-gray-500 hover:text-white transition-colors">

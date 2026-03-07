@@ -15,8 +15,8 @@ const config: Config = {
           "blue-light": "#4D82FF",
           gold: "#FFC745",
           "gold-dark": "#E5A800",
-          charcoal: "#1A1D2E",
-          "charcoal-light": "#2D3150",
+          charcoal: "#0D0F18",
+          "charcoal-light": "#161820",
           muted: "#6B7280",
         }
       },

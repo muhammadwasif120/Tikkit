@@ -12,8 +12,8 @@
   --brand-gold-dark:     #E5A800;
 
   /* Dashboard surfaces */
-  --brand-charcoal:      #1A1C23;
-  --brand-charcoal-light:#2D2F3A;
+  --brand-charcoal:      #0D0F18;
+  --brand-charcoal-light:#161820;
 
   /* Guest surfaces */
   --guest-bg:            #080A10;
@@ -48,7 +48,7 @@ html {
 }
 
 body {
-  background-color: #0F1117;
+  background-color: #080A10;
   color: #F3F4F6;
   min-height: 100vh;
   font-family: var(--font-body);
@@ -60,10 +60,10 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #1A1C23;
+  background: #0D0F18;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2D2F3A;
+  background: #1A1C28;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -139,6 +139,7 @@ body {
 
   .sidebar-link-active {
     @apply sidebar-link bg-brand-blue/10 text-brand-blue hover:bg-brand-blue/15 hover:text-brand-blue;
+    box-shadow: inset 3px 0 0 #1E5EFF;
   }
 
   .table-header {

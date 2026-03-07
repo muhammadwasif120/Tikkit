@@ -100,7 +100,7 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
     <div className="space-y-6 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Events</h2>
+          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Events</h2>
           <p className="text-gray-400 text-sm mt-1">{events.length} total events</p>
         </div>
         <Link href="/dashboard/events/new" className="btn-primary">
@@ -177,7 +177,7 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Edit Event</h3>
+              <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Edit Event</h3>
               <button onClick={() => setEditEvent(null)} className="text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
             </div>
 
@@ -271,7 +271,7 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
             <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-5 h-5 text-red-400" />
             </div>
-            <h3 className="font-semibold text-white mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>Delete Event</h3>
+            <h3 className="font-semibold text-white mb-1" style={{ fontFamily: 'var(--font-display)' }}>Delete Event</h3>
             <p className="text-gray-400 text-sm mb-5">
               Are you sure you want to delete <span className="text-white font-medium">{deleteEvent.title}</span>? All guests and data will be permanently removed.
             </p>
