@@ -29,19 +29,28 @@ CREATE TABLE events (
   description TEXT,
   venue_name TEXT,
   venue_address TEXT,
-  -- Secret venue: address hidden until reveal_at
-  venue_secret BOOLEAN DEFAULT FALSE,
+  -- Secret venue: address hidden until confirmed
+  secret_venue BOOLEAN DEFAULT FALSE,
   venue_reveal_at TIMESTAMPTZ,
   date_start TIMESTAMPTZ NOT NULL,
   date_end TIMESTAMPTZ,
   capacity INTEGER NOT NULL DEFAULT 100,
-  is_public BOOLEAN DEFAULT TRUE,
+  is_private BOOLEAN DEFAULT FALSE,
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'cancelled', 'completed')),
   cover_image_url TEXT,
   tags TEXT[],
-  -- Demographic ratio controls (Phase 2)
-  male_ratio_max INTEGER CHECK (male_ratio_max BETWEEN 0 AND 100),
-  female_ratio_max INTEGER CHECK (female_ratio_max BETWEEN 0 AND 100),
+  -- Demographic ratio controls
+  male_ratio INTEGER DEFAULT 50 CHECK (male_ratio BETWEEN 0 AND 100),
+  female_ratio INTEGER DEFAULT 50 CHECK (female_ratio BETWEEN 0 AND 100),
+  -- Finance (legacy single-price; prefer ticket_types for multi-tier)
+  ticket_price NUMERIC(10,2) DEFAULT 0,
+  budget NUMERIC(10,2) DEFAULT 0,
+  -- Registration settings
+  registration_mode TEXT NOT NULL DEFAULT 'invite_only'
+    CHECK (registration_mode IN ('invite_only', 'open', 'expression_of_interest')),
+  require_id_verification BOOLEAN DEFAULT FALSE,
+  require_reference_code BOOLEAN DEFAULT FALSE,
+  reference_code TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -52,8 +61,11 @@ CREATE TABLE events (
 CREATE TABLE ticket_types (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
-  name TEXT NOT NULL,          -- e.g. "General", "VIP", "Staff"
-  price NUMERIC(10,2) DEFAULT 0,
+  name TEXT NOT NULL,                    -- e.g. "Standard", "VIP", "Discounted"
+  price NUMERIC(10,2) DEFAULT 0,         -- Final charged price
+  original_price NUMERIC(10,2),          -- Pre-discount price (Discounted tier)
+  discount_type TEXT CHECK (discount_type IN ('percentage', 'fixed')),
+  discount_value NUMERIC(10,2),          -- e.g. 20 (percent) or 500 (fixed PKR)
   quantity INTEGER NOT NULL,
   quantity_sold INTEGER DEFAULT 0,
   is_vip BOOLEAN DEFAULT FALSE,
@@ -105,11 +117,14 @@ CREATE TABLE guest_profiles (
 CREATE TABLE public_registrations (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   event_id UUID NOT NULL REFERENCES events(id) ON DELETE CASCADE,
+  ticket_type_id UUID REFERENCES ticket_types(id),
   email TEXT NOT NULL,
   full_name TEXT NOT NULL,
   phone TEXT,
+  gender TEXT CHECK (gender IN ('male', 'female', 'other', 'prefer_not_to_say')),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'checked_in')),
-  payment_status TEXT NOT NULL DEFAULT 'not_required' CHECK (payment_status IN ('not_required', 'pending', 'confirmed')),
+  payment_status TEXT NOT NULL DEFAULT 'not_required'
+    CHECK (payment_status IN ('not_required', 'pending', 'submitted', 'confirmed')),
   registration_notes TEXT,
   reviewed_at TIMESTAMPTZ,
   checked_in_at TIMESTAMPTZ,

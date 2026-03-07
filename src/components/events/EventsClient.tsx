@@ -19,7 +19,6 @@ type Event = {
   capacity: number
   is_private: boolean | null
   secret_venue: boolean | null
-  ticket_price: number | null
   budget: number | null
   registration_mode: string | null
   cover_image_url: string | null
@@ -41,7 +40,7 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
   const [editForm, setEditForm] = useState({
     title: '', description: '', venue_name: '', venue_address: '',
     date_start: '', date_end: '', capacity: '', status: 'draft',
-    ticket_price: '', budget: '', is_private: false, secret_venue: false,
+    budget: '', is_private: false, secret_venue: false,
   })
   const [editSaving, setEditSaving] = useState(false)
   const [deleteEvent, setDeleteEvent] = useState<Event | null>(null)
@@ -58,7 +57,6 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
       date_end: event.date_end ? event.date_end.slice(0, 16) : '',
       capacity: String(event.capacity),
       status: event.status,
-      ticket_price: String(event.ticket_price ?? ''),
       budget: String(event.budget ?? ''),
       is_private: event.is_private ?? false,
       secret_venue: event.secret_venue ?? false,
@@ -77,7 +75,6 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
       date_end: editForm.date_end || null,
       capacity: parseInt(editForm.capacity) || 0,
       status: editForm.status,
-      ticket_price: parseFloat(editForm.ticket_price) || 0,
       budget: parseFloat(editForm.budget) || 0,
       is_private: editForm.is_private,
       secret_venue: editForm.secret_venue,
@@ -226,15 +223,13 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="label">Ticket Price (PKR)</label>
-                  <input type="number" className="input" value={editForm.ticket_price} onChange={e => setEditForm(p => ({ ...p, ticket_price: e.target.value }))} />
-                </div>
-                <div>
-                  <label className="label">Budget (PKR)</label>
-                  <input type="number" className="input" value={editForm.budget} onChange={e => setEditForm(p => ({ ...p, budget: e.target.value }))} />
-                </div>
+              <div>
+                <label className="label">Budget (PKR)</label>
+                <input type="number" className="input" value={editForm.budget} onChange={e => setEditForm(p => ({ ...p, budget: e.target.value }))} />
+              </div>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FFC745]/5 border border-[#FFC745]/15 text-xs text-gray-400">
+                <span className="text-[#FFC745]">🎫</span>
+                Ticket tiers are managed in the event detail page
               </div>
               <div className="flex gap-4">
                 <div className="flex items-center justify-between flex-1 p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
