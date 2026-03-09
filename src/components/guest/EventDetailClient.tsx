@@ -63,6 +63,15 @@ function daysUntil(iso: string) { return Math.ceil(msUntil(iso) / 86400000) }
 
 /* ─── Registration status banner ────────────────────────────────── */
 function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus: string | null }) {
+  // Map actual DB status values → display key
+  let key = status
+  if (status === 'pending')   key = 'eoi_submitted'
+  if (status === 'approved') {
+    if (paymentStatus === 'pending')   key = 'eoi_approved'
+    else if (paymentStatus === 'submitted') key = 'payment_pending'
+    else key = 'confirmed' // not_required or confirmed → they're in
+  }
+
   const cfg: Record<string, { label: string; sub: string; color: string; bg: string; border: string; icon: any }> = {
     eoi_submitted:   { label: 'Interest Submitted',    sub: 'Waiting for organizer review',                     color: '#EAB308', bg: 'rgba(234,179,8,0.08)',   border: 'rgba(234,179,8,0.2)',   icon: Clock        },
     eoi_approved:    { label: 'Approved — Pay Now',    sub: 'Complete payment to confirm your spot',             color: '#EF4444', bg: 'rgba(239,68,68,0.08)',  border: 'rgba(239,68,68,0.2)',  icon: AlertCircle  },
@@ -71,7 +80,7 @@ function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus
     registered:      { label: 'Registered',            sub: 'Your QR ticket is ready in the Tickets tab',       color: '#10B981', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', icon: CheckCircle  },
     rejected:        { label: 'Not Approved',          sub: 'Your application was not approved',                 color: '#6B7280', bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.15)', icon: X          },
   }
-  const s = cfg[status]
+  const s = cfg[key]
   if (!s) return null
   const Icon = s.icon
   return (
@@ -271,11 +280,25 @@ export default function EventDetailClient({
 
   const ctaLabel = () => {
     if (!isLoggedIn) return { label: 'Sign in to Register', color: '#1E5EFF', disabled: false }
+
+    const payStatus = existingReg?.payment_status ?? null
+
+    // Actual DB status values
+    if (regStatus === 'pending') return { label: 'Interest Submitted', color: '#EAB308', disabled: true }
+    if (regStatus === 'approved') {
+      if (payStatus === 'pending')   return { label: 'Pay Now →', color: '#EF4444', disabled: false, href: '/guest/tikkit' }
+      if (payStatus === 'submitted') return { label: 'Payment Verifying…', color: '#818CF8', disabled: true }
+      // not_required or confirmed → ticket is ready
+      return { label: 'View Ticket →', color: '#10B981', disabled: false, href: '/guest/tikkit' }
+    }
+
+    // Legacy UI-side status values (set client-side after successful registration on this page)
     if (regStatus === 'eoi_submitted') return { label: 'Interest Submitted', color: '#EAB308', disabled: true }
     if (regStatus === 'eoi_approved') return { label: 'Pay Now →', color: '#EF4444', disabled: false, href: '/guest/tikkit' }
     if (regStatus === 'payment_pending') return { label: 'Payment Verifying…', color: '#818CF8', disabled: true }
     if (regStatus === 'confirmed' || regStatus === 'registered') return { label: 'View Ticket →', color: '#10B981', disabled: false, href: '/guest/tikkit' }
     if (regStatus === 'rejected') return { label: 'Not Approved', color: '#4B5563', disabled: true }
+
     if (isFull) return { label: 'Sold Out', color: '#4B5563', disabled: true }
     if (isInviteOnly) return { label: 'Invite Only', color: '#4B5563', disabled: true }
     if (isEOI) return { label: 'Express Interest', color: '#A855F7', disabled: false }
