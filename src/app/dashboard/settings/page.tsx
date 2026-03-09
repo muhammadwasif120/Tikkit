@@ -13,6 +13,16 @@ import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInv
 import PaymentAccountsSection from '@/components/settings/PaymentAccountsSection'
 import clsx from 'clsx'
 
+type NotifPrefs = {
+  guest_signup: boolean
+  guest_cancellation: boolean
+  entry_scan: boolean
+  exit_scan: boolean
+  vendor_payment_due: boolean
+  event_going_live: boolean
+  event_ended: boolean
+}
+
 type Profile = {
   id: string
   full_name: string
@@ -21,6 +31,7 @@ type Profile = {
   avatar_url: string | null
   phone_number: string | null
   company_name: string | null
+  notification_preferences: NotifPrefs | null
 }
 
 type TeamInvite = {
@@ -109,6 +120,7 @@ export default function SettingsPage() {
     exit_scan: false, vendor_payment_due: true, event_going_live: true, event_ended: true,
   })
   const [notifSaved, setNotifSaved] = useState(false)
+  const [notifSaving, setNotifSaving] = useState(false)
 
   useEffect(() => {
     const loadData = async () => {
@@ -121,6 +133,9 @@ export default function SettingsPage() {
         setFullName(prof.full_name ?? '')
         setPhoneNumber(prof.phone_number ?? '')
         setCompanyName(prof.company_name ?? '')
+        if (prof.notification_preferences && typeof prof.notification_preferences === 'object') {
+          setNotifications(prev => ({ ...prev, ...(prof.notification_preferences as NotifPrefs) }))
+        }
       }
 
       const { data: inv } = await supabase
@@ -216,7 +231,16 @@ export default function SettingsPage() {
   const handleReactivate  = async (invite: TeamInvite) => { await reactivateTeamInvite(invite.id); setInvites(prev => prev.map(i => i.id === invite.id ? { ...i, revoked: false } : i)) }
   const handleDelete      = async (id: string) => { await deleteTeamInvite(id); setInvites(prev => prev.filter(i => i.id !== id)) }
 
-  const saveNotifications = () => { setNotifSaved(true); setTimeout(() => setNotifSaved(false), 3000) }
+  const saveNotifications = async () => {
+    setNotifSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.from('profiles').update({ notification_preferences: notifications } as any).eq('id', user.id)
+    }
+    setNotifSaving(false)
+    setNotifSaved(true)
+    setTimeout(() => setNotifSaved(false), 3000)
+  }
 
   const activeInvites   = invites.filter(i => !i.revoked && !isExpired(i))
   const inactiveInvites = invites.filter(i => i.revoked || isExpired(i))
@@ -598,16 +622,16 @@ export default function SettingsPage() {
                     </div>
                     <button type="button"
                       onClick={() => setNotifications(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
-                      className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/20'}`}>
-                      <span className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
+                      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : ''}`} />
                     </button>
                   </div>
                 )
               })}
             </div>
             <div className="flex justify-end">
-              <button onClick={saveNotifications} className="btn-primary">
-                {notifSaved ? <><Check className="w-4 h-4" /> Saved</> : <><Save className="w-4 h-4" /> Save Preferences</>}
+              <button onClick={saveNotifications} disabled={notifSaving} className="btn-primary">
+                {notifSaved ? <><Check className="w-4 h-4" /> Saved</> : notifSaving ? 'Saving...' : <><Save className="w-4 h-4" /> Save Preferences</>}
               </button>
             </div>
           </div>

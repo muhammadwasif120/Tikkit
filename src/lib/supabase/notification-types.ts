@@ -9,6 +9,12 @@ export type NotificationType =
   | 'vendor_payment_due'
   | 'event_going_live'
   | 'event_ended'
+  // Public-facing registration events (fired when guests register via public event page)
+  | 'new_registration'
+  | 'eoi_submitted'
+  // Guest-facing notifications (sent to the guest's account)
+  | 'eoi_approved'
+  | 'eoi_approved_payment_required'
 
 export type NotificationPayload = {
   userId: string
@@ -74,5 +80,21 @@ export const Notifications = {
     title: 'Event ended',
     body: `${eventTitle} has ended · ${totalAttendees} attendees`,
     metadata: { eventTitle, totalAttendees },
+  }),
+
+  newRegistration: (userId: string, eventId: string, guestName: string, eventTitle: string): NotificationPayload => ({
+    userId, eventId,
+    type: 'new_registration',
+    title: 'New Registration',
+    body: `${guestName} registered for ${eventTitle}`,
+    metadata: { guestName, eventTitle },
+  }),
+
+  eoiSubmitted: (userId: string, eventId: string, guestName: string, eventTitle: string): NotificationPayload => ({
+    userId, eventId,
+    type: 'eoi_submitted',
+    title: 'New Application',
+    body: `${guestName} expressed interest in ${eventTitle}`,
+    metadata: { guestName, eventTitle },
   }),
 }

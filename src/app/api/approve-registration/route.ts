@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createNotification, Notifications } from '@/lib/supabase/notifications'
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function POST(req: NextRequest) {
 
     const { data: reg, error: regError } = await supabase
       .from('public_registrations')
-      .select('*, event:events(id, title, ticket_price, registration_mode, organizer:profiles(full_name, company_name))')
+      .select('*, event:events(id, title, ticket_price, registration_mode, organizer_id, organizer:profiles(full_name, company_name))')
       .eq('id', registrationId)
       .single()
 
@@ -26,6 +27,13 @@ export async function POST(req: NextRequest) {
       .eq('id', registrationId)
 
     if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
+
+    // Notify the organizer that a guest has been approved / signed up
+    if (event?.organizer_id) {
+      await createNotification(
+        Notifications.guestSignup(event.organizer_id, reg.event_id, reg.full_name, event.title)
+      )
+    }
 
     // Create guest record for free events immediately
     if (!isPaid) {

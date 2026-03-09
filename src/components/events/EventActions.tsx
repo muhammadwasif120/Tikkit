@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { MoreHorizontal, Edit, Trash2, CheckCircle, XCircle } from 'lucide-react'
+import { MoreHorizontal, Edit, Trash2, CheckCircle, XCircle, FlagOff } from 'lucide-react'
 import { notifyEventGoingLive, notifyEventEnded } from '@/app/actions/eventNotificationActions'
 import { dismissEventLiveNotification } from '@/app/actions/approvalDismissAction'
 import type { Database } from '@/lib/supabase/database.types'
@@ -27,7 +27,7 @@ export default function EventActions({ event }: { event: Event }) {
     if (user) {
       if (status === 'published') {
         await notifyEventGoingLive(user.id, event.id, event.title)
-      } else if (status === 'cancelled') {
+      } else if (status === 'completed' || status === 'cancelled') {
         const { count } = await supabase
           .from('guests')
           .select('*', { count: 'exact', head: true })
@@ -74,15 +74,24 @@ export default function EventActions({ event }: { event: Event }) {
               </button>
             )}
             {event.status === 'published' && (
-              <button
-                onClick={() => updateStatus('draft')}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 transition-colors"
-              >
-                <Edit className="w-4 h-4" />
-                Unpublish
-              </button>
+              <>
+                <button
+                  onClick={() => updateStatus('completed')}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-blue-400 hover:bg-blue-500/10 transition-colors"
+                >
+                  <FlagOff className="w-4 h-4" />
+                  Mark Complete
+                </button>
+                <button
+                  onClick={() => updateStatus('draft')}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 transition-colors"
+                >
+                  <Edit className="w-4 h-4" />
+                  Unpublish
+                </button>
+              </>
             )}
-            {event.status !== 'cancelled' && (
+            {event.status !== 'cancelled' && event.status !== 'completed' && (
               <button
                 onClick={() => updateStatus('cancelled')}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-yellow-400 hover:bg-yellow-500/10 transition-colors"

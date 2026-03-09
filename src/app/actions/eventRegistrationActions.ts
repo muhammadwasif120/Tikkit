@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { createNotification, Notifications } from '@/lib/supabase/notifications'
 
 export async function registerForEvent(formData: FormData) {
   const supabase = await createClient()
@@ -66,13 +67,7 @@ export async function registerForEvent(formData: FormData) {
     source:   'public_registration',
   } as any)
 
-  await supabase.from('notifications').insert({
-    user_id: event.organizer_id,
-    type:    'new_registration',
-    title:   'New Registration',
-    body:    `${name} registered for ${event.title}`,
-    data:    { event_id: eventId },
-  } as any)
+  await createNotification(Notifications.newRegistration(event.organizer_id, eventId, name, event.title))
 
   revalidatePath(`/guest/explore/${eventId}`)
   revalidatePath('/guest/tikkit')
@@ -123,13 +118,7 @@ export async function submitEOI(formData: FormData) {
 
   if (error) { console.error("EOI insert error:", JSON.stringify(error)); return { error: error.message ?? "Could not submit application. Please try again." } }
 
-  await supabase.from('notifications').insert({
-    user_id: event.organizer_id,
-    type:    'eoi_submitted',
-    title:   'New Application',
-    body:    `${name} expressed interest in ${event.title}`,
-    data:    { event_id: eventId },
-  } as any)
+  await createNotification(Notifications.eoiSubmitted(event.organizer_id, eventId, name, event.title))
 
   revalidatePath(`/guest/explore/${eventId}`)
   revalidatePath('/guest/tikkit')
