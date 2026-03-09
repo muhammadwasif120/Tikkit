@@ -1,13 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Calendar, MapPin, Users, Lock, Eye, Wallet, Ticket,
-  Star, Tag,
+  Star, Tag, CreditCard, Building2, Smartphone, ExternalLink, Check,
 } from 'lucide-react'
 import Link from 'next/link'
+import type { PaymentAccount } from '@/app/actions/paymentAccountActions'
+import { setEventPaymentAccounts } from '@/app/actions/paymentAccountActions'
 
 /* ─── Ticket tier state ─── */
 type TierKey = 'standard' | 'vip' | 'discounted'
@@ -76,6 +78,26 @@ export default function NewEventPage() {
   })
 
   const [tiers, setTiers] = useState<Record<TierKey, Tier>>(DEFAULT_TIERS)
+
+  // Payment accounts
+  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([])
+  const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(new Set())
+
+  // Load organizer's payment accounts
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('payment_accounts')
+        .select('*')
+        .eq('organizer_id', user.id)
+        .order('created_at', { ascending: false })
+      setPaymentAccounts(data ?? [])
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const update = (field: string, value: string | boolean) =>
     setForm(prev => ({ ...prev, [field]: value }))
@@ -168,6 +190,11 @@ export default function NewEventPage() {
         setLoading(false)
         return
       }
+    }
+
+    // Link selected payment accounts to the event
+    if (selectedAccountIds.size > 0) {
+      await setEventPaymentAccounts(event.id, Array.from(selectedAccountIds))
     }
 
     router.push('/dashboard/events')
@@ -443,6 +470,30 @@ export default function NewEventPage() {
           </TierCard>
         </div>
 
+        {/* ── Payment Accounts ── */}
+        <PaymentAccountsSelector
+          accounts={paymentAccounts}
+          selected={selectedAccountIds}
+          onToggle={(id) => setSelectedAccountIds(prev => {
+            const next = new Set(prev)
+            if (next.has(id)) next.delete(id)
+            else next.add(id)
+            return next
+          })}
+          hasPaidTiers={
+            (tiers.standard.enabled && parseFloat(tiers.standard.price || '0') > 0) ||
+            (tiers.vip.enabled && parseFloat(tiers.vip.price || '0') > 0) ||
+            (tiers.discounted.enabled && (() => {
+              const orig = parseFloat(tiers.discounted.price || '0')
+              const dval = parseFloat(tiers.discounted.discountValue || '0')
+              const final = tiers.discounted.discountType === 'percentage'
+                ? Math.max(0, orig - orig * dval / 100)
+                : Math.max(0, orig - dval)
+              return final > 0
+            })())
+          }
+        />
+
         {/* ── Budget ── */}
         <div className="card space-y-4">
           <h3 className="font-semibold text-white text-sm flex items-center gap-2">
@@ -538,6 +589,99 @@ export default function NewEventPage() {
           </button>
         </div>
       </form>
+    </div>
+  )
+}
+
+/* ─── Payment accounts selector ─── */
+
+const accountTypeColor = (type: string) => {
+  if (type === 'bank')      return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+  if (type === 'jazzcash')  return 'text-red-400 bg-red-500/10 border-red-500/20'
+  if (type === 'easypaisa') return 'text-green-400 bg-green-500/10 border-green-500/20'
+  return 'text-gray-400 bg-white/5 border-white/10'
+}
+
+const accountTypeIcon = (type: string) => (type === 'bank' ? Building2 : Smartphone)
+
+function PaymentAccountsSelector({
+  accounts,
+  selected,
+  onToggle,
+  hasPaidTiers,
+}: {
+  accounts: PaymentAccount[]
+  selected: Set<string>
+  onToggle: (id: string) => void
+  hasPaidTiers: boolean
+}) {
+  // Only show this section when at least one tier has a real price
+  if (!hasPaidTiers) return null
+
+  return (
+    <div className="card space-y-4">
+      <div>
+        <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+          <CreditCard className="w-4 h-4 text-yellow-400" /> Payment Collection
+        </h3>
+        <p className="text-xs text-gray-500 mt-0.5">
+          Select which accounts guests will send payment to
+        </p>
+      </div>
+
+      {accounts.length === 0 ? (
+        <div className="text-center py-5 space-y-2">
+          <CreditCard className="w-8 h-8 text-gray-600 mx-auto" />
+          <p className="text-sm text-gray-400">No payment accounts saved yet</p>
+          <Link
+            href="/dashboard/settings"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 text-xs text-[#1E5EFF] hover:text-white transition-colors"
+          >
+            <ExternalLink className="w-3 h-3" /> Add accounts in Settings
+          </Link>
+          <p className="text-xs text-gray-600">You can also link accounts after creating the event</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {accounts.map(acc => {
+            const Icon = accountTypeIcon(acc.account_type)
+            const colorClass = accountTypeColor(acc.account_type)
+            const isSelected = selected.has(acc.id)
+            return (
+              <button
+                key={acc.id}
+                type="button"
+                onClick={() => onToggle(acc.id)}
+                className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
+                  isSelected
+                    ? 'border-[#1E5EFF] bg-[#1E5EFF08]'
+                    : 'border-white/10 hover:border-white/20 bg-brand-charcoal-light'
+                }`}
+              >
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${colorClass}`}>
+                  <Icon className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">{acc.label}</p>
+                  <p className="text-xs text-gray-500">{acc.account_title} · {acc.account_number}</p>
+                </div>
+                <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
+                  isSelected ? 'bg-[#1E5EFF] border-[#1E5EFF]' : 'border-white/20'
+                }`}>
+                  {isSelected && <Check className="w-3 h-3 text-white" />}
+                </div>
+              </button>
+            )
+          })}
+
+          {selected.size === 0 && (
+            <p className="text-xs text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2">
+              ⚠️ No accounts selected — you can link them later from the event page
+            </p>
+          )}
+        </div>
+      )}
     </div>
   )
 }

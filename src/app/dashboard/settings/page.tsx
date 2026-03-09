@@ -10,8 +10,6 @@ import {
   Clock, RefreshCw, ChevronDown, Phone, Building2,
 } from 'lucide-react'
 import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInvite } from '@/app/actions/teamActions'
-import { getPaymentAccounts } from '@/app/actions/paymentAccountActions'
-import type { PaymentAccount } from '@/app/actions/paymentAccountActions'
 import PaymentAccountsSection from '@/components/settings/PaymentAccountsSection'
 import clsx from 'clsx'
 
@@ -95,8 +93,7 @@ export default function SettingsPage() {
   const [passwordError, setPasswordError] = useState<string | null>(null)
   const [passwordSaved, setPasswordSaved] = useState(false)
 
-  // Payment accounts
-  const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([])
+  // (payment accounts are now fetched inside PaymentAccountsSection directly)
 
   // Team
   const [invites, setInvites] = useState<TeamInvite[]>([])
@@ -133,8 +130,7 @@ export default function SettingsPage() {
         .order('created_at', { ascending: false })
       setInvites(inv ?? [])
 
-      const accounts = await getPaymentAccounts()
-      setPaymentAccounts(accounts)
+      // (payment accounts loaded inside PaymentAccountsSection)
     }
     loadData()
   }, [])
@@ -387,7 +383,6 @@ export default function SettingsPage() {
 
       {/* Payment Accounts */}
       <PaymentAccountsSection
-        initialAccounts={paymentAccounts}
         open={paymentOpen}
         onToggle={() => setPaymentOpen(!paymentOpen)}
       />

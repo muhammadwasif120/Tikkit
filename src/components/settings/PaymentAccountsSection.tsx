@@ -1,10 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   CreditCard, Plus, Trash2, Edit2, Check, X,
   Building2, Smartphone, ChevronDown,
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import {
   createPaymentAccount, updatePaymentAccount, deletePaymentAccount,
   type PaymentAccount,
@@ -12,10 +13,10 @@ import {
 import clsx from 'clsx'
 
 const ACCOUNT_TYPES = [
-  { value: 'bank',       label: 'Bank Transfer', icon: Building2,  color: 'text-blue-400',   bg: 'bg-blue-500/10',   border: 'border-blue-500/20' },
-  { value: 'jazzcash',   label: 'JazzCash',       icon: Smartphone, color: 'text-red-400',    bg: 'bg-red-500/10',    border: 'border-red-500/20' },
-  { value: 'easypaisa',  label: 'EasyPaisa',      icon: Smartphone, color: 'text-green-400',  bg: 'bg-green-500/10',  border: 'border-green-500/20' },
-  { value: 'other',      label: 'Other',           icon: CreditCard, color: 'text-gray-400',   bg: 'bg-white/5',       border: 'border-white/10' },
+  { value: 'bank',      label: 'Bank Transfer', icon: Building2,  color: 'text-blue-400',  bg: 'bg-blue-500/10',  border: 'border-blue-500/20' },
+  { value: 'jazzcash',  label: 'JazzCash',      icon: Smartphone, color: 'text-red-400',   bg: 'bg-red-500/10',   border: 'border-red-500/20' },
+  { value: 'easypaisa', label: 'EasyPaisa',     icon: Smartphone, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' },
+  { value: 'other',     label: 'Other',          icon: CreditCard, color: 'text-gray-400',  bg: 'bg-white/5',      border: 'border-white/10' },
 ]
 
 function getTypeConfig(type: string) {
@@ -24,7 +25,7 @@ function getTypeConfig(type: string) {
 
 const EMPTY_FORM = {
   label: '',
-  account_type: 'bank' as const,
+  account_type: 'bank' as string,
   account_title: '',
   account_number: '',
   bank_name: '',
@@ -33,22 +34,42 @@ const EMPTY_FORM = {
 }
 
 export default function PaymentAccountsSection({
-  initialAccounts,
   open,
   onToggle,
 }: {
-  initialAccounts: PaymentAccount[]
   open: boolean
   onToggle: () => void
 }) {
-  const [accounts, setAccounts] = useState<PaymentAccount[]>(initialAccounts)
+  const supabase = createClient()
+  const [accounts, setAccounts] = useState<PaymentAccount[]>([])
+  const [loading, setLoading] = useState(true)
+
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
-  const update = (field: string, value: string) => setForm(prev => ({ ...prev, [field]: value }))
+  /* ── Load accounts directly via Supabase client ── */
+  useEffect(() => {
+    const load = async () => {
+      setLoading(true)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setLoading(false); return }
+      const { data } = await supabase
+        .from('payment_accounts')
+        .select('*')
+        .eq('organizer_id', user.id)
+        .order('created_at', { ascending: false })
+      setAccounts(data ?? [])
+      setLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const update = (field: string, value: string) =>
+    setForm(prev => ({ ...prev, [field]: value }))
 
   const openAdd = () => {
     setForm(EMPTY_FORM)
@@ -58,13 +79,13 @@ export default function PaymentAccountsSection({
 
   const openEdit = (acc: PaymentAccount) => {
     setForm({
-      label: acc.label,
-      account_type: acc.account_type,
-      account_title: acc.account_title,
+      label:          acc.label,
+      account_type:   acc.account_type,
+      account_title:  acc.account_title,
       account_number: acc.account_number,
-      bank_name: acc.bank_name ?? '',
-      iban: acc.iban ?? '',
-      instructions: acc.instructions ?? '',
+      bank_name:      acc.bank_name ?? '',
+      iban:           acc.iban ?? '',
+      instructions:   acc.instructions ?? '',
     })
     setEditingId(acc.id)
     setShowForm(true)
@@ -78,24 +99,28 @@ export default function PaymentAccountsSection({
     try {
       if (editingId) {
         await updatePaymentAccount(editingId, {
-          label: form.label,
-          account_type: form.account_type,
-          account_title: form.account_title,
+          label:          form.label,
+          account_type:   form.account_type,
+          account_title:  form.account_title,
           account_number: form.account_number,
-          bank_name: form.bank_name || undefined,
-          iban: form.iban || undefined,
-          instructions: form.instructions || undefined,
+          bank_name:      form.bank_name || undefined,
+          iban:           form.iban || undefined,
+          instructions:   form.instructions || undefined,
         })
-        setAccounts(prev => prev.map(a => a.id === editingId ? { ...a, ...form } : a))
+        setAccounts(prev => prev.map(a =>
+          a.id === editingId
+            ? { ...a, ...form, bank_name: form.bank_name || null, iban: form.iban || null, instructions: form.instructions || null }
+            : a
+        ))
       } else {
         const created = await createPaymentAccount({
-          label: form.label,
-          account_type: form.account_type,
-          account_title: form.account_title,
+          label:          form.label,
+          account_type:   form.account_type,
+          account_title:  form.account_title,
           account_number: form.account_number,
-          bank_name: form.bank_name || undefined,
-          iban: form.iban || undefined,
-          instructions: form.instructions || undefined,
+          bank_name:      form.bank_name || undefined,
+          iban:           form.iban || undefined,
+          instructions:   form.instructions || undefined,
         })
         setAccounts(prev => [created, ...prev])
       }
@@ -113,8 +138,6 @@ export default function PaymentAccountsSection({
     setDeletingId(null)
   }
 
-  const activeAccounts = accounts.filter(a => a.is_active)
-
   return (
     <div className="card space-y-5">
       {/* Header toggle */}
@@ -124,11 +147,13 @@ export default function PaymentAccountsSection({
             <CreditCard className="w-4 h-4 text-yellow-400" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Payment Accounts</p>
+            <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Payment Accounts</p>
             <p className="text-xs text-gray-500 mt-0.5">
-              {activeAccounts.length > 0
-                ? `${activeAccounts.length} account${activeAccounts.length !== 1 ? 's' : ''} saved`
-                : 'No payment accounts saved'}
+              {loading
+                ? 'Loading...'
+                : accounts.length > 0
+                  ? `${accounts.length} account${accounts.length !== 1 ? 's' : ''} saved`
+                  : 'No payment accounts saved'}
             </p>
           </div>
         </div>
@@ -176,10 +201,19 @@ export default function PaymentAccountsSection({
             </div>
           )}
 
+          {/* Empty state */}
+          {!loading && accounts.length === 0 && !showForm && (
+            <div className="text-center py-4">
+              <CreditCard className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+              <p className="text-sm text-gray-500">No payment accounts yet</p>
+              <p className="text-xs text-gray-600 mt-0.5">Add an account so guests can pay for tickets</p>
+            </div>
+          )}
+
           {/* Add/Edit form */}
           {showForm ? (
             <div className="border border-white/10 rounded-xl p-4 space-y-4 bg-brand-charcoal-light">
-              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>
                 {editingId ? 'Edit Account' : 'Add Payment Account'}
               </p>
 
@@ -232,7 +266,8 @@ export default function PaymentAccountsSection({
                 )}
                 <div className="col-span-2">
                   <label className="label">Instructions <span className="text-gray-600">(shown to guest)</span></label>
-                  <textarea className="input resize-none min-h-16 text-sm" placeholder="e.g. Send payment to this number and upload screenshot below"
+                  <textarea className="input resize-none min-h-16 text-sm"
+                    placeholder="e.g. Send payment to this number and upload screenshot below"
                     value={form.instructions} onChange={e => update('instructions', e.target.value)} />
                 </div>
               </div>
@@ -241,8 +276,12 @@ export default function PaymentAccountsSection({
                 <button type="button" onClick={cancelForm} className="btn-secondary">
                   <X className="w-4 h-4" /> Cancel
                 </button>
-                <button type="button" onClick={handleSave} disabled={saving || !form.label || !form.account_title || !form.account_number}
-                  className="btn-primary">
+                <button
+                  type="button"
+                  onClick={handleSave}
+                  disabled={saving || !form.label || !form.account_title || !form.account_number}
+                  className="btn-primary"
+                >
                   {saving ? 'Saving...' : <><Check className="w-4 h-4" /> {editingId ? 'Update' : 'Save Account'}</>}
                 </button>
               </div>

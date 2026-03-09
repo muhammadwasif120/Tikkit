@@ -18,10 +18,13 @@ export async function getPaymentAccounts() {
 }
 
 export async function createPaymentAccount(account: {
-  account_name: string
-  bank_name: string
-  account_number: string
+  label: string
+  account_type: string
   account_title: string
+  account_number: string
+  bank_name?: string
+  iban?: string
+  instructions?: string
   is_default?: boolean
 }) {
   const supabase = await createClient()
@@ -47,10 +50,14 @@ export async function createPaymentAccount(account: {
 }
 
 export async function updatePaymentAccount(id: string, updates: {
-  account_name?: string
-  bank_name?: string
-  account_number?: string
+  label?: string
+  account_type?: string
   account_title?: string
+  account_number?: string
+  bank_name?: string
+  iban?: string
+  instructions?: string
+  is_active?: boolean
   is_default?: boolean
 }) {
   const supabase = await createClient()
@@ -191,10 +198,12 @@ export type PaymentAccount = {
   organizer_id: string
   label: string
   account_type: string
-  bank_name: string
   account_title: string
   account_number: string
-  account_name: string
+  bank_name: string | null
+  iban: string | null
+  instructions: string | null
+  is_active: boolean
   is_default: boolean
   created_at: string
 }
