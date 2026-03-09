@@ -99,64 +99,25 @@ function Confetti({ active }: { active: boolean }) {
 function QRDisplay({ registrationId, eventDate, guestName }: { registrationId: string; eventDate: string; guestName: string }) {
   const [qrSrc, setQrSrc] = useState('')
   const [bright, setBright] = useState(false)
-  const [ms, setMs] = useState(msUntil(eventDate))
-  const [showConfetti, setShowConfetti] = useState(false)
-  const [unlocked, setUnlocked] = useState(ms <= 3600000)
-  const prevUnlocked = useRef(unlocked)
   const ticketCode = `TIKKIT-${registrationId.replace(/-/g,'').slice(0,16).toUpperCase()}`
 
+  // Generate QR immediately — available as soon as approved/confirmed
   useEffect(() => {
-    const t = setInterval(() => {
-      const newMs = msUntil(eventDate)
-      setMs(newMs)
-      if (newMs <= 3600000 && !prevUnlocked.current) {
-        prevUnlocked.current = true
-        setUnlocked(true)
-        setShowConfetti(true)
-        setTimeout(() => setShowConfetti(false), 3000)
-      }
-    }, 1000)
-    return () => clearInterval(t)
-  }, [eventDate])
-
-  useEffect(() => {
-    if (unlocked) {
-      QRCode.toDataURL(ticketCode, { width: 200, margin: 2, color: { dark: '#080A10', light: '#FFFFFF' }, errorCorrectionLevel: 'H' })
-        .then(setQrSrc)
-    }
-  }, [unlocked, ticketCode])
+    QRCode.toDataURL(ticketCode, { width: 200, margin: 2, color: { dark: '#080A10', light: '#FFFFFF' }, errorCorrectionLevel: 'H' })
+      .then(setQrSrc)
+  }, [ticketCode])
 
   return (
-    <>
-      <Confetti active={showConfetti} />
-      <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
-        {unlocked ? (
-          <>
-            <div onClick={() => setBright(b => !b)} style={{ display: 'inline-block', padding: 10, borderRadius: 14, background: bright ? 'white' : '#F9FAFB', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', transition: 'background 0.2s' }}>
-              {qrSrc
-                ? <img src={qrSrc} alt="QR" style={{ width: 180, height: 180, display: 'block', borderRadius: 8 }} />
-                : <div style={{ width: 180, height: 180, background: '#E5E7EB', borderRadius: 8 }} />
-              }
-            </div>
-            <p style={{ color: '#9CA3AF', fontSize: 11, marginTop: 8 }}>Tap to boost brightness · Show at entry</p>
-            <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'monospace', marginTop: 4 }}>{ticketCode.slice(0,20)}</p>
-          </>
-        ) : (
-          <div>
-            <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px', animation: 'pulse 2.5s ease infinite' }}>
-              <Lock size={26} color="#6B7280" />
-            </div>
-            <p style={{ color: '#6B7280', fontSize: 13, fontWeight: 600, margin: '0 0 6px' }}>QR unlocks 1 hour before</p>
-            {ms > 0 && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 12, background: 'rgba(129,140,248,0.08)', border: '1px solid rgba(129,140,248,0.15)' }}>
-                <Clock size={11} color="#818CF8" />
-                <span style={{ color: '#818CF8', fontSize: 13, fontWeight: 800, fontFamily: 'var(--font-display)' }}>{fmtCountdown(ms)}</span>
-              </div>
-            )}
-          </div>
-        )}
+    <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
+      <div onClick={() => setBright(b => !b)} style={{ display: 'inline-block', padding: 10, borderRadius: 14, background: bright ? 'white' : '#F9FAFB', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', transition: 'background 0.2s' }}>
+        {qrSrc
+          ? <img src={qrSrc} alt="QR" style={{ width: 180, height: 180, display: 'block', borderRadius: 8 }} />
+          : <div style={{ width: 180, height: 180, background: '#E5E7EB', borderRadius: 8 }} />
+        }
       </div>
-    </>
+      <p style={{ color: '#9CA3AF', fontSize: 11, marginTop: 8 }}>Tap to boost brightness · Show at entry</p>
+      <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'monospace', marginTop: 4 }}>{ticketCode.slice(0,20)}</p>
+    </div>
   )
 }
 
@@ -276,13 +237,6 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
   const passCfg = pass ? (PASS_CFG[pass.pass_type] ?? PASS_CFG.attendance) : null
   const passIcon = pass ? (PASS_ICONS[pass.pass_type] ?? PASS_ICONS.attendance) : null
 
-  // Secret venue reveal countdown
-  const [venueMs, setVenueMs] = useState(ev.venue_reveal_at ? msUntil(ev.venue_reveal_at) : null)
-  useEffect(() => {
-    if (!ev.venue_reveal_at) return
-    const t = setInterval(() => setVenueMs(msUntil(ev.venue_reveal_at!)), 1000)
-    return () => clearInterval(t)
-  }, [ev.venue_reveal_at])
 
   return (
     <div style={{ background: '#0E1018', border: `1px solid ${isPast ? 'rgba(255,255,255,0.04)' : st.border}`, borderRadius: 20, overflow: 'hidden', opacity: isPast && !pass ? 0.5 : 1, transition: 'opacity 0.2s' }}>
@@ -324,9 +278,9 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
           <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#6B7280', fontSize: 11 }}>
             <MapPin size={10} />
             {ev.secret_venue
-              ? venueMs !== null && venueMs > 0
-                ? <span style={{ color: '#FFC745' }}><Lock size={9} style={{ display: 'inline', marginRight: 3 }} />Reveals in {fmtCountdown(venueMs)}</span>
-                : <span style={{ color: '#10B981' }}>{ev.venue_name ?? 'Venue revealed'}</span>
+              ? isConfirmed
+                ? <span style={{ color: '#10B981' }}>{ev.venue_name ?? 'TBA'}</span>
+                : <span style={{ color: '#FFC745' }}><Lock size={9} style={{ display: 'inline', marginRight: 3 }} />Secret Venue</span>
               : ev.venue_name ?? 'TBA'
             }
           </span>

@@ -257,6 +257,9 @@ export default function EventDetailClient({
   const isPaid = (event.ticket_price ?? 0) > 0
   const isEOI = event.registration_mode === 'expression_of_interest'
   const isInviteOnly = event.registration_mode === 'invite_only'
+  const isConfirmedGuest = existingReg !== null &&
+    (['confirmed', 'registered'].includes(existingReg.status) ||
+     (existingReg.status === 'approved' && (existingReg.payment_status === 'confirmed' || existingReg.payment_status === 'not_required')))
   const days = daysUntil(event.date_start)
   const gradient = getGradient(event.id)
   const organiser = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Tikkit'
@@ -336,7 +339,7 @@ export default function EventDetailClient({
             {[
               { icon: <Calendar size={14} color="#818CF8" />, label: 'Date',     value: `${days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d away`}`, sub: new Date(event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) },
               { icon: <Clock    size={14} color="#818CF8" />, label: 'Time',     value: fmtTime(event.date_start), sub: event.date_end ? `until ${fmtTime(event.date_end)}` : '' },
-              { icon: <MapPin   size={14} color="#818CF8" />, label: 'Venue',    value: event.secret_venue ? 'Secret' : (event.venue_name ?? 'TBA'), sub: event.secret_venue ? 'Revealed before event' : (event.venue_address ?? '') },
+              { icon: <MapPin   size={14} color="#818CF8" />, label: 'Venue',    value: event.secret_venue && !isConfirmedGuest ? 'Secret' : (event.venue_name ?? 'TBA'), sub: event.secret_venue && !isConfirmedGuest ? 'Revealed upon confirmation' : (event.venue_address ?? '') },
               { icon: <Users    size={14} color="#818CF8" />, label: 'Capacity', value: event.capacity ? `${event.registered_count} / ${event.capacity}` : 'Unlimited', sub: spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 20 ? `${spotsLeft} spots left` : '' },
             ].map((item, i) => (
               <div key={i} style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '12px 13px' }}>
@@ -344,8 +347,8 @@ export default function EventDetailClient({
                   {item.icon}
                   <span style={{ color: '#6B7280', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
                 </div>
-                <p style={{ color: item.label === 'Venue' && event.secret_venue ? '#FFC745' : 'white', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: 'var(--font-display)' }}>
-                  {item.label === 'Venue' && event.secret_venue
+                <p style={{ color: item.label === 'Venue' && event.secret_venue && !isConfirmedGuest ? '#FFC745' : 'white', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: 'var(--font-display)' }}>
+                  {item.label === 'Venue' && event.secret_venue && !isConfirmedGuest
                     ? <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Lock size={11} />{item.value}</span>
                     : item.value
                   }
@@ -384,7 +387,7 @@ export default function EventDetailClient({
           )}
 
           {/* Venue map link */}
-          {!event.secret_venue && event.venue_address && (
+          {(!event.secret_venue || isConfirmedGuest) && event.venue_address && (
             <a href={`https://maps.google.com/?q=${encodeURIComponent(event.venue_address)}`} target="_blank" rel="noopener noreferrer"
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 15px', background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, marginBottom: 16, textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

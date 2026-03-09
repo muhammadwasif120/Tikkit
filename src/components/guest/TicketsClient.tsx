@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { Ticket, Lock, MapPin, Calendar, Clock, CheckCircle, Unlock } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Ticket, MapPin, Calendar, CheckCircle } from 'lucide-react'
 import QRCode from 'qrcode'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
@@ -28,16 +28,6 @@ function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
 function msUntil(iso: string) { return new Date(iso).getTime() - Date.now() }
-function fmtCountdown(ms: number) {
-  if (ms <= 0) return null
-  const h = Math.floor(ms / 3600000)
-  const m = Math.floor((ms % 3600000) / 60000)
-  const s = Math.floor((ms % 60000) / 1000)
-  if (h > 24) { const d = Math.floor(h / 24); return `${d}d ${h % 24}h` }
-  if (h > 0) return `${h}h ${m}m`
-  return `${m}m ${s}s`
-}
-
 /* ─── Confetti ───────────────────────────────────────────────────── */
 function Confetti({ active }: { active: boolean }) {
   const colors = ['#1E5EFF','#EAB308','#EF4444','#10B981','#A855F7','#F97316']
@@ -117,78 +107,44 @@ function TicketTear({ onComplete }: { onComplete: () => void }) {
 function QRTicketCard({ ticket }: { ticket: TicketData }) {
   const [qrSrc, setQrSrc] = useState('')
   const [brightness, setBrightness] = useState(false)
-  const [showTear, setShowTear] = useState(false)
-  const [showConfetti, setShowConfetti] = useState(false)
   const [timeLeft, setTimeLeft] = useState(msUntil(ticket.eventDate))
-  const [venueTimeLeft, setVenueTimeLeft] = useState(
-    ticket.venueRevealAt ? msUntil(ticket.venueRevealAt) : null
-  )
-  const [unlocked, setUnlocked] = useState(false)
-  const [venueRevealed, setVenueRevealed] = useState(
-    ticket.secretVenue ? (ticket.venueRevealAt ? msUntil(ticket.venueRevealAt) <= 0 : false) : true
-  )
-  const tearShownRef = useRef(false)
-
-  const isUnlocked = timeLeft <= 3600000 // 1 hour before
 
   // Countdown tick
   useEffect(() => {
-    const interval = setInterval(() => {
-      const ms = msUntil(ticket.eventDate)
-      setTimeLeft(ms)
-      if (ticket.venueRevealAt) {
-        const vms = msUntil(ticket.venueRevealAt)
-        setVenueTimeLeft(vms)
-        if (vms <= 0 && !venueRevealed) setVenueRevealed(true)
-      }
-      // Trigger tear animation once when QR unlocks
-      if (ms <= 3600000 && !unlocked && !tearShownRef.current) {
-        tearShownRef.current = true
-        setShowTear(true)
-      }
-    }, 1000)
+    const interval = setInterval(() => setTimeLeft(msUntil(ticket.eventDate)), 1000)
     return () => clearInterval(interval)
-  }, [unlocked, venueRevealed, ticket])
+  }, [ticket.eventDate])
 
-  // Generate QR only when unlocked
+  // Generate QR immediately — available as soon as ticket is confirmed
   useEffect(() => {
-    if (isUnlocked || ticket.checkedIn) {
-      QRCode.toDataURL(ticket.ticketCode, {
-        width: 220, margin: 2,
-        color: { dark: '#080A10', light: '#FFFFFF' },
-        errorCorrectionLevel: 'H',
-      }).then(setQrSrc).catch(console.error)
-    }
-  }, [isUnlocked, ticket.checkedIn, ticket.ticketCode])
+    QRCode.toDataURL(ticket.ticketCode, {
+      width: 220, margin: 2,
+      color: { dark: '#080A10', light: '#FFFFFF' },
+      errorCorrectionLevel: 'H',
+    }).then(setQrSrc).catch(console.error)
+  }, [ticket.ticketCode])
 
   const isSoldOut = timeLeft < 0
 
   return (
     <>
-      {showTear && <TicketTear onComplete={() => { setShowTear(false); setUnlocked(true); setShowConfetti(true); setTimeout(() => setShowConfetti(false), 3000) }} />}
-      <Confetti active={showConfetti} />
-
       <div style={{
         background: '#13151E', border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 22, overflow: 'hidden',
-        boxShadow: isUnlocked ? '0 0 40px rgba(30,94,255,0.2)' : '0 8px 32px rgba(0,0,0,0.4)',
-        transition: 'box-shadow 0.5s ease',
+        boxShadow: '0 0 40px rgba(30,94,255,0.2)',
       }}>
         {/* Header */}
         <div style={{
           background: isSoldOut
             ? 'linear-gradient(135deg,#1A1A2E,#16213E)'
-            : isUnlocked
-            ? 'linear-gradient(135deg,#0F2A5E 0%,#1E5EFF 100%)'
-            : 'linear-gradient(135deg,#1E3A5F 0%,#0D1B2E 100%)',
+            : 'linear-gradient(135deg,#0F2A5E 0%,#1E5EFF 100%)',
           padding: '20px 20px 16px', position: 'relative', overflow: 'hidden',
-          transition: 'background 0.8s ease',
         }}>
           <div style={{ position: 'absolute', right: -30, top: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(30,94,255,0.1)' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
             <Ticket size={13} color="#818CF8" />
             <span style={{ color: '#818CF8', fontSize: 10, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>
-              {ticket.checkedIn ? 'Checked In ✓' : isUnlocked ? 'Active Ticket' : 'Upcoming'}
+              {ticket.checkedIn ? 'Checked In ✓' : 'Active Ticket'}
             </span>
             {ticket.checkedIn && <CheckCircle size={13} color="#10B981" style={{ marginLeft: 'auto' }} />}
           </div>
@@ -199,22 +155,10 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
             <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
               <Calendar size={11} /> {fmtDate(ticket.eventDate)} · {fmtTime(ticket.eventDate)}
             </span>
-            {/* Venue */}
-            {!ticket.secretVenue && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
-                <MapPin size={11} /> {ticket.eventVenue ?? 'TBA'}
-              </span>
-            )}
-            {ticket.secretVenue && venueRevealed && ticket.eventVenue && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#10B981', fontSize: 12 }}>
-                <MapPin size={11} /> {ticket.eventVenue}
-              </span>
-            )}
-            {ticket.secretVenue && !venueRevealed && venueTimeLeft !== null && venueTimeLeft > 0 && (
-              <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#FFC745', fontSize: 12 }}>
-                <Lock size={11} /> Venue reveals in {fmtCountdown(venueTimeLeft)}
-              </span>
-            )}
+            {/* Venue — always visible to confirmed ticket holders */}
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: ticket.secretVenue ? '#10B981' : 'rgba(255,255,255,0.6)', fontSize: 12 }}>
+              <MapPin size={11} /> {ticket.eventVenue ?? 'TBA'}
+            </span>
           </div>
         </div>
 
@@ -225,62 +169,25 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
           <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#080A10', flexShrink: 0, marginRight: -11 }} />
         </div>
 
-        {/* QR / Lock section */}
+        {/* QR section — available immediately to confirmed ticket holders */}
         <div style={{ padding: '20px', textAlign: 'center' }}>
-          {isUnlocked || ticket.checkedIn ? (
-            <>
-              <div
-                onClick={() => setBrightness(!brightness)}
-                style={{
-                  display: 'inline-block', padding: 12, borderRadius: 16,
-                  background: brightness ? 'white' : '#F9FAFB',
-                  cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
-                  transition: 'background 0.2s',
-                  animation: isUnlocked && !ticket.checkedIn ? 'pulse 2s ease infinite' : 'none',
-                }}
-              >
-                {qrSrc
-                  ? <img src={qrSrc} alt="QR" style={{ width: 196, height: 196, display: 'block', borderRadius: 8 }} />
-                  : <div style={{ width: 196, height: 196, background: '#E5E7EB', borderRadius: 8 }} />
-                }
-              </div>
-              <p style={{ color: '#4B5563', fontSize: 11, marginTop: 10 }}>
-                {ticket.checkedIn ? "You're checked in ✓" : 'Tap to boost brightness · Show at entry'}
-              </p>
-            </>
-          ) : (
-            <div style={{ padding: '8px 0' }}>
-              {/* Lock visual */}
-              <div style={{
-                width: 80, height: 80, borderRadius: 24,
-                background: 'rgba(255,255,255,0.04)', border: '2px solid rgba(255,255,255,0.08)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                margin: '0 auto 16px',
-                animation: 'pulse 2.5s ease infinite',
-              }}>
-                <Lock size={32} color="#4B5563" />
-              </div>
-              <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>
-                QR Locked
-              </p>
-              <p style={{ color: '#4B5563', fontSize: 13, margin: '0 0 16px' }}>
-                Unlocks 1 hour before the event
-              </p>
-              {/* Countdown */}
-              {timeLeft > 0 && (
-                <div style={{
-                  display: 'inline-flex', alignItems: 'center', gap: 6,
-                  padding: '8px 16px', borderRadius: 14,
-                  background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.2)',
-                }}>
-                  <Clock size={13} color="#818CF8" />
-                  <span style={{ color: '#818CF8', fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
-                    {fmtCountdown(timeLeft)}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
+          <div
+            onClick={() => setBrightness(!brightness)}
+            style={{
+              display: 'inline-block', padding: 12, borderRadius: 16,
+              background: brightness ? 'white' : '#F9FAFB',
+              cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+              transition: 'background 0.2s',
+            }}
+          >
+            {qrSrc
+              ? <img src={qrSrc} alt="QR" style={{ width: 196, height: 196, display: 'block', borderRadius: 8 }} />
+              : <div style={{ width: 196, height: 196, background: '#E5E7EB', borderRadius: 8 }} />
+            }
+          </div>
+          <p style={{ color: '#4B5563', fontSize: 11, marginTop: 10 }}>
+            {ticket.checkedIn ? "You're checked in ✓" : 'Tap to boost brightness · Show at entry'}
+          </p>
         </div>
 
         {/* Footer */}
