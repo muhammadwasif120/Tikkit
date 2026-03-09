@@ -6,34 +6,42 @@ import { setEventPaymentAccounts } from '@/app/actions/paymentAccountActions'
 import type { PaymentAccount } from '@/app/actions/paymentAccountActions'
 import clsx from 'clsx'
 
+/* ─── Helpers ─── */
 const accountTypeColor = (type: string) => {
-  if (type === 'bank') return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
-  if (type === 'jazzcash') return 'text-red-400 bg-red-500/10 border-red-500/20'
+  if (type === 'bank')      return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+  if (type === 'jazzcash')  return 'text-red-400 bg-red-500/10 border-red-500/20'
   if (type === 'easypaisa') return 'text-green-400 bg-green-500/10 border-green-500/20'
   return 'text-gray-400 bg-white/5 border-white/10'
 }
+const accountTypeIcon = (type: string) => (type === 'bank' ? Building2 : Smartphone)
 
-const accountTypeIcon = (type: string) => {
-  if (type === 'bank') return Building2
-  return Smartphone
+/* ─── Toggle ─── */
+function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" onClick={onToggle}
+      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
+      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : ''}`} />
+    </button>
+  )
 }
 
+/* ─── Component ─── */
 export default function EventPaymentSetup({
   eventId,
-  ticketPrice,
   allAccounts,
   linkedAccountIds: initialLinked,
 }: {
   eventId: string
-  ticketPrice: number
   allAccounts: PaymentAccount[]
   linkedAccountIds: string[]
 }) {
+  // Default toggle ON if there are already linked accounts
+  const [collectPayment, setCollectPayment] = useState(initialLinked.length > 0)
   const [selected, setSelected] = useState<Set<string>>(new Set(initialLinked))
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  const toggle = (id: string) => {
+  const toggleAccount = (id: string) => {
     setSelected(prev => {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
@@ -43,43 +51,55 @@ export default function EventPaymentSetup({
     setSaved(false)
   }
 
+  const handleCollectToggle = () => {
+    const newVal = !collectPayment
+    setCollectPayment(newVal)
+    if (!newVal) setSelected(new Set())
+    setSaved(false)
+  }
+
   const handleSave = async () => {
     setSaving(true)
-    await setEventPaymentAccounts(eventId, Array.from(selected))
+    await setEventPaymentAccounts(eventId, collectPayment ? Array.from(selected) : [])
     setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
   }
 
-  const isPaid = ticketPrice > 0
+  const dirty = !saved // show Save button whenever state has changed
 
   return (
     <div className="card space-y-4">
-      <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
-          <CreditCard className="w-4 h-4 text-yellow-400" />
+      {/* Header + toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+            <CreditCard className="w-4 h-4 text-yellow-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-white text-sm">
+              Payment Collection
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {collectPayment
+                ? 'Guests will see your payment details at checkout'
+                : 'Free event or payment handled externally'}
+            </p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Payment Collection
-          </h3>
-          <p className="text-xs text-gray-500 mt-0.5">
-            {isPaid
-              ? `₨${ticketPrice.toLocaleString()} ticket — select accounts guests can pay to`
-              : 'Free event — no payment collection needed'}
-          </p>
-        </div>
+        <Toggle on={collectPayment} onToggle={handleCollectToggle} />
       </div>
 
-      {!isPaid ? (
+      {!collectPayment ? (
         <div className="text-xs text-gray-500 bg-white/5 rounded-lg px-4 py-3">
-          Since this event is free, guests will be registered automatically (open) or approved by you (EOI) with no payment step.
+          In-app payment is disabled. Guests won&apos;t see any payment details. Toggle on to collect payments through Tikkit.
         </div>
       ) : allAccounts.length === 0 ? (
         <div className="text-center py-6 space-y-2">
           <CreditCard className="w-8 h-8 text-gray-600 mx-auto" />
           <p className="text-sm text-gray-400">No payment accounts saved yet</p>
-          <a href="/dashboard/settings" className="inline-flex items-center gap-1.5 text-xs text-brand-blue hover:text-white transition-colors">
+          <a href="/dashboard/settings"
+            className="inline-flex items-center gap-1.5 text-xs text-brand-blue hover:text-white transition-colors">
             <Plus className="w-3 h-3" /> Add accounts in Settings
             <ExternalLink className="w-3 h-3" />
           </a>
@@ -92,7 +112,7 @@ export default function EventPaymentSetup({
               const colorClass = accountTypeColor(acc.account_type)
               const isSelected = selected.has(acc.id)
               return (
-                <button key={acc.id} type="button" onClick={() => toggle(acc.id)}
+                <button key={acc.id} type="button" onClick={() => toggleAccount(acc.id)}
                   className={clsx(
                     'w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-all',
                     isSelected
@@ -119,13 +139,17 @@ export default function EventPaymentSetup({
 
           {selected.size === 0 && (
             <p className="text-xs text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2">
-              ⚠️ No payment accounts selected — guests won't see payment details.
+              ⚠️ No accounts selected — guests won&apos;t see payment details.
             </p>
           )}
 
           <div className="flex justify-end">
-            <button onClick={handleSave} disabled={saving} className="btn-primary">
-              {saved ? <><Check className="w-4 h-4" /> Saved</> : saving ? 'Saving...' : <><Check className="w-4 h-4" /> Save Payment Setup</>}
+            <button onClick={handleSave} disabled={saving}
+              className={clsx('btn-primary', saved && 'bg-green-600 hover:bg-green-700 border-green-600')}>
+              {saved
+                ? <><Check className="w-4 h-4" /> Saved</>
+                : saving ? 'Saving…'
+                : <><Check className="w-4 h-4" /> Save Payment Setup</>}
             </button>
           </div>
         </>

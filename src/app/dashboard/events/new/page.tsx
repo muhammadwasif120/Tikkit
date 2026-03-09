@@ -82,6 +82,7 @@ export default function NewEventPage() {
   // Payment accounts
   const [paymentAccounts, setPaymentAccounts] = useState<PaymentAccount[]>([])
   const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(new Set())
+  const [collectPayment, setCollectPayment] = useState(false)
 
   // Load organizer's payment accounts
   useEffect(() => {
@@ -192,8 +193,8 @@ export default function NewEventPage() {
       }
     }
 
-    // Link selected payment accounts to the event
-    if (selectedAccountIds.size > 0) {
+    // Link selected payment accounts to the event (only if collecting in-app)
+    if (collectPayment && selectedAccountIds.size > 0) {
       await setEventPaymentAccounts(event.id, Array.from(selectedAccountIds))
     }
 
@@ -470,28 +471,23 @@ export default function NewEventPage() {
           </TierCard>
         </div>
 
-        {/* ── Payment Accounts ── */}
-        <PaymentAccountsSelector
+        {/* ── Payment Collection ── */}
+        <PaymentSection
           accounts={paymentAccounts}
           selected={selectedAccountIds}
-          onToggle={(id) => setSelectedAccountIds(prev => {
+          onToggleAccount={(id) => setSelectedAccountIds(prev => {
             const next = new Set(prev)
             if (next.has(id)) next.delete(id)
             else next.add(id)
             return next
           })}
-          hasPaidTiers={
-            (tiers.standard.enabled && parseFloat(tiers.standard.price || '0') > 0) ||
-            (tiers.vip.enabled && parseFloat(tiers.vip.price || '0') > 0) ||
-            (tiers.discounted.enabled && (() => {
-              const orig = parseFloat(tiers.discounted.price || '0')
-              const dval = parseFloat(tiers.discounted.discountValue || '0')
-              const final = tiers.discounted.discountType === 'percentage'
-                ? Math.max(0, orig - orig * dval / 100)
-                : Math.max(0, orig - dval)
-              return final > 0
-            })())
-          }
+          collectPayment={collectPayment}
+          onCollectToggle={() => {
+            setCollectPayment(prev => {
+              if (prev) setSelectedAccountIds(new Set())
+              return !prev
+            })
+          }}
         />
 
         {/* ── Budget ── */}
@@ -593,7 +589,7 @@ export default function NewEventPage() {
   )
 }
 
-/* ─── Payment accounts selector ─── */
+/* ─── Payment section (always visible, with toggle) ─── */
 
 const accountTypeColor = (type: string) => {
   if (type === 'bank')      return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
@@ -604,32 +600,44 @@ const accountTypeColor = (type: string) => {
 
 const accountTypeIcon = (type: string) => (type === 'bank' ? Building2 : Smartphone)
 
-function PaymentAccountsSelector({
+function PaymentSection({
   accounts,
   selected,
-  onToggle,
-  hasPaidTiers,
+  onToggleAccount,
+  collectPayment,
+  onCollectToggle,
 }: {
   accounts: PaymentAccount[]
   selected: Set<string>
-  onToggle: (id: string) => void
-  hasPaidTiers: boolean
+  onToggleAccount: (id: string) => void
+  collectPayment: boolean
+  onCollectToggle: () => void
 }) {
-  // Only show this section when at least one tier has a real price
-  if (!hasPaidTiers) return null
-
   return (
     <div className="card space-y-4">
-      <div>
-        <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-          <CreditCard className="w-4 h-4 text-yellow-400" /> Payment Collection
-        </h3>
-        <p className="text-xs text-gray-500 mt-0.5">
-          Select which accounts guests will send payment to
-        </p>
+      {/* Header + master toggle */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 rounded-lg bg-yellow-500/10 flex items-center justify-center shrink-0">
+            <CreditCard className="w-3.5 h-3.5 text-yellow-400" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-white text-sm">Payment Collection</h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              {collectPayment
+                ? 'Guests will see your payment details at checkout'
+                : 'No in-app payment — free or handled externally'}
+            </p>
+          </div>
+        </div>
+        <Toggle on={collectPayment} onToggle={onCollectToggle} />
       </div>
 
-      {accounts.length === 0 ? (
+      {!collectPayment ? (
+        <div className="text-xs text-gray-500 bg-white/5 rounded-lg px-4 py-3">
+          Turn on to collect payments through the app. You can also configure this after creating the event.
+        </div>
+      ) : accounts.length === 0 ? (
         <div className="text-center py-5 space-y-2">
           <CreditCard className="w-8 h-8 text-gray-600 mx-auto" />
           <p className="text-sm text-gray-400">No payment accounts saved yet</p>
@@ -640,7 +648,7 @@ function PaymentAccountsSelector({
           >
             <ExternalLink className="w-3 h-3" /> Add accounts in Settings
           </Link>
-          <p className="text-xs text-gray-600">You can also link accounts after creating the event</p>
+          <p className="text-xs text-gray-600">You can link accounts after creating the event too</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -652,7 +660,7 @@ function PaymentAccountsSelector({
               <button
                 key={acc.id}
                 type="button"
-                onClick={() => onToggle(acc.id)}
+                onClick={() => onToggleAccount(acc.id)}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
                   isSelected
                     ? 'border-[#1E5EFF] bg-[#1E5EFF08]'
@@ -677,7 +685,7 @@ function PaymentAccountsSelector({
 
           {selected.size === 0 && (
             <p className="text-xs text-yellow-400 bg-yellow-500/10 border border-yellow-500/20 rounded-lg px-3 py-2">
-              ⚠️ No accounts selected — you can link them later from the event page
+              ⚠️ No accounts selected — select at least one so guests can pay
             </p>
           )}
         </div>

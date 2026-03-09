@@ -7,6 +7,7 @@ import clsx from 'clsx'
 import EventActions from '@/components/events/EventActions'
 import GuestTable from '@/components/guests/GuestTable'
 import EventPaymentSetup from '@/components/events/EventPaymentSetup'
+import EventTicketTypes from '@/components/events/EventTicketTypes'
 
 const statusBadge: Record<string, string> = {
   draft: 'badge-gray',
@@ -130,15 +131,18 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         ))}
       </div>
 
-      {/* Payment Setup — only shown for paid events or if organizer wants to configure */}
-      {event.registration_mode !== 'invite_only' && (
-        <EventPaymentSetup
-          eventId={event.id}
-          ticketPrice={event.ticket_price ?? 0}
-          allAccounts={allPaymentAccounts ?? []}
-          linkedAccountIds={linkedAccountIds}
-        />
-      )}
+      {/* Ticket Tiers — always visible and editable */}
+      <EventTicketTypes
+        eventId={event.id}
+        initialTicketTypes={ticketTypes ?? []}
+      />
+
+      {/* Payment Setup — always visible, toggle controls in-app collection */}
+      <EventPaymentSetup
+        eventId={event.id}
+        allAccounts={allPaymentAccounts ?? []}
+        linkedAccountIds={linkedAccountIds}
+      />
 
       {/* Guest table */}
       <div className="card">

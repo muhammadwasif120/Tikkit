@@ -6,6 +6,23 @@ import { createClient } from '@/lib/supabase/client'
 import { ArrowLeft, Plus, Upload, FileSpreadsheet, X, Check, AlertCircle, Download } from 'lucide-react'
 import Link from 'next/link'
 
+/* ─── Toggle ─── */
+function Toggle({
+  on, onToggle, color = 'blue',
+}: { on: boolean; onToggle: () => void; color?: 'blue' | 'yellow' | 'green' }) {
+  const bg = on
+    ? color === 'yellow' ? 'bg-[#FFC745]'
+    : color === 'green'  ? 'bg-green-500'
+    : 'bg-[#1E5EFF]'
+    : 'bg-white/10'
+  return (
+    <button type="button" onClick={onToggle}
+      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${bg}`}>
+      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : ''}`} />
+    </button>
+  )
+}
+
 type ImportRow = {
   full_name: string
   email?: string
@@ -250,21 +267,22 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
 
           <div className="card space-y-3">
             <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>Guest Options</h3>
-            {[
-              { key: 'is_vip', label: 'VIP Guest', desc: 'Marked with VIP badge on entry', color: 'bg-[#FFC745]' },
-              { key: 'plus_one', label: 'Plus One', desc: 'Guest is bringing a +1', color: 'bg-[#1E5EFF]' },
-              { key: 'waitlist', label: 'Add to Waitlist', desc: 'Guest is on waitlist, not confirmed', color: 'bg-[#1E5EFF]' },
-            ].map(opt => (
+            {([
+              { key: 'is_vip',   label: 'VIP Guest',         desc: 'Marked with VIP badge on entry',           color: 'yellow' as const },
+              { key: 'plus_one', label: 'Plus One',           desc: 'Guest is bringing a +1',                    color: 'blue'   as const },
+              { key: 'waitlist', label: 'Add to Waitlist',    desc: 'Guest is on waitlist, not confirmed',        color: 'blue'   as const },
+            ]).map(opt => (
               <div key={opt.key}>
                 <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
                   <div>
                     <p className="text-sm font-medium text-white">{opt.label}</p>
                     <p className="text-xs text-gray-500">{opt.desc}</p>
                   </div>
-                  <button type="button" onClick={() => update(opt.key, !form[opt.key as keyof typeof form])}
-                    className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${form[opt.key as keyof typeof form] ? opt.color : 'bg-white/10'}`}>
-                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${form[opt.key as keyof typeof form] ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                  </button>
+                  <Toggle
+                    on={!!form[opt.key as keyof typeof form]}
+                    onToggle={() => update(opt.key, !form[opt.key as keyof typeof form])}
+                    color={opt.color}
+                  />
                 </div>
                 {opt.key === 'plus_one' && form.plus_one && (
                   <div className="mt-2 animate-slide-up">
