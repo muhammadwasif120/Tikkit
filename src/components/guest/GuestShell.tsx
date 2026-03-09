@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Compass, Ticket, User, Bell } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
+import AddToHomeScreen from '@/components/guest/AddToHomeScreen'
 
 const tabs = [
   { href: '/guest/explore', label: 'Explore',   icon: Compass },
@@ -69,6 +70,9 @@ export default function GuestShell({
 
       {/* ── Page content ── */}
       <main style={{ paddingBottom: 88 }}>{children}</main>
+
+      {/* ── Add to Home Screen nudge ── */}
+      <AddToHomeScreen />
 
       {/* ── Bottom tab bar ── */}
       <nav

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { DM_Sans } from 'next/font/google'
 import './globals.css'
 
@@ -9,9 +9,46 @@ const dmSans = DM_Sans({
   display: 'swap',
 })
 
+export const viewport: Viewport = {
+  themeColor: '#1E5EFF',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+}
+
 export const metadata: Metadata = {
   title: 'Tikkit — Plan. Sell. Manage.',
-  description: 'All-in-one event management platform for boutique, private, and corporate events.',
+  description: 'Discover and attend exclusive events. Your digital pass lives here.',
+  applicationName: 'Tikkit',
+  appleWebApp: {
+    capable: true,
+    title: 'Tikkit',
+    statusBarStyle: 'black-translucent',
+    startupImage: [
+      { url: '/icons/apple-touch-icon.png' },
+    ],
+  },
+  manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icons/favicon-16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/icons/favicon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/icon-192.png',   sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      { rel: 'mask-icon', url: '/icons/icon-512-maskable.png', color: '#1E5EFF' },
+    ],
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'msapplication-TileColor': '#1E5EFF',
+    'msapplication-tap-highlight': 'no',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
