@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Zap, TrendingUp, TrendingDown, Award, Shield, ChevronRight, Info, Star, Flame, Gem } from 'lucide-react'
+import { Zap, TrendingUp, TrendingDown, Award, Shield, ChevronRight, Star, Flame, Gem } from 'lucide-react'
 
 /* ─── Types ──────────────────────────────────────────── */
 type Transaction = {
@@ -21,22 +21,22 @@ type TierInfo = {
   perks: string[]
 }
 
-/* ─── Tier config ────────────────────────────────────── */
+/* ─── Tier config — aligned with creditUtils.ts ─────── */
 const TIERS: TierInfo[] = [
-  { name: 'Scout',    color: '#9CA3AF', minScore: 0,    maxScore: 99,   perks: ['Basic access to public events', 'Collect attendance passes'] },
-  { name: 'Regular',  color: '#60A5FA', minScore: 100,  maxScore: 299,  perks: ['Priority waitlist placement', 'Early event notifications'] },
-  { name: 'Insider',  color: '#F97316', minScore: 300,  maxScore: 599,  perks: ['Early access to private events', 'Exclusive Insider badge'] },
-  { name: 'Elite',    color: '#A855F7', minScore: 600,  maxScore: 999,  perks: ['Direct invites from organizers', 'VIP pass eligibility'] },
-  { name: 'Legend',   color: '#EAB308', minScore: 1000, maxScore: null, perks: ['Auto-approved for all events', 'Lifetime platinum status'] },
+  { name: 'Newcomer', color: '#6B7280', minScore: 0,    maxScore: 49,   perks: ['Basic access to public events', 'Collect attendance passes'] },
+  { name: 'Rising',   color: '#22C55E', minScore: 50,   maxScore: 199,  perks: ['Priority waitlist placement', 'Early event notifications'] },
+  { name: 'Regular',  color: '#1E5EFF', minScore: 200,  maxScore: 499,  perks: ['Early access to select events', 'Regular member badge'] },
+  { name: 'VIP',      color: '#A855F7', minScore: 500,  maxScore: 999,  perks: ['Direct invites from organizers', 'VIP pass eligibility'] },
+  { name: 'Elite',    color: '#FFC745', minScore: 1000, maxScore: null, perks: ['Auto-approved for all events', 'Lifetime platinum status'] },
 ]
 
 function getTierIcon(name: string, size: number, color: string): React.ReactNode {
   const map: Record<string, React.ReactNode> = {
-    Scout:   <Award size={size} color={color} style={{ opacity: 0.5 }} />,
-    Regular: <Star  size={size} color={color} />,
-    Insider: <Flame size={size} color={color} />,
-    Elite:   <Gem   size={size} color={color} />,
-    Legend:  <Zap   size={size} color={color} />,
+    Newcomer: <Award size={size} color={color} style={{ opacity: 0.5 }} />,
+    Rising:   <Star  size={size} color={color} />,
+    Regular:  <Flame size={size} color={color} />,
+    VIP:      <Gem   size={size} color={color} />,
+    Elite:    <Zap   size={size} color={color} />,
   }
   return map[name] ?? <Award size={size} color={color} />
 }
@@ -106,12 +106,13 @@ function TxRow({ tx }: { tx: Transaction }) {
 
 /* ─── Main ───────────────────────────────────────────── */
 export default function CreditsClient({
-  score,
+  profile,
   transactions,
 }: {
-  score: number
+  profile: { credit_score?: number | null } | null
   transactions: Transaction[]
 }) {
+  const score = profile?.credit_score ?? 0
   const [showTiers, setShowTiers] = useState(false)
   const tier = getTier(score)
   const nextTier = getNextTier(score)

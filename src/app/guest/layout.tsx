@@ -16,15 +16,15 @@ export default async function GuestLayout({ children }: { children: React.ReactN
 
   if (profile?.role && profile.role !== 'guest') redirect('/dashboard')
 
-  // Fetch unread notification count for the bell
-  // We store guest notifications in public_registrations status changes
-  // Count approved registrations the guest hasn't "seen" yet
+  // Fetch actionable notification count for the bell:
+  // Count upcoming registrations that need guest action (payment required)
+  // or were recently reviewed (approved/rejected in last 7 days)
+  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString()
   const { count: notifCount } = await supabase
     .from('public_registrations')
     .select('*', { count: 'exact', head: true })
     .eq('email', user.email!)
-    .eq('status', 'approved')
-    .is('reviewed_at', null)  // proxy for "unseen" — adjust if you add a seen_at column
+    .or(`payment_status.eq.pending,and(reviewed_at.gte.${sevenDaysAgo},status.neq.pending)`)
 
   return <GuestShell notifCount={notifCount ?? 0}>{children}</GuestShell>
 }

@@ -127,9 +127,17 @@ function HeroBanner({ event }: { event: Event }) {
 /* ─── My Events Strip ────────────────────────────────────────────── */
 function MyEventsStrip({ myEvents }: { myEvents: MyEvent[] }) {
   if (!myEvents.length) return null
-  const statusDot: Record<string, string> = {
-    confirmed: '#10B981', registered: '#10B981',
-    eoi_submitted: '#EAB308', eoi_approved: '#EF4444', payment_pending: '#818CF8',
+  // Map actual DB statuses + UI-side statuses to dot colors
+  function resolveStatusDot(status: string): string {
+    if (status === 'pending') return '#EAB308'       // EOI awaiting review — gold
+    if (status === 'rejected') return '#EF4444'      // rejected — red
+    if (status === 'approved') return '#10B981'      // approved/confirmed — green
+    // legacy UI-side keys
+    const map: Record<string, string> = {
+      confirmed: '#10B981', registered: '#10B981',
+      eoi_submitted: '#EAB308', eoi_approved: '#EF4444', payment_pending: '#818CF8',
+    }
+    return map[status] ?? '#9CA3AF'
   }
   return (
     <div style={{ margin: '20px 0 0' }}>
@@ -143,7 +151,7 @@ function MyEventsStrip({ myEvents }: { myEvents: MyEvent[] }) {
       <div style={{ display: 'flex', gap: 9, overflowX: 'auto', padding: '0 16px 2px', scrollbarWidth: 'none' }}>
         {myEvents.map((reg, i) => {
           const ev = reg.event; if (!ev) return null
-          const dot = statusDot[reg.status] ?? '#9CA3AF'
+          const dot = resolveStatusDot(reg.status)
           return (
             <Link key={reg.id} href="/guest/tikkit" style={{ textDecoration: 'none', flexShrink: 0, width: 120, opacity: 0, animation: 'revealUp 0.3s ease forwards', animationDelay: `${i * 50}ms` }}>
               <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
