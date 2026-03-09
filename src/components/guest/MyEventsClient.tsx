@@ -16,9 +16,20 @@ type EventInfo = {
   cover_image_url: string | null; ticket_price: number | null
 }
 type Registration = {
-  id: string; status: string; created_at: string
+  id: string; status: string; payment_status?: string; created_at: string
   payment_screenshot_url: string | null
   event: EventInfo | null
+}
+
+/* ─── Resolve DB statuses → display key ─────────────────────────── */
+function resolveStatus(status: string, paymentStatus?: string): string {
+  if (status === 'pending') return 'eoi_submitted'
+  if (status === 'approved') {
+    if (paymentStatus === 'pending')   return 'eoi_approved'
+    if (paymentStatus === 'submitted') return 'payment_pending'
+    return 'confirmed' // not_required or confirmed
+  }
+  return status // rejected, etc.
 }
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
@@ -206,8 +217,10 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
 function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) => void }) {
   const event = reg.event
   if (!event) return null
-  const cfg = STATUS_CONFIG[reg.status] ?? STATUS_CONFIG.registered
+  const displayStatus = resolveStatus(reg.status, reg.payment_status)
+  const cfg = STATUS_CONFIG[displayStatus] ?? STATUS_CONFIG.confirmed
   const past = isPast(event.date_start)
+  const isConfirmed = displayStatus === 'confirmed' || displayStatus === 'registered'
 
   return (
     <div style={{
@@ -237,7 +250,9 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 12 }}>
             <MapPin size={11} color="#1E5EFF" />
-            {event.secret_venue ? <span style={{ color: '#FFC745' }}>Secret venue</span> : (event.venue_name ?? 'TBA')}
+            {event.secret_venue && !isConfirmed
+              ? <span style={{ color: '#FFC745' }}>Secret venue</span>
+              : (event.venue_name ?? 'TBA')}
           </span>
         </div>
 
@@ -248,20 +263,17 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: 8 }}>
-          {reg.status === 'eoi_approved' && (
-            <button
-              onClick={() => onPay(reg)}
-              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', border: 'none', borderRadius: 12, background: '#EF4444', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
-            >
+          {displayStatus === 'eoi_approved' && (
+            <Link href="/guest/tikkit" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', border: 'none', borderRadius: 12, background: '#EF4444', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', fontFamily: 'var(--font-body)' }}>
               <CreditCard size={13} /> Pay Now
-            </button>
+            </Link>
           )}
-          {(reg.status === 'confirmed' || reg.status === 'registered') && (
+          {isConfirmed && !past && (
             <Link href="/guest/tikkit" style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'rgba(30,94,255,0.15)', border: '1px solid rgba(30,94,255,0.25)', color: '#818CF8', fontSize: 13, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
               <Ticket size={13} /> View Ticket
             </Link>
           )}
-          {reg.status === 'payment_pending' && reg.payment_screenshot_url && (
+          {displayStatus === 'payment_pending' && reg.payment_screenshot_url && (
             <div style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'rgba(129,140,248,0.08)', border: '1px solid rgba(129,140,248,0.15)', color: '#818CF8', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
               <CheckCircle size={13} /> Screenshot sent
             </div>
@@ -281,9 +293,10 @@ export default function MyEventsClient({ registrations }: { registrations: Regis
   const filtered = registrations.filter(r => {
     if (!r.event) return false
     const past = isPast(r.event.date_start)
-    if (filter === 'active') return ['confirmed', 'registered'].includes(r.status) && !past
-    if (filter === 'pending') return ['eoi_submitted', 'eoi_approved', 'payment_pending'].includes(r.status)
-    if (filter === 'past') return past
+    const ds = resolveStatus(r.status, r.payment_status)
+    if (filter === 'active')  return (ds === 'confirmed' || ds === 'registered') && !past
+    if (filter === 'pending') return ['eoi_submitted', 'eoi_approved', 'payment_pending'].includes(ds)
+    if (filter === 'past')    return past
     return true
   })
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { User, Edit3, Star, Zap, TrendingUp, TrendingDown, Award, LogOut, Bell, Shield, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound } from 'lucide-react'
+import { User, Edit3, Star, Zap, TrendingUp, TrendingDown, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound } from 'lucide-react'
 import { updateGuestProfile, signOut, sendPasswordReset } from '@/app/actions/guestProfileActions'
 import { getCreditTier } from '@/lib/creditUtils'
 
@@ -14,7 +14,7 @@ type Profile = {
   credit_score: number
 }
 type Transaction = {
-  id: string; type: string; points: number; balance_after: number
+  id: string; type: string; amount: number; balance_after: number
   created_at: string; note: string | null
   event: { title: string; date_start: string } | null
 }
@@ -366,8 +366,8 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
                       </p>
                       <p style={{ color: '#4B5563', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.event?.title ?? tx.note ?? '—'}</p>
                     </div>
-                    <span style={{ color: tx.points > 0 ? '#10B981' : '#EF4444', fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-display)', marginLeft: 12, flexShrink: 0 }}>
-                      {tx.points > 0 ? '+' : ''}{tx.points}
+                    <span style={{ color: tx.amount > 0 ? '#10B981' : '#EF4444', fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-display)', marginLeft: 12, flexShrink: 0 }}>
+                      {tx.amount > 0 ? '+' : ''}{tx.amount}
                     </span>
                   </div>
                 ))}
@@ -380,7 +380,6 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
         <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, overflow: 'hidden', marginBottom: 24 }}>
           {[
             { icon: <Bell size={16} />, label: 'Notifications', href: '/guest/notifications' },
-            { icon: <Shield size={16} />, label: 'Privacy', href: '/guest/privacy' },
             profile.instagram_handle
               ? { icon: <Instagram size={16} />, label: `@${profile.instagram_handle}`, href: `https://instagram.com/${profile.instagram_handle}` }
               : { icon: <Instagram size={16} />, label: 'Connect Instagram', href: '#', onClick: () => setShowEdit(true) },

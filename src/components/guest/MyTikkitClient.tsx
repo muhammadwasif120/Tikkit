@@ -228,10 +228,12 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
   const isConfirmed  = ['confirmed', 'registered'].includes(reg.status)
     || (reg.status === 'approved' && (!isPaidEvent || paymentStatus === 'confirmed'))
 
-  // Status override for paid events
-  const statusKey = isPayNow ? 'eoi_approved'
-    : isPayPending ? 'payment_pending'
-    : reg.status
+  // Map actual DB status values → display key
+  const statusKey = isPayNow    ? 'eoi_approved'
+    : isPayPending              ? 'payment_pending'
+    : reg.status === 'pending'  ? 'eoi_submitted'   // EOI submitted, awaiting review
+    : isConfirmed               ? 'confirmed'        // approved + free, or approved + paid confirmed
+    : reg.status                                     // 'rejected', etc.
   const st = STATUS[statusKey] ?? STATUS.registered
   const pass = reg.pass
   const passCfg = pass ? (PASS_CFG[pass.pass_type] ?? PASS_CFG.attendance) : null
