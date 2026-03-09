@@ -2,10 +2,20 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, CalendarDays, MapPin, Users, Edit2, Trash2, X, Check, ChevronDown } from 'lucide-react'
+import { Plus, CalendarDays, MapPin, Users, Edit2, Trash2, X, Check, ChevronDown, Lock, Eye } from 'lucide-react'
 import { format } from 'date-fns'
 import clsx from 'clsx'
 import Link from 'next/link'
+
+/* ─── Toggle ─── */
+function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" onClick={onToggle}
+      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
+      <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : ''}`} />
+    </button>
+  )
+}
 
 type Event = {
   id: string
@@ -231,20 +241,31 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
                 <span className="text-[#FFC745]">🎫</span>
                 Ticket tiers are managed in the event detail page
               </div>
-              <div className="flex gap-4">
-                <div className="flex items-center justify-between flex-1 p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
-                  <p className="text-sm text-white">Private</p>
-                  <button type="button" onClick={() => setEditForm(p => ({ ...p, is_private: !p.is_private }))}
-                    className={`relative w-10 h-5 rounded-full transition-colors ${editForm.is_private ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
-                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editForm.is_private ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                  </button>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                  <div>
+                    <p className="text-sm font-medium text-white flex items-center gap-2">
+                      <Lock className="w-3.5 h-3.5 text-gray-400" /> Private Event
+                    </p>
+                    <p className="text-xs text-gray-500">Only invited guests can see this event</p>
+                  </div>
+                  <Toggle
+                    on={editForm.is_private}
+                    onToggle={() => setEditForm(p => ({ ...p, is_private: !p.is_private }))}
+                  />
                 </div>
-                <div className="flex items-center justify-between flex-1 p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
-                  <p className="text-sm text-white">Secret Venue</p>
-                  <button type="button" onClick={() => setEditForm(p => ({ ...p, secret_venue: !p.secret_venue }))}
-                    className={`relative w-10 h-5 rounded-full transition-colors ${editForm.secret_venue ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
-                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editForm.secret_venue ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                  </button>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                  <div>
+                    <p className="text-sm font-medium text-white flex items-center gap-2">
+                      <Eye className="w-3.5 h-3.5 text-gray-400" /> Secret Venue
+                    </p>
+                    <p className="text-xs text-gray-500">Hide address until guests are confirmed</p>
+                  </div>
+                  <Toggle
+                    on={editForm.secret_venue}
+                    onToggle={() => setEditForm(p => ({ ...p, secret_venue: !p.secret_venue }))}
+                  />
                 </div>
               </div>
             </div>
