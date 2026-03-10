@@ -5,8 +5,7 @@ import Link from 'next/link'
 import {
   Ticket, Clock, CheckCircle, AlertCircle, Lock,
   MapPin, Calendar, Upload, X, FileImage, Loader,
-  ChevronDown, ChevronUp, Award, Zap, Star, Flame,
-  CreditCard,
+  Award, Zap, Star, Flame, CreditCard,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
@@ -53,16 +52,6 @@ function fmtDate(iso: string) {
 function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
-function msUntil(iso: string) { return new Date(iso).getTime() - Date.now() }
-function fmtCountdown(ms: number) {
-  if (ms <= 0) return null
-  const h = Math.floor(ms / 3600000)
-  const m = Math.floor((ms % 3600000) / 60000)
-  const s = Math.floor((ms % 60000) / 1000)
-  if (h > 48) return `${Math.floor(h/24)}d ${h%24}h`
-  if (h > 0) return `${h}h ${m}m`
-  return `${m}m ${s}s`
-}
 
 /* ─── Status config ──────────────────────────────────────────────── */
 const STATUS: Record<string, { label: string; color: string; bg: string; border: string }> = {
@@ -95,28 +84,100 @@ function Confetti({ active }: { active: boolean }) {
   )
 }
 
-/* ─── QR display ─────────────────────────────────────────────────── */
-function QRDisplay({ registrationId, eventDate, guestName }: { registrationId: string; eventDate: string; guestName: string }) {
+/* ─── QR Modal popup ─────────────────────────────────────────────── */
+function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: string; onClose: () => void }) {
+  const ev = reg.event!
   const [qrSrc, setQrSrc] = useState('')
   const [bright, setBright] = useState(false)
-  const ticketCode = `TIKKIT-${registrationId.replace(/-/g,'').slice(0,16).toUpperCase()}`
+  const ticketCode = `TIKKIT-${reg.id.replace(/-/g,'').slice(0,16).toUpperCase()}`
 
-  // Generate QR immediately — available as soon as approved/confirmed
   useEffect(() => {
-    QRCode.toDataURL(ticketCode, { width: 200, margin: 2, color: { dark: '#080A10', light: '#FFFFFF' }, errorCorrectionLevel: 'H' })
-      .then(setQrSrc)
+    QRCode.toDataURL(ticketCode, {
+      width: 260, margin: 2,
+      color: { dark: '#080A10', light: '#FFFFFF' },
+      errorCorrectionLevel: 'H',
+    }).then(setQrSrc)
   }, [ticketCode])
 
   return (
-    <div style={{ textAlign: 'center', padding: '16px 0 8px' }}>
-      <div onClick={() => setBright(b => !b)} style={{ display: 'inline-block', padding: 10, borderRadius: 14, background: bright ? 'white' : '#F9FAFB', cursor: 'pointer', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', transition: 'background 0.2s' }}>
-        {qrSrc
-          ? <img src={qrSrc} alt="QR" style={{ width: 180, height: 180, display: 'block', borderRadius: 8 }} />
-          : <div style={{ width: 180, height: 180, background: '#E5E7EB', borderRadius: 8 }} />
-        }
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      {/* Backdrop */}
+      <div
+        onClick={onClose}
+        style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(10px)' }}
+      />
+
+      {/* Card */}
+      <div style={{
+        position: 'relative', background: '#0E1018', borderRadius: 28,
+        padding: '24px 20px 28px', border: '1px solid rgba(255,255,255,0.1)',
+        width: '100%', maxWidth: 340,
+        animation: 'revealUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
+        boxShadow: '0 24px 80px rgba(0,0,0,0.8)',
+      }}>
+        {/* Close */}
+        <button
+          onClick={onClose}
+          style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}
+        >
+          <X size={15} />
+        </button>
+
+        {/* Header */}
+        <div style={{ marginBottom: 20, paddingRight: 36 }}>
+          <p style={{ color: '#10B981', fontSize: 10, fontWeight: 800, margin: '0 0 5px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            ✓ Your Ticket
+          </p>
+          <h3 style={{ color: 'white', fontSize: 19, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px', lineHeight: 1.2 }}>
+            {ev.title}
+          </h3>
+          <p style={{ color: '#6B7280', fontSize: 12, margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Calendar size={10} /> {fmtDate(ev.date_start)} · {fmtTime(ev.date_start)}
+          </p>
+        </div>
+
+        {/* QR Code */}
+        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+          <div
+            onClick={() => setBright(b => !b)}
+            style={{
+              display: 'inline-block', padding: 14, borderRadius: 20,
+              background: bright ? 'white' : '#F9FAFB',
+              cursor: 'pointer',
+              boxShadow: bright
+                ? '0 0 40px rgba(255,255,255,0.25), 0 8px 32px rgba(0,0,0,0.5)'
+                : '0 8px 32px rgba(0,0,0,0.5)',
+              transition: 'all 0.25s ease',
+            }}
+          >
+            {qrSrc
+              ? <img src={qrSrc} alt="QR Code" style={{ width: 220, height: 220, display: 'block', borderRadius: 8 }} />
+              : <div style={{ width: 220, height: 220, background: '#E5E7EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Loader size={24} color="#9CA3AF" style={{ animation: 'spin 1s linear infinite' }} />
+                </div>
+            }
+          </div>
+          <p style={{ color: '#6B7280', fontSize: 11, margin: '10px 0 3px' }}>
+            Tap QR to boost brightness · Show at entry
+          </p>
+          <p style={{ color: '#4B5563', fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.5px' }}>
+            {ticketCode}
+          </p>
+        </div>
+
+        {/* Guest chip */}
+        <div style={{ padding: '10px 14px', background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 14, textAlign: 'center' }}>
+          <p style={{ color: '#6B7280', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Guest</p>
+          <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>{guestName}</p>
+        </div>
+
+        {ev.venue_name && !ev.secret_venue && (
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, color: '#6B7280', fontSize: 12 }}>
+            <MapPin size={11} />
+            <span>{ev.venue_name}</span>
+          </div>
+        )}
       </div>
-      <p style={{ color: '#9CA3AF', fontSize: 11, marginTop: 8 }}>Tap to boost brightness · Show at entry</p>
-      <p style={{ color: '#6B7280', fontSize: 10, fontFamily: 'monospace', marginTop: 4 }}>{ticketCode.slice(0,20)}</p>
     </div>
   )
 }
@@ -150,8 +211,8 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)' }} />
       <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 20px 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '88vh', overflowY: 'auto' }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 16px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -185,7 +246,7 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
         <input ref={ref} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
         {err && <div style={{ padding: '9px 12px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 10, marginBottom: 12, color: '#FCA5A5', fontSize: 13 }}>{err}</div>}
         <button onClick={handleSubmit} disabled={!file||busy} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: !file||busy ? 'rgba(255,255,255,0.06)' : '#1E5EFF', color: !file||busy ? '#6B7280' : 'white', fontSize: 15, fontWeight: 700, cursor: !file||busy ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          {busy ? <><Loader size={15} className="animate-spin" />Uploading…</> : <><Upload size={15} />Submit Screenshot</>}
+          {busy ? <><Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />Uploading…</> : <><Upload size={15} />Submit Screenshot</>}
         </button>
       </div>
     </div>
@@ -211,10 +272,13 @@ const PASS_CFG: Record<string, { color: string; bg: string; label: string }> = {
 }
 
 /* ─── Registration Card ──────────────────────────────────────────── */
-function RegCard({ reg, guestName, creditScore, onPay }: {
-  reg: Registration; guestName: string; creditScore: number; onPay: (r: Registration) => void
+function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
+  reg: Registration
+  guestName: string
+  creditScore: number
+  onPay: (r: Registration) => void
+  onViewTicket: (r: Registration) => void
 }) {
-  const [expanded, setExpanded] = useState(false)
   const ev = reg.event
   if (!ev) return null
 
@@ -231,23 +295,23 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
   // Map actual DB status values → display key
   const statusKey = isPayNow    ? 'eoi_approved'
     : isPayPending              ? 'payment_pending'
-    : reg.status === 'pending'  ? 'eoi_submitted'   // EOI submitted, awaiting review
-    : isConfirmed               ? 'confirmed'        // approved + free, or approved + paid confirmed
-    : reg.status                                     // 'rejected', etc.
+    : reg.status === 'pending'  ? 'eoi_submitted'
+    : isConfirmed               ? 'confirmed'
+    : reg.status
   const st = STATUS[statusKey] ?? STATUS.registered
   const pass = reg.pass
   const passCfg = pass ? (PASS_CFG[pass.pass_type] ?? PASS_CFG.attendance) : null
   const passIcon = pass ? (PASS_ICONS[pass.pass_type] ?? PASS_ICONS.attendance) : null
 
-
   return (
     <div style={{ background: '#0E1018', border: `1px solid ${isPast ? 'rgba(255,255,255,0.04)' : st.border}`, borderRadius: 20, overflow: 'hidden', opacity: isPast && !pass ? 0.5 : 1, transition: 'opacity 0.2s' }}>
-      {/* Cover */}
+
+      {/* Cover — tap to view event details */}
       <Link href={`/guest/explore/${ev.id}`} style={{ textDecoration: 'none', display: 'block' }}>
         <div style={{ height: 100, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : grad(ev.id), position: 'relative' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(14,16,24,1) 0%, rgba(14,16,24,0.1) 100%)' }} />
 
-          {/* Pass badge if earned */}
+          {/* Pass badge */}
           {pass && passCfg && (
             <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', border: `1px solid ${passCfg.color}30` }}>
               <span style={{ color: passCfg.color, display: 'flex' }}>{passIcon}</span>
@@ -288,21 +352,7 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
           </span>
         </div>
 
-        {/* Expand toggle for QR */}
-        {isConfirmed && !isPast && (
-          <button onClick={() => setExpanded(e => !e)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 12px', borderRadius: 10, background: expanded ? 'rgba(30,94,255,0.15)' : 'rgba(255,255,255,0.05)', border: `1px solid ${expanded ? 'rgba(30,94,255,0.3)' : 'rgba(255,255,255,0.07)'}`, cursor: 'pointer', color: expanded ? '#818CF8' : '#9CA3AF', fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-body)', transition: 'all 0.15s' }}>
-            <Ticket size={11} />
-            {expanded ? 'Hide' : 'QR'}
-            {expanded ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-          </button>
-        )}
-
-        {/* Pay Now button */}
-        {isPayNow && (
-          <button onClick={() => onPay(reg)} style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', borderRadius: 10, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', fontSize: 11, fontWeight: 800, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
-            <CreditCard size={11} /> Pay Now
-          </button>
-        )}
+        {/* Verifying badge */}
         {isPayPending && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 10, background: 'rgba(129,140,248,0.1)', border: '1px solid rgba(129,140,248,0.2)', color: '#818CF8', fontSize: 11, fontWeight: 700 }}>
             <Clock size={11} /> Verifying
@@ -310,14 +360,59 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
         )}
       </div>
 
-      {/* QR expanded */}
-      {expanded && isConfirmed && !isPast && (
-        <QRDisplay registrationId={reg.id} eventDate={ev.date_start} guestName={guestName} />
+      {/* ── Primary action button ── */}
+      {!isPast && (isConfirmed || isPayNow) && (
+        <div style={{ padding: '12px 14px 14px' }}>
+          {isConfirmed && (
+            <button
+              onClick={() => onViewTicket(reg)}
+              style={{
+                width: '100%', padding: '11px', borderRadius: 14,
+                background: 'linear-gradient(135deg, rgba(16,185,129,0.18) 0%, rgba(16,185,129,0.10) 100%)',
+                border: '1px solid rgba(16,185,129,0.3)',
+                color: '#10B981', fontSize: 13, fontWeight: 800,
+                cursor: 'pointer', fontFamily: 'var(--font-body)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                transition: 'all 0.15s',
+              }}
+            >
+              <Ticket size={14} /> View Ticket
+            </button>
+          )}
+
+          {isPayNow && (
+            <button
+              onClick={() => onPay(reg)}
+              style={{
+                width: '100%', padding: '11px', borderRadius: 14,
+                background: 'linear-gradient(135deg, rgba(239,68,68,0.20) 0%, rgba(239,68,68,0.12) 100%)',
+                border: '1px solid rgba(239,68,68,0.35)',
+                color: '#EF4444', fontSize: 13, fontWeight: 800,
+                cursor: 'pointer', fontFamily: 'var(--font-body)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                transition: 'all 0.15s',
+              }}
+            >
+              <CreditCard size={14} />
+              Pay Now
+              {ev.ticket_price && ev.ticket_price > 0 && (
+                <span style={{ marginLeft: 2, opacity: 0.8, fontWeight: 700 }}>
+                  · PKR {ev.ticket_price.toLocaleString('en-PK')}
+                </span>
+              )}
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Spacer when no action button */}
+      {(isPast || (!isConfirmed && !isPayNow)) && (
+        <div style={{ height: isPayPending ? 10 : 14 }} />
       )}
 
       {/* Pass details for past events */}
       {isPast && pass && passCfg && (
-        <div style={{ padding: '10px 14px 14px', borderTop: '1px solid rgba(255,255,255,0.04)', marginTop: 10 }}>
+        <div style={{ padding: '0 14px 14px', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 12, background: passCfg.bg, border: `1px solid ${passCfg.color}25` }}>
             <span style={{ color: passCfg.color, display: 'flex' }}>{passIcon}</span>
             <div>
@@ -327,9 +422,6 @@ function RegCard({ reg, guestName, creditScore, onPay }: {
           </div>
         </div>
       )}
-
-      {/* Bottom padding */}
-      {!expanded && !isPast && <div style={{ height: 14 }} />}
     </div>
   )
 }
@@ -339,6 +431,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore }
   registrations: Registration[]; guestName: string; creditScore: number
 }) {
   const [payTarget, setPayTarget] = useState<Registration | null>(null)
+  const [ticketTarget, setTicketTarget] = useState<Registration | null>(null)
   const [successMsg, setSuccessMsg] = useState(false)
   const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming')
 
@@ -346,11 +439,12 @@ export default function MyTikkitClient({ registrations, guestName, creditScore }
   const past = registrations.filter(r => r.event && new Date(r.event.date_start) < new Date())
 
   const tier = getCreditTier(creditScore)
-
   const current = tab === 'upcoming' ? upcoming : past
 
   return (
     <>
+      <Confetti active={successMsg} />
+
       {successMsg && (
         <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 999, padding: '11px 20px', background: '#10B981', borderRadius: 14, color: 'white', fontSize: 14, fontWeight: 700, boxShadow: '0 8px 24px rgba(16,185,129,0.4)', animation: 'revealUp 0.3s ease', whiteSpace: 'nowrap' }}>
           ✓ Screenshot submitted!
@@ -379,7 +473,14 @@ export default function MyTikkitClient({ registrations, guestName, creditScore }
       <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {current.length > 0
           ? current.map(r => (
-              <RegCard key={r.id} reg={r} guestName={guestName} creditScore={creditScore} onPay={setPayTarget} />
+              <RegCard
+                key={r.id}
+                reg={r}
+                guestName={guestName}
+                creditScore={creditScore}
+                onPay={setPayTarget}
+                onViewTicket={setTicketTarget}
+              />
             ))
           : (
             <div style={{ padding: '64px 0', textAlign: 'center', animation: 'revealUp 0.3s ease' }}>
@@ -404,8 +505,26 @@ export default function MyTikkitClient({ registrations, guestName, creditScore }
       </div>
       <div style={{ height: 20 }} />
 
+      {/* QR Ticket popup */}
+      {ticketTarget && (
+        <QRModal
+          reg={ticketTarget}
+          guestName={guestName}
+          onClose={() => setTicketTarget(null)}
+        />
+      )}
+
+      {/* Payment popup */}
       {payTarget && (
-        <PaymentSheet reg={payTarget} onClose={() => setPayTarget(null)} onSuccess={() => { setPayTarget(null); setSuccessMsg(true); setTimeout(() => setSuccessMsg(false), 3000) }} />
+        <PaymentSheet
+          reg={payTarget}
+          onClose={() => setPayTarget(null)}
+          onSuccess={() => {
+            setPayTarget(null)
+            setSuccessMsg(true)
+            setTimeout(() => setSuccessMsg(false), 3000)
+          }}
+        />
       )}
     </>
   )
