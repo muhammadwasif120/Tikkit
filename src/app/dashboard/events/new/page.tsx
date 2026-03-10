@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Calendar, MapPin, Users, Lock, Eye, Wallet, Ticket,
   Star, Tag, CreditCard, Building2, Smartphone, ExternalLink, Check,
+  ImagePlus, X,
 } from 'lucide-react'
 import Link from 'next/link'
 import type { PaymentAccount } from '@/app/actions/paymentAccountActions'
@@ -58,6 +59,11 @@ export default function NewEventPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Cover image state
+  const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [coverPreview, setCoverPreview] = useState<string | null>(null)
+  const coverInputRef = useRef<HTMLInputElement>(null)
+
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -106,6 +112,20 @@ export default function NewEventPage() {
   const updateTier = (key: TierKey, field: keyof Tier, value: string | boolean) =>
     setTiers(prev => ({ ...prev, [key]: { ...prev[key], [field]: value } }))
 
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > 10 * 1024 * 1024) { setError('Cover image must be under 10MB'); return }
+    setCoverFile(file)
+    setCoverPreview(URL.createObjectURL(file))
+  }
+
+  const removeCover = () => {
+    setCoverFile(null)
+    setCoverPreview(null)
+    if (coverInputRef.current) coverInputRef.current.value = ''
+  }
+
   /* ─── Submit ─── */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -142,6 +162,22 @@ export default function NewEventPage() {
       .single()
 
     if (eventErr) { setError(eventErr.message); setLoading(false); return }
+
+    // 2. Upload cover image if provided
+    if (coverFile) {
+      const ext = coverFile.name.split('.').pop() ?? 'jpg'
+      const path = `event-covers/${event.id}/cover.${ext}`
+      const { error: uploadErr } = await supabase.storage
+        .from('tikkit-uploads')
+        .upload(path, coverFile, { upsert: true, contentType: coverFile.type })
+
+      if (!uploadErr) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('tikkit-uploads')
+          .getPublicUrl(path)
+        await supabase.from('events').update({ cover_image_url: publicUrl }).eq('id', event.id)
+      }
+    }
 
     // 2. Insert enabled ticket tiers
     const inserts: object[] = []
@@ -232,8 +268,66 @@ export default function NewEventPage() {
 
           <div>
             <label className="label">Description</label>
-            <textarea className="input min-h-20 resize-none" placeholder="What's this event about?"
+            <textarea className="input min-h-[100px] resize-none" placeholder="Tell guests what to expect — the vibe, dress code, highlights..."
               value={form.description} onChange={e => update('description', e.target.value)} />
+          </div>
+
+          {/* ── Cover Image ── */}
+          <div>
+            <label className="label">Cover Image</label>
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleCoverChange}
+            />
+
+            {coverPreview ? (
+              <div className="relative rounded-xl overflow-hidden border border-white/10" style={{ aspectRatio: '16/7' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-3">
+                  <span className="text-xs text-white/80 bg-black/40 rounded-lg px-2 py-1 backdrop-blur-sm">
+                    {coverFile?.name}
+                  </span>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => coverInputRef.current?.click()}
+                      className="text-xs text-white bg-black/50 rounded-lg px-2.5 py-1 border border-white/20 hover:bg-black/70 transition-colors backdrop-blur-sm"
+                    >
+                      Change
+                    </button>
+                    <button
+                      type="button"
+                      onClick={removeCover}
+                      className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/50 border border-white/20 text-gray-300 hover:text-red-400 transition-colors backdrop-blur-sm"
+                    >
+                      <X size={13} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => coverInputRef.current?.click()}
+                className="w-full rounded-xl border-2 border-dashed border-white/10 hover:border-[#1E5EFF]/40 transition-all group"
+                style={{ aspectRatio: '16/7' }}
+              >
+                <div className="flex flex-col items-center justify-center gap-2 py-2">
+                  <div className="w-10 h-10 rounded-xl bg-[#1E5EFF]/10 border border-[#1E5EFF]/20 flex items-center justify-center group-hover:bg-[#1E5EFF]/15 transition-colors">
+                    <ImagePlus size={20} color="#1E5EFF" />
+                  </div>
+                  <p className="text-sm font-medium text-gray-400 group-hover:text-gray-300 transition-colors">
+                    Add cover image
+                  </p>
+                  <p className="text-xs text-gray-600">JPG, PNG or WebP · max 10 MB · 16:9 recommended</p>
+                </div>
+              </button>
+            )}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
