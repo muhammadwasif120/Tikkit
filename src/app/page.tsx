@@ -467,6 +467,22 @@ export default function LandingPage() {
           font-family: var(--font-display);
         }
         .btn-outline-lg:hover { border-color: rgba(255,255,255,0.22); color: var(--text); transform: translateY(-1px); }
+        .btn-gold-lg {
+          padding: 15px 30px; border-radius: 12px; font-size: 15px; font-weight: 700;
+          border: 1px solid rgba(255,199,69,0.45); color: #FFC745; text-decoration: none;
+          display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+          font-family: var(--font-display);
+          background: rgba(255,199,69,0.07);
+          box-shadow: 0 0 22px rgba(255,199,69,0.12), inset 0 1px 0 rgba(255,199,69,0.12);
+          transition: all 0.22s ease;
+        }
+        .btn-gold-lg:hover {
+          border-color: rgba(255,199,69,0.75);
+          background: rgba(255,199,69,0.13);
+          box-shadow: 0 0 36px rgba(255,199,69,0.28), inset 0 1px 0 rgba(255,199,69,0.2);
+          transform: translateY(-1px);
+          color: #FFD97A;
+        }
         .hero-scroll {
           display: flex; flex-direction: column; align-items: center; gap: 10px;
           margin-top: 80px; color: var(--subtle); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
@@ -479,30 +495,49 @@ export default function LandingPage() {
         }
 
         /* ── Ticker ── */
+        @keyframes tickerGlow {
+          0%, 100% { opacity: 0.5; }
+          50%       { opacity: 1;   }
+        }
         .ticker-wrap {
-          padding: 36px 0; overflow: hidden;
-          border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-          background: linear-gradient(to right, #080A10 0%, transparent 12%, transparent 88%, #080A10 100%);
+          padding: 32px 0; overflow: hidden;
+          border-top: 1px solid rgba(255,199,69,0.12);
+          border-bottom: 1px solid rgba(255,199,69,0.12);
+          background: linear-gradient(180deg, rgba(255,199,69,0.03) 0%, transparent 100%),
+                      linear-gradient(to right, #080A10 0%, transparent 10%, transparent 90%, #080A10 100%);
           position: relative;
         }
+        .ticker-wrap::before {
+          content: '';
+          position: absolute; inset: 0;
+          background: radial-gradient(ellipse 60% 100% at 50% 50%, rgba(255,199,69,0.04) 0%, transparent 70%);
+          pointer-events: none;
+        }
         .ticker-track {
-          display: flex; gap: 10px; width: max-content;
-          animation: ticker 28s linear infinite;
+          display: flex; gap: 12px; width: max-content;
+          animation: ticker 32s linear infinite;
         }
         .ticker-track:hover { animation-play-state: paused; }
         .ticker-item {
-          display: flex; align-items: center; gap: 8px;
-          padding: 8px 22px; border-radius: 100px;
-          border: 1px solid var(--border); background: var(--card);
-          font-size: 13px; font-weight: 600; color: var(--muted);
+          display: flex; align-items: center; gap: 9px;
+          padding: 9px 22px; border-radius: 100px;
+          border: 1px solid rgba(255,255,255,0.11);
+          background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(30,94,255,0.04) 100%);
+          font-size: 13px; font-weight: 600; color: #C4C8E0;
           white-space: nowrap; cursor: default;
-          transition: border-color 0.25s, color 0.25s, box-shadow 0.25s;
+          transition: border-color 0.25s, color 0.25s, box-shadow 0.25s, background 0.25s;
           font-family: var(--font-display);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
         }
-        .ticker-item:hover { border-color: rgba(30,94,255,0.35); color: var(--text); box-shadow: 0 0 16px rgba(30,94,255,0.12); }
+        .ticker-item:hover {
+          border-color: rgba(255,199,69,0.4);
+          color: #F0F2FF;
+          background: linear-gradient(135deg, rgba(255,199,69,0.08) 0%, rgba(30,94,255,0.06) 100%);
+          box-shadow: 0 0 18px rgba(255,199,69,0.14), inset 0 1px 0 rgba(255,255,255,0.08);
+        }
         .ticker-dot {
-          width: 5px; height: 5px; border-radius: 50%;
-          background: var(--blue); opacity: 0.5; flex-shrink: 0;
+          width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+          animation: tickerGlow 2.4s ease-in-out infinite;
         }
 
         /* ── Stats ── */
@@ -772,7 +807,7 @@ export default function LandingPage() {
         </Link>
         <div className="nav-links">
           <a href="#features" className="nav-link">Features</a>
-          <a href="#how-it-works" className="nav-link">How it works</a>
+          <Link href="/how-it-works" className="nav-link">How it works</Link>
           <a href="#pricing" className="nav-link">Pricing</a>
         </div>
         <div className="nav-actions">
@@ -796,7 +831,7 @@ export default function LandingPage() {
           </button>
         </div>
         <a href="#features"     className="mmenu-link" onClick={() => setMenuOpen(false)}>Features</a>
-        <a href="#how-it-works" className="mmenu-link" onClick={() => setMenuOpen(false)}>How it works</a>
+        <Link href="/how-it-works" className="mmenu-link" onClick={() => setMenuOpen(false)}>How it works</Link>
         <a href="#pricing"      className="mmenu-link" onClick={() => setMenuOpen(false)}>Pricing</a>
         <div className="mmenu-actions">
           <Link href="/auth/login" className="btn-full-primary">Get started free</Link>
@@ -838,7 +873,7 @@ export default function LandingPage() {
             <Link href="/auth/login" className="btn-primary-lg">
               Start for free <ArrowRight size={16} />
             </Link>
-            <Link href="/how-it-works" className="btn-outline-lg">
+            <Link href="/how-it-works" className="btn-gold-lg">
               See how it works
             </Link>
           </div>
@@ -853,12 +888,16 @@ export default function LandingPage() {
       {/* ── Event types ticker ── */}
       <div className="ticker-wrap" aria-hidden="true">
         <div className="ticker-track">
-          {[...eventTypes, ...eventTypes, ...eventTypes].map((label, i) => (
-            <div key={i} className="ticker-item">
-              <div className="ticker-dot" />
-              {label}
-            </div>
-          ))}
+          {[...eventTypes, ...eventTypes, ...eventTypes].map((label, i) => {
+            const dotColors = ['#FFC745', '#1E5EFF', '#A855F7', '#00D4FF', '#22C55E', '#FF6B6B']
+            const dotColor  = dotColors[i % dotColors.length]
+            return (
+              <div key={i} className="ticker-item">
+                <div className="ticker-dot" style={{ background: dotColor, boxShadow: `0 0 6px ${dotColor}` }} />
+                {label}
+              </div>
+            )
+          })}
         </div>
       </div>
 
