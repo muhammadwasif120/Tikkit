@@ -8,6 +8,7 @@ import EventActions from '@/components/events/EventActions'
 import GuestTable from '@/components/guests/GuestTable'
 import EventPaymentSetup from '@/components/events/EventPaymentSetup'
 import EventTicketTypes from '@/components/events/EventTicketTypes'
+import EventCoverAndDescription from '@/components/events/EventCoverAndDescription'
 
 const statusBadge: Record<string, string> = {
   draft: 'badge-gray',
@@ -95,6 +96,14 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         </div>
         <EventActions event={event} />
       </div>
+
+      {/* Cover image + description */}
+      <EventCoverAndDescription
+        eventId={event.id}
+        initialCoverUrl={event.cover_image_url ?? null}
+        initialDescription={event.description ?? null}
+        eventTitle={event.title}
+      />
 
       {/* Capacity bar */}
       <div className="card">
