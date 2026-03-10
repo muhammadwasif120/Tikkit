@@ -19,7 +19,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Tikkit — Plan. Sell. Manage.',
+  title: 'Tikkit',
   description: 'Discover and attend exclusive events. Your digital pass lives here.',
   applicationName: 'Tikkit',
   appleWebApp: {
