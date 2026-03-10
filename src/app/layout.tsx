@@ -19,18 +19,9 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Tikkit — Plan. Sell. Manage.',
+  title: 'Tikkit',
   description: 'Discover and attend exclusive events. Your digital pass lives here.',
   applicationName: 'Tikkit',
-  appleWebApp: {
-    capable: true,
-    title: 'Tikkit',
-    statusBarStyle: 'black-translucent',
-    startupImage: [
-      { url: '/icons/apple-touch-icon.png' },
-    ],
-  },
-  manifest: '/manifest.json',
   icons: {
     icon: [
       { url: '/icons/favicon-16.png', sizes: '16x16', type: 'image/png' },
@@ -40,14 +31,6 @@ export const metadata: Metadata = {
     apple: [
       { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
-    other: [
-      { rel: 'mask-icon', url: '/icons/icon-512-maskable.png', color: '#1E5EFF' },
-    ],
-  },
-  other: {
-    'mobile-web-app-capable': 'yes',
-    'msapplication-TileColor': '#1E5EFF',
-    'msapplication-tap-highlight': 'no',
   },
 }
 
@@ -55,11 +38,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={dmSans.variable}>
       <head>
+        {/* Fonts */}
         <link rel="preconnect" href="https://api.fontshare.com" />
         <link
           href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=cabinet-grotesk@400,500,700,800&display=swap"
           rel="stylesheet"
         />
+
+        {/* PWA manifest */}
+        <link rel="manifest" href="/manifest.json" />
+
+        {/* iOS Web App */}
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-title" content="Tikkit" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+        {/* Android / legacy */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="msapplication-TileColor" content="#1E5EFF" />
+        <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body className="antialiased">{children}</body>
     </html>
