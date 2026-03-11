@@ -332,13 +332,13 @@ export default function NewEventPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="label">Start Date & Time</label>
-              <input type="datetime-local" className="input"
+              <label className="label">Start Date & Time *</label>
+              <input type="datetime-local" className="input" required
                 value={form.date_start} onChange={e => update('date_start', e.target.value)} />
             </div>
             <div>
-              <label className="label">End Date & Time</label>
-              <input type="datetime-local" className="input"
+              <label className="label">End Date & Time *</label>
+              <input type="datetime-local" className="input" required
                 value={form.date_end} onChange={e => update('date_end', e.target.value)} />
             </div>
           </div>

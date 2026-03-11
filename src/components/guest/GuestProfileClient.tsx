@@ -188,8 +188,8 @@ function ChangePasswordSheet({ onClose }: { onClose: () => void }) {
 // ── Shared sheet / field helpers ──────────────────────────────────────────────
 function Sheet({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'flex-end' }} onClick={onClose}>
-      <div style={{ background: '#13151E', borderRadius: '20px 20px 0 0', border: '1px solid rgba(255,255,255,0.07)', width: '100%', maxWidth: 480, margin: '0 auto', padding: '20px 20px 40px' }} onClick={e => e.stopPropagation()}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={onClose}>
+      <div style={{ background: '#13151E', borderRadius: '20px 20px 0 0', border: '1px solid rgba(255,255,255,0.07)', width: '100%', maxWidth: 480, padding: '20px 20px 40px' }} onClick={e => e.stopPropagation()}>
         <div style={{ width: 36, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, margin: '0 auto 16px' }} />
         <p style={{ color: 'white', fontSize: 16, fontWeight: 700, margin: '0 0 18px' }}>{title}</p>
         {children}

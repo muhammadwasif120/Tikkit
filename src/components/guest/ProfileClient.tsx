@@ -224,9 +224,9 @@ function AvatarPicker({ current, onSelect, onClose }: {
   current: string | null; onSelect: (id: string) => void; onClose: () => void
 }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }} />
-      <div style={{ position: 'relative', background: '#0D0F1A', borderRadius: '28px 28px 0 0', padding: '20px 20px 44px', border: '1px solid rgba(255,255,255,0.08)', borderBottom: 'none' }}>
+      <div style={{ position: 'relative', background: '#0D0F1A', borderRadius: '28px 28px 0 0', padding: '20px 20px 44px', border: '1px solid rgba(255,255,255,0.08)', borderBottom: 'none', width: '100%', maxWidth: 480 }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '0 auto 20px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <div>
@@ -399,9 +399,9 @@ function EditSheet({ profile, email, onClose, onSave }: {
   const saveDisabled = busy || usernameState === 'taken' || usernameState === 'checking'
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
-      <div style={{ position: 'relative', background: '#13151E', borderRadius: '24px 24px 0 0', padding: '24px 20px 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '90vh', overflowY: 'auto' }}>
+      <div style={{ position: 'relative', background: '#13151E', borderRadius: '24px 24px 0 0', padding: '24px 20px 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '90vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)', margin: '0 auto 20px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Edit Profile</h3>
