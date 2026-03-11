@@ -77,6 +77,8 @@ export default function EventTicketTypes({
   const [newState, setNewState] = useState<EditState>({ price: '', quantity: '', discountType: 'percentage', discountValue: '' })
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [addError, setAddError] = useState<string | null>(null)
+  const [editError, setEditError] = useState<string | null>(null)
 
   /* ── helpers ── */
   const computePrice = (state: EditState, isDisc: boolean) => {
@@ -101,21 +103,28 @@ export default function EventTicketTypes({
 
   const saveEdit = async (t: TicketType) => {
     setSaving(true)
+    setEditError(null)
     const isDisc = t.name === 'Discounted'
     const orig = parseFloat(editState.price) || 0
     const dval = parseFloat(editState.discountValue) || 0
     const finalPrice = computePrice(editState, isDisc)
-    const updates: Partial<TicketType> & Record<string, unknown> = {
+    const updates: Record<string, unknown> = {
       price:    isDisc ? finalPrice : orig,
       quantity: parseInt(editState.quantity) || t.quantity,
+      is_vip:   t.is_vip,
       ...(isDisc ? {
         original_price: orig,
         discount_type:  editState.discountType,
         discount_value: dval,
       } : {}),
     }
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('ticket_types').update(updates).eq('id', t.id).select().single()
+    if (error) {
+      setEditError(error.message)
+      setSaving(false)
+      return
+    }
     if (data) setTiers(prev => prev.map(x => x.id === t.id ? data : x))
     setSaving(false)
     setEditingId(null)
@@ -132,22 +141,63 @@ export default function EventTicketTypes({
   /* ── add ── */
   const addTier = async (key: 'standard' | 'vip' | 'discounted') => {
     setSaving(true)
+    setAddError(null)
     const isDisc = key === 'discounted'
     const orig = parseFloat(newState.price) || 0
     const dval = parseFloat(newState.discountValue) || 0
     const finalPrice = computePrice(newState, isDisc)
     const nameMap = { standard: 'Standard', vip: 'VIP', discounted: 'Discounted' }
-    const { data } = await supabase.from('ticket_types').insert({
-      event_id:       eventId,
-      name:           nameMap[key],
-      price:          isDisc ? finalPrice : orig,
-      original_price: isDisc ? orig : null,
-      discount_type:  isDisc ? newState.discountType : null,
-      discount_value: isDisc ? dval : null,
-      quantity:       parseInt(newState.quantity) || 0,
-      is_vip:         key === 'vip',
-    }).select().single()
-    if (data) setTiers(prev => [...prev, data])
+
+    // Build insert payload — only include discount fields if they exist in the DB
+    const payload: Record<string, unknown> = {
+      event_id:  eventId,
+      name:      nameMap[key],
+      price:     isDisc ? finalPrice : orig,
+      quantity:  parseInt(newState.quantity) || 0,
+      is_vip:    key === 'vip',
+    }
+    if (isDisc) {
+      payload.original_price = orig
+      payload.discount_type  = newState.discountType
+      payload.discount_value = dval
+    }
+
+    const { data, error } = await supabase
+      .from('ticket_types')
+      .insert(payload)
+      .select()
+      .single()
+
+    if (error) {
+      // Retry without discount columns if they don't exist in the schema yet
+      if (error.code === 'PGRST204' || error.message?.includes('original_price') || error.message?.includes('discount')) {
+        const fallbackPayload: Record<string, unknown> = {
+          event_id: eventId,
+          name:     nameMap[key],
+          price:    isDisc ? finalPrice : orig,
+          quantity: parseInt(newState.quantity) || 0,
+          is_vip:   key === 'vip',
+        }
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('ticket_types')
+          .insert(fallbackPayload)
+          .select()
+          .single()
+        if (fallbackError) {
+          setAddError(fallbackError.message)
+          setSaving(false)
+          return
+        }
+        if (fallbackData) setTiers(prev => [...prev, fallbackData as TicketType])
+      } else {
+        setAddError(error.message)
+        setSaving(false)
+        return
+      }
+    } else {
+      if (data) setTiers(prev => [...prev, data as TicketType])
+    }
+
     setSaving(false)
     setAddingKey(null)
     setNewState({ price: '', quantity: '', discountType: 'percentage', discountValue: '' })
@@ -311,8 +361,13 @@ export default function EventTicketTypes({
                     ) : null
                   })()}
 
+                  {editError && (
+                    <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                      {editError}
+                    </p>
+                  )}
                   <div className="flex justify-end gap-2">
-                    <button type="button" onClick={() => setEditingId(null)}
+                    <button type="button" onClick={() => { setEditingId(null); setEditError(null) }}
                       className="btn-secondary text-xs px-3 py-1.5">
                       Cancel
                     </button>
@@ -406,8 +461,13 @@ export default function EventTicketTypes({
                   </>
                 )}
 
+                {addError && (
+                  <p className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                    {addError}
+                  </p>
+                )}
                 <div className="flex justify-end gap-2">
-                  <button type="button" onClick={() => setAddingKey(null)}
+                  <button type="button" onClick={() => { setAddingKey(null); setAddError(null) }}
                     className="btn-secondary text-xs px-3 py-1.5">
                     Cancel
                   </button>
