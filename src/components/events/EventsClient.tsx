@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, CalendarDays, MapPin, Users, Edit2, Trash2, X, Check, ChevronDown, Lock, Eye } from 'lucide-react'
 import { format } from 'date-fns'
@@ -17,52 +17,6 @@ function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   )
 }
 
-/* ─── Tier Cycler ─── */
-const ORG_TIER_ORDER = ['standard', 'vip', 'discounted']
-const ORG_TIER_CFG: Record<string, { label: string; cls: string }> = {
-  standard:   { label: 'Standard',   cls: 'bg-[#1E5EFF]/10 text-[#1E5EFF]' },
-  vip:        { label: 'VIP',        cls: 'bg-[#FFC745]/10 text-[#FFC745]' },
-  discounted: { label: 'Discounted', cls: 'bg-emerald-500/10 text-emerald-400' },
-}
-
-function TierCycler({ tiers }: { tiers: { name: string }[] | null | undefined }) {
-  const tierKeys = (tiers ?? [])
-    .map(t => t.name.toLowerCase())
-    .filter(n => ORG_TIER_CFG[n])
-    .filter((n, i, arr) => arr.indexOf(n) === i)
-    .sort((a, b) => ORG_TIER_ORDER.indexOf(a) - ORG_TIER_ORDER.indexOf(b))
-
-  const [idx, setIdx] = useState(0)
-  const [vis, setVis] = useState(true)
-
-  useEffect(() => {
-    setIdx(0)
-    setVis(true)
-    if (tierKeys.length <= 1) return
-    const interval = setInterval(() => {
-      setVis(false)
-      const t = setTimeout(() => {
-        setIdx(i => (i + 1) % tierKeys.length)
-        setVis(true)
-      }, 180)
-      return () => clearTimeout(t)
-    }, 2000)
-    return () => clearInterval(interval)
-  }, [tierKeys.join(',')])
-
-  if (!tierKeys.length) return null
-  const cfg = ORG_TIER_CFG[tierKeys[idx]]
-  return (
-    <span
-      className={clsx('inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide transition-opacity duration-200', cfg.cls)}
-      style={{ opacity: vis ? 1 : 0 }}
-    >
-      {cfg.label}
-    </span>
-  )
-}
-
-type TicketTier = { name: string; price: number; is_vip: boolean }
 type Event = {
   id: string
   title: string
@@ -80,7 +34,6 @@ type Event = {
   cover_image_url: string | null
   male_ratio: number | null
   female_ratio: number | null
-  ticket_types?: TicketTier[] | null
 }
 
 const statusBadge: Record<string, string> = {
@@ -90,7 +43,13 @@ const statusBadge: Record<string, string> = {
   completed: 'badge-blue',
 }
 
-export default function EventsClient({ initialEvents }: { initialEvents: Event[] }) {
+export default function EventsClient({
+  initialEvents,
+  pendingCounts = {},
+}: {
+  initialEvents: Event[]
+  pendingCounts?: Record<string, number>
+}) {
   const supabase = createClient()
   const [events, setEvents] = useState<Event[]>(initialEvents)
   const [editEvent, setEditEvent] = useState<Event | null>(null)
@@ -190,7 +149,12 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
                   <h3 className="font-semibold text-white">{event.title}</h3>
                   <span className={clsx(statusBadge[event.status])}>{event.status}</span>
                   {event.is_private && <span className="badge-yellow">Private</span>}
-                  <TierCycler tiers={event.ticket_types} />
+                  {(pendingCounts[event.id] ?? 0) > 0 && (
+                    <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse shrink-0" />
+                      {pendingCounts[event.id]} pending
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
                   {event.date_start && (
