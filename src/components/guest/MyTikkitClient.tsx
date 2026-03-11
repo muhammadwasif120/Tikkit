@@ -189,15 +189,20 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const ref = useRef<HTMLInputElement>(null)
+  const account = reg.payment_accounts?.[0]
+  const ticketPrice = reg.event?.ticket_price
 
-  const handleFile = (f: File) => {
-    if (!f.type.startsWith('image/')) { setErr('Please upload an image'); return }
-    if (f.size > 8*1024*1024) { setErr('Max 8MB'); return }
-    setErr(null); setFile(f)
-    const r = new FileReader(); r.onload = e => setPreview(e.target?.result as string); r.readAsDataURL(f)
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]
+    if (!f) return
+    if (f.size > 8 * 1024 * 1024) { setErr('File too large (max 8MB)'); return }
+    setFile(f)
+    setPreview(URL.createObjectURL(f))
+    setErr(null)
   }
+
   const handleSubmit = async () => {
-    if (!file) return
+    if (!file) { setErr('Please attach your payment screenshot'); return }
     setBusy(true); setErr(null)
     try {
       const fd = new FormData()
@@ -212,42 +217,101 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)' }} />
-      <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 20px 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '88vh', overflowY: 'auto' }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 16px' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h3 style={{ color: 'white', fontSize: 17, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)' }}>Submit Payment</h3>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}><X size={15} /></button>
-        </div>
-        {reg.event?.ticket_price && reg.event.ticket_price > 0 && (
-          <div style={{ padding: '11px 14px', background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 12, marginBottom: 12 }}>
-            <p style={{ color: '#6B7280', fontSize: 11, margin: '0 0 2px' }}>Amount due</p>
-            <p style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)' }}>PKR {reg.event.ticket_price.toLocaleString('en-PK')}</p>
+      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
+      <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto' }}>
+
+        {/* Handle */}
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 0' }} />
+
+        {/* Header */}
+        <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
+          <div>
+            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>Complete Payment</h3>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{reg.event?.title}</p>
           </div>
-        )}
-        {reg.payment_accounts && reg.payment_accounts.length > 0 && (
-          <div style={{ marginBottom: 14 }}>
-            <p style={{ color: '#6B7280', fontSize: 11, margin: '0 0 8px', fontWeight: 600, letterSpacing: '0.5px' }}>SEND PAYMENT TO</p>
-            {reg.payment_accounts.map((acc: any) => (
-              <div key={acc.id} style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, marginBottom: 8 }}>
-                <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>{acc.label}</p>
-                <p style={{ color: '#9CA3AF', fontSize: 12, margin: '0 0 2px' }}>{acc.account_title} · {acc.account_number}</p>
-                {acc.instructions && <p style={{ color: '#6B7280', fontSize: 11, margin: 0, fontStyle: 'italic' }}>{acc.instructions}</p>}
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
+            <X size={16} />
+          </button>
+        </div>
+
+        <div style={{ padding: '16px 20px 0', display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+          {/* Bank details */}
+          {account && (
+            <div style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.18)' }}>
+              <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, margin: '0 0 10px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Transfer Details</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span style={{ color: '#6B7280', fontSize: 12 }}>Amount</span>
+                <span style={{ color: 'white', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)' }}>PKR {(ticketPrice ?? 0).toLocaleString('en-PK')}</span>
               </div>
-            ))}
+              <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 8 }} />
+              {[
+                { label: 'Bank',          value: account.bank_name || account.label },
+                { label: 'Account #',     value: account.account_number },
+                { label: 'Account Title', value: account.account_title },
+              ].filter(r => r.value).map(row => (
+                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                  <span style={{ color: '#6B7280', fontSize: 12 }}>{row.label}</span>
+                  <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{row.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Screenshot upload */}
+          <div>
+            <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Upload Payment Screenshot</p>
+            <input ref={ref} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
+
+            {preview ? (
+              <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(16,185,129,0.25)' }}>
+                <img src={preview} alt="Screenshot preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
+                <button
+                  onClick={() => { setFile(null); setPreview(null) }}
+                  style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 5, cursor: 'pointer', color: 'white', display: 'flex' }}
+                >
+                  <X size={14} />
+                </button>
+                <div style={{ position: 'absolute', bottom: 8, left: 8 }}>
+                  <span style={{ background: 'rgba(16,185,129,0.9)', color: 'white', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6 }}>✓ Ready to submit</span>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => ref.current?.click()}
+                style={{ width: '100%', padding: '20px 16px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(255,255,255,0.1)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'all 0.2s' }}
+              >
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <FileImage size={20} color="#818CF8" />
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>Attach Screenshot</p>
+                  <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>Tap to select from your gallery</p>
+                </div>
+              </button>
+            )}
           </div>
-        )}
-        <div onClick={() => ref.current?.click()} style={{ border: `2px dashed ${preview ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 16, padding: preview ? 0 : '28px 20px', textAlign: 'center', cursor: 'pointer', marginBottom: 14, overflow: 'hidden' }}>
-          {preview
-            ? <div style={{ position: 'relative' }}><img src={preview} style={{ width: '100%', maxHeight: 240, objectFit: 'cover', display: 'block', borderRadius: 14 }} /><button onClick={e => { e.stopPropagation(); setFile(null); setPreview(null) }} style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: 8, padding: 6, cursor: 'pointer', color: 'white', display: 'flex' }}><X size={13} /></button></div>
-            : <><FileImage size={28} color="#6B7280" style={{ marginBottom: 8 }} /><p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Tap to upload payment screenshot</p></>
-          }
+
+          {/* Error */}
+          {err && (
+            <div style={{ display: 'flex', gap: 8, padding: '10px 12px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12 }}>
+              <AlertCircle size={14} color="#F87171" style={{ flexShrink: 0, marginTop: 1 }} />
+              <span style={{ color: '#FCA5A5', fontSize: 13 }}>{err}</span>
+            </div>
+          )}
+
+          {/* Submit */}
+          <button
+            onClick={handleSubmit}
+            disabled={busy || !file}
+            style={{ width: '100%', padding: '14px', borderRadius: 14, background: busy || !file ? 'rgba(255,255,255,0.06)' : '#EF4444', border: 'none', color: busy || !file ? '#6B7280' : 'white', fontSize: 15, fontWeight: 800, cursor: busy || !file ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}
+          >
+            {busy
+              ? <><Loader size={16} className="animate-spin" /> Submitting…</>
+              : <><Upload size={16} /> Submit Payment Screenshot</>
+            }
+          </button>
         </div>
-        <input ref={ref} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
-        {err && <div style={{ padding: '9px 12px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 10, marginBottom: 12, color: '#FCA5A5', fontSize: 13 }}>{err}</div>}
-        <button onClick={handleSubmit} disabled={!file||busy} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: !file||busy ? 'rgba(255,255,255,0.06)' : '#1E5EFF', color: !file||busy ? '#6B7280' : 'white', fontSize: 15, fontWeight: 700, cursor: !file||busy ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          {busy ? <><Loader size={15} style={{ animation: 'spin 1s linear infinite' }} />Uploading…</> : <><Upload size={15} />Submit Screenshot</>}
-        </button>
       </div>
     </div>
   )
