@@ -121,7 +121,7 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       {/* Backdrop */}
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
       {/* Sheet */}
@@ -130,7 +130,7 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
         borderRadius: '24px 24px 0 0', padding: '24px 20px 40px',
         border: '1px solid rgba(255,255,255,0.08)',
         animation: 'sheetSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
-        maxHeight: '90vh', overflowY: 'auto',
+        maxHeight: '90vh', overflowY: 'auto', width: '100%', maxWidth: 480,
       }}>
         {/* Handle */}
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)', margin: '0 auto 20px' }} />
