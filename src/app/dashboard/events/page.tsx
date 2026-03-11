@@ -7,7 +7,7 @@ export default async function EventsPage() {
 
   const { data: events } = await supabase
     .from('events')
-    .select('*')
+    .select('*, ticket_types(name, price, is_vip)')
     .eq('organizer_id', user!.id)
     .order('date_start', { ascending: false })
 
