@@ -6,7 +6,6 @@ import { Search, MapPin, Clock, Lock, Flame, Zap, Star, CalendarDays } from 'luc
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type Organizer = { full_name: string | null; company_name: string | null }
-type TicketTier = { name: string; price: number; is_vip: boolean }
 type Event = {
   id: string; title: string; description: string | null
   venue_name: string | null; venue_address: string | null
@@ -15,7 +14,6 @@ type Event = {
   tags: string[] | null; ticket_price: number | null
   registration_mode: string; is_private: boolean
   organizer: Organizer | null; registered_count?: number
-  ticket_types?: TicketTier[] | null
 }
 type MyEvent = {
   id: string; status: string
@@ -63,54 +61,6 @@ function groupEvents(events: Event[]) {
     else groups[2].events.push(e)
   }
   return groups.filter(g => g.events.length > 0)
-}
-
-/* ─── Tier Cycler ────────────────────────────────────────────────── */
-const TIER_ORDER = ['standard', 'vip', 'discounted']
-const TIER_CFG: Record<string, { label: string; bg: string; color: string }> = {
-  standard:   { label: 'STANDARD',   bg: 'rgba(30,94,255,0.14)',  color: '#1E5EFF' },
-  vip:        { label: 'VIP',        bg: 'rgba(255,199,69,0.14)', color: '#FFC745' },
-  discounted: { label: 'DISCOUNTED', bg: 'rgba(16,185,129,0.14)', color: '#10B981' },
-}
-
-function TierCycler({ tiers }: { tiers: TicketTier[] | null | undefined }) {
-  const tierKeys = (tiers ?? [])
-    .map(t => t.name.toLowerCase())
-    .filter(n => TIER_CFG[n])
-    .filter((n, i, arr) => arr.indexOf(n) === i)
-    .sort((a, b) => TIER_ORDER.indexOf(a) - TIER_ORDER.indexOf(b))
-
-  const [idx, setIdx] = useState(0)
-  const [vis, setVis] = useState(true)
-
-  useEffect(() => {
-    setIdx(0)
-    setVis(true)
-    if (tierKeys.length <= 1) return
-    const interval = setInterval(() => {
-      setVis(false)
-      const t = setTimeout(() => {
-        setIdx(i => (i + 1) % tierKeys.length)
-        setVis(true)
-      }, 180)
-      return () => clearTimeout(t)
-    }, 2000)
-    return () => clearInterval(interval)
-  }, [tierKeys.join(',')])
-
-  if (!tierKeys.length) return null
-  const cfg = TIER_CFG[tierKeys[idx]]
-  return (
-    <span style={{
-      padding: '2px 7px', borderRadius: 5,
-      background: cfg.bg, color: cfg.color,
-      fontSize: 8, fontWeight: 800, letterSpacing: '0.5px',
-      opacity: vis ? 1 : 0, transition: 'opacity 0.18s ease',
-      display: 'inline-block',
-    }}>
-      {cfg.label}
-    </span>
-  )
 }
 
 /* ─── Hero Banner ────────────────────────────────────────────────── */
@@ -282,7 +232,6 @@ function EventRow({ event, index }: { event: Event; index: number }) {
             <span style={{ padding: '2px 6px', borderRadius: 5, background: `${mode.color}18`, color: mode.color, fontSize: 8, fontWeight: 800, letterSpacing: '0.4px' }}>
               {mode.label}
             </span>
-            <TierCycler tiers={event.ticket_types} />
             {(event.ticket_price ?? 0) === 0
               ? <span style={{ padding: '2px 6px', borderRadius: 5, background: 'rgba(16,185,129,0.1)', color: '#10B981', fontSize: 8, fontWeight: 800 }}>FREE</span>
               : <span style={{ color: '#6B7280', fontSize: 10, fontWeight: 700 }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
