@@ -235,7 +235,7 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
           <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
             {event.title}
           </h3>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color, fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 8 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: 'rgba(0,0,0,0.62)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.1)', color: cfg.color, fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 8 }}>
             {cfg.icon} {cfg.label}
           </span>
         </div>
