@@ -296,7 +296,7 @@ export async function getPublicEvents(limit = 20) {
 
   const { data } = await supabase
     .from('events')
-    .select('id, title, description, venue_name, venue_address, secret_venue, date_start, date_end, capacity, cover_image_url, tags, ticket_price, registration_mode, is_private, organizer:profiles!events_organizer_id_fkey(full_name, company_name)')
+    .select('id, title, description, venue_name, venue_address, secret_venue, date_start, date_end, capacity, cover_image_url, tags, ticket_price, registration_mode, is_private, organizer:profiles!events_organizer_id_fkey(full_name, company_name), ticket_types(name, price, is_vip)')
     .eq('status', 'published')
     .eq('is_private', false)
     .gte('date_start', new Date().toISOString())
