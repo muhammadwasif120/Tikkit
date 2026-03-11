@@ -124,45 +124,49 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
             <Plus className="w-4 h-4" /> Create Event
           </Link>
         </div>
-      ) : (
-        <div className="grid gap-4">
-          {events.map((event) => (
-            <div key={event.id} className="card-hover flex items-start justify-between group">
-              <Link href={`/dashboard/events/${event.id}`} className="flex gap-4 flex-1 min-w-0">
-                {event.cover_image_url ? (
-                  <img src={event.cover_image_url} alt={event.title} className="w-16 h-16 rounded-lg object-cover shrink-0" />
-                ) : (
-                  <div className="w-16 h-16 rounded-lg bg-brand-charcoal-light border border-white/5 flex items-center justify-center shrink-0">
-                    <CalendarDays className="w-5 h-5 text-gray-500" />
-                  </div>
-                )}
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <h3 className="font-semibold text-white">{event.title}</h3>
-                    <span className={clsx(statusBadge[event.status])}>{event.status}</span>
-                    {event.is_private && <span className="badge-yellow">Private</span>}
-                  </div>
-                  <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
-                    {event.date_start && (
-                      <span className="flex items-center gap-1">
-                        <CalendarDays className="w-3 h-3" />
-                        {format(new Date(event.date_start), 'MMM d, yyyy · h:mm a')}
-                      </span>
-                    )}
-                    {event.venue_name && !event.secret_venue && (
-                      <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{event.venue_name}</span>
-                    )}
-                    {event.secret_venue && (
-                      <span className="flex items-center gap-1 text-brand-yellow"><MapPin className="w-3 h-3" />Secret Venue</span>
-                    )}
-                  </div>
+      ) : (() => {
+        const activeEvents   = events.filter(e => e.status !== 'completed' && e.status !== 'cancelled')
+        const archivedEvents = events.filter(e => e.status === 'completed' || e.status === 'cancelled')
+
+        const renderCard = (event: Event, archived: boolean) => (
+          <div key={event.id} className={clsx('card-hover flex items-start justify-between group', archived && 'opacity-60')}>
+            <Link href={`/dashboard/events/${event.id}`} className="flex gap-4 flex-1 min-w-0">
+              {event.cover_image_url ? (
+                <img src={event.cover_image_url} alt={event.title} className="w-16 h-16 rounded-lg object-cover shrink-0" />
+              ) : (
+                <div className="w-16 h-16 rounded-lg bg-brand-charcoal-light border border-white/5 flex items-center justify-center shrink-0">
+                  <CalendarDays className="w-5 h-5 text-gray-500" />
                 </div>
-              </Link>
-              <div className="flex items-center gap-3 shrink-0 ml-4">
-                <div className="flex items-center gap-1 text-gray-500 text-xs">
-                  <Users className="w-3 h-3" />
-                  <span>{event.capacity}</span>
+              )}
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <h3 className="font-semibold text-white">{event.title}</h3>
+                  <span className={clsx(statusBadge[event.status])}>{event.status}</span>
+                  {event.is_private && <span className="badge-yellow">Private</span>}
                 </div>
+                <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
+                  {event.date_start && (
+                    <span className="flex items-center gap-1">
+                      <CalendarDays className="w-3 h-3" />
+                      {format(new Date(event.date_start), 'MMM d, yyyy · h:mm a')}
+                    </span>
+                  )}
+                  {event.venue_name && !event.secret_venue && (
+                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{event.venue_name}</span>
+                  )}
+                  {event.secret_venue && (
+                    <span className="flex items-center gap-1 text-brand-yellow"><MapPin className="w-3 h-3" />Secret Venue</span>
+                  )}
+                </div>
+              </div>
+            </Link>
+            <div className="flex items-center gap-3 shrink-0 ml-4">
+              <div className="flex items-center gap-1 text-gray-500 text-xs">
+                <Users className="w-3 h-3" />
+                <span>{event.capacity}</span>
+              </div>
+              {/* Edit + delete only available for non-archived events */}
+              {!archived && (
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button onClick={(e) => { e.preventDefault(); openEdit(event) }}
                     className="p-1.5 text-gray-500 hover:text-white transition-colors rounded-md hover:bg-white/5">
@@ -173,11 +177,36 @@ export default function EventsClient({ initialEvents }: { initialEvents: Event[]
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              </div>
+              )}
             </div>
-          ))}
-        </div>
-      )}
+          </div>
+        )
+
+        return (
+          <div className="space-y-6">
+            {/* Active events */}
+            {activeEvents.length > 0 && (
+              <div className="grid gap-4">
+                {activeEvents.map(e => renderCard(e, false))}
+              </div>
+            )}
+
+            {/* Archived events */}
+            {archivedEvents.length > 0 && (
+              <div>
+                <div className="flex items-center gap-3 mb-3">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Archived</p>
+                  <div className="flex-1 h-px bg-white/5" />
+                  <span className="text-xs text-gray-600">{archivedEvents.length} event{archivedEvents.length !== 1 ? 's' : ''}</span>
+                </div>
+                <div className="grid gap-4">
+                  {archivedEvents.map(e => renderCard(e, true))}
+                </div>
+              </div>
+            )}
+          </div>
+        )
+      })()}
 
       {/* EDIT MODAL */}
       {editEvent && (

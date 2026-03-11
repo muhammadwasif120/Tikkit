@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
-import { CalendarDays, MapPin, Users, ArrowLeft } from 'lucide-react'
+import { CalendarDays, MapPin, Users, ArrowLeft, Archive } from 'lucide-react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import EventActions from '@/components/events/EventActions'
@@ -29,6 +29,8 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
     .single()
 
   if (!event) notFound()
+
+  const isArchived = event.status === 'completed' || event.status === 'cancelled'
 
   const { data: guests } = await supabase
     .from('guests')
@@ -94,15 +96,27 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
             </div>
           </div>
         </div>
-        <EventActions event={event} />
+        {/* Actions menu — hidden for archived events */}
+        {!isArchived && <EventActions event={event} />}
       </div>
 
-      {/* Cover image + description */}
+      {/* Archived banner */}
+      {isArchived && (
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/3 border border-white/8 text-sm text-gray-400">
+          <Archive className="w-4 h-4 shrink-0 text-gray-500" />
+          <span>
+            This event has ended and is now <span className="text-white font-medium">archived</span>. Analytics and guest records are available below.
+          </span>
+        </div>
+      )}
+
+      {/* Cover image + description — editing only for non-archived events */}
       <EventCoverAndDescription
         eventId={event.id}
         initialCoverUrl={event.cover_image_url ?? null}
         initialDescription={event.description ?? null}
         eventTitle={event.title}
+        readOnly={isArchived}
       />
 
       {/* Capacity bar */}
@@ -140,33 +154,37 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         ))}
       </div>
 
-      {/* Ticket Tiers — always visible and editable */}
-      <EventTicketTypes
-        eventId={event.id}
-        initialTicketTypes={ticketTypes ?? []}
-      />
+      {/* Ticket Tiers + Payment Setup — hidden for archived events */}
+      {!isArchived && (
+        <>
+          <EventTicketTypes
+            eventId={event.id}
+            initialTicketTypes={ticketTypes ?? []}
+          />
+          <EventPaymentSetup
+            eventId={event.id}
+            allAccounts={allPaymentAccounts ?? []}
+            linkedAccountIds={linkedAccountIds}
+          />
+        </>
+      )}
 
-      {/* Payment Setup — always visible, toggle controls in-app collection */}
-      <EventPaymentSetup
-        eventId={event.id}
-        allAccounts={allPaymentAccounts ?? []}
-        linkedAccountIds={linkedAccountIds}
-      />
-
-      {/* Guest table */}
+      {/* Guest table — always visible, Add Guest hidden for archived events */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>
             Guest List
           </h3>
-          <div className="flex gap-2">
-            <Link
-              href={`/dashboard/events/${event.id}/guests/add`}
-              className="btn-primary text-xs px-3 py-2"
-            >
-              Add Guest
-            </Link>
-          </div>
+          {!isArchived && (
+            <div className="flex gap-2">
+              <Link
+                href={`/dashboard/events/${event.id}/guests/add`}
+                className="btn-primary text-xs px-3 py-2"
+              >
+                Add Guest
+              </Link>
+            </div>
+          )}
         </div>
         <GuestTable guests={guests ?? []} eventId={event.id} />
       </div>

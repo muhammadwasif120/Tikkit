@@ -18,6 +18,7 @@ type Props = {
   initialCoverUrl: string | null
   initialDescription: string | null
   eventTitle: string
+  readOnly?: boolean
 }
 
 export default function EventCoverAndDescription({
@@ -25,6 +26,7 @@ export default function EventCoverAndDescription({
   initialCoverUrl,
   initialDescription,
   eventTitle,
+  readOnly = false,
 }: Props) {
   const supabase = createClient()
 
@@ -152,43 +154,46 @@ export default function EventCoverAndDescription({
           />
         )}
 
-        {/* Upload overlay controls */}
-        <input
-          ref={coverInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleCoverChange}
-        />
-
-        <div className="absolute bottom-3 right-3 flex gap-2">
-          {coverUploading ? (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-black/50 border border-white/20 backdrop-blur-sm">
-              <Loader2 size={12} className="animate-spin" />
-              Uploading…
-            </div>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => coverInputRef.current?.click()}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-black/50 border border-white/20 backdrop-blur-sm hover:bg-black/70 transition-all"
-              >
-                <ImagePlus size={13} />
-                {coverUrl ? 'Change' : 'Add Cover'}
-              </button>
-              {coverUrl && (
-                <button
-                  type="button"
-                  onClick={removeCover}
-                  className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/50 border border-white/20 text-gray-300 hover:text-red-400 transition-colors backdrop-blur-sm"
-                >
-                  <X size={13} />
-                </button>
+        {/* Upload overlay controls — hidden in readOnly mode */}
+        {!readOnly && (
+          <>
+            <input
+              ref={coverInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleCoverChange}
+            />
+            <div className="absolute bottom-3 right-3 flex gap-2">
+              {coverUploading ? (
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-black/50 border border-white/20 backdrop-blur-sm">
+                  <Loader2 size={12} className="animate-spin" />
+                  Uploading…
+                </div>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => coverInputRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-black/50 border border-white/20 backdrop-blur-sm hover:bg-black/70 transition-all"
+                  >
+                    <ImagePlus size={13} />
+                    {coverUrl ? 'Change' : 'Add Cover'}
+                  </button>
+                  {coverUrl && (
+                    <button
+                      type="button"
+                      onClick={removeCover}
+                      className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/50 border border-white/20 text-gray-300 hover:text-red-400 transition-colors backdrop-blur-sm"
+                    >
+                      <X size={13} />
+                    </button>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
         {coverError && (
           <div className="absolute top-3 left-3 right-3 text-xs text-red-300 bg-red-900/60 border border-red-500/30 rounded-lg px-3 py-2 backdrop-blur-sm">
@@ -201,7 +206,8 @@ export default function EventCoverAndDescription({
       <div className="px-5 py-4 space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-white">Description</h3>
-          {!editingDesc && (
+          {/* Edit button hidden in readOnly mode */}
+          {!readOnly && !editingDesc && (
             <button
               type="button"
               onClick={() => { setDraftDesc(description); setEditingDesc(true) }}
@@ -213,7 +219,7 @@ export default function EventCoverAndDescription({
           )}
         </div>
 
-        {editingDesc ? (
+        {!readOnly && editingDesc ? (
           <div className="space-y-2">
             <textarea
               className="input min-h-[100px] resize-none w-full text-sm"
@@ -248,7 +254,7 @@ export default function EventCoverAndDescription({
           <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
             {description}
           </p>
-        ) : (
+        ) : !readOnly ? (
           <button
             type="button"
             onClick={() => { setDraftDesc(''); setEditingDesc(true) }}
@@ -256,6 +262,8 @@ export default function EventCoverAndDescription({
           >
             + Add a description for guests
           </button>
+        ) : (
+          <p className="text-sm text-gray-500 italic">No description added</p>
         )}
       </div>
     </div>
