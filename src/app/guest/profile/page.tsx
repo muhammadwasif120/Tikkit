@@ -7,7 +7,7 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [profileRes, guestProfileRes, txRes] = await Promise.all([
+  const [profileRes, guestProfileRes, txRes, pastEventsRes] = await Promise.all([
     supabase
       .from('profiles')
       .select('full_name, email, phone_number, avatar_url')
@@ -24,6 +24,13 @@ export default async function ProfilePage() {
       .eq('guest_id', user.id)
       .order('created_at', { ascending: false })
       .limit(30),
+    supabase
+      .from('public_registrations')
+      .select('id, status, created_at, event:events(id, title, date_start, cover_image_url, venue_name)')
+      .eq('guest_id', user.id)
+      .in('status', ['confirmed', 'checked_in', 'attended', 'registered', 'payment_pending', 'eoi_approved'])
+      .order('created_at', { ascending: false })
+      .limit(20),
   ])
 
   const p  = profileRes.data
@@ -49,6 +56,7 @@ export default async function ProfilePage() {
       profile={profile}
       email={p?.email ?? user.email ?? ''}
       transactions={txRes.data ?? []}
+      pastEvents={(pastEventsRes.data ?? []) as any[]}
     />
   )
 }

@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, Users, ScanLine,
-  Building2, BarChart3, Settings, LogOut, Ticket, ClipboardCheck, X,
+  Building2, BarChart3, Settings, LogOut, Ticket, ClipboardCheck, X, UserCircle,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import { createClient } from '@/lib/supabase/client'
@@ -83,6 +83,14 @@ export default function Sidebar({ profile, open, onClose }: Props) {
 
         <div className="divider" />
         <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-widest px-3 pb-2">Account</p>
+        <Link
+          href="/dashboard/profile"
+          onClick={handleNavClick}
+          className={clsx(isActive('/dashboard/profile') ? 'sidebar-link-active' : 'sidebar-link')}
+        >
+          <UserCircle className="w-4 h-4 shrink-0" />
+          Profile
+        </Link>
         <Link
           href="/dashboard/settings"
           onClick={handleNavClick}
