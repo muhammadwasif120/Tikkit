@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   User, Lock, Users, Bell, Save, Check,
@@ -8,6 +8,7 @@ import {
   CreditCard, Zap, Flag, Plus, Trash2, Link2,
   Copy, ExternalLink, Shield, Crown, AlertCircle,
   Clock, RefreshCw, ChevronDown, Phone, Building2,
+  Camera, Loader2, ImageIcon, AtSign, X,
 } from 'lucide-react'
 import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInvite } from '@/app/actions/teamActions'
 import PaymentAccountsSection from '@/components/settings/PaymentAccountsSection'
@@ -31,8 +32,14 @@ type Profile = {
   avatar_url: string | null
   phone_number: string | null
   company_name: string | null
+  cover_image_url: string | null
+  logo_url: string | null
+  username: string | null
   notification_preferences: NotifPrefs | null
 }
+
+const MAX_UPLOAD_SIZE = 10 * 1024 * 1024 // 10 MB
+const SLUG_RE = /^[a-z0-9-]+$/
 
 type TeamInvite = {
   id: string
@@ -78,14 +85,26 @@ function InviteStatus({ invite }: { invite: TeamInvite }) {
 
 export default function SettingsPage() {
   const supabase = createClient()
+  const coverInputRef = useRef<HTMLInputElement>(null)
+  const logoInputRef  = useRef<HTMLInputElement>(null)
 
   // Profile
   const [profile, setProfile] = useState<Profile | null>(null)
   const [fullName, setFullName] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [companyName, setCompanyName] = useState('')
+  const [username, setUsername] = useState('')
+  const [usernameError, setUsernameError] = useState<string | null>(null)
   const [profileSaving, setProfileSaving] = useState(false)
   const [profileSaved, setProfileSaved] = useState(false)
+
+  // Branding uploads
+  const [brandingOpen, setBrandingOpen] = useState(false)
+  const [coverUrl, setCoverUrl] = useState<string | null>(null)
+  const [logoUrl,  setLogoUrl]  = useState<string | null>(null)
+  const [coverUploading, setCoverUploading] = useState(false)
+  const [logoUploading,  setLogoUploading]  = useState(false)
+  const [brandingError,  setBrandingError]  = useState<string | null>(null)
 
   // Section expand/collapse
   const [profileOpen, setProfileOpen] = useState(false)
@@ -133,6 +152,9 @@ export default function SettingsPage() {
         setFullName(prof.full_name ?? '')
         setPhoneNumber(prof.phone_number ?? '')
         setCompanyName(prof.company_name ?? '')
+        setUsername(prof.username ?? '')
+        setCoverUrl(prof.cover_image_url ?? null)
+        setLogoUrl(prof.logo_url ?? null)
         if (prof.notification_preferences && typeof prof.notification_preferences === 'object') {
           setNotifications(prev => ({ ...prev, ...(prof.notification_preferences as NotifPrefs) }))
         }
@@ -152,15 +174,66 @@ export default function SettingsPage() {
 
   const saveProfile = async () => {
     if (!profile) return
+    // Validate username slug
+    const slug = username.trim().toLowerCase()
+    if (slug && !SLUG_RE.test(slug)) {
+      setUsernameError('Only lowercase letters, numbers and hyphens allowed')
+      return
+    }
+    setUsernameError(null)
     setProfileSaving(true)
     await supabase.from('profiles').update({
-      full_name: fullName,
+      full_name:    fullName,
       phone_number: phoneNumber || null,
       company_name: companyName || null,
+      username:     slug || null,
     }).eq('id', profile.id)
     setProfileSaving(false)
     setProfileSaved(true)
     setTimeout(() => setProfileSaved(false), 3000)
+  }
+
+  /* ── Branding upload helpers ─────────────────────────────────── */
+  const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !profile) return
+    if (file.size > MAX_UPLOAD_SIZE) { setBrandingError('Cover image must be under 10 MB'); return }
+    setBrandingError(null); setCoverUploading(true)
+    const ext  = file.name.split('.').pop() ?? 'jpg'
+    const path = `profile-covers/${profile.id}/cover.${ext}`
+    await supabase.storage.from('tikkit-uploads').upload(path, file, { upsert: true, contentType: file.type })
+    const { data: { publicUrl } } = supabase.storage.from('tikkit-uploads').getPublicUrl(path)
+    const url = `${publicUrl}?t=${Date.now()}`
+    await supabase.from('profiles').update({ cover_image_url: url }).eq('id', profile.id)
+    setCoverUrl(url); setCoverUploading(false)
+    if (coverInputRef.current) coverInputRef.current.value = ''
+  }
+
+  const removeCover = async () => {
+    if (!profile) return
+    await supabase.from('profiles').update({ cover_image_url: null }).eq('id', profile.id)
+    setCoverUrl(null)
+  }
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !profile) return
+    if (file.size > MAX_UPLOAD_SIZE) { setBrandingError('Logo must be under 10 MB'); return }
+    setBrandingError(null); setLogoUploading(true)
+    const ext  = file.name.split('.').pop() ?? 'jpg'
+    const path = `profile-logos/${profile.id}/logo.${ext}`
+    await supabase.storage.from('tikkit-uploads').upload(path, file, { upsert: true, contentType: file.type })
+    const { data: { publicUrl } } = supabase.storage.from('tikkit-uploads').getPublicUrl(path)
+    const url = `${publicUrl}?t=${Date.now()}`
+    await supabase.from('profiles').update({ logo_url: url }).eq('id', profile.id)
+    setLogoUrl(url); setLogoUploading(false)
+    if (logoInputRef.current) logoInputRef.current.value = ''
+  }
+
+  const removeLogo = async () => {
+    if (!profile) return
+    await supabase.from('profiles').update({ logo_url: null }).eq('id', profile.id)
+    setLogoUrl(null)
   }
 
   const savePassword = async () => {
@@ -247,6 +320,10 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-8">
+      {/* Hidden file inputs for branding uploads */}
+      <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+      <input ref={logoInputRef}  type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}  />
+
       <div>
         <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Settings</h2>
         <p className="text-gray-400 text-sm mt-1">Manage your account and preferences</p>
@@ -312,6 +389,25 @@ export default function SettingsPage() {
                   />
                 </div>
                 <p className="text-xs text-gray-600 mt-1">Used in guest emails and communications</p>
+              </div>
+              <div className="col-span-2">
+                <label className="label">Profile URL / Username</label>
+                <div className="relative">
+                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  <input
+                    type="text"
+                    className="input pl-9"
+                    placeholder="e.g. janes-events"
+                    value={username}
+                    onChange={e => { setUsername(e.target.value.toLowerCase()); setUsernameError(null) }}
+                  />
+                </div>
+                {usernameError
+                  ? <p className="text-xs text-red-400 mt-1">{usernameError}</p>
+                  : <p className="text-xs text-gray-600 mt-1">
+                      Public profile URL: <span className="text-gray-400">tikkit.app/organizer/{username || 'your-username'}</span>
+                    </p>
+                }
               </div>
             </div>
             <div className="flex justify-end">
@@ -403,6 +499,111 @@ export default function SettingsPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Branding */}
+      <div className="card space-y-5">
+        <button
+          type="button"
+          onClick={() => setBrandingOpen(!brandingOpen)}
+          className="w-full flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#1E5EFF]/10 flex items-center justify-center shrink-0">
+              <ImageIcon className="w-4 h-4 text-[#1E5EFF]" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Branding</p>
+              <p className="text-xs text-gray-500 mt-0.5">Profile cover photo and company logo</p>
+            </div>
+          </div>
+          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', brandingOpen && 'rotate-180')} />
+        </button>
+
+        {brandingOpen && (
+          <div className="border-t border-white/5 pt-4 space-y-5">
+            {brandingError && (
+              <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2.5">
+                {brandingError}
+              </div>
+            )}
+
+            {/* Cover Photo */}
+            <div className="space-y-2">
+              <label className="label">Cover Photo</label>
+              <p className="text-xs text-gray-600 -mt-1">Displayed as the banner on your public organizer profile</p>
+              <div
+                className="relative w-full rounded-xl overflow-hidden border border-white/10"
+                style={{ height: 120, background: coverUrl ? 'transparent' : '#161820' }}
+              >
+                {coverUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-gray-600">
+                    <ImageIcon className="w-6 h-6" />
+                    <p className="text-xs">No cover photo set</p>
+                  </div>
+                )}
+                <div className="absolute bottom-2 right-2 flex items-center gap-1.5">
+                  {coverUrl && (
+                    <button onClick={removeCover}
+                      className="flex items-center gap-1 text-xs text-gray-300 hover:text-white bg-black/60 hover:bg-black/80 rounded-lg px-2 py-1 transition-all backdrop-blur-sm">
+                      <X size={11} /> Remove
+                    </button>
+                  )}
+                  <button
+                    onClick={() => coverInputRef.current?.click()}
+                    disabled={coverUploading}
+                    className="flex items-center gap-1.5 text-xs text-white bg-black/60 hover:bg-black/80 disabled:opacity-60 rounded-lg px-2.5 py-1 transition-all backdrop-blur-sm"
+                  >
+                    {coverUploading ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
+                    {coverUrl ? 'Change Cover' : 'Upload Cover'}
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-gray-600">Max 10 MB · Recommended 1500 × 500 px</p>
+            </div>
+
+            {/* Company Logo */}
+            <div className="space-y-2">
+              <label className="label">Company Logo</label>
+              <p className="text-xs text-gray-600 -mt-1">Shown as your profile badge on events and your public profile</p>
+              <div className="flex items-center gap-4">
+                <div
+                  className="relative w-20 h-20 rounded-2xl overflow-hidden border border-white/10 shrink-0 flex items-center justify-center"
+                  style={{ background: logoUrl ? 'transparent' : '#161820' }}
+                >
+                  {logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                  ) : (
+                    <Building2 className="w-6 h-6 text-gray-600" />
+                  )}
+                </div>
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => logoInputRef.current?.click()}
+                      disabled={logoUploading}
+                      className="flex items-center gap-1.5 text-xs text-white bg-[#1E5EFF] hover:bg-[#1448CC] disabled:opacity-60 rounded-lg px-3 py-1.5 transition-colors"
+                    >
+                      {logoUploading ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
+                      {logoUrl ? 'Change Logo' : 'Upload Logo'}
+                    </button>
+                    {logoUrl && (
+                      <button onClick={removeLogo}
+                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-all">
+                        <X size={11} /> Remove
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-600">Max 10 MB · Square image recommended (1:1)</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Payment Accounts */}

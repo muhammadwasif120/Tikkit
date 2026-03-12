@@ -25,7 +25,7 @@ type Event = {
   capacity: number | null; cover_image_url: string | null
   tags: string[] | null; ticket_price: number | null
   registration_mode: string; is_private: boolean
-  organizer: { full_name: string | null; company_name: string | null; avatar_url?: string | null } | null
+  organizer: { id?: string | null; full_name: string | null; company_name: string | null; avatar_url?: string | null; logo_url?: string | null; username?: string | null } | null
   registered_count: number
   payment_accounts: PaymentAccount[]
 }
@@ -574,7 +574,17 @@ export default function EventDetailClient({
             <h1 style={{ color: 'white', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.8px', lineHeight: 1.15 }}>
               {event.title}
             </h1>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>
+            {event.organizer?.username ? (
+              <a
+                href={`/organizer/${event.organizer.username}`}
+                style={{ color: '#6B7280', fontSize: 13, margin: 0, fontStyle: 'italic', textDecoration: 'none', display: 'inline-block' }}
+                className="hover:text-white hover:underline transition-colors"
+              >
+                by {organiser}
+              </a>
+            ) : (
+              <p style={{ color: '#6B7280', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>
+            )}
           </div>
 
           {/* Key info grid */}
