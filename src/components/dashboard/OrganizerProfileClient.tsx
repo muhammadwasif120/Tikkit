@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  Check, Edit3, X, Loader2,
-  CalendarDays, Users, MapPin, TrendingUp, UserCheck, Settings,
+  Check, Edit3, X, Loader2, Camera,
+  CalendarDays, Users, MapPin, TrendingUp, UserCheck, Settings, ExternalLink,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import clsx from 'clsx'
@@ -18,6 +18,9 @@ export type OrgProfile = {
   avatar_url: string | null
   phone_number: string | null
   company_name: string | null
+  cover_image_url: string | null
+  logo_url: string | null
+  username: string | null
 }
 
 export type EventWithStats = {
@@ -60,7 +63,9 @@ function getCardGradient(id: string) {
   return CARD_GRADIENTS[id.charCodeAt(0) % CARD_GRADIENTS.length]
 }
 
-/* ─── Inline Name Editor ─────────────────────────────────────────── */
+const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
+
+/* ─── Inline Personal Name Editor ───────────────────────────────── */
 function NameEditor({ profileId, initial }: { profileId: string; initial: string | null }) {
   const supabase = createClient()
   const [editing, setEditing] = useState(false)
@@ -80,9 +85,9 @@ function NameEditor({ profileId, initial }: { profileId: string; initial: string
 
   if (editing) {
     return (
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div className="flex items-center gap-2 min-w-0">
         <input
-          className="input text-sm py-1.5 flex-1"
+          className="input text-sm py-1.5 flex-1 min-w-0"
           value={draft}
           onChange={e => setDraft(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') save() }}
@@ -101,12 +106,12 @@ function NameEditor({ profileId, initial }: { profileId: string; initial: string
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>
+    <div className="flex items-center gap-1.5">
+      <span className="text-sm text-gray-400" style={{ fontFamily: 'var(--font-body)' }}>
         {name || 'Organizer'}
-      </h3>
+      </span>
       <button onClick={() => setEditing(true)} className="text-gray-600 hover:text-gray-400 transition-colors">
-        <Edit3 size={13} />
+        <Edit3 size={12} />
       </button>
       {saved && <span className="flex items-center gap-1 text-xs text-[#10B981]"><Check size={11} /> Saved</span>}
     </div>
@@ -120,7 +125,6 @@ function EventStatCard({ event }: { event: EventWithStats }) {
 
   return (
     <Link href={`/dashboard/events/${event.id}`} className="card-hover flex gap-4 items-start group">
-      {/* Thumbnail */}
       <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0" style={{ background: getCardGradient(event.id) }}>
         {event.cover_image_url && (
           // eslint-disable-next-line @next/next/no-img-element
@@ -149,7 +153,6 @@ function EventStatCard({ event }: { event: EventWithStats }) {
           )}
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-2">
           <div className="text-center">
             <p className="text-base font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>{event.guest_count}</p>
@@ -165,7 +168,6 @@ function EventStatCard({ event }: { event: EventWithStats }) {
           </div>
         </div>
 
-        {/* Fill bar */}
         <div className="space-y-1">
           <div className="flex justify-between text-[10px] text-gray-600">
             <span>Capacity fill</span>
@@ -193,16 +195,24 @@ function EventStatCard({ event }: { event: EventWithStats }) {
 
 /* ─── Main Component ─────────────────────────────────────────────── */
 export default function OrganizerProfileClient({
-  profile,
+  profile: initialProfile,
   events,
 }: {
   profile: OrgProfile
   events: EventWithStats[]
 }) {
-  const [showArchived, setShowArchived] = useState(false)
+  const supabase = createClient()
+  const coverInputRef = useRef<HTMLInputElement>(null)
+  const logoInputRef  = useRef<HTMLInputElement>(null)
 
-  const activeEvents   = events.filter(e => e.status !== 'completed' && e.status !== 'cancelled')
-  const archivedEvents = events.filter(e => e.status === 'completed'  || e.status === 'cancelled')
+  const [profile, setProfile] = useState(initialProfile)
+  const [coverUploading, setCoverUploading] = useState(false)
+  const [logoUploading,  setLogoUploading]  = useState(false)
+  const [uploadError,    setUploadError]    = useState<string | null>(null)
+  const [showPast, setShowPast] = useState(false)
+
+  const activeEvents = events.filter(e => e.status !== 'completed' && e.status !== 'cancelled')
+  const pastEvents   = events.filter(e => e.status === 'completed'  || e.status === 'cancelled')
 
   const totalGuests   = events.reduce((s, e) => s + e.guest_count, 0)
   const totalAttended = events.reduce((s, e) => s + e.checked_in_count, 0)
@@ -210,10 +220,61 @@ export default function OrganizerProfileClient({
     ? Math.round(events.reduce((s, e) => s + (e.capacity > 0 ? (e.guest_count / e.capacity) * 100 : 0), 0) / events.length)
     : 0
 
-  const initials = (profile.full_name || 'O').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+  const initials = (profile.full_name || profile.company_name || 'O')
+    .split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
+
+  /* ── Cover upload ─────────────────────────────────────────────── */
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > MAX_FILE_SIZE) { setUploadError('Cover image must be under 10 MB'); return }
+    setUploadError(null)
+    setCoverUploading(true)
+    const ext  = file.name.split('.').pop() ?? 'jpg'
+    const path = `profile-covers/${profile.id}/cover.${ext}`
+    await supabase.storage.from('tikkit-uploads').upload(path, file, { upsert: true, contentType: file.type })
+    const { data: { publicUrl } } = supabase.storage.from('tikkit-uploads').getPublicUrl(path)
+    const url = `${publicUrl}?t=${Date.now()}`
+    await supabase.from('profiles').update({ cover_image_url: url }).eq('id', profile.id)
+    setProfile(p => ({ ...p, cover_image_url: url }))
+    setCoverUploading(false)
+    if (coverInputRef.current) coverInputRef.current.value = ''
+  }
+
+  const removeCover = async () => {
+    await supabase.from('profiles').update({ cover_image_url: null }).eq('id', profile.id)
+    setProfile(p => ({ ...p, cover_image_url: null }))
+  }
+
+  /* ── Logo upload ──────────────────────────────────────────────── */
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.size > MAX_FILE_SIZE) { setUploadError('Logo must be under 10 MB'); return }
+    setUploadError(null)
+    setLogoUploading(true)
+    const ext  = file.name.split('.').pop() ?? 'jpg'
+    const path = `profile-logos/${profile.id}/logo.${ext}`
+    await supabase.storage.from('tikkit-uploads').upload(path, file, { upsert: true, contentType: file.type })
+    const { data: { publicUrl } } = supabase.storage.from('tikkit-uploads').getPublicUrl(path)
+    const url = `${publicUrl}?t=${Date.now()}`
+    await supabase.from('profiles').update({ logo_url: url }).eq('id', profile.id)
+    setProfile(p => ({ ...p, logo_url: url }))
+    setLogoUploading(false)
+    if (logoInputRef.current) logoInputRef.current.value = ''
+  }
+
+  /* Geometry */
+  const BANNER_H  = 120
+  const AVATAR_H  = 64
+  const avatarTop = BANNER_H - AVATAR_H / 2  // 88px — half overlaps banner
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-5xl space-y-6">
+
+      {/* Hidden file inputs */}
+      <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
+      <input ref={logoInputRef}  type="file" accept="image/*" className="hidden" onChange={handleLogoChange}  />
 
       {/* Page header */}
       <div className="flex items-start justify-between">
@@ -223,51 +284,135 @@ export default function OrganizerProfileClient({
           </h2>
           <p className="text-gray-400 text-sm mt-1">Your public identity and event portfolio</p>
         </div>
-        <Link href="/dashboard/settings"
-          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-all">
-          <Settings size={13} /> Edit Details
-        </Link>
+        <div className="flex items-center gap-2 shrink-0">
+          {profile.username && (
+            <Link
+              href={`/organizer/${profile.username}`}
+              target="_blank"
+              className="flex items-center gap-1.5 text-xs text-[#1E5EFF] hover:text-white border border-[#1E5EFF]/30 hover:border-white/25 rounded-lg px-3 py-1.5 transition-all"
+            >
+              <ExternalLink size={12} /> View Public Profile
+            </Link>
+          )}
+          <Link href="/dashboard/settings"
+            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-all">
+            <Settings size={13} /> Edit Details
+          </Link>
+        </div>
       </div>
 
+      {uploadError && (
+        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2.5">
+          {uploadError}
+        </div>
+      )}
+
       {/* Profile hero card */}
-      <div className="card overflow-hidden p-0">
-        {/* Gradient banner */}
+      <div className="card overflow-hidden p-0 relative">
+
+        {/* Gradient banner + optional cover image */}
         <div
-          className="relative w-full"
-          style={{ height: 100, background: getGradient(profile.id) }}
+          className="relative w-full overflow-hidden"
+          style={{ height: BANNER_H, background: getGradient(profile.id) }}
         >
-          {/* Subtle grid overlay */}
-          <div className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-              backgroundSize: '24px 24px',
-            }}
-          />
+          {profile.cover_image_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.cover_image_url}
+              alt="Cover"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+          )}
+          {/* Grid overlay (only shown on gradient) */}
+          {!profile.cover_image_url && (
+            <div className="absolute inset-0 opacity-10"
+              style={{
+                backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+                backgroundSize: '24px 24px',
+              }}
+            />
+          )}
           {/* Bottom fade */}
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#111420] to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#0D0F18] to-transparent" />
+
+          {/* Cover edit controls — bottom right */}
+          <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+            {profile.cover_image_url && (
+              <button
+                onClick={removeCover}
+                className="flex items-center gap-1 text-xs text-gray-300 hover:text-white bg-black/50 hover:bg-black/70 rounded-lg px-2 py-1 transition-all backdrop-blur-sm"
+              >
+                <X size={11} /> Remove
+              </button>
+            )}
+            <button
+              onClick={() => coverInputRef.current?.click()}
+              disabled={coverUploading}
+              className="flex items-center gap-1.5 text-xs text-white bg-black/50 hover:bg-black/70 disabled:opacity-60 rounded-lg px-2.5 py-1 transition-all backdrop-blur-sm"
+            >
+              {coverUploading
+                ? <Loader2 size={12} className="animate-spin" />
+                : <Camera size={12} />
+              }
+              {profile.cover_image_url ? 'Change Cover' : 'Add Cover'}
+            </button>
+          </div>
         </div>
 
-        {/* Identity row — avatar overlapping banner */}
-        <div className="px-5 pb-5" style={{ marginTop: -28 }}>
-          <div className="flex items-end gap-4 mb-3">
-            {/* Avatar */}
+        {/* Logo badge — absolute, half-overlapping banner */}
+        <div className="absolute" style={{ top: avatarTop, left: 20 }}>
+          <div className="relative group">
             <div
-              className="w-14 h-14 rounded-xl border-2 border-[#111420] flex items-center justify-center shrink-0"
-              style={{ background: 'linear-gradient(135deg, rgba(30,94,255,0.3), rgba(30,94,255,0.1))' }}
+              className="w-16 h-16 rounded-2xl overflow-hidden flex items-center justify-center"
+              style={{
+                background: profile.logo_url ? 'transparent' : 'linear-gradient(135deg, rgba(30,94,255,0.3), rgba(30,94,255,0.1))',
+                border: '3px solid #0D0F18',
+                boxShadow: '0 0 0 1px rgba(30,94,255,0.25)',
+              }}
             >
-              <span className="text-xl font-black text-[#1E5EFF]" style={{ fontFamily: 'var(--font-display)' }}>
-                {initials}
-              </span>
+              {profile.logo_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={profile.logo_url} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-2xl font-black text-[#1E5EFF]" style={{ fontFamily: 'var(--font-display)' }}>
+                  {initials}
+                </span>
+              )}
             </div>
+            {/* Camera button overlay on logo */}
+            <button
+              onClick={() => logoInputRef.current?.click()}
+              disabled={logoUploading}
+              className="absolute inset-0 rounded-2xl bg-black/0 group-hover:bg-black/50 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100"
+              title="Change logo"
+            >
+              {logoUploading
+                ? <Loader2 size={16} className="text-white animate-spin" />
+                : <Camera size={16} className="text-white" />
+              }
+            </button>
+          </div>
+        </div>
+
+        {/* Identity content */}
+        <div className="px-5 pb-6" style={{ paddingTop: AVATAR_H / 2 + 16 }}>
+          {/* Organisation name — primary bold */}
+          {profile.company_name ? (
+            <h3 className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
+              {profile.company_name}
+            </h3>
+          ) : (
+            <p className="text-sm text-gray-600 italic">No organisation name set</p>
+          )}
+
+          {/* Personal name — secondary, inline-editable */}
+          <div className="mt-0.5">
+            <NameEditor profileId={profile.id} initial={profile.full_name} />
           </div>
 
-          <NameEditor profileId={profile.id} initial={profile.full_name} />
-
-          <div className="mt-1 space-y-0.5">
+          {/* Contact */}
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5">
             <p className="text-xs text-gray-500">{profile.email}</p>
-            {profile.company_name && (
-              <p className="text-xs text-gray-400">{profile.company_name}</p>
-            )}
             {profile.phone_number && (
               <p className="text-xs text-gray-600">{profile.phone_number}</p>
             )}
@@ -276,17 +421,21 @@ export default function OrganizerProfileClient({
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Events',     value: events.length,  color: '#1E5EFF', icon: <CalendarDays className="w-4 h-4" /> },
-          { label: 'Total Registered', value: totalGuests,    color: '#A855F7', icon: <Users className="w-4 h-4" /> },
-          { label: 'Total Attended',   value: totalAttended,  color: '#10B981', icon: <UserCheck className="w-4 h-4" /> },
-          { label: 'Avg Fill Rate',    value: `${avgFill}%`,  color: '#FFC745', icon: <TrendingUp className="w-4 h-4" /> },
+          { label: 'Total Events',     value: events.length,  color: '#1E5EFF', bg: 'rgba(30,94,255,0.1)',   border: 'rgba(30,94,255,0.15)',  icon: <CalendarDays className="w-4 h-4" /> },
+          { label: 'Total Registered', value: totalGuests,    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.15)', icon: <Users className="w-4 h-4" /> },
+          { label: 'Total Attended',   value: totalAttended,  color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.15)', icon: <UserCheck className="w-4 h-4" /> },
+          { label: 'Avg Fill Rate',    value: `${avgFill}%`,  color: '#FFC745', bg: 'rgba(255,199,69,0.1)',  border: 'rgba(255,199,69,0.15)', icon: <TrendingUp className="w-4 h-4" /> },
         ].map(s => (
-          <div key={s.label} className="card text-center py-4">
-            <div className="flex items-center justify-center mb-1" style={{ color: s.color }}>{s.icon}</div>
-            <p className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>{s.value}</p>
-            <p className="text-xs text-gray-500 mt-1">{s.label}</p>
+          <div key={s.label} className="stat-card" style={{ borderColor: s.border }}>
+            <div className="flex items-center justify-between mb-3">
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: s.color }}>{s.icon}</span>
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px' }}>{s.value}</p>
+            <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
           </div>
         ))}
       </div>
@@ -297,28 +446,28 @@ export default function OrganizerProfileClient({
           <h3 className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>
             Active Events
           </h3>
-          <div className="grid gap-3">
+          <div className="grid md:grid-cols-2 gap-3">
             {activeEvents.map(ev => <EventStatCard key={ev.id} event={ev} />)}
           </div>
         </div>
       )}
 
-      {/* Archived Events (collapsible) */}
-      {archivedEvents.length > 0 && (
+      {/* Past Events (collapsible) */}
+      {pastEvents.length > 0 && (
         <div className="space-y-3">
           <button
-            onClick={() => setShowArchived(v => !v)}
+            onClick={() => setShowPast(v => !v)}
             className="flex items-center gap-3 w-full"
           >
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Archived Events</p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Past Events</p>
             <div className="flex-1 h-px bg-white/5" />
-            <span className="text-xs text-gray-600">{archivedEvents.length}</span>
-            <span className={clsx('text-xs text-gray-500 transition-transform inline-block', showArchived && 'rotate-180')}>▾</span>
+            <span className="text-xs text-gray-600">{pastEvents.length}</span>
+            <span className={clsx('text-xs text-gray-500 transition-transform inline-block', showPast && 'rotate-180')}>▾</span>
           </button>
 
-          {showArchived && (
-            <div className="grid gap-3 opacity-70">
-              {archivedEvents.map(ev => <EventStatCard key={ev.id} event={ev} />)}
+          {showPast && (
+            <div className="grid md:grid-cols-2 gap-3 opacity-70">
+              {pastEvents.map(ev => <EventStatCard key={ev.id} event={ev} />)}
             </div>
           )}
         </div>

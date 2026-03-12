@@ -54,12 +54,15 @@ async function ProfileData() {
   return (
     <OrganizerProfileClient
       profile={{
-        id:           profile.id,
-        full_name:    profile.full_name    ?? null,
-        email:        profile.email        ?? user.email ?? '',
-        avatar_url:   profile.avatar_url   ?? null,
-        phone_number: profile.phone_number ?? null,
-        company_name: profile.company_name ?? null,
+        id:              profile.id,
+        full_name:       profile.full_name       ?? null,
+        email:           profile.email           ?? user.email ?? '',
+        avatar_url:      profile.avatar_url      ?? null,
+        phone_number:    profile.phone_number    ?? null,
+        company_name:    profile.company_name    ?? null,
+        cover_image_url: profile.cover_image_url ?? null,
+        logo_url:        profile.logo_url        ?? null,
+        username:        profile.username        ?? null,
       }}
       events={enrichedEvents}
     />

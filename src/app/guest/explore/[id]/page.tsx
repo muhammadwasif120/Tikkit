@@ -14,7 +14,7 @@ async function EventData({ id }: { id: string }) {
       id, title, description, venue_name, venue_address, secret_venue, venue_reveal_at,
       date_start, date_end, capacity, cover_image_url, tags, ticket_price,
       registration_mode, is_private, status,
-      organizer:profiles!events_organizer_id_fkey(full_name, company_name, avatar_url)
+      organizer:profiles!events_organizer_id_fkey(id, full_name, company_name, avatar_url, logo_url, username)
     `)
     .eq('id', id)
     .single()

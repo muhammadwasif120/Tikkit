@@ -17,6 +17,9 @@ CREATE TABLE profiles (
   role TEXT NOT NULL DEFAULT 'organizer' CHECK (role IN ('organizer', 'staff', 'admin', 'guest')),
   phone_number TEXT,
   company_name TEXT,
+  cover_image_url TEXT,
+  logo_url TEXT,
+  username TEXT UNIQUE,
   notification_preferences JSONB NOT NULL DEFAULT '{"guest_signup":true,"guest_cancellation":true,"entry_scan":true,"exit_scan":false,"vendor_payment_due":true,"event_going_live":true,"event_ended":true}',
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
