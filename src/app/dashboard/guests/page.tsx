@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import GuestsPageClient from '@/components/guests/GuestsPageClient'
+import DashboardLoader from '@/components/layout/DashboardLoader'
 
-export default async function GuestsPage() {
+async function GuestsData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -24,5 +26,13 @@ export default async function GuestsPage() {
       events={events ?? []}
       initialGuests={guests ?? []}
     />
+  )
+}
+
+export default function GuestsPage() {
+  return (
+    <Suspense fallback={<DashboardLoader variant="list" />}>
+      <GuestsData />
+    </Suspense>
   )
 }

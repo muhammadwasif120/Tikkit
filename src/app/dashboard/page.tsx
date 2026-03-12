@@ -1,9 +1,11 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { CalendarDays, Users, TicketIcon, TrendingUp, ScanLine, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
+import DashboardLoader from '@/components/layout/DashboardLoader'
 
-export default async function DashboardPage() {
+async function DashboardData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -176,5 +178,13 @@ export default async function DashboardPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<DashboardLoader variant="home" />}>
+      <DashboardData />
+    </Suspense>
   )
 }

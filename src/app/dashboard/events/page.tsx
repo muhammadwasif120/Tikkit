@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import EventsClient from '@/components/events/EventsClient'
+import DashboardLoader from '@/components/layout/DashboardLoader'
 
-export default async function EventsPage() {
+async function EventsData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -28,4 +30,12 @@ export default async function EventsPage() {
   }
 
   return <EventsClient initialEvents={events ?? []} pendingCounts={pendingCounts} />
+}
+
+export default function EventsPage() {
+  return (
+    <Suspense fallback={<DashboardLoader variant="list" />}>
+      <EventsData />
+    </Suspense>
+  )
 }

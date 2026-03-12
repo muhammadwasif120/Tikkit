@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import MyEventsClient from '@/components/guest/MyEventsClient'
+import CyberLoader from '@/components/guest/CyberLoader'
 
-export default async function MyEventsPage() {
+async function MyEventsData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -14,4 +16,12 @@ export default async function MyEventsPage() {
     .order('created_at', { ascending: false })
 
   return <MyEventsClient registrations={registrations ?? []} />
+}
+
+export default function MyEventsPage() {
+  return (
+    <Suspense fallback={<CyberLoader />}>
+      <MyEventsData />
+    </Suspense>
+  )
 }

@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import ProfileClient from '@/components/guest/ProfileClient'
+import CyberLoader from '@/components/guest/CyberLoader'
 
-export default async function ProfilePage() {
+async function ProfileData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -58,5 +60,13 @@ export default async function ProfilePage() {
       transactions={txRes.data ?? []}
       pastEvents={(pastEventsRes.data ?? []) as any[]}
     />
+  )
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={<CyberLoader />}>
+      <ProfileData />
+    </Suspense>
   )
 }
