@@ -370,34 +370,39 @@ function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
   return (
     <div style={{ background: '#0E1018', border: `1px solid ${isPast ? 'rgba(255,255,255,0.04)' : st.border}`, borderRadius: 20, overflow: 'hidden', opacity: isPast && !pass ? 0.5 : 1, transition: 'opacity 0.2s' }}>
 
-      {/* Cover — tap to view event details */}
-      <Link href={`/guest/explore/${ev.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-        <div style={{ height: 100, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : grad(ev.id), position: 'relative' }}>
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(14,16,24,1) 0%, rgba(14,16,24,0.1) 100%)' }} />
+      {/* Cover — tap to view event details (upcoming only) */}
+      {(() => {
+        const coverInner = (
+          <div style={{ height: 100, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : grad(ev.id), position: 'relative' }}>
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(14,16,24,1) 0%, rgba(14,16,24,0.1) 100%)' }} />
 
-          {/* Pass badge */}
-          {pass && passCfg && (
-            <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: 'rgba(8,10,18,0.92)', border: `1px solid ${passCfg.color}40` }}>
-              <span style={{ color: passCfg.color, display: 'flex' }}>{passIcon}</span>
-              <span style={{ color: passCfg.color, fontSize: 10, fontWeight: 700 }}>Pass Earned</span>
+            {/* Pass badge */}
+            {pass && passCfg && (
+              <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: 'rgba(8,10,18,0.92)', border: `1px solid ${passCfg.color}40` }}>
+                <span style={{ color: passCfg.color, display: 'flex' }}>{passIcon}</span>
+                <span style={{ color: passCfg.color, fontSize: 10, fontWeight: 700 }}>Pass Earned</span>
+              </div>
+            )}
+
+            {/* Status pill */}
+            <div style={{ position: 'absolute', top: 10, right: 10 }}>
+              <span style={{ padding: '4px 10px', borderRadius: 20, background: 'rgba(8,10,18,0.92)', border: `1px solid ${st.color}40`, color: st.color, fontSize: 10, fontWeight: 800 }}>
+                {st.label}
+              </span>
             </div>
-          )}
 
-          {/* Status pill */}
-          <div style={{ position: 'absolute', top: 10, right: 10 }}>
-            <span style={{ padding: '4px 10px', borderRadius: 20, background: 'rgba(8,10,18,0.92)', border: `1px solid ${st.color}40`, color: st.color, fontSize: 10, fontWeight: 800 }}>
-              {st.label}
-            </span>
+            {/* Title */}
+            <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14 }}>
+              <h3 style={{ color: 'white', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+                {ev.title}
+              </h3>
+            </div>
           </div>
-
-          {/* Title */}
-          <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14 }}>
-            <h3 style={{ color: 'white', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
-              {ev.title}
-            </h3>
-          </div>
-        </div>
-      </Link>
+        )
+        return isPast
+          ? <div style={{ display: 'block' }}>{coverInner}</div>
+          : <Link href={`/guest/explore/${ev.id}`} style={{ textDecoration: 'none', display: 'block' }}>{coverInner}</Link>
+      })()}
 
       {/* Info row */}
       <div style={{ padding: '10px 14px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
