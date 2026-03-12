@@ -16,6 +16,9 @@ export interface Database {
           email: string
           avatar_url: string | null
           role: 'organizer' | 'staff' | 'admin' | 'guest'
+          phone_number: string | null
+          company_name: string | null
+          notification_preferences: Record<string, boolean> | null
           created_at: string
           updated_at: string
         }
@@ -25,6 +28,9 @@ export interface Database {
           email: string
           avatar_url?: string | null
           role?: 'organizer' | 'staff' | 'admin' | 'guest'
+          phone_number?: string | null
+          company_name?: string | null
+          notification_preferences?: Record<string, boolean> | null
           created_at?: string
           updated_at?: string
         }
@@ -33,6 +39,9 @@ export interface Database {
           email?: string
           avatar_url?: string | null
           role?: 'organizer' | 'staff' | 'admin' | 'guest'
+          phone_number?: string | null
+          company_name?: string | null
+          notification_preferences?: Record<string, boolean> | null
           updated_at?: string
         }
       }

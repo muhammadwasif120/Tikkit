@@ -1,10 +1,10 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  ImagePlus, X, Loader2, Check, Edit3, Pencil,
-  CalendarDays, Users, MapPin, TrendingUp, UserCheck,
+  Check, Edit3, X, Loader2,
+  CalendarDays, Users, MapPin, TrendingUp, UserCheck, Settings,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import clsx from 'clsx'
@@ -18,8 +18,6 @@ export type OrgProfile = {
   avatar_url: string | null
   phone_number: string | null
   company_name: string | null
-  cover_image_url: string | null
-  bio: string | null
 }
 
 export type EventWithStats = {
@@ -42,230 +40,88 @@ const statusBadge: Record<string, string> = {
   completed: 'badge-blue',
 }
 
-const GRADIENTS = [
-  'linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%)',
+const COVER_GRADIENTS = [
+  'linear-gradient(135deg, #0a0f2e 0%, #1a2a6c 50%, #1E5EFF 100%)',
+  'linear-gradient(135deg, #0d001a 0%, #2d0050 50%, #7c3aed 100%)',
+  'linear-gradient(135deg, #001233 0%, #023e8a 50%, #0077b6 100%)',
+  'linear-gradient(135deg, #0f2027 0%, #2c5364 50%, #203a43 100%)',
   'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-  'linear-gradient(135deg, #200122 0%, #6f0000 100%)',
-  'linear-gradient(135deg, #1f0033 0%, #0d001a 50%, #2d0050 100%)',
-  'linear-gradient(135deg, #001233 0%, #001845 50%, #023e8a 100%)',
 ]
-function getGradient(id: string) { return GRADIENTS[id.charCodeAt(0) % GRADIENTS.length] }
+function getGradient(id: string) { return COVER_GRADIENTS[id.charCodeAt(0) % COVER_GRADIENTS.length] }
 
-/* ─── Cover Image Uploader ───────────────────────────────────────── */
-function CoverUploader({ profileId, coverUrl, onUpdate }: {
-  profileId: string
-  coverUrl: string | null
-  onUpdate: (url: string | null) => void
-}) {
-  const supabase = createClient()
-  const [uploading, setUploading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-
-  const fallbackGrad = GRADIENTS[profileId.charCodeAt(0) % GRADIENTS.length]
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setError(null)
-    if (file.size > 10 * 1024 * 1024) { setError('Image must be under 10 MB'); return }
-
-    setUploading(true)
-    try {
-      const ext = file.name.split('.').pop() ?? 'jpg'
-      const path = `organizer-covers/${profileId}/cover.${ext}`
-      const { error: uploadErr } = await supabase.storage
-        .from('tikkit-uploads')
-        .upload(path, file, { upsert: true, contentType: file.type })
-      if (uploadErr) throw new Error(uploadErr.message)
-
-      const { data: { publicUrl } } = supabase.storage.from('tikkit-uploads').getPublicUrl(path)
-      const finalUrl = `${publicUrl}?t=${Date.now()}`
-      await supabase.from('profiles').update({ cover_image_url: finalUrl } as never).eq('id', profileId)
-      onUpdate(finalUrl)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Upload failed')
-    } finally {
-      setUploading(false)
-      if (inputRef.current) inputRef.current.value = ''
-    }
-  }
-
-  const removeCover = async () => {
-    setUploading(true)
-    await supabase.from('profiles').update({ cover_image_url: null } as never).eq('id', profileId)
-    onUpdate(null)
-    setUploading(false)
-  }
-
-  return (
-    <div className="relative w-full overflow-hidden rounded-t-2xl" style={{ aspectRatio: '16/5', minHeight: 120 }}>
-      {coverUrl
-        ? <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={coverUrl} alt="cover" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-          </>
-        : <div className="absolute inset-0" style={{ background: fallbackGrad }} />
-      }
-
-      <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-      <div className="absolute bottom-3 right-3 flex gap-2">
-        {uploading
-          ? <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-black/50 border border-white/20 backdrop-blur-sm">
-              <Loader2 size={12} className="animate-spin" /> Uploading…
-            </div>
-          : <>
-              <button onClick={() => inputRef.current?.click()}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-black/50 border border-white/20 backdrop-blur-sm hover:bg-black/70 transition-all">
-                <ImagePlus size={13} /> {coverUrl ? 'Change Cover' : 'Add Cover'}
-              </button>
-              {coverUrl && (
-                <button onClick={removeCover}
-                  className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/50 border border-white/20 text-gray-300 hover:text-red-400 transition-colors backdrop-blur-sm">
-                  <X size={13} />
-                </button>
-              )}
-            </>
-        }
-      </div>
-      {error && (
-        <div className="absolute top-3 left-3 right-3 text-xs text-red-300 bg-red-900/60 border border-red-500/30 rounded-lg px-3 py-2 backdrop-blur-sm">
-          {error}
-        </div>
-      )}
-    </div>
-  )
+function getCardGradient(id: string) {
+  const CARD_GRADIENTS = [
+    'linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%)',
+    'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+    'linear-gradient(135deg, #200122 0%, #6f0000 100%)',
+    'linear-gradient(135deg, #1f0033 0%, #2d0050 100%)',
+    'linear-gradient(135deg, #001233 0%, #023e8a 100%)',
+  ]
+  return CARD_GRADIENTS[id.charCodeAt(0) % CARD_GRADIENTS.length]
 }
 
-/* ─── Bio Editor ─────────────────────────────────────────────────── */
-function BioEditor({ profileId, initial, onUpdate }: {
-  profileId: string
-  initial: string | null
-  onUpdate: (bio: string | null) => void
-}) {
-  const supabase = createClient()
-  const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState(initial ?? '')
-  const [bio, setBio] = useState(initial ?? '')
-  const [saving, setSaving] = useState(false)
-  const [err, setErr] = useState<string | null>(null)
-
-  const save = async () => {
-    setSaving(true); setErr(null)
-    const { error } = await supabase.from('profiles').update({ bio: draft || null } as never).eq('id', profileId)
-    if (error) { setErr(error.message) }
-    else { setBio(draft); onUpdate(draft || null); setEditing(false) }
-    setSaving(false)
-  }
-
-  return (
-    <div className="px-5 py-4 space-y-2">
-      <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white">Bio</h3>
-        {!editing && (
-          <button onClick={() => { setDraft(bio); setEditing(true) }}
-            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors">
-            <Pencil size={12} /> {bio ? 'Edit' : 'Add bio'}
-          </button>
-        )}
-      </div>
-      {editing ? (
-        <div className="space-y-2">
-          <textarea
-            className="input min-h-[80px] resize-none w-full text-sm"
-            placeholder="Tell guests about yourself, your event style, what to expect…"
-            value={draft}
-            onChange={e => setDraft(e.target.value)}
-            autoFocus
-          />
-          {err && <p className="text-xs text-red-400">{err}</p>}
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setEditing(false)} className="flex items-center gap-1 text-xs text-gray-400 hover:text-white px-3 py-1.5">
-              <X size={12} /> Cancel
-            </button>
-            <button onClick={save} disabled={saving}
-              className="flex items-center gap-1.5 text-xs font-semibold text-white bg-[#1E5EFF] hover:bg-[#1448CC] disabled:opacity-50 rounded-lg px-3 py-1.5 transition-colors">
-              {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
-              {saving ? 'Saving…' : 'Save'}
-            </button>
-          </div>
-        </div>
-      ) : bio ? (
-        <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{bio}</p>
-      ) : (
-        <button onClick={() => { setDraft(''); setEditing(true) }}
-          className="w-full py-3 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-all text-sm text-gray-500 hover:text-gray-400">
-          + Add a bio
-        </button>
-      )}
-    </div>
-  )
-}
-
-/* ─── Name Editor ────────────────────────────────────────────────── */
+/* ─── Inline Name Editor ─────────────────────────────────────────── */
 function NameEditor({ profileId, initial }: { profileId: string; initial: string | null }) {
   const supabase = createClient()
   const [editing, setEditing] = useState(false)
-  const [draft, setDraft] = useState(initial ?? '')
-  const [name, setName] = useState(initial ?? '')
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  const [draft, setDraft]     = useState(initial ?? '')
+  const [name, setName]       = useState(initial ?? '')
+  const [saving, setSaving]   = useState(false)
+  const [saved, setSaved]     = useState(false)
 
   const save = async () => {
     if (!draft.trim()) return
     setSaving(true)
     await supabase.from('profiles').update({ full_name: draft.trim() }).eq('id', profileId)
     setName(draft.trim())
-    setSaved(true)
-    setSaving(false)
-    setEditing(false)
+    setSaved(true); setSaving(false); setEditing(false)
     setTimeout(() => setSaved(false), 3000)
   }
 
+  if (editing) {
+    return (
+      <div className="flex items-center gap-2 flex-1 min-w-0">
+        <input
+          className="input text-sm py-1.5 flex-1"
+          value={draft}
+          onChange={e => setDraft(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') save() }}
+          autoFocus
+        />
+        <button onClick={save} disabled={saving || !draft.trim()}
+          className="flex items-center gap-1 text-xs font-semibold text-white bg-[#1E5EFF] hover:bg-[#1448CC] disabled:opacity-50 rounded-lg px-3 py-1.5 transition-colors shrink-0">
+          {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+        </button>
+        <button onClick={() => { setEditing(false); setDraft(name) }}
+          className="p-1.5 text-gray-500 hover:text-white transition-colors shrink-0">
+          <X size={14} />
+        </button>
+      </div>
+    )
+  }
+
   return (
-    <div className="flex items-center gap-2 flex-1 min-w-0">
-      {editing ? (
-        <>
-          <input
-            className="input text-sm py-1.5 flex-1"
-            value={draft}
-            onChange={e => setDraft(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') save() }}
-            autoFocus
-          />
-          <button onClick={save} disabled={saving || !draft.trim()}
-            className="flex items-center gap-1 text-xs font-semibold text-white bg-[#1E5EFF] hover:bg-[#1448CC] disabled:opacity-50 rounded-lg px-3 py-1.5 transition-colors shrink-0">
-            {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
-          </button>
-          <button onClick={() => { setEditing(false); setDraft(name) }}
-            className="p-1.5 text-gray-500 hover:text-white transition-colors shrink-0">
-            <X size={14} />
-          </button>
-        </>
-      ) : (
-        <>
-          <h3 className="text-lg font-bold text-white truncate" style={{ fontFamily: 'var(--font-display)' }}>
-            {name || 'Organizer'}
-          </h3>
-          <button onClick={() => setEditing(true)} className="text-gray-600 hover:text-gray-400 transition-colors shrink-0">
-            <Edit3 size={12} />
-          </button>
-          {saved && <span className="flex items-center gap-1 text-xs text-[#10B981] shrink-0"><Check size={12} /> Saved</span>}
-        </>
-      )}
+    <div className="flex items-center gap-2">
+      <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>
+        {name || 'Organizer'}
+      </h3>
+      <button onClick={() => setEditing(true)} className="text-gray-600 hover:text-gray-400 transition-colors">
+        <Edit3 size={13} />
+      </button>
+      {saved && <span className="flex items-center gap-1 text-xs text-[#10B981]"><Check size={11} /> Saved</span>}
     </div>
   )
 }
 
 /* ─── Event Stat Card ────────────────────────────────────────────── */
 function EventStatCard({ event }: { event: EventWithStats }) {
-  const fillPct = event.capacity > 0 ? Math.min(100, (event.guest_count / event.capacity) * 100) : 0
+  const fillPct    = event.capacity > 0 ? Math.min(100, (event.guest_count      / event.capacity)   * 100) : 0
   const checkinPct = event.guest_count > 0 ? Math.min(100, (event.checked_in_count / event.guest_count) * 100) : 0
 
   return (
     <Link href={`/dashboard/events/${event.id}`} className="card-hover flex gap-4 items-start group">
-      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0" style={{ background: getGradient(event.id) }}>
+      {/* Thumbnail */}
+      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0" style={{ background: getCardGradient(event.id) }}>
         {event.cover_image_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={event.cover_image_url} alt="" className="w-full h-full object-cover" />
@@ -274,7 +130,9 @@ function EventStatCard({ event }: { event: EventWithStats }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h4 className="text-sm font-semibold text-white group-hover:text-[#1E5EFF] transition-colors leading-tight truncate">{event.title}</h4>
+          <h4 className="text-sm font-semibold text-white group-hover:text-[#1E5EFF] transition-colors leading-tight truncate">
+            {event.title}
+          </h4>
           <span className={clsx(statusBadge[event.status] ?? 'badge-gray', 'shrink-0')}>{event.status}</span>
         </div>
 
@@ -291,8 +149,8 @@ function EventStatCard({ event }: { event: EventWithStats }) {
           )}
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-3 mb-2">
           <div className="text-center">
             <p className="text-base font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>{event.guest_count}</p>
             <p className="text-[10px] text-gray-500">Registered</p>
@@ -307,18 +165,18 @@ function EventStatCard({ event }: { event: EventWithStats }) {
           </div>
         </div>
 
-        {/* Fill bars */}
-        <div className="mt-2 space-y-1">
+        {/* Fill bar */}
+        <div className="space-y-1">
           <div className="flex justify-between text-[10px] text-gray-600">
             <span>Capacity fill</span>
             <span>{Math.round(fillPct)}%</span>
           </div>
           <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full bg-[#1E5EFF] rounded-full transition-all" style={{ width: `${fillPct}%` }} />
+            <div className="h-full bg-[#1E5EFF] rounded-full" style={{ width: `${fillPct}%` }} />
           </div>
           {event.status === 'completed' && event.guest_count > 0 && (
             <>
-              <div className="flex justify-between text-[10px] text-gray-600 mt-1">
+              <div className="flex justify-between text-[10px] text-gray-600">
                 <span>Check-in rate</span>
                 <span className="text-[#10B981]">{Math.round(checkinPct)}%</span>
               </div>
@@ -333,7 +191,7 @@ function EventStatCard({ event }: { event: EventWithStats }) {
   )
 }
 
-/* ─── Main Client Component ──────────────────────────────────────── */
+/* ─── Main Component ─────────────────────────────────────────────── */
 export default function OrganizerProfileClient({
   profile,
   events,
@@ -341,11 +199,10 @@ export default function OrganizerProfileClient({
   profile: OrgProfile
   events: EventWithStats[]
 }) {
-  const [coverUrl, setCoverUrl] = useState(profile.cover_image_url)
   const [showArchived, setShowArchived] = useState(false)
 
   const activeEvents   = events.filter(e => e.status !== 'completed' && e.status !== 'cancelled')
-  const archivedEvents = events.filter(e => e.status === 'completed' || e.status === 'cancelled')
+  const archivedEvents = events.filter(e => e.status === 'completed'  || e.status === 'cancelled')
 
   const totalGuests   = events.reduce((s, e) => s + e.guest_count, 0)
   const totalAttended = events.reduce((s, e) => s + e.checked_in_count, 0)
@@ -357,7 +214,8 @@ export default function OrganizerProfileClient({
 
   return (
     <div className="max-w-3xl space-y-6">
-      {/* Header */}
+
+      {/* Page header */}
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
@@ -366,56 +224,64 @@ export default function OrganizerProfileClient({
           <p className="text-gray-400 text-sm mt-1">Your public identity and event portfolio</p>
         </div>
         <Link href="/dashboard/settings"
-          className="text-xs text-gray-500 hover:text-white border border-white/10 hover:border-white/20 rounded-lg px-3 py-1.5 transition-all">
-          Edit Details
+          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-all">
+          <Settings size={13} /> Edit Details
         </Link>
       </div>
 
-      {/* Profile Card */}
+      {/* Profile hero card */}
       <div className="card overflow-hidden p-0">
-        {/* Cover */}
-        <CoverUploader
-          profileId={profile.id}
-          coverUrl={coverUrl}
-          onUpdate={setCoverUrl}
-        />
-
-        {/* Identity row */}
-        <div className="px-5 py-4 flex items-center gap-4">
-          <div className="w-14 h-14 rounded-xl bg-[#1E5EFF20] border-2 border-[#1E5EFF33] flex items-center justify-center shrink-0">
-            <span className="text-xl font-black text-[#1E5EFF]" style={{ fontFamily: 'var(--font-display)' }}>
-              {initials}
-            </span>
-          </div>
-          <div className="flex-1 min-w-0">
-            <NameEditor profileId={profile.id} initial={profile.full_name} />
-            <p className="text-xs text-gray-500 mt-0.5">{profile.email}</p>
-            {profile.company_name && (
-              <p className="text-xs text-gray-400 mt-0.5">{profile.company_name}</p>
-            )}
-            {profile.phone_number && (
-              <p className="text-xs text-gray-600 mt-0.5">{profile.phone_number}</p>
-            )}
-          </div>
+        {/* Gradient banner */}
+        <div
+          className="relative w-full"
+          style={{ height: 100, background: getGradient(profile.id) }}
+        >
+          {/* Subtle grid overlay */}
+          <div className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+              backgroundSize: '24px 24px',
+            }}
+          />
+          {/* Bottom fade */}
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[#111420] to-transparent" />
         </div>
 
-        {/* Bio */}
-        <div className="border-t border-white/5">
-          <BioEditor
-            profileId={profile.id}
-            initial={profile.bio}
-            onUpdate={() => {}}
-          />
+        {/* Identity row — avatar overlapping banner */}
+        <div className="px-5 pb-5" style={{ marginTop: -28 }}>
+          <div className="flex items-end gap-4 mb-3">
+            {/* Avatar */}
+            <div
+              className="w-14 h-14 rounded-xl border-2 border-[#111420] flex items-center justify-center shrink-0"
+              style={{ background: 'linear-gradient(135deg, rgba(30,94,255,0.3), rgba(30,94,255,0.1))' }}
+            >
+              <span className="text-xl font-black text-[#1E5EFF]" style={{ fontFamily: 'var(--font-display)' }}>
+                {initials}
+              </span>
+            </div>
+          </div>
+
+          <NameEditor profileId={profile.id} initial={profile.full_name} />
+
+          <div className="mt-1 space-y-0.5">
+            <p className="text-xs text-gray-500">{profile.email}</p>
+            {profile.company_name && (
+              <p className="text-xs text-gray-400">{profile.company_name}</p>
+            )}
+            {profile.phone_number && (
+              <p className="text-xs text-gray-600">{profile.phone_number}</p>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Stats overview */}
+      {/* Stats grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Events',     value: events.length, color: '#1E5EFF', icon: <CalendarDays className="w-4 h-4" /> },
-          { label: 'Total Registered', value: totalGuests,   color: '#A855F7', icon: <Users className="w-4 h-4" /> },
-          { label: 'Total Attended',   value: totalAttended, color: '#10B981', icon: <UserCheck className="w-4 h-4" /> },
-          { label: 'Avg Fill Rate',    value: `${avgFill}%`, color: '#FFC745', icon: <TrendingUp className="w-4 h-4" /> },
+          { label: 'Total Events',     value: events.length,  color: '#1E5EFF', icon: <CalendarDays className="w-4 h-4" /> },
+          { label: 'Total Registered', value: totalGuests,    color: '#A855F7', icon: <Users className="w-4 h-4" /> },
+          { label: 'Total Attended',   value: totalAttended,  color: '#10B981', icon: <UserCheck className="w-4 h-4" /> },
+          { label: 'Avg Fill Rate',    value: `${avgFill}%`,  color: '#FFC745', icon: <TrendingUp className="w-4 h-4" /> },
         ].map(s => (
           <div key={s.label} className="card text-center py-4">
             <div className="flex items-center justify-center mb-1" style={{ color: s.color }}>{s.icon}</div>
@@ -441,12 +307,10 @@ export default function OrganizerProfileClient({
       {archivedEvents.length > 0 && (
         <div className="space-y-3">
           <button
-            onClick={() => setShowArchived(!showArchived)}
+            onClick={() => setShowArchived(v => !v)}
             className="flex items-center gap-3 w-full"
           >
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Archived Events
-            </p>
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Archived Events</p>
             <div className="flex-1 h-px bg-white/5" />
             <span className="text-xs text-gray-600">{archivedEvents.length}</span>
             <span className={clsx('text-xs text-gray-500 transition-transform inline-block', showArchived && 'rotate-180')}>▾</span>
@@ -460,6 +324,7 @@ export default function OrganizerProfileClient({
         </div>
       )}
 
+      {/* Empty state */}
       {events.length === 0 && (
         <div className="card text-center py-12">
           <CalendarDays className="w-10 h-10 text-gray-600 mx-auto mb-3" />
@@ -470,6 +335,7 @@ export default function OrganizerProfileClient({
           </Link>
         </div>
       )}
+
     </div>
   )
 }
