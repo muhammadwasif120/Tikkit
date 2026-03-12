@@ -30,19 +30,14 @@ async function OrganizerData({ username }: { username: string }) {
   const events = eventsData ?? []
   const eventIds = events.map(e => e.id)
 
-  // 3. Batch guest counts (no N+1)
-  let allGuests: { event_id: string }[] = []
-  if (eventIds.length > 0) {
-    const { data } = await supabase
-      .from('guests')
-      .select('event_id')
-      .in('event_id', eventIds)
-    allGuests = data ?? []
-  }
-
+  // 3. Batch guest counts via security-definer RPC (bypasses RLS safely)
   const guestCountMap: Record<string, number> = {}
-  for (const g of allGuests) {
-    guestCountMap[g.event_id] = (guestCountMap[g.event_id] ?? 0) + 1
+  if (eventIds.length > 0) {
+    const { data: counts } = await supabase
+      .rpc('get_public_event_guest_counts', { p_event_ids: eventIds })
+    for (const row of counts ?? []) {
+      guestCountMap[row.event_id] = Number(row.guest_count)
+    }
   }
 
   const enrichedEvents: PublicEvent[] = events.map(ev => ({
