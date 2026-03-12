@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { CalendarDays, Users, TicketIcon, TrendingUp, ScanLine, Building2 } from 'lucide-react'
+import { CalendarDays, Users, ClipboardList, Receipt, ScanLine, Building2 } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import DashboardLoader from '@/components/layout/DashboardLoader'
@@ -9,19 +9,45 @@ async function DashboardData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Fetch stats
-  const [eventsRes, guestsRes, vendorsRes] = await Promise.all([
-    supabase.from('events').select('id, title, status, date_start, capacity').eq('organizer_id', user!.id),
-    supabase.from('guests').select('id, status, event_id').in(
-      'event_id',
-      (await supabase.from('events').select('id').eq('organizer_id', user!.id)).data?.map(e => e.id) ?? []
-    ),
-    supabase.from('vendors').select('id').eq('organizer_id', user!.id),
+  // Fetch event IDs first (needed for guest + registration queries)
+  const { data: eventRows } = await supabase
+    .from('events')
+    .select('id, title, status, date_start, capacity')
+    .eq('organizer_id', user!.id)
+  const events = eventRows ?? []
+  const eventIds = events.map(e => e.id)
+
+  // Fetch vendor IDs (needed for invoice query)
+  const { data: vendorRows } = await supabase
+    .from('vendors')
+    .select('id')
+    .eq('organizer_id', user!.id)
+  const vendorIds = (vendorRows ?? []).map(v => v.id)
+
+  // Parallel fetch: guests, pending approvals, pending/overdue invoices
+  const [guestsRes, pendingApprovalsRes, pendingInvoicesRes] = await Promise.all([
+    eventIds.length > 0
+      ? supabase.from('guests').select('id, status').in('event_id', eventIds)
+      : Promise.resolve({ data: [] }),
+    eventIds.length > 0
+      ? supabase
+          .from('public_registrations')
+          .select('id', { count: 'exact', head: true })
+          .in('event_id', eventIds)
+          .eq('status', 'pending')
+      : Promise.resolve({ count: 0 }),
+    vendorIds.length > 0
+      ? supabase
+          .from('vendor_invoices')
+          .select('id', { count: 'exact', head: true })
+          .in('vendor_id', vendorIds)
+          .in('status', ['pending', 'overdue'])
+      : Promise.resolve({ count: 0 }),
   ])
 
-  const events = eventsRes.data ?? []
-  const guests = guestsRes.data ?? []
-  const vendors = vendorsRes.data ?? []
+  const guests = (guestsRes as { data: { id: string; status: string }[] | null }).data ?? []
+  const pendingApprovals = (pendingApprovalsRes as { count: number | null }).count ?? 0
+  const pendingInvoices  = (pendingInvoicesRes  as { count: number | null }).count ?? 0
 
   const publishedEvents = events.filter(e => e.status === 'published').length
   const checkedIn = guests.filter(g => g.status === 'checked_in').length
@@ -39,6 +65,7 @@ async function DashboardData() {
       color: '#1E5EFF',
       bg: 'rgba(30,94,255,0.1)',
       border: 'rgba(30,94,255,0.15)',
+      href: '/dashboard/events',
     },
     {
       label: 'Total Guests',
@@ -48,24 +75,27 @@ async function DashboardData() {
       color: '#22C55E',
       bg: 'rgba(34,197,94,0.1)',
       border: 'rgba(34,197,94,0.15)',
+      href: '/dashboard/guests',
     },
     {
-      label: 'Ticket Types',
-      value: '—',
-      sub: 'Across all events',
-      icon: TicketIcon,
+      label: 'Pending Approvals',
+      value: pendingApprovals,
+      sub: pendingApprovals === 1 ? '1 awaiting review' : `${pendingApprovals} awaiting review`,
+      icon: ClipboardList,
       color: '#FFC745',
       bg: 'rgba(255,199,69,0.1)',
-      border: 'rgba(255,199,69,0.15)',
+      border: pendingApprovals > 0 ? 'rgba(255,199,69,0.35)' : 'rgba(255,199,69,0.15)',
+      href: '/dashboard/approvals',
     },
     {
-      label: 'Vendors',
-      value: vendors.length,
-      sub: 'Registered',
-      icon: TrendingUp,
+      label: 'Pending Invoices',
+      value: pendingInvoices,
+      sub: pendingInvoices === 1 ? '1 unpaid' : `${pendingInvoices} unpaid`,
+      icon: Receipt,
       color: '#A78BFA',
       bg: 'rgba(167,139,250,0.1)',
-      border: 'rgba(167,139,250,0.15)',
+      border: pendingInvoices > 0 ? 'rgba(167,139,250,0.35)' : 'rgba(167,139,250,0.15)',
+      href: '/dashboard/vendors',
     },
   ]
 
@@ -88,20 +118,36 @@ async function DashboardData() {
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <div key={stat.label} className="stat-card animate-slide-up" style={{ border: `1px solid ${stat.border}` }}>
-            <div className="flex items-center justify-between mb-3">
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <stat.icon style={{ width: 16, height: 16, color: stat.color }} />
+        {stats.map((stat) => {
+          const inner = (
+            <>
+              <div className="flex items-center justify-between mb-3">
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <stat.icon style={{ width: 16, height: 16, color: stat.color }} />
+                </div>
               </div>
+              <p className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px' }}>
+                {stat.value}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">{stat.label}</p>
+              <p className="text-xs text-gray-600 mt-1">{stat.sub}</p>
+            </>
+          )
+          return 'href' in stat && stat.href ? (
+            <Link
+              key={stat.label}
+              href={stat.href}
+              className="stat-card animate-slide-up hover:border-opacity-60 transition-all"
+              style={{ border: `1px solid ${stat.border}`, textDecoration: 'none' }}
+            >
+              {inner}
+            </Link>
+          ) : (
+            <div key={stat.label} className="stat-card animate-slide-up" style={{ border: `1px solid ${stat.border}` }}>
+              {inner}
             </div>
-            <p className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px' }}>
-              {stat.value}
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5">{stat.label}</p>
-            <p className="text-xs text-gray-600 mt-1">{stat.sub}</p>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Upcoming events + Quick actions */}

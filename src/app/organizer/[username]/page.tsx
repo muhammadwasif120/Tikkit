@@ -31,12 +31,17 @@ async function OrganizerData({ username }: { username: string }) {
   const eventIds = events.map(e => e.id)
 
   // 3. Batch guest counts via security-definer RPC (bypasses RLS safely)
+  //    Falls back to 0 gracefully if the function hasn't been created yet.
   const guestCountMap: Record<string, number> = {}
   if (eventIds.length > 0) {
-    const { data: counts } = await supabase
-      .rpc('get_public_event_guest_counts', { p_event_ids: eventIds })
-    for (const row of counts ?? []) {
-      guestCountMap[row.event_id] = Number(row.guest_count)
+    try {
+      const { data: counts } = await supabase
+        .rpc('get_public_event_guest_counts', { p_event_ids: eventIds })
+      for (const row of (counts ?? [])) {
+        guestCountMap[row.event_id] = Number(row.guest_count)
+      }
+    } catch {
+      // RPC not yet available — fill bars will render empty
     }
   }
 
