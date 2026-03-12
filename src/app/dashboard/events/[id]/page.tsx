@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
@@ -9,6 +10,7 @@ import GuestTable from '@/components/guests/GuestTable'
 import EventPaymentSetup from '@/components/events/EventPaymentSetup'
 import EventTicketTypes from '@/components/events/EventTicketTypes'
 import EventCoverAndDescription from '@/components/events/EventCoverAndDescription'
+import DashboardLoader from '@/components/layout/DashboardLoader'
 
 const statusBadge: Record<string, string> = {
   draft: 'badge-gray',
@@ -17,7 +19,7 @@ const statusBadge: Record<string, string> = {
   completed: 'badge-blue',
 }
 
-export default async function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+async function EventDetailData({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -189,5 +191,13 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
         <GuestTable guests={guests ?? []} eventId={event.id} />
       </div>
     </div>
+  )
+}
+
+export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<DashboardLoader variant="detail" />}>
+      <EventDetailData params={params} />
+    </Suspense>
   )
 }

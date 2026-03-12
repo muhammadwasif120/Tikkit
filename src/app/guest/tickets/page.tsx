@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import TicketsClient from '@/components/guest/TicketsClient'
+import CyberLoader from '@/components/guest/CyberLoader'
 
-export default async function TicketsPage() {
+async function TicketsData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -13,32 +15,40 @@ export default async function TicketsPage() {
     .eq('id', user.id)
     .single()
 
-  const { data: registrations } = await supabase
-    .from('public_registrations')
+  const { data: guestsData } = await supabase
+    .from('guests')
     .select(`
-      id, status, check_in_time,
+      id, status, qr_code, checked_in_at, event_id,
       event:events (
         id, title, date_start, venue_name, secret_venue, venue_reveal_at, cover_image_url
       )
     `)
     .eq('email', user.email!)
-    .in('status', ['confirmed', 'registered', 'approved'])
+    .in('status', ['confirmed', 'registered', 'checked_in'])
     .order('created_at', { ascending: false })
 
-  const tickets = (registrations ?? []).map((reg: any) => ({
-    registrationId: reg.id,
-    eventId:        reg.event?.id ?? '',
-    eventTitle:     reg.event?.title ?? 'Event',
-    eventDate:      reg.event?.date_start ?? new Date().toISOString(),
-    eventVenue:     reg.event?.venue_name ?? null,
-    secretVenue:    reg.event?.secret_venue ?? false,
-    venueRevealAt:  reg.event?.venue_reveal_at ?? null,
+  const tickets = (guestsData ?? []).map((gst: any) => ({
+    registrationId: gst.id,
+    eventId:        gst.event?.id ?? '',
+    eventTitle:     gst.event?.title ?? 'Event',
+    eventDate:      gst.event?.date_start ?? new Date().toISOString(),
+    eventVenue:     gst.event?.venue_name ?? null,
+    secretVenue:    gst.event?.secret_venue ?? false,
+    venueRevealAt:  gst.event?.venue_reveal_at ?? null,
     guestName:      profile?.full_name ?? user.email ?? 'Guest',
-    ticketCode:     `TIKKIT-${reg.id.replace(/-/g, '').slice(0, 16).toUpperCase()}`,
-    status:         reg.status as 'confirmed' | 'registered',
-    checkedIn:      !!reg.check_in_time,
-    checkInTime:    reg.check_in_time ?? null,
+    ticketCode:     gst.qr_code,
+    status:         gst.status as 'confirmed' | 'registered',
+    checkedIn:      gst.status === 'checked_in' || !!gst.checked_in_at,
+    checkInTime:    gst.checked_in_at ?? null,
   }))
 
   return <TicketsClient tickets={tickets} />
+}
+
+export default function TicketsPage() {
+  return (
+    <Suspense fallback={<CyberLoader />}>
+      <TicketsData />
+    </Suspense>
+  )
 }

@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import ApprovalsClient from '@/components/approvals/ApprovalsClient'
+import DashboardLoader from '@/components/layout/DashboardLoader'
 
-export default async function ApprovalsPage() {
+async function ApprovalsData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -23,5 +25,13 @@ export default async function ApprovalsPage() {
       registrations={registrations ?? []}
       events={events ?? []}
     />
+  )
+}
+
+export default function ApprovalsPage() {
+  return (
+    <Suspense fallback={<DashboardLoader variant="list" />}>
+      <ApprovalsData />
+    </Suspense>
   )
 }

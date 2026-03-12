@@ -1,9 +1,11 @@
-// ─── Server component: src/app/guest/credits/page.tsx ────────────────────────
+// ─── Server component: src/app/guest/credits/page.tsx ─────────────
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import CreditsClient from '@/components/guest/CreditsClient'
 import { redirect } from 'next/navigation'
+import CreditsClient from '@/components/guest/CreditsClient'
+import CyberLoader from '@/components/guest/CyberLoader'
 
-export default async function CreditsPage() {
+async function CreditsData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -25,5 +27,13 @@ export default async function CreditsPage() {
       profile={profileRes.data}
       transactions={txRes.data ?? []}
     />
+  )
+}
+
+export default function CreditsPage() {
+  return (
+    <Suspense fallback={<CyberLoader />}>
+      <CreditsData />
+    </Suspense>
   )
 }

@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import VendorsClient from '@/components/vendors/VendorsClient'
+import DashboardLoader from '@/components/layout/DashboardLoader'
 
-export default async function VendorsPage() {
+async function VendorsData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -29,5 +31,13 @@ export default async function VendorsPage() {
       events={events ?? []}
       userId={user!.id}
     />
+  )
+}
+
+export default function VendorsPage() {
+  return (
+    <Suspense fallback={<DashboardLoader variant="list" />}>
+      <VendorsData />
+    </Suspense>
   )
 }

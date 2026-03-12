@@ -1,32 +1,32 @@
 /* ─── Skeleton loader for the Explore page ────────────────────────── */
 export default function SkeletonExplore() {
   return (
-    <div style={{ padding: '12px 0' }}>
+    <div className="skeleton-screen" style={{ padding: '12px 0' }}>
 
-      {/* Search bar skeleton */}
+      {/* Search bar */}
       <div style={{ padding: '0 16px', marginBottom: 10 }}>
         <div className="skeleton" style={{ height: 44, borderRadius: 12 }} />
       </div>
 
-      {/* Tag chips skeleton */}
+      {/* Tag chips */}
       <div style={{ display: 'flex', gap: 6, padding: '0 16px', marginBottom: 14, overflow: 'hidden' }}>
         {[48, 56, 40, 64, 44].map((w, i) => (
           <div key={i} className="skeleton" style={{ height: 28, width: w, borderRadius: 8, flexShrink: 0 }} />
         ))}
       </div>
 
-      {/* Hero banner skeleton */}
+      {/* Hero banner */}
       <div style={{ padding: '0 16px', marginBottom: 20 }}>
         <div className="skeleton skeleton-rounded" style={{ height: 215, borderRadius: 20 }} />
       </div>
 
-      {/* My Events strip label */}
+      {/* Section label */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '0 16px', marginBottom: 10 }}>
         <div className="skeleton" style={{ width: 3, height: 13, borderRadius: 2 }} />
         <div className="skeleton skeleton-text" style={{ width: 80 }} />
       </div>
 
-      {/* My Events cards */}
+      {/* Mini event cards */}
       <div style={{ display: 'flex', gap: 9, padding: '0 16px', marginBottom: 24, overflow: 'hidden' }}>
         {[1, 2, 3].map(i => (
           <div key={i} style={{ flexShrink: 0, width: 120 }}>
@@ -44,9 +44,12 @@ export default function SkeletonExplore() {
         <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.04)' }} />
       </div>
 
-      {/* Event rows */}
+      {/* Event list rows — staggered */}
       {[1, 2, 3, 4, 5].map(i => (
-        <div key={i} style={{ display: 'flex', gap: 11, padding: '11px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        <div key={i} className="skeleton-card" style={{
+          display: 'flex', gap: 11, padding: '11px 16px',
+          borderBottom: '1px solid rgba(255,255,255,0.04)',
+        }}>
           {/* Date col */}
           <div style={{ flexShrink: 0, width: 42, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, paddingTop: 2 }}>
             <div className="skeleton skeleton-text" style={{ width: 28, height: 9 }} />

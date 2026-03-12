@@ -227,20 +227,34 @@ body {
 }
 
 /* ─── Skeleton Loader ─────────────────────────────────────────────── */
-@keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+@keyframes neonShimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position:  800px 0; }
+}
+@keyframes scanLine {
+  0%   { transform: translateY(-4px); opacity: 0; }
+  5%   { opacity: 1; }
+  90%  { opacity: 0.7; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+@keyframes skeletonFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .skeleton {
   background: linear-gradient(
-    90deg,
-    rgba(255,255,255,0.04) 25%,
-    rgba(255,255,255,0.08) 50%,
-    rgba(255,255,255,0.04) 75%
+    105deg,
+    rgba(255,255,255,0.03) 0%,
+    rgba(255,255,255,0.03) 28%,
+    rgba(30, 94,255,0.16)  43%,
+    rgba(168,85,247,0.12)  50%,
+    rgba(30, 94,255,0.16)  57%,
+    rgba(255,255,255,0.03) 72%,
+    rgba(255,255,255,0.03) 100%
   );
-  background-size: 800px 100%;
-  animation: shimmer 1.4s ease-in-out infinite;
+  background-size: 1600px 100%;
+  animation: neonShimmer 2s linear infinite;
   border-radius: 8px;
 }
 
@@ -248,6 +262,37 @@ body {
 .skeleton-circle  { border-radius: 50%; }
 .skeleton-text    { height: 12px; border-radius: 4px; }
 .skeleton-title   { height: 18px; border-radius: 5px; }
+
+/* Staggered card reveals */
+.skeleton-card { animation: skeletonFadeIn 0.4s ease both; }
+.skeleton-card:nth-child(1) { animation-delay: 0.05s; }
+.skeleton-card:nth-child(2) { animation-delay: 0.15s; }
+.skeleton-card:nth-child(3) { animation-delay: 0.25s; }
+.skeleton-card:nth-child(4) { animation-delay: 0.35s; }
+.skeleton-card:nth-child(5) { animation-delay: 0.45s; }
+
+/* Scan-line sweep across the screen */
+.skeleton-screen { position: relative; }
+.skeleton-screen::before {
+  content: '';
+  position: fixed;
+  left: 0; right: 0; top: 0;
+  height: 1.5px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(30, 94,255,0.0) 10%,
+    rgba(30, 94,255,0.9) 35%,
+    rgba(168,85,247,1.0) 50%,
+    rgba(30, 94,255,0.9) 65%,
+    rgba(30, 94,255,0.0) 90%,
+    transparent 100%
+  );
+  box-shadow: 0 0 12px 3px rgba(30,94,255,0.45), 0 0 24px 6px rgba(168,85,247,0.2);
+  animation: scanLine 2.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 9999;
+}
 
 /* ─── Animations ──────────────────────────────────────────────────── */
 @keyframes revealUp {
