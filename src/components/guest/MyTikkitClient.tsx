@@ -377,7 +377,7 @@ function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
 
           {/* Pass badge */}
           {pass && passCfg && (
-            <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', border: `1px solid ${passCfg.color}30` }}>
+            <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 20, background: 'rgba(8,10,18,0.92)', border: `1px solid ${passCfg.color}40` }}>
               <span style={{ color: passCfg.color, display: 'flex' }}>{passIcon}</span>
               <span style={{ color: passCfg.color, fontSize: 10, fontWeight: 700 }}>Pass Earned</span>
             </div>
@@ -385,7 +385,7 @@ function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
 
           {/* Status pill */}
           <div style={{ position: 'absolute', top: 10, right: 10 }}>
-            <span style={{ padding: '4px 10px', borderRadius: 20, background: st.bg, border: `1px solid ${st.border}`, color: st.color, fontSize: 10, fontWeight: 800 }}>
+            <span style={{ padding: '4px 10px', borderRadius: 20, background: 'rgba(8,10,18,0.92)', border: `1px solid ${st.color}40`, color: st.color, fontSize: 10, fontWeight: 800 }}>
               {st.label}
             </span>
           </div>
