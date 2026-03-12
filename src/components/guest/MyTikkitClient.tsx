@@ -62,6 +62,8 @@ const STATUS: Record<string, { label: string; color: string; bg: string; border:
   confirmed:       { label: 'Confirmed',       color: '#10B981', bg: 'rgba(16,185,129,0.1)',   border: 'rgba(16,185,129,0.2)'   },
   rejected:        { label: 'Not Approved',    color: '#4B5563', bg: 'rgba(75,85,99,0.1)',     border: 'rgba(75,85,99,0.15)'    },
   attended:        { label: 'Attended',        color: '#818CF8', bg: 'rgba(129,140,248,0.1)',  border: 'rgba(129,140,248,0.2)'  },
+  no_show:         { label: 'No Show',         color: '#EF4444', bg: 'rgba(239,68,68,0.1)',    border: 'rgba(239,68,68,0.2)'    },
+  refunded:        { label: 'Refunded',        color: '#6B7280', bg: 'rgba(107,114,128,0.1)',  border: 'rgba(107,114,128,0.15)' },
 }
 
 /* ─── Confetti ───────────────────────────────────────────────────── */
@@ -357,10 +359,18 @@ function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
     || (reg.status === 'approved' && (!isPaidEvent || paymentStatus === 'confirmed'))
 
   // Map actual DB status values → display key
-  const statusKey = isPayNow    ? 'eoi_approved'
-    : isPayPending              ? 'payment_pending'
-    : reg.status === 'pending'  ? 'eoi_submitted'
-    : isConfirmed               ? 'confirmed'
+  // For past events: show the real outcome (attended / no_show / refunded).
+  // If the system hasn't updated the status yet, a past confirmed → "Attended".
+  const statusKey = isPast
+    ? reg.status === 'no_show'   ? 'no_show'
+    : reg.status === 'refunded'  ? 'refunded'
+    : reg.status === 'attended'  ? 'attended'
+    : isConfirmed                ? 'attended'   // confirmed but event is past → attended
+    : reg.status
+    : isPayNow                   ? 'eoi_approved'
+    : isPayPending               ? 'payment_pending'
+    : reg.status === 'pending'   ? 'eoi_submitted'
+    : isConfirmed                ? 'confirmed'
     : reg.status
   const st = STATUS[statusKey] ?? STATUS.registered
   const pass = reg.pass
