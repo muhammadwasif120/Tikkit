@@ -10,13 +10,13 @@ import SkeletonEventDetail from '@/components/guest/SkeletonEventDetail'
 async function OrganizerData({ username }: { username: string }) {
   const supabase = await createClient()
 
-  // 1. Fetch profile by username
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('id, full_name, email, company_name, phone_number, logo_url, cover_image_url, username, created_at')
-    .eq('username', username)
-    .single()
+  // 1. Fetch profile via SECURITY DEFINER RPC — bypasses RLS for public reads.
+  //    Accepts either a username slug or a UUID (ID fallback for organizers
+  //    who haven't set a username yet).
+  const { data: rows } = await (supabase as any)
+    .rpc('get_public_organizer_profile', { p_lookup: username })
 
+  const profile = (rows as any[])?.[0] ?? null
   if (!profile) notFound()
 
   // 2. Fetch published + completed events

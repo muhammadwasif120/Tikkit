@@ -11,6 +11,7 @@ import {
 import QRCode from 'qrcode'
 import { registerForEvent, submitEOI } from '@/app/actions/eventRegistrationActions'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
+import { logBehaviour } from '@/app/actions/behaviourActions'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type PaymentAccount = {
@@ -25,6 +26,7 @@ type Event = {
   capacity: number | null; cover_image_url: string | null
   tags: string[] | null; ticket_price: number | null
   registration_mode: string; is_private: boolean
+  category_id: string | null
   organizer: { id?: string | null; full_name: string | null; company_name: string | null; avatar_url?: string | null; logo_url?: string | null; username?: string | null } | null
   registered_count: number
   payment_accounts: PaymentAccount[]
@@ -316,6 +318,13 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
       const action = isEOI ? submitEOI : registerForEvent
       const res = await action(fd)
       if (res?.error) { setErr(res.error); return }
+      // Log registration behaviour signal (fire-and-forget)
+      logBehaviour({
+        action: 'register',
+        eventId: event.id,
+        organizerId: (event as any).organizer?.id ?? null,
+        categoryId: (event as any).category_id ?? null,
+      })
       onSuccess(isEOI ? 'eoi_submitted' : 'registered')
     } catch { setErr('Something went wrong. Try again.') }
     finally { setBusy(false) }
@@ -500,6 +509,18 @@ export default function EventDetailClient({
     return () => clearInterval(t)
   }, [event.date_start])
 
+  // Log view behaviour signal (fire-and-forget, only for logged-in users)
+  useEffect(() => {
+    if (!isLoggedIn) return
+    logBehaviour({
+      action: 'view_event',
+      eventId: event.id,
+      organizerId: event.organizer?.id ?? null,
+      categoryId: event.category_id ?? null,
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [event.id])
+
   const ctaLabel = () => {
     if (!isLoggedIn) return { label: 'Sign in to Register', color: '#1E5EFF', disabled: false }
 
@@ -574,9 +595,9 @@ export default function EventDetailClient({
             <h1 style={{ color: 'white', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.8px', lineHeight: 1.15 }}>
               {event.title}
             </h1>
-            {event.organizer?.username ? (
+            {event.organizer?.id ? (
               <a
-                href={`/organizer/${event.organizer.username}`}
+                href={`/organizer/${event.organizer.username ?? event.organizer.id}`}
                 style={{ color: '#6B7280', fontSize: 13, margin: 0, fontStyle: 'italic', textDecoration: 'none', display: 'inline-block' }}
                 className="hover:text-white hover:underline transition-colors"
               >

@@ -5,10 +5,11 @@ import Link from 'next/link'
 import {
   Ticket, Clock, CheckCircle, AlertCircle, Lock,
   MapPin, Calendar, Upload, X, FileImage, Loader,
-  Award, Zap, Star, Flame, CreditCard,
+  Award, Zap, Star, Flame, CreditCard, Heart,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
+import { toggleEventFavourite } from '@/app/actions/eventFavouriteActions'
 import { getCreditTier } from '@/lib/creditUtils'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
@@ -29,6 +30,13 @@ type Registration = {
   created_at: string
   event: EventInfo | null
   pass: Pass | null
+}
+type FavEvent = {
+  id: string; title: string
+  date_start: string
+  cover_image_url: string | null
+  venue_name: string | null
+  ticket_price: number | null
 }
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
@@ -505,17 +513,66 @@ function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
   )
 }
 
+/* ─── Fav Card ───────────────────────────────────────────────────── */
+function FavCard({ event, onRemove }: { event: FavEvent; onRemove: (id: string) => void }) {
+  return (
+    <div style={{ position: 'relative', background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden' }}>
+      <Link href={`/guest/explore/${event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+        {/* Cover */}
+        <div style={{ height: 80, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : grad(event.id), position: 'relative' }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(14,16,24,1) 0%, transparent 60%)' }} />
+          <div style={{ position: 'absolute', bottom: 10, left: 14, right: 44 }}>
+            <h3 style={{ color: 'white', fontSize: 14, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {event.title}
+            </h3>
+          </div>
+        </div>
+        {/* Meta row */}
+        <div style={{ padding: '8px 14px 12px', display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#6B7280', fontSize: 11 }}>
+            <Calendar size={10} />{fmtDate(event.date_start)} · {fmtTime(event.date_start)}
+          </span>
+          {event.venue_name && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#6B7280', fontSize: 11 }}>
+              <MapPin size={10} />{event.venue_name}
+            </span>
+          )}
+          {(event.ticket_price ?? 0) === 0
+            ? <span style={{ padding: '2px 7px', borderRadius: 5, background: 'rgba(16,185,129,0.1)', color: '#10B981', fontSize: 9, fontWeight: 800 }}>FREE</span>
+            : <span style={{ color: '#6B7280', fontSize: 11, fontWeight: 700 }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
+          }
+        </div>
+      </Link>
+
+      {/* Remove heart */}
+      <button
+        onClick={() => onRemove(event.id)}
+        style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 8, padding: 6, cursor: 'pointer', display: 'flex', color: '#EF4444' }}
+      >
+        <Heart size={13} fill="#EF4444" />
+      </button>
+    </div>
+  )
+}
+
 /* ─── Main ───────────────────────────────────────────────────────── */
-export default function MyTikkitClient({ registrations, guestName, creditScore }: {
+export default function MyTikkitClient({ registrations, guestName, creditScore, favourites: initialFavourites = [] }: {
   registrations: Registration[]; guestName: string; creditScore: number
+  favourites?: FavEvent[]
 }) {
   const [payTarget, setPayTarget] = useState<Registration | null>(null)
   const [ticketTarget, setTicketTarget] = useState<Registration | null>(null)
   const [successMsg, setSuccessMsg] = useState(false)
-  const [tab, setTab] = useState<'upcoming' | 'past'>('upcoming')
+  const [tab, setTab] = useState<'upcoming' | 'past' | 'saved'>('upcoming')
+  const [favEvents, setFavEvents] = useState<FavEvent[]>(initialFavourites)
 
   const upcoming = registrations.filter(r => r.event && new Date(r.event.date_start) >= new Date() && r.status !== 'rejected')
   const past = registrations.filter(r => r.event && new Date(r.event.date_start) < new Date())
+
+  const handleRemoveFav = async (eventId: string) => {
+    setFavEvents(prev => prev.filter(e => e.id !== eventId))
+    await toggleEventFavourite(eventId)
+  }
 
   const tier = getCreditTier(creditScore)
   const current = tab === 'upcoming' ? upcoming : past
@@ -541,16 +598,33 @@ export default function MyTikkitClient({ registrations, guestName, creditScore }
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, padding: '14px 16px 0' }}>
-        {(['upcoming', 'past'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: `2px solid ${tab === t ? '#1E5EFF' : 'rgba(255,255,255,0.06)'}`, color: tab === t ? 'white' : '#6B7280', fontSize: 13, fontWeight: tab === t ? 700 : 500, transition: 'all 0.15s' }}>
-            {t === 'upcoming' ? `Upcoming${upcoming.length > 0 ? ` (${upcoming.length})` : ''}` : `Past${past.length > 0 ? ` (${past.length})` : ''}`}
+        {([
+          { key: 'upcoming', label: `Upcoming${upcoming.length > 0 ? ` (${upcoming.length})` : ''}` },
+          { key: 'past',     label: `Past${past.length > 0 ? ` (${past.length})` : ''}` },
+          { key: 'saved',    label: favEvents.length > 0 ? `❤️ Saved (${favEvents.length})` : '❤️ Saved' },
+        ] as const).map(({ key, label }) => (
+          <button key={key} onClick={() => setTab(key)} style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: `2px solid ${tab === key ? '#1E5EFF' : 'rgba(255,255,255,0.06)'}`, color: tab === key ? 'white' : '#6B7280', fontSize: 12, fontWeight: tab === key ? 700 : 500, transition: 'all 0.15s' }}>
+            {label}
           </button>
         ))}
       </div>
 
       {/* Cards */}
       <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {current.length > 0
+        {tab === 'saved' ? (
+          favEvents.length > 0
+            ? favEvents.map(ev => <FavCard key={ev.id} event={ev} onRemove={handleRemoveFav} />)
+            : (
+              <div style={{ padding: '64px 0', textAlign: 'center', animation: 'revealUp 0.3s ease' }}>
+                <Heart size={36} color="#4B5563" style={{ marginBottom: 14, opacity: 0.4 }} />
+                <p style={{ color: '#9CA3AF', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No saved events</p>
+                <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 20px' }}>Tap the ❤️ on any event to save it here.</p>
+                <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
+                  Explore Events
+                </Link>
+              </div>
+            )
+        ) : current.length > 0
           ? current.map(r => (
               <RegCard
                 key={r.id}
