@@ -3,13 +3,14 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import MyTikkitClient from '@/components/guest/MyTikkitClient'
 import SkeletonTikkit from '@/components/guest/SkeletonTikkit'
+import { getUserFavouriteEventIds } from '@/app/actions/eventFavouriteActions'
 
 async function TikkitData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [profileRes, guestProfileRes, registrationsRes] = await Promise.all([
+  const [profileRes, guestProfileRes, registrationsRes, favouriteIds] = await Promise.all([
     supabase.from('profiles').select('full_name').eq('id', user.id).single(),
     supabase.from('guest_profiles').select('credit_score').eq('id', user.id).maybeSingle(),
     supabase
@@ -21,7 +22,21 @@ async function TikkitData() {
       .eq('email', user.email!)
       .not('status', 'eq', 'rejected')
       .order('created_at', { ascending: false }),
+    getUserFavouriteEventIds(),
   ])
+
+  // Fetch full event details for favourited events
+  const favouriteEvents = favouriteIds.length > 0
+    ? await (async () => {
+        const { data } = await supabase
+          .from('events')
+          .select('id, title, date_start, cover_image_url, venue_name, ticket_price')
+          .in('id', favouriteIds)
+          .eq('status', 'published')
+          .order('date_start', { ascending: true })
+        return data ?? []
+      })()
+    : []
 
   const registrations = registrationsRes.data ?? []
 
@@ -66,6 +81,7 @@ async function TikkitData() {
       registrations={enrichedRegistrations}
       guestName={profileRes.data?.full_name ?? user.email ?? 'Guest'}
       creditScore={guestProfileRes.data?.credit_score ?? 0}
+      favourites={favouriteEvents as any}
     />
   )
 }

@@ -6,7 +6,6 @@ import { format } from 'date-fns'
 import {
   CalendarDays, MapPin, Mail, Phone, Users, ChevronDown,
 } from 'lucide-react'
-import clsx from 'clsx'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 export type PublicProfile = {
@@ -131,112 +130,104 @@ export default function PublicOrganizerProfile({
   const initials = (profile.full_name || profile.company_name || 'O')
     .split(' ').map((w: string) => w[0]).join('').slice(0, 2).toUpperCase()
 
-  const BANNER_H  = 160
-  const AVATAR_H  = 72
-  const avatarTop = BANNER_H - AVATAR_H / 2  // 124px
+  const BANNER_H = 180
+  const LOGO_H   = 68
 
   return (
-    <div style={{ background: '#080A10', minHeight: '100svh', paddingBottom: 64 }}>
+    <div style={{ background: '#080A10', minHeight: '100svh', paddingBottom: 64, maxWidth: 480, margin: '0 auto' }}>
 
-      {/* Back to explore */}
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '16px 20px 0' }}>
-        <Link
-          href="/guest/explore"
-          style={{ display: 'inline-flex', alignItems: 'center', gap: 6, color: '#6B7280', fontSize: 13, textDecoration: 'none' }}
-          className="hover:text-white transition-colors"
-        >
-          ← Explore Events
-        </Link>
-      </div>
+      {/* Cover banner — edge-to-edge */}
+      <div style={{ position: 'relative', height: BANNER_H, background: getGradient(profile.id), overflow: 'hidden' }}>
+        {profile.cover_image_url && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={profile.cover_image_url} alt="Cover" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+        )}
+        {!profile.cover_image_url && (
+          <div style={{
+            position: 'absolute', inset: 0, opacity: 0.1,
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }} />
+        )}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 40%, rgba(8,10,16,0.8) 100%)' }} />
 
-      {/* Profile hero */}
-      <div style={{ maxWidth: 680, margin: '12px auto 0', padding: '0 20px' }}>
-        <div style={{
-          background: '#0D0F18', borderRadius: 20,
-          border: '1px solid rgba(255,255,255,0.06)',
-          overflow: 'hidden', position: 'relative',
-        }}>
-          {/* Banner */}
-          <div style={{ position: 'relative', height: BANNER_H, background: getGradient(profile.id), overflow: 'hidden' }}>
-            {profile.cover_image_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={profile.cover_image_url} alt="Cover" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
-            )}
-            {!profile.cover_image_url && (
-              <div style={{
-                position: 'absolute', inset: 0, opacity: 0.1,
-                backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-                backgroundSize: '28px 28px',
-              }} />
-            )}
-            <div style={{ position: 'absolute', inset: '0 0 0', bottom: 0, height: 60, background: 'linear-gradient(to top, #0D0F18, transparent)' }} />
-          </div>
-
-          {/* Logo badge */}
-          <div style={{ position: 'absolute', top: avatarTop, left: 24 }}>
-            <div style={{
-              width: AVATAR_H, height: AVATAR_H, borderRadius: 18,
-              overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: profile.logo_url ? 'transparent' : 'linear-gradient(135deg, rgba(30,94,255,0.3), rgba(30,94,255,0.1))',
-              border: '3px solid #0D0F18',
-              boxShadow: '0 0 0 1px rgba(30,94,255,0.25)',
-            }}>
-              {profile.logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <span style={{ fontSize: 26, fontWeight: 900, color: '#1E5EFF', fontFamily: 'var(--font-display)' }}>
-                  {initials}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Identity content */}
-          <div style={{ padding: `${AVATAR_H / 2 + 20}px 24px 24px` }}>
-            {profile.company_name && (
-              <h1 style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
-                {profile.company_name}
-              </h1>
-            )}
-            {profile.full_name && (
-              <p style={{ color: '#9CA3AF', fontSize: 14, margin: '0 0 12px' }}>{profile.full_name}</p>
-            )}
-
-            {/* Contact row */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px' }}>
-              <a href={`mailto:${profile.email}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#6B7280', fontSize: 13, textDecoration: 'none' }}
-                className="hover:text-white transition-colors">
-                <Mail style={{ width: 13, height: 13 }} />
-                {profile.email}
-              </a>
-              {profile.phone_number && (
-                <a href={`tel:${profile.phone_number}`} style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#6B7280', fontSize: 13, textDecoration: 'none' }}
-                  className="hover:text-white transition-colors">
-                  <Phone style={{ width: 13, height: 13 }} />
-                  {profile.phone_number}
-                </a>
-              )}
-            </div>
-
-            {/* Member since */}
-            <p style={{ color: '#4B5563', fontSize: 11, marginTop: 10 }}>
-              Organiser since {format(new Date(profile.created_at), 'MMMM yyyy')}
-            </p>
-          </div>
+        {/* Back link inside banner */}
+        <div style={{ position: 'absolute', top: 14, left: 16 }}>
+          <Link
+            href="/guest/explore"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'rgba(255,255,255,0.7)', fontSize: 12, textDecoration: 'none', background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(8px)', padding: '5px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)' }}
+          >
+            ← Explore
+          </Link>
         </div>
       </div>
 
-      {/* Upcoming Events */}
-      <div style={{ maxWidth: 680, margin: '28px auto 0', padding: '0 20px' }}>
-        <h2 style={{ color: 'white', fontSize: 16, fontWeight: 700, margin: '0 0 14px', fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
-          Upcoming Events
-          {upcomingEvents.length > 0 && (
-            <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 500, color: '#6B7280' }}>
-              ({upcomingEvents.length})
+      {/* Logo badge — overlaps banner */}
+      <div style={{ padding: '0 16px', position: 'relative', marginTop: -(LOGO_H / 2) }}>
+        <div style={{
+          width: LOGO_H, height: LOGO_H, borderRadius: 18,
+          overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: profile.logo_url ? 'transparent' : 'linear-gradient(135deg, rgba(30,94,255,0.3), rgba(30,94,255,0.1))',
+          border: '3px solid #080A10',
+          boxShadow: '0 0 0 1px rgba(30,94,255,0.25)',
+        }}>
+          {profile.logo_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={profile.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          ) : (
+            <span style={{ fontSize: 24, fontWeight: 900, color: '#1E5EFF', fontFamily: 'var(--font-display)' }}>
+              {initials}
             </span>
           )}
-        </h2>
+        </div>
+      </div>
+
+      {/* Identity */}
+      <div style={{ padding: '12px 16px 0' }}>
+        {profile.company_name && (
+          <h1 style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+            {profile.company_name}
+          </h1>
+        )}
+        {profile.full_name && (
+          <p style={{ color: '#9CA3AF', fontSize: 13, margin: '0 0 10px' }}>{profile.full_name}</p>
+        )}
+
+        {/* Contact row */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px 16px', marginBottom: 8 }}>
+          <a href={`mailto:${profile.email}`} style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 12, textDecoration: 'none' }}
+            className="hover:text-white transition-colors">
+            <Mail style={{ width: 12, height: 12 }} />
+            {profile.email}
+          </a>
+          {profile.phone_number && (
+            <a href={`tel:${profile.phone_number}`} style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 12, textDecoration: 'none' }}
+              className="hover:text-white transition-colors">
+              <Phone style={{ width: 12, height: 12 }} />
+              {profile.phone_number}
+            </a>
+          )}
+        </div>
+
+        <p style={{ color: '#374151', fontSize: 11 }}>
+          Organiser since {format(new Date(profile.created_at), 'MMMM yyyy')}
+        </p>
+      </div>
+
+      {/* Divider */}
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', margin: '16px 0' }} />
+
+      {/* Upcoming Events */}
+      <div style={{ padding: '0 16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 12 }}>
+          <div style={{ width: 3, height: 13, borderRadius: 2, background: '#1E5EFF' }} />
+          <span style={{ color: 'white', fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>
+            UPCOMING EVENTS
+          </span>
+          {upcomingEvents.length > 0 && (
+            <span style={{ marginLeft: 2, fontSize: 11, color: '#6B7280' }}>({upcomingEvents.length})</span>
+          )}
+        </div>
 
         {upcomingEvents.length === 0 ? (
           <div style={{
@@ -244,12 +235,12 @@ export default function PublicOrganizerProfile({
             background: '#0D0F18', borderRadius: 16,
             border: '1px solid rgba(255,255,255,0.05)',
           }}>
-            <CalendarDays style={{ width: 32, height: 32, color: '#374151', margin: '0 auto 8px' }} />
-            <p style={{ color: '#6B7280', fontSize: 14 }}>No upcoming events right now</p>
-            <p style={{ color: '#4B5563', fontSize: 12, marginTop: 4 }}>Check back soon</p>
+            <CalendarDays style={{ width: 28, height: 28, color: '#374151', margin: '0 auto 8px' }} />
+            <p style={{ color: '#6B7280', fontSize: 13 }}>No upcoming events right now</p>
+            <p style={{ color: '#4B5563', fontSize: 11, marginTop: 4 }}>Check back soon</p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {upcomingEvents.map(ev => <EventCard key={ev.id} event={ev} />)}
           </div>
         )}
@@ -257,21 +248,21 @@ export default function PublicOrganizerProfile({
 
       {/* Past Events (collapsible) */}
       {pastEvents.length > 0 && (
-        <div style={{ maxWidth: 680, margin: '24px auto 0', padding: '0 20px' }}>
+        <div style={{ padding: '20px 16px 0' }}>
           <button
             onClick={() => setShowPast(v => !v)}
-            style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 12 }}
+            style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: 10 }}
           >
             <span style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Past Events</span>
             <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
-            <span style={{ color: '#4B5563', fontSize: 12 }}>{pastEvents.length}</span>
+            <span style={{ color: '#4B5563', fontSize: 11 }}>{pastEvents.length}</span>
             <ChevronDown
-              style={{ width: 14, height: 14, color: '#4B5563', transform: showPast ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
+              style={{ width: 13, height: 13, color: '#4B5563', transform: showPast ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}
             />
           </button>
 
           {showPast && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, opacity: 0.65 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, opacity: 0.65 }}>
               {pastEvents.map(ev => <EventCard key={ev.id} event={ev} />)}
             </div>
           )}
