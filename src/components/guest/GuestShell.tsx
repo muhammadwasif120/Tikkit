@@ -34,7 +34,12 @@ export default function GuestShell({
       {/* ── Top bar ── */}
       <header
         className="glass-bar sticky top-0 z-50 flex items-center justify-between border-b"
-        style={{ padding: '14px 20px 12px' }}
+        style={{
+          paddingTop: 'calc(14px + env(safe-area-inset-top))',
+          paddingRight: 20,
+          paddingBottom: 12,
+          paddingLeft: 20,
+        }}
       >
         {/* Wordmark */}
         <TikkitXLogo size="md" variant="text-only" />

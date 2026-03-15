@@ -8,11 +8,17 @@ export async function POST(req: NextRequest) {
 
     const supabase = await createClient()
 
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const { data: reg } = await supabase
       .from('public_registrations')
-      .select('email, event:events(id, title)')
+      .select('email, event:events(id, title, organizer_id)')
       .eq('id', registrationId)
       .single()
+
+    if (!reg) return NextResponse.json({ error: 'Registration not found' }, { status: 404 })
+    if ((reg.event as any)?.organizer_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
     const { error } = await supabase
       .from('public_registrations')

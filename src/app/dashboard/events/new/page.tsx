@@ -330,7 +330,7 @@ export default function NewEventPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="label">Start Date & Time *</label>
               <input type="datetime-local" className="input" required
@@ -385,7 +385,7 @@ export default function NewEventPage() {
               value={form.capacity} onChange={e => update('capacity', e.target.value)} required />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="label">Male Ratio (%)</label>
               <input type="number" className="input" min="0" max="100" value={form.male_ratio}
@@ -430,7 +430,7 @@ export default function NewEventPage() {
             toggleColor="blue"
             onToggle={() => updateTier('standard', 'enabled', !tiers.standard.enabled)}
           >
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="label">Price (PKR)</label>
                 <PriceInput
@@ -460,7 +460,7 @@ export default function NewEventPage() {
             toggleColor="yellow"
             onToggle={() => updateTier('vip', 'enabled', !tiers.vip.enabled)}
           >
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="label">VIP Price (PKR)</label>
                 <PriceInput
@@ -489,7 +489,7 @@ export default function NewEventPage() {
             onToggle={() => updateTier('discounted', 'enabled', !tiers.discounted.enabled)}
           >
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="label">Original Price (PKR)</label>
                   <PriceInput
@@ -606,7 +606,7 @@ export default function NewEventPage() {
             <Users className="w-4 h-4 text-[#1E5EFF]" /> Registration Mode
           </h3>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {([
               { value: 'invite_only',          label: 'Invite Only',            desc: 'Private, guests added manually' },
               { value: 'open',                  label: 'Open',                   desc: 'Anyone can register via link' },

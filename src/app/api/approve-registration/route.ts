@@ -9,6 +9,9 @@ export async function POST(req: NextRequest) {
 
     const supabase = await createClient()
 
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const { data: reg, error: regError } = await supabase
       .from('public_registrations')
       .select('*, event:events(id, title, ticket_price, registration_mode, organizer_id, organizer:profiles(full_name, company_name))')
@@ -18,6 +21,8 @@ export async function POST(req: NextRequest) {
     if (regError || !reg) return NextResponse.json({ error: 'Registration not found' }, { status: 404 })
 
     const event = reg.event as any
+    if (event.organizer_id !== user.id) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
     const isPaid = (event?.ticket_price ?? 0) > 0
 
     // Update registration to approved

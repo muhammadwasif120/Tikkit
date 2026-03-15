@@ -36,7 +36,7 @@ export default function TopBar({ profile, onMenuClick }: Props) {
   }
 
   return (
-    <header className="h-16 bg-brand-charcoal border-b border-white/[0.04] flex items-center justify-between px-4 md:px-6 shrink-0">
+    <header className="h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-brand-charcoal border-b border-white/[0.04] flex items-center justify-between px-4 md:px-6 shrink-0">
       <div className="flex items-center gap-3">
         {/* Hamburger — mobile only */}
         <button
