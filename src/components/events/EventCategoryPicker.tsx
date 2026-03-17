@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { getEventCategories } from '@/app/actions/behaviourActions'
 import type { EventCategory } from '@/app/actions/behaviourActions'
-import { Tag, Check } from 'lucide-react'
+import { Tag, ChevronDown, Check } from 'lucide-react'
 
 export default function EventCategoryPicker({
   eventId,
@@ -17,7 +17,7 @@ export default function EventCategoryPicker({
 }) {
   const supabase = createClient()
   const [categories, setCategories] = useState<EventCategory[]>([])
-  const [selected, setSelected] = useState<string | null>(currentCategoryId)
+  const [selected, setSelected] = useState<string>(currentCategoryId ?? '')
   const [saved, setSaved] = useState(false)
   const [isPending, startTransition] = useTransition()
 
@@ -25,18 +25,22 @@ export default function EventCategoryPicker({
     getEventCategories().then(setCategories)
   }, [])
 
-  const handleSelect = (catId: string) => {
+  const handleChange = (catId: string) => {
     if (isArchived) return
-    const next = selected === catId ? null : catId
-    setSelected(next)
+    setSelected(catId)
     startTransition(async () => {
-      await supabase.from('events').update({ category_id: next }).eq('id', eventId)
+      await supabase
+        .from('events')
+        .update({ category_id: catId || null })
+        .eq('id', eventId)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     })
   }
 
   if (categories.length === 0) return null
+
+  const selectedCat = categories.find(c => c.id === selected)
 
   return (
     <div className="card space-y-3">
@@ -52,41 +56,31 @@ export default function EventCategoryPicker({
         )}
       </h3>
 
-      <div className="flex flex-wrap gap-2">
-        {categories.map(cat => {
-          const isSelected = selected === cat.id
-          return (
-            <button
-              key={cat.id}
-              type="button"
-              disabled={isArchived}
-              onClick={() => handleSelect(cat.id)}
-              style={{
-                background: isSelected ? `${cat.color}22` : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${isSelected ? cat.color : 'rgba(255,255,255,0.08)'}`,
-                color: isSelected ? cat.color : '#9CA3AF',
-                borderRadius: 20,
-                padding: '5px 12px',
-                fontSize: 12,
-                fontWeight: isSelected ? 700 : 500,
-                cursor: isArchived ? 'default' : 'pointer',
-                opacity: isArchived ? 0.5 : 1,
-                transition: 'all 0.15s',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 5,
-              }}
-            >
-              <span>{cat.icon}</span>
-              <span>{cat.name}</span>
-            </button>
-          )
-        })}
+      <div className="relative">
+        <select
+          className="input appearance-none pr-9"
+          value={selected}
+          disabled={isArchived}
+          onChange={e => handleChange(e.target.value)}
+          style={{
+            color: selectedCat ? selectedCat.color : undefined,
+            fontWeight: selectedCat ? 600 : undefined,
+            opacity: isArchived ? 0.5 : 1,
+          }}
+        >
+          <option value="">— No category —</option>
+          {categories.map(cat => (
+            <option key={cat.id} value={cat.id}>
+              {cat.icon}  {cat.name}
+            </option>
+          ))}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
       </div>
 
       {!selected && !isArchived && (
         <p className="text-xs text-gray-600">
-          Select a category so guests can find this event when filtering by interest.
+          Tag this event so guests can find it under the right category on Explore.
         </p>
       )}
     </div>

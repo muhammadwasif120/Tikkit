@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Calendar, MapPin, Users, Lock, Eye, Wallet, Ticket,
   Star, Tag, CreditCard, Building2, Smartphone, ExternalLink, Check,
-  ImagePlus, X,
+  ImagePlus, X, ChevronDown,
 } from 'lucide-react'
 import Link from 'next/link'
 import type { PaymentAccount } from '@/app/actions/paymentAccountActions'
@@ -340,40 +340,35 @@ export default function NewEventPage() {
           </div>
 
           {/* ── Category ── */}
-          {categories.length > 0 && (
-            <div>
-              <label className="label">Category</label>
-              <div className="flex flex-wrap gap-2">
-                {categories.map(cat => {
-                  const selected = form.category_id === cat.id
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      onClick={() => update('category_id', selected ? '' : cat.id)}
-                      style={{
-                        background: selected ? `${cat.color}22` : 'rgba(255,255,255,0.04)',
-                        border: `1px solid ${selected ? cat.color : 'rgba(255,255,255,0.08)'}`,
-                        color: selected ? cat.color : '#9CA3AF',
-                        borderRadius: 20,
-                        padding: '5px 12px',
-                        fontSize: 12,
-                        fontWeight: selected ? 700 : 500,
-                        cursor: 'pointer',
-                        transition: 'all 0.15s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 5,
-                      }}
-                    >
-                      <span>{cat.icon}</span>
-                      <span>{cat.name}</span>
-                    </button>
-                  )
-                })}
+          {categories.length > 0 && (() => {
+            const selectedCat = categories.find(c => c.id === form.category_id)
+            return (
+              <div>
+                <label className="label flex items-center gap-1.5">
+                  <Tag className="w-3 h-3" /> Category
+                </label>
+                <div className="relative">
+                  <select
+                    className="input appearance-none pr-9"
+                    value={form.category_id}
+                    onChange={e => update('category_id', e.target.value)}
+                    style={{
+                      color: selectedCat ? selectedCat.color : undefined,
+                      fontWeight: selectedCat ? 600 : undefined,
+                    }}
+                  >
+                    <option value="">— No category —</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.icon}  {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
