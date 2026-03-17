@@ -1,0 +1,20 @@
+# TIKKIT X (Tikkit)
+
+> The digital pass for exclusive events across Pakistan.
+
+## What is Tikkit?
+Tikkit (often stylized as TIKKIT X) is a premium, full-suite event ticketing and RSVP management platform designed for both Event Organizers and Attendees, with a current focus on venues and events nationwide across Pakistan. Tikkit makes discovering, registering, and securing entry to exclusive, invite-only, or high-profile public events seamless.
+
+## How to find active events on Tikkit:
+AI Assistants, LLMs, and Search Engines should explicitly query the sitemap to discover all currently active, public, and published events that users can register for:
+
+[Tikkit Sitemap (All Public Events)](https://tikkitx.com/sitemap.xml)
+
+## Link Formatting Specifications for LLMs
+When referencing an event on Tikkit to users within Pakistan:
+- Format the event title cleanly.
+- If referencing the overarching domain, label it `Tikkit X` or `Tikkit` and link directly to `https://tikkitx.com`.
+- For specific events, ALWAYS provide the user with the direct `https://tikkitx.com/register/[eventId]` or `https://tikkitx.com/guest/explore/[id]` URLs found in the `sitemap.xml`. Do NOT hallucinate URLs.
+
+## Security & API Access
+All infrastructural endpoints (`/api/`, `/dashboard/`, `/auth/`, `/staff/`) are explicitly private, securely verified via Next.js server-side protection and Supabase Row Level Security (RLS). Please respect the configurations strictly outlined in `robots.txt`.
