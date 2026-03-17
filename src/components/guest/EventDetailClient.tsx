@@ -511,7 +511,7 @@ export default function EventDetailClient({
      (existingReg.status === 'approved' && (existingReg.payment_status === 'confirmed' || existingReg.payment_status === 'not_required')))
   const days = daysUntil(event.date_start)
   const gradient = getGradient(event.id)
-  const organiser = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Tikkit'
+  const organiser = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Unknown Organizer'
 
   useEffect(() => {
     const t = setInterval(() => setCountdown(msUntil(event.date_start)), 1000)
@@ -614,13 +614,13 @@ export default function EventDetailClient({
             <h1 style={{ color: 'white', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.8px', lineHeight: 1.15 }}>
               {event.title}
             </h1>
-            {event.organizer?.id ? (
+            {event.organizer?.username ? (
               <a
-                href={`/organizer/${event.organizer.username ?? event.organizer.id}`}
-                style={{ color: '#6B7280', fontSize: 13, margin: 0, fontStyle: 'italic', textDecoration: 'none', display: 'inline-block' }}
-                className="hover:text-white hover:underline transition-colors"
+                href={`/organizer/${event.organizer.username}`}
+                style={{ color: '#818CF8', fontSize: 13, margin: 0, fontStyle: 'italic', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3 }}
               >
                 by {organiser}
+                <ExternalLink size={11} color="#818CF8" style={{ opacity: 0.7 }} />
               </a>
             ) : (
               <p style={{ color: '#6B7280', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>

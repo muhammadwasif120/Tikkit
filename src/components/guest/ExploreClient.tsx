@@ -89,7 +89,7 @@ function groupEvents(events: Event[]) {
 /* ─── Hero Banner ────────────────────────────────────────────── */
 function HeroBanner({ event }: { event: Event }) {
   const days = daysUntil(event.date_start)
-  const organiser = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Tikkit'
+  const organiser = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Unknown Organizer'
 
   return (
     <Link href={`/guest/explore/${event.id}`} style={{ textDecoration: 'none', display: 'block', margin: '14px 16px 0' }}>
@@ -239,7 +239,7 @@ function TopOrganizersStrip({
       <div style={{ display: 'flex', gap: 10, overflowX: 'auto', padding: '0 16px 4px', scrollbarWidth: 'none' }}>
         {organizers.map((org, i) => {
           const name = org.company_name ?? org.full_name ?? 'Organizer'
-          const href = `/organizer/${org.username ?? org.id}`
+          const href = org.username ? `/organizer/${org.username}` : null
           const card = (
             <div
               key={org.id}
@@ -326,10 +326,12 @@ function TopOrganizersStrip({
             </div>
           )
 
-          return (
+          return href ? (
             <Link key={org.id} href={href} style={{ textDecoration: 'none' }}>
               {card}
             </Link>
+          ) : (
+            <div key={org.id}>{card}</div>
           )
         })}
       </div>
@@ -343,7 +345,7 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
   isFavourited: boolean
   onToggleFav: (id: string) => void
 }) {
-  const orgName = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Tikkit'
+  const orgName = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Unknown Organizer'
   const orgUsername = event.organizer?.username
   const spotsLeft = (event.capacity && event.registered_count !== undefined) ? event.capacity - event.registered_count : null
   const modeCfg: Record<string, { label: string; color: string }> = {
@@ -386,11 +388,11 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
             {event.title}
           </h3>
           {/* Organizer link */}
-          {event.organizer?.id ? (
+          {orgUsername ? (
             <a
-              href={`/organizer/${orgUsername ?? event.organizer.id}`}
+              href={`/organizer/${orgUsername}`}
               onClick={e => e.stopPropagation()}
-              style={{ color: '#6B7280', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic', textDecoration: 'none', display: 'inline-block' }}
+              style={{ color: '#818CF8', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic', textDecoration: 'none', display: 'inline-block' }}
             >
               {orgName} →
             </a>
