@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   Plus, X, Check, ChevronDown, Building2, Tag, FileText,
   DollarSign, Calendar, AlertCircle, CheckCircle, Clock,
-  Edit2, Trash2, Link as LinkIcon
+  Edit2, Trash2, Link as LinkIcon, Search
 } from 'lucide-react'
 import { notifyVendorPaymentDue } from '@/app/actions/vendorNotificationActions'
 import { dismissVendorPaymentNotification } from '@/app/actions/approvalDismissAction'
@@ -91,6 +91,8 @@ export default function VendorsClient({
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [selectedVendorId, setSelectedVendorId] = useState('all')
+  const [vendorSearch, setVendorSearch] = useState('')
+  const [invoiceSearch, setInvoiceSearch] = useState('')
 
   const openVendorModal = (vendor?: Vendor) => {
     if (vendor) {
@@ -201,14 +203,23 @@ export default function VendorsClient({
   }
 
   // Filtered data
-  const filteredVendors = vendors.filter(v =>
-    categoryFilter === 'all' || v.category === categoryFilter
-  )
+  const filteredVendors = vendors.filter(v => {
+    const matchCategory = categoryFilter === 'all' || v.category === categoryFilter
+    const q = vendorSearch.toLowerCase()
+    const matchSearch = !q || v.name.toLowerCase().includes(q) ||
+      (v.contact_name ?? '').toLowerCase().includes(q) ||
+      (v.contact_email ?? '').toLowerCase().includes(q)
+    return matchCategory && matchSearch
+  })
 
   const filteredInvoices = invoices.filter(i => {
     const matchStatus = statusFilter === 'all' || i.status === statusFilter
     const matchVendor = selectedVendorId === 'all' || i.vendor_id === selectedVendorId
-    return matchStatus && matchVendor
+    const q = invoiceSearch.toLowerCase()
+    const vendor = vendors.find(v => v.id === i.vendor_id)
+    const matchSearch = !q || (vendor?.name ?? '').toLowerCase().includes(q) ||
+      (i.description ?? '').toLowerCase().includes(q)
+    return matchStatus && matchVendor && matchSearch
   })
 
   // Finance summary
@@ -221,8 +232,7 @@ export default function VendorsClient({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Vendors</h2>
-          <p className="text-gray-400 text-sm mt-1">{vendors.length} vendors · {invoices.length} invoices</p>
+          <p className="text-gray-400 text-sm">{vendors.length} vendors · {invoices.length} invoices</p>
         </div>
         <button onClick={() => activeTab === 'vendors' ? openVendorModal() : openInvoiceModal()} className="btn-primary">
           <Plus className="w-4 h-4" />
@@ -231,18 +241,18 @@ export default function VendorsClient({
       </div>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2">
         {[
           { label: 'Pending', value: totalPending, color: 'text-[#FFC745]', icon: Clock },
           { label: 'Paid',    value: totalPaid,    color: 'text-green-400',  icon: CheckCircle },
           { label: 'Overdue', value: totalOverdue, color: 'text-red-400',    icon: AlertCircle },
         ].map(s => (
-          <div key={s.label} className="stat-card">
-            <div className="flex items-center gap-2 mb-1">
-              <s.icon className={clsx('w-4 h-4', s.color)} />
-              <p className="text-xs text-gray-500">{s.label}</p>
+          <div key={s.label} className="bg-brand-charcoal rounded-xl border border-white/5 p-3 sm:p-5 flex flex-col gap-1">
+            <div className="flex items-center gap-1.5">
+              <s.icon className={clsx('w-3.5 h-3.5 shrink-0', s.color)} />
+              <p className="text-[10px] sm:text-xs text-gray-500 truncate">{s.label}</p>
             </div>
-            <p className={clsx('text-xl font-bold', s.color)} style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+            <p className={clsx('text-base sm:text-xl font-bold truncate', s.color)} style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
               {formatCurrency(s.value)}
             </p>
           </div>
@@ -250,16 +260,25 @@ export default function VendorsClient({
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-1 bg-brand-charcoal-light rounded-lg p-1 w-fit">
+      <div className="grid grid-cols-2 gap-2">
         {[
-          { key: 'vendors'  as Tab, label: 'Vendors',  icon: Building2 },
-          { key: 'invoices' as Tab, label: 'Invoices', icon: FileText },
+          { key: 'vendors'  as Tab, label: 'Vendors',  icon: Building2, count: vendors.length },
+          { key: 'invoices' as Tab, label: 'Invoices', icon: FileText,  count: invoices.length },
         ].map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={clsx('flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all',
-              activeTab === tab.key ? 'bg-[#1E5EFF] text-white' : 'text-gray-400 hover:text-white')}>
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
+            className={clsx(
+              'flex items-center justify-between p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer',
+              activeTab === tab.key
+                ? 'bg-[#1E5EFF15] border-[#1E5EFF40] text-white'
+                : 'bg-brand-charcoal border-white/5 text-gray-400 hover:border-white/10 hover:text-gray-200'
+            )}>
+            <div className="flex items-center gap-2">
+              <tab.icon className={clsx('w-3.5 h-3.5 shrink-0', activeTab === tab.key ? 'text-[#1E5EFF]' : 'text-gray-500')} />
+              <span className="text-sm font-medium">{tab.label}</span>
+            </div>
+            <span className={clsx('ml-2 text-xs font-semibold px-2 py-0.5 rounded-full',
+              activeTab === tab.key ? 'bg-[#1E5EFF25] text-[#4D82FF]' : 'bg-white/5 text-gray-500'
+            )}>{tab.count}</span>
           </button>
         ))}
       </div>
@@ -267,12 +286,18 @@ export default function VendorsClient({
       {/* VENDORS TAB */}
       {activeTab === 'vendors' && (
         <div className="space-y-4 animate-fade-in">
-          <div className="relative w-fit">
-            <select className="input pr-10 appearance-none" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
-              <option value="all">All Categories</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+          <div className="bg-brand-charcoal rounded-xl border border-white/5 p-4 space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input type="text" className="input pl-9 w-full" placeholder="Search vendors…" value={vendorSearch} onChange={e => setVendorSearch(e.target.value)} />
+            </div>
+            <div className="relative">
+              <select className="input appearance-none pr-10 w-full cursor-pointer" value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}>
+                <option value="all">All Categories</option>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
           </div>
 
           {filteredVendors.length === 0 ? (
@@ -280,9 +305,6 @@ export default function VendorsClient({
               <Building2 className="w-10 h-10 text-gray-600 mx-auto mb-3" />
               <p className="text-gray-400 font-medium text-sm">No vendors yet</p>
               <p className="text-gray-600 text-xs mt-1">Add your first vendor to get started</p>
-              <button onClick={() => openVendorModal()} className="btn-primary mt-4">
-                <Plus className="w-4 h-4" /> Add Vendor
-              </button>
             </div>
           ) : (
             <div className="grid gap-3">
@@ -352,23 +374,29 @@ export default function VendorsClient({
       {/* INVOICES TAB */}
       {activeTab === 'invoices' && (
         <div className="space-y-4 animate-fade-in">
-          <div className="flex gap-3">
+          <div className="bg-brand-charcoal rounded-xl border border-white/5 p-4 space-y-3">
             <div className="relative">
-              <select className="input appearance-none pr-10" value={selectedVendorId} onChange={e => setSelectedVendorId(e.target.value)}>
-                <option value="all">All Vendors</option>
-                {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <input type="text" className="input pl-9 w-full" placeholder="Search invoices…" value={invoiceSearch} onChange={e => setInvoiceSearch(e.target.value)} />
             </div>
-            <div className="relative">
-              <select className="input appearance-none pr-10" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="paid">Paid</option>
-                <option value="overdue">Overdue</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <select className="appearance-none input pr-8 w-full cursor-pointer" value={selectedVendorId} onChange={e => setSelectedVendorId(e.target.value)}>
+                  <option value="all">All Vendors</option>
+                  {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+              </div>
+              <div className="relative flex-1">
+                <select className="appearance-none input pr-8 w-full cursor-pointer" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+                  <option value="all">All Statuses</option>
+                  <option value="pending">Pending</option>
+                  <option value="paid">Paid</option>
+                  <option value="overdue">Overdue</option>
+                  <option value="cancelled">Cancelled</option>
+                </select>
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+              </div>
             </div>
           </div>
 
@@ -376,9 +404,6 @@ export default function VendorsClient({
             <div className="card text-center py-12">
               <FileText className="w-10 h-10 text-gray-600 mx-auto mb-3" />
               <p className="text-gray-400 font-medium text-sm">No invoices yet</p>
-              <button onClick={() => openInvoiceModal()} className="btn-primary mt-4">
-                <Plus className="w-4 h-4" /> New Invoice
-              </button>
             </div>
           ) : (
             <div className="card overflow-x-auto -mx-6 px-6">

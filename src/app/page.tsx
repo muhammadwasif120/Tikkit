@@ -785,16 +785,46 @@ export default function LandingPage() {
         @media (max-width: 768px) {
           .nav-links, .nav-actions { display: none; }
           .nav-hamburger { display: block; }
-          .hero { padding: 100px 20px 60px; }
+
+          /* Hero */
+          .hero { padding: 100px 20px 48px; }
           .hero-h1 { letter-spacing: -1.5px; }
-          .stats-inner { grid-template-columns: 1fr; gap: 36px; }
-          .stat-item::after { display: none; }
-          .feat-grid { grid-template-columns: 1fr; }
-          .steps-grid { grid-template-columns: 1fr; }
-          .step-card { border-right: none !important; border-top: 1px solid var(--border); }
+          .hero-scroll { margin-top: 48px; }
+          .hero-badge { font-size: 10px; gap: 8px; padding: 5px 12px; white-space: nowrap; }
+
+          /* Stats — keep 3 columns, compress font + padding */
+          .stats-band { padding: 40px 20px; }
+          .stats-inner { gap: 0; }
+          .stat-item::after { top: 10%; bottom: 10%; }
+          .stat-val { font-size: clamp(28px, 7.5vw, 40px); letter-spacing: -1px; }
+          .stat-label { font-size: 12px; margin-top: 6px; }
+
+          /* Features — 2-column grid */
+          .feat-grid { grid-template-columns: repeat(2, 1fr); }
+          .feat-card { padding: 20px 16px; }
+          .feat-icon { width: 38px; height: 38px; border-radius: 10px; margin-bottom: 14px; }
+
+          /* Steps — 2-column grid, smaller numbers */
+          .steps-grid { grid-template-columns: repeat(2, 1fr); }
+          .step-card { padding: 24px 20px; border-right: 1px solid var(--border) !important; border-top: 1px solid var(--border); }
           .step-card:first-child { border-top: none; }
-          .why-card { grid-template-columns: 1fr !important; gap: 36px !important; padding: 36px !important; }
-          .section { padding: 64px 20px; }
+          .step-card:nth-child(2) { border-top: none; }
+          .step-card:nth-child(2) { border-right: none !important; }
+          .step-card:last-child { border-right: none !important; }
+          .step-num { font-size: 36px; margin-bottom: 14px; }
+          .step-title { font-size: 14px; }
+          .step-desc { font-size: 13px; }
+
+          /* Why card */
+          .why-card { grid-template-columns: 1fr !important; gap: 28px !important; padding: 28px 24px !important; }
+
+          /* CTA */
+          .cta-section { padding: 72px 20px; }
+          .cta-h2 { font-size: clamp(24px, 7vw, 30px); line-height: 1.2; letter-spacing: -1px; }
+          .cta-sub { font-size: 15px; margin-top: 16px; }
+
+          /* General */
+          .section { padding: 56px 20px; }
           .footer-inner { flex-direction: column; text-align: center; }
           .footer-links { justify-content: center; }
         }

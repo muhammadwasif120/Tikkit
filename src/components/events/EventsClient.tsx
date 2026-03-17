@@ -111,13 +111,12 @@ export default function EventsClient({
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Events</h2>
-          <p className="text-gray-400 text-sm mt-1">{events.length} total events</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-gray-400 text-sm">{events.length} total event{events.length !== 1 ? 's' : ''}</p>
         </div>
-        <Link href="/dashboard/events/new" className="btn-primary">
-          <Plus className="w-4 h-4" /> New Event
+        <Link href="/dashboard/events/new" className="btn-primary shrink-0">
+          <Plus className="w-4 h-4" /> <span className="hidden xs:inline">New </span>Event
         </Link>
       </div>
 
@@ -135,57 +134,75 @@ export default function EventsClient({
         const archivedEvents = events.filter(e => e.status === 'completed' || e.status === 'cancelled')
 
         const renderCard = (event: Event, archived: boolean) => (
-          <div key={event.id} className={clsx('card-hover flex items-start justify-between group', archived && 'opacity-60')}>
-            <Link href={`/dashboard/events/${event.id}`} className="flex gap-4 flex-1 min-w-0">
+          <div key={event.id} className={clsx('card-hover flex items-start gap-3 group', archived && 'opacity-60')}>
+            <Link href={`/dashboard/events/${event.id}`} className="flex gap-3 flex-1 min-w-0">
+              {/* Thumbnail */}
               {event.cover_image_url ? (
-                <img src={event.cover_image_url} alt={event.title} className="w-16 h-16 rounded-lg object-cover shrink-0" />
+                <img src={event.cover_image_url} alt={event.title} className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg object-cover shrink-0" />
               ) : (
-                <div className="w-16 h-16 rounded-lg bg-brand-charcoal-light border border-white/5 flex items-center justify-center shrink-0">
+                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-brand-charcoal-light border border-white/5 flex items-center justify-center shrink-0">
                   <CalendarDays className="w-5 h-5 text-gray-500" />
                 </div>
               )}
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-1 flex-wrap">
-                  <h3 className="font-semibold text-white">{event.title}</h3>
+
+              {/* Content */}
+              <div className="min-w-0 flex-1">
+                {/* Title */}
+                <h3 className="font-semibold text-white text-sm sm:text-base leading-snug truncate mb-1">
+                  {event.title}
+                </h3>
+
+                {/* Badges row */}
+                <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
                   <span className={clsx(statusBadge[event.status])}>{event.status}</span>
                   {event.is_private && <span className="badge-yellow">Private</span>}
                   {(pendingCounts[event.id] ?? 0) > 0 && (
-                    <span className="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
+                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
                       <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse shrink-0" />
                       {pendingCounts[event.id]} pending
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
+
+                {/* Meta — stacks on mobile, row on sm+ */}
+                <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3 text-xs text-gray-500">
                   {event.date_start && (
                     <span className="flex items-center gap-1">
-                      <CalendarDays className="w-3 h-3" />
+                      <CalendarDays className="w-3 h-3 shrink-0" />
                       {format(new Date(event.date_start), 'MMM d, yyyy · h:mm a')}
                     </span>
                   )}
                   {event.venue_name && !event.secret_venue && (
-                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{event.venue_name}</span>
+                    <span className="flex items-center gap-1 truncate">
+                      <MapPin className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{event.venue_name}</span>
+                    </span>
                   )}
                   {event.secret_venue && (
-                    <span className="flex items-center gap-1 text-brand-yellow"><MapPin className="w-3 h-3" />Secret Venue</span>
+                    <span className="flex items-center gap-1 text-brand-yellow">
+                      <MapPin className="w-3 h-3 shrink-0" />Secret Venue
+                    </span>
                   )}
                 </div>
               </div>
             </Link>
-            <div className="flex items-center gap-3 shrink-0 ml-4">
+
+            {/* Right — capacity + actions */}
+            <div className="flex flex-col items-end gap-2 shrink-0">
               <div className="flex items-center gap-1 text-gray-500 text-xs">
                 <Users className="w-3 h-3" />
                 <span>{event.capacity}</span>
               </div>
-              {/* Edit + delete only available for non-archived events */}
               {!archived && (
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   <button onClick={(e) => { e.preventDefault(); openEdit(event) }}
-                    className="p-1.5 text-gray-500 hover:text-white transition-colors rounded-md hover:bg-white/5">
+                    className="p-1.5 text-gray-500 hover:text-white transition-colors rounded-md hover:bg-white/5"
+                    aria-label="Edit event">
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button onClick={(e) => { e.preventDefault(); setDeleteEvent(event) }}
-                    className="p-1.5 text-gray-500 hover:text-red-400 transition-colors rounded-md hover:bg-red-500/5">
+                    className="p-1.5 text-gray-500 hover:text-red-400 transition-colors rounded-md hover:bg-red-500/5"
+                    aria-label="Delete event">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>

@@ -104,18 +104,23 @@ export default function Sidebar({ profile, open, onClose }: Props) {
       {/* Profile footer */}
       <div className="p-3 border-t border-white/[0.04] shrink-0">
         <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
-          <div style={{
-            width: 32, height: 32, borderRadius: '50%',
-            background: 'linear-gradient(135deg, rgba(30,94,255,0.25), rgba(30,94,255,0.1))',
-            border: '1px solid rgba(30,94,255,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#1E5EFF', fontFamily: 'var(--font-display)' }}>
-              {profile?.full_name?.charAt(0)?.toUpperCase() ?? 'U'}
-            </span>
-          </div>
+          <Link href="/dashboard/profile" onClick={handleNavClick} style={{ textDecoration: 'none', flexShrink: 0 }}>
+            <div style={{
+              width: 32, height: 32, borderRadius: '50%',
+              background: 'linear-gradient(135deg, rgba(30,94,255,0.25), rgba(30,94,255,0.1))',
+              border: '1px solid rgba(30,94,255,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer',
+            }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#1E5EFF', fontFamily: 'var(--font-display)' }}>
+                {(profile?.company_name ?? profile?.full_name)?.charAt(0)?.toUpperCase() ?? 'U'}
+              </span>
+            </div>
+          </Link>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate" style={{ fontFamily: 'var(--font-display)' }}>{profile?.full_name ?? 'Organizer'}</p>
+            <p className="text-sm font-medium text-white truncate" style={{ fontFamily: 'var(--font-display)' }}>
+              {profile?.company_name ?? profile?.full_name ?? 'Organizer'}
+            </p>
             <p className="text-xs text-gray-500 capitalize">{profile?.role}</p>
           </div>
           <button onClick={handleSignOut} className="text-gray-500 hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-red-500/5" title="Sign out">

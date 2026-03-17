@@ -286,7 +286,7 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
       </form>
 
       {/* Perks */}
-      <div style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="auth-form-perks" style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <p style={{ color: '#374151', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' as const, margin: '0 0 14px', fontFamily: 'var(--font-display)' }}>
           What you get
         </p>
@@ -315,7 +315,7 @@ function RoleCard({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClic
       onMouseLeave={() => setHov(false)}
       style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', flex: '1 1 0', minWidth: 0 }}
     >
-      <div style={{
+      <div className="auth-card-inner" style={{
         height: '100%', boxSizing: 'border-box' as const,
         padding: 'clamp(28px,3vw,44px) clamp(24px,2.5vw,40px)',
         background: hov ? 'rgba(255,255,255,0.04)' : 'rgba(13,15,22,0.95)',
@@ -338,7 +338,7 @@ function RoleCard({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClic
 
         <div style={{ position: 'relative' }}>
           {/* Badge */}
-          <div style={{
+          <div className="auth-card-badge" style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
             padding: '5px 13px',
             background: `${accent}15`,
@@ -356,7 +356,7 @@ function RoleCard({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClic
           </div>
 
           {/* Title */}
-          <h2 style={{
+          <h2 className="auth-card-title" style={{
             color: '#F0F2FF', fontWeight: 700,
             margin: '0 0 14px', letterSpacing: '-1px', lineHeight: 1.15,
             fontFamily: 'var(--font-display)',
@@ -365,27 +365,29 @@ function RoleCard({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClic
             {title}
           </h2>
 
-          <p style={{ color: '#6B7280', fontSize: 15, margin: '0 0 28px', lineHeight: 1.7, fontFamily: 'var(--font-body)' }}>
+          <p className="auth-card-sub" style={{ color: '#6B7280', fontSize: 15, margin: '0 0 28px', lineHeight: 1.7, fontFamily: 'var(--font-body)' }}>
             {sub}
           </p>
 
-          <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 22 }} />
+          <div className="auth-card-divider" style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 22 }} />
 
-          <p style={{
-            color: '#374151', fontSize: 11, fontWeight: 700,
-            letterSpacing: '.1em', textTransform: 'uppercase' as const,
-            margin: '0 0 14px', fontFamily: 'var(--font-display)',
-          }}>
-            What you get
-          </p>
-          {perks.map(p => (
-            <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 12 }}>
-              <div style={{ width: 5, height: 5, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}`, flexShrink: 0 }} />
-              <span style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--font-body)' }}>{p}</span>
-            </div>
-          ))}
+          <div className="auth-card-perks">
+            <p style={{
+              color: '#374151', fontSize: 11, fontWeight: 700,
+              letterSpacing: '.1em', textTransform: 'uppercase' as const,
+              margin: '0 0 14px', fontFamily: 'var(--font-display)',
+            }}>
+              What you get
+            </p>
+            {perks.map(p => (
+              <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 12 }}>
+                <div style={{ width: 5, height: 5, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}`, flexShrink: 0 }} />
+                <span style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--font-body)' }}>{p}</span>
+              </div>
+            ))}
+          </div>
 
-          <div style={{
+          <div className="auth-card-cta" style={{
             display: 'flex', alignItems: 'center', gap: 6, marginTop: 28,
             color: accent, fontSize: 14, fontWeight: 600,
             fontFamily: 'var(--font-display)',
@@ -502,10 +504,29 @@ export default function AuthPage() {
         }
         /* Responsive */
         @media (max-width: 640px) {
-          .auth-page { padding: 28px 16px; }
+          .auth-page { padding: 32px 16px 48px; justify-content: flex-start; }
           .auth-content.picker { max-width: 480px; }
-          .auth-cards { grid-template-columns: 1fr; gap: 14px; }
-          .auth-fbox { padding: 28px 20px; }
+          .auth-cards { grid-template-columns: 1fr; gap: 10px; }
+          .auth-fbox { padding: 24px 20px; border-radius: 18px; }
+
+          /* Compact role tiles on mobile — hide the verbose parts */
+          .auth-card-divider { display: none; }
+          .auth-card-perks   { display: none; }
+          .auth-card-inner   { padding: 20px 22px 22px !important; }
+          .auth-card-cta     { margin-top: 12px !important; }
+          .auth-card-title   { font-size: 22px !important; letter-spacing: -0.5px !important; margin-bottom: 6px !important; }
+          .auth-card-sub     { font-size: 13px !important; margin-bottom: 0 !important; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+          .auth-card-badge   { margin-bottom: 12px !important; }
+
+          /* Picker heading on mobile */
+          .auth-picker-heading h1 { font-size: 26px !important; letter-spacing: -0.8px !important; }
+          .auth-picker-heading    { margin-bottom: 20px !important; }
+
+          /* Logo on mobile */
+          .auth-logo { margin-bottom: 24px !important; }
+
+          /* Hide perks in form on mobile */
+          .auth-form-perks { display: none; }
         }
         @media (min-width: 1440px) {
           .auth-content.picker { max-width: 1280px; }
@@ -523,7 +544,7 @@ export default function AuthPage() {
         <div className={`auth-content ${mode ? 'form' : 'picker'}`}>
 
           {/* Logo */}
-          <div style={{ textAlign: 'center', marginBottom: 40 }}>
+          <div className="auth-logo" style={{ textAlign: 'center', marginBottom: 40 }}>
             <a href="/" style={{ display: 'inline-flex', textDecoration: 'none' }}>
               <TikkitXLogo size="lg" />
             </a>
@@ -531,7 +552,7 @@ export default function AuthPage() {
 
           {/* Picker heading */}
           {!mode && (
-            <div style={{ textAlign: 'center', marginBottom: 36, animation: 'authFadeUp .3s ease both' }}>
+            <div className="auth-picker-heading" style={{ textAlign: 'center', marginBottom: 36, animation: 'authFadeUp .3s ease both' }}>
               <h1 style={{
                 color: '#F0F2FF',
                 fontSize: 'clamp(28px, 3vw, 46px)', fontWeight: 700,

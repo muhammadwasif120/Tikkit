@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import NotificationBell from '@/components/NotificationBell'
@@ -48,7 +49,7 @@ export default function TopBar({ profile, onMenuClick }: Props) {
         </button>
 
         <h1
-          className="text-base font-semibold text-white"
+          className="text-lg font-bold text-white"
           style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}
         >
           {getTitle()}
@@ -58,19 +59,22 @@ export default function TopBar({ profile, onMenuClick }: Props) {
       <div className="flex items-center gap-3">
         <NotificationBell />
         <div className="h-4 w-px bg-white/10" />
-        <div className="flex items-center gap-2">
+        <Link href="/dashboard/profile" className="flex items-center gap-2" style={{ textDecoration: 'none' }}>
           <div style={{
             width: 28, height: 28, borderRadius: '50%',
             background: 'linear-gradient(135deg, rgba(30,94,255,0.25), rgba(30,94,255,0.1))',
             border: '1px solid rgba(30,94,255,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer',
           }}>
             <span style={{ fontSize: 11, fontWeight: 700, color: '#1E5EFF', fontFamily: 'var(--font-display)' }}>
-              {profile?.full_name?.charAt(0)?.toUpperCase() ?? 'U'}
+              {(profile?.company_name ?? profile?.full_name)?.charAt(0)?.toUpperCase() ?? 'U'}
             </span>
           </div>
-          <span className="text-sm text-gray-300 hidden md:block" style={{ fontFamily: 'var(--font-body)' }}>{profile?.full_name}</span>
-        </div>
+          <span className="text-sm text-gray-300 hidden md:block" style={{ fontFamily: 'var(--font-body)' }}>
+            {profile?.company_name ?? profile?.full_name}
+          </span>
+        </Link>
       </div>
     </header>
   )
