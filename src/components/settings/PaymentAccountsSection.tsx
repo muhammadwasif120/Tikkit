@@ -218,7 +218,7 @@ export default function PaymentAccountsSection({
               </p>
 
               {/* Account type selector */}
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {ACCOUNT_TYPES.map(t => (
                   <button key={t.value} type="button"
                     onClick={() => update('account_type', t.value)}

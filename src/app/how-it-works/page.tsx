@@ -659,7 +659,7 @@ export default function HowItWorksPage() {
   const tabsInView = useInView(0.1)
   const orgSectionInView = useInView(0.05)
   const attSectionInView = useInView(0.05)
-  const ctaInView = useInView(0.2)
+  const ctaInView = useInView(0.05)
 
   const orgSteps = [
     { ref: org1, mockup: OrgStep1, icon: Calendar, title: 'Create your event in minutes', desc: 'Set the date, venue, capacity, ticket price, and guest mode. Go live in under two minutes.', color: '#1E5EFF', num: '01' },
@@ -786,6 +786,10 @@ export default function HowItWorksPage() {
         }
         @media (max-width: 640px) {
           .tab-btn { padding: 10px 18px; font-size: 13px; }
+          .hiw-hero { min-height: auto !important; padding: 80px 20px 48px !important; }
+          .hiw-content { padding: 0 20px 64px !important; }
+          .hiw-cta { padding: 0 20px 64px !important; }
+          .step-section { gap: 24px; padding: 40px 0; }
         }
       `}</style>
 
@@ -821,7 +825,7 @@ export default function HowItWorksPage() {
       </nav>
 
       {/* ── Hero ── */}
-      <section style={{ position: 'relative', minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '120px 24px 80px', overflow: 'hidden' }}>
+      <section className="hiw-hero" style={{ position: 'relative', minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '120px 24px 80px', overflow: 'hidden' }}>
         {/* Orbs */}
         <Orb x="20%" y="30%" color="#1E5EFF" size={600} opacity={0.15} />
         <Orb x="80%" y="60%" color="#A855F7" size={500} opacity={0.12} />
@@ -881,13 +885,13 @@ export default function HowItWorksPage() {
             opacity: tabsInView.inView ? 1 : 0,
             animation: tabsInView.inView ? 'fadeUp 0.7s ease 0.3s both' : 'none',
           }}>
-            <button className="tab-btn tab-btn-org" onClick={() => setActiveTab('organizer')}>
+            <button className="tab-btn tab-btn-org" onClick={() => { setActiveTab('organizer'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <BarChart3 size={15} />
                 For Organizers
               </div>
             </button>
-            <button className="tab-btn tab-btn-att" onClick={() => setActiveTab('attendee')}>
+            <button className="tab-btn tab-btn-att" onClick={() => { setActiveTab('attendee'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Ticket size={15} />
                 For Attendees
@@ -899,6 +903,7 @@ export default function HowItWorksPage() {
 
       {/* ── Organizer Section ── */}
       <section
+        className="hiw-content"
         ref={orgSectionInView.ref}
         style={{
           maxWidth: 1100, margin: '0 auto', padding: '0 24px 120px',
@@ -972,6 +977,7 @@ export default function HowItWorksPage() {
 
       {/* ── Attendee Section ── */}
       <section
+        className="hiw-content"
         ref={attSectionInView.ref}
         style={{
           maxWidth: 1100, margin: '0 auto', padding: '0 24px 120px',
@@ -1054,7 +1060,7 @@ export default function HowItWorksPage() {
             </div>
           </div>
           <button
-            onClick={() => setActiveTab(activeTab === 'organizer' ? 'attendee' : 'organizer')}
+            onClick={() => { setActiveTab(activeTab === 'organizer' ? 'attendee' : 'organizer'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
             style={{
               display: 'flex', alignItems: 'center', gap: 8,
               background: activeTab === 'organizer' ? 'rgba(255,199,69,0.12)' : 'rgba(30,94,255,0.12)',
@@ -1074,6 +1080,7 @@ export default function HowItWorksPage() {
 
       {/* ── CTA ── */}
       <section
+        className="hiw-cta"
         ref={ctaInView.ref}
         style={{ padding: '0 24px 120px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}
       >

@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { CheckCircle, XCircle, Clock, Search, Filter, ChevronDown, Eye, CreditCard, FileText, AlertCircle, User, Mail, Phone, Calendar, Tag, Loader2 } from 'lucide-react'
+import { CheckCircle, XCircle, Clock, Search, ChevronDown, CreditCard, FileText, AlertCircle, User, Mail, Phone, Calendar, Tag, Loader2 } from 'lucide-react'
+import clsx from 'clsx'
 import { approvePaymentSubmission, rejectPaymentSubmission } from '@/app/actions/paymentAccountActions'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -133,12 +134,10 @@ function RegistrationModal({
       <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', zIndex: 100 }} />
 
       {/* Modal */}
-      <div style={{
-        position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
-        width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto',
-        background: '#111318', border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 20, zIndex: 101, padding: '28px',
-      }}>
+      <div
+        className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-32px)] sm:w-full max-w-[560px] max-h-[88vh] overflow-y-auto rounded-[20px] z-[101] p-5 sm:p-7"
+        style={{ background: '#111318', border: '1px solid rgba(255,255,255,0.08)' }}
+      >
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
@@ -298,31 +297,37 @@ function RegistrationModal({
   )
 }
 
-// ── Registration Row ──────────────────────────────────────────────────────────
+// ── Status icon for mobile ────────────────────────────────────────────────────
+function StatusIcon({ status, paymentStatus }: { status: string; paymentStatus: string }) {
+  let Icon = Clock, color = '#6B7280'
+  if (status === 'rejected')                                           { Icon = XCircle;    color = '#EF4444' }
+  else if (status === 'approved' && paymentStatus === 'confirmed')    { Icon = CheckCircle; color = '#22C55E' }
+  else if (status === 'approved' && paymentStatus === 'not_required') { Icon = CheckCircle; color = '#22C55E' }
+  else if (status === 'approved' && paymentStatus === 'pending')      { Icon = AlertCircle; color = '#FFC745' }
+  else if (status === 'approved' && paymentStatus === 'submitted')    { Icon = CreditCard;  color = '#F97316' }
+  return <Icon size={18} color={color} />
+}
+
+// ── Mobile Registration Row ───────────────────────────────────────────────────
 function RegistrationRow({ reg, event, onClick }: { reg: Registration; event: Event | undefined; onClick: () => void }) {
   const needsAttention = reg.status === 'pending' || (reg.status === 'approved' && reg.payment_status === 'submitted')
 
   return (
     <div
       onClick={onClick}
-      style={{
-        display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 12, alignItems: 'center',
-        padding: '14px 18px', borderBottom: '1px solid rgba(255,255,255,0.04)',
-        cursor: 'pointer', transition: 'background 0.15s',
-        background: needsAttention ? 'rgba(255,199,69,0.02)' : 'transparent',
-      }}
-      onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'}
-      onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = needsAttention ? 'rgba(255,199,69,0.02)' : 'transparent'}
+      className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.04] cursor-pointer transition-colors hover:bg-white/[0.02]"
+      style={{ background: needsAttention ? 'rgba(255,199,69,0.02)' : undefined }}
     >
-      <div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-          {needsAttention && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFC745', flexShrink: 0 }} />}
-          <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: 0 }}>{reg.full_name}</p>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          {needsAttention && <div className="w-1.5 h-1.5 rounded-full bg-[#FFC745] shrink-0" />}
+          <p className="text-white text-sm font-semibold truncate">{reg.full_name}</p>
         </div>
-        <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>{reg.email} · {event?.title ?? '—'}</p>
+        <p className="text-[#4B5563] text-xs mt-0.5 truncate">{event?.title ?? '—'}</p>
       </div>
-      <p style={{ color: '#374151', fontSize: 12, margin: 0, whiteSpace: 'nowrap' }}>{fmtDate(reg.created_at)}</p>
-      <StatusBadge status={reg.status} paymentStatus={reg.payment_status} />
+      <div className="shrink-0">
+        <StatusIcon status={reg.status} paymentStatus={reg.payment_status} />
+      </div>
     </div>
   )
 }
@@ -389,100 +394,159 @@ export default function ApprovalsClient({
   }
 
   return (
-    <div style={{ fontFamily: 'var(--font-body)', color: 'white' }}>
-      {/* Header */}
-      <div style={{ padding: '24px 24px 0', marginBottom: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <h1 style={{ color: 'white', fontSize: 22, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Approvals</h1>
-          {counts['Pending'] + counts['Payment Review'] > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', background: 'rgba(255,199,69,0.12)', border: '1px solid rgba(255,199,69,0.25)', borderRadius: 20 }}>
-              <AlertCircle size={13} color="#FFC745" />
-              <span style={{ color: '#FFC745', fontSize: 12, fontWeight: 700 }}>
-                {counts['Pending'] + counts['Payment Review']} need attention
-              </span>
-            </div>
-          )}
+    <div className="space-y-5 max-w-5xl">
+
+      {/* ── Header ── */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-gray-500 text-sm">Review applications and payment submissions</p>
         </div>
-        <p style={{ color: '#4B5563', fontSize: 14, margin: 0 }}>Review applications and payment submissions</p>
+        {counts['Pending'] + counts['Payment Review'] > 0 && (
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FFC74512] border border-[#FFC74525] rounded-full shrink-0">
+            <AlertCircle className="w-3.5 h-3.5 text-[#FFC745]" />
+            <span className="text-[#FFC745] text-xs font-bold whitespace-nowrap">
+              {counts['Pending'] + counts['Payment Review']} need attention
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Event filter dropdown */}
-      {events.length > 1 && (
-        <div style={{ padding: '0 24px', marginBottom: 12 }}>
-          <select
-            value={eventFilter}
-            onChange={e => setEventFilter(e.target.value)}
-            style={{ width: '100%', background: '#1A1D2E', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '10px 14px', color: eventFilter === 'all' ? '#6B7280' : 'white', fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none', cursor: 'pointer' }}
-          >
-            <option value="all">All Events ({registrations.length})</option>
-            {events.map(e => (
-              <option key={e.id} value={e.id}>
-                {e.title} ({registrations.filter(r => r.event_id === e.id).length})
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {/* Search */}
-      <div style={{ padding: '0 24px', marginBottom: 16 }}>
-        <div style={{ position: 'relative' }}>
-          <Search size={15} color="#4B5563" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+      {/* ── Filters card ── */}
+      <div className="bg-brand-charcoal rounded-xl border border-white/5 p-4 space-y-3">
+        {/* Search */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
           <input
-            type="text" placeholder="Search by name or email..." value={search}
+            type="text"
+            className="input pl-9 w-full"
+            placeholder="Search by name or email…"
+            value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{ width: '100%', padding: '10px 14px 10px 36px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, color: 'white', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
           />
         </div>
+        {/* Event selector */}
+        {events.length > 1 && (
+          <div className="relative">
+            <select
+              className="appearance-none input pr-8 font-medium cursor-pointer"
+              value={eventFilter}
+              onChange={e => setEventFilter(e.target.value)}
+            >
+              <option value="all">All Events</option>
+              {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+          </div>
+        )}
       </div>
 
-      {/* Filter tabs */}
-      <div style={{ display: 'flex', gap: 6, padding: '0 24px', marginBottom: 16, overflowX: 'auto', scrollbarWidth: 'none' }}>
-        {FILTERS.map(f => (
-          <button key={f} onClick={() => setFilter(f)} style={{
-            padding: '6px 14px', borderRadius: 20, border: 'none', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0,
-            background: filter === f ? '#1E5EFF' : 'rgba(255,255,255,0.06)',
-            color: filter === f ? 'white' : '#6B7280', fontSize: 13, fontWeight: filter === f ? 700 : 500,
-            display: 'flex', alignItems: 'center', gap: 6,
-          }}>
-            {f}
-            {counts[f] > 0 && (
-              <span style={{ background: filter === f ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.08)', color: filter === f ? 'white' : '#6B7280', fontSize: 11, fontWeight: 700, padding: '1px 6px', borderRadius: 10 }}>
+      {/* ── Filter tabs — 2×2 on mobile (last spans full), 5-col on desktop ── */}
+      <div className="grid [grid-template-columns:repeat(2,minmax(0,1fr))] sm:[grid-template-columns:repeat(5,minmax(0,1fr))] gap-2">
+        {FILTERS.map((f, i) => {
+          const isActive   = filter === f
+          const isUrgent   = f === 'Pending' || f === 'Payment Review'
+          const hasItems   = counts[f] > 0
+          const isLastItem = i === FILTERS.length - 1
+          return (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={clsx(
+                'flex items-center justify-between p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer min-w-0 overflow-hidden',
+                isLastItem && 'col-span-2 sm:col-span-1',
+                isActive
+                  ? isUrgent
+                    ? 'bg-[#FFC74512] border-[#FFC74535] text-[#FFC745]'
+                    : 'bg-[#1E5EFF15] border-[#1E5EFF40] text-white'
+                  : 'bg-brand-charcoal border-white/5 text-gray-400 hover:border-white/10 hover:text-gray-200'
+              )}
+            >
+              <span className="text-sm font-medium truncate">{f}</span>
+              <span className={clsx(
+                'ml-2 shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full',
+                isActive
+                  ? isUrgent
+                    ? 'bg-[#FFC74525] text-[#FFC745]'
+                    : 'bg-[#1E5EFF25] text-[#4D82FF]'
+                  : isUrgent && hasItems
+                    ? 'bg-[#FFC74515] text-[#FFC74590]'
+                    : 'bg-white/5 text-gray-500'
+              )}>
                 {counts[f]}
               </span>
-            )}
-          </button>
-        ))}
+            </button>
+          )
+        })}
       </div>
 
-      {/* Table header */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 12, padding: '8px 18px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        <span style={{ color: '#374151', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Applicant</span>
-        <span style={{ color: '#374151', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Date</span>
-        <span style={{ color: '#374151', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Status</span>
-      </div>
+      {/* ── Registration list ── */}
+      <div className="bg-brand-charcoal rounded-xl border border-white/5">
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 px-6">
+            <CheckCircle className="w-8 h-8 text-gray-700 mx-auto mb-3" />
+            <p className="text-gray-500 font-semibold text-sm mb-1">
+              {search ? 'No results found' : `No ${filter.toLowerCase()} applications`}
+            </p>
+            <p className="text-gray-700 text-xs">
+              {!search && filter === 'All' ? 'Applications will appear here as people register for your events' : ''}
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Mobile list */}
+            <div className="md:hidden">
+              {filtered.map(reg => (
+                <RegistrationRow
+                  key={reg.id}
+                  reg={reg}
+                  event={eventMap[reg.event_id]}
+                  onClick={() => setSelected(reg)}
+                />
+              ))}
+            </div>
 
-      {/* Rows */}
-      {filtered.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '60px 24px' }}>
-          <CheckCircle size={32} color="#1F2937" style={{ marginBottom: 12 }} />
-          <p style={{ color: '#374151', fontSize: 15, fontWeight: 600, margin: '0 0 4px' }}>
-            {search ? 'No results found' : `No ${filter.toLowerCase()} applications`}
-          </p>
-          <p style={{ color: '#1F2937', fontSize: 13, margin: 0 }}>
-            {!search && filter === 'All' ? 'Applications will appear here as people register for your events' : ''}
-          </p>
-        </div>
-      ) : (
-        filtered.map(reg => (
-          <RegistrationRow
-            key={reg.id}
-            reg={reg}
-            event={eventMap[reg.event_id]}
-            onClick={() => setSelected(reg)}
-          />
-        ))
-      )}
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto -mx-0 px-0">
+              <table className="w-full min-w-[600px]">
+                <thead>
+                  <tr className="border-b border-white/[0.06]">
+                    <th className="table-header">Applicant</th>
+                    <th className="table-header">Event</th>
+                    <th className="table-header">Email</th>
+                    <th className="table-header">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(reg => {
+                    const event = eventMap[reg.event_id]
+                    const needsAttention = reg.status === 'pending' || (reg.status === 'approved' && reg.payment_status === 'submitted')
+                    return (
+                      <tr
+                        key={reg.id}
+                        onClick={() => setSelected(reg)}
+                        className="border-b border-white/[0.04] cursor-pointer transition-colors hover:bg-white/[0.02]"
+                        style={{ background: needsAttention ? 'rgba(255,199,69,0.02)' : undefined }}
+                      >
+                        <td className="table-cell">
+                          <div className="flex items-center gap-2">
+                            {needsAttention && <div className="w-1.5 h-1.5 rounded-full bg-[#FFC745] shrink-0" />}
+                            <span className="font-semibold text-white">{reg.full_name}</span>
+                          </div>
+                        </td>
+                        <td className="table-cell text-gray-400">{event?.title ?? '—'}</td>
+                        <td className="table-cell text-gray-400">{reg.email}</td>
+                        <td className="table-cell">
+                          <StatusBadge status={reg.status} paymentStatus={reg.payment_status} />
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+      </div>
 
       {/* Detail modal */}
       {selected && (

@@ -277,14 +277,11 @@ export default function OrganizerProfileClient({
       <input ref={logoInputRef}  type="file" accept="image/*" className="hidden" onChange={handleLogoChange}  />
 
       {/* Page header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
-            Organizer Profile
-          </h2>
-          <p className="text-gray-400 text-sm mt-1">Your public identity and event portfolio</p>
+          <p className="text-gray-400 text-sm">Your public identity and event portfolio</p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 sm:shrink-0">
           {profile.username && (
             <Link
               href={`/organizer/${profile.username}`}
@@ -421,21 +418,21 @@ export default function OrganizerProfileClient({
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         {[
-          { label: 'Total Events',     value: events.length,  color: '#1E5EFF', bg: 'rgba(30,94,255,0.1)',   border: 'rgba(30,94,255,0.15)',  icon: <CalendarDays className="w-4 h-4" /> },
-          { label: 'Total Registered', value: totalGuests,    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.15)', icon: <Users className="w-4 h-4" /> },
-          { label: 'Total Attended',   value: totalAttended,  color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.15)', icon: <UserCheck className="w-4 h-4" /> },
-          { label: 'Avg Fill Rate',    value: `${avgFill}%`,  color: '#FFC745', bg: 'rgba(255,199,69,0.1)',  border: 'rgba(255,199,69,0.15)', icon: <TrendingUp className="w-4 h-4" /> },
+          { label: 'Total Events',     value: events.length,  color: '#1E5EFF', bg: 'rgba(30,94,255,0.1)',   border: 'rgba(30,94,255,0.15)',  icon: <CalendarDays className="w-3.5 h-3.5" /> },
+          { label: 'Total Registered', value: totalGuests,    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.15)', icon: <Users className="w-3.5 h-3.5" /> },
+          { label: 'Total Attended',   value: totalAttended,  color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.15)', icon: <UserCheck className="w-3.5 h-3.5" /> },
+          { label: 'Avg Fill Rate',    value: `${avgFill}%`,  color: '#FFC745', bg: 'rgba(255,199,69,0.1)',  border: 'rgba(255,199,69,0.15)', icon: <TrendingUp className="w-3.5 h-3.5" /> },
         ].map(s => (
-          <div key={s.label} className="stat-card" style={{ borderColor: s.border }}>
-            <div className="flex items-center justify-between mb-3">
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div key={s.label} className="bg-brand-charcoal rounded-xl border p-3 sm:p-5 flex flex-col gap-1" style={{ borderColor: s.border }}>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <div style={{ width: 26, height: 26, borderRadius: 8, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ color: s.color }}>{s.icon}</span>
               </div>
+              <p className="text-[10px] sm:text-xs text-gray-500 truncate">{s.label}</p>
             </div>
-            <p className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px' }}>{s.value}</p>
-            <p className="text-xs text-gray-400 mt-0.5">{s.label}</p>
+            <p className="text-base sm:text-xl font-bold text-white truncate" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>{s.value}</p>
           </div>
         ))}
       </div>

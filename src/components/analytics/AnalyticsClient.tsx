@@ -183,23 +183,29 @@ export default function AnalyticsClient({
 
   return (
     <div className="space-y-6 max-w-5xl">
-      <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Analytics</h2>
-        <p className="text-gray-400 text-sm mt-1">Performance metrics and audience intelligence</p>
-      </div>
+      <p className="text-gray-400 text-sm">Performance metrics and audience intelligence</p>
 
       {/* Tab switcher */}
-      <div className="flex items-center gap-1 bg-brand-charcoal-light rounded-lg p-1 w-fit">
+      <div className="grid grid-cols-3 gap-2">
         {[
-          { key: 'overview' as Tab, label: 'Overview', icon: BarChart3 },
-          { key: 'audience' as Tab, label: 'Audience', icon: Users },
-          { key: 'finance' as Tab, label: 'Finance', icon: DollarSign },
+          { key: 'overview' as Tab, label: 'Overview', icon: BarChart3,   count: events.length },
+          { key: 'audience' as Tab, label: 'Audience', icon: Users,       count: audienceGuests.length },
+          { key: 'finance'  as Tab, label: 'Finance',  icon: DollarSign,  count: discountCodes.length },
         ].map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-            className={clsx('flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all',
-              activeTab === tab.key ? 'bg-[#1E5EFF] text-white' : 'text-gray-400 hover:text-white')}>
-            <tab.icon className="w-4 h-4" />
-            {tab.label}
+            className={clsx(
+              'flex items-center justify-center sm:justify-between p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer',
+              activeTab === tab.key
+                ? 'bg-[#1E5EFF15] border-[#1E5EFF40] text-white'
+                : 'bg-brand-charcoal border-white/5 text-gray-400 hover:border-white/10 hover:text-gray-200'
+            )}>
+            <div className="flex items-center gap-2 min-w-0">
+              <tab.icon className={clsx('w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0', activeTab === tab.key ? 'text-[#1E5EFF]' : 'text-gray-500')} />
+              <span className="hidden sm:block text-sm font-medium truncate">{tab.label}</span>
+            </div>
+            <span className={clsx('hidden sm:inline-flex ml-2 shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full',
+              activeTab === tab.key ? 'bg-[#1E5EFF25] text-[#4D82FF]' : 'bg-white/5 text-gray-500'
+            )}>{tab.count}</span>
           </button>
         ))}
       </div>
@@ -302,48 +308,91 @@ export default function AnalyticsClient({
                 <p className="text-sm text-gray-500">No events to analyse yet</p>
               </div>
             ) : (
-              <div className="overflow-x-auto -mx-6 px-6">
-                <table className="w-full min-w-[560px]">
-                  <thead>
-                    <tr className="border-b border-white/5">
-                      <th className="table-header">Event</th>
-                      <th className="table-header">Status</th>
-                      <th className="table-header">Guests</th>
-                      <th className="table-header">Checked In</th>
-                      <th className="table-header">Show-Up Rate</th>
-                      <th className="table-header">Fill Rate</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {eventStats.map((e) => (
-                      <tr key={e.id} className="border-b border-white/5">
-                        <td className="table-cell font-medium text-white">{e.title}</td>
-                        <td className="table-cell">
-                          <span className={clsx('badge', e.status === 'published' ? 'badge-green' : e.status === 'completed' ? 'badge-blue' : e.status === 'cancelled' ? 'badge-red' : 'badge-gray')}>{e.status}</span>
-                        </td>
-                        <td className="table-cell">{e.total}</td>
-                        <td className="table-cell">{e.checkedIn}</td>
-                        <td className="table-cell">
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 bg-brand-charcoal-light rounded-full h-1.5">
-                              <div className={clsx('h-1.5 rounded-full transition-all', e.showUpRate >= 70 ? 'bg-green-500' : e.showUpRate >= 40 ? 'bg-[#FFC745]' : 'bg-red-500')} style={{ width: `${e.showUpRate}%` }} />
+              <>
+                {/* Mobile cards */}
+                <div className="md:hidden space-y-2">
+                  {eventStats.map((e) => (
+                    <div key={e.id} className="p-3 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
+                      <div className="flex items-center justify-between mb-2.5">
+                        <p className="text-sm font-semibold text-white truncate flex-1 mr-2">{e.title}</p>
+                        <span className={clsx('badge shrink-0', e.status === 'published' ? 'badge-green' : e.status === 'completed' ? 'badge-blue' : e.status === 'cancelled' ? 'badge-red' : 'badge-gray')}>{e.status}</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                        <div>
+                          <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-0.5">Guests</p>
+                          <p className="text-sm font-semibold text-white">{e.total}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-0.5">Check-ins</p>
+                          <p className="text-sm font-semibold text-white">{e.checkedIn}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-1">Show-up</p>
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex-1 bg-brand-charcoal-light rounded-full h-1">
+                              <div className={clsx('h-1 rounded-full', e.showUpRate >= 70 ? 'bg-green-500' : e.showUpRate >= 40 ? 'bg-[#FFC745]' : 'bg-red-500')} style={{ width: `${e.showUpRate}%` }} />
                             </div>
-                            <span className="text-xs text-gray-400">{e.showUpRate}%</span>
+                            <span className="text-xs text-gray-400 shrink-0">{e.showUpRate}%</span>
                           </div>
-                        </td>
-                        <td className="table-cell">
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 bg-brand-charcoal-light rounded-full h-1.5">
-                              <div className="h-1.5 rounded-full bg-[#1E5EFF]" style={{ width: `${e.fillRate}%` }} />
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-1">Fill rate</p>
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex-1 bg-brand-charcoal-light rounded-full h-1">
+                              <div className="h-1 rounded-full bg-[#1E5EFF]" style={{ width: `${e.fillRate}%` }} />
                             </div>
-                            <span className="text-xs text-gray-400">{e.fillRate}%</span>
+                            <span className="text-xs text-gray-400 shrink-0">{e.fillRate}%</span>
                           </div>
-                        </td>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Desktop table */}
+                <div className="hidden md:block overflow-x-auto -mx-6 px-6">
+                  <table className="w-full min-w-[560px]">
+                    <thead>
+                      <tr className="border-b border-white/5">
+                        <th className="table-header">Event</th>
+                        <th className="table-header">Status</th>
+                        <th className="table-header">Guests</th>
+                        <th className="table-header">Checked In</th>
+                        <th className="table-header">Show-Up Rate</th>
+                        <th className="table-header">Fill Rate</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {eventStats.map((e) => (
+                        <tr key={e.id} className="border-b border-white/5">
+                          <td className="table-cell font-medium text-white">{e.title}</td>
+                          <td className="table-cell">
+                            <span className={clsx('badge', e.status === 'published' ? 'badge-green' : e.status === 'completed' ? 'badge-blue' : e.status === 'cancelled' ? 'badge-red' : 'badge-gray')}>{e.status}</span>
+                          </td>
+                          <td className="table-cell">{e.total}</td>
+                          <td className="table-cell">{e.checkedIn}</td>
+                          <td className="table-cell">
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 bg-brand-charcoal-light rounded-full h-1.5">
+                                <div className={clsx('h-1.5 rounded-full transition-all', e.showUpRate >= 70 ? 'bg-green-500' : e.showUpRate >= 40 ? 'bg-[#FFC745]' : 'bg-red-500')} style={{ width: `${e.showUpRate}%` }} />
+                              </div>
+                              <span className="text-xs text-gray-400">{e.showUpRate}%</span>
+                            </div>
+                          </td>
+                          <td className="table-cell">
+                            <div className="flex items-center gap-2">
+                              <div className="w-16 bg-brand-charcoal-light rounded-full h-1.5">
+                                <div className="h-1.5 rounded-full bg-[#1E5EFF]" style={{ width: `${e.fillRate}%` }} />
+                              </div>
+                              <span className="text-xs text-gray-400">{e.fillRate}%</span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>
@@ -364,21 +413,21 @@ export default function AnalyticsClient({
 
           {tiers.map((tier) => (
             <div key={tier.key} className={clsx('card border', tier.borderColor)}>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                 <div className="flex items-center gap-3">
-                  <div className={clsx('w-9 h-9 rounded-lg flex items-center justify-center', tier.bgColor)}>
+                  <div className={clsx('w-9 h-9 rounded-lg flex items-center justify-center shrink-0', tier.bgColor)}>
                     <tier.icon className={clsx('w-4 h-4', tier.color)} />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>{tier.label}</h3>
-                      <span className={clsx('px-2 py-0.5 rounded-full text-[10px] font-bold', tier.bgColor, tier.color)}>{tier.guests.length}</span>
+                      <span className={clsx('px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0', tier.bgColor, tier.color)}>{tier.guests.length}</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">{tier.description}</p>
                   </div>
                 </div>
                 {tier.guests.length > 0 && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 sm:shrink-0">
                     <button onClick={() => exportCSV(tier)} className="btn-secondary text-xs px-3 py-2">
                       <Download className="w-3 h-3" /> Export
                     </button>
@@ -394,14 +443,14 @@ export default function AnalyticsClient({
               ) : (
                 <div className="space-y-1">
                   {tier.guests.slice(0, 5).map((guest) => (
-                    <div key={guest.email} className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className={clsx('w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold', tier.bgColor, tier.color)}>
+                    <div key={guest.email} className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={clsx('w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0', tier.bgColor, tier.color)}>
                           {guest.full_name.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-white">{guest.full_name}</p>
-                          <p className="text-xs text-gray-500">{guest.email}</p>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium text-white truncate">{guest.full_name}</p>
+                          <p className="text-xs text-gray-500 truncate">{guest.email}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">

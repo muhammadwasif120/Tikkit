@@ -109,41 +109,36 @@ async function DashboardData() {
   return (
     <div className="space-y-6 max-w-6xl">
       {/* Welcome */}
-      <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
-          Overview
-        </h2>
-        <p className="text-gray-400 text-sm mt-1">Here&apos;s what&apos;s happening across your events.</p>
-      </div>
+      <p className="text-gray-400 text-sm">Here&apos;s what&apos;s happening across your events.</p>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         {stats.map((stat) => {
           const inner = (
             <>
-              <div className="flex items-center justify-between mb-3">
-                <div style={{ width: 36, height: 36, borderRadius: 10, background: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <stat.icon style={{ width: 16, height: 16, color: stat.color }} />
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <div style={{ width: 26, height: 26, borderRadius: 8, background: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <stat.icon style={{ width: 14, height: 14, color: stat.color }} />
                 </div>
+                <p className="text-[10px] sm:text-xs text-gray-500 truncate">{stat.label}</p>
               </div>
-              <p className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px' }}>
+              <p className="text-base sm:text-xl font-bold text-white truncate" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
                 {stat.value}
               </p>
-              <p className="text-xs text-gray-400 mt-0.5">{stat.label}</p>
-              <p className="text-xs text-gray-600 mt-1">{stat.sub}</p>
+              <p className="text-[10px] text-gray-600 mt-0.5 truncate">{stat.sub}</p>
             </>
           )
           return 'href' in stat && stat.href ? (
             <Link
               key={stat.label}
               href={stat.href}
-              className="stat-card animate-slide-up hover:border-opacity-60 transition-all"
+              className="bg-brand-charcoal rounded-xl border p-3 sm:p-5 flex flex-col gap-0.5 animate-slide-up hover:border-opacity-60 transition-all"
               style={{ border: `1px solid ${stat.border}`, textDecoration: 'none' }}
             >
               {inner}
             </Link>
           ) : (
-            <div key={stat.label} className="stat-card animate-slide-up" style={{ border: `1px solid ${stat.border}` }}>
+            <div key={stat.label} className="bg-brand-charcoal rounded-xl border p-3 sm:p-5 flex flex-col gap-0.5 animate-slide-up" style={{ border: `1px solid ${stat.border}` }}>
               {inner}
             </div>
           )
@@ -178,15 +173,15 @@ async function DashboardData() {
                   href={`/dashboard/events/${event.id}`}
                   className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group"
                 >
-                  <div>
-                    <p className="text-sm font-medium text-white group-hover:text-brand-blue transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white group-hover:text-brand-blue transition-colors truncate">
                       {event.title}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
                       {formatDistanceToNow(new Date(event.date_start), { addSuffix: true })}
                     </p>
                   </div>
-                  <span className="badge-blue text-xs">{event.capacity} cap</span>
+                  <span className="badge-blue text-xs shrink-0">{event.capacity} cap</span>
                 </Link>
               ))}
             </div>

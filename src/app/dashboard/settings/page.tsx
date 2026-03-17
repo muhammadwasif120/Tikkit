@@ -324,10 +324,7 @@ export default function SettingsPage() {
       <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
       <input ref={logoInputRef}  type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}  />
 
-      <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>Settings</h2>
-        <p className="text-gray-400 text-sm mt-1">Manage your account and preferences</p>
-      </div>
+      <p className="text-gray-400 text-sm">Manage your account and preferences</p>
 
       {/* Profile + Password */}
       <div className="card space-y-5">
@@ -353,12 +350,12 @@ export default function SettingsPage() {
         {/* Expandable edit form */}
         {profileOpen && (
           <div className="border-t border-white/5 pt-4 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
                 <label className="label">Full Name</label>
                 <input type="text" className="input" value={fullName} onChange={e => setFullName(e.target.value)} />
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Email Address</label>
                 <input type="email" className="input opacity-50 cursor-not-allowed" value={profile?.email ?? ''} disabled />
                 <p className="text-xs text-gray-600 mt-1">Email cannot be changed here</p>
@@ -390,7 +387,7 @@ export default function SettingsPage() {
                 </div>
                 <p className="text-xs text-gray-600 mt-1">Used in guest emails and communications</p>
               </div>
-              <div className="col-span-2">
+              <div className="sm:col-span-2">
                 <label className="label">Profile URL / Username</label>
                 <div className="relative">
                   <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
@@ -711,7 +708,7 @@ export default function SettingsPage() {
                           Expires {new Date(invite.expires_at).toLocaleDateString('en-PK', { dateStyle: 'medium' })}
                         </div>
                       )}
-                      <div className="flex items-center gap-2 pt-1">
+                      <div className="flex flex-wrap items-center gap-2 pt-1">
                         <button onClick={() => copyLink(invite)}
                           className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all',
                             copiedId === invite.id
