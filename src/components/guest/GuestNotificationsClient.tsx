@@ -51,6 +51,14 @@ function getNotif(reg: Registration): { icon: typeof Bell; color: string; bg: st
     cta: { label: 'View Ticket', href: '/guest/tikkit' },
   }
 
+  // Open-registration events: user self-registered, immediately confirmed
+  if (reg.status === 'registered' || reg.status === 'confirmed') return {
+    icon: CheckCircle, color: '#22C55E', bg: 'rgba(34,197,94,0.1)',
+    title: "You're Registered!",
+    body: `Your spot at "${name}" is all set. Your QR ticket is ready.`,
+    cta: { label: 'View Ticket', href: '/guest/tikkit' },
+  }
+
   return null
 }
 
