@@ -1025,6 +1025,7 @@ export default function LandingPage() {
           </Link>
           <p className="footer-copy">© {new Date().getFullYear()} Tikkit. Built in Pakistan 🇵🇰</p>
           <div className="footer-links">
+            <Link href="/how-it-works" className="footer-link">How it works</Link>
             <Link href="/auth/login" className="footer-link">Log in</Link>
             <Link href="/auth/login" className="footer-link">Sign up</Link>
           </div>

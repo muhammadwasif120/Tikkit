@@ -6,7 +6,7 @@ import {
   Ticket, ArrowRight, ArrowLeft, Users, QrCode, BarChart3,
   CreditCard, MapPin, Calendar, CheckCircle, Sparkles,
   Zap, Shield, Bell, Search, Star, Clock, ChevronRight,
-  ScanLine, TrendingUp, UserCheck, Package, X,
+  ScanLine, TrendingUp, UserCheck, Package, X, ChevronDown, Lock, ThumbsUp
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
@@ -641,6 +641,7 @@ function FeatureStep({
 export default function HowItWorksPage() {
   const scrollY = useScrollY()
   const [activeTab, setActiveTab] = useState<'organizer' | 'attendee'>('organizer')
+  const [openFaq, setOpenFaq] = useState<number | null>(null)
   const heroRef = useRef<HTMLDivElement>(null)
 
   // Organizer step refs
@@ -1081,6 +1082,112 @@ export default function HowItWorksPage() {
             </div>
           )
         })}
+        {/* Attendee Internal Link CTA */}
+        <div style={{
+          marginTop: 64, textAlign: 'center',
+          opacity: attSectionInView.inView ? 1 : 0,
+          transform: attSectionInView.inView ? 'translateY(0)' : 'translateY(20px)',
+          transition: 'opacity 0.6s ease 0.8s, transform 0.6s ease 0.8s',
+        }}>
+          <Link href="/guest/explore" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            background: 'linear-gradient(135deg,#FFC745,#F97316)',
+            color: '#111827', textDecoration: 'none',
+            borderRadius: 14, padding: '16px 32px',
+            fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-display)',
+            boxShadow: '0 0 30px rgba(255,199,69,0.3)',
+            letterSpacing: '-0.2px',
+          }}>
+            Explore Live Events in Pakistan <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
+
+      {/* ── EEAT Trust Section: Safe Payments ── */}
+      <section style={{ maxWidth: 1100, margin: '0 auto 80px', padding: '0 24px' }}>
+        <GlassCard style={{ padding: '64px 40px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+          <Orb x="50%" y="50%" color="#22C55E" size={400} opacity={0.08} />
+          <div style={{
+            width: 56, height: 56, borderRadius: '50%', background: 'rgba(34,197,94,0.15)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px',
+            border: '1px solid rgba(34,197,94,0.3)',
+          }}>
+            <Lock size={26} color="#22C55E" />
+          </div>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 800, color: '#F0F2FF', marginBottom: 16, letterSpacing: '-1px' }}>
+            Safe Payments in Pakistan
+          </h2>
+          <p style={{ fontSize: 16, color: '#9CA3AF', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 680, margin: '0 auto 32px' }}>
+            Unlike automated payment gateways that are vulnerable to regional scams and chargebacks, TIKKIT X secures your transaction using 100% Manual P2P Verification. By uploading your direct transfer screenshot (EasyPaisa, JazzCash, or Bank), the event Organizer personally verifies the funds. 
+            <br/><br/>
+            No bots. No delayed processing. Absolute cryptographic trust between you and the host.
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
+            {[
+              { icon: Shield, title: 'Fraud Prevention' },
+              { icon: UserCheck, title: 'Organizer Verified' },
+              { icon: Sparkles, title: 'Zero Hidden Fees' }
+            ].map(({ icon: Icon, title }, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Icon size={16} color="#22C55E" />
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#E5E7EB', fontFamily: 'var(--font-display)' }}>{title}</span>
+              </div>
+            ))}
+          </div>
+        </GlassCard>
+      </section>
+
+      {/* ── Interactive FAQ ── */}
+      <section style={{ maxWidth: 800, margin: '0 auto 120px', padding: '0 24px' }}>
+        <h2 style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800, color: '#F0F2FF', marginBottom: 40, letterSpacing: '-1px' }}>
+          Frequently Asked Questions
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {[
+            {
+              q: 'How long does manual payment verification take?',
+              a: 'Once you upload your transfer screenshot, the organizer is instantly notified via their TIKKIT dashboard. Most verifications are handled within minutes to a few hours, depending on the organizer. Your status goes from Pending to Approved in real-time.'
+            },
+            {
+              q: 'What if the organizer denies or ignores my payment?',
+              a: 'TIKKIT acts as the underlying arbiter. Every P2P transaction happens via explicit tracking IDs. If you have valid proof of transfer (EasyPaisa/JazzCash tracking number) but face a dispute, our dispute resolution team enforces accountability.'
+            },
+            {
+              q: 'Do I need a physical ticket?',
+              a: 'No. The moment your payment is verified, a cinematic QR code is generated inside your TIKKIT dashboard. It is impossible to duplicate. Just show it at the door to be scanned in.'
+            },
+            {
+              q: 'How does the Guest Score work?',
+              a: 'A high guest score pushes your profile to the top of the organizer\'s list for invite-only events. Showing up on time and being verified rapidly increases your reputation explicitly recorded on the platform.'
+            }
+          ].map((faq, i) => (
+            <div key={i} style={{
+              background: '#0F1119', border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 12, overflow: 'hidden',
+            }}>
+              <button
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                style={{
+                  width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '20px 24px', background: 'transparent', border: 'none', cursor: 'pointer',
+                  fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F2FF', textAlign: 'left',
+                }}
+              >
+                {faq.q}
+                <ChevronDown size={18} color="#6B7280" style={{ transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease' }} />
+              </button>
+              <div style={{
+                maxHeight: openFaq === i ? 200 : 0, opacity: openFaq === i ? 1 : 0,
+                transition: 'all 0.4s cubic-bezier(0.4,0,0.2,1)',
+                padding: openFaq === i ? '0 24px 24px' : '0 24px',
+              }}>
+                <p style={{ fontSize: 15, color: '#9CA3AF', fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>
+                  {faq.a}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
 
       {/* ── Switch CTA strip ── */}
