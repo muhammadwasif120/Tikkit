@@ -10,6 +10,7 @@ import GuestTable from '@/components/guests/GuestTable'
 import EventPaymentSetup from '@/components/events/EventPaymentSetup'
 import EventTicketTypes from '@/components/events/EventTicketTypes'
 import EventCoverAndDescription from '@/components/events/EventCoverAndDescription'
+import EventCategoryPicker from '@/components/events/EventCategoryPicker'
 import DashboardLoader from '@/components/layout/DashboardLoader'
 
 const statusBadge: Record<string, string> = {
@@ -119,6 +120,13 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
         initialDescription={event.description ?? null}
         eventTitle={event.title}
         readOnly={isArchived}
+      />
+
+      {/* Category picker */}
+      <EventCategoryPicker
+        eventId={event.id}
+        currentCategoryId={(event as any).category_id ?? null}
+        isArchived={isArchived}
       />
 
       {/* Capacity bar */}

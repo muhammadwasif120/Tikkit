@@ -11,6 +11,8 @@ import {
 import Link from 'next/link'
 import type { PaymentAccount } from '@/app/actions/paymentAccountActions'
 import { setEventPaymentAccounts } from '@/app/actions/paymentAccountActions'
+import { getEventCategories } from '@/app/actions/behaviourActions'
+import type { EventCategory } from '@/app/actions/behaviourActions'
 
 /* ─── Ticket tier state ─── */
 type TierKey = 'standard' | 'vip' | 'discounted'
@@ -81,8 +83,10 @@ export default function NewEventPage() {
     require_id_verification: false,
     require_reference_code: false,
     reference_code: '',
+    category_id: '',
   })
 
+  const [categories, setCategories] = useState<EventCategory[]>([])
   const [tiers, setTiers] = useState<Record<TierKey, Tier>>(DEFAULT_TIERS)
 
   // Payment accounts
@@ -90,17 +94,21 @@ export default function NewEventPage() {
   const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(new Set())
   const [collectPayment, setCollectPayment] = useState(false)
 
-  // Load organizer's payment accounts
+  // Load organizer's payment accounts + event categories
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { data } = await supabase
-        .from('payment_accounts')
-        .select('*')
-        .eq('organizer_id', user.id)
-        .order('created_at', { ascending: false })
+      const [{ data }, cats] = await Promise.all([
+        supabase
+          .from('payment_accounts')
+          .select('*')
+          .eq('organizer_id', user.id)
+          .order('created_at', { ascending: false }),
+        getEventCategories(),
+      ])
       setPaymentAccounts(data ?? [])
+      setCategories(cats)
     }
     load()
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -156,6 +164,7 @@ export default function NewEventPage() {
         require_id_verification: form.require_id_verification,
         require_reference_code:  form.require_reference_code,
         reference_code:          form.reference_code || null,
+        category_id:             form.category_id || null,
         status:                  'draft',
       })
       .select()
@@ -329,6 +338,42 @@ export default function NewEventPage() {
               </button>
             )}
           </div>
+
+          {/* ── Category ── */}
+          {categories.length > 0 && (
+            <div>
+              <label className="label">Category</label>
+              <div className="flex flex-wrap gap-2">
+                {categories.map(cat => {
+                  const selected = form.category_id === cat.id
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => update('category_id', selected ? '' : cat.id)}
+                      style={{
+                        background: selected ? `${cat.color}22` : 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${selected ? cat.color : 'rgba(255,255,255,0.08)'}`,
+                        color: selected ? cat.color : '#9CA3AF',
+                        borderRadius: 20,
+                        padding: '5px 12px',
+                        fontSize: 12,
+                        fontWeight: selected ? 700 : 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                      }}
+                    >
+                      <span>{cat.icon}</span>
+                      <span>{cat.name}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
