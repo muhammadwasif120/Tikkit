@@ -45,8 +45,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
 
-        {/* PWA manifest */}
-        <link rel="manifest" href="/manifest.json" />
+        {/* PWA manifest handled natively by app/manifest.ts */}
 
         {/* iOS Web App */}
         <meta name="apple-mobile-web-app-capable" content="yes" />

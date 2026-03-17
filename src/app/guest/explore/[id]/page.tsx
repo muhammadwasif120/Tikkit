@@ -1,8 +1,39 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import EventDetailClient from '@/components/guest/EventDetailClient'
 import SkeletonEventDetail from '@/components/guest/SkeletonEventDetail'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data } = await supabase
+    .from('events')
+    .select('title, description, cover_image_url')
+    .eq('id', id)
+    .single()
+
+  const event = data as any;
+
+  if (!event) return { title: 'Event Not Found - Tikkit' }
+
+  return {
+    title: `${event.title} - Tikkit`,
+    description: event.description || `Register for ${event.title} on Tikkit.`,
+    openGraph: {
+      title: event.title,
+      description: event.description || `Register for ${event.title} on Tikkit.`,
+      images: event.cover_image_url ? [{ url: event.cover_image_url }] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: event.title,
+      description: event.description || `Register for ${event.title} on Tikkit.`,
+      images: event.cover_image_url ? [event.cover_image_url] : [],
+    },
+  }
+}
 
 async function EventData({ id }: { id: string }) {
   const supabase = await createClient()
@@ -73,12 +104,48 @@ async function EventData({ id }: { id: string }) {
   }
 
   return (
-    <EventDetailClient
-      event={enrichedEvent as any}
-      existingReg={existingReg}
-      isLoggedIn={!!user}
-      userProfile={userProfile}
-    />
+    <>
+      {typeof window === 'undefined' ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Event',
+              name: enrichedEvent.title,
+              description: enrichedEvent.description || `Register for ${enrichedEvent.title} on Tikkit.`,
+              image: enrichedEvent.cover_image_url ? [enrichedEvent.cover_image_url] : [],
+              startDate: enrichedEvent.date_start,
+              endDate: enrichedEvent.date_end,
+              eventStatus: 'https://schema.org/EventScheduled',
+              eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+              location: {
+                '@type': 'Place',
+                name: enrichedEvent.secret_venue ? 'Secret Venue' : enrichedEvent.venue_name || 'Venue TBA',
+                address: enrichedEvent.secret_venue ? undefined : enrichedEvent.venue_address,
+              },
+              offers: {
+                '@type': 'Offer',
+                url: `https://tikkitx.com/register/${id}`,
+                price: enrichedEvent.ticket_price || 0,
+                priceCurrency: 'PKR',
+                availability: 'https://schema.org/InStock',
+              },
+              organizer: {
+                '@type': 'Organization',
+                name: enrichedEvent.organizer?.company_name || enrichedEvent.organizer?.full_name || 'Tikkit Organizer',
+              },
+            }),
+          }}
+        />
+      ) : null}
+      <EventDetailClient
+        event={enrichedEvent as any}
+        existingReg={existingReg}
+        isLoggedIn={!!user}
+        userProfile={userProfile}
+      />
+    </>
   )
 }
 

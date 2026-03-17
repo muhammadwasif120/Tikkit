@@ -1,16 +1,50 @@
+import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import PublicRegistrationForm from '@/components/register/PublicRegistrationForm'
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
+import CyberLoader from '@/components/guest/CyberLoader'
 
-export default async function PublicRegistrationPage({ params }: { params: Promise<{ eventId: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ eventId: string }> }): Promise<Metadata> {
   const { eventId } = await params
   const supabase = await createClient()
+  const { data } = await supabase
+    .from('events')
+    .select('title, description, cover_image_url')
+    .eq('id', eventId)
+    .single()
 
-  const { data: event } = await supabase
+  const event = data as any;
+
+  if (!event) return { title: 'Registration Not Found' }
+
+  return {
+    title: `Register for ${event.title} - Tikkit`,
+    description: event.description || `Secure your spot for ${event.title} on Tikkit.`,
+    openGraph: {
+      title: `Register for ${event.title}`,
+      description: event.description || `Secure your spot for ${event.title} on Tikkit.`,
+      images: event.cover_image_url ? [{ url: event.cover_image_url }] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `Register for ${event.title}`,
+      description: event.description || `Secure your spot for ${event.title} on Tikkit.`,
+      images: event.cover_image_url ? [event.cover_image_url] : [],
+    },
+  }
+}
+
+async function RegistrationData({ eventId }: { eventId: string }) {
+  const supabase = await createClient()
+
+  const { data } = await supabase
     .from('events')
     .select('id, title, description, venue_name, date_start, date_end, capacity, registration_mode, require_id_verification, require_reference_code, secret_venue, status')
     .eq('id', eventId)
     .single()
+
+  const event = data as any;
 
   if (!event || event.status === 'cancelled') notFound()
   if (event.registration_mode === 'invite_only') notFound()
@@ -63,8 +97,44 @@ export default async function PublicRegistrationPage({ params }: { params: Promi
           <PublicRegistrationForm event={event} ticketTypes={ticketTypes ?? []} />
         )}
 
+        {typeof window === 'undefined' ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Event',
+                name: event.title,
+                description: event.description || `Register for ${event.title} on Tikkit.`,
+                startDate: event.date_start,
+                endDate: event.date_end,
+                eventStatus: event.status === 'cancelled' ? 'https://schema.org/EventCancelled' : 'https://schema.org/EventScheduled',
+                eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+                location: {
+                  '@type': 'Place',
+                  name: event.secret_venue ? 'Secret Venue' : event.venue_name || 'Venue TBA',
+                },
+                offers: {
+                  '@type': 'Offer',
+                  url: `https://tikkitx.com/register/${eventId}`,
+                  availability: isFull ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
+                },
+              }),
+            }}
+          />
+        ) : null}
+
         <p className="text-center text-xs text-gray-600">Powered by Tikkit</p>
       </div>
     </div>
+  )
+}
+
+export default async function PublicRegistrationPage({ params }: { params: Promise<{ eventId: string }> }) {
+  const { eventId } = await params
+  return (
+    <Suspense fallback={<CyberLoader />}>
+      <RegistrationData eventId={eventId} />
+    </Suspense>
   )
 }
