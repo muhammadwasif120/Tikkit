@@ -14,7 +14,7 @@ async function EventData({ id }: { id: string }) {
     .select(`
       id, title, description, venue_name, venue_address, secret_venue, venue_reveal_at,
       date_start, date_end, capacity, cover_image_url, tags, ticket_price,
-      registration_mode, is_private, status, category_id,
+      registration_mode, is_private, status, category_id, organizer_id,
       organizer:profiles!events_organizer_id_fkey(id, full_name, company_name, avatar_url, logo_url, username)
     `)
     .eq('id', id)
@@ -22,6 +22,14 @@ async function EventData({ id }: { id: string }) {
 
   const ev = event as any
   if (!ev || ev.status !== 'published') notFound()
+
+  // Organizer join may return null if RLS blocks anonymous reads.
+  // Fall back to the SECURITY DEFINER RPC which bypasses RLS.
+  if (!ev.organizer && ev.organizer_id) {
+    const { data: orgRows } = await (supabase as any)
+      .rpc('get_public_organizer_profile', { p_lookup: ev.organizer_id })
+    ev.organizer = orgRows?.[0] ?? null
+  }
 
   // Fetch payment accounts linked via junction table
   const { data: linkedAccounts } = await supabase
