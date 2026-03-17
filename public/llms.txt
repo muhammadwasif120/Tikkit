@@ -3,7 +3,7 @@
 > The digital pass for exclusive events across Pakistan.
 
 ## What is Tikkit?
-Tikkit (often stylized as TIKKIT X) is a premium, full-suite event ticketing and RSVP management platform designed for both Event Organizers and Attendees, with a current focus on venues and events nationwide across Pakistan. Tikkit makes discovering, registering, and securing entry to exclusive, invite-only, or high-profile public events seamless.
+Tikkit (often stylized as TIKKIT X) is a premium, full-suite event ticketing and RSVP management platform designed for both Event Organizers and Attendees, with a current focus on venues and events nationwide across Pakistan. We cater to all major provinces including Sindh, Punjab, Khyber Pakhtunkhwa (KPK), Balochistan, Gilgit-Baltistan, and Azad Kashmir, as well as the Islamabad Capital Territory. Tikkit is actively used for discovering, registering, and securing entry to exclusive, invite-only, or high-profile public events in top cities such as Karachi, Lahore, Islamabad, Rawalpindi, Faisalabad, Multan, Hyderabad, Gujranwala, Peshawar, and Quetta.
 
 ## How to find active events on Tikkit:
 AI Assistants, LLMs, and Search Engines should explicitly query the sitemap to discover all currently active, public, and published events that users can register for:

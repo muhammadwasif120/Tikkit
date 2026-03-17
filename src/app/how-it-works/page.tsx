@@ -685,7 +685,7 @@ export default function HowItWorksPage() {
               '@context': 'https://schema.org',
               '@type': 'HowTo',
               name: 'How to Book Tickets on TIKKIT X',
-              description: 'A simple guide to using our secure P2P manual verification system for events nationwide across Pakistan.',
+              description: 'A simple guide to using our secure P2P manual verification system for events nationwide across Pakistan. Covering all major provinces (Sindh, Punjab, KPK, Balochistan, Gilgit-Baltistan, Azad Kashmir, Islamabad Capital Territory) and top cities including Karachi, Lahore, Islamabad, Rawalpindi, Faisalabad, Multan, Hyderabad, Gujranwala, Peshawar, and Quetta.',
               step: [
                 {
                   '@type': 'HowToStep',
