@@ -677,6 +677,41 @@ export default function HowItWorksPage() {
 
   return (
     <>
+      {typeof window === 'undefined' ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'HowTo',
+              name: 'How to Book Tickets on TIKKIT X',
+              description: 'A simple guide to using our secure P2P manual verification system for events nationwide across Pakistan.',
+              step: [
+                {
+                  '@type': 'HowToStep',
+                  text: 'Browse local events nationwide and select your event.',
+                  name: 'Explore Events',
+                },
+                {
+                  '@type': 'HowToStep',
+                  text: 'Copy the organizer\'s EasyPaisa or Bank details and send the payment.',
+                  name: 'P2P Payment',
+                },
+                {
+                  '@type': 'HowToStep',
+                  text: 'Upload a screenshot of your transfer for manual verification.',
+                  name: 'Verification',
+                },
+                {
+                  '@type': 'HowToStep',
+                  text: 'Once approved, your cinematic QR ticket is issued instantly.',
+                  name: 'Entry',
+                },
+              ],
+            }),
+          }}
+        />
+      ) : null}
       <style>{`
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html { scroll-behavior: smooth; }
