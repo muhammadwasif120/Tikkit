@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, MapPin, Calendar, Users, Lock, Clock,
@@ -12,6 +12,7 @@ import QRCode from 'qrcode'
 import { registerForEvent, submitEOI } from '@/app/actions/eventRegistrationActions'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
 import { logBehaviour } from '@/app/actions/behaviourActions'
+import { toggleEventFavourite } from '@/app/actions/eventFavouriteActions'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type PaymentAccount = {
@@ -63,7 +64,12 @@ function fmtCountdown(ms: number) {
   if (h > 0) return `${h}h ${m}m`
   return `${m}m ${Math.floor((ms % 60000) / 1000)}s`
 }
-function daysUntil(iso: string) { return Math.ceil(msUntil(iso) / 86400000) }
+function daysUntil(iso: string) {
+  // Compare calendar days, not raw hours — prevents "Tomorrow" for same-day events
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const evDay = new Date(iso); evDay.setHours(0, 0, 0, 0)
+  return Math.round((evDay.getTime() - today.getTime()) / 86400000)
+}
 
 /* ─── Registration status banner ────────────────────────────────── */
 function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus: string | null }) {
@@ -477,9 +483,11 @@ function PaymentSuccessOverlay({ onClose }: { onClose: () => void }) {
 
 /* ─── Main ───────────────────────────────────────────────────────── */
 export default function EventDetailClient({
-  event, existingReg, isLoggedIn, userProfile = null,
+  event, existingReg, isLoggedIn, userProfile = null, isFavourited = false,
 }: {
-  event: Event; existingReg: ExistingReg; isLoggedIn: boolean; userProfile: { full_name: string; email: string } | null
+  event: Event; existingReg: ExistingReg; isLoggedIn: boolean
+  userProfile: { full_name: string; email: string } | null
+  isFavourited?: boolean
 }) {
   const router = useRouter()
   const [showSheet, setShowSheet] = useState(false)
@@ -490,7 +498,8 @@ export default function EventDetailClient({
   const [regStatus, setRegStatus] = useState(existingReg?.status ?? null)
   const [paymentStatus, setPaymentStatus] = useState(existingReg?.payment_status ?? null)
   const [countdown, setCountdown] = useState(msUntil(event.date_start))
-  const [liked, setLiked] = useState(false)
+  const [liked, setLiked] = useState(isFavourited)
+  const [, startFavTransition] = useTransition()
 
   const spotsLeft = event.capacity ? event.capacity - event.registered_count : null
   const isFull = spotsLeft !== null && spotsLeft <= 0
@@ -549,7 +558,7 @@ export default function EventDetailClient({
 
   return (
     <>
-      <div style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: 'var(--font-body)', paddingBottom: 200 }}>
+      <div style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
 
         {/* Hero */}
         <div style={{ position: 'relative', height: 280, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : gradient, overflow: 'hidden' }}>
@@ -563,7 +572,17 @@ export default function EventDetailClient({
               <ArrowLeft size={18} />
             </button>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => setLiked(l => !l)} style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: `1px solid ${liked ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}>
+              <button
+                onClick={() => {
+                  if (!isLoggedIn) { router.push('/auth/login'); return }
+                  setLiked(l => !l)
+                  startFavTransition(async () => {
+                    const res = await toggleEventFavourite(event.id)
+                    setLiked(res.favourited)
+                  })
+                }}
+                style={{ width: 38, height: 38, borderRadius: 12, background: liked ? 'rgba(239,68,68,0.15)' : 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: `1px solid ${liked ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+              >
                 <Heart size={16} color={liked ? '#EF4444' : 'white'} fill={liked ? '#EF4444' : 'none'} />
               </button>
               <button onClick={() => navigator.share?.({ title: event.title, url: window.location.href })} style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>

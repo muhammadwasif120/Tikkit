@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import EventDetailClient from '@/components/guest/EventDetailClient'
 import SkeletonEventDetail from '@/components/guest/SkeletonEventDetail'
+import { getUserFavouriteEventIds } from '@/app/actions/eventFavouriteActions'
 
 async function EventData({ id }: { id: string }) {
   const supabase = await createClient()
@@ -42,9 +43,10 @@ async function EventData({ id }: { id: string }) {
   // Fetch user profile for one-tap registration
   let userProfile = null
   let existingReg = null
+  let isFavourited = false
 
   if (user) {
-    const [profileRes, regRes] = await Promise.all([
+    const [profileRes, regRes, favIds] = await Promise.all([
       supabase
         .from('profiles')
         .select('full_name')
@@ -57,6 +59,7 @@ async function EventData({ id }: { id: string }) {
         .eq('email', user.email!)
         .not('status', 'eq', 'rejected')
         .maybeSingle(),
+      getUserFavouriteEventIds(),
     ])
 
     userProfile = {
@@ -64,6 +67,7 @@ async function EventData({ id }: { id: string }) {
       email: user.email ?? '',
     }
     existingReg = regRes.data ?? null
+    isFavourited = favIds.includes(id)
   }
 
   const enrichedEvent = {
@@ -78,6 +82,7 @@ async function EventData({ id }: { id: string }) {
       existingReg={existingReg}
       isLoggedIn={!!user}
       userProfile={userProfile}
+      isFavourited={isFavourited}
     />
   )
 }

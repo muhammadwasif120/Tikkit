@@ -63,7 +63,11 @@ function fmtDay(iso: string) {
 function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
-function daysUntil(iso: string) { return Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000) }
+function daysUntil(iso: string) {
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const evDay = new Date(iso); evDay.setHours(0, 0, 0, 0)
+  return Math.round((evDay.getTime() - today.getTime()) / 86400000)
+}
 
 function groupEvents(events: Event[]) {
   const todayEnd = new Date(); todayEnd.setHours(23,59,59)

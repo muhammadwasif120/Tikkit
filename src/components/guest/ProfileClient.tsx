@@ -525,7 +525,7 @@ function CreditScoreCard({ score }: { score: number }) {
           <div>
             <p style={{ color: '#4B5563', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px' }}>Social Credits</p>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ color: 'white', fontSize: 48, fontWeight: 900, fontFamily: 'var(--font-display)', lineHeight: 1, letterSpacing: '-2px' }}>
+              <span style={{ color: 'white', fontSize: 48, fontWeight: 900, fontFamily: 'var(--font-body)', fontVariantNumeric: 'tabular-nums', lineHeight: 1, letterSpacing: '-2px' }}>
                 {score}
               </span>
               <span style={{ color: '#4B5563', fontSize: 16, fontWeight: 600 }}>pts</span>
@@ -746,7 +746,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
           {stats.map(stat => (
             <div key={stat.label} style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '14px 10px', textAlign: 'center' }}>
-              <p style={{ color: stat.color, fontSize: 24, fontWeight: 900, margin: '0 0 2px', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
+              <p style={{ color: stat.color, fontSize: 24, fontWeight: 900, margin: '0 0 2px', fontFamily: 'var(--font-body)', fontVariantNumeric: 'tabular-nums', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
                 {stat.value}{stat.icon}
               </p>
               <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{stat.label}</p>
