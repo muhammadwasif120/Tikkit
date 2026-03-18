@@ -848,7 +848,7 @@ export default function LandingPage() {
         <div className="nav-links">
           <a href="#features" className="nav-link">Features</a>
           <Link href="/how-it-works" className="nav-link">How it works</Link>
-          <Link href="/guest/explore" className="nav-link">Explore</Link>
+          <Link href="/explore" className="nav-link">Explore</Link>
         </div>
         <div className="nav-actions">
           <Link href="/auth/login" className="btn-ghost">Log in</Link>
@@ -872,7 +872,7 @@ export default function LandingPage() {
         </div>
         <a href="#features"     className="mmenu-link" onClick={() => setMenuOpen(false)}>Features</a>
         <Link href="/how-it-works" className="mmenu-link" onClick={() => setMenuOpen(false)}>How it works</Link>
-        <Link href="/guest/explore" className="mmenu-link" onClick={() => setMenuOpen(false)}>Explore</Link>
+        <Link href="/explore" className="mmenu-link" onClick={() => setMenuOpen(false)}>Explore</Link>
         <div className="mmenu-actions">
           <Link href="/auth/login" className="btn-full-primary">Get started free</Link>
           <Link href="/auth/login" className="btn-full-outline">Log in</Link>
@@ -1018,7 +1018,7 @@ export default function LandingPage() {
             <Link href="/auth/login" className="btn-primary-lg">
               Create your first event <ArrowRight size={16} />
             </Link>
-            <Link href="/guest/explore" className="btn-gold-lg">
+            <Link href="/explore" className="btn-gold-lg">
               Explore events →
             </Link>
           </div>
