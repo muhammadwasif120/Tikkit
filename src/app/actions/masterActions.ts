@@ -1,0 +1,449 @@
+'use server'
+
+import { createAdminClient } from '@/lib/supabase/admin'
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type MasterOrg = {
+  id: string
+  name: string
+  username: string
+  email: string
+  phone: string
+  events: number
+  active: number
+  status: 'active' | 'review' | 'suspended'
+  joined: string
+}
+
+export type MasterEvt = {
+  id: string
+  title: string
+  org: string
+  orgId: string
+  username: string
+  date: string
+  status: 'live' | 'draft' | 'suspended' | 'ended'
+  registered: number
+  capacity: number
+  cat: string
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function mapEventStatus(s: string): MasterEvt['status'] {
+  if (s === 'published') return 'live'
+  if (s === 'cancelled') return 'suspended'
+  if (s === 'completed') return 'ended'
+  return 'draft'
+}
+
+// ─── Queries ─────────────────────────────────────────────────────────────────
+
+export async function getMasterOrganizers(): Promise<MasterOrg[]> {
+  const supabase = createAdminClient()
+
+  const [{ data: profiles }, { data: events }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, full_name, company_name, email, phone_number, username, created_at, admin_status')
+      .eq('role', 'organizer')
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('events')
+      .select('organizer_id, status'),
+  ])
+
+  // Build event count map per organizer
+  const countMap: Record<string, { total: number; active: number }> = {}
+  for (const e of events ?? []) {
+    const id = (e as any).organizer_id
+    if (!countMap[id]) countMap[id] = { total: 0, active: 0 }
+    countMap[id].total++
+    if ((e as any).status === 'published') countMap[id].active++
+  }
+
+  return (profiles ?? []).map((p: any) => ({
+    id: p.id,
+    name: p.company_name || p.full_name || 'Unnamed',
+    username: p.username || '',
+    email: p.email || '',
+    phone: p.phone_number || '',
+    events: countMap[p.id]?.total ?? 0,
+    active: countMap[p.id]?.active ?? 0,
+    status: (p.admin_status as MasterOrg['status']) ?? 'active',
+    joined: p.created_at ?? '',
+  }))
+}
+
+export async function getMasterEvents(): Promise<MasterEvt[]> {
+  const supabase = createAdminClient()
+
+  const { data: events } = await supabase
+    .from('events')
+    .select('id, title, status, date_start, capacity, organizer_id, organizer:profiles!events_organizer_id_fkey(full_name, company_name, username)')
+    .order('date_start', { ascending: false })
+
+  if (!events?.length) return []
+
+  // Batch guest counts from both tables in parallel
+  const eventIds = events.map((e: any) => e.id)
+  const [{ data: guests }, { data: pubRegs }] = await Promise.all([
+    supabase.from('guests').select('event_id').in('event_id', eventIds),
+    supabase.from('public_registrations').select('event_id').in('event_id', eventIds),
+  ])
+
+  const guestMap: Record<string, number> = {}
+  for (const g of guests ?? []) {
+    const eid = (g as any).event_id
+    guestMap[eid] = (guestMap[eid] || 0) + 1
+  }
+  for (const r of pubRegs ?? []) {
+    const eid = (r as any).event_id
+    guestMap[eid] = (guestMap[eid] || 0) + 1
+  }
+
+  return events.map((e: any) => {
+    const org = e.organizer as any
+    return {
+      id: e.id,
+      title: e.title,
+      org: org?.company_name || org?.full_name || 'Unknown',
+      orgId: e.organizer_id,
+      username: org?.username || '',
+      date: e.date_start,
+      status: mapEventStatus(e.status),
+      registered: guestMap[e.id] || 0,
+      capacity: e.capacity,
+      cat: '',
+    }
+  })
+}
+
+// ─── Detail types ────────────────────────────────────────────────────────────
+
+export type OrgProfile = {
+  id: string
+  full_name: string
+  company_name: string | null
+  email: string
+  phone_number: string | null
+  username: string | null
+  avatar_url: string | null
+  cover_image_url: string | null
+  logo_url: string | null
+  admin_status: 'active' | 'review' | 'suspended'
+  created_at: string
+}
+
+export type OrgEvent = {
+  id: string
+  title: string
+  status: string          // raw DB status: draft / published / completed / cancelled
+  date_start: string
+  date_end: string | null
+  venue_name: string | null
+  cover_image_url: string | null
+  capacity: number
+  registered: number
+  attended: number
+}
+
+export type EventGuest = {
+  id: string
+  full_name: string
+  email: string | null
+  phone: string | null
+  gender: string | null
+  status: string
+  is_vip: boolean
+  checked_in_at: string | null
+  source: 'invited' | 'registered'
+}
+
+// ─── Detail queries ──────────────────────────────────────────────────────────
+
+export async function getMasterOrgProfile(orgId: string): Promise<OrgProfile | null> {
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, full_name, company_name, email, phone_number, username, avatar_url, cover_image_url, logo_url, admin_status, created_at')
+    .eq('id', orgId)
+    .single()
+  if (!data) return null
+  const p = data as any
+  return {
+    id: p.id,
+    full_name: p.full_name,
+    company_name: p.company_name,
+    email: p.email,
+    phone_number: p.phone_number,
+    username: p.username,
+    avatar_url: p.avatar_url,
+    cover_image_url: p.cover_image_url,
+    logo_url: p.logo_url,
+    admin_status: p.admin_status ?? 'active',
+    created_at: p.created_at,
+  }
+}
+
+export async function getMasterOrgEvents(orgId: string): Promise<OrgEvent[]> {
+  const supabase = createAdminClient()
+
+  const { data: events } = await supabase
+    .from('events')
+    .select('id, title, status, date_start, date_end, venue_name, cover_image_url, capacity')
+    .eq('organizer_id', orgId)
+    .order('date_start', { ascending: false })
+
+  if (!events?.length) return []
+
+  const eventIds = (events as any[]).map(e => e.id)
+
+  const [{ data: guests }, { data: regs }] = await Promise.all([
+    supabase.from('guests').select('event_id, status').in('event_id', eventIds),
+    supabase.from('public_registrations').select('event_id, status').in('event_id', eventIds),
+  ])
+
+  const countMap: Record<string, { total: number; attended: number }> = {}
+  for (const g of guests ?? []) {
+    const id = (g as any).event_id
+    if (!countMap[id]) countMap[id] = { total: 0, attended: 0 }
+    countMap[id].total++
+    if ((g as any).status === 'checked_in') countMap[id].attended++
+  }
+  for (const r of regs ?? []) {
+    const id = (r as any).event_id
+    if (!countMap[id]) countMap[id] = { total: 0, attended: 0 }
+    if ((r as any).status !== 'rejected') countMap[id].total++
+    if ((r as any).status === 'checked_in') countMap[id].attended++
+  }
+
+  return (events as any[]).map(e => ({
+    id: e.id,
+    title: e.title,
+    status: e.status,
+    date_start: e.date_start,
+    date_end: e.date_end,
+    venue_name: e.venue_name,
+    cover_image_url: e.cover_image_url,
+    capacity: e.capacity,
+    registered: countMap[e.id]?.total ?? 0,
+    attended: countMap[e.id]?.attended ?? 0,
+  }))
+}
+
+export async function getMasterEventGuests(eventId: string): Promise<EventGuest[]> {
+  const supabase = createAdminClient()
+
+  const [{ data: invited }, { data: registered }] = await Promise.all([
+    supabase
+      .from('guests')
+      .select('id, full_name, email, phone, gender, status, is_vip, checked_in_at')
+      .eq('event_id', eventId)
+      .order('full_name'),
+    supabase
+      .from('public_registrations')
+      .select('id, full_name, email, phone, gender, status, checked_in_at')
+      .eq('event_id', eventId)
+      .order('full_name'),
+  ])
+
+  const result: EventGuest[] = [
+    ...(invited ?? []).map((g: any) => ({
+      id: g.id, full_name: g.full_name, email: g.email, phone: g.phone,
+      gender: g.gender, status: g.status, is_vip: g.is_vip ?? false,
+      checked_in_at: g.checked_in_at, source: 'invited' as const,
+    })),
+    ...(registered ?? []).map((r: any) => ({
+      id: r.id, full_name: r.full_name, email: r.email, phone: r.phone,
+      gender: r.gender, status: r.status, is_vip: false,
+      checked_in_at: r.checked_in_at, source: 'registered' as const,
+    })),
+  ]
+  return result.sort((a, b) => a.full_name.localeCompare(b.full_name))
+}
+
+// ─── Platform Analytics ──────────────────────────────────────────────────────
+
+export type PlatformAnalytics = {
+  kpis: {
+    totalOrganizers: number
+    newOrgsThisMonth: number
+    orgGrowth: number | null        // % vs last month, null if no prior data
+    totalEvents: number
+    newEventsThisMonth: number
+    totalRegistrations: number
+    newRegsThisMonth: number
+    regGrowth: number | null
+    liveEvents: number
+    avgFillRate: number
+  }
+  topOrganizers: Array<{
+    id: string
+    name: string
+    username: string
+    totalEvents: number
+    totalRegistrations: number
+    avgFillRate: number
+    liveEvents: number
+  }>
+  categoryBreakdown: Array<{
+    name: string
+    icon: string | null
+    eventCount: number
+    registrations: number
+    avgFillRate: number
+  }>
+  topEventsByFill: Array<{
+    id: string; title: string; org: string
+    capacity: number; registered: number; fillRate: number; status: string
+  }>
+  topEventsByRegs: Array<{
+    id: string; title: string; org: string
+    registered: number; capacity: number; status: string
+  }>
+  registrationTrend: Array<{ label: string; count: number }>
+  statusDistribution: Record<string, number>
+}
+
+export async function getMasterAnalytics(): Promise<PlatformAnalytics> {
+  const supabase = createAdminClient()
+
+  const now = new Date()
+  const startOfMonth     = new Date(now.getFullYear(), now.getMonth(), 1)
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+
+  const [
+    { data: profiles },
+    { data: events },
+    { data: guests },
+    { data: regs },
+  ] = await Promise.all([
+    supabase.from('profiles').select('id, created_at').eq('role', 'organizer'),
+    supabase.from('events').select(`
+      id, title, status, capacity, created_at, organizer_id,
+      organizer:profiles!events_organizer_id_fkey(full_name, company_name, username),
+      category:event_categories!events_category_id_fkey(id, name, icon)
+    `),
+    supabase.from('guests').select('id, event_id, status, created_at'),
+    supabase.from('public_registrations').select('id, event_id, status, created_at'),
+  ])
+
+  const evts = (events ?? []) as any[]
+
+  // ── Registration map ──
+  const regMap: Record<string, number> = {}
+  const allRegDates: string[] = []
+
+  for (const g of guests ?? []) {
+    const id = (g as any).event_id
+    regMap[id] = (regMap[id] || 0) + 1
+    allRegDates.push((g as any).created_at)
+  }
+  for (const r of regs ?? []) {
+    const id = (r as any).event_id
+    if ((r as any).status !== 'rejected') {
+      regMap[id] = (regMap[id] || 0) + 1
+    }
+    allRegDates.push((r as any).created_at)
+  }
+
+  // ── KPIs ──
+  const totalOrganizers   = (profiles ?? []).length
+  const newOrgsThisMonth  = (profiles ?? []).filter(p => new Date((p as any).created_at) >= startOfMonth).length
+  const newOrgsLastMonth  = (profiles ?? []).filter(p => { const d = new Date((p as any).created_at); return d >= startOfLastMonth && d < startOfMonth }).length
+  const orgGrowth         = newOrgsLastMonth === 0 ? null : Math.round(((newOrgsThisMonth - newOrgsLastMonth) / newOrgsLastMonth) * 100)
+
+  const totalEvents       = evts.length
+  const newEventsThisMonth = evts.filter(e => new Date(e.created_at) >= startOfMonth).length
+  const liveEvents        = evts.filter(e => e.status === 'published').length
+
+  const totalRegistrations = Object.values(regMap).reduce((a, b) => a + b, 0)
+  const newRegsThisMonth   = allRegDates.filter(d => new Date(d) >= startOfMonth).length
+  const newRegsLastMonth   = allRegDates.filter(d => { const dt = new Date(d); return dt >= startOfLastMonth && dt < startOfMonth }).length
+  const regGrowth          = newRegsLastMonth === 0 ? null : Math.round(((newRegsThisMonth - newRegsLastMonth) / newRegsLastMonth) * 100)
+
+  const eventsWithCap = evts.filter(e => e.capacity > 0)
+  const avgFillRate   = eventsWithCap.length > 0
+    ? Math.round(eventsWithCap.reduce((a, e) => a + ((regMap[e.id] || 0) / e.capacity * 100), 0) / eventsWithCap.length)
+    : 0
+
+  // ── Top organizers ──
+  const orgMap: Record<string, { name: string; username: string; events: number; live: number; totalRegs: number; totalCap: number }> = {}
+  for (const e of evts) {
+    const id = e.organizer_id
+    if (!orgMap[id]) {
+      const o = e.organizer as any
+      orgMap[id] = { name: o?.company_name || o?.full_name || 'Unknown', username: o?.username || '', events: 0, live: 0, totalRegs: 0, totalCap: 0 }
+    }
+    orgMap[id].events++
+    if (e.status === 'published') orgMap[id].live++
+    orgMap[id].totalRegs += regMap[e.id] || 0
+    orgMap[id].totalCap  += e.capacity || 0
+  }
+  const topOrganizers = Object.entries(orgMap)
+    .map(([id, o]) => ({
+      id, name: o.name, username: o.username,
+      totalEvents: o.events, totalRegistrations: o.totalRegs, liveEvents: o.live,
+      avgFillRate: o.totalCap > 0 ? Math.round((o.totalRegs / o.totalCap) * 100) : 0,
+    }))
+    .sort((a, b) => b.totalRegistrations - a.totalRegistrations)
+    .slice(0, 12)
+
+  // ── Category breakdown ──
+  const catMap: Record<string, { name: string; icon: string | null; events: number; regs: number; cap: number }> = {}
+  for (const e of evts) {
+    const cat = e.category as any
+    const key = cat?.id || '_none'
+    if (!catMap[key]) catMap[key] = { name: cat?.name || 'Uncategorised', icon: cat?.icon || null, events: 0, regs: 0, cap: 0 }
+    catMap[key].events++
+    catMap[key].regs += regMap[e.id] || 0
+    catMap[key].cap  += e.capacity || 0
+  }
+  const categoryBreakdown = Object.values(catMap)
+    .map(c => ({ name: c.name, icon: c.icon, eventCount: c.events, registrations: c.regs, avgFillRate: c.cap > 0 ? Math.round((c.regs / c.cap) * 100) : 0 }))
+    .sort((a, b) => b.registrations - a.registrations)
+
+  // ── Top events ──
+  const eventsList = evts.map(e => ({
+    id: e.id, title: e.title, org: (e.organizer as any)?.company_name || (e.organizer as any)?.full_name || 'Unknown',
+    capacity: e.capacity, registered: regMap[e.id] || 0, status: e.status,
+    fillRate: e.capacity > 0 ? Math.round(((regMap[e.id] || 0) / e.capacity) * 100) : 0,
+  }))
+  const topEventsByFill = [...eventsList].filter(e => e.capacity > 0).sort((a, b) => b.fillRate - a.fillRate).slice(0, 6)
+  const topEventsByRegs = [...eventsList].sort((a, b) => b.registered - a.registered).slice(0, 6)
+
+  // ── Registration trend (last 6 months) ──
+  const registrationTrend = Array.from({ length: 6 }, (_, i) => {
+    const start = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+    const end   = new Date(now.getFullYear(), now.getMonth() - (5 - i) + 1, 1)
+    return {
+      label: start.toLocaleDateString('en-PK', { month: 'short', year: '2-digit' }),
+      count: allRegDates.filter(d => { const dt = new Date(d); return dt >= start && dt < end }).length,
+    }
+  })
+
+  // ── Status distribution ──
+  const statusDistribution: Record<string, number> = { draft: 0, published: 0, completed: 0, cancelled: 0 }
+  for (const e of evts) statusDistribution[e.status] = (statusDistribution[e.status] || 0) + 1
+
+  return {
+    kpis: { totalOrganizers, newOrgsThisMonth, orgGrowth, totalEvents, newEventsThisMonth, totalRegistrations, newRegsThisMonth, regGrowth, liveEvents, avgFillRate },
+    topOrganizers, categoryBreakdown, topEventsByFill, topEventsByRegs, registrationTrend, statusDistribution,
+  }
+}
+
+// ─── Mutations ───────────────────────────────────────────────────────────────
+
+export async function setOrgAdminStatus(
+  orgId: string,
+  status: 'active' | 'review' | 'suspended'
+): Promise<{ error?: string }> {
+  const supabase = createAdminClient()
+  const { error } = await supabase
+    .from('profiles')
+    .update({ admin_status: status } as any)
+    .eq('id', orgId)
+  return { error: error?.message }
+}

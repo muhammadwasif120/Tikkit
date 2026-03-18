@@ -1,50 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
   LayoutDashboard, Users, Calendar, MessageSquare,
   Shield, Mail, Phone, CheckCircle, Search, ArrowUpRight,
   MoreHorizontal, Flag, Trash2, Send, X, Menu,
   UserX, UserCheck, TrendingUp, ExternalLink, RefreshCw,
-  Eye, Ban, AlertTriangle, Clock, ChevronRight,
+  Eye, Ban, AlertTriangle, Clock, ChevronRight, ChevronLeft, BarChart2,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
+import {
+  getMasterOrganizers, getMasterEvents, setOrgAdminStatus,
+  getMasterOrgProfile, getMasterOrgEvents, getMasterEventGuests,
+  getMasterAnalytics,
+  type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
+  type PlatformAnalytics,
+} from '@/app/actions/masterActions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'organizers' | 'events' | 'queries'
+type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'analytics'
 type OrgStatus = 'active' | 'review' | 'suspended'
 type EventStatus = 'live' | 'draft' | 'flagged' | 'suspended' | 'ended'
 type QueryStatus = 'open' | 'in_progress' | 'resolved'
 type QueryPriority = 'high' | 'medium' | 'low'
 
-interface Org { id: number; name: string; username: string; email: string; phone: string; city: string; events: number; active: number; status: OrgStatus; joined: string; rating: number }
-interface Evt { id: number; title: string; org: string; username: string; date: string; status: EventStatus; registered: number; capacity: number; cat: string }
+type Org = MasterOrg
+type Evt = MasterEvt & { status: EventStatus }
 interface Query { id: string; from: string; fromType: 'organizer' | 'attendee'; subject: string; status: QueryStatus; priority: QueryPriority; date: string }
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
-const MOCK_ORGS: Org[] = [
-  { id: 1, name: 'Zara Events Co.',   username: 'zaraevents',      email: 'contact@zaraevents.pk',      phone: '+92 300 1234567', city: 'Karachi',    events: 14, active: 3, status: 'active',    joined: '2025-10-08', rating: 4.9 },
-  { id: 2, name: 'Omar Productions',  username: 'omarproductions',  email: 'omar@omarproductions.pk',    phone: '+92 321 9876543', city: 'Lahore',     events: 7,  active: 2, status: 'active',    joined: '2025-11-22', rating: 4.6 },
-  { id: 3, name: 'Nightlife Karachi', username: 'nightlifekhi',     email: 'info@nightlifekhi.com',      phone: '+92 333 5551234', city: 'Karachi',    events: 22, active: 5, status: 'review',    joined: '2025-09-03', rating: 3.8 },
-  { id: 4, name: 'Arfa Collective',   username: 'arfacollective',   email: 'arfa@collective.pk',         phone: '+92 345 6667778', city: 'Islamabad',  events: 5,  active: 1, status: 'active',    joined: '2026-01-15', rating: 5.0 },
-  { id: 5, name: 'BeatDrop Events',   username: 'beatdrop',         email: 'team@beatdrop.pk',           phone: '+92 311 2223334', city: 'Lahore',     events: 9,  active: 0, status: 'suspended', joined: '2025-08-19', rating: 2.1 },
-  { id: 6, name: 'Saad & Co. Events', username: 'saadco',           email: 'saad@saadco.pk',             phone: '+92 322 4445556', city: 'Karachi',    events: 3,  active: 1, status: 'active',    joined: '2026-02-28', rating: 4.4 },
-  { id: 7, name: 'Dusk Experiences',  username: 'duskpk',           email: 'hello@dusk.pk',              phone: '+92 334 7778889', city: 'Lahore',     events: 6,  active: 2, status: 'review',    joined: '2025-12-01', rating: 4.1 },
-]
-
-const MOCK_EVENTS: Evt[] = [
-  { id: 1, title: 'Rooftop Night Karachi',      org: 'Zara Events Co.',   username: 'zaraevents',     date: '2026-03-22', status: 'live',      registered: 84,  capacity: 150, cat: 'Party'     },
-  { id: 2, title: 'Brand Launch — Lahore',       org: 'Omar Productions',  username: 'omarproductions',date: '2026-03-28', status: 'live',      registered: 203, capacity: 300, cat: 'Corporate' },
-  { id: 3, title: 'Jazz Night Islamabad',        org: 'Arfa Collective',   username: 'arfacollective', date: '2026-03-30', status: 'live',      registered: 56,  capacity: 80,  cat: 'Music'     },
-  { id: 4, title: 'Underground Rave — Phase 6', org: 'Nightlife Karachi', username: 'nightlifekhi',   date: '2026-03-20', status: 'flagged',   registered: 312, capacity: 250, cat: 'Party'     },
-  { id: 5, title: 'Tech Summit PK 2026',         org: 'Arfa Collective',   username: 'arfacollective', date: '2026-04-05', status: 'draft',     registered: 0,   capacity: 200, cat: 'Tech'      },
-  { id: 6, title: 'BeatDrop Vol. 3',             org: 'BeatDrop Events',   username: 'beatdrop',       date: '2026-02-14', status: 'suspended', registered: 180, capacity: 200, cat: 'Music'     },
-  { id: 7, title: 'Saad × Dusk Collab Night',   org: 'Saad & Co. Events', username: 'saadco',         date: '2026-04-12', status: 'live',      registered: 34,  capacity: 100, cat: 'Party'     },
-  { id: 8, title: 'Startup Mixer Karachi',       org: 'Arfa Collective',   username: 'arfacollective', date: '2026-04-18', status: 'live',      registered: 67,  capacity: 120, cat: 'Tech'      },
-]
 
 const MOCK_QUERIES: Query[] = [
   { id: 'Q-001', from: 'Nightlife Karachi',          fromType: 'organizer', subject: 'Event suspension appeal — Underground Rave', status: 'open',        priority: 'high',   date: '2026-03-17' },
@@ -73,7 +57,7 @@ const sc = (s: string) => SC[s] ?? '#6B7280'
 const sl = (s: string) => SL[s] ?? s
 const fmtDate = (d: string) => new Date(d).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: '2-digit' })
 const initials = (n: string) => n.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-const avBg = (id: number) => AVBG[id % AVBG.length]
+const avBg = (id: string) => AVBG[id.split('').reduce((a, c) => a + c.charCodeAt(0), 0) % AVBG.length]
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
 
@@ -138,7 +122,7 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
             </div>
             <div>
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: '#F0F2FF' }}>{org.name}</div>
-              <div style={{ fontSize: 12, color: '#6B7280' }}>@{org.username}</div>
+              {org.username && <div style={{ fontSize: 12, color: '#6B7280' }}>@{org.username}</div>}
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -194,39 +178,697 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
+// ─── Organizer Detail View ────────────────────────────────────────────────────
+
+const GUEST_SC: Record<string, string> = {
+  invited: '#6B7280', confirmed: '#1E5EFF', checked_in: '#22C55E',
+  checked_out: '#4B5563', cancelled: '#EF4444',
+  pending: '#F59E0B', approved: '#22C55E', rejected: '#EF4444',
+}
+const GUEST_SL: Record<string, string> = {
+  invited: 'Invited', confirmed: 'Confirmed', checked_in: 'Checked In',
+  checked_out: 'Checked Out', cancelled: 'Cancelled',
+  pending: 'Pending', approved: 'Approved', rejected: 'Rejected',
+}
+const mapEvtBadge = (s: string) =>
+  ({ published: 'live', completed: 'ended', cancelled: 'suspended' }[s] ?? s)
+
+function OrgDetailView({
+  orgId, onBack, onContact, currentStatus, onStatusChange,
+}: {
+  orgId: string
+  onBack: () => void
+  onContact: (org: Org) => void
+  currentStatus: OrgStatus
+  onStatusChange: (id: string, s: OrgStatus) => void
+}) {
+  const [profile, setProfile] = useState<OrgProfile | null>(null)
+  const [orgEvents, setOrgEvents] = useState<OrgEvent[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'active' | 'draft' | 'past'>('active')
+  const [expandedEvent, setExpandedEvent] = useState<string | null>(null)
+  const [guestData, setGuestData] = useState<Record<string, EventGuest[]>>({})
+  const [guestLoading, setGuestLoading] = useState<string | null>(null)
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false)
+
+  useEffect(() => {
+    setLoading(true)
+    Promise.all([getMasterOrgProfile(orgId), getMasterOrgEvents(orgId)])
+      .then(([prof, evts]) => { setProfile(prof); setOrgEvents(evts) })
+      .finally(() => setLoading(false))
+  }, [orgId])
+
+  const toggleGuests = (eventId: string) => {
+    if (expandedEvent === eventId) { setExpandedEvent(null); return }
+    setExpandedEvent(eventId)
+    if (guestData[eventId] !== undefined) return
+    setGuestLoading(eventId)
+    getMasterEventGuests(eventId).then(guests => {
+      setGuestData(prev => ({ ...prev, [eventId]: guests }))
+      setGuestLoading(null)
+    })
+  }
+
+  const activeEvts = orgEvents.filter(e => e.status === 'published')
+  const draftEvts  = orgEvents.filter(e => e.status === 'draft')
+  const pastEvts   = orgEvents.filter(e => e.status === 'completed' || e.status === 'cancelled')
+  const displayEvts = activeTab === 'active' ? activeEvts : activeTab === 'draft' ? draftEvts : pastEvts
+
+  if (loading) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: '#374151', fontSize: 13, fontFamily: 'var(--font-body)' }}>
+      Loading profile…
+    </div>
+  )
+  if (!profile) return (
+    <div style={{ textAlign: 'center', padding: 40, color: '#374151', fontSize: 13 }}>Profile not found</div>
+  )
+
+  const displayName = profile.company_name || profile.full_name
+  const avatarBg = avBg(profile.id)
+
+  return (
+    <div onClick={() => setStatusMenuOpen(false)}>
+      {/* Back */}
+      <button className="od-back" onClick={onBack}><ChevronLeft size={14} /> Organizers</button>
+
+      {/* Profile card */}
+      <div className="ms-card" style={{ overflow: 'visible' }}>
+        {/* Banner */}
+        <div className="od-banner">
+          {profile.cover_image_url
+            ? <img src={profile.cover_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${avatarBg}40 0%, #080A14 100%)` }} />
+          }
+          {/* Status actions in top-right of banner */}
+          <div style={{ position: 'absolute', top: 12, right: 12, display: 'flex', gap: 8 }} onClick={e => e.stopPropagation()}>
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setStatusMenuOpen(s => !s)}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '6px 12px', color: '#F0F2FF', fontSize: 12, fontWeight: 600, fontFamily: 'var(--font-body)', cursor: 'pointer' }}
+              >
+                <SBadge status={currentStatus} />
+                <ChevronRight size={11} style={{ transform: statusMenuOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
+              </button>
+              {statusMenuOpen && (
+                <div className="ms-dropdown" style={{ right: 0, top: 'calc(100% + 6px)' }}>
+                  {currentStatus !== 'active'    && <button className="ms-drop-item dd-green" onClick={() => { onStatusChange(orgId, 'active');    setStatusMenuOpen(false) }}><UserCheck size={13} /> Restore to Active</button>}
+                  {currentStatus !== 'review'    && <button className="ms-drop-item dd-amber" onClick={() => { onStatusChange(orgId, 'review');    setStatusMenuOpen(false) }}><Flag size={13} /> Put Under Review</button>}
+                  {currentStatus !== 'suspended' && <button className="ms-drop-item dd-red"   onClick={() => { onStatusChange(orgId, 'suspended'); setStatusMenuOpen(false) }}><Ban size={13} /> Suspend Account</button>}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Avatar + name row */}
+        <div className="od-profile-hdr">
+          <div className="od-avatar-wrap">
+            {profile.logo_url
+              ? <img src={profile.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              : <div className="od-avatar-initials" style={{ background: avatarBg }}>{initials(displayName)}</div>
+            }
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="od-name">{displayName}</div>
+            {profile.company_name && profile.full_name !== displayName && (
+              <div className="od-subname">{profile.full_name}</div>
+            )}
+            {profile.username && <div className="od-username">@{profile.username}</div>}
+          </div>
+          <div className="od-actions">
+            <button className="ms-ib blue" title="Contact" onClick={() => onContact({ id: orgId, name: displayName, username: profile.username || '', email: profile.email, phone: profile.phone_number || '', events: orgEvents.length, active: activeEvts.length, status: currentStatus, joined: profile.created_at } as Org)}>
+              <Mail size={13} />
+            </button>
+            {profile.username
+              ? <Link href={`/organizer/${profile.username}`} target="_blank" className="ms-ib" title="View public profile" style={{ color: '#6B7280', textDecoration: 'none' }}><ExternalLink size={13} /></Link>
+              : <span className="ms-ib" title="No username set" style={{ opacity: 0.25, cursor: 'not-allowed' }}><ExternalLink size={13} /></span>
+            }
+          </div>
+        </div>
+
+        {/* Info strip */}
+        <div className="od-info-strip">
+          {[
+            { icon: Mail,     text: profile.email },
+            { icon: Phone,    text: profile.phone_number || '—' },
+            { icon: Calendar, text: `Joined ${fmtDate(profile.created_at)}` },
+            { icon: Calendar, text: `${orgEvents.length} event${orgEvents.length !== 1 ? 's' : ''} total` },
+            { icon: Users,    text: `${orgEvents.reduce((a, e) => a + e.registered, 0)} guests registered` },
+          ].map(({ icon: Icon, text }, i) => (
+            <div key={i} className="od-info-item">
+              <Icon size={11} color="#4B5563" style={{ flexShrink: 0 }} />
+              <span style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{text}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Events */}
+      <div style={{ marginTop: 24 }}>
+        <div className="od-tabs">
+          {([
+            { key: 'active', label: 'Active',  count: activeEvts.length },
+            { key: 'draft',  label: 'Draft',   count: draftEvts.length  },
+            { key: 'past',   label: 'Past',    count: pastEvts.length   },
+          ] as const).map(t => (
+            <button key={t.key} className={`od-tab${activeTab === t.key ? ' active' : ''}`} onClick={() => setActiveTab(t.key)}>
+              {t.label} <span className="od-tab-count">{t.count}</span>
+            </button>
+          ))}
+        </div>
+
+        {displayEvts.length === 0 ? (
+          <div className="od-empty">No {activeTab} events</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {displayEvts.map(event => {
+              const fill = event.capacity > 0 ? Math.round((event.registered / event.capacity) * 100) : 0
+              const fillColor = fill > 100 ? '#EF4444' : fill > 80 ? '#F97316' : '#22C55E'
+              const isExpanded = expandedEvent === event.id
+              const guests = guestData[event.id] ?? []
+
+              return (
+                <div key={event.id} className="ms-card" style={{ overflow: 'visible' }}>
+                  {/* Event row */}
+                  <div className="od-event-hdr" onClick={() => toggleGuests(event.id)}>
+                    <div className={`od-chevron${isExpanded ? ' open' : ''}`}><ChevronRight size={13} /></div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.title}</div>
+                      <div style={{ fontSize: 11, color: '#4B5563', marginTop: 2 }}>
+                        {event.venue_name || 'Venue TBA'} · {fmtDate(event.date_start)}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexShrink: 0 }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: 12, color: fillColor, marginBottom: 4 }}>{event.registered}/{event.capacity}</div>
+                        <div className="ms-bar" style={{ width: 80 }}>
+                          <div style={{ height: '100%', width: `${Math.min(fill, 100)}%`, background: fillColor, borderRadius: 2 }} />
+                        </div>
+                      </div>
+                      {event.attended > 0 && (
+                        <div style={{ fontSize: 11, color: '#22C55E', whiteSpace: 'nowrap' }}>{event.attended} attended</div>
+                      )}
+                      <SBadge status={mapEvtBadge(event.status)} />
+                    </div>
+                  </div>
+
+                  {/* Guest list */}
+                  {isExpanded && (
+                    <div className="od-guest-list">
+                      {guestLoading === event.id ? (
+                        <div style={{ padding: '24px', textAlign: 'center', color: '#374151', fontSize: 12, fontFamily: 'var(--font-body)' }}>Loading guests…</div>
+                      ) : guests.length === 0 ? (
+                        <div style={{ padding: '24px', textAlign: 'center', color: '#374151', fontSize: 12, fontFamily: 'var(--font-body)' }}>No guests on this event yet</div>
+                      ) : (
+                        <>
+                          <div style={{ padding: '10px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: '#4B5563', fontFamily: 'var(--font-body)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                              {guests.length} Guest{guests.length !== 1 ? 's' : ''}
+                            </span>
+                            <span style={{ fontSize: 11, color: '#374151', fontFamily: 'var(--font-body)' }}>
+                              {guests.filter(g => g.checked_in_at).length} checked in
+                            </span>
+                          </div>
+                          <div style={{ overflowX: 'auto' }}>
+                            <table className="ms-tbl" style={{ minWidth: 560 }}>
+                              <thead>
+                                <tr>
+                                  <th>Name</th>
+                                  <th className="ms-hide">Email</th>
+                                  <th className="ms-hide">Phone</th>
+                                  <th>Status</th>
+                                  <th className="ms-hide">Source</th>
+                                  <th className="ms-hide">Check-in</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {guests.map(g => (
+                                  <tr key={g.id}>
+                                    <td>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                                        <span style={{ fontSize: 13, fontWeight: 500, color: '#F0F2FF', fontFamily: 'var(--font-body)' }}>{g.full_name}</span>
+                                        {g.is_vip && <span style={{ fontSize: 9, fontWeight: 800, color: '#FFC745', background: 'rgba(255,199,69,0.1)', border: '1px solid rgba(255,199,69,0.25)', borderRadius: 4, padding: '1px 5px', letterSpacing: '0.06em' }}>VIP</span>}
+                                      </div>
+                                    </td>
+                                    <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>{g.email || '—'}</td>
+                                    <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>{g.phone || '—'}</td>
+                                    <td>
+                                      <span style={{ fontSize: 11, fontWeight: 700, color: GUEST_SC[g.status] ?? '#6B7280', background: `${GUEST_SC[g.status] ?? '#6B7280'}18`, border: `1px solid ${GUEST_SC[g.status] ?? '#6B7280'}28`, borderRadius: 999, padding: '2px 8px', whiteSpace: 'nowrap' }}>
+                                        {GUEST_SL[g.status] ?? g.status}
+                                      </span>
+                                    </td>
+                                    <td className="ms-hide">
+                                      <span style={{ fontSize: 10, fontWeight: 700, color: g.source === 'invited' ? '#4D82FF' : '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                                        {g.source === 'invited' ? 'Invited' : 'Applied'}
+                                      </span>
+                                    </td>
+                                    <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>
+                                      {g.checked_in_at
+                                        ? new Date(g.checked_in_at).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })
+                                        : '—'}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Analytics View ───────────────────────────────────────────────────────────
+
+const AN_COLORS = ['#1E5EFF','#8B5CF6','#EC4899','#22C55E','#F97316','#06B6D4','#FFC745','#EF4444','#14B8A6','#F59E0B','#6366F1','#84CC16','#E879F9','#0EA5E9']
+
+function GrowthChip({ value }: { value: number | null }) {
+  if (value === null) return null
+  const pos = value > 0, neu = value === 0
+  const color = neu ? '#4B5563' : pos ? '#22C55E' : '#EF4444'
+  return (
+    <span style={{ fontSize: 10, fontWeight: 700, color, background: `${color}14`, border: `1px solid ${color}22`, borderRadius: 999, padding: '2px 7px', whiteSpace: 'nowrap', fontFamily: 'var(--font-body)' }}>
+      {neu ? '—' : pos ? `↑ +${value}%` : `↓ ${value}%`}
+    </span>
+  )
+}
+
+function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
+  const [data, setData] = useState<PlatformAnalytics | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [sortKey, setSortKey] = useState<'totalRegistrations' | 'totalEvents' | 'avgFillRate'>('totalRegistrations')
+  const [topEvtTab, setTopEvtTab] = useState<'fill' | 'regs'>('fill')
+
+  useEffect(() => {
+    getMasterAnalytics().then(d => { setData(d); setLoading(false) })
+  }, [])
+
+  if (loading || !data) return (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 280, flexDirection: 'column', gap: 12 }}>
+      <div style={{ width: 28, height: 28, border: '2px solid rgba(30,94,255,0.2)', borderTopColor: '#1E5EFF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div style={{ fontSize: 12, color: '#374151', fontFamily: 'var(--font-body)' }}>Crunching platform data…</div>
+    </div>
+  )
+
+  const { kpis, topOrganizers, categoryBreakdown, topEventsByFill, topEventsByRegs, registrationTrend, statusDistribution } = data
+
+  const maxTrend   = Math.max(...registrationTrend.map(t => t.count), 1)
+  const maxCatRegs = Math.max(...categoryBreakdown.map(c => c.registrations), 1)
+  const totalEvtForStatus = Object.values(statusDistribution).reduce((a, b) => a + b, 0)
+  const sortedOrgs = [...topOrganizers].sort((a, b) => b[sortKey] - a[sortKey])
+  const topEvts = topEvtTab === 'fill' ? topEventsByFill : topEventsByRegs
+  const maxTopEvtMetric = topEvtTab === 'fill' ? 100 : Math.max(...topEventsByRegs.map(e => e.registered), 1)
+
+  return (
+    <div>
+      {/* ── KPI row ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 24 }}>
+        {[
+          { label: 'Total Organizers',   value: kpis.totalOrganizers,   sub: `+${kpis.newOrgsThisMonth} this month`,  growth: kpis.orgGrowth,  color: '#1E5EFF', icon: Users       },
+          { label: 'Total Events',        value: kpis.totalEvents,        sub: `${kpis.liveEvents} live now`,           growth: null,            color: '#22C55E', icon: Calendar    },
+          { label: 'Total Registrations', value: kpis.totalRegistrations, sub: `+${kpis.newRegsThisMonth} this month`, growth: kpis.regGrowth,  color: '#FFC745', icon: TrendingUp  },
+          { label: 'Avg Fill Rate',       value: `${kpis.avgFillRate}%`,  sub: 'across all events',                     growth: null,            color: '#8B5CF6', icon: BarChart2   },
+        ].map(({ label, value, sub, growth, color, icon: Icon }) => (
+          <div key={label} className="ms-stat">
+            <div style={{ width: 32, height: 32, borderRadius: 9, background: `${color}14`, border: `1px solid ${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <Icon size={14} color={color} />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#F0F2FF', letterSpacing: '-1.5px', lineHeight: 1 }}>{value.toLocaleString()}</div>
+              {growth !== undefined && <GrowthChip value={growth} />}
+            </div>
+            <div style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 6 }}>{label}</div>
+            <div style={{ fontSize: 11, color, fontFamily: 'var(--font-body)', marginTop: 3 }}>{sub}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Trend + Status row ── */}
+      <div className="ms-two-col" style={{ marginBottom: 22 }}>
+        {/* Registration trend */}
+        <div className="ms-card">
+          <div className="ms-card-hdr">
+            <span className="ms-card-title">Registration Trend</span>
+            <span style={{ fontSize: 11, color: '#374151', fontFamily: 'var(--font-body)' }}>Last 6 months</span>
+          </div>
+          <div style={{ padding: '20px 24px 16px', display: 'flex', gap: 10, alignItems: 'flex-end', height: 160 }}>
+            {registrationTrend.map((t, i) => {
+              const isLatest = i === registrationTrend.length - 1
+              const h = maxTrend > 0 ? Math.max((t.count / maxTrend) * 100, t.count > 0 ? 6 : 0) : 0
+              return (
+                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, height: '100%' }}>
+                  <div style={{ fontSize: 10, color: t.count > 0 ? '#9CA3AF' : 'transparent', fontFamily: 'var(--font-body)', fontWeight: 600 }}>{t.count}</div>
+                  <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'flex-end' }}>
+                    <div style={{ width: '100%', height: `${h}%`, background: isLatest ? '#1E5EFF' : 'rgba(30,94,255,0.28)', borderRadius: '4px 4px 0 0', transition: 'height 0.5s ease', minHeight: 0 }} />
+                  </div>
+                  <div style={{ fontSize: 10, color: isLatest ? '#4D82FF' : '#374151', fontFamily: 'var(--font-body)', fontWeight: isLatest ? 700 : 400 }}>{t.label}</div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Status distribution */}
+        <div className="ms-card">
+          <div className="ms-card-hdr"><span className="ms-card-title">Event Status Mix</span></div>
+          <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {[
+              { key: 'published', label: 'Published / Live', color: '#22C55E' },
+              { key: 'completed', label: 'Completed',         color: '#4D82FF' },
+              { key: 'draft',     label: 'Draft',             color: '#6B7280' },
+              { key: 'cancelled', label: 'Cancelled',         color: '#EF4444' },
+            ].map(s => {
+              const count = statusDistribution[s.key] || 0
+              const pct = totalEvtForStatus > 0 ? Math.round((count / totalEvtForStatus) * 100) : 0
+              return (
+                <div key={s.key}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <div style={{ width: 7, height: 7, borderRadius: 2, background: s.color, flexShrink: 0 }} />
+                      <span style={{ fontSize: 12, color: '#9CA3AF', fontFamily: 'var(--font-body)' }}>{s.label}</span>
+                    </div>
+                    <span style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)' }}>{count} <span style={{ color: '#374151' }}>({pct}%)</span></span>
+                  </div>
+                  <div style={{ height: 5, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: s.color, borderRadius: 3, opacity: 0.75 }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Organizer Rankings ── */}
+      <div className="ms-card" style={{ marginBottom: 22 }}>
+        <div className="ms-card-hdr">
+          <span className="ms-card-title">Organizer Rankings</span>
+          <div className="ms-pills">
+            {([
+              { key: 'totalRegistrations', label: 'By Guests'    },
+              { key: 'totalEvents',        label: 'By Events'    },
+              { key: 'avgFillRate',        label: 'By Fill Rate' },
+            ] as const).map(s => (
+              <button key={s.key} className={`ms-pill${sortKey === s.key ? ' pa' : ''}`} onClick={() => setSortKey(s.key)}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div style={{ overflowX: 'auto' }}>
+          <table className="ms-tbl" style={{ minWidth: 640 }}>
+            <thead>
+              <tr>
+                <th style={{ width: 40 }}>#</th>
+                <th>Organizer</th>
+                <th>Events</th>
+                <th>Total Guests</th>
+                <th>Avg Fill</th>
+                <th className="ms-hide">Live Now</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sortedOrgs.length === 0 && (
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: '32px', color: '#374151' }}>No organizer data yet</td></tr>
+              )}
+              {sortedOrgs.map((org, i) => {
+                const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : null
+                return (
+                  <tr key={org.id}>
+                    <td style={{ color: medal ? '#FFC745' : '#374151', fontWeight: 700, fontSize: medal ? 16 : 12 }}>
+                      {medal ?? `${i + 1}`}
+                    </td>
+                    <td>
+                      <div className="od-clickable" style={{ display: 'flex', alignItems: 'center', gap: 10 }} onClick={() => onOrgClick(org.id)}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: avBg(org.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{initials(org.name)}</div>
+                        <div>
+                          <div className="od-name-text" style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', transition: 'color 0.15s' }}>{org.name}</div>
+                          {org.username && <div style={{ fontSize: 11, color: '#4B5563' }}>@{org.username}</div>}
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ fontSize: 13, color: '#9CA3AF' }}>{org.totalEvents}</td>
+                    <td>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 800, color: '#F0F2FF', letterSpacing: '-0.5px' }}>{org.totalRegistrations.toLocaleString()}</span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: org.avgFillRate >= 80 ? '#22C55E' : org.avgFillRate >= 50 ? '#F59E0B' : '#6B7280', minWidth: 36 }}>{org.avgFillRate}%</span>
+                        <div className="ms-bar" style={{ width: 56 }}>
+                          <div style={{ height: '100%', width: `${Math.min(org.avgFillRate, 100)}%`, background: org.avgFillRate >= 80 ? '#22C55E' : org.avgFillRate >= 50 ? '#F59E0B' : '#4B5563', borderRadius: 2 }} />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="ms-hide">
+                      {org.liveEvents > 0
+                        ? <span style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.22)', borderRadius: 999, padding: '2px 8px' }}>{org.liveEvents} live</span>
+                        : <span style={{ color: '#2D3140', fontSize: 12 }}>—</span>
+                      }
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── Category + Top Events ── */}
+      <div className="ms-two-col">
+        {/* Category performance */}
+        <div className="ms-card">
+          <div className="ms-card-hdr"><span className="ms-card-title">Category Performance</span></div>
+          <div style={{ padding: '14px 20px 18px', display: 'flex', flexDirection: 'column', gap: 13 }}>
+            {categoryBreakdown.length === 0 && <div style={{ color: '#374151', fontSize: 12, textAlign: 'center', padding: 24 }}>No category data</div>}
+            {categoryBreakdown.slice(0, 10).map((cat, i) => {
+              const pct = Math.round((cat.registrations / maxCatRegs) * 100)
+              const color = AN_COLORS[i % AN_COLORS.length]
+              return (
+                <div key={i}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
+                      {cat.icon && <span style={{ fontSize: 14, flexShrink: 0 }}>{cat.icon}</span>}
+                      <span style={{ fontSize: 12, color: '#D1D5DB', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.name}</span>
+                      <span style={{ fontSize: 10, color: '#374151', fontFamily: 'var(--font-body)', flexShrink: 0 }}>{cat.eventCount} events</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: '#9CA3AF' }}>{cat.registrations}</span>
+                      <span style={{ fontSize: 10, color: '#374151' }}>{cat.avgFillRate}% fill</span>
+                    </div>
+                  </div>
+                  <div style={{ height: 5, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 3, opacity: 0.8 }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Top events */}
+        <div className="ms-card">
+          <div className="ms-card-hdr">
+            <span className="ms-card-title">Top Events</span>
+            <div style={{ display: 'flex', gap: 5 }}>
+              <button className={`ms-pill${topEvtTab === 'fill' ? ' pg' : ''}`} onClick={() => setTopEvtTab('fill')}>Fill Rate</button>
+              <button className={`ms-pill${topEvtTab === 'regs' ? ' pa' : ''}`} onClick={() => setTopEvtTab('regs')}>Registrations</button>
+            </div>
+          </div>
+          <div>
+            {topEvts.length === 0 && <div style={{ color: '#374151', fontSize: 12, textAlign: 'center', padding: 32 }}>No events yet</div>}
+            {topEvts.map((evt, i) => {
+              const fillRate = (evt as any).fillRate as number | undefined
+              const metric = topEvtTab === 'fill' ? `${fillRate ?? 0}%` : evt.registered.toLocaleString()
+              const barW = topEvtTab === 'fill' ? (fillRate ?? 0) : Math.round((evt.registered / maxTopEvtMetric) * 100)
+              const barColor = topEvtTab === 'fill' ? ((fillRate ?? 0) >= 80 ? '#22C55E' : (fillRate ?? 0) >= 50 ? '#F59E0B' : '#6B7280') : '#1E5EFF'
+              return (
+                <div key={evt.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 20px', borderBottom: i < topEvts.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 6, background: avBg(evt.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, color: '#fff', flexShrink: 0 }}>{i + 1}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{evt.title}</div>
+                    <div style={{ fontSize: 11, color: '#4B5563', marginTop: 2 }}>{evt.org}</div>
+                    <div style={{ height: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 2, marginTop: 6, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${barW}%`, background: barColor, borderRadius: 2, opacity: 0.8 }} />
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: '#F0F2FF', letterSpacing: '-0.5px' }}>{metric}</div>
+                    <div style={{ fontSize: 10, color: '#374151', fontFamily: 'var(--font-body)' }}>{evt.registered}/{evt.capacity}</div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Auth Gate ────────────────────────────────────────────────────────────────
+
+const MASTER_KEY = 'tkmaster2026' // ⚠️  change before going to production
+
+function NotFoundGate({ onAuth }: { onAuth: () => void }) {
+  const [showModal, setShowModal] = useState(false)
+  const [pwd, setPwd] = useState('')
+  const [shake, setShake] = useState(false)
+  const clickCount = useRef(0)
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleSecretClick = () => {
+    clickCount.current += 1
+    if (clickTimer.current) clearTimeout(clickTimer.current)
+    clickTimer.current = setTimeout(() => { clickCount.current = 0 }, 2500)
+    if (clickCount.current >= 5) {
+      clickCount.current = 0
+      setShowModal(true)
+    }
+  }
+
+  const handleSubmit = () => {
+    if (pwd === MASTER_KEY) {
+      sessionStorage.setItem('_ms', '1')
+      onAuth()
+    } else {
+      setShake(true)
+      setPwd('')
+      setTimeout(() => setShake(false), 600)
+    }
+  }
+
+  return (
+    <>
+      <style>{`
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        .nf-page { min-height:100vh; background:#0A0C14; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:40px 24px; font-family:var(--font-body,'Inter',sans-serif); position:relative; }
+        .nf-code { font-family:var(--font-display,'Space Grotesk',sans-serif); font-size:clamp(80px,18vw,180px); font-weight:900; color:rgba(255,255,255,0.04); letter-spacing:-6px; line-height:1; transition:color 0.15s; }
+        .nf-code:active { color:rgba(255,255,255,0.06); }
+        .nf-heading { font-family:var(--font-display,'Space Grotesk',sans-serif); font-size:clamp(20px,4vw,28px); font-weight:700; color:#F0F2FF; letter-spacing:-0.5px; }
+        .nf-sub { font-size:14px; color:#4B5563; text-align:center; max-width:360px; line-height:1.6; }
+        .nf-btn { margin-top:8px; display:inline-block; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#9CA3AF; font-size:13px; font-family:var(--font-body,'Inter',sans-serif); text-decoration:none; border-radius:10px; padding:9px 20px; transition:all 0.2s; }
+        .nf-btn:hover { background:rgba(255,255,255,0.08); color:#F0F2FF; }
+        .nf-footer { position:absolute; bottom:24px; font-size:11px; color:#1F2937; }
+        .nf-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.72); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:999; }
+        .nf-modal { background:#0F1120; border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:34px 28px; display:flex; flex-direction:column; align-items:center; gap:18px; width:min(340px,90vw); }
+        .nf-modal-input { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 16px; color:#F0F2FF; font-size:18px; letter-spacing:5px; width:100%; text-align:center; outline:none; font-family:var(--font-body,'Inter',sans-serif); transition:border-color 0.2s; }
+        .nf-modal-input::placeholder { letter-spacing:2px; font-size:14px; color:#374151; }
+        .nf-modal-input:focus { border-color:rgba(30,94,255,0.45); }
+        .nf-modal-btn { background:#1E5EFF; border:none; border-radius:10px; padding:12px 24px; color:#fff; font-size:14px; font-weight:700; font-family:var(--font-body,'Inter',sans-serif); cursor:pointer; width:100%; transition:opacity 0.2s; letter-spacing:0.02em; }
+        .nf-modal-btn:hover { opacity:0.88; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+        .nf-modal-input.shake { animation:shake 0.5s ease; border-color:rgba(239,68,68,0.5) !important; }
+      `}</style>
+
+      <div className="nf-page">
+        <div
+          className="nf-code"
+          onClick={handleSecretClick}
+          style={{ cursor: 'default', userSelect: 'none' }}
+        >
+          404
+        </div>
+        <div className="nf-heading">Page not found</div>
+        <div className="nf-sub">The page you&apos;re looking for doesn&apos;t exist or has been moved.</div>
+        <Link href="/" className="nf-btn">← Back to Tikkit</Link>
+        <div className="nf-footer">© {new Date().getFullYear()} Tikkit</div>
+      </div>
+
+      {showModal && (
+        <div className="nf-modal-overlay" onClick={() => { setShowModal(false); setPwd('') }}>
+          <div className="nf-modal" onClick={e => e.stopPropagation()}>
+            <TikkitXLogo size="sm" />
+            <input
+              className={`nf-modal-input${shake ? ' shake' : ''}`}
+              type="password"
+              value={pwd}
+              onChange={e => setPwd(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
+              autoFocus
+              placeholder="············"
+            />
+            <button className="nf-modal-btn" onClick={handleSubmit}>Continue →</button>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
+
+// ─── Master Dashboard ─────────────────────────────────────────────────────────
+
 export default function MasterPage() {
+  const [authed, setAuthed] = useState(false)
   const [tab, setTab] = useState<Tab>('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && sessionStorage.getItem('_ms') === '1') {
+      setAuthed(true)
+    }
+  }, [])
+
+  // Real data
+  const [orgs, setOrgs] = useState<Org[]>([])
+  const [events, setEvents] = useState<Evt[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (!authed) return
+    setLoading(true)
+    Promise.all([getMasterOrganizers(), getMasterEvents()])
+      .then(([orgsData, evtsData]) => {
+        setOrgs(orgsData as Org[])
+        setEvents(evtsData as Evt[])
+      })
+      .finally(() => setLoading(false))
+  }, [authed])
 
   // Organizers state
-  const [orgStatuses, setOrgStatuses] = useState<Record<number, OrgStatus>>({})
-  const [removedOrgs, setRemovedOrgs] = useState<Set<number>>(new Set())
+  const [orgStatuses, setOrgStatuses] = useState<Record<string, OrgStatus>>({})
+  const [removedOrgs, setRemovedOrgs] = useState<Set<string>>(new Set())
   const [orgFilter, setOrgFilter] = useState<'all' | OrgStatus>('all')
   const [orgSearch, setOrgSearch] = useState('')
-  const [openOrgMenu, setOpenOrgMenu] = useState<number | null>(null)
+  const [openOrgMenu, setOpenOrgMenu] = useState<string | null>(null)
+  const [orgMenuPos, setOrgMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 })
   const [contactTarget, setContactTarget] = useState<Org | null>(null)
 
   // Events state
-  const [eventStatuses, setEventStatuses] = useState<Record<number, EventStatus>>({})
+  const [eventStatuses, setEventStatuses] = useState<Record<string, EventStatus>>({})
   const [eventFilter, setEventFilter] = useState<'all' | EventStatus>('all')
   const [eventSearch, setEventSearch] = useState('')
-  const [openEvtMenu, setOpenEvtMenu] = useState<number | null>(null)
+  const [openEvtMenu, setOpenEvtMenu] = useState<string | null>(null)
+  const [evtMenuPos, setEvtMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 })
 
   // Queries state
   const [queryStatuses, setQueryStatuses] = useState<Record<string, QueryStatus>>({})
   const [queryFilter, setQueryFilter] = useState<'all' | QueryStatus>('all')
 
   // Derived
-  const liveOrgs = MOCK_ORGS.filter(o => !removedOrgs.has(o.id))
+  const liveOrgs = orgs.filter(o => !removedOrgs.has(o.id))
   const getOrgStatus = (o: Org): OrgStatus => orgStatuses[o.id] ?? o.status
+  const setOrgStatus = (id: string, s: OrgStatus) => {
+    setOrgStatuses(prev => ({...prev,[id]:s}))
+    setOpenOrgMenu(null)
+    setOrgAdminStatus(id, s) // persist to DB — fire and forget
+  }
   const getEvtStatus = (e: Evt): EventStatus => eventStatuses[e.id] ?? e.status
   const getQStatus = (q: Query): QueryStatus => queryStatuses[q.id] ?? q.status
 
   const filteredOrgs = liveOrgs
     .filter(o => orgFilter === 'all' || getOrgStatus(o) === orgFilter)
-    .filter(o => !orgSearch || o.name.toLowerCase().includes(orgSearch.toLowerCase()) || o.username.toLowerCase().includes(orgSearch.toLowerCase()))
+    .filter(o => !orgSearch || o.name.toLowerCase().includes(orgSearch.toLowerCase()) || (o.username && o.username.toLowerCase().includes(orgSearch.toLowerCase())) || (o.email && o.email.toLowerCase().includes(orgSearch.toLowerCase())))
 
-  const filteredEvents = MOCK_EVENTS
+  const filteredEvents = events
     .filter(e => eventFilter === 'all' || getEvtStatus(e) === eventFilter)
     .filter(e => !eventSearch || e.title.toLowerCase().includes(eventSearch.toLowerCase()) || e.org.toLowerCase().includes(eventSearch.toLowerCase()))
 
@@ -235,20 +877,23 @@ export default function MasterPage() {
 
   const openQCount = MOCK_QUERIES.filter(q => getQStatus(q) === 'open').length
   const reviewOrgCount = liveOrgs.filter(o => getOrgStatus(o) === 'review').length
-  const flaggedEvtCount = MOCK_EVENTS.filter(e => getEvtStatus(e) === 'flagged').length
-  const liveEvtCount = MOCK_EVENTS.filter(e => getEvtStatus(e) === 'live').length
-  const totalRegistered = MOCK_EVENTS.reduce((a, e) => a + e.registered, 0)
+  const flaggedEvtCount = events.filter(e => getEvtStatus(e) === 'flagged').length
+  const liveEvtCount = events.filter(e => getEvtStatus(e) === 'live').length
+  const totalRegistered = events.reduce((a, e) => a + e.registered, 0)
 
   const NAV = [
     { id: 'overview'   as Tab, icon: LayoutDashboard, label: 'Overview' },
-    { id: 'organizers' as Tab, icon: Users,           label: 'Organizers',        badge: reviewOrgCount > 0 ? reviewOrgCount : undefined },
-    { id: 'events'     as Tab, icon: Calendar,        label: 'Events',            badge: flaggedEvtCount > 0 ? flaggedEvtCount : undefined },
+    { id: 'organizers' as Tab, icon: Users,           label: 'Organizers',         badge: reviewOrgCount > 0 ? reviewOrgCount : undefined },
+    { id: 'events'     as Tab, icon: Calendar,        label: 'Events',             badge: flaggedEvtCount > 0 ? flaggedEvtCount : undefined },
+    { id: 'analytics'  as Tab, icon: BarChart2,       label: 'Analytics'           },
     { id: 'queries'    as Tab, icon: MessageSquare,   label: 'Queries & Disputes', badge: openQCount > 0 ? openQCount : undefined },
   ]
 
   const PAGE_TITLES: Record<Tab, string> = {
-    overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes',
+    overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes', analytics: 'Analytics',
   }
+
+  if (!authed) return <NotFoundGate onAuth={() => setAuthed(true)} />
 
   return (
     <>
@@ -452,6 +1097,36 @@ export default function MasterPage() {
           .ms-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
           .ms-stat { padding: 14px; }
         }
+
+        /* ── Organizer Detail ── */
+        .od-back { display:flex; align-items:center; gap:6px; background:none; border:none; color:#4D82FF; font-size:13px; font-family:var(--font-body); font-weight:600; cursor:pointer; padding:0; margin-bottom:20px; transition:color 0.15s; }
+        .od-back:hover { color:#7AA3FF; }
+        .od-banner { height:140px; border-radius:12px 12px 0 0; position:relative; overflow:hidden; background:#0D111F; }
+        .od-profile-hdr { padding:0 22px 18px; display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap; }
+        .od-avatar-wrap { width:72px; height:72px; border-radius:16px; border:3px solid #0A0C14; overflow:hidden; flex-shrink:0; margin-top:-36px; position:relative; z-index:1; }
+        .od-avatar-initials { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:#fff; font-family:var(--font-display); }
+        .od-name { font-family:var(--font-display); font-size:20px; font-weight:800; color:#F0F2FF; letter-spacing:-0.5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .od-subname { font-size:13px; color:#9CA3AF; margin-top:2px; }
+        .od-username { font-size:12px; color:#4B5563; margin-top:2px; }
+        .od-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding-top:6px; margin-left:auto; }
+        .od-info-strip { display:flex; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.06); }
+        .od-info-item { display:flex; align-items:center; gap:7px; padding:11px 18px; flex:1; min-width:140px; border-right:1px solid rgba(255,255,255,0.05); }
+        .od-info-item:last-child { border-right:none; }
+        .od-tabs { display:flex; gap:4px; margin-bottom:16px; background:#0D0F18; border:1px solid rgba(255,255,255,0.07); border-radius:10px; padding:4px; width:fit-content; }
+        .od-tab { padding:7px 16px; border-radius:7px; font-size:12px; font-weight:600; color:#4B5563; background:none; border:none; cursor:pointer; font-family:var(--font-body); transition:all 0.15s; display:flex; align-items:center; gap:6px; white-space:nowrap; }
+        .od-tab:hover { color:#9CA3AF; }
+        .od-tab.active { background:rgba(30,94,255,0.12); color:#4D82FF; }
+        .od-tab-count { font-size:10px; font-weight:700; background:rgba(255,255,255,0.06); border-radius:999px; padding:1px 6px; }
+        .od-tab.active .od-tab-count { background:rgba(30,94,255,0.18); }
+        .od-empty { background:#0D0F18; border:1px solid rgba(255,255,255,0.07); border-radius:12px; padding:48px 24px; text-align:center; color:#374151; font-size:13px; font-family:var(--font-body); }
+        .od-event-hdr { display:flex; align-items:center; gap:14px; padding:16px 20px; cursor:pointer; transition:background 0.15s; border-radius:12px 12px 0 0; }
+        .od-event-hdr:hover { background:rgba(255,255,255,0.02); }
+        .od-chevron { color:#4B5563; transition:transform 0.2s; flex-shrink:0; }
+        .od-chevron.open { transform:rotate(90deg); }
+        .od-guest-list { border-top:1px solid rgba(255,255,255,0.06); }
+        .od-clickable { cursor:pointer; }
+        .od-clickable:hover .od-name-text { color:#7AA3FF !important; text-decoration:underline; text-decoration-color:rgba(77,130,255,0.4); }
+        @keyframes spin { to { transform: rotate(360deg); } }
       `}</style>
 
       <div className="ms-shell" onClick={() => { setOpenOrgMenu(null); setOpenEvtMenu(null) }}>
@@ -473,7 +1148,17 @@ export default function MasterPage() {
             ))}
           </nav>
 
-          <div className="ms-sidebar-footer">TIKKIT INTERNAL · CONFIDENTIAL</div>
+          <div className="ms-sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ fontSize: 10, color: '#374151', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tikkit Internal · Confidential</div>
+            <button
+              onClick={() => { sessionStorage.removeItem('_ms'); setAuthed(false) }}
+              style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.12)', borderRadius: 8, padding: '7px 12px', color: '#4B5563', fontSize: 11, fontFamily: 'var(--font-body)', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}
+              onMouseEnter={e => { (e.target as HTMLButtonElement).style.color = '#EF4444'; (e.target as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.3)' }}
+              onMouseLeave={e => { (e.target as HTMLButtonElement).style.color = '#4B5563'; (e.target as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.12)' }}
+            >
+              Sign out
+            </button>
+          </div>
         </aside>
 
         {/* Mobile sidebar overlay */}
@@ -530,24 +1215,34 @@ export default function MasterPage() {
                       <thead>
                         <tr>
                           <th>Organizer</th>
-                          <th>City</th>
+                          <th>Events</th>
                           <th>Status</th>
                           <th></th>
                         </tr>
                       </thead>
                       <tbody>
-                        {MOCK_ORGS.slice(0, 5).map(o => (
+                        {loading && (
+                          <tr><td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: '#374151', fontSize: 12 }}>Loading…</td></tr>
+                        )}
+                        {!loading && orgs.length === 0 && (
+                          <tr><td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: '#374151', fontSize: 12 }}>No organizers yet</td></tr>
+                        )}
+                        {orgs.slice(0, 5).map(o => (
                           <tr key={o.id}>
                             <td>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div
+                                className="od-clickable"
+                                style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+                                onClick={() => { setSelectedOrgId(o.id); setTab('organizers') }}
+                              >
                                 <div style={{ width: 30, height: 30, borderRadius: 8, background: avBg(o.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>{initials(o.name)}</div>
                                 <div>
-                                  <div style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)' }}>{o.name}</div>
-                                  <div style={{ fontSize: 11, color: '#4B5563' }}>@{o.username}</div>
+                                  <div className="od-name-text" style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', transition: 'color 0.15s' }}>{o.name}</div>
+                                  {o.username && <div style={{ fontSize: 11, color: '#4B5563' }}>@{o.username}</div>}
                                 </div>
                               </div>
                             </td>
-                            <td style={{ color: '#6B7280', fontSize: 12 }}>{o.city}</td>
+                            <td style={{ color: '#9CA3AF', fontSize: 12 }}>{o.events} <span style={{ color: '#4B5563' }}>({o.active} live)</span></td>
                             <td><SBadge status={getOrgStatus(o)} /></td>
                             <td>
                               <button onClick={e => { e.stopPropagation(); setContactTarget(o) }} className="ms-ib blue"><Mail size={12} /></button>
@@ -606,6 +1301,15 @@ export default function MasterPage() {
 
             {/* ════════════════════════════════════════════════════ ORGANIZERS */}
             {tab === 'organizers' && (
+              selectedOrgId ? (
+                <OrgDetailView
+                  orgId={selectedOrgId}
+                  onBack={() => setSelectedOrgId(null)}
+                  onContact={setContactTarget}
+                  currentStatus={getOrgStatus(liveOrgs.find(o => o.id === selectedOrgId) ?? { id: selectedOrgId, status: 'active' } as Org)}
+                  onStatusChange={setOrgStatus}
+                />
+              ) :
               <div>
                 <div className="ms-card">
                   <div className="ms-card-hdr">
@@ -628,58 +1332,68 @@ export default function MasterPage() {
                       <thead>
                         <tr>
                           <th>Organizer</th>
-                          <th className="ms-hide">City</th>
+                          <th className="ms-hide">Email</th>
                           <th>Events</th>
                           <th className="ms-hide">Joined</th>
-                          <th className="ms-hide">Rating</th>
                           <th>Status</th>
                           <th style={{ textAlign: 'right' }}>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {filteredOrgs.length === 0 && (
-                          <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px 20px', color: '#374151' }}>No organizers found</td></tr>
+                          <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px 20px', color: '#374151' }}>{loading ? 'Loading…' : 'No organizers found'}</td></tr>
                         )}
                         {filteredOrgs.map(o => {
                           const os = getOrgStatus(o)
                           return (
                             <tr key={o.id}>
                               <td>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div
+                                  className="od-clickable"
+                                  style={{ display: 'flex', alignItems: 'center', gap: 10 }}
+                                  onClick={() => setSelectedOrgId(o.id)}
+                                >
                                   <div style={{ width: 32, height: 32, borderRadius: 9, background: avBg(o.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'white', flexShrink: 0 }}>{initials(o.name)}</div>
                                   <div>
-                                    <div style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{o.name}</div>
-                                    <div style={{ fontSize: 11, color: '#4B5563' }}>@{o.username}</div>
+                                    <div className="od-name-text" style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', transition: 'color 0.15s' }}>{o.name}</div>
+                                    {o.username && <div style={{ fontSize: 11, color: '#4B5563' }}>@{o.username}</div>}
                                   </div>
                                 </div>
                               </td>
-                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>{o.city}</td>
+                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>{o.email}</td>
                               <td>
                                 <span style={{ fontSize: 13, color: '#F0F2FF', fontWeight: 600 }}>{o.events}</span>
                                 <span style={{ fontSize: 11, color: '#4B5563', marginLeft: 4 }}>({o.active} live)</span>
                               </td>
                               <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>{fmtDate(o.joined)}</td>
-                              <td className="ms-hide">
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                  <span style={{ color: '#FFC745', fontSize: 12 }}>★</span>
-                                  <span style={{ fontSize: 13, color: '#D1D5DB' }}>{o.rating.toFixed(1)}</span>
-                                </div>
-                              </td>
                               <td><SBadge status={os} /></td>
                               <td>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
                                   <button className="ms-ib blue" title="Contact" onClick={e => { e.stopPropagation(); setContactTarget(o) }}><Mail size={12} /></button>
-                                  <Link href={`/organizer/${o.username}`} target="_blank" className="ms-ib" title="View profile" style={{ color: '#6B7280', textDecoration: 'none' }}><ExternalLink size={12} /></Link>
+                                  {o.username ? (
+                                    <Link href={`/organizer/${o.username}`} target="_blank" className="ms-ib" title="View public profile" style={{ color: '#6B7280', textDecoration: 'none' }}><ExternalLink size={12} /></Link>
+                                  ) : (
+                                    <span className="ms-ib" title="No username set — organizer must set one in Settings" style={{ opacity: 0.25, cursor: 'not-allowed' }}><ExternalLink size={12} /></span>
+                                  )}
                                   <div className="ms-menu" onClick={e => e.stopPropagation()}>
-                                    <button className="ms-ib" onClick={() => setOpenOrgMenu(openOrgMenu === o.id ? null : o.id)}><MoreHorizontal size={13} /></button>
+                                    <button className="ms-ib" onClick={(e) => {
+                                      if (openOrgMenu === o.id) { setOpenOrgMenu(null); return }
+                                      const r = (e.currentTarget as HTMLElement).getBoundingClientRect()
+                                      setOrgMenuPos({ top: r.bottom + 6, right: window.innerWidth - r.right })
+                                      setOpenOrgMenu(o.id)
+                                    }}><MoreHorizontal size={13} /></button>
                                     {openOrgMenu === o.id && (
-                                      <div className="ms-dropdown">
+                                      <div className="ms-dropdown" style={{ position: 'fixed', top: orgMenuPos.top, right: orgMenuPos.right, left: 'auto' }}>
                                         {os !== 'active'    && <button className="ms-drop-item dd-green" onClick={() => setOrgStatus(o.id, 'active')}><UserCheck size={13} /> Restore to Active</button>}
                                         {os !== 'review'    && <button className="ms-drop-item dd-amber" onClick={() => setOrgStatus(o.id, 'review')}><Flag size={13} /> Put Under Review</button>}
                                         {os !== 'suspended' && <button className="ms-drop-item dd-red"   onClick={() => setOrgStatus(o.id, 'suspended')}><Ban size={13} /> Suspend Account</button>}
                                         <div className="ms-drop-divider" />
                                         <button className="ms-drop-item" onClick={() => { setContactTarget(o); setOpenOrgMenu(null) }}><Mail size={13} /> Contact Organizer</button>
-                                        <Link href={`/organizer/${o.username}`} target="_blank" className="ms-drop-item"><Eye size={13} /> View Public Profile</Link>
+                                        {o.username ? (
+                                          <Link href={`/organizer/${o.username}`} target="_blank" className="ms-drop-item"><Eye size={13} /> View Public Profile</Link>
+                                        ) : (
+                                          <span className="ms-drop-item" style={{ opacity: 0.35, cursor: 'not-allowed' }}><Eye size={13} /> No username set</span>
+                                        )}
                                         <div className="ms-drop-divider" />
                                         <button className="ms-drop-item dd-red" onClick={() => { setRemovedOrgs(s => new Set([...s, o.id])); setOpenOrgMenu(null) }}><Trash2 size={13} /> Remove Organizer</button>
                                       </div>
@@ -733,7 +1447,7 @@ export default function MasterPage() {
                       </thead>
                       <tbody>
                         {filteredEvents.length === 0 && (
-                          <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px 20px', color: '#374151' }}>No events found</td></tr>
+                          <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px 20px', color: '#374151' }}>{loading ? 'Loading…' : 'No events found'}</td></tr>
                         )}
                         {filteredEvents.map(e => {
                           const es = getEvtStatus(e)
@@ -747,7 +1461,7 @@ export default function MasterPage() {
                               </td>
                               <td>
                                 <div style={{ fontSize: 13, color: '#D1D5DB' }}>{e.org}</div>
-                                <div style={{ fontSize: 11, color: '#4B5563' }}>@{e.username}</div>
+                                {e.username && <div style={{ fontSize: 11, color: '#4B5563' }}>@{e.username}</div>}
                               </td>
                               <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(e.date)}</td>
                               <td>
@@ -760,9 +1474,14 @@ export default function MasterPage() {
                               <td>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
                                   <div className="ms-menu" onClick={ev => ev.stopPropagation()}>
-                                    <button className="ms-ib" onClick={() => setOpenEvtMenu(openEvtMenu === e.id ? null : e.id)}><MoreHorizontal size={13} /></button>
+                                    <button className="ms-ib" onClick={(ev) => {
+                                      if (openEvtMenu === e.id) { setOpenEvtMenu(null); return }
+                                      const r = (ev.currentTarget as HTMLElement).getBoundingClientRect()
+                                      setEvtMenuPos({ top: r.bottom + 6, right: window.innerWidth - r.right })
+                                      setOpenEvtMenu(e.id)
+                                    }}><MoreHorizontal size={13} /></button>
                                     {openEvtMenu === e.id && (
-                                      <div className="ms-dropdown">
+                                      <div className="ms-dropdown" style={{ position: 'fixed', top: evtMenuPos.top, right: evtMenuPos.right, left: 'auto' }}>
                                         {es === 'flagged'   && <button className="ms-drop-item dd-green" onClick={() => { setEventStatuses(s => ({...s,[e.id]:'live'})); setOpenEvtMenu(null) }}><CheckCircle size={13} /> Clear Flag</button>}
                                         {es !== 'flagged'   && es !== 'suspended' && <button className="ms-drop-item dd-amber" onClick={() => { setEventStatuses(s => ({...s,[e.id]:'flagged'})); setOpenEvtMenu(null) }}><Flag size={13} /> Flag Event</button>}
                                         {es !== 'suspended' && <button className="ms-drop-item dd-red" onClick={() => { setEventStatuses(s => ({...s,[e.id]:'suspended'})); setOpenEvtMenu(null) }}><Ban size={13} /> Suspend Event</button>}
@@ -771,7 +1490,7 @@ export default function MasterPage() {
                                         <button
                                           className="ms-drop-item"
                                           onClick={() => {
-                                            const org = MOCK_ORGS.find(o => o.username === e.username)
+                                            const org = orgs.find(o => o.id === e.orgId)
                                             if (org) { setContactTarget(org); setTab('organizers') }
                                             setOpenEvtMenu(null)
                                           }}
@@ -791,9 +1510,14 @@ export default function MasterPage() {
                   </div>
                 </div>
                 <div style={{ marginTop: 12, fontSize: 12, color: '#374151', fontFamily: 'var(--font-body)', paddingLeft: 2 }}>
-                  Showing {filteredEvents.length} of {MOCK_EVENTS.length} events
+                  {loading ? 'Loading events…' : `Showing ${filteredEvents.length} of ${events.length} events`}
                 </div>
               </div>
+            )}
+
+            {/* ════════════════════════════════════════════════════ ANALYTICS */}
+            {tab === 'analytics' && (
+              <AnalyticsView onOrgClick={(id) => { setSelectedOrgId(id); setTab('organizers') }} />
             )}
 
             {/* ════════════════════════════════════════════════════ QUERIES */}
@@ -883,7 +1607,7 @@ export default function MasterPage() {
                                   )}
                                   {/* Contact the sender if they are an organizer */}
                                   {q.fromType === 'organizer' && (() => {
-                                    const org = MOCK_ORGS.find(o => o.name === q.from)
+                                    const org = orgs.find((o: Org) => o.name === q.from)
                                     return org ? (
                                       <button title="Contact" className="ms-ib blue" onClick={() => setContactTarget(org)}><Mail size={11} /></button>
                                     ) : null
