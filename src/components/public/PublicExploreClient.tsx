@@ -40,22 +40,104 @@ function fmtTime(iso: string) {
 
 /* ─── Responsive CSS ─────────────────────────────────────────────── */
 const CSS = `
-  @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulseDot { 0%,100% { box-shadow:0 0 6px #1E5EFF; opacity:1; } 50% { box-shadow:0 0 14px #1E5EFF; opacity:0.6; } }
+  @keyframes orbDrift { 0%,100% { transform:translateX(-50%) translateY(0); } 50% { transform:translateX(-50%) translateY(-28px); } }
 
   .pe-wrap { background:#080A10; min-height:100vh; padding-top:64px; font-family:var(--font-body); }
 
   /* Container */
   .pe-container { max-width:1200px; margin:0 auto; padding:0 16px; }
 
-  /* Hero — mobile first */
-  .pe-hero { padding:36px 16px 32px; max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:64px; }
-  .pe-hero-text { flex:1; min-width:0; animation:fadeUp 0.55s ease; }
-  .pe-hero-visual { flex:0 0 420px; display:none; }
-  .pe-hero-h1 { color:#fff; font-size:clamp(28px,7vw,56px); font-weight:900; margin:0 0 12px; font-family:var(--font-display); letter-spacing:-1.5px; line-height:1.08; }
-  .pe-hero-sub { color:#9CA3AF; font-size:14px; margin:0 0 24px; line-height:1.65; }
-  .pe-stats { display:flex; gap:24px; }
-  .pe-stat-n { color:white; font-size:22px; font-weight:900; margin:0 0 2px; font-family:var(--font-display); }
-  .pe-stat-l { color:#4B5563; font-size:10px; margin:0; font-weight:600; letter-spacing:0.5px; }
+  /* ── Hero ── */
+  .pe-hero {
+    position:relative; overflow:hidden;
+    min-height:88vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:120px 24px 72px;
+  }
+  .pe-hero-grid {
+    position:absolute; inset:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.022) 1px, transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,0.022) 1px, transparent 1px);
+    background-size:64px 64px;
+    mask-image:radial-gradient(ellipse 85% 65% at 50% 20%, black 0%, transparent 100%);
+    -webkit-mask-image:radial-gradient(ellipse 85% 65% at 50% 20%, black 0%, transparent 100%);
+  }
+  .pe-hero-orb-1 {
+    position:absolute; top:-15%; left:50%; transform:translateX(-50%);
+    width:900px; height:700px; pointer-events:none;
+    background:radial-gradient(ellipse, rgba(30,94,255,0.2) 0%, transparent 68%);
+    animation:orbDrift 18s ease-in-out infinite;
+  }
+  .pe-hero-orb-2 {
+    position:absolute; top:30%; left:5%;
+    width:500px; height:500px; pointer-events:none; border-radius:50%;
+    background:radial-gradient(ellipse, rgba(168,85,247,0.1) 0%, transparent 70%);
+  }
+  .pe-hero-orb-3 {
+    position:absolute; top:15%; right:2%;
+    width:480px; height:480px; pointer-events:none; border-radius:50%;
+    background:radial-gradient(ellipse, rgba(34,197,94,0.07) 0%, transparent 70%);
+  }
+  .pe-hero-content { position:relative; z-index:2; }
+  .pe-hero-badge {
+    display:inline-flex; align-items:center; gap:10px;
+    padding:6px 16px; border-radius:100px;
+    border:1px solid rgba(30,94,255,0.3); background:rgba(30,94,255,0.08);
+    font-size:12px; font-weight:700; color:#6B9FFF;
+    letter-spacing:0.07em; text-transform:uppercase;
+    margin-bottom:28px; animation:fadeUp 0.7s ease both;
+  }
+  .pe-badge-dot {
+    width:7px; height:7px; border-radius:50%;
+    background:#1E5EFF; box-shadow:0 0 10px #1E5EFF;
+    animation:pulseDot 2s infinite; flex-shrink:0;
+  }
+  .pe-hero-h1 {
+    font-family:var(--font-display);
+    font-size:clamp(40px,7.5vw,82px);
+    font-weight:700; line-height:1.0; letter-spacing:-3px;
+    color:white; margin:0; animation:fadeUp 0.7s ease 0.1s both;
+  }
+  .pe-hero-h1 .pe-accent {
+    background:linear-gradient(135deg,#5B8AFF 0%,#1E5EFF 50%,#8B5CF6 100%);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  .pe-hero-sub {
+    margin:22px auto 0; font-size:clamp(15px,2.2vw,19px);
+    color:#9CA3AF; max-width:540px; line-height:1.75;
+    animation:fadeUp 0.7s ease 0.2s both;
+  }
+  .pe-hero-cta {
+    display:flex; gap:12px; margin-top:40px;
+    flex-wrap:wrap; justify-content:center;
+    animation:fadeUp 0.7s ease 0.3s both;
+  }
+  .pe-btn-primary {
+    padding:15px 30px; border-radius:12px; font-size:15px; font-weight:700;
+    background:#1E5EFF; color:white; text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    box-shadow:0 0 40px rgba(30,94,255,0.45);
+    transition:opacity 0.2s, transform 0.25s, box-shadow 0.25s;
+    font-family:var(--font-display);
+  }
+  .pe-btn-primary:hover { opacity:0.9; transform:translateY(-2px); box-shadow:0 0 60px rgba(30,94,255,0.6); }
+  .pe-btn-outline {
+    padding:15px 30px; border-radius:12px; font-size:15px; font-weight:600;
+    border:1px solid rgba(255,255,255,0.1); color:#9CA3AF; text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:border-color 0.2s, color 0.2s, transform 0.2s;
+    font-family:var(--font-display);
+  }
+  .pe-btn-outline:hover { border-color:rgba(255,255,255,0.22); color:#F0F2FF; transform:translateY(-1px); }
+  .pe-hero-stats {
+    display:flex; gap:36px; margin-top:44px; justify-content:center;
+    animation:fadeUp 0.7s ease 0.4s both;
+  }
+  .pe-stat-n { color:white; font-size:26px; font-weight:900; margin:0 0 3px; font-family:var(--font-display); }
+  .pe-stat-l { color:#4B5563; font-size:11px; margin:0; font-weight:600; letter-spacing:0.5px; }
 
   /* Category pills */
   .pe-cats { display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; margin-bottom:24px; }
@@ -78,9 +160,7 @@ const CSS = `
 
   /* Tablet+ */
   @media (min-width:600px) {
-    .pe-hero { padding:48px 24px 40px; }
     .pe-container { padding:0 24px; }
-
     .pe-featured-grid { grid-template-columns:repeat(2,1fr); }
     .pe-events-grid   { grid-template-columns:repeat(2,1fr); }
     .pe-nudge { flex-direction:row; align-items:center; justify-content:space-between; padding:24px 28px; }
@@ -92,12 +172,6 @@ const CSS = `
 
   /* Desktop */
   @media (min-width:900px) {
-    .pe-hero { padding:64px 24px 48px; }
-    .pe-hero-visual { display:block; }
-    .pe-hero-h1 { font-size:clamp(32px,4vw,56px); }
-    .pe-hero-sub { font-size:16px; margin-bottom:32px; }
-    .pe-stat-n { font-size:28px; }
-    .pe-stats { gap:36px; }
     .pe-cats { flex-wrap:wrap; overflow-x:visible; }
     .pe-featured-grid { grid-template-columns:repeat(2,1fr); gap:16px; }
     .pe-events-grid   { grid-template-columns:repeat(3,1fr); gap:14px; }
@@ -367,42 +441,48 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
 
         {/* ── Hero ── */}
         <div className="pe-hero">
-          <div className="pe-hero-text">
-            <p style={{ color: '#1E5EFF', fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', margin: '0 0 18px' }}>
-              UPCOMING EVENTS ACROSS PAKISTAN
-            </p>
+          <div className="pe-hero-grid" />
+          <div className="pe-hero-orb-1" />
+          <div className="pe-hero-orb-2" />
+          <div className="pe-hero-orb-3" />
+
+          <div className="pe-hero-content">
+            <div className="pe-hero-badge">
+              <span className="pe-badge-dot" />
+              Upcoming events across Pakistan
+            </div>
+
             <h1 className="pe-hero-h1">
-              What's happening<br /><span style={{ color: '#1E5EFF' }}>near you</span>
+              What's happening<br />
+              <span className="pe-accent">near you</span>
             </h1>
+
             <p className="pe-hero-sub">
-              Browse top events — from underground nights to massive concerts.<br />
+              Browse top events — from underground nights to massive concerts.
               RSVP free in 30 seconds.
             </p>
-            <div className="pe-stats">
+
+            <div className="pe-hero-cta">
+              <Link href="/auth/login" className="pe-btn-primary">
+                Join free <ArrowRight size={16} />
+              </Link>
+              <Link href="/auth/login" className="pe-btn-outline">
+                Sign in
+              </Link>
+            </div>
+
+            <div className="pe-hero-stats">
               {[
                 { n: `${events.length}+`, label: 'live events' },
                 { n: 'Free',              label: 'to sign up'  },
                 { n: '30s',              label: 'to RSVP'     },
               ].map(s => (
-                <div key={s.label}>
+                <div key={s.label} style={{ textAlign: 'center' }}>
                   <p className="pe-stat-n">{s.n}</p>
                   <p className="pe-stat-l">{s.label}</p>
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: 32, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <Link href="/auth/login" style={{ background: '#1E5EFF', color: 'white', fontSize: 14, fontWeight: 700, textDecoration: 'none', padding: '11px 28px', borderRadius: 24, display: 'inline-flex', alignItems: 'center', gap: 6, boxShadow: '0 0 24px rgba(30,94,255,0.35)' }}>
-                Join free <ArrowRight size={14} />
-              </Link>
-              <Link href="/auth/login" style={{ background: 'rgba(255,255,255,0.06)', color: '#D1D5DB', fontSize: 14, fontWeight: 600, textDecoration: 'none', padding: '11px 24px', borderRadius: 24, border: '1px solid rgba(255,255,255,0.1)' }}>
-                Sign in
-              </Link>
-            </div>
-          </div>
-
-          {/* Desktop visual */}
-          <div className="pe-hero-visual">
-            <HeroVisual events={events} catMap={catMap} />
           </div>
         </div>
 
