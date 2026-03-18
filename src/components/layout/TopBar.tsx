@@ -37,7 +37,7 @@ export default function TopBar({ profile, onMenuClick }: Props) {
   }
 
   return (
-    <header className="h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-brand-charcoal border-b border-white/[0.04] flex items-center justify-between px-4 md:px-6 shrink-0">
+    <header className="relative h-[calc(4rem+env(safe-area-inset-top))] pt-[env(safe-area-inset-top)] bg-brand-charcoal border-b border-white/[0.04] flex items-center justify-between px-4 md:px-6 shrink-0">
       <div className="flex items-center gap-3">
         {/* Hamburger — mobile only */}
         <button
@@ -47,14 +47,14 @@ export default function TopBar({ profile, onMenuClick }: Props) {
         >
           <Menu className="w-5 h-5" />
         </button>
-
-        <h1
-          className="text-lg font-bold text-white"
-          style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}
-        >
-          {getTitle()}
-        </h1>
       </div>
+
+      <h1
+        className="text-lg font-bold text-white absolute left-1/2 -translate-x-1/2"
+        style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}
+      >
+        {getTitle()}
+      </h1>
 
       <div className="flex items-center gap-3">
         <NotificationBell />
