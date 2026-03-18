@@ -45,40 +45,67 @@ const CSS = `
 
   /* Nav */
   .pe-nav { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(8,10,16,0.92); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.06); height:64px; display:flex; align-items:center; }
-  .pe-nav-inner { max-width:1200px; width:100%; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between; }
+  .pe-nav-inner { max-width:1200px; width:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; justify-content:space-between; }
 
   /* Container */
-  .pe-container { max-width:1200px; margin:0 auto; padding:0 24px; }
+  .pe-container { max-width:1200px; margin:0 auto; padding:0 16px; }
 
-  /* Hero */
-  .pe-hero { padding:64px 24px 48px; max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:64px; }
+  /* Hero — mobile first */
+  .pe-hero { padding:36px 16px 32px; max-width:1200px; margin:0 auto; display:flex; align-items:center; gap:64px; }
   .pe-hero-text { flex:1; min-width:0; animation:fadeUp 0.55s ease; }
   .pe-hero-visual { flex:0 0 420px; display:none; }
-  .pe-hero-h1 { color:#fff; font-size:clamp(32px,4vw,56px); font-weight:900; margin:0 0 16px; font-family:var(--font-display); letter-spacing:-1.5px; line-height:1.08; }
-  .pe-hero-sub { color:#9CA3AF; font-size:16px; margin:0 0 32px; line-height:1.7; }
-  .pe-stats { display:flex; gap:36px; }
+  .pe-hero-h1 { color:#fff; font-size:clamp(28px,7vw,56px); font-weight:900; margin:0 0 12px; font-family:var(--font-display); letter-spacing:-1.5px; line-height:1.08; }
+  .pe-hero-sub { color:#9CA3AF; font-size:14px; margin:0 0 24px; line-height:1.65; }
+  .pe-stats { display:flex; gap:24px; }
+  .pe-stat-n { color:white; font-size:22px; font-weight:900; margin:0 0 2px; font-family:var(--font-display); }
+  .pe-stat-l { color:#4B5563; font-size:10px; margin:0; font-weight:600; letter-spacing:0.5px; }
 
   /* Category pills */
-  .pe-cats { display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; margin-bottom:28px; }
+  .pe-cats { display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; margin-bottom:24px; }
 
-  /* Events grid */
-  .pe-featured-grid { display:grid; grid-template-columns:1fr; gap:16px; margin-bottom:16px; }
-  .pe-events-grid   { display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-bottom:16px; }
+  /* Events grid — mobile: single column */
+  .pe-featured-grid { display:grid; grid-template-columns:1fr; gap:14px; margin-bottom:14px; }
+  .pe-events-grid   { display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:14px; }
 
-  /* Why grid */
-  .pe-why-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  /* Nudge — mobile: stack vertically */
+  .pe-nudge { display:flex; flex-direction:column; gap:16px; border-radius:18px; padding:20px 18px; }
+  .pe-nudge-row { display:flex; align-items:flex-start; gap:14px; }
+  .pe-nudge-btn { width:100%; justify-content:center !important; }
+
+  /* Why grid — mobile: 2 columns */
+  .pe-why-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
 
   /* CTA */
-  .pe-cta-btns { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .pe-cta-btns { display:flex; flex-direction:column; align-items:stretch; gap:12px; }
+  .pe-cta-primary { width:100%; justify-content:center !important; }
 
-  /* Desktop overrides */
-  @media (min-width:900px) {
-    .pe-hero-visual { display:block; }
-    .pe-cats { flex-wrap:wrap; overflow-x:visible; }
+  /* Tablet+ */
+  @media (min-width:600px) {
+    .pe-hero { padding:48px 24px 40px; }
+    .pe-container { padding:0 24px; }
+    .pe-nav-inner { padding:0 24px; }
     .pe-featured-grid { grid-template-columns:repeat(2,1fr); }
-    .pe-events-grid   { grid-template-columns:repeat(3,1fr); }
-    .pe-why-grid      { grid-template-columns:repeat(4,1fr); }
-    .pe-cta-btns      { flex-direction:row; justify-content:center; }
+    .pe-events-grid   { grid-template-columns:repeat(2,1fr); }
+    .pe-nudge { flex-direction:row; align-items:center; justify-content:space-between; padding:24px 28px; }
+    .pe-nudge-row { align-items:center; }
+    .pe-nudge-btn { width:auto !important; }
+    .pe-cta-btns { flex-direction:row; justify-content:center; align-items:center; }
+    .pe-cta-primary { width:auto !important; }
+  }
+
+  /* Desktop */
+  @media (min-width:900px) {
+    .pe-hero { padding:64px 24px 48px; }
+    .pe-hero-visual { display:block; }
+    .pe-hero-h1 { font-size:clamp(32px,4vw,56px); }
+    .pe-hero-sub { font-size:16px; margin-bottom:32px; }
+    .pe-stat-n { font-size:28px; }
+    .pe-stats { gap:36px; }
+    .pe-cats { flex-wrap:wrap; overflow-x:visible; }
+    .pe-featured-grid { grid-template-columns:repeat(2,1fr); gap:16px; }
+    .pe-events-grid   { grid-template-columns:repeat(3,1fr); gap:14px; }
+    .pe-why-grid      { grid-template-columns:repeat(4,1fr); gap:12px; }
+    .pe-nudge { padding:28px 32px; }
   }
 `
 
@@ -190,7 +217,7 @@ function EventCard({ event, category, featured = false }: { event: Event; catego
         }}
       >
         {/* Cover */}
-        <div style={{ height: featured ? 200 : 150, position: 'relative', flexShrink: 0, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : grad(event.id) }}>
+        <div style={{ height: featured ? 170 : 130, position: 'relative', flexShrink: 0, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : grad(event.id) }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(12,14,22,0.95) 0%, transparent 55%)' }} />
           <div style={{ position: 'absolute', top: 10, left: 10, right: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 6 }}>
             <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
@@ -253,20 +280,18 @@ function EventCard({ event, category, featured = false }: { event: Event; catego
 function SignupNudge({ variant = 'default' }: { variant?: 'default' | 'gold' }) {
   const isGold = variant === 'gold'
   return (
-    <div style={{
+    <div className="pe-nudge" style={{
       background: isGold
         ? 'linear-gradient(135deg, rgba(255,199,69,0.1), rgba(249,115,22,0.06))'
         : 'linear-gradient(135deg, rgba(30,94,255,0.12), rgba(168,85,247,0.07))',
       border: `1px solid ${isGold ? 'rgba(255,199,69,0.25)' : 'rgba(30,94,255,0.25)'}`,
-      borderRadius: 20, padding: '28px 32px',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 24, flexWrap: 'wrap',
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1, minWidth: 0 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 14, background: isGold ? 'rgba(255,199,69,0.15)' : 'rgba(30,94,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Sparkles size={20} color={isGold ? '#FFC745' : '#1E5EFF'} />
+      <div className="pe-nudge-row">
+        <div style={{ width: 42, height: 42, borderRadius: 13, background: isGold ? 'rgba(255,199,69,0.15)' : 'rgba(30,94,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Sparkles size={18} color={isGold ? '#FFC745' : '#1E5EFF'} />
         </div>
-        <div>
-          <p style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>
+        <div style={{ minWidth: 0 }}>
+          <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>
             {isGold ? 'Get personalised event picks' : 'Ready to RSVP?'}
           </p>
           <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
@@ -276,9 +301,9 @@ function SignupNudge({ variant = 'default' }: { variant?: 'default' | 'gold' }) 
           </p>
         </div>
       </div>
-      <Link href="/auth/login" style={{
+      <Link href="/auth/login" className="pe-nudge-btn" style={{
         background: isGold ? '#FFC745' : '#1E5EFF', color: isGold ? '#0D0F18' : 'white',
-        fontSize: 14, fontWeight: 700, textDecoration: 'none', flexShrink: 0,
+        fontSize: 14, fontWeight: 700, textDecoration: 'none',
         padding: '11px 24px', borderRadius: 24,
         display: 'inline-flex', alignItems: 'center', gap: 6,
       }}>
@@ -336,10 +361,10 @@ function FinalCTA({ totalEvents }: { totalEvents: number }) {
         RSVP instantly. Get your QR ticket.<br />Your personalised event feed awaits.
       </p>
       <div className="pe-cta-btns">
-        <Link href="/auth/login" style={{ background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, textDecoration: 'none', padding: '14px 40px', borderRadius: 30, display: 'inline-flex', alignItems: 'center', gap: 8, boxShadow: '0 0 32px rgba(30,94,255,0.4)' }}>
+        <Link href="/auth/login" className="pe-cta-primary" style={{ background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, textDecoration: 'none', padding: '14px 40px', borderRadius: 30, display: 'inline-flex', alignItems: 'center', gap: 8, boxShadow: '0 0 32px rgba(30,94,255,0.4)' }}>
           Create free account <ArrowRight size={16} />
         </Link>
-        <Link href="/auth/login" style={{ color: '#6B7280', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+        <Link href="/auth/login" style={{ color: '#6B7280', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
           Already on Tikkit? <span style={{ color: '#818CF8', marginLeft: 4 }}>Sign in →</span>
         </Link>
       </div>
@@ -387,8 +412,8 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
                 { n: '30s',              label: 'to RSVP'     },
               ].map(s => (
                 <div key={s.label}>
-                  <p style={{ color: 'white', fontSize: 28, fontWeight: 900, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>{s.n}</p>
-                  <p style={{ color: '#4B5563', fontSize: 11, margin: 0, fontWeight: 600, letterSpacing: '0.5px' }}>{s.label}</p>
+                  <p className="pe-stat-n">{s.n}</p>
+                  <p className="pe-stat-l">{s.label}</p>
                 </div>
               ))}
             </div>
