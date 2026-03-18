@@ -19,9 +19,27 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Tikkit',
-  description: 'Discover and attend exclusive events. Your digital pass lives here.',
+  metadataBase: new URL('https://tikkitx.com'),
+  title: {
+    template: '%s | Tikkit',
+    default: 'Tikkit | Host & Discover Exclusive Events in Pakistan',
+  },
+  description: 'The premier platform to discover, register, and host exclusive events nationwide across Pakistan.',
   applicationName: 'Tikkit',
+  openGraph: {
+    type: 'website',
+    siteName: 'Tikkit',
+    title: 'Tikkit | Host & Discover Exclusive Events in Pakistan',
+    description: 'The premier platform to discover, register, and host exclusive events nationwide across Pakistan.',
+    url: 'https://tikkitx.com',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit Event Platform Preview' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tikkit | Host & Discover Exclusive Events',
+    description: 'The premier platform to discover, register, and host exclusive events nationwide across Pakistan.',
+    images: ['/og-image.jpg'],
+  },
   icons: {
     icon: [
       { url: '/icons/favicon.svg', type: 'image/svg+xml' },

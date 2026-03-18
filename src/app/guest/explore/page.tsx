@@ -1,4 +1,18 @@
 import { Suspense } from 'react'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Explore Live Events Pakistan',
+  description: 'Discover the best upcoming concerts, private parties, corporate networking, and exclusive experiences playing near you.',
+  openGraph: {
+    title: 'Explore Live Events Pakistan | Tikkit',
+    description: 'Discover the best upcoming concerts, private parties, corporate networking, and exclusive experiences playing near you.',
+  },
+  twitter: {
+    title: 'Explore Live Events Pakistan | Tikkit',
+    description: 'Discover the best upcoming concerts, private parties, corporate networking, and exclusive experiences playing near you.',
+  },
+}
 import { createClient } from '@/lib/supabase/server'
 import ExploreClient from '@/components/guest/ExploreClient'
 import SkeletonExplore from '@/components/guest/SkeletonExplore'
