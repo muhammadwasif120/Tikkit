@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Search, MapPin, Clock, Lock, Flame, Zap, Star, CalendarDays,
   Building2, Users, Heart,
@@ -345,6 +346,7 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
   isFavourited: boolean
   onToggleFav: (id: string) => void
 }) {
+  const router = useRouter()
   const orgName = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Unknown Organizer'
   const orgUsername = event.organizer?.username
   const spotsLeft = (event.capacity && event.registered_count !== undefined) ? event.capacity - event.registered_count : null
@@ -387,15 +389,17 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
           <h3 style={{ color: 'white', fontSize: 13, fontWeight: 800, margin: '0 0 1px', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {event.title}
           </h3>
-          {/* Organizer link */}
+          {/* Organizer link — must be a span (not <a>) since EventRow is already inside <Link> */}
           {orgUsername ? (
-            <a
-              href={`/organizer/${orgUsername}`}
-              onClick={e => e.stopPropagation()}
-              style={{ color: '#818CF8', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic', textDecoration: 'none', display: 'inline-block' }}
+            <span
+              role="link"
+              tabIndex={0}
+              onClick={e => { e.preventDefault(); e.stopPropagation(); router.push(`/organizer/${orgUsername}`) }}
+              onKeyDown={e => e.key === 'Enter' && router.push(`/organizer/${orgUsername}`)}
+              style={{ color: '#818CF8', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic', cursor: 'pointer', display: 'inline-block' }}
             >
               {orgName} →
-            </a>
+            </span>
           ) : (
             <p style={{ color: '#6B7280', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic' }}>{orgName}</p>
           )}

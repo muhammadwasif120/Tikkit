@@ -6,11 +6,13 @@ import { createClient } from '@/lib/supabase/client'
 import {
   ArrowLeft, Calendar, MapPin, Users, Lock, Eye, Wallet, Ticket,
   Star, Tag, CreditCard, Building2, Smartphone, ExternalLink, Check,
-  ImagePlus, X,
+  ImagePlus, X, ChevronDown,
 } from 'lucide-react'
 import Link from 'next/link'
 import type { PaymentAccount } from '@/app/actions/paymentAccountActions'
 import { setEventPaymentAccounts } from '@/app/actions/paymentAccountActions'
+import { getEventCategories } from '@/app/actions/behaviourActions'
+import type { EventCategory } from '@/app/actions/behaviourActions'
 
 /* ─── Ticket tier state ─── */
 type TierKey = 'standard' | 'vip' | 'discounted'
@@ -81,8 +83,10 @@ export default function NewEventPage() {
     require_id_verification: false,
     require_reference_code: false,
     reference_code: '',
+    category_id: '',
   })
 
+  const [categories, setCategories] = useState<EventCategory[]>([])
   const [tiers, setTiers] = useState<Record<TierKey, Tier>>(DEFAULT_TIERS)
 
   // Payment accounts
@@ -90,17 +94,21 @@ export default function NewEventPage() {
   const [selectedAccountIds, setSelectedAccountIds] = useState<Set<string>>(new Set())
   const [collectPayment, setCollectPayment] = useState(false)
 
-  // Load organizer's payment accounts
+  // Load organizer's payment accounts + event categories
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      const { data } = await supabase
-        .from('payment_accounts')
-        .select('*')
-        .eq('organizer_id', user.id)
-        .order('created_at', { ascending: false })
+      const [{ data }, cats] = await Promise.all([
+        supabase
+          .from('payment_accounts')
+          .select('*')
+          .eq('organizer_id', user.id)
+          .order('created_at', { ascending: false }),
+        getEventCategories(),
+      ])
       setPaymentAccounts(data ?? [])
+      setCategories(cats)
     }
     load()
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -156,6 +164,7 @@ export default function NewEventPage() {
         require_id_verification: form.require_id_verification,
         require_reference_code:  form.require_reference_code,
         reference_code:          form.reference_code || null,
+        category_id:             form.category_id || null,
         status:                  'draft',
       })
       .select()
@@ -329,6 +338,37 @@ export default function NewEventPage() {
               </button>
             )}
           </div>
+
+          {/* ── Category ── */}
+          {categories.length > 0 && (() => {
+            const selectedCat = categories.find(c => c.id === form.category_id)
+            return (
+              <div>
+                <label className="label flex items-center gap-1.5">
+                  <Tag className="w-3 h-3" /> Category
+                </label>
+                <div className="relative">
+                  <select
+                    className="input appearance-none pr-9"
+                    value={form.category_id}
+                    onChange={e => update('category_id', e.target.value)}
+                    style={{
+                      color: selectedCat ? selectedCat.color : undefined,
+                      fontWeight: selectedCat ? 600 : undefined,
+                    }}
+                  >
+                    <option value="">— No category —</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.icon}  {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                </div>
+              </div>
+            )
+          })()}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
