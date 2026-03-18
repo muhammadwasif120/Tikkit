@@ -715,7 +715,7 @@ export default function LandingPage() {
           max-width: 440px; margin-left: auto; margin-right: auto; margin-top: 22px;
         }
         .cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 44px; }
-        .cta-note { margin-top: 18px; font-size: 13px; color: var(--subtle); }
+        .cta-note { margin-top: 18px; font-size: 13px; color: var(--gold); font-family: var(--font-display); font-weight: 700; letter-spacing: 0.1em; }
 
         /* ── Footer ── */
         .footer-inner {
@@ -1012,7 +1012,7 @@ export default function LandingPage() {
               Log in
             </Link>
           </div>
-          <p className="cta-note">No credit card required · Works on every phone · Made in Pakistan 🇵🇰</p>
+          <p className="cta-note">PLAN. PUBLISH. PARTY.</p>
         </div>
       </section>
 
@@ -1020,8 +1020,7 @@ export default function LandingPage() {
       <footer>
         <div className="footer-inner">
           <Link href="/" className="footer-brand">
-            <div className="footer-icon"><Ticket size={14} color="white" /></div>
-            <span className="footer-name">Tikkit</span>
+            <TikkitXLogo size="sm" />
           </Link>
           <p className="footer-copy">© {new Date().getFullYear()} Tikkit. Built in Pakistan 🇵🇰</p>
           <div className="footer-links">
