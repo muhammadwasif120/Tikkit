@@ -52,9 +52,9 @@ function Pill({ color, children }: { color: string; children: React.ReactNode })
   )
 }
 
-function GlassCard({ children, style = {} }: { children: React.ReactNode; style?: React.CSSProperties }) {
+function GlassCard({ children, style = {}, className }: { children: React.ReactNode; style?: React.CSSProperties; className?: string }) {
   return (
-    <div style={{
+    <div className={className} style={{
       background: 'rgba(13,15,24,0.85)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
@@ -784,12 +784,42 @@ export default function HowItWorksPage() {
           .step-section { grid-template-columns: 1fr; gap: 36px; }
           .step-section.reverse { direction: ltr; }
         }
+        .hiw-sec-header { margin-bottom: 80px; }
+        .hiw-cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+        .hiw-step-text { display: flex; flex-direction: column; gap: 32px; }
+
+        /* ── Footer ── */
+        .footer-inner {
+          max-width: 1200px; margin: 0 auto;
+          padding: 40px 24px;
+          display: flex; align-items: center; justify-content: space-between;
+          flex-wrap: wrap; gap: 16px;
+          border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .footer-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .footer-copy { font-size: 13px; color: #4B5563; }
+        .footer-links { display: flex; gap: 24px; }
+        .footer-link { color: #4B5563; font-size: 13px; text-decoration: none; transition: color 0.2s; }
+        .footer-link:hover { color: #9CA3AF; }
+
+        /* ── Switch card ── */
+        .hiw-switch-btn { display: flex; align-items: center; gap: 8px; white-space: nowrap; cursor: pointer; }
+
         @media (max-width: 640px) {
-          .tab-btn { padding: 10px 18px; font-size: 13px; }
-          .hiw-hero { min-height: auto !important; padding: 80px 20px 48px !important; }
-          .hiw-content { padding: 0 20px 64px !important; }
-          .hiw-cta { padding: 0 20px 64px !important; }
-          .step-section { gap: 24px; padding: 40px 0; }
+          .tab-btn { padding: 9px 16px; font-size: 13px; }
+          .hiw-hero { min-height: auto !important; padding: 72px 16px 40px !important; }
+          .hiw-content { padding: 0 16px 56px !important; }
+          .hiw-cta { padding: 0 16px 60px !important; }
+          .step-section { gap: 20px; padding: 36px 0; }
+          .hiw-sec-header { margin-bottom: 36px !important; }
+          .hiw-cta-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+          .hiw-cta-actions a { width: 100%; justify-content: center !important; box-sizing: border-box; }
+          .hiw-step-text { gap: 16px; }
+          .hiw-trust-badges { gap: 12px !important; margin-top: 28px !important; flex-direction: column; align-items: center; }
+          .hiw-switch-card { flex-direction: column !important; text-align: center; padding: 20px 18px !important; }
+          .hiw-switch-btn { width: 100%; justify-content: center !important; }
+          .footer-inner { flex-direction: column; text-align: center; padding: 28px 16px; }
+          .footer-links { justify-content: center; }
         }
       `}</style>
 
@@ -911,8 +941,8 @@ export default function HowItWorksPage() {
         }}
       >
         {/* Section header */}
-        <div style={{
-          textAlign: 'center', marginBottom: 80,
+        <div className="hiw-sec-header" style={{
+          textAlign: 'center',
           opacity: orgSectionInView.inView ? 1 : 0,
           transform: orgSectionInView.inView ? 'translateY(0)' : 'translateY(24px)',
           transition: 'opacity 0.6s ease, transform 0.6s ease',
@@ -940,7 +970,7 @@ export default function HowItWorksPage() {
               className={`step-section${i % 2 === 1 ? ' reverse' : ''}`}
             >
               {/* Text side */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+              <div className="hiw-step-text">
                 <FeatureStep
                   num={step.num}
                   icon={step.icon}
@@ -985,8 +1015,8 @@ export default function HowItWorksPage() {
         }}
       >
         {/* Section header */}
-        <div style={{
-          textAlign: 'center', marginBottom: 80,
+        <div className="hiw-sec-header" style={{
+          textAlign: 'center',
           opacity: attSectionInView.inView ? 1 : 0,
           transform: attSectionInView.inView ? 'translateY(0)' : 'translateY(24px)',
           transition: 'opacity 0.6s ease, transform 0.6s ease',
@@ -1014,7 +1044,7 @@ export default function HowItWorksPage() {
               className={`step-section${i % 2 === 1 ? ' reverse' : ''}`}
             >
               {/* Text side */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+              <div className="hiw-step-text">
                 <FeatureStep
                   num={step.num}
                   icon={step.icon}
@@ -1050,7 +1080,7 @@ export default function HowItWorksPage() {
 
       {/* ── Switch CTA strip ── */}
       <div style={{ maxWidth: 1100, margin: '0 auto 80px', padding: '0 24px' }}>
-        <GlassCard style={{ padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+        <GlassCard style={{ padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }} className="hiw-switch-card">
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: '#F0F2FF', marginBottom: 4 }}>
               {activeTab === 'organizer' ? 'Curious how attendees experience it?' : 'Want to run your own events?'}
@@ -1060,15 +1090,14 @@ export default function HowItWorksPage() {
             </div>
           </div>
           <button
+            className="hiw-switch-btn"
             onClick={() => { setActiveTab(activeTab === 'organizer' ? 'attendee' : 'organizer'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
             style={{
-              display: 'flex', alignItems: 'center', gap: 8,
               background: activeTab === 'organizer' ? 'rgba(255,199,69,0.12)' : 'rgba(30,94,255,0.12)',
               border: `1px solid ${activeTab === 'organizer' ? 'rgba(255,199,69,0.3)' : 'rgba(30,94,255,0.3)'}`,
               color: activeTab === 'organizer' ? '#FFC745' : '#1E5EFF',
               borderRadius: 10, padding: '10px 20px',
               fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-display)',
-              cursor: 'pointer', whiteSpace: 'nowrap',
             }}
           >
             {activeTab === 'organizer' ? <Ticket size={14} /> : <BarChart3 size={14} />}
@@ -1116,7 +1145,7 @@ export default function HowItWorksPage() {
             Join organizers across Pakistan who use Tikkit to manage events that people actually remember.
           </p>
 
-          <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
+          <div className="hiw-cta-actions">
             <Link href="/auth/login" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               background: 'linear-gradient(135deg,#1E5EFF,#1448CC)',
@@ -1141,7 +1170,7 @@ export default function HowItWorksPage() {
           </div>
 
           {/* Trust badges */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 40, flexWrap: 'wrap' }}>
+          <div className="hiw-trust-badges" style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 40, flexWrap: 'wrap' }}>
             {[
               { icon: Shield, text: 'No credit card required' },
               { icon: Zap, text: 'Live in 2 minutes' },
@@ -1155,6 +1184,20 @@ export default function HowItWorksPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Footer ── */}
+      <footer>
+        <div className="footer-inner">
+          <Link href="/" className="footer-brand">
+            <TikkitXLogo size="sm" />
+          </Link>
+          <p className="footer-copy">© {new Date().getFullYear()} Tikkit. Built in Pakistan 🇵🇰</p>
+          <div className="footer-links">
+            <Link href="/auth/login" className="footer-link">Log in</Link>
+            <Link href="/auth/login" className="footer-link">Sign up</Link>
+          </div>
+        </div>
+      </footer>
     </>
   )
 }

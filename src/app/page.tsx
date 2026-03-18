@@ -787,45 +787,55 @@ export default function LandingPage() {
           .nav-hamburger { display: block; }
 
           /* Hero */
-          .hero { padding: 100px 20px 48px; }
-          .hero-h1 { letter-spacing: -1.5px; }
-          .hero-scroll { margin-top: 48px; }
+          .hero { padding: 80px 16px 36px; min-height: auto; }
+          .hero-h1 { letter-spacing: -1.5px; font-size: clamp(36px, 9vw, 56px); }
+          .hero-sub { font-size: 15px; margin-top: 18px; }
+          .hero-scroll { margin-top: 36px; }
           .hero-badge { font-size: 10px; gap: 8px; padding: 5px 12px; white-space: nowrap; }
+          .hero-cta { flex-direction: column; align-items: stretch; margin-top: 32px; }
+          .btn-primary-lg, .btn-gold-lg, .btn-outline-lg { justify-content: center; width: 100%; padding: 14px 24px; }
 
-          /* Stats — keep 3 columns, compress font + padding */
-          .stats-band { padding: 40px 20px; }
+          /* Stats */
+          .stats-band { padding: 36px 16px; }
           .stats-inner { gap: 0; }
           .stat-item::after { top: 10%; bottom: 10%; }
-          .stat-val { font-size: clamp(28px, 7.5vw, 40px); letter-spacing: -1px; }
-          .stat-label { font-size: 12px; margin-top: 6px; }
+          .stat-val { font-size: clamp(26px, 7vw, 38px); letter-spacing: -1px; }
+          .stat-label { font-size: 11px; margin-top: 5px; max-width: none; }
 
           /* Features — 2-column grid */
           .feat-grid { grid-template-columns: repeat(2, 1fr); }
-          .feat-card { padding: 20px 16px; }
-          .feat-icon { width: 38px; height: 38px; border-radius: 10px; margin-bottom: 14px; }
+          .feat-card { padding: 18px 14px; }
+          .feat-icon { width: 36px; height: 36px; border-radius: 10px; margin-bottom: 12px; }
+          .feat-title { font-size: 13px; margin-bottom: 6px; }
+          .feat-desc { font-size: 12px; line-height: 1.55; }
 
-          /* Steps — 2-column grid, smaller numbers */
+          /* Steps — 2-column grid */
           .steps-grid { grid-template-columns: repeat(2, 1fr); }
-          .step-card { padding: 24px 20px; border-right: 1px solid var(--border) !important; border-top: 1px solid var(--border); }
+          .step-card { padding: 22px 16px; border-right: 1px solid var(--border) !important; border-top: 1px solid var(--border); }
           .step-card:first-child { border-top: none; }
-          .step-card:nth-child(2) { border-top: none; }
-          .step-card:nth-child(2) { border-right: none !important; }
+          .step-card:nth-child(2) { border-top: none; border-right: none !important; }
           .step-card:last-child { border-right: none !important; }
-          .step-num { font-size: 36px; margin-bottom: 14px; }
-          .step-title { font-size: 14px; }
-          .step-desc { font-size: 13px; }
+          .step-num { font-size: 32px; margin-bottom: 12px; }
+          .step-title { font-size: 13px; }
+          .step-desc { font-size: 12px; line-height: 1.55; }
 
           /* Why card */
-          .why-card { grid-template-columns: 1fr !important; gap: 28px !important; padding: 28px 24px !important; }
+          .why-card { grid-template-columns: 1fr !important; gap: 24px !important; padding: 24px 20px !important; }
+          .why-sub { font-size: 14px; }
+          .why-text { font-size: 14px; }
 
           /* CTA */
-          .cta-section { padding: 72px 20px; }
-          .cta-h2 { font-size: clamp(24px, 7vw, 30px); line-height: 1.2; letter-spacing: -1px; }
-          .cta-sub { font-size: 15px; margin-top: 16px; }
+          .cta-section { padding: 60px 16px; }
+          .cta-h2 { font-size: clamp(28px, 7.5vw, 36px); line-height: 1.1; letter-spacing: -1px; }
+          .cta-sub { font-size: 14px; margin-top: 14px; }
+          .cta-actions { flex-direction: column; align-items: stretch; gap: 10px; }
+          .cta-actions .btn-primary-lg, .cta-actions .btn-gold-lg { width: 100%; justify-content: center; }
 
           /* General */
-          .section { padding: 56px 20px; }
-          .footer-inner { flex-direction: column; text-align: center; }
+          .section { padding: 48px 16px; }
+          .sec-h2 { font-size: clamp(26px, 6.5vw, 40px); }
+          .sec-sub { font-size: 14px; margin-top: 12px; }
+          .footer-inner { flex-direction: column; text-align: center; padding: 28px 16px; }
           .footer-links { justify-content: center; }
         }
       `}</style>
@@ -1008,8 +1018,8 @@ export default function LandingPage() {
             <Link href="/auth/login" className="btn-primary-lg">
               Create your first event <ArrowRight size={16} />
             </Link>
-            <Link href="/auth/login" className="btn-outline-lg">
-              Log in
+            <Link href="/explore" className="btn-gold-lg">
+              Explore events →
             </Link>
           </div>
           <p className="cta-note">PLAN. PUBLISH. PARTY.</p>

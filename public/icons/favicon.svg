@@ -1,13 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
   <rect width="32" height="32" rx="7" fill="#080A10"/>
-  <!-- Purple stroke layer -->
-  <text x="16" y="16" text-anchor="middle" dominant-baseline="central"
-    font-family="'Arial Black','Impact','Helvetica Neue',sans-serif"
-    font-weight="900" font-size="26"
-    fill="none" stroke="#8800CC" stroke-width="3" stroke-linejoin="round">X</text>
-  <!-- Cyan fill layer -->
-  <text x="16" y="16" text-anchor="middle" dominant-baseline="central"
-    font-family="'Arial Black','Impact','Helvetica Neue',sans-serif"
-    font-weight="900" font-size="26"
-    fill="#00E5FF">X</text>
+  <rect x="3.84" y="10.559999999999999" width="24.32" height="10.88" rx="0" fill="#8800CC" transform="rotate(45 16 16)"/>
+  <rect x="3.84" y="10.559999999999999" width="24.32" height="10.88" rx="0" fill="#8800CC" transform="rotate(-45 16 16)"/>
+  <rect x="3.84" y="12.96" width="24.32" height="6.08" rx="0" fill="#00E5FF" transform="rotate(45 16 16)"/>
+  <rect x="3.84" y="12.96" width="24.32" height="6.08" rx="0" fill="#00E5FF" transform="rotate(-45 16 16)"/>
 </svg>
