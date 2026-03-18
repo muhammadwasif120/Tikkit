@@ -34,6 +34,18 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
 
   const isArchived = event.status === 'completed' || event.status === 'cancelled'
 
+  // Fetch category details for display (read-only — locked after creation)
+  const ev = event as any
+  let category: { name: string; icon: string; color: string } | null = null
+  if (ev.category_id) {
+    const { data: cat } = await (supabase as any)
+      .from('event_categories')
+      .select('name, icon, color')
+      .eq('id', ev.category_id)
+      .single()
+    category = cat ?? null
+  }
+
   const { data: guests } = await supabase
     .from('guests')
     .select('*')
@@ -79,6 +91,15 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
               </h2>
               <span className={clsx(statusBadge[event.status])}>{event.status}</span>
               {!event.is_public && <span className="badge-yellow">Private</span>}
+              {category && (
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
+                  style={{ background: `${category.color}18`, color: category.color, border: `1px solid ${category.color}30` }}
+                >
+                  <span>{category.icon}</span>
+                  <span>{category.name}</span>
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-4 text-xs text-gray-500">
               <span className="flex items-center gap-1">
