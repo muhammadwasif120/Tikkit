@@ -6,7 +6,7 @@ import {
   Ticket, ArrowRight, ArrowLeft, Users, QrCode, BarChart3,
   CreditCard, MapPin, Calendar, CheckCircle, Sparkles,
   Zap, Shield, Bell, Search, Star, Clock, ChevronRight,
-  ScanLine, TrendingUp, UserCheck, Package, X, ChevronDown, Lock, ThumbsUp
+  ScanLine, TrendingUp, UserCheck, Package, X, ChevronDown, Lock, ThumbsUp, Menu
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
@@ -642,6 +642,7 @@ export default function HowItWorksPage() {
   const scrollY = useScrollY()
   const [activeTab, setActiveTab] = useState<'organizer' | 'attendee'>('organizer')
   const [openFaq, setOpenFaq] = useState<number | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
   const heroRef = useRef<HTMLDivElement>(null)
 
   // Organizer step refs
@@ -860,35 +861,43 @@ export default function HowItWorksPage() {
       `}</style>
 
       {/* ── Nav ── */}
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
-        padding: '0 24px',
-        background: scrollY > 40 ? 'rgba(8,10,16,0.9)' : 'transparent',
-        backdropFilter: scrollY > 40 ? 'blur(20px)' : 'none',
-        WebkitBackdropFilter: scrollY > 40 ? 'blur(20px)' : 'none',
-        borderBottom: scrollY > 40 ? '1px solid rgba(255,255,255,0.06)' : 'none',
-        height: 64,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        transition: 'background 0.3s ease, border-color 0.3s ease',
-      }}>
-        <Link href="/" style={{ display: 'flex', textDecoration: 'none' }}>
-          <TikkitXLogo size="sm" />
+      <nav className={`nav ${scrollY > 40 ? 'scrolled' : ''}`}>
+        <Link href="/" className="nav-logo">
+          <TikkitXLogo size="md" />
         </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#6B7280', textDecoration: 'none', fontFamily: 'var(--font-body)' }}>
-            <ArrowLeft size={14} /> Back
-          </Link>
-          <Link href="/auth/login" style={{
-            background: 'linear-gradient(135deg,#1E5EFF,#1448CC)',
-            color: 'white', textDecoration: 'none', borderRadius: 10, padding: '8px 18px',
-            fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-display)',
-            display: 'flex', alignItems: 'center', gap: 6,
-            boxShadow: '0 0 20px rgba(30,94,255,0.35)',
-          }}>
-            Get started <ArrowRight size={13} />
-          </Link>
+        <div className="nav-links">
+          <Link href="/#features" className="nav-link">Features</Link>
+          <Link href="/how-it-works" className="nav-link" style={{ color: '#F0F2FF' }}>How it works</Link>
+          <Link href="/explore" className="nav-link">Explore</Link>
         </div>
+        <div className="nav-actions">
+          <Link href="/auth/login" className="btn-ghost">Log in</Link>
+          <Link href="/auth/login" className="btn-nav">Get started <ArrowRight size={14} /></Link>
+        </div>
+        <button className="nav-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
+          <Menu size={24} />
+        </button>
       </nav>
+
+      {/* ── Mobile menu ── */}
+      <div className={`mmenu ${menuOpen ? 'open' : ''}`} role="dialog" aria-modal="true">
+        <div className="mmenu-header">
+          <div className="nav-logo">
+            <TikkitXLogo size="md" />
+          </div>
+          <button style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer' }}
+            onClick={() => setMenuOpen(false)} aria-label="Close menu">
+            <X size={24} />
+          </button>
+        </div>
+        <Link href="/#features" className="mmenu-link" onClick={() => setMenuOpen(false)}>Features</Link>
+        <Link href="/how-it-works" className="mmenu-link" onClick={() => setMenuOpen(false)}>How it works</Link>
+        <Link href="/explore" className="mmenu-link" onClick={() => setMenuOpen(false)}>Explore</Link>
+        <div className="mmenu-actions">
+          <Link href="/auth/login" className="btn-full-primary">Get started free</Link>
+          <Link href="/auth/login" className="btn-full-outline">Log in</Link>
+        </div>
+      </div>
 
       {/* ── Hero ── */}
       <section className="hiw-hero" style={{ position: 'relative', minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '120px 24px 80px', overflow: 'hidden' }}>
