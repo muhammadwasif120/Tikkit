@@ -10,7 +10,26 @@ type Recipient = {
 
 export async function POST(req: Request) {
   try {
+    // SECURITY PATCH: Strongly authorize the sender
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const { recipients, subject, body, eventId } = await req.json()
+
+    if (!eventId) return NextResponse.json({ error: 'eventId required' }, { status: 400 })
+    
+    // Verify the user owns this event
+    const { data: event, error: eventError } = await supabase
+      .from('events')
+      .select('organizer_id')
+      .eq('id', eventId)
+      .single()
+
+    if (eventError || !event || (event as any).organizer_id !== user.id) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
 
     if (!recipients?.length) {
       return NextResponse.json({ error: 'No recipients provided' }, { status: 400 })

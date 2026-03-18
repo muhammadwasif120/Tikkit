@@ -167,6 +167,12 @@ function buildPaymentRejectedEmail({ name, eventTitle, notes }: any) {
 
 export async function POST(req: NextRequest) {
   try {
+    // SECURITY PATCH: Prevent malicious email hijacking
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const body = await req.json()
     const { type, name, email, eventTitle, organizer } = body
 

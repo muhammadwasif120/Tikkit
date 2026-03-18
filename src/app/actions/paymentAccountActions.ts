@@ -7,7 +7,7 @@ export async function getPaymentAccounts() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('payment_accounts')
     .select('*')
     .eq('organizer_id', user.id)
@@ -33,13 +33,13 @@ export async function createPaymentAccount(account: {
 
   // If setting as default, unset all others first
   if (account.is_default) {
-    await supabase
+    await (supabase as any)
       .from('payment_accounts')
       .update({ is_default: false })
       .eq('organizer_id', user.id)
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('payment_accounts')
     .insert({ ...account, organizer_id: user.id })
     .select()
@@ -66,13 +66,13 @@ export async function updatePaymentAccount(id: string, updates: {
 
   // If setting as default, unset all others first
   if (updates.is_default) {
-    await supabase
+    await (supabase as any)
       .from('payment_accounts')
       .update({ is_default: false })
       .eq('organizer_id', user.id)
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('payment_accounts')
     .update(updates)
     .eq('id', id)
@@ -89,7 +89,7 @@ export async function deletePaymentAccount(id: string) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const { error } = await supabase
+  const { error } = await (supabase as any)
     .from('payment_accounts')
     .delete()
     .eq('id', id)
@@ -100,98 +100,107 @@ export async function deletePaymentAccount(id: string) {
 
 export async function approvePaymentSubmission(submissionId: string, registrationId: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
 
-  // 1. Mark submission approved
-  const { error: subError } = await supabase
+  // 1. Fetch registration + event details to verify ownership
+  const { data: reg } = await (supabase as any)
+    .from('public_registrations')
+    .select('*, event:events(*, organizer:profiles(full_name, company_name))')
+    .eq('id', registrationId)
+    .single()
+
+  if (!reg || (reg.event as any)?.organizer_id !== user.id) {
+    throw new Error('Forbidden: Only the event organizer can approve payments')
+  }
+
+  // 2. Mark submission approved
+  const { error: subError } = await (supabase as any)
     .from('payment_submissions')
     .update({ status: 'approved', reviewed_at: new Date().toISOString() })
     .eq('id', submissionId)
 
   if (subError) throw subError
 
-  // 2. Update registration payment_status → confirmed, status → approved
-  const { error: regError } = await supabase
+  // 3. Update registration payment_status → confirmed, status → approved
+  const { error: regError } = await (supabase as any)
     .from('public_registrations')
     .update({ payment_status: 'confirmed', status: 'approved', reviewed_at: new Date().toISOString() })
     .eq('id', registrationId)
 
   if (regError) throw regError
 
-  // 3. Fetch registration + event details for email + guest creation
-  const { data: reg } = await supabase
-    .from('public_registrations')
-    .select('*, event:events(*, organizer:profiles(full_name, company_name))')
-    .eq('id', registrationId)
-    .single()
+  // 4. Create guest record (payment is now confirmed)
+  await (supabase as any).from('guests').insert({
+    event_id:        (reg as any).event_id,
+    name:            (reg as any).full_name,
+    email:           (reg as any).email,
+    phone:           (reg as any).phone,
+    status:          'registered',
+    source:          'public_registration',
+    registration_id: (reg as any).id,
+  } as any)
 
-  if (reg) {
-    // 4. Create guest record (payment is now confirmed)
-    await supabase.from('guests').insert({
-      event_id:        reg.event_id,
-      name:            reg.full_name,
-      email:           reg.email,
-      phone:           reg.phone,
-      status:          'registered',
-      source:          'public_registration',
-      registration_id: reg.id,
-    })
-
-    // 5. Send payment confirmed email
-    const event = reg.event as any
-    await fetch('/api/send-approval-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type:          'payment_confirmed',
-        name:          reg.full_name,
-        email:         reg.email,
-        eventTitle:    event?.title,
-        organizer:     event?.organizer?.company_name ?? event?.organizer?.full_name,
-        referenceCode: event?.require_reference_code ? event?.reference_code : null,
-      }),
-    })
-  }
+  // 5. Send payment confirmed email
+  const event = (reg as any).event as any
+  await fetch('/api/send-approval-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type:          'payment_confirmed',
+      name:          (reg as any).full_name,
+      email:         (reg as any).email,
+      eventTitle:    event?.title,
+      organizer:     event?.organizer?.company_name ?? event?.organizer?.full_name,
+      referenceCode: event?.require_reference_code ? event?.reference_code : null,
+    }),
+  })
 }
 
 export async function rejectPaymentSubmission(submissionId: string, registrationId: string, notes?: string) {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Not authenticated')
 
-  // 1. Mark submission rejected
-  const { error: subError } = await supabase
+  // 1. Verify ownership and fetch email info
+  const { data: reg } = await (supabase as any)
+    .from('public_registrations')
+    .select('*, event:events(title, organizer_id)')
+    .eq('id', registrationId)
+    .single()
+
+  if (!reg || (reg.event as any)?.organizer_id !== user.id) {
+    throw new Error('Forbidden: Only the event organizer can reject payments')
+  }
+
+  // 2. Mark submission rejected
+  const { error: subError } = await (supabase as any)
     .from('payment_submissions')
     .update({ status: 'rejected', notes: notes ?? null, reviewed_at: new Date().toISOString() })
     .eq('id', submissionId)
 
   if (subError) throw subError
 
-  // 2. Update registration payment_status → rejected
-  const { error: regError } = await supabase
+  // 3. Update registration payment_status → rejected
+  const { error: regError } = await (supabase as any)
     .from('public_registrations')
     .update({ payment_status: 'rejected' })
     .eq('id', registrationId)
 
   if (regError) throw regError
 
-  // 3. Send rejection email
-  const { data: reg } = await supabase
-    .from('public_registrations')
-    .select('*, event:events(title)')
-    .eq('id', registrationId)
-    .single()
-
-  if (reg) {
-    await fetch('/api/send-approval-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        type:       'payment_rejected',
-        name:       reg.full_name,
-        email:      reg.email,
-        eventTitle: (reg.event as any)?.title,
-        notes:      notes ?? null,
-      }),
-    })
-  }
+  // 4. Send rejection email
+  await fetch('/api/send-approval-email', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type:       'payment_rejected',
+      name:       (reg as any).full_name,
+      email:      (reg as any).email,
+      eventTitle: ((reg as any).event as any)?.title,
+      notes:      notes ?? null,
+    }),
+  })
 }
 export type PaymentAccount = {
   id: string
@@ -221,7 +230,7 @@ export async function setEventPaymentAccounts(eventId: string, accountIds: strin
 
   // Insert new links
   if (accountIds.length > 0) {
-    await supabase
+    await (supabase as any)
       .from('event_payment_accounts')
       .insert(accountIds.map(id => ({ event_id: eventId, payment_account_id: id })))
   }
