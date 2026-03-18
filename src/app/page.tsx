@@ -848,7 +848,7 @@ export default function LandingPage() {
         <div className="nav-links">
           <a href="#features" className="nav-link">Features</a>
           <Link href="/how-it-works" className="nav-link">How it works</Link>
-          <a href="#pricing" className="nav-link">Pricing</a>
+          <Link href="/guest/explore" className="nav-link">Explore</Link>
         </div>
         <div className="nav-actions">
           <Link href="/auth/login" className="btn-ghost">Log in</Link>
@@ -872,7 +872,7 @@ export default function LandingPage() {
         </div>
         <a href="#features"     className="mmenu-link" onClick={() => setMenuOpen(false)}>Features</a>
         <Link href="/how-it-works" className="mmenu-link" onClick={() => setMenuOpen(false)}>How it works</Link>
-        <a href="#pricing"      className="mmenu-link" onClick={() => setMenuOpen(false)}>Pricing</a>
+        <Link href="/guest/explore" className="mmenu-link" onClick={() => setMenuOpen(false)}>Explore</Link>
         <div className="mmenu-actions">
           <Link href="/auth/login" className="btn-full-primary">Get started free</Link>
           <Link href="/auth/login" className="btn-full-outline">Log in</Link>
@@ -974,7 +974,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Why Tikkit ── */}
-      <section style={{ padding: '0 24px 100px', maxWidth: 1200, margin: '0 auto' }} id="pricing">
+      <section style={{ padding: '0 24px 100px', maxWidth: 1200, margin: '0 auto' }} id="why-tikkit">
         <div className="why-card">
           <div>
             <div className="sec-label">Why Tikkit</div>
@@ -1018,7 +1018,7 @@ export default function LandingPage() {
             <Link href="/auth/login" className="btn-primary-lg">
               Create your first event <ArrowRight size={16} />
             </Link>
-            <Link href="/explore" className="btn-gold-lg">
+            <Link href="/guest/explore" className="btn-gold-lg">
               Explore events →
             </Link>
           </div>
