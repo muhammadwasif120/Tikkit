@@ -53,8 +53,8 @@ const CSS = `
   .pe-hero {
     position:relative; overflow:hidden;
     min-height:88vh;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    text-align:center; padding:120px 24px 72px;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
+    text-align:center; padding:48px 24px 72px;
   }
   .pe-hero-grid {
     position:absolute; inset:0; pointer-events:none;
