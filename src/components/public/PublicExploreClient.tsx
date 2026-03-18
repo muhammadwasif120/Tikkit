@@ -6,6 +6,7 @@ import {
   MapPin, Clock, Users, Zap, QrCode, CreditCard,
   ArrowRight, ChevronRight, Sparkles, Star,
 } from 'lucide-react'
+import PublicNav from '@/components/layout/PublicNav'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
@@ -43,10 +44,6 @@ const CSS = `
 
   .pe-wrap { background:#080A10; min-height:100vh; padding-top:64px; font-family:var(--font-body); }
 
-  /* Nav */
-  .pe-nav { position:fixed; top:0; left:0; right:0; z-index:100; background:rgba(8,10,16,0.92); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.06); height:64px; display:flex; align-items:center; }
-  .pe-nav-inner { max-width:1200px; width:100%; margin:0 auto; padding:0 16px; display:flex; align-items:center; justify-content:space-between; }
-
   /* Container */
   .pe-container { max-width:1200px; margin:0 auto; padding:0 16px; }
 
@@ -83,7 +80,7 @@ const CSS = `
   @media (min-width:600px) {
     .pe-hero { padding:48px 24px 40px; }
     .pe-container { padding:0 24px; }
-    .pe-nav-inner { padding:0 24px; }
+
     .pe-featured-grid { grid-template-columns:repeat(2,1fr); }
     .pe-events-grid   { grid-template-columns:repeat(2,1fr); }
     .pe-nudge { flex-direction:row; align-items:center; justify-content:space-between; padding:24px 28px; }
@@ -108,30 +105,6 @@ const CSS = `
     .pe-nudge { padding:28px 32px; }
   }
 `
-
-/* ─── Nav ────────────────────────────────────────────────────────── */
-function PublicNav() {
-  return (
-    <nav className="pe-nav">
-      <div className="pe-nav-inner">
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <TikkitXLogo size="sm" />
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Link href="/auth/login" style={{ color: '#9CA3AF', fontSize: 14, fontWeight: 600, textDecoration: 'none', padding: '6px 14px' }}>
-            Sign in
-          </Link>
-          <Link href="/auth/login" style={{
-            background: '#1E5EFF', color: 'white', fontSize: 14, fontWeight: 700,
-            textDecoration: 'none', padding: '8px 20px', borderRadius: 22,
-          }}>
-            Join free →
-          </Link>
-        </div>
-      </div>
-    </nav>
-  )
-}
 
 /* ─── Hero visual (desktop) ──────────────────────────────────────── */
 function HeroVisual({ events, catMap }: { events: Event[]; catMap: Record<string, Category> }) {
@@ -388,7 +361,7 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
     <>
       <style>{CSS}</style>
 
-      <PublicNav />
+      <PublicNav activePage="explore" />
 
       <div className="pe-wrap">
 

@@ -6,8 +6,9 @@ import {
   Ticket, ArrowRight, ArrowLeft, Users, QrCode, BarChart3,
   CreditCard, MapPin, Calendar, CheckCircle, Sparkles,
   Zap, Shield, Bell, Search, Star, Clock, ChevronRight,
-  ScanLine, TrendingUp, UserCheck, Package, X, ChevronDown, Lock, ThumbsUp, Menu
+  ScanLine, TrendingUp, UserCheck, Package, X, ChevronDown, Lock, ThumbsUp
 } from 'lucide-react'
+import PublicNav from '@/components/layout/PublicNav'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
 // ─── Scroll hook ─────────────────────────────────────────────────────────────
@@ -642,7 +643,6 @@ export default function HowItWorksPage() {
   const scrollY = useScrollY()
   const [activeTab, setActiveTab] = useState<'organizer' | 'attendee'>('organizer')
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const [menuOpen, setMenuOpen] = useState(false)
   const heroRef = useRef<HTMLDivElement>(null)
 
   // Organizer step refs
@@ -859,122 +859,9 @@ export default function HowItWorksPage() {
           .footer-links { justify-content: center; }
         }
 
-        /* ── Nav (Ported from Landing) ── */
-        .nav {
-          position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-          display: flex; align-items: center; justify-content: space-between;
-          padding: 0 28px; height: 64px;
-          transition: background 0.3s, border-color 0.3s, backdrop-filter 0.3s;
-        }
-        .nav.scrolled {
-          background: rgba(8,10,16,0.88);
-          backdrop-filter: blur(24px);
-          -webkit-backdrop-filter: blur(24px);
-          border-bottom: 1px solid rgba(255,255,255,0.07);
-        }
-        .nav-logo {
-          display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; flex: 1;
-        }
-        .nav-links { display: flex; align-items: center; gap: 36px; }
-        .nav-link {
-          font-size: 14px; color: #6B7280; text-decoration: none;
-          font-weight: 500; transition: color 0.2s; cursor: pointer;
-        }
-        .nav-link:hover { color: #F0F2FF; }
-        .nav-actions { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; }
-        .btn-ghost {
-          padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600;
-          color: #6B7280; text-decoration: none; transition: color 0.2s; cursor: pointer;
-        }
-        .btn-ghost:hover { color: #F0F2FF; }
-        .btn-nav {
-          padding: 9px 20px; border-radius: 8px; font-size: 14px; font-weight: 700;
-          background: #1E5EFF; color: white; text-decoration: none;
-          transition: opacity 0.2s, box-shadow 0.2s, transform 0.2s;
-          display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-          box-shadow: 0 0 24px rgba(30,94,255,0.35);
-        }
-        .btn-nav:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 0 36px rgba(30,94,255,0.5); }
-        .nav-hamburger {
-          display: none; background: none; border: none; color: #6B7280; cursor: pointer; padding: 4px;
-        }
-
-        /* ── Mobile menu ── */
-        .mmenu {
-          position: fixed; inset: 0; z-index: 200;
-          background: rgba(8,10,16,0.97);
-          backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-          display: flex; flex-direction: column; padding: 24px;
-          transform: translateX(100%); transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
-        }
-        .mmenu.open { transform: translateX(0); }
-        .mmenu-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 52px; }
-        .mmenu-link {
-          font-family: var(--font-display);
-          font-size: 26px; font-weight: 700; color: #6B7280;
-          text-decoration: none; padding: 14px 0;
-          border-bottom: 1px solid rgba(255,255,255,0.07); transition: color 0.2s; display: block; cursor: pointer;
-        }
-        .mmenu-link:hover { color: #F0F2FF; }
-        .mmenu-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 44px; }
-        .btn-full-primary {
-          padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 700;
-          font-family: var(--font-display);
-          background: #1E5EFF; color: white; text-decoration: none;
-          display: block; text-align: center;
-          box-shadow: 0 0 32px rgba(30,94,255,0.45); cursor: pointer;
-        }
-        .btn-full-outline {
-          padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600;
-          font-family: var(--font-display);
-          border: 1px solid rgba(255,255,255,0.07); color: #6B7280; text-decoration: none;
-          display: block; text-align: center; cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-          .nav-links, .nav-actions { display: none; }
-          .nav-hamburger { display: block; }
-        }
       `}</style>
 
-      {/* ── Nav ── */}
-      <nav className={`nav ${scrollY > 40 ? 'scrolled' : ''}`}>
-        <Link href="/" className="nav-logo">
-          <TikkitXLogo size="md" />
-        </Link>
-        <div className="nav-links">
-          <Link href="/#features" className="nav-link">Features</Link>
-          <Link href="/how-it-works" className="nav-link" style={{ color: '#F0F2FF' }}>How it works</Link>
-          <Link href="/explore" className="nav-link">Explore</Link>
-        </div>
-        <div className="nav-actions">
-          <Link href="/auth/login" className="btn-ghost">Log in</Link>
-          <Link href="/auth/login" className="btn-nav">Get started <ArrowRight size={14} /></Link>
-        </div>
-        <button className="nav-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
-          <Menu size={24} />
-        </button>
-      </nav>
-
-      {/* ── Mobile menu ── */}
-      <div className={`mmenu ${menuOpen ? 'open' : ''}`} role="dialog" aria-modal="true">
-        <div className="mmenu-header">
-          <div className="nav-logo">
-            <TikkitXLogo size="md" />
-          </div>
-          <button style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer' }}
-            onClick={() => setMenuOpen(false)} aria-label="Close menu">
-            <X size={24} />
-          </button>
-        </div>
-        <Link href="/#features" className="mmenu-link" onClick={() => setMenuOpen(false)}>Features</Link>
-        <Link href="/how-it-works" className="mmenu-link" onClick={() => setMenuOpen(false)}>How it works</Link>
-        <Link href="/explore" className="mmenu-link" onClick={() => setMenuOpen(false)}>Explore</Link>
-        <div className="mmenu-actions">
-          <Link href="/auth/login" className="btn-full-primary">Get started free</Link>
-          <Link href="/auth/login" className="btn-full-outline">Log in</Link>
-        </div>
-      </div>
+      <PublicNav activePage="how-it-works" />
 
       {/* ── Hero ── */}
       <section className="hiw-hero" style={{ position: 'relative', minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '120px 24px 80px', overflow: 'hidden' }}>
