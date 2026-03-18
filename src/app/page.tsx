@@ -300,7 +300,7 @@ export default function LandingPage() {
           border-bottom: 1px solid var(--border);
         }
         .nav-logo {
-          display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer;
+          display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; flex: 1;
         }
         .nav-logo-icon {
           width: 34px; height: 34px;
@@ -320,7 +320,7 @@ export default function LandingPage() {
           font-weight: 500; transition: color 0.2s; cursor: pointer;
         }
         .nav-link:hover { color: var(--text); }
-        .nav-actions { display: flex; align-items: center; gap: 8px; }
+        .nav-actions { display: flex; align-items: center; gap: 8px; flex: 1; justify-content: flex-end; }
         .btn-ghost {
           padding: 8px 18px; border-radius: 8px; font-size: 14px; font-weight: 600;
           color: var(--muted); text-decoration: none; transition: color 0.2s; cursor: pointer;
