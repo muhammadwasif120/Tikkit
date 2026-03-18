@@ -52,9 +52,8 @@ const CSS = `
   /* ── Hero ── */
   .pe-hero {
     position:relative; overflow:hidden;
-    min-height:88vh;
     display:flex; flex-direction:column; align-items:center; justify-content:flex-start;
-    text-align:center; padding:48px 24px 72px;
+    text-align:center; padding:48px 24px 64px;
   }
   .pe-hero-grid {
     position:absolute; inset:0; pointer-events:none;
@@ -157,6 +156,19 @@ const CSS = `
   /* CTA */
   .pe-cta-btns { display:flex; flex-direction:column; align-items:stretch; gap:12px; }
   .pe-cta-primary { width:100%; justify-content:center !important; }
+
+  /* Mobile — kill dead hero space */
+  @media (max-width:599px) {
+    .pe-hero { min-height:auto; padding:20px 20px 36px; }
+    .pe-hero-badge { font-size:10px; padding:5px 12px; margin-bottom:18px; }
+    .pe-hero-h1 { letter-spacing:-1.5px; }
+    .pe-hero-sub { margin-top:14px; font-size:15px; }
+    .pe-hero-cta { margin-top:24px; gap:10px; }
+    .pe-btn-primary { padding:12px 22px; font-size:14px; }
+    .pe-btn-outline { padding:12px 22px; font-size:14px; }
+    .pe-hero-stats { margin-top:28px; gap:24px; }
+    .pe-stat-n { font-size:22px; }
+  }
 
   /* Tablet+ */
   @media (min-width:600px) {
