@@ -226,3 +226,99 @@ export async function updateRegistrationStatus(
 
   return error ? { error: error.message } : { success: true }
 }
+
+/**
+ * Send a chat message as a guest (checks registration, not ownership).
+ */
+export async function sendGuestMessage(eventId: string, message: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  // Verify user is registered for this event
+  const { data: reg } = await (supabase as any)
+    .from('public_registrations')
+    .select('id, status')
+    .eq('event_id', eventId)
+    .eq('guest_id', user.id)
+    .in('status', ['confirmed', 'checked_in', 'attended', 'registered', 'eoi_approved', 'payment_pending'])
+    .single()
+
+  if (!reg) return { error: 'You are not registered for this event' }
+
+  const trimmed = message.trim()
+  if (!trimmed || trimmed.length > 2000) return { error: 'Invalid message' }
+
+  const { error } = await (supabase as any)
+    .from('event_chats')
+    .insert({ event_id: eventId, user_id: user.id, role: 'guest', message: trimmed })
+
+  if (error) {
+    console.error('sendGuestMessage error:', error)
+    return { error: 'Failed to send message' }
+  }
+  return {}
+}
+
+/**
+ * Fetch recent chat messages for a guest (their own + organizer messages).
+ */
+export async function getGuestChatMessages(eventId: string): Promise<{
+  messages: import('@/types/verification').ChatMessage[]
+  event: { id: string; title: string; organizer_name: string | null } | null
+  error?: string
+}> {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { messages: [], event: null, error: 'Not authenticated' }
+
+  // Verify registration
+  const { data: reg } = await (supabase as any)
+    .from('public_registrations')
+    .select('id')
+    .eq('event_id', eventId)
+    .eq('guest_id', user.id)
+    .single()
+
+  if (!reg) return { messages: [], event: null, error: 'Not registered for this event' }
+
+  // Fetch event info
+  const { data: ev } = await supabase
+    .from('events')
+    .select('id, title, organizer_id')
+    .eq('id', eventId)
+    .single()
+
+  if (!ev) return { messages: [], event: null, error: 'Event not found' }
+
+  // Fetch organizer name
+  const { data: orgProfile } = await (admin as any)
+    .from('profiles')
+    .select('full_name, company_name')
+    .eq('id', ev.organizer_id)
+    .single()
+
+  const organizerName = (orgProfile as any)?.company_name ?? (orgProfile as any)?.full_name ?? 'Organizer'
+
+  // Fetch messages — guest's own + organizer's messages
+  const { data: msgs } = await (admin as any)
+    .from('event_chats')
+    .select('id, event_id, user_id, role, message, screenshot_url, created_at')
+    .eq('event_id', eventId)
+    .or(`user_id.eq.${user.id},role.eq.organizer`)
+    .order('created_at', { ascending: true })
+    .limit(100)
+
+  const messages: import('@/types/verification').ChatMessage[] = (msgs ?? []).map((m: any) => ({
+    ...m,
+    sender_name: m.role === 'organizer' ? organizerName : 'You',
+    sender_avatar: null,
+  }))
+
+  return {
+    messages,
+    event: { id: ev.id, title: ev.title, organizer_name: organizerName },
+  }
+}

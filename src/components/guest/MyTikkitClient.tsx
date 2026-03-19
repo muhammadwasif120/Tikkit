@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   Ticket, Clock, CheckCircle, AlertCircle, Lock,
   MapPin, Calendar, Upload, X, FileImage, Loader,
-  Award, Zap, Star, Flame, CreditCard, Heart,
+  Award, Zap, Star, Flame, CreditCard, Heart, MessageCircle,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
@@ -489,6 +489,38 @@ function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
               )}
             </button>
           )}
+
+          {/* Chat link */}
+          <div style={{ marginTop: 8 }}>
+            <Link
+              href={`/guest/events/${ev.id}/chat`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5,
+                padding: '7px 14px', borderRadius: 10,
+                background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)',
+                color: '#818CF8', fontSize: 12, fontWeight: 600, textDecoration: 'none',
+              }}
+            >
+              <MessageCircle size={13} /> Chat
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* Chat link for pending/verifying states (no primary action) */}
+      {!isPast && !isConfirmed && !isPayNow && reg.status !== 'rejected' && (
+        <div style={{ padding: '0 14px 14px' }}>
+          <Link
+            href={`/guest/events/${ev.id}/chat`}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              padding: '7px 14px', borderRadius: 10,
+              background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)',
+              color: '#818CF8', fontSize: 12, fontWeight: 600, textDecoration: 'none',
+            }}
+          >
+            <MessageCircle size={13} /> Chat
+          </Link>
         </div>
       )}
 
