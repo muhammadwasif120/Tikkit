@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { User, Edit3, Star, Zap, TrendingUp, TrendingDown, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown } from 'lucide-react'
+import { User, Edit3, Star, Zap, TrendingUp, TrendingDown, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown, ShieldCheck } from 'lucide-react'
 import { updateGuestProfile, signOut, sendPasswordReset } from '@/app/actions/guestProfileActions'
 import { getCreditTier } from '@/lib/creditUtils'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
+import VerifyForm from '@/components/verification/VerifyForm'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type Profile = {
@@ -14,6 +15,7 @@ type Profile = {
   bio: string | null; is_discoverable: boolean
   attendance_streak: number; total_attended: number; total_no_shows: number
   credit_score: number
+  is_id_verified: boolean; is_payment_verified: boolean; social_score: number
 }
 type Transaction = {
   id: string; type: string; amount: number; balance_after: number
@@ -665,6 +667,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
   const [showEdit, setShowEdit] = useState(false)
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
   const [showTx, setShowTx] = useState(false)
+  const [showVerify, setShowVerify] = useState(false)
   const [avatarSaving, setAvatarSaving] = useState(false)
   const tier = getCreditTier(profile.credit_score)
   const supabase = createClient()
@@ -808,6 +811,19 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
             </a>
           ))}
           <button
+            onClick={() => setShowVerify(true)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+          >
+            <span style={{ color: profile.is_id_verified && profile.is_payment_verified ? '#22C55E' : '#4B5563' }}>
+              <ShieldCheck size={16} />
+            </span>
+            <span style={{ flex: 1, textAlign: 'left', fontSize: 14, color: '#D1D5DB' }}>Verification</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: profile.is_id_verified && profile.is_payment_verified ? '#22C55E' : '#4B5563', marginRight: 4 }}>
+              {profile.is_id_verified && profile.is_payment_verified ? 'Verified ✓' : 'Not verified'}
+            </span>
+            <ChevronRight size={14} color="#4B5563" />
+          </button>
+          <button
             onClick={() => signOut()}
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', color: '#EF4444', fontSize: 14 }}
           >
@@ -832,6 +848,31 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
           onClose={() => setShowEdit(false)}
           onSave={updates => setProfile(p => ({ ...p, ...updates }))}
         />
+      )}
+
+      {showVerify && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          onClick={() => setShowVerify(false)}
+        >
+          <div
+            style={{ background: '#0D0F18', borderRadius: '24px 24px 0 0', border: '1px solid rgba(255,255,255,0.08)', width: '100%', maxWidth: 560, padding: '20px 20px 40px', maxHeight: '90vh', overflowY: 'auto' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ width: 36, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, margin: '0 auto 16px' }} />
+            <p style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: '0 0 20px', fontFamily: 'var(--font-display)' }}>Identity &amp; Payment Verification</p>
+            <VerifyForm profile={{
+              id:                     profile.id,
+              full_name:              profile.full_name,
+              email:                  initialEmail,
+              is_id_verified:         profile.is_id_verified,
+              is_payment_verified:    profile.is_payment_verified,
+              didit_verification_id:  null,
+              payment_method_token:   null,
+              social_score:           profile.social_score,
+            }} />
+          </div>
+        </div>
       )}
     </>
   )

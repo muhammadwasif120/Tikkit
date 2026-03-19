@@ -12,7 +12,7 @@ async function ProfileData() {
   const [profileRes, guestProfileRes, txRes, pastEventsRes] = await Promise.all([
     supabase
       .from('profiles')
-      .select('full_name, email, phone_number, avatar_url')
+      .select('full_name, email, phone_number, avatar_url, is_id_verified, is_payment_verified, social_score')
       .eq('id', user.id)
       .single(),
     supabase
@@ -51,6 +51,9 @@ async function ProfileData() {
     attendance_streak: gp?.attendance_streak ?? 0,
     total_attended:    gp?.total_attended   ?? 0,
     total_no_shows:    gp?.total_no_shows   ?? 0,
+    is_id_verified:      (p as any)?.is_id_verified      ?? false,
+    is_payment_verified: (p as any)?.is_payment_verified ?? false,
+    social_score:        (p as any)?.social_score        ?? 0,
   }
 
   return (
