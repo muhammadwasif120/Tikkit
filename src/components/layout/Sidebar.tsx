@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, Users, ScanLine,
   Building2, BarChart3, Settings, LogOut, Ticket, ClipboardCheck, X, UserCircle,
+  ShieldCheck, Radio,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import { createClient } from '@/lib/supabase/client'
@@ -19,6 +20,7 @@ const navItems = [
   { href: '/dashboard/events',    label: 'Events',    icon: CalendarDays },
   { href: '/dashboard/guests',    label: 'Guests',    icon: Users },
   { href: '/dashboard/approvals', label: 'Approvals', icon: ClipboardCheck },
+  { href: '/dashboard/command',   label: 'Command',   icon: Radio },
   { href: '/dashboard/scan',      label: 'Scanner',   icon: ScanLine },
   { href: '/dashboard/vendors',   label: 'Vendors',   icon: Building2 },
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
@@ -83,6 +85,14 @@ export default function Sidebar({ profile, open, onClose }: Props) {
 
         <div className="divider" />
         <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-widest px-3 pb-2">Account</p>
+        <Link
+          href="/dashboard/verify"
+          onClick={handleNavClick}
+          className={clsx(isActive('/dashboard/verify') ? 'sidebar-link-active' : 'sidebar-link')}
+        >
+          <ShieldCheck className="w-4 h-4 shrink-0" />
+          Verification
+        </Link>
         <Link
           href="/dashboard/profile"
           onClick={handleNavClick}
