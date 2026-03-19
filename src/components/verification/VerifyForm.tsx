@@ -1,13 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { loadStripe } from '@stripe/stripe-js'
-import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js'
+import { useState } from 'react'
 import { initiateVerification } from '@/app/actions/verificationActions'
-import { ShieldCheck, CreditCard, ArrowRight, Loader2, CheckCircle2, ExternalLink } from 'lucide-react'
+import { ShieldCheck, CreditCard, ExternalLink, Loader2, CheckCircle2 } from 'lucide-react'
 import type { VerifiedProfile } from '@/types/verification'
-
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ?? '')
 
 const CSS = `
   .vf-wrap { max-width:520px; margin:0 auto; }
@@ -18,95 +14,61 @@ const CSS = `
   }
   .vf-step { flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; position:relative; }
   .vf-step-dot {
-    width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    font-size:14px; font-weight:800; border:2px solid; z-index:1;
-    transition:all 0.3s;
+    width:40px; height:40px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:14px; font-weight:800; border:2px solid; z-index:1; transition:all 0.3s;
   }
-  .vf-step-dot.active  { background:#1E5EFF; border-color:#1E5EFF; color:white; }
-  .vf-step-dot.done    { background:rgba(34,197,94,0.15); border-color:#22C55E; color:#22C55E; }
-  .vf-step-dot.idle    { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); color:#4B5563; }
+  .vf-step-dot.active { background:#1E5EFF; border-color:#1E5EFF; color:white; }
+  .vf-step-dot.done   { background:rgba(34,197,94,0.15); border-color:#22C55E; color:#22C55E; }
+  .vf-step-dot.idle   { background:rgba(255,255,255,0.04); border-color:rgba(255,255,255,0.1); color:#4B5563; }
   .vf-step-label { font-size:11px; font-weight:600; color:#6B7280; text-align:center; }
   .vf-step-label.active { color:#F0F2FF; }
   .vf-step-label.done   { color:#22C55E; }
 
   .vf-card {
     background:#0C0E16; border:1px solid rgba(255,255,255,0.07);
-    border-radius:20px; padding:28px;
+    border-radius:20px; padding:28px; margin-bottom:16px;
   }
-  .vf-card-title { color:white; font-size:17px; font-weight:800; margin:0 0 6px; font-family:var(--font-display); }
-  .vf-card-sub   { color:#6B7280; font-size:13px; margin:0 0 24px; line-height:1.6; }
+  .vf-card-title { color:white; font-size:17px; font-weight:800; margin:0 0 4px; font-family:var(--font-display); }
+  .vf-card-sub   { color:#6B7280; font-size:13px; margin:0 0 20px; line-height:1.6; }
+
   .vf-btn {
     width:100%; padding:14px; border-radius:12px; font-size:15px; font-weight:700;
     cursor:pointer; border:none; display:flex; align-items:center; justify-content:center; gap:8px;
-    transition:opacity 0.2s, transform 0.2s;
+    transition:opacity 0.2s, transform 0.2s; text-decoration:none;
   }
   .vf-btn:hover:not(:disabled) { opacity:0.88; transform:translateY(-1px); }
   .vf-btn:disabled { opacity:0.5; cursor:not-allowed; }
   .vf-btn-primary { background:#1E5EFF; color:white; }
+  .vf-btn-purple  { background:linear-gradient(135deg,#7C3AED,#A855F7); color:white; }
   .vf-btn-success { background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.3) !important; color:#22C55E; }
-  .vf-divider { border:none; border-top:1px solid rgba(255,255,255,0.06); margin:24px 0; }
-  .vf-note { font-size:11px; color:#4B5563; text-align:center; margin-top:16px; line-height:1.7; }
 
-  .vf-stripe-wrap { padding:4px 0 20px; }
-`
+  .vf-note { font-size:11px; color:#4B5563; text-align:center; margin-top:14px; line-height:1.7; }
 
-// Inner Stripe form (must be inside <Elements>)
-function StripePaymentForm({ onSuccess }: { onSuccess: () => void }) {
-  const stripe = useStripe()
-  const elements = useElements()
-  const [loading, setLoading] = useState(false)
-  const [errMsg, setErrMsg] = useState<string | null>(null)
-
-  const handleSubmit = async () => {
-    if (!stripe || !elements) return
-    setLoading(true)
-    setErrMsg(null)
-
-    const { error, paymentIntent } = await stripe.confirmPayment({
-      elements,
-      redirect: 'if_required',
-      confirmParams: {
-        return_url: `${window.location.origin}/dashboard/verify?payment=success`,
-      },
-    })
-
-    if (error) {
-      setErrMsg(error.message ?? 'Payment failed')
-      setLoading(false)
-    } else if (paymentIntent?.status === 'succeeded') {
-      onSuccess()
-    }
+  .vf-methods { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+  .vf-method-pill {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:5px 12px; border-radius:100px; font-size:11px; font-weight:700;
+    border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04);
+    color:#9CA3AF;
   }
 
-  return (
-    <div>
-      <div className="vf-stripe-wrap">
-        <PaymentElement options={{ layout: 'tabs' }} />
-      </div>
-      {errMsg && (
-        <p style={{ color: '#F87171', fontSize: 12, marginBottom: 14, textAlign: 'center' }}>{errMsg}</p>
-      )}
-      <button
-        className="vf-btn vf-btn-primary"
-        onClick={handleSubmit}
-        disabled={!stripe || loading}
-      >
-        {loading ? <Loader2 size={16} className="animate-spin" /> : <CreditCard size={16} />}
-        {loading ? 'Processing...' : 'Pay PKR 500 & Verify'}
-      </button>
-    </div>
-  )
-}
+  .vf-amount {
+    display:inline-flex; align-items:baseline; gap:4px; margin-bottom:20px;
+  }
+  .vf-amount-n  { color:white; font-size:28px; font-weight:900; font-family:var(--font-display); }
+  .vf-amount-cu { color:#6B7280; font-size:13px; font-weight:600; }
+  .vf-amount-label { color:#4B5563; font-size:12px; margin-left:6px; }
+`
 
 export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
   const [loading, setLoading] = useState(false)
   const [diditUrl, setDiditUrl] = useState<string | null>(null)
-  const [stripeClientSecret, setStripeClientSecret] = useState<string | null>(null)
+  const [payproUrl, setPayproUrl] = useState<string | null>(null)
   const [idDone, setIdDone] = useState(profile.is_id_verified)
   const [paymentDone, setPaymentDone] = useState(profile.is_payment_verified)
   const [initiated, setInitiated] = useState(false)
 
-  // Step: 0=not started, 1=id, 2=payment, 3=done
   const step = idDone && paymentDone ? 3 : idDone ? 2 : 1
 
   const handleInitiate = async () => {
@@ -118,14 +80,12 @@ export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
       alert(result.error)
       return
     }
-
     setInitiated(true)
     if (result.diditSessionUrl) setDiditUrl(result.diditSessionUrl)
-    if (result.stripeClientSecret) setStripeClientSecret(result.stripeClientSecret)
+    if (result.payproPaymentUrl) setPayproUrl(result.payproPaymentUrl)
   }
 
-  const stepState = (n: number) =>
-    step > n ? 'done' : step === n ? 'active' : 'idle'
+  const stepState = (n: number) => step > n ? 'done' : step === n ? 'active' : 'idle'
 
   if (step === 3) {
     return (
@@ -150,15 +110,11 @@ export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
   return (
     <>
       <style>{CSS}</style>
-
       <div className="vf-wrap">
+
         {/* Step indicator */}
         <div className="vf-steps">
-          {[
-            { label: 'ID Verify', n: 1 },
-            { label: 'Payment', n: 2 },
-            { label: 'Verified', n: 3 },
-          ].map(({ label, n }) => (
+          {[{ label: 'ID Verify', n: 1 }, { label: 'Payment', n: 2 }, { label: 'Verified', n: 3 }].map(({ label, n }) => (
             <div key={n} className="vf-step">
               <div className={`vf-step-dot ${stepState(n)}`}>
                 {stepState(n) === 'done' ? <CheckCircle2 size={18} /> : n}
@@ -168,14 +124,14 @@ export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
           ))}
         </div>
 
-        {/* Step 1 — Didit ID */}
-        <div className="vf-card" style={{ marginBottom: 16 }}>
+        {/* ── Step 1: Didit ID Verification ── */}
+        <div className="vf-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: idDone ? 'rgba(34,197,94,0.12)' : 'rgba(30,94,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: idDone ? 'rgba(34,197,94,0.12)' : 'rgba(30,94,255,0.12)', border: `1px solid ${idDone ? 'rgba(34,197,94,0.25)' : 'rgba(30,94,255,0.2)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <ShieldCheck size={18} color={idDone ? '#22C55E' : '#1E5EFF'} />
             </div>
             <div>
-              <h3 className="vf-card-title" style={{ marginBottom: 2 }}>Identity Verification</h3>
+              <h3 className="vf-card-title">Identity Verification</h3>
               <p className="vf-card-sub" style={{ marginBottom: 0 }}>CNIC scan + passive liveness check via Didit</p>
             </div>
           </div>
@@ -187,66 +143,75 @@ export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
           ) : !initiated ? (
             <button className="vf-btn vf-btn-primary" onClick={handleInitiate} disabled={loading}>
               {loading ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
-              {loading ? 'Starting...' : 'Start ID Verification'}
+              {loading ? 'Setting up...' : 'Start ID Verification'}
             </button>
           ) : diditUrl ? (
-            <a
-              href={diditUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="vf-btn vf-btn-primary"
-              style={{ textDecoration: 'none' }}
-            >
+            <a href={diditUrl} target="_blank" rel="noopener noreferrer" className="vf-btn vf-btn-primary">
               <ExternalLink size={16} /> Open ID Verification
             </a>
           ) : (
             <button className="vf-btn vf-btn-primary" disabled>
-              <Loader2 size={16} className="animate-spin" /> Loading...
+              <Loader2 size={16} className="animate-spin" /> Loading…
             </button>
           )}
-
           <p className="vf-note">
-            Your CNIC information is processed by Didit and never stored on our servers.
+            Your CNIC information is processed by Didit and never stored on Tikkit servers.
           </p>
         </div>
 
-        {/* Step 2 — Stripe payment */}
+        {/* ── Step 2: PayPro Payment ── */}
         <div className="vf-card" style={{ opacity: initiated || idDone ? 1 : 0.45 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 12, background: paymentDone ? 'rgba(34,197,94,0.12)' : 'rgba(168,85,247,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: paymentDone ? 'rgba(34,197,94,0.12)' : 'rgba(124,58,237,0.12)', border: `1px solid ${paymentDone ? 'rgba(34,197,94,0.25)' : 'rgba(124,58,237,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <CreditCard size={18} color={paymentDone ? '#22C55E' : '#A855F7'} />
             </div>
             <div>
-              <h3 className="vf-card-title" style={{ marginBottom: 2 }}>Signup Fee</h3>
-              <p className="vf-card-sub" style={{ marginBottom: 0 }}>One-time verification fee of PKR 500</p>
+              <h3 className="vf-card-title">Signup Fee</h3>
+              <p className="vf-card-sub" style={{ marginBottom: 0 }}>One-time verification fee — paid via PayPro</p>
             </div>
+          </div>
+
+          {/* Amount */}
+          <div className="vf-amount">
+            <span className="vf-amount-n">500</span>
+            <span className="vf-amount-cu">PKR</span>
+            <span className="vf-amount-label">· one-time · non-refundable</span>
+          </div>
+
+          {/* Accepted methods */}
+          <div className="vf-methods">
+            {['JazzCash', 'EasyPaisa', 'Debit Card', 'Bank Transfer'].map(m => (
+              <span key={m} className="vf-method-pill">{m}</span>
+            ))}
           </div>
 
           {paymentDone ? (
             <button className="vf-btn vf-btn-success" disabled>
               <CheckCircle2 size={16} /> Payment Verified
             </button>
-          ) : stripeClientSecret ? (
-            <Elements
-              stripe={stripePromise}
-              options={{
-                clientSecret: stripeClientSecret,
-                appearance: {
-                  theme: 'night',
-                  variables: { colorPrimary: '#1E5EFF', colorBackground: '#0C0E16', borderRadius: '10px' },
-                },
-              }}
+          ) : payproUrl ? (
+            <a
+              href={payproUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="vf-btn vf-btn-purple"
             >
-              <StripePaymentForm onSuccess={() => setPaymentDone(true)} />
-            </Elements>
+              <ExternalLink size={16} /> Pay PKR 500 via PayPro
+            </a>
           ) : (
-            <p style={{ color: '#4B5563', fontSize: 13, textAlign: 'center', margin: 0 }}>
-              {initiated ? 'Initializing payment...' : 'Start ID verification first'}
-            </p>
+            <button
+              className="vf-btn vf-btn-purple"
+              onClick={handleInitiate}
+              disabled={loading || !initiated}
+              style={{ opacity: initiated ? 0.5 : 0.35 }}
+            >
+              {initiated ? 'Generating payment link…' : 'Start ID verification first'}
+            </button>
           )}
 
           <p className="vf-note">
-            Payments are processed securely by Stripe. Your card is never stored on Tikkit.
+            You will be redirected to PayPro&apos;s secure payment page. Return here once payment is complete.
+            Verification is confirmed automatically within a few minutes.
           </p>
         </div>
       </div>

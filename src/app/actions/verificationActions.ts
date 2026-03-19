@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { VerifiedProfile } from '@/types/verification'
+import type { VerifiedProfile, PayProOrderResponse } from '@/types/verification'
 
 // ─── Didit helpers ────────────────────────────────────────────────
 
@@ -41,10 +41,10 @@ async function createDiditSession(userId: string): Promise<{
       Authorization: `Bearer ${access_token}`,
     },
     body: JSON.stringify({
-      vendor_data: userId,          // echoed back in webhook payload
+      vendor_data: userId,
       callback: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/didit`,
-      features: 'OCR + FACE',       // CNIC OCR + passive liveness
-      document_country: 'PK',       // Pakistan CNIC
+      features: 'OCR + FACE',
+      document_country: 'PK',
     }),
   })
 
@@ -57,50 +57,92 @@ async function createDiditSession(userId: string): Promise<{
   return { sessionId: data.session_id, sessionUrl: data.session_url }
 }
 
-// ─── Stripe helpers ───────────────────────────────────────────────
+// ─── PayPro helpers ───────────────────────────────────────────────
 
-async function createStripePaymentIntent(userId: string): Promise<{
-  clientSecret: string
-  paymentIntentId: string
+/**
+ * Creates a PayPro order and returns the Click2Pay payment URL.
+ * Docs: https://docs.paypro.com.pk
+ * BillReference encodes the userId so the IPN webhook can route it back.
+ */
+async function createPayProOrder(userId: string): Promise<{
+  paymentUrl: string
+  orderId: string
 } | null> {
-  const secretKey = process.env.STRIPE_SECRET_KEY
-  if (!secretKey) return null
+  const apiKey = process.env.PAYPRO_API_KEY
+  const merchantId = process.env.PAYPRO_MERCHANT_ID
+  const storeId = process.env.PAYPRO_STORE_ID
 
-  const res = await fetch('https://api.stripe.com/v1/payment_intents', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: new URLSearchParams({
-      amount: '500',             // PKR 500 sign-up fee (in paisas for PKR = 500 × 100)
-      currency: 'pkr',
-      'automatic_payment_methods[enabled]': 'true',
-      'metadata[user_id]': userId,
-      'metadata[purpose]': 'tikkit_signup_verification',
-    }),
-  })
-
-  if (!res.ok) {
-    console.error('Stripe PaymentIntent error:', await res.text())
+  if (!apiKey || !merchantId || !storeId) {
+    console.error('PayPro env vars missing: PAYPRO_API_KEY, PAYPRO_MERCHANT_ID, PAYPRO_STORE_ID')
     return null
   }
 
-  const pi = await res.json()
-  return { clientSecret: pi.client_secret, paymentIntentId: pi.id }
+  // BillReference: encode userId for routing in IPN — max 50 chars
+  const orderId = `TKT-VRF-${userId.slice(0, 20)}-${Date.now()}`
+
+  // Bill dates: today + 3 days expiry
+  const today = new Date()
+  const expiry = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000)
+  const fmt = (d: Date) => d.toISOString().slice(0, 10)  // YYYY-MM-DD
+
+  const payload = {
+    MerchantId: merchantId,
+    StoreId: storeId,
+    MerchantName: 'Tikkit X',
+    MerchantEmailAddress: process.env.PAYPRO_MERCHANT_EMAIL ?? 'payments@tikkit.pk',
+    MerchantPhoneNumber: process.env.PAYPRO_MERCHANT_PHONE ?? '03000000000',
+    MerchantProductInformation: 'Tikkit X — Organizer Verification Fee',
+    RedirectURL: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/verify?payment=success`,
+    CancelURL: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/verify?payment=cancelled`,
+    NotificationURL: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/paypro`,
+    BillReference: orderId,
+    Amount: '500',
+    BillDate: fmt(today),
+    BillExpiryDate: fmt(expiry),
+    EnabledPaymentMethods: '1',    // all methods (JazzCash, EasyPaisa, Card, Bank)
+  }
+
+  try {
+    const res = await fetch('https://api.paypro.com.pk/v2/ppro/oms', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: apiKey,
+      },
+      body: JSON.stringify([payload]),   // PayPro expects array
+    })
+
+    if (!res.ok) {
+      console.error('PayPro order error:', res.status, await res.text())
+      return null
+    }
+
+    const data: PayProOrderResponse[] = await res.json()
+    const result = data[0]
+
+    if (result?.ResponseCode !== '00' || !result['Click2Pay URL']) {
+      console.error('PayPro order failed:', result?.Message)
+      return null
+    }
+
+    return { paymentUrl: result['Click2Pay URL'], orderId }
+  } catch (err) {
+    console.error('PayPro order exception:', err)
+    return null
+  }
 }
 
 // ─── Public server actions ────────────────────────────────────────
 
 /**
  * Initiates a dual verification flow:
- * 1. Creates a Didit session (ID + liveness)
- * 2. Creates a Stripe PaymentIntent (signup fee)
- * Returns URLs/secrets needed by the client.
+ * 1. Creates a Didit session (CNIC OCR + liveness)
+ * 2. Creates a PayPro order (PKR 500 signup fee)
+ * Returns URLs needed by the client.
  */
 export async function initiateVerification(): Promise<{
   diditSessionUrl?: string
-  stripeClientSecret?: string
+  payproPaymentUrl?: string
   sessionId?: string
   error?: string
 }> {
@@ -121,55 +163,35 @@ export async function initiateVerification(): Promise<{
     return { error: 'Already fully verified' }
   }
 
-  // Check for an existing pending session
-  const { data: existing } = await (admin as any)
-    .from('verification_sessions')
-    .select('*')
-    .eq('user_id', user.id)
-    .in('status', ['pending', 'id_complete', 'payment_complete'])
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single()
-
-  if (existing) {
-    // Resume existing session if it's still valid
-    const [diditResult, stripeResult] = await Promise.all([
-      !profile?.is_id_verified ? createDiditSession(user.id) : null,
-      !profile?.is_payment_verified ? createStripePaymentIntent(user.id) : null,
-    ])
-    return {
-      diditSessionUrl: diditResult?.sessionUrl,
-      stripeClientSecret: stripeResult?.clientSecret,
-      sessionId: existing.id,
-    }
-  }
-
-  // Create Didit + Stripe in parallel
-  const [diditResult, stripeResult] = await Promise.all([
-    createDiditSession(user.id),
-    createStripePaymentIntent(user.id),
+  // Create Didit + PayPro in parallel
+  const [diditResult, payproResult] = await Promise.all([
+    !profile?.is_id_verified ? createDiditSession(user.id) : null,
+    !profile?.is_payment_verified ? createPayProOrder(user.id) : null,
   ])
 
-  // Persist session record
+  // Persist / upsert session record
   const { data: session, error: sessionErr } = await (admin as any)
     .from('verification_sessions')
-    .insert({
-      user_id: user.id,
-      didit_session_id: diditResult?.sessionId ?? null,
-      stripe_payment_intent_id: stripeResult?.paymentIntentId ?? null,
-      status: 'pending',
-    })
+    .upsert(
+      {
+        user_id: user.id,
+        didit_session_id: diditResult?.sessionId ?? null,
+        paypro_order_id: payproResult?.orderId ?? null,
+        status: 'pending',
+      },
+      { onConflict: 'user_id', ignoreDuplicates: false }
+    )
     .select('id')
     .single()
 
   if (sessionErr) {
-    console.error('initiateVerification session insert:', sessionErr)
+    console.error('initiateVerification session upsert:', sessionErr)
     return { error: 'Failed to create verification session' }
   }
 
   return {
     diditSessionUrl: diditResult?.sessionUrl,
-    stripeClientSecret: stripeResult?.clientSecret,
+    payproPaymentUrl: payproResult?.paymentUrl,
     sessionId: session?.id,
   }
 }
@@ -185,18 +207,16 @@ export async function updateVerificationStatus(params: {
   metadata?: Record<string, unknown>
 }): Promise<void> {
   const admin = createAdminClient()
-  const { userId, type, externalId, metadata = {} } = params
+  const { userId, type, externalId } = params
 
   const field = type === 'id' ? 'is_id_verified' : 'is_payment_verified'
   const idField = type === 'id' ? 'didit_verification_id' : 'payment_method_token'
 
-  // Update profile field
   await (admin as any)
     .from('profiles')
     .update({ [field]: true, [idField]: externalId })
     .eq('id', userId)
 
-  // Update verification_session status
   const newStatus = type === 'id' ? 'id_complete' : 'payment_complete'
   await (admin as any)
     .from('verification_sessions')
@@ -204,24 +224,20 @@ export async function updateVerificationStatus(params: {
     .eq('user_id', userId)
     .in('status', ['pending', 'id_complete', 'payment_complete'])
 
-  // Check if both are now verified → award social_score (idempotent)
-  const { data: profile } = await (admin as any)
+  // Check if both verified → award +150 social_score (idempotent)
+  const { data: updated } = await (admin as any)
     .from('profiles')
     .select('is_id_verified, is_payment_verified, social_score')
     .eq('id', userId)
     .single()
 
-  if (profile?.is_id_verified && profile?.is_payment_verified) {
-    // Only award once (guard: score was 0 before; this is the triple-verified boost)
-    const alreadyAwarded = profile.social_score >= 150
-    if (!alreadyAwarded) {
+  if (updated?.is_id_verified && updated?.is_payment_verified) {
+    if (updated.social_score < 150) {
       await (admin as any)
         .from('profiles')
-        .update({ social_score: profile.social_score + 150 })
+        .update({ social_score: updated.social_score + 150 })
         .eq('id', userId)
     }
-
-    // Mark session as fully_verified
     await (admin as any)
       .from('verification_sessions')
       .update({ status: 'fully_verified' })
