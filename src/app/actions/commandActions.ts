@@ -32,15 +32,14 @@ export async function getCommandCenterData(eventId: string): Promise<{
     return { event: null, attendees: [], recentMessages: [], error: 'Event not found or access denied' }
   }
 
-  // Fetch registrations with payment info
   const { data: registrations } = await supabase
     .from('public_registrations')
-    .select('id, user_id, full_name, email, phone_number, status, payment_status, payment_screenshot_url, created_at')
+    .select('id, full_name, email, phone, status, payment_status, created_at')
     .eq('event_id', eventId)
     .order('created_at', { ascending: false })
 
-  // Batch-fetch profile verification data for all registrant user_ids
-  const userIds = (registrations ?? []).map((r: any) => r.user_id).filter(Boolean)
+  // Public registrations do not enforce a user_id link in this schema structure
+  const userIds: string[] = []
   let profileMap: Record<string, any> = {}
 
   if (userIds.length > 0) {
@@ -55,20 +54,21 @@ export async function getCommandCenterData(eventId: string): Promise<{
   }
 
   const attendees: CommandAttendee[] = (registrations ?? []).map((r: any) => {
-    const profile = profileMap[r.user_id] ?? null
+    // There are no user_ids for pure public registrations in this table
+    const profile = null 
     return {
       registration_id: r.id,
-      user_id: r.user_id,
+      user_id: null,
       full_name: r.full_name,
       email: r.email,
-      phone_number: r.phone_number ?? null,
+      phone_number: r.phone ?? null,
       avatar_url: profile?.avatar_url ?? null,
       status: r.status,
       payment_status: r.payment_status ?? null,
-      payment_screenshot_url: r.payment_screenshot_url ?? null,
-      is_id_verified: profile?.is_id_verified ?? false,
-      is_payment_verified: profile?.is_payment_verified ?? false,
-      social_score: profile?.social_score ?? 0,
+      payment_screenshot_url: null, // manual screenshots deprecated by PayPro Integration
+      is_id_verified: false,
+      is_payment_verified: false,
+      social_score: 0,
       registered_at: r.created_at,
     }
   })

@@ -13,6 +13,23 @@ const STATUS_STYLES: Record<string, { bg: string; color: string; border: string 
   completed: { bg: 'rgba(75,85,99,0.1)',   color: '#6B7280', border: 'rgba(75,85,99,0.2)'  },
 }
 
+const CSS = `
+  .cc-event-card {
+    background: #0C0E16;
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .cc-event-card:hover {
+    border-color: rgba(168,85,247,0.3);
+    transform: translateY(-1px);
+  }
+`
+
 export default async function CommandPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,6 +39,7 @@ export default async function CommandPage() {
 
   return (
     <div style={{ padding: '28px 24px', maxWidth: 800, margin: '0 auto' }}>
+      <style>{CSS}</style>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 28 }}>
         <div style={{ width: 44, height: 44, borderRadius: 14, background: 'rgba(168,85,247,0.12)', border: '1px solid rgba(168,85,247,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -64,20 +82,7 @@ export default async function CommandPage() {
             const style = STATUS_STYLES[event.status] ?? STATUS_STYLES.completed
             return (
               <Link key={event.id} href={`/dashboard/command/${event.id}`} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  background: '#0C0E16', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16,
-                  padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14,
-                  transition: 'border-color 0.15s, transform 0.15s',
-                }}
-                  onMouseEnter={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(168,85,247,0.3)'
-                    ;(e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'
-                  }}
-                  onMouseLeave={e => {
-                    (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)'
-                    ;(e.currentTarget as HTMLElement).style.transform = 'translateY(0)'
-                  }}
-                >
+                <div className="cc-event-card">
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 5 }}>
                       <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
