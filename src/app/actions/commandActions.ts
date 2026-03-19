@@ -158,6 +158,7 @@ export async function getCommandEvents(): Promise<{
   date_start: string
   date_end: string | null
   status: string
+  cover_image_url: string | null
   _count: number
 }[]> {
   const supabase = await createClient()
@@ -166,7 +167,7 @@ export async function getCommandEvents(): Promise<{
 
   const { data: events } = await supabase
     .from('events')
-    .select('id, title, date_start, date_end, status')
+    .select('id, title, date_start, date_end, status, cover_image_url')
     .eq('organizer_id', user.id)
     .in('status', ['published', 'completed'])
     .order('date_start', { ascending: false })

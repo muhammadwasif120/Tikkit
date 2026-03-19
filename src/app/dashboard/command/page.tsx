@@ -132,25 +132,14 @@ export default async function CommandPage() {
 
             return (
               <Link key={event.id} href={`/dashboard/command/${event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-                <div style={{
+                <div className={`cc-event-card${isLive ? ' cc-live' : ''}`} style={{
                   background: '#0C0E16',
                   border: `1px solid ${isLive ? 'rgba(168,85,247,0.18)' : 'rgba(255,255,255,0.06)'}`,
                   borderRadius: 18, padding: '0', overflow: 'hidden',
                   transition: 'border-color 0.15s, box-shadow 0.15s',
                   cursor: 'pointer',
                   boxShadow: isLive ? '0 4px 24px rgba(168,85,247,0.08)' : 'none',
-                }}
-                  onMouseEnter={e => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.borderColor = 'rgba(168,85,247,0.35)'
-                    el.style.boxShadow = '0 8px 32px rgba(168,85,247,0.12)'
-                  }}
-                  onMouseLeave={e => {
-                    const el = e.currentTarget as HTMLElement
-                    el.style.borderColor = isLive ? 'rgba(168,85,247,0.18)' : 'rgba(255,255,255,0.06)'
-                    el.style.boxShadow = isLive ? '0 4px 24px rgba(168,85,247,0.08)' : 'none'
-                  }}
-                >
+                }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
                     {/* Cover thumbnail */}
                     <div style={{
@@ -220,6 +209,10 @@ export default async function CommandPage() {
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.4; }
+        }
+        .cc-event-card:hover {
+          border-color: rgba(168,85,247,0.35) !important;
+          box-shadow: 0 8px 32px rgba(168,85,247,0.12) !important;
         }
       `}</style>
     </div>
