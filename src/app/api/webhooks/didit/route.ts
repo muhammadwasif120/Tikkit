@@ -8,16 +8,20 @@ export async function POST(req: NextRequest) {
 
   // Verify HMAC-SHA256 signature
   const secret = process.env.DIDIT_WEBHOOK_SECRET
-  if (secret) {
-    const signature = req.headers.get('x-didit-signature') ?? ''
-    const expected = crypto
-      .createHmac('sha256', secret)
-      .update(rawBody)
-      .digest('hex')
-    if (signature !== expected) {
-      console.warn('didit webhook: invalid signature')
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-    }
+  if (!secret) {
+    console.error('didit webhook: missing DIDIT_WEBHOOK_SECRET')
+    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+  }
+  
+  const signature = req.headers.get('x-didit-signature') ?? ''
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody)
+    .digest('hex')
+    
+  if (signature !== expected) {
+    console.warn('didit webhook: invalid signature')
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
   let payload: DiditWebhookPayload

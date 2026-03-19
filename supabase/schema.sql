@@ -276,12 +276,24 @@ CREATE POLICY "events_organizer_all" ON events
 
 -- Public events are readable by anyone authenticated
 CREATE POLICY "events_public_read" ON events
-  FOR SELECT USING (is_public = TRUE AND status = 'published');
+  FOR SELECT USING (is_private = FALSE AND status = 'published');
 
 -- Ticket types: organizer of the event
 CREATE POLICY "ticket_types_organizer" ON ticket_types
   FOR ALL USING (
     event_id IN (SELECT id FROM events WHERE organizer_id = auth.uid())
+  );
+
+-- Users can read messages for events they registered for
+CREATE POLICY "event_chats_user_read"
+  ON event_chats FOR SELECT
+  USING (
+    auth.uid() = user_id
+    OR event_id IN (SELECT id FROM events WHERE organizer_id = auth.uid())
+    OR event_id IN (
+      SELECT event_id FROM public_registrations
+      WHERE email = (auth.jwt() ->> 'email') AND status = 'approved'
+    )
   );
 
 -- Guests: organizer of the event + staff can scan
@@ -324,7 +336,7 @@ CREATE POLICY "guest_profiles_self" ON guest_profiles
 
 -- Public registrations: guests can read/create/update their own, organizer can see all for their events
 CREATE POLICY "public_registrations_guest_self" ON public_registrations
-  FOR SELECT USING (email = current_user_email() OR auth.uid() IN (SELECT organizer_id FROM events WHERE id = event_id));
+  FOR SELECT USING (email = (auth.jwt() ->> 'email') OR auth.uid() IN (SELECT organizer_id FROM events WHERE id = event_id));
 
 CREATE POLICY "public_registrations_organizer" ON public_registrations
   FOR ALL USING (

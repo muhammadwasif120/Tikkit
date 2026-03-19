@@ -61,14 +61,23 @@ Deno.serve(async (req) => {
     let chatsLedgered = 0, chatsDeleted = 0, filesLedgered = 0, filesDeleted = 0
 
     // ── Step 1: Ledger + delete event_chats ────────────────────────
-    const { data: chats, error: chatsReadErr } = await supabase
-      .from('event_chats')
-      .select('id, user_id, message, screenshot_url, created_at')
-      .eq('event_id', eventId)
+    let hasMoreChats = true
+    while (hasMoreChats) {
+      const { data: chats, error: chatsReadErr } = await supabase
+        .from('event_chats')
+        .select('id, user_id, message, screenshot_url, created_at')
+        .eq('event_id', eventId)
+        .limit(1000)
 
-    if (chatsReadErr) {
-      errors.push(`chats read: ${chatsReadErr.message}`)
-    } else if (chats && chats.length > 0) {
+      if (chatsReadErr || !chats) {
+        errors.push(`chats read: ${chatsReadErr?.message}`)
+        break
+      }
+      if (chats.length === 0) {
+        hasMoreChats = false
+        break
+      }
+
       // Write ledger skeleton for each message
       const ledgerRows = chats.map((chat: any) => ({
         event_id: eventId,
@@ -86,42 +95,59 @@ Deno.serve(async (req) => {
       const { error: ledgerErr } = await supabase.from('event_ledger').insert(ledgerRows)
       if (ledgerErr) {
         errors.push(`chat ledger insert: ${ledgerErr.message}`)
+        // If ledger fails, DO NOT DELETE! Break the loop immediately.
+        break 
       } else {
-        chatsLedgered = ledgerRows.length
+        chatsLedgered += ledgerRows.length
       }
 
-      // Delete chats
+      // Delete only the successfully ledgered chats
+      const chatIds = chats.map((c: any) => c.id)
       const { error: chatsDelErr } = await supabase
         .from('event_chats')
         .delete()
-        .eq('event_id', eventId)
+        .in('id', chatIds)
 
       if (chatsDelErr) {
-        errors.push(`chats delete: ${chatsDelErr.message}`)
+        errors.push(`chats delete batch: ${chatsDelErr.message}`)
+        break // Stop deleting if a batch delete fails
       } else {
-        chatsDeleted = chats.length
+        chatsDeleted += chatIds.length
+      }
+      
+      if (chats.length < 1000) {
+        hasMoreChats = false
       }
     }
 
     // ── Step 2: Ledger + delete Storage media ──────────────────────
     const storagePath = `event-media/${eventId}`
+    let hasMoreFiles = true
 
-    const { data: files, error: listErr } = await supabase.storage
-      .from('tikkit-uploads')
-      .list(storagePath)
+    while (hasMoreFiles) {
+      const { data: files, error: listErr } = await supabase.storage
+        .from('tikkit-uploads')
+        .list(storagePath, { limit: 100, offset: 0 })
 
-    if (listErr) {
-      errors.push(`storage list: ${listErr.message}`)
-    } else if (files && files.length > 0) {
-      // Write single ledger record summarising deleted files
+      if (listErr || !files) {
+        errors.push(`storage list: ${listErr?.message}`)
+        break
+      }
+      
+      const actualFiles = files.filter((f: any) => f.id || f.name.includes('.'))
+      if (actualFiles.length === 0) {
+        hasMoreFiles = false
+        break
+      }
+
       const { error: mediaLedgerErr } = await supabase.from('event_ledger').insert({
         event_id: eventId,
         user_id: event.organizer_id,
         ref_id: `media-purge-${eventId}-${Date.now()}`,
         ledger_type: 'media_purge_record',
         metadata: {
-          files_count: files.length,
-          files_deleted: files.map((f: any) => f.name),
+          files_count: actualFiles.length,
+          files_deleted: actualFiles.map((f: any) => f.name),
           storage_bucket: 'tikkit-uploads',
           storage_path: storagePath,
           purged_at: new Date().toISOString(),
@@ -130,20 +156,25 @@ Deno.serve(async (req) => {
 
       if (mediaLedgerErr) {
         errors.push(`media ledger insert: ${mediaLedgerErr.message}`)
+        break
       } else {
-        filesLedgered = files.length
+        filesLedgered += actualFiles.length
       }
 
-      // Delete all files
-      const filePaths = files.map((f: any) => `${storagePath}/${f.name}`)
+      const filePaths = actualFiles.map((f: any) => `${storagePath}/${f.name}`)
       const { error: removeErr } = await supabase.storage
         .from('tikkit-uploads')
         .remove(filePaths)
 
       if (removeErr) {
         errors.push(`storage remove: ${removeErr.message}`)
+        break // Break to avoid infinite loops on offset 0 if delete fails
       } else {
-        filesDeleted = files.length
+        filesDeleted += actualFiles.length
+      }
+      
+      if (files.length < 100) {
+        hasMoreFiles = false
       }
     }
 

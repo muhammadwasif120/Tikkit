@@ -211,6 +211,20 @@ export async function updateVerificationStatus(params: {
 
   const field = type === 'id' ? 'is_id_verified' : 'is_payment_verified'
   const idField = type === 'id' ? 'didit_verification_id' : 'payment_method_token'
+  const sessionCol = type === 'id' ? 'didit_session_id' : 'paypro_order_id'
+
+  // Security Fix: Prevent race conditions by strictly correlating the external session ID
+  const { data: activeSession } = await (admin as any)
+    .from('verification_sessions')
+    .select('id')
+    .eq('user_id', userId)
+    .eq(sessionCol, externalId)
+    .single()
+
+  if (!activeSession) {
+    console.warn(`Security check failed: Webhook externalId ${externalId} does not match active session for user ${userId}. Ignored.`)
+    return
+  }
 
   await (admin as any)
     .from('profiles')

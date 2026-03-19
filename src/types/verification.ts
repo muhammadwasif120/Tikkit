@@ -96,7 +96,7 @@ export interface LedgerRecord {
 // Command center attendee card data
 export interface CommandAttendee {
   registration_id: string
-  user_id: string
+  user_id: string | null
   full_name: string
   email: string
   phone_number: string | null
