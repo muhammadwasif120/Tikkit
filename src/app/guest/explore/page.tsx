@@ -36,7 +36,7 @@ async function ExploreData() {
   const myEvents = user ? await (async () => {
     const { data } = await supabase
       .from('public_registrations')
-      .select('id, status, event:events(id, title, date_start, cover_image_url, venue_name)')
+      .select('id, status, event:events(id, slug, title, date_start, cover_image_url, venue_name)')
       .eq('email', user.email ?? '')
       .not('status', 'in', '("rejected","cancelled")')
       .order('created_at', { ascending: false })

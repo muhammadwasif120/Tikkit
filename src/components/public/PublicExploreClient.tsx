@@ -13,7 +13,7 @@ import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 type Category = { id: string; name: string; icon: string; color: string }
 type Organizer = { full_name: string | null; company_name: string | null; username: string | null; logo_url: string | null }
 type Event = {
-  id: string; title: string; date_start: string
+  id: string; slug?: string | null; title: string; date_start: string
   cover_image_url: string | null; venue_name: string | null
   ticket_price: number | null; registration_mode: string
   category_id: string | null; registered_count: number; capacity: number | null
@@ -268,7 +268,7 @@ function EventCard({ event, category, featured = false }: { event: Event; catego
   const almostFull = spotsLeft !== null && spotsLeft <= 10 && spotsLeft > 0
 
   return (
-    <Link href={`/guest/explore/${event.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+    <Link href={`/guest/explore/${event.slug || event.id}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
       <div style={{
         background: '#0C0E16', borderRadius: 18,
         border: `1px solid ${featured ? 'rgba(30,94,255,0.3)' : 'rgba(255,255,255,0.07)'}`,

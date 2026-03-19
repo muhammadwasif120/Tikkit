@@ -1,61 +1,110 @@
 import { Suspense } from 'react'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import EventDetailClient from '@/components/guest/EventDetailClient'
 import SkeletonEventDetail from '@/components/guest/SkeletonEventDetail'
 import { getUserFavouriteEventIds } from '@/app/actions/eventFavouriteActions'
+import { isUUID } from '@/lib/slugify'
 
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  const { id } = await params
+// ─── Resolve slug OR uuid to an event row ─────────────────────────────────────
+async function resolveEvent(idOrSlug: string) {
   const supabase = await createClient()
+
+  if (isUUID(idOrSlug)) {
+    // Legacy UUID URL — look up by id, then redirect to slug URL
+    const { data } = await supabase
+      .from('events')
+      .select('id, slug, status')
+      .eq('id', idOrSlug)
+      .single()
+    const ev = data as any
+    if (ev?.slug) redirect(`/guest/explore/${ev.slug}`)
+    return ev // slug missing — fall through to UUID-based render
+  }
+
+  // Slug URL — look up by slug
   const { data } = await supabase
     .from('events')
-    .select('title, description, cover_image_url')
-    .eq('id', id)
+    .select('id, slug, status')
+    .eq('slug', idOrSlug)
     .single()
+  return data as any
+}
 
-  const event = data as any;
+// ─── Metadata ─────────────────────────────────────────────────────────────────
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id: idOrSlug } = await params
+  const supabase = await createClient()
 
-  if (!event) return { title: 'Event Not Found - Tikkit' }
+  let eventId = idOrSlug
+  if (!isUUID(idOrSlug)) {
+    // Resolve slug → id
+    const { data } = await supabase
+      .from('events')
+      .select('id, title, description, cover_image_url, slug')
+      .eq('slug', idOrSlug)
+      .single()
+    if (!data) return { title: 'Event Not Found - Tikkit' }
+    const ev = data as any
+    return buildMetadata(ev, ev.slug || ev.id)
+  }
 
+  const { data } = await supabase
+    .from('events')
+    .select('id, title, description, cover_image_url, slug')
+    .eq('id', eventId)
+    .single()
+  if (!data) return { title: 'Event Not Found - Tikkit' }
+  const ev = data as any
+  return buildMetadata(ev, ev.slug || ev.id)
+}
+
+function buildMetadata(ev: any, slugOrId: string): Metadata {
   return {
-    title: `${event.title} - Tikkit`,
-    description: event.description || `Register for ${event.title} on Tikkit.`,
+    title: `${ev.title} - Tikkit`,
+    description: ev.description || `Register for ${ev.title} on Tikkit.`,
+    alternates: { canonical: `https://tikkitx.com/guest/explore/${slugOrId}` },
     openGraph: {
-      title: event.title,
-      description: event.description || `Register for ${event.title} on Tikkit.`,
-      images: event.cover_image_url ? [{ url: event.cover_image_url }] : [],
+      title: ev.title,
+      description: ev.description || `Register for ${ev.title} on Tikkit.`,
+      url: `https://tikkitx.com/guest/explore/${slugOrId}`,
+      images: ev.cover_image_url ? [{ url: ev.cover_image_url }] : [],
     },
     twitter: {
       card: 'summary_large_image',
-      title: event.title,
-      description: event.description || `Register for ${event.title} on Tikkit.`,
-      images: event.cover_image_url ? [event.cover_image_url] : [],
+      title: ev.title,
+      description: ev.description || `Register for ${ev.title} on Tikkit.`,
+      images: ev.cover_image_url ? [ev.cover_image_url] : [],
     },
   }
 }
 
-async function EventData({ id }: { id: string }) {
+// ─── Event Data ───────────────────────────────────────────────────────────────
+async function EventData({ idOrSlug }: { idOrSlug: string }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Resolve the actual event id
+  const resolved = await resolveEvent(idOrSlug)
+  if (!resolved) notFound()
+  const eventId = resolved.id
 
   const { data: event } = await supabase
     .from('events')
     .select(`
       id, title, description, venue_name, venue_address, secret_venue, venue_reveal_at,
-      date_start, date_end, capacity, cover_image_url, tags, ticket_price,
+      date_start, date_end, capacity, cover_image_url, tags, ticket_price, slug,
       registration_mode, is_private, status, category_id, organizer_id,
       organizer:profiles!events_organizer_id_fkey(id, full_name, company_name, avatar_url, logo_url, username)
     `)
-    .eq('id', id)
+    .eq('id', eventId)
     .single()
 
   const ev = event as any
   if (!ev || ev.status !== 'published') notFound()
 
   // Organizer join may return null if RLS blocks anonymous reads.
-  // Fall back to the SECURITY DEFINER RPC which bypasses RLS.
   if (!ev.organizer && ev.organizer_id) {
     const { data: orgRows } = await (supabase as any)
       .rpc('get_public_organizer_profile', { p_lookup: ev.organizer_id })
@@ -66,7 +115,7 @@ async function EventData({ id }: { id: string }) {
   const { data: linkedAccounts } = await supabase
     .from('event_payment_accounts')
     .select('payment_account:payment_accounts(id, label, account_type, bank_name, account_title, account_number, instructions)')
-    .eq('event_id', id)
+    .eq('event_id', eventId)
 
   const paymentAccounts = (linkedAccounts ?? [])
     .map((r: any) => r.payment_account)
@@ -76,7 +125,7 @@ async function EventData({ id }: { id: string }) {
   const { count: registeredCount } = await supabase
     .from('public_registrations')
     .select('*', { count: 'exact', head: true })
-    .eq('event_id', id)
+    .eq('event_id', eventId)
     .not('status', 'eq', 'rejected')
 
   // Fetch user profile for one-tap registration
@@ -94,7 +143,7 @@ async function EventData({ id }: { id: string }) {
       supabase
         .from('public_registrations')
         .select('id, status, payment_status')
-        .eq('event_id', id)
+        .eq('event_id', eventId)
         .eq('email', user.email!)
         .not('status', 'eq', 'rejected')
         .maybeSingle(),
@@ -106,8 +155,10 @@ async function EventData({ id }: { id: string }) {
       email: user.email ?? '',
     }
     existingReg = regRes.data ?? null
-    isFavourited = favIds.includes(id)
+    isFavourited = favIds.includes(eventId)
   }
+
+  const slugOrId = ev.slug || eventId
 
   const enrichedEvent = {
     ...(event as any),
@@ -129,6 +180,7 @@ async function EventData({ id }: { id: string }) {
               image: enrichedEvent.cover_image_url ? [enrichedEvent.cover_image_url] : [],
               startDate: enrichedEvent.date_start,
               endDate: enrichedEvent.date_end,
+              url: `https://tikkitx.com/guest/explore/${slugOrId}`,
               eventStatus: 'https://schema.org/EventScheduled',
               eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
               location: {
@@ -138,7 +190,7 @@ async function EventData({ id }: { id: string }) {
               },
               offers: {
                 '@type': 'Offer',
-                url: `https://tikkitx.com/register/${id}`,
+                url: `https://tikkitx.com/guest/explore/${slugOrId}`,
                 price: enrichedEvent.ticket_price || 0,
                 priceCurrency: 'PKR',
                 availability: 'https://schema.org/InStock',
@@ -166,7 +218,7 @@ export default async function EventDetailPage({ params }: { params: Promise<{ id
   const { id } = await params
   return (
     <Suspense fallback={<SkeletonEventDetail />}>
-      <EventData id={id} />
+      <EventData idOrSlug={id} />
     </Suspense>
   )
 }

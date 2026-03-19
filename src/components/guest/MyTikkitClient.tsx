@@ -14,7 +14,7 @@ import { getCreditTier } from '@/lib/creditUtils'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type EventInfo = {
-  id: string; title: string
+  id: string; slug?: string | null; title: string
   date_start: string; date_end: string | null
   venue_name: string | null; secret_venue: boolean
   venue_reveal_at: string | null; cover_image_url: string | null
@@ -32,7 +32,7 @@ type Registration = {
   pass: Pass | null
 }
 type FavEvent = {
-  id: string; title: string
+  id: string; slug?: string | null; title: string
   date_start: string
   cover_image_url: string | null
   venue_name: string | null
@@ -419,7 +419,7 @@ function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
         )
         return isPast
           ? <div style={{ display: 'block' }}>{coverInner}</div>
-          : <Link href={`/guest/explore/${ev.id}`} style={{ textDecoration: 'none', display: 'block' }}>{coverInner}</Link>
+          : <Link href={`/guest/explore/${ev.slug || ev.id}`} style={{ textDecoration: 'none', display: 'block' }}>{coverInner}</Link>
       })()}
 
       {/* Info row */}
@@ -549,7 +549,7 @@ function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
 function FavCard({ event, onRemove }: { event: FavEvent; onRemove: (id: string) => void }) {
   return (
     <div style={{ position: 'relative', background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden' }}>
-      <Link href={`/guest/explore/${event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+      <Link href={`/guest/explore/${event.slug || event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
         {/* Cover */}
         <div style={{ height: 80, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : grad(event.id), position: 'relative' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(14,16,24,1) 0%, transparent 60%)' }} />

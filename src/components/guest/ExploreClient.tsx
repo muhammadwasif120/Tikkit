@@ -20,7 +20,7 @@ type Organizer = {
   username?: string | null
 }
 type Event = {
-  id: string; title: string; description: string | null
+  id: string; slug?: string | null; title: string; description: string | null
   venue_name: string | null; venue_address: string | null
   secret_venue: boolean; date_start: string; date_end: string | null
   capacity: number | null; cover_image_url: string | null
@@ -31,7 +31,7 @@ type Event = {
 }
 type MyEvent = {
   id: string; status: string
-  event: { id: string; title: string; date_start: string; cover_image_url: string | null; venue_name: string | null } | null
+  event: { id: string; slug?: string | null; title: string; date_start: string; cover_image_url: string | null; venue_name: string | null } | null
 }
 
 /* ─── Auto-gradients when no cover image ────────────────────── */
@@ -93,7 +93,7 @@ function HeroBanner({ event }: { event: Event }) {
   const organiser = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Unknown Organizer'
 
   return (
-    <Link href={`/guest/explore/${event.id}`} style={{ textDecoration: 'none', display: 'block', margin: '14px 16px 0' }}>
+    <Link href={`/guest/explore/${event.slug || event.id}`} style={{ textDecoration: 'none', display: 'block', margin: '14px 16px 0' }}>
       <div style={{
         borderRadius: 20, overflow: 'hidden', position: 'relative', height: 215,
         background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : getGradient(event.id),
@@ -359,7 +359,7 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
   const isFull = spotsLeft !== null && spotsLeft <= 0
 
   return (
-    <Link href={`/guest/explore/${event.id}`} style={{ textDecoration: 'none', display: 'block', opacity: 0, animation: 'revealUp 0.35s ease forwards', animationDelay: `${index * 55}ms` }}>
+    <Link href={`/guest/explore/${event.slug || event.id}`} style={{ textDecoration: 'none', display: 'block', opacity: 0, animation: 'revealUp 0.35s ease forwards', animationDelay: `${index * 55}ms` }}>
       <div style={{ display: 'flex', gap: 11, padding: '11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         {/* Date column */}
         <div style={{ flexShrink: 0, width: 42, textAlign: 'center', paddingTop: 1 }}>

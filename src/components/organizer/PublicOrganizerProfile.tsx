@@ -22,6 +22,7 @@ export type PublicProfile = {
 
 export type PublicEvent = {
   id: string
+  slug: string | null
   title: string
   date_start: string
   cover_image_url: string | null
@@ -58,7 +59,7 @@ function EventCard({ event }: { event: PublicEvent }) {
 
   return (
     <Link
-      href={`/guest/explore/${event.id}`}
+      href={`/guest/explore/${event.slug || event.id}`}
       style={{
         display: 'flex', gap: 14, padding: '14px 16px',
         background: '#111420', border: '1px solid rgba(255,255,255,0.06)',

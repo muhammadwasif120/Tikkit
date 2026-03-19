@@ -17,7 +17,7 @@ async function TikkitData() {
       .from('public_registrations')
       .select(`
         id, status, payment_status, created_at,
-        event:events(id, title, date_start, date_end, venue_name, secret_venue, venue_reveal_at, cover_image_url, ticket_price, registration_mode)
+        event:events(id, slug, title, date_start, date_end, venue_name, secret_venue, venue_reveal_at, cover_image_url, ticket_price, registration_mode)
       `)
       .eq('email', user.email!)
       .not('status', 'eq', 'rejected')
@@ -30,7 +30,7 @@ async function TikkitData() {
     ? await (async () => {
         const { data } = await supabase
           .from('events')
-          .select('id, title, date_start, cover_image_url, venue_name, ticket_price')
+          .select('id, slug, title, date_start, cover_image_url, venue_name, ticket_price')
           .in('id', favouriteIds)
           .eq('status', 'published')
           .order('date_start', { ascending: true })

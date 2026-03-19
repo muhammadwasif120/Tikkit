@@ -22,7 +22,7 @@ async function OrganizerData({ username }: { username: string }) {
   // 2. Fetch published + completed events
   const { data: eventsData } = await supabase
     .from('events')
-    .select('id, title, date_start, cover_image_url, venue_name, capacity, status')
+    .select('id, slug, title, date_start, cover_image_url, venue_name, capacity, status')
     .eq('organizer_id', profile.id)
     .in('status', ['published', 'completed'])
     .order('date_start', { ascending: false })
@@ -47,6 +47,7 @@ async function OrganizerData({ username }: { username: string }) {
 
   const enrichedEvents: PublicEvent[] = events.map(ev => ({
     id:              ev.id,
+    slug:            (ev as any).slug   ?? null,
     title:           ev.title,
     date_start:      ev.date_start,
     cover_image_url: ev.cover_image_url ?? null,

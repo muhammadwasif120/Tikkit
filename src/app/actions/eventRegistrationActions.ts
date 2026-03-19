@@ -69,7 +69,7 @@ export async function registerForEvent(formData: FormData) {
 
   await createNotification(Notifications.newRegistration(event.organizer_id, eventId, name, event.title))
 
-  revalidatePath(`/guest/explore/${eventId}`)
+  revalidatePath('/guest/explore/[id]', 'page')  // revalidates all event detail pages
   revalidatePath('/guest/tikkit')
   return { success: true }
 }
@@ -120,7 +120,7 @@ export async function submitEOI(formData: FormData) {
 
   await createNotification(Notifications.eoiSubmitted(event.organizer_id, eventId, name, event.title))
 
-  revalidatePath(`/guest/explore/${eventId}`)
+  revalidatePath('/guest/explore/[id]', 'page')  // revalidates all event detail pages
   revalidatePath('/guest/tikkit')
   return { success: true }
 }

@@ -29,26 +29,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ]
 
-  // Fetch all active public events
+  // Fetch all active public events — include slug for SEO-friendly URLs
   const { data: events } = await supabase
     .from('events')
-    .select('id, updated_at')
+    .select('id, slug, updated_at')
     .eq('status', 'published')
     .eq('is_private', false)
     .not('registration_mode', 'eq', 'invite_only')
 
   const dynamicRoutes: MetadataRoute.Sitemap = (events || []).flatMap((event) => {
+    const slugOrId = (event as any).slug || event.id
+    const lastMod = new Date((event as any).updated_at || Date.now())
     return [
       {
-        url: `${baseUrl}/guest/explore/${event.id}`,
-        lastModified: new Date(event.updated_at || Date.now()),
-        changeFrequency: 'daily',
+        url: `${baseUrl}/guest/explore/${slugOrId}`,
+        lastModified: lastMod,
+        changeFrequency: 'daily' as const,
         priority: 0.8,
       },
       {
         url: `${baseUrl}/register/${event.id}`,
-        lastModified: new Date(event.updated_at || Date.now()),
-        changeFrequency: 'daily',
+        lastModified: lastMod,
+        changeFrequency: 'daily' as const,
         priority: 0.8,
       },
     ]

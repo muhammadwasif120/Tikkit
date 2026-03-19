@@ -240,7 +240,7 @@ export async function sendGuestMessage(eventId: string, message: string): Promis
     .from('public_registrations')
     .select('id, status')
     .eq('event_id', eventId)
-    .eq('guest_id', user.id)
+    .eq('email', user.email!)
     .in('status', ['confirmed', 'checked_in', 'attended', 'registered', 'eoi_approved', 'payment_pending'])
     .single()
 
@@ -279,7 +279,7 @@ export async function getGuestChatMessages(eventId: string): Promise<{
     .from('public_registrations')
     .select('id')
     .eq('event_id', eventId)
-    .eq('guest_id', user.id)
+    .eq('email', user.email!)
     .single()
 
   if (!reg) return { messages: [], event: null, error: 'Not registered for this event' }
