@@ -40,9 +40,10 @@ function fmtTime(iso: string) {
 
 /* ─── Responsive CSS ─────────────────────────────────────────────── */
 const CSS = `
-  @keyframes fadeUp   { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-  @keyframes pulseDot { 0%,100% { box-shadow:0 0 6px #1E5EFF; opacity:1; } 50% { box-shadow:0 0 14px #1E5EFF; opacity:0.6; } }
-  @keyframes orbDrift { 0%,100% { transform:translateX(-50%) translateY(0); } 50% { transform:translateX(-50%) translateY(-28px); } }
+  @keyframes fadeUp      { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes pulseDot    { 0%,100% { box-shadow:0 0 6px #1E5EFF; opacity:1; } 50% { box-shadow:0 0 14px #1E5EFF; opacity:0.6; } }
+  @keyframes orbDrift    { 0%,100% { transform:translateX(-50%) translateY(0); } 50% { transform:translateX(-50%) translateY(-28px); } }
+  @keyframes tickerCats  { from { transform:translateX(0); } to { transform:translateX(-50%); } }
 
   .pe-wrap { background:#080A10; min-height:100vh; padding-top:64px; font-family:var(--font-body); }
 
@@ -138,8 +139,21 @@ const CSS = `
   .pe-stat-n { color:white; font-size:26px; font-weight:900; margin:0 0 3px; font-family:var(--font-display); }
   .pe-stat-l { color:#4B5563; font-size:11px; margin:0; font-weight:600; letter-spacing:0.5px; }
 
-  /* Category pills */
-  .pe-cats { display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; margin-bottom:24px; }
+  /* Category ribbon — auto-cycling ticker */
+  .pe-cats-wrap {
+    position:relative; overflow:hidden; margin-bottom:24px;
+  }
+  .pe-cats-wrap::before, .pe-cats-wrap::after {
+    content:''; position:absolute; top:0; bottom:0; width:56px; z-index:2; pointer-events:none;
+  }
+  .pe-cats-wrap::before { left:0;  background:linear-gradient(to right, #080A10 0%, transparent 100%); }
+  .pe-cats-wrap::after  { right:0; background:linear-gradient(to left,  #080A10 0%, transparent 100%); }
+  .pe-cats-track {
+    display:flex; gap:8px; width:max-content;
+    animation:tickerCats 28s linear infinite;
+    padding:4px 0;
+  }
+  .pe-cats-track:hover { animation-play-state:paused; }
 
   /* Events grid — mobile: single column */
   .pe-featured-grid { display:grid; grid-template-columns:1fr; gap:14px; margin-bottom:14px; }
@@ -157,17 +171,18 @@ const CSS = `
   .pe-cta-btns { display:flex; flex-direction:column; align-items:stretch; gap:12px; }
   .pe-cta-primary { width:100%; justify-content:center !important; }
 
-  /* Mobile — kill dead hero space */
+  /* Mobile */
   @media (max-width:599px) {
-    .pe-hero { min-height:auto; padding:20px 20px 36px; }
-    .pe-hero-badge { font-size:10px; padding:5px 12px; margin-bottom:18px; }
-    .pe-hero-h1 { letter-spacing:-1.5px; }
-    .pe-hero-sub { margin-top:14px; font-size:15px; }
-    .pe-hero-cta { margin-top:24px; gap:10px; }
-    .pe-btn-primary { padding:12px 22px; font-size:14px; }
-    .pe-btn-outline { padding:12px 22px; font-size:14px; }
-    .pe-hero-stats { margin-top:28px; gap:24px; }
-    .pe-stat-n { font-size:22px; }
+    .pe-hero { min-height:auto; padding:48px 20px 40px; }
+    .pe-hero-badge { font-size:10px; padding:5px 14px; margin-bottom:22px; }
+    .pe-hero-h1 { font-size:clamp(34px,10vw,46px); letter-spacing:-1.5px; }
+    .pe-hero-sub { margin-top:16px; font-size:15px; max-width:90%; }
+    .pe-hero-cta { margin-top:28px; gap:10px; }
+    .pe-btn-primary { padding:13px 24px; font-size:14px; }
+    .pe-btn-outline { padding:13px 24px; font-size:14px; }
+    .pe-hero-stats { margin-top:32px; gap:28px; }
+    .pe-stat-n { font-size:24px; }
+    .pe-stat-l { font-size:11px; }
   }
 
   /* Tablet+ */
@@ -184,7 +199,6 @@ const CSS = `
 
   /* Desktop */
   @media (min-width:900px) {
-    .pe-cats { flex-wrap:wrap; overflow-x:visible; }
     .pe-featured-grid { grid-template-columns:repeat(2,1fr); gap:16px; }
     .pe-events-grid   { grid-template-columns:repeat(3,1fr); gap:14px; }
     .pe-why-grid      { grid-template-columns:repeat(4,1fr); gap:12px; }
@@ -501,17 +515,29 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
         {/* ── Content ── */}
         <div className="pe-container">
 
-          {/* ── Category filter ── */}
+          {/* ── Category ribbon — auto-cycling ticker ── */}
           {categories.length > 0 && (
-            <div className="pe-cats">
-              <button onClick={() => setActiveCat(null)} style={{ flexShrink: 0, padding: '7px 16px', borderRadius: 22, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: !activeCat ? '#1E5EFF' : 'rgba(255,255,255,0.05)', border: `1px solid ${!activeCat ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`, color: !activeCat ? 'white' : '#9CA3AF', transition: 'all 0.15s' }}>
-                All events
-              </button>
-              {categories.map(cat => (
-                <button key={cat.id} onClick={() => setActiveCat(activeCat === cat.id ? null : cat.id)} style={{ flexShrink: 0, padding: '7px 15px', borderRadius: 22, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: activeCat === cat.id ? `${cat.color}22` : 'rgba(255,255,255,0.05)', border: `1px solid ${activeCat === cat.id ? cat.color : 'rgba(255,255,255,0.08)'}`, color: activeCat === cat.id ? cat.color : '#9CA3AF', transition: 'all 0.15s' }}>
-                  {cat.icon} {cat.name}
+            <div className="pe-cats-wrap">
+              <div className="pe-cats-track">
+                {/* First set */}
+                <button onClick={() => setActiveCat(null)} style={{ flexShrink: 0, padding: '7px 16px', borderRadius: 22, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: !activeCat ? '#1E5EFF' : 'rgba(255,255,255,0.05)', border: `1px solid ${!activeCat ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`, color: !activeCat ? 'white' : '#9CA3AF', transition: 'all 0.15s' }}>
+                  All events
                 </button>
-              ))}
+                {categories.map(cat => (
+                  <button key={cat.id} onClick={() => setActiveCat(activeCat === cat.id ? null : cat.id)} style={{ flexShrink: 0, padding: '7px 15px', borderRadius: 22, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: activeCat === cat.id ? `${cat.color}22` : 'rgba(255,255,255,0.05)', border: `1px solid ${activeCat === cat.id ? cat.color : 'rgba(255,255,255,0.08)'}`, color: activeCat === cat.id ? cat.color : '#9CA3AF', transition: 'all 0.15s' }}>
+                    {cat.icon} {cat.name}
+                  </button>
+                ))}
+                {/* Duplicate set — seamless loop */}
+                <button onClick={() => setActiveCat(null)} aria-hidden="true" style={{ flexShrink: 0, padding: '7px 16px', borderRadius: 22, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: !activeCat ? '#1E5EFF' : 'rgba(255,255,255,0.05)', border: `1px solid ${!activeCat ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`, color: !activeCat ? 'white' : '#9CA3AF', transition: 'all 0.15s' }}>
+                  All events
+                </button>
+                {categories.map(cat => (
+                  <button key={`dup-${cat.id}`} onClick={() => setActiveCat(activeCat === cat.id ? null : cat.id)} aria-hidden="true" style={{ flexShrink: 0, padding: '7px 15px', borderRadius: 22, fontSize: 12, fontWeight: 700, cursor: 'pointer', background: activeCat === cat.id ? `${cat.color}22` : 'rgba(255,255,255,0.05)', border: `1px solid ${activeCat === cat.id ? cat.color : 'rgba(255,255,255,0.08)'}`, color: activeCat === cat.id ? cat.color : '#9CA3AF', transition: 'all 0.15s' }}>
+                    {cat.icon} {cat.name}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
