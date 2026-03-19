@@ -47,14 +47,13 @@ export default function TopBar({ profile, onMenuClick }: Props) {
         >
           <Menu className="w-5 h-5" />
         </button>
+        <h1
+          className="text-lg font-bold text-white"
+          style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}
+        >
+          {getTitle()}
+        </h1>
       </div>
-
-      <h1
-        className="text-lg font-bold text-white absolute left-1/2 -translate-x-1/2"
-        style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}
-      >
-        {getTitle()}
-      </h1>
 
       <div className="flex items-center gap-3">
         <NotificationBell />
