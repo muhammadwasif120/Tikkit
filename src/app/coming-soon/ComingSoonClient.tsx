@@ -302,10 +302,10 @@ export function ComingSoonClient({ initialCount }: Props) {
           {/* Headline */}
           <h1 style={{
             fontFamily: "'Clash Display', 'Poppins', sans-serif",
-            fontSize: 'clamp(40px, 8vw, 84px)',
+            fontSize: 'clamp(32px, 5.5vw, 64px)',
             fontWeight: 700,
-            lineHeight: 1.0,
-            letterSpacing: '-3px',
+            lineHeight: 1.15,
+            letterSpacing: '-0.5px',
             color: '#F0F2FF',
             marginBottom: 24,
             animation: 'fadeUp 0.6s ease 0.1s both',
