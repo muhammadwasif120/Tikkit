@@ -316,6 +316,7 @@ export function ComingSoonClient({ initialCount }: Props) {
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
+              whiteSpace: 'nowrap',
             }}>
               Like a pro.
             </span>
