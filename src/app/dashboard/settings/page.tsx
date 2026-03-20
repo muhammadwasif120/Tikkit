@@ -325,7 +325,6 @@ export default function SettingsPage() {
       <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
       <input ref={logoInputRef}  type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}  />
 
-      <p className="text-gray-400 text-sm">Manage your account and preferences</p>
 
       {/* Profile + Password */}
       <div className="card space-y-5">
@@ -337,12 +336,12 @@ export default function SettingsPage() {
         >
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-[#1E5EFF20] border-2 border-[#1E5EFF33] flex items-center justify-center shrink-0">
-              <span className="text-base font-bold text-[#1E5EFF]">{fullName?.charAt(0)?.toUpperCase() ?? 'U'}</span>
+              <span className="text-base font-bold text-[#1E5EFF]">{(companyName || fullName)?.charAt(0)?.toUpperCase() ?? 'U'}</span>
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-white">{fullName || 'Your Name'}</p>
+              <p className="text-sm font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>{companyName || fullName || 'Your Name'}</p>
+              {companyName && <p className="text-xs text-gray-500 mt-0.5">{fullName}</p>}
               <p className="text-xs text-gray-500">{profile?.email}</p>
-              {companyName && <p className="text-xs text-gray-600 mt-0.5">{companyName}</p>}
             </div>
           </div>
           <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', profileOpen && 'rotate-180')} />

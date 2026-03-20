@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
-import { CalendarDays, Users, ClipboardList, Receipt, ScanLine, Building2 } from 'lucide-react'
+import { CalendarDays, Users, ClipboardList, Receipt, ScanLine, Building2, LayoutDashboard } from 'lucide-react'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import DashboardLoader from '@/components/layout/DashboardLoader'
@@ -107,9 +107,27 @@ async function DashboardData() {
   ]
 
   return (
-    <div className="space-y-6 max-w-6xl">
-      {/* Welcome */}
-      <p className="text-gray-400 text-sm">Here&apos;s what&apos;s happening across your events.</p>
+    <div className="space-y-6 max-w-5xl" style={{ padding: '28px 24px' }}>
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 4 }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+          background: 'linear-gradient(135deg, rgba(30,94,255,0.2), rgba(168,85,247,0.12))',
+          border: '1px solid rgba(30,94,255,0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 8px 24px rgba(30,94,255,0.15)',
+        }}>
+          <LayoutDashboard size={22} color="#1E5EFF" />
+        </div>
+        <div>
+          <h1 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+            Dashboard
+          </h1>
+          <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+            {"Here's what's happening across your events."}
+          </p>
+        </div>
+      </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
