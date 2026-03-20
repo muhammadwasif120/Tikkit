@@ -8,8 +8,9 @@ import {
   CreditCard, Zap, Flag, Plus, Trash2, Link2,
   Copy, ExternalLink, Shield, Crown, AlertCircle,
   Clock, RefreshCw, ChevronDown, Phone, Building2,
-  Camera, Loader2, ImageIcon, AtSign, X,
+  Camera, Loader2, ImageIcon, AtSign, X, ShieldCheck, ArrowRight,
 } from 'lucide-react'
+import Link from 'next/link'
 import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInvite } from '@/app/actions/teamActions'
 import PaymentAccountsSection from '@/components/settings/PaymentAccountsSection'
 import clsx from 'clsx'
@@ -834,6 +835,23 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+      </div>
+      {/* Verification */}
+      <div className="card">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center shrink-0">
+              <ShieldCheck className="w-5 h-5 text-purple-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Triple Verification</p>
+              <p className="text-xs text-gray-500 mt-0.5">ID, payment & Social Score — completed once</p>
+            </div>
+          </div>
+          <Link href="/dashboard/verify" className="flex items-center gap-1.5 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors shrink-0">
+            Manage <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
       </div>
     </div>
   )

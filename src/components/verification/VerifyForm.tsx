@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { initiateVerification } from '@/app/actions/verificationActions'
 import { ShieldCheck, CreditCard, ExternalLink, Loader2, CheckCircle2, Lock } from 'lucide-react'
 import type { VerifiedProfile } from '@/types/verification'
@@ -160,8 +160,8 @@ export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
             { label: 'Payment',   n: 2 },
             { label: 'Verified',  n: 3 },
           ].map(({ label, n }, i, arr) => (
-            <>
-              <div key={n} className="vf-step">
+            <React.Fragment key={n}>
+              <div className="vf-step">
                 <div className={`vf-step-dot ${stepState(n)}`}>
                   {stepState(n) === 'done' ? <CheckCircle2 size={17} /> : n}
                 </div>
@@ -169,13 +169,12 @@ export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
               </div>
               {i < arr.length - 1 && (
                 <div
-                  key={`conn-${n}`}
                   className={`vf-connector ${
                     step > n + 1 ? 'done' : step === n + 1 ? 'active' : 'idle'
                   }`}
                 />
               )}
-            </>
+            </React.Fragment>
           ))}
         </div>
 

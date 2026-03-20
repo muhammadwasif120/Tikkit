@@ -546,6 +546,7 @@ export default function LandingPage() {
           background: linear-gradient(180deg, var(--surface) 0%, #080A10 100%);
           border-bottom: 1px solid var(--border);
           position: relative;
+          overflow: hidden;
         }
         .stats-band::before {
           content: '';
@@ -787,10 +788,10 @@ export default function LandingPage() {
           .nav-hamburger { display: block; }
 
           /* Hero */
-          .hero { padding: 80px 16px 36px; min-height: auto; }
+          .hero { padding: 80px 16px 48px; min-height: auto; }
           .hero-h1 { letter-spacing: -1.5px; font-size: clamp(36px, 9vw, 56px); }
           .hero-sub { font-size: 15px; margin-top: 18px; }
-          .hero-scroll { margin-top: 36px; }
+          .hero-scroll { display: none; }
           .hero-badge { font-size: 10px; gap: 8px; padding: 5px 12px; white-space: nowrap; }
           .hero-cta { flex-direction: column; align-items: stretch; margin-top: 32px; }
           .btn-primary-lg, .btn-gold-lg, .btn-outline-lg { justify-content: center; width: 100%; padding: 14px 24px; }

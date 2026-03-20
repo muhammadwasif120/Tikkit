@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { sendGuestMessage } from '@/app/actions/commandActions'
-import { Send, Loader2, ArrowLeft } from 'lucide-react'
+import { Send, Loader2, ArrowLeft, Lock, Globe } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { ChatMessage } from '@/types/verification'
 
@@ -39,16 +39,16 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
         { event: 'INSERT', schema: 'public', table: 'event_chats', filter: `event_id=eq.${eventId}` },
         (payload: any) => {
           const msg = payload.new as any
-          // Only show own messages + organizer messages
-          if (msg.user_id !== userId && msg.role !== 'organizer') return
-          setMessages(prev => {
-            if (prev.some(m => m.id === msg.id)) return prev
-            return [...prev, {
-              ...msg,
-              sender_name: msg.role === 'organizer' ? (organizerName ?? 'Organizer') : 'You',
-              sender_avatar: null,
-            }]
-          })
+          // Own messages
+          if (msg.user_id === userId) {
+            setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, { ...msg, sender_name: 'You', sender_avatar: null }])
+            return
+          }
+          // Organizer broadcasts (no recipient) or private replies to this user
+          if (msg.role === 'organizer') {
+            if (msg.recipient_user_id !== null && msg.recipient_user_id !== undefined && msg.recipient_user_id !== userId) return
+            setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, { ...msg, sender_name: organizerName ?? 'Organizer', sender_avatar: null }])
+          }
         }
       )
       .subscribe()
@@ -125,6 +125,23 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                   <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 600, margin: 0, textAlign: isMe ? 'right' : 'left' }}>{msg.sender_name}</p>
+                  {/* Broadcast / private reply badge on organizer messages */}
+                  {!isMe && msg.role === 'organizer' && (
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 3,
+                      fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 100,
+                      marginBottom: 4, width: 'fit-content',
+                      ...(msg.recipient_user_id
+                        ? { background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.2)', color: '#C084FC' }
+                        : { background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)', color: '#6B9FFF' }
+                      ),
+                    }}>
+                      {msg.recipient_user_id
+                        ? <><Lock size={8} /> Private reply</>
+                        : <><Globe size={8} /> Broadcast</>
+                      }
+                    </div>
+                  )}
                   <div style={{
                     padding: '8px 12px', borderRadius: 12, fontSize: 13, lineHeight: 1.5,
                     wordBreak: 'break-word',

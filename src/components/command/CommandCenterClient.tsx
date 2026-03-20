@@ -51,7 +51,7 @@ const CSS = `
     font-size:10px; font-weight:800; letter-spacing:0.04em;
   }
   .cc-live-dot {
-    width:6px; height:6px; border-radius:50%; background:#22C55E;
+    display:inline-block; width:6px; height:6px; border-radius:50%; background:#22C55E;
     animation:ccPulse 2s infinite; flex-shrink:0;
   }
   @keyframes ccPulse {
@@ -165,17 +165,17 @@ export default function CommandCenterClient({ event, attendees: initial, recentM
 
           <div className="cc-header-info">
             <h1 className="cc-event-title">{event.title}</h1>
-            <p className="cc-event-meta">
+            <div className="cc-event-meta">
               <Calendar size={10} style={{ flexShrink: 0 }} />
               {fmtDate(event.date_start)}
               {isLive ? (
-                <span className="cc-live-badge"><div className="cc-live-dot" /> LIVE NOW</span>
+                <span className="cc-live-badge"><span className="cc-live-dot" /> LIVE NOW</span>
               ) : (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#4B5563' }}>
                   <Clock size={10} /> Ended
                 </span>
               )}
-            </p>
+            </div>
           </div>
 
           <div className="cc-stats">

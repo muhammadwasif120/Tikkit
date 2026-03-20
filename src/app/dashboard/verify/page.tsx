@@ -32,7 +32,7 @@ export default async function VerifyPage() {
   const fullyVerified = profile.is_id_verified && profile.is_payment_verified
 
   return (
-    <div style={{ padding: '28px 24px', maxWidth: 660, margin: '0 auto' }}>
+    <div style={{ padding: '28px 24px', maxWidth: 660 }}>
 
       {/* ── Header ──────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 28 }}>

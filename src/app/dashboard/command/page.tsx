@@ -37,7 +37,7 @@ export default async function CommandPage() {
   const events = await getCommandEvents()
 
   return (
-    <div style={{ padding: '28px 24px', maxWidth: 820, margin: '0 auto' }}>
+    <div style={{ padding: '28px 24px', maxWidth: 820 }}>
 
       {/* ── Header ────────────────────────────────────────────── */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 32 }}>
