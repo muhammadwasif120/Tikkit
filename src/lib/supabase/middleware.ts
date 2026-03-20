@@ -43,6 +43,11 @@ export async function updateSession(request: NextRequest) {
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (isPublic) {
+    // Root → coming soon (temporary while platform is pre-launch)
+    if (pathname === '/') {
+      return NextResponse.redirect(new URL('/coming-soon', request.url))
+    }
+
     // Already logged in + hitting login → redirect to their home
     if (user && pathname === '/auth/login') {
       const { data: profile } = await supabase
