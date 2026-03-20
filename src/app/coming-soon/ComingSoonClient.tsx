@@ -656,7 +656,7 @@ export function ComingSoonClient({ initialCount }: Props) {
           borderTop: '1px solid rgba(255,255,255,0.04)',
           fontSize: 12, color: '#374151',
         }}>
-          © {new Date().getFullYear()} Tikkit X — built in Pakistan, for Pakistan.
+          © {new Date().getFullYear()} Tikkit X — Verified Globally. Trusted Locally. Optimized for the Scene.
         </footer>
       </div>
 
