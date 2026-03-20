@@ -121,17 +121,20 @@ function useCountdown(target: Date) {
   const calc = () => {
     const diff = Math.max(0, target.getTime() - Date.now())
     return {
-      days:    Math.floor(diff / 86400000),
-      hours:   Math.floor((diff % 86400000) / 3600000),
-      mins:    Math.floor((diff % 3600000) / 60000),
-      secs:    Math.floor((diff % 60000) / 1000),
+      days:  Math.floor(diff / 86400000),
+      hours: Math.floor((diff % 86400000) / 3600000),
+      mins:  Math.floor((diff % 3600000) / 60000),
+      secs:  Math.floor((diff % 60000) / 1000),
     }
   }
-  const [time, setTime] = useState(calc)
+  // Initialize to zeros to avoid SSR/client hydration mismatch
+  const [time, setTime] = useState({ days: 0, hours: 0, mins: 0, secs: 0 })
   useEffect(() => {
+    setTime(calc())
     const id = setInterval(() => setTime(calc()), 1000)
     return () => clearInterval(id)
-  })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   return time
 }
 
