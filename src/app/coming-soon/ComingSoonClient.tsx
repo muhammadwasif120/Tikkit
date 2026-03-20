@@ -183,7 +183,7 @@ const features = [
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function ComingSoonClient({ initialCount }: Props) {
-  const launchDate = new Date('2026-05-01T00:00:00')
+  const launchDate = new Date('2026-04-05T00:00:00')
   const countdown  = useCountdown(launchDate)
 
   const [role, setRole]       = useState<Role>('organizer')
@@ -262,7 +262,7 @@ export function ComingSoonClient({ initialCount }: Props) {
         {/* Top nav */}
         <nav style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '28px 24px',
+          padding: '16px 24px',
         }}>
           <TikkitXLogo size="lg" />
         </nav>
@@ -686,7 +686,7 @@ export function ComingSoonClient({ initialCount }: Props) {
         }
 
         @media (max-width: 480px) {
-          nav { padding: 20px 16px; }
+          nav { padding: 14px 16px; }
         }
       `}</style>
     </div>
