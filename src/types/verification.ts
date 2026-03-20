@@ -74,6 +74,7 @@ export interface ChatMessage {
   role: 'organizer' | 'guest' | 'staff'
   message: string
   screenshot_url: string | null
+  recipient_user_id?: string | null  // null = broadcast; set = private reply to that user
   created_at: string
   // joined
   sender_name?: string

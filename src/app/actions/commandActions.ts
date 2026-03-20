@@ -76,7 +76,7 @@ export async function getCommandCenterData(eventId: string): Promise<{
   // Fetch recent chat messages (last 50)
   const { data: rawMessages } = await (admin as any)
     .from('event_chats')
-    .select('id, event_id, user_id, role, message, screenshot_url, created_at')
+    .select('id, event_id, user_id, role, message, screenshot_url, recipient_user_id, created_at')
     .eq('event_id', eventId)
     .order('created_at', { ascending: false })
     .limit(50)
@@ -105,6 +105,7 @@ export async function getCommandCenterData(eventId: string): Promise<{
       role: m.role,
       message: m.message,
       screenshot_url: m.screenshot_url,
+      recipient_user_id: m.recipient_user_id ?? null,
       created_at: m.created_at,
       sender_name: senderMap[m.user_id]?.full_name ?? 'Unknown',
       sender_avatar: senderMap[m.user_id]?.avatar_url ?? null,
@@ -114,11 +115,59 @@ export async function getCommandCenterData(eventId: string): Promise<{
 }
 
 /**
+ * Lightweight chat fetch for the floating chat panel — messages only, no attendees.
+ */
+export async function getEventChatMessages(eventId: string): Promise<{
+  event: { id: string; title: string } | null
+  messages: import('@/types/verification').ChatMessage[]
+  error?: string
+}> {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { event: null, messages: [], error: 'Not authenticated' }
+
+  const { data: event } = await supabase
+    .from('events')
+    .select('id, title')
+    .eq('id', eventId)
+    .eq('organizer_id', user.id)
+    .single()
+
+  if (!event) return { event: null, messages: [], error: 'Access denied' }
+
+  const { data: rawMessages } = await (admin as any)
+    .from('event_chats')
+    .select('id, event_id, user_id, role, message, screenshot_url, recipient_user_id, created_at')
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: true })
+    .limit(50)
+
+  const userIds = [...new Set((rawMessages ?? []).map((m: any) => m.user_id))]
+  let nameMap: Record<string, string> = {}
+  if (userIds.length > 0) {
+    const { data: profiles } = await (admin as any)
+      .from('profiles').select('id, full_name').in('id', userIds)
+    for (const p of profiles ?? []) nameMap[p.id] = p.full_name
+  }
+
+  const messages = (rawMessages ?? []).map((m: any) => ({
+    ...m,
+    recipient_user_id: m.recipient_user_id ?? null,
+    sender_name: m.role === 'organizer' ? 'You' : (nameMap[m.user_id] ?? 'Guest'),
+    sender_avatar: null,
+  }))
+
+  return { event, messages }
+}
+
+/**
  * Send a chat message as the organizer in a command channel.
  */
 export async function sendCommandMessage(
   eventId: string,
-  message: string
+  message: string,
+  recipientUserId: string | null = null
 ): Promise<{ success?: boolean; error?: string }> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -144,6 +193,7 @@ export async function sendCommandMessage(
       user_id: user.id,
       role: 'organizer',
       message: trimmed,
+      recipient_user_id: recipientUserId,
     })
 
   return error ? { error: error.message } : { success: true }
@@ -158,6 +208,7 @@ export async function getCommandEvents(): Promise<{
   date_start: string
   date_end: string | null
   status: string
+  cover_image_url: string | null
   _count: number
 }[]> {
   const supabase = await createClient()
@@ -166,7 +217,7 @@ export async function getCommandEvents(): Promise<{
 
   const { data: events } = await supabase
     .from('events')
-    .select('id, title, date_start, date_end, status')
+    .select('id, title, date_start, date_end, status, cover_image_url')
     .eq('organizer_id', user.id)
     .in('status', ['published', 'completed'])
     .order('date_start', { ascending: false })
@@ -305,14 +356,15 @@ export async function getGuestChatMessages(eventId: string): Promise<{
   // Fetch messages — guest's own + organizer's messages
   const { data: msgs } = await (admin as any)
     .from('event_chats')
-    .select('id, event_id, user_id, role, message, screenshot_url, created_at')
+    .select('id, event_id, user_id, role, message, screenshot_url, recipient_user_id, created_at')
     .eq('event_id', eventId)
-    .or(`user_id.eq.${user.id},role.eq.organizer`)
+    .or(`user_id.eq.${user.id},and(role.eq.organizer,recipient_user_id.is.null),and(role.eq.organizer,recipient_user_id.eq.${user.id})`)
     .order('created_at', { ascending: true })
     .limit(100)
 
   const messages: import('@/types/verification').ChatMessage[] = (msgs ?? []).map((m: any) => ({
     ...m,
+    recipient_user_id: m.recipient_user_id ?? null,
     sender_name: m.role === 'organizer' ? organizerName : 'You',
     sender_avatar: null,
   }))
