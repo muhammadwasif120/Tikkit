@@ -34,7 +34,7 @@ export async function getCommandCenterData(eventId: string): Promise<{
 
   const { data: registrations } = await supabase
     .from('public_registrations')
-    .select('id, full_name, email, phone, status, payment_status, created_at')
+    .select('id, full_name, email, phone, status, payment_status, payment_screenshot_url, created_at')
     .eq('event_id', eventId)
     .order('created_at', { ascending: false })
 
@@ -65,7 +65,7 @@ export async function getCommandCenterData(eventId: string): Promise<{
       avatar_url: profile?.avatar_url ?? null,
       status: r.status,
       payment_status: r.payment_status ?? null,
-      payment_screenshot_url: null, // manual screenshots deprecated by PayPro Integration
+      payment_screenshot_url: r.payment_screenshot_url ?? null,
       is_id_verified: false,
       is_payment_verified: false,
       social_score: 0,

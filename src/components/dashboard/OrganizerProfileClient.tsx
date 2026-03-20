@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   Check, Edit3, X, Loader2, Camera,
-  CalendarDays, Users, MapPin, TrendingUp, UserCheck, Settings, ExternalLink,
+  CalendarDays, Users, MapPin, TrendingUp, UserCheck, Settings, ExternalLink, UserCircle,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import clsx from 'clsx'
@@ -270,18 +270,34 @@ export default function OrganizerProfileClient({
   const avatarTop = BANNER_H - AVATAR_H / 2  // 88px — half overlaps banner
 
   return (
-    <div className="max-w-5xl space-y-6">
+    <div className="max-w-5xl space-y-6" style={{ padding: '28px 24px' }}>
 
       {/* Hidden file inputs */}
       <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
       <input ref={logoInputRef}  type="file" accept="image/*" className="hidden" onChange={handleLogoChange}  />
 
-      {/* Page header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div>
-          <p className="text-gray-400 text-sm">Your public identity and event portfolio</p>
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+            background: 'linear-gradient(135deg, rgba(30,94,255,0.2), rgba(34,197,94,0.1))',
+            border: '1px solid rgba(30,94,255,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 8px 24px rgba(30,94,255,0.15)',
+          }}>
+            <UserCircle size={22} color="#1E5EFF" />
+          </div>
+          <div>
+            <h1 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+              Profile
+            </h1>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+              Your public identity and event portfolio
+            </p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 sm:shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {profile.username && (
             <Link
               href={`/organizer/${profile.username}`}

@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { CheckCircle, XCircle, Clock, Search, ChevronDown, CreditCard, FileText, AlertCircle, User, Mail, Phone, Calendar, Tag, Loader2 } from 'lucide-react'
-import clsx from 'clsx'
+import { CheckCircle, XCircle, Clock, Search, ChevronDown, CreditCard, FileText, AlertCircle, User, Mail, Phone, Calendar, Tag, Loader2, ClipboardCheck } from 'lucide-react'
 import { approvePaymentSubmission, rejectPaymentSubmission } from '@/app/actions/paymentAccountActions'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -41,17 +40,17 @@ function fmtTime(iso: string) {
 }
 
 function StatusBadge({ status, paymentStatus }: { status: string; paymentStatus: string }) {
-  let label = '', color = '', bg = '', Icon = Clock
+  let label = '', color = '', bg = '', border = '', Icon = Clock
 
-  if (status === 'rejected')                                          { label = 'Declined';          color = '#EF4444'; bg = 'rgba(239,68,68,0.12)';    Icon = XCircle       }
-  else if (status === 'approved' && paymentStatus === 'confirmed')   { label = 'Confirmed';          color = '#22C55E'; bg = 'rgba(34,197,94,0.12)';   Icon = CheckCircle   }
-  else if (status === 'approved' && paymentStatus === 'not_required'){ label = 'Approved';           color = '#22C55E'; bg = 'rgba(34,197,94,0.12)';   Icon = CheckCircle   }
-  else if (status === 'approved' && paymentStatus === 'pending')     { label = 'Awaiting Payment';   color = '#FFC745'; bg = 'rgba(255,199,69,0.12)';  Icon = AlertCircle   }
-  else if (status === 'approved' && paymentStatus === 'submitted')   { label = 'Payment Submitted';  color = '#F97316'; bg = 'rgba(249,115,22,0.12)';  Icon = CreditCard    }
-  else if (status === 'pending')                                      { label = 'Pending Review';     color = '#6B7280'; bg = 'rgba(107,114,128,0.12)'; Icon = Clock         }
+  if (status === 'rejected')                                          { label = 'Declined';          color = '#EF4444'; bg = 'rgba(239,68,68,0.1)';    border = 'rgba(239,68,68,0.2)';    Icon = XCircle       }
+  else if (status === 'approved' && paymentStatus === 'confirmed')   { label = 'Confirmed';          color = '#22C55E'; bg = 'rgba(34,197,94,0.1)';   border = 'rgba(34,197,94,0.2)';    Icon = CheckCircle   }
+  else if (status === 'approved' && paymentStatus === 'not_required'){ label = 'Approved';           color = '#22C55E'; bg = 'rgba(34,197,94,0.1)';   border = 'rgba(34,197,94,0.2)';    Icon = CheckCircle   }
+  else if (status === 'approved' && paymentStatus === 'pending')     { label = 'Awaiting Payment';   color = '#FFC745'; bg = 'rgba(255,199,69,0.1)';  border = 'rgba(255,199,69,0.2)';   Icon = AlertCircle   }
+  else if (status === 'approved' && paymentStatus === 'submitted')   { label = 'Payment Submitted';  color = '#F97316'; bg = 'rgba(249,115,22,0.1)';  border = 'rgba(249,115,22,0.2)';   Icon = CreditCard    }
+  else if (status === 'pending')                                      { label = 'Pending Review';     color = '#6B7280'; bg = 'rgba(107,114,128,0.1)'; border = 'rgba(107,114,128,0.15)'; Icon = Clock         }
 
   return (
-    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', background: bg, borderRadius: 20, whiteSpace: 'nowrap' }}>
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', background: bg, border: `1px solid ${border}`, borderRadius: 20, whiteSpace: 'nowrap' }}>
       <Icon size={11} color={color} />
       <span style={{ color, fontSize: 11, fontWeight: 700 }}>{label}</span>
     </div>
@@ -86,7 +85,6 @@ function RegistrationModal({
         })
         if (!res.ok) throw new Error(await res.text())
       } else {
-        // EOI approval — no payment needed yet
         const res = await fetch('/api/approve-registration', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -105,21 +103,12 @@ function RegistrationModal({
   const handleReject = async () => {
     setLoading('reject')
     try {
-      if (isPaymentReview) {
-        const res = await fetch('/api/reject-registration', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ registrationId: reg.id, notes: rejectNote }),
-        })
-        if (!res.ok) throw new Error(await res.text())
-      } else {
-        const res = await fetch('/api/reject-registration', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ registrationId: reg.id, notes: rejectNote }),
-        })
-        if (!res.ok) throw new Error(await res.text())
-      }
+      const res = await fetch('/api/reject-registration', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ registrationId: reg.id, notes: rejectNote }),
+      })
+      if (!res.ok) throw new Error(await res.text())
       onAction()
       onClose()
     } catch (e: any) {
@@ -130,29 +119,27 @@ function RegistrationModal({
 
   return (
     <>
-      {/* Backdrop */}
-      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)', zIndex: 100 }} />
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', zIndex: 100 }} />
 
-      {/* Modal */}
       <div
         className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-32px)] sm:w-full max-w-[560px] max-h-[88vh] overflow-y-auto rounded-[20px] z-[101] p-5 sm:p-7"
-        style={{ background: '#111318', border: '1px solid rgba(255,255,255,0.08)' }}
+        style={{ background: '#111318', border: '1px solid rgba(255,255,255,0.1)' }}
       >
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
-            <h2 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 6px' }}>{reg.full_name}</h2>
+            <h2 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>{reg.full_name}</h2>
             <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{event?.title ?? 'Unknown event'}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <StatusBadge status={reg.status} paymentStatus={reg.payment_status} />
-            <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', color: '#9CA3AF', cursor: 'pointer', width: 32, height: 32, borderRadius: 8, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+            <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#9CA3AF', cursor: 'pointer', width: 32, height: 32, borderRadius: 8, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
           </div>
         </div>
 
         {/* Applicant info */}
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '16px', marginBottom: 16 }}>
-          <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 12px' }}>Applicant Details</p>
+        <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px', marginBottom: 12 }}>
+          <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>Applicant Details</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
               { icon: User,     label: 'Name',    value: reg.full_name },
@@ -171,10 +158,10 @@ function RegistrationModal({
 
         {/* Reference code */}
         {event?.require_reference_code && (
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
+          <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <Tag size={13} color="#4B5563" />
-              <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>Reference Code</p>
+              <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>Reference Code</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <code style={{ color: '#E5E7EB', fontSize: 14, fontFamily: 'monospace', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: 6 }}>
@@ -191,44 +178,41 @@ function RegistrationModal({
 
         {/* ID document */}
         {reg.id_document_url && (
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
+          <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <FileText size={13} color="#4B5563" />
-              <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>ID Document</p>
+              <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>ID Document</p>
             </div>
             <img
               src={reg.id_document_url}
               alt="ID document"
               onClick={() => setImgZoom(reg.id_document_url!)}
-              style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 8, cursor: 'zoom-in', border: '1px solid rgba(255,255,255,0.08)' }}
+              style={{ width: '100%', maxHeight: 200, objectFit: 'cover', borderRadius: 10, cursor: 'zoom-in', border: '1px solid rgba(255,255,255,0.08)' }}
             />
           </div>
         )}
 
         {/* Payment screenshot */}
         {reg.payment_screenshot_url && (
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,199,69,0.15)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
+          <div style={{ background: '#0C0E16', border: '1px solid rgba(255,199,69,0.2)', borderRadius: 14, padding: '14px 16px', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <CreditCard size={13} color="#FFC745" />
-              <p style={{ color: '#FFC745', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: 0 }}>Payment Submission</p>
-
+              <p style={{ color: '#FFC745', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>Payment Submission</p>
             </div>
             <img
               src={reg.payment_screenshot_url}
               alt="Payment screenshot"
               onClick={() => setImgZoom(reg.payment_screenshot_url!)}
-              style={{ width: '100%', maxHeight: 240, objectFit: 'cover', borderRadius: 8, cursor: 'zoom-in', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 8 }}
+              style={{ width: '100%', maxHeight: 240, objectFit: 'cover', borderRadius: 10, cursor: 'zoom-in', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 8 }}
             />
-            <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>
-              Submitted — tap to zoom
-            </p>
+            <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>Tap to zoom</p>
           </div>
         )}
 
         {/* Notes from applicant */}
         {reg.notes && (
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '14px 16px', marginBottom: 16 }}>
-            <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 6px' }}>Applicant Note</p>
+          <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px', marginBottom: 12 }}>
+            <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 6px' }}>Applicant Note</p>
             <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0, lineHeight: 1.6 }}>{reg.notes}</p>
           </div>
         )}
@@ -241,7 +225,7 @@ function RegistrationModal({
               value={rejectNote} onChange={e => setNote(e.target.value)}
               placeholder="Let the applicant know why they were declined..."
               rows={3}
-              style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 13, resize: 'none', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 13, resize: 'none', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
             />
           </div>
         )}
@@ -297,39 +281,15 @@ function RegistrationModal({
   )
 }
 
-// ── Status icon for mobile ────────────────────────────────────────────────────
+// ── Status icon for list rows ─────────────────────────────────────────────────
 function StatusIcon({ status, paymentStatus }: { status: string; paymentStatus: string }) {
-  let Icon = Clock, color = '#6B7280'
+  let Icon = Clock, color = '#4B5563'
   if (status === 'rejected')                                           { Icon = XCircle;    color = '#EF4444' }
   else if (status === 'approved' && paymentStatus === 'confirmed')    { Icon = CheckCircle; color = '#22C55E' }
   else if (status === 'approved' && paymentStatus === 'not_required') { Icon = CheckCircle; color = '#22C55E' }
   else if (status === 'approved' && paymentStatus === 'pending')      { Icon = AlertCircle; color = '#FFC745' }
   else if (status === 'approved' && paymentStatus === 'submitted')    { Icon = CreditCard;  color = '#F97316' }
-  return <Icon size={18} color={color} />
-}
-
-// ── Mobile Registration Row ───────────────────────────────────────────────────
-function RegistrationRow({ reg, event, onClick }: { reg: Registration; event: Event | undefined; onClick: () => void }) {
-  const needsAttention = reg.status === 'pending' || (reg.status === 'approved' && reg.payment_status === 'submitted')
-
-  return (
-    <div
-      onClick={onClick}
-      className="flex items-center gap-3 px-4 py-3.5 border-b border-white/[0.04] cursor-pointer transition-colors hover:bg-white/[0.02]"
-      style={{ background: needsAttention ? 'rgba(255,199,69,0.02)' : undefined }}
-    >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          {needsAttention && <div className="w-1.5 h-1.5 rounded-full bg-[#FFC745] shrink-0" />}
-          <p className="text-white text-sm font-semibold truncate">{reg.full_name}</p>
-        </div>
-        <p className="text-[#4B5563] text-xs mt-0.5 truncate">{event?.title ?? '—'}</p>
-      </div>
-      <div className="shrink-0">
-        <StatusIcon status={reg.status} paymentStatus={reg.payment_status} />
-      </div>
-    </div>
-  )
+  return <Icon size={16} color={color} />
 }
 
 // ── Main Component ─────────────────────────────────────────────────────────────
@@ -347,7 +307,7 @@ export default function ApprovalsClient({
   const [selected, setSelected]           = useState<Registration | null>(null)
   const [filter, setFilter]               = useState<Filter>('All')
   const [search, setSearch]               = useState('')
-  const [eventFilter, setEventFilter]       = useState<string>('all')
+  const [eventFilter, setEventFilter]     = useState<string>('all')
 
   const eventMap = useMemo(() => {
     const m: Record<string, Event> = {}
@@ -355,7 +315,6 @@ export default function ApprovalsClient({
     return m
   }, [events])
 
-  // Count badges
   const counts = useMemo(() => ({
     'All':            registrations.length,
     'Pending':        registrations.filter(r => r.status === 'pending').length,
@@ -380,7 +339,6 @@ export default function ApprovalsClient({
         return r.full_name.toLowerCase().includes(s) || r.email.toLowerCase().includes(s)
       })
       .sort((a, b) => {
-        // Pending and payment-submitted first
         const priority = (r: Registration) =>
           r.status === 'pending' ? 2 :
           (r.status === 'approved' && r.payment_status === 'submitted') ? 1 : 0
@@ -388,106 +346,147 @@ export default function ApprovalsClient({
       })
   }, [registrations, filter, search, eventFilter])
 
-  const refresh = async () => {
-    // Re-fetch by reloading the page data — simplest approach
-    window.location.reload()
-  }
+  const refresh = () => window.location.reload()
+
+  const urgentCount = counts['Pending'] + counts['Payment Review']
 
   return (
-    <div className="space-y-5 max-w-5xl">
+    <div className="max-w-5xl" style={{ padding: '28px 24px' }}>
 
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-gray-500 text-sm">Review applications and payment submissions</p>
+      {/* ── Header ──────────────────────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 28 }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+          background: 'linear-gradient(135deg, rgba(30,94,255,0.2), rgba(168,85,247,0.12))',
+          border: '1px solid rgba(30,94,255,0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 8px 24px rgba(30,94,255,0.15)',
+        }}>
+          <ClipboardCheck size={22} color="#1E5EFF" />
         </div>
-        {counts['Pending'] + counts['Payment Review'] > 0 && (
-          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FFC74512] border border-[#FFC74525] rounded-full shrink-0">
-            <AlertCircle className="w-3.5 h-3.5 text-[#FFC745]" />
-            <span className="text-[#FFC745] text-xs font-bold whitespace-nowrap">
-              {counts['Pending'] + counts['Payment Review']} need attention
-            </span>
-          </div>
-        )}
+        <div>
+          <h1 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+            Approvals
+          </h1>
+          <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+            Review applications and payment submissions across all events
+          </p>
+        </div>
       </div>
 
-      {/* ── Filters card ── */}
-      <div className="bg-brand-charcoal rounded-xl border border-white/5 p-4 space-y-3">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+      {/* ── Needs attention strip ────────────────────────────── */}
+      {urgentCount > 0 && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(255,199,69,0.08) 0%, rgba(249,115,22,0.05) 100%)',
+          border: '1px solid rgba(255,199,69,0.2)',
+          borderRadius: 16, padding: '16px 20px', marginBottom: 24,
+          display: 'flex', alignItems: 'center', gap: 12,
+        }}>
+          <AlertCircle size={16} color="#FFC745" style={{ flexShrink: 0 }} />
+          <p style={{ color: '#FFC745', fontSize: 13, fontWeight: 700, margin: 0 }}>
+            {urgentCount} {urgentCount === 1 ? 'registration needs' : 'registrations need'} your attention
+          </p>
+        </div>
+      )}
+
+      {/* ── Search + event filter ────────────────────────────── */}
+      <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '16px', marginBottom: 10 }}>
+        <div style={{ position: 'relative', marginBottom: events.length > 1 ? 10 : 0 }}>
+          <Search size={15} color="#4B5563" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
           <input
             type="text"
-            className="input pl-9 w-full"
             placeholder="Search by name or email…"
             value={search}
             onChange={e => setSearch(e.target.value)}
+            style={{
+              width: '100%', padding: '10px 12px 10px 36px',
+              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 12, color: 'white', fontSize: 13, outline: 'none',
+              fontFamily: 'inherit', boxSizing: 'border-box',
+            }}
           />
         </div>
-        {/* Event selector */}
         {events.length > 1 && (
-          <div className="relative">
+          <div style={{ position: 'relative' }}>
             <select
-              className="appearance-none input pr-8 font-medium cursor-pointer"
               value={eventFilter}
               onChange={e => setEventFilter(e.target.value)}
+              style={{
+                width: '100%', padding: '10px 32px 10px 12px', appearance: 'none',
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: 12, color: 'white', fontSize: 13, cursor: 'pointer',
+                fontFamily: 'inherit', outline: 'none',
+              }}
             >
               <option value="all">All Events</option>
               {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
             </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+            <ChevronDown size={14} color="#4B5563" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
           </div>
         )}
       </div>
 
-      {/* ── Filter tabs — 2×2 on mobile (last spans full), 5-col on desktop ── */}
-      <div className="grid [grid-template-columns:repeat(2,minmax(0,1fr))] sm:[grid-template-columns:repeat(5,minmax(0,1fr))] gap-2">
+      {/* ── Filter tabs ──────────────────────────────────────── */}
+      <div className="grid [grid-template-columns:repeat(2,minmax(0,1fr))] sm:[grid-template-columns:repeat(5,minmax(0,1fr))] gap-2" style={{ marginBottom: 20 }}>
         {FILTERS.map((f, i) => {
-          const isActive   = filter === f
-          const isUrgent   = f === 'Pending' || f === 'Payment Review'
-          const hasItems   = counts[f] > 0
-          const isLastItem = i === FILTERS.length - 1
+          const isActive  = filter === f
+          const isUrgent  = f === 'Pending' || f === 'Payment Review'
+          const isLast    = i === FILTERS.length - 1
           return (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={clsx(
-                'flex items-center justify-between p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer min-w-0 overflow-hidden',
-                isLastItem && 'col-span-2 sm:col-span-1',
-                isActive
-                  ? isUrgent
-                    ? 'bg-[#FFC74512] border-[#FFC74535] text-[#FFC745]'
-                    : 'bg-[#1E5EFF15] border-[#1E5EFF40] text-white'
-                  : 'bg-brand-charcoal border-white/5 text-gray-400 hover:border-white/10 hover:text-gray-200'
-              )}
+              className={isLast ? 'col-span-2 sm:col-span-1' : undefined}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 14px', borderRadius: 14, cursor: 'pointer', transition: 'all 0.15s',
+                background: isActive
+                  ? isUrgent ? 'rgba(255,199,69,0.1)' : 'rgba(30,94,255,0.12)'
+                  : '#0C0E16',
+                border: isActive
+                  ? isUrgent ? '1px solid rgba(255,199,69,0.3)' : '1px solid rgba(30,94,255,0.3)'
+                  : '1px solid rgba(255,255,255,0.06)',
+              }}
             >
-              <span className="text-sm font-medium truncate">{f}</span>
-              <span className={clsx(
-                'ml-2 shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full',
-                isActive
-                  ? isUrgent
-                    ? 'bg-[#FFC74525] text-[#FFC745]'
-                    : 'bg-[#1E5EFF25] text-[#4D82FF]'
-                  : isUrgent && hasItems
-                    ? 'bg-[#FFC74515] text-[#FFC74590]'
-                    : 'bg-white/5 text-gray-500'
-              )}>
-                {counts[f]}
-              </span>
+              <span style={{
+                fontSize: 12, fontWeight: 700,
+                color: isActive ? (isUrgent ? '#FFC745' : 'white') : '#6B7280',
+                truncate: true,
+              }}>{f}</span>
+              <span style={{
+                marginLeft: 8, fontSize: 11, fontWeight: 800, padding: '2px 7px', borderRadius: 20, flexShrink: 0,
+                background: isActive
+                  ? isUrgent ? 'rgba(255,199,69,0.2)' : 'rgba(30,94,255,0.2)'
+                  : 'rgba(255,255,255,0.05)',
+                color: isActive
+                  ? isUrgent ? '#FFC745' : '#7DA4FF'
+                  : '#4B5563',
+              }}>{counts[f]}</span>
             </button>
           )
         })}
       </div>
 
-      {/* ── Registration list ── */}
-      <div className="bg-brand-charcoal rounded-xl border border-white/5">
+      {/* ── Count label ──────────────────────────────────────── */}
+      <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+        {filtered.length} {filtered.length === 1 ? 'registration' : 'registrations'}
+      </p>
+
+      {/* ── Registration list ────────────────────────────────── */}
+      <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, overflow: 'hidden' }}>
         {filtered.length === 0 ? (
-          <div className="text-center py-16 px-6">
-            <CheckCircle className="w-8 h-8 text-gray-700 mx-auto mb-3" />
-            <p className="text-gray-500 font-semibold text-sm mb-1">
+          <div style={{ textAlign: 'center', padding: '72px 24px' }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 18, margin: '0 auto 16px',
+              background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <ClipboardCheck size={24} color="#1E5EFF" />
+            </div>
+            <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
               {search ? 'No results found' : `No ${filter.toLowerCase()} applications`}
             </p>
-            <p className="text-gray-700 text-xs">
+            <p style={{ color: '#4B5563', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
               {!search && filter === 'All' ? 'Applications will appear here as people register for your events' : ''}
             </p>
           </div>
@@ -495,25 +494,50 @@ export default function ApprovalsClient({
           <>
             {/* Mobile list */}
             <div className="md:hidden">
-              {filtered.map(reg => (
-                <RegistrationRow
-                  key={reg.id}
-                  reg={reg}
-                  event={eventMap[reg.event_id]}
-                  onClick={() => setSelected(reg)}
-                />
-              ))}
+              {filtered.map(reg => {
+                const needsAttention = reg.status === 'pending' || (reg.status === 'approved' && reg.payment_status === 'submitted')
+                return (
+                  <div
+                    key={reg.id}
+                    onClick={() => setSelected(reg)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 14,
+                      padding: '14px 18px', cursor: 'pointer',
+                      borderBottom: '1px solid rgba(255,255,255,0.04)',
+                      background: needsAttention ? 'rgba(255,199,69,0.02)' : 'transparent',
+                    }}
+                  >
+                    <div style={{
+                      width: 36, height: 36, borderRadius: 12, flexShrink: 0,
+                      background: needsAttention ? 'rgba(255,199,69,0.1)' : 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${needsAttention ? 'rgba(255,199,69,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <StatusIcon status={reg.status} paymentStatus={reg.payment_status} />
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                        {needsAttention && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFC745', flexShrink: 0 }} />}
+                        <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{reg.full_name}</p>
+                      </div>
+                      <p style={{ color: '#4B5563', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{eventMap[reg.event_id]?.title ?? '—'}</p>
+                    </div>
+                    <div style={{ flexShrink: 0 }}>
+                      <StatusBadge status={reg.status} paymentStatus={reg.payment_status} />
+                    </div>
+                  </div>
+                )
+              })}
             </div>
 
             {/* Desktop table */}
-            <div className="hidden md:block overflow-x-auto -mx-0 px-0">
-              <table className="w-full min-w-[600px]">
+            <div className="hidden md:block overflow-x-auto">
+              <table style={{ width: '100%', minWidth: 600, borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr className="border-b border-white/[0.06]">
-                    <th className="table-header">Applicant</th>
-                    <th className="table-header">Event</th>
-                    <th className="table-header">Email</th>
-                    <th className="table-header">Status</th>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    {['Applicant', 'Event', 'Email', 'Status'].map(h => (
+                      <th key={h} style={{ padding: '12px 20px', textAlign: 'left', color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -524,18 +548,22 @@ export default function ApprovalsClient({
                       <tr
                         key={reg.id}
                         onClick={() => setSelected(reg)}
-                        className="border-b border-white/[0.04] cursor-pointer transition-colors hover:bg-white/[0.02]"
-                        style={{ background: needsAttention ? 'rgba(255,199,69,0.02)' : undefined }}
+                        className="approval-row"
+                        style={{
+                          borderBottom: '1px solid rgba(255,255,255,0.04)',
+                          cursor: 'pointer',
+                          background: needsAttention ? 'rgba(255,199,69,0.02)' : 'transparent',
+                        }}
                       >
-                        <td className="table-cell">
-                          <div className="flex items-center gap-2">
-                            {needsAttention && <div className="w-1.5 h-1.5 rounded-full bg-[#FFC745] shrink-0" />}
-                            <span className="font-semibold text-white">{reg.full_name}</span>
+                        <td style={{ padding: '14px 20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {needsAttention && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFC745', flexShrink: 0 }} />}
+                            <span style={{ color: 'white', fontSize: 13, fontWeight: 700 }}>{reg.full_name}</span>
                           </div>
                         </td>
-                        <td className="table-cell text-gray-400">{event?.title ?? '—'}</td>
-                        <td className="table-cell text-gray-400">{reg.email}</td>
-                        <td className="table-cell">
+                        <td style={{ padding: '14px 20px', color: '#6B7280', fontSize: 13 }}>{event?.title ?? '—'}</td>
+                        <td style={{ padding: '14px 20px', color: '#6B7280', fontSize: 13 }}>{reg.email}</td>
+                        <td style={{ padding: '14px 20px' }}>
                           <StatusBadge status={reg.status} paymentStatus={reg.payment_status} />
                         </td>
                       </tr>
@@ -548,7 +576,6 @@ export default function ApprovalsClient({
         )}
       </div>
 
-      {/* Detail modal */}
       {selected && (
         <RegistrationModal
           reg={selected}
@@ -557,6 +584,10 @@ export default function ApprovalsClient({
           onAction={refresh}
         />
       )}
+
+      <style>{`
+        .approval-row:hover { background: rgba(255,255,255,0.02) !important; }
+      `}</style>
     </div>
   )
 }

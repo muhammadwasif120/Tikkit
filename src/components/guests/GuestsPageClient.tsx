@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { QrCode, Search, Users, Clock, Crown, Plus, ChevronDown, Edit2, Trash2, X, Check } from 'lucide-react'
-import clsx from 'clsx'
 import Link from 'next/link'
 import type { Database } from '@/lib/supabase/database.types'
 import QrModal from '@/components/guests/QrModal'
@@ -12,13 +11,22 @@ type Guest = Database['public']['Tables']['guests']['Row']
 type Event = { id: string; title: string; status: string }
 type Tab = 'all' | 'vip' | 'regular' | 'waitlist'
 
-const statusBadge: Record<string, string> = {
-  invited: 'badge-gray',
-  registered: 'badge-blue',
-  confirmed: 'badge-blue',
-  checked_in: 'badge-green',
-  checked_out: 'badge-gray',
-  cancelled: 'badge-red',
+const STATUS_COLORS: Record<string, { bg: string; color: string; border: string }> = {
+  invited:     { bg: 'rgba(107,114,128,0.1)', color: '#6B7280', border: 'rgba(107,114,128,0.2)' },
+  registered:  { bg: 'rgba(30,94,255,0.1)',   color: '#4D82FF', border: 'rgba(30,94,255,0.2)'   },
+  confirmed:   { bg: 'rgba(30,94,255,0.1)',   color: '#4D82FF', border: 'rgba(30,94,255,0.2)'   },
+  checked_in:  { bg: 'rgba(34,197,94,0.1)',   color: '#22C55E', border: 'rgba(34,197,94,0.2)'   },
+  checked_out: { bg: 'rgba(107,114,128,0.1)', color: '#6B7280', border: 'rgba(107,114,128,0.2)' },
+  cancelled:   { bg: 'rgba(239,68,68,0.1)',   color: '#EF4444', border: 'rgba(239,68,68,0.2)'   },
+}
+
+function StatusPill({ status }: { status: string }) {
+  const c = STATUS_COLORS[status] ?? STATUS_COLORS.invited
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700, letterSpacing: '0.04em', background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>
+      {status.replace('_', ' ')}
+    </span>
+  )
 }
 
 export default function GuestsPageClient({
@@ -29,17 +37,17 @@ export default function GuestsPageClient({
   initialGuests: Guest[]
 }) {
   const supabase = createClient()
-  const [guests, setGuests] = useState<Guest[]>(initialGuests)
+  const [guests, setGuests]                 = useState<Guest[]>(initialGuests)
   const [selectedEventId, setSelectedEventId] = useState<string>('all')
-  const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
-  const [activeTab, setActiveTab] = useState<Tab>('all')
-  const [selectedQR, setSelectedQR] = useState<Guest | null>(null)
-  const [editGuest, setEditGuest] = useState<Guest | null>(null)
-  const [editForm, setEditForm] = useState({ full_name: '', email: '', phone: '', gender: '', is_vip: false, waitlist: false })
-  const [editSaving, setEditSaving] = useState(false)
-  const [deleteGuest, setDeleteGuest] = useState<Guest | null>(null)
-  const [deleting, setDeleting] = useState(false)
+  const [search, setSearch]                 = useState('')
+  const [statusFilter, setStatusFilter]     = useState('all')
+  const [activeTab, setActiveTab]           = useState<Tab>('all')
+  const [selectedQR, setSelectedQR]         = useState<Guest | null>(null)
+  const [editGuest, setEditGuest]           = useState<Guest | null>(null)
+  const [editForm, setEditForm]             = useState({ full_name: '', email: '', phone: '', gender: '', is_vip: false, waitlist: false })
+  const [editSaving, setEditSaving]         = useState(false)
+  const [deleteGuest, setDeleteGuest]       = useState<Guest | null>(null)
+  const [deleting, setDeleting]             = useState(false)
   const [expandedGuestId, setExpandedGuestId] = useState<string | null>(null)
 
   const openEdit = (guest: Guest) => {
@@ -65,78 +73,112 @@ export default function GuestsPageClient({
     setDeleteGuest(null)
   }
 
-  const visibleGuests = selectedEventId === 'all' ? guests : guests.filter(g => g.event_id === selectedEventId)
-  const vipCount = visibleGuests.filter(g => g.is_vip && !g.waitlist).length
-  const regularCount = visibleGuests.filter(g => !g.is_vip && !g.waitlist).length
-  const waitlistCount = visibleGuests.filter(g => g.waitlist).length
+  const visibleGuests  = selectedEventId === 'all' ? guests : guests.filter(g => g.event_id === selectedEventId)
+  const vipCount       = visibleGuests.filter(g => g.is_vip && !g.waitlist).length
+  const regularCount   = visibleGuests.filter(g => !g.is_vip && !g.waitlist).length
+  const waitlistCount  = visibleGuests.filter(g => g.waitlist).length
 
-  const tabs = [
-    { key: 'all' as Tab, label: 'All', count: visibleGuests.length, icon: Users },
-    { key: 'vip' as Tab, label: 'VIP', count: vipCount, icon: Crown },
-    { key: 'regular' as Tab, label: 'Regular', count: regularCount, icon: Users },
-    { key: 'waitlist' as Tab, label: 'Waitlist', count: waitlistCount, icon: Clock },
+  const tabs: { key: Tab; label: string; count: number; color: string; activeColor: string }[] = [
+    { key: 'all',      label: 'All',      count: visibleGuests.length, color: 'rgba(30,94,255,0.1)',  activeColor: 'rgba(30,94,255,0.15)'  },
+    { key: 'vip',      label: 'VIP',      count: vipCount,             color: 'rgba(255,199,69,0.1)', activeColor: 'rgba(255,199,69,0.15)' },
+    { key: 'regular',  label: 'Regular',  count: regularCount,         color: 'rgba(30,94,255,0.1)',  activeColor: 'rgba(30,94,255,0.15)'  },
+    { key: 'waitlist', label: 'Waitlist', count: waitlistCount,        color: 'rgba(107,114,128,0.1)',activeColor: 'rgba(107,114,128,0.15)'},
   ]
 
-  const sortGuests = (list: Guest[]) => [...list].sort((a, b) => { if (a.is_vip && !b.is_vip) return -1; if (!a.is_vip && b.is_vip) return 1; return a.full_name.localeCompare(b.full_name) })
-
-  const filtered = sortGuests(visibleGuests.filter((g) => {
-    const matchSearch = !search || g.full_name.toLowerCase().includes(search.toLowerCase()) || g.email?.toLowerCase().includes(search.toLowerCase())
-    const matchStatus = statusFilter === 'all' || g.status === statusFilter
-    const matchTab = activeTab === 'all' || (activeTab === 'vip' && g.is_vip && !g.waitlist) || (activeTab === 'regular' && !g.is_vip && !g.waitlist) || (activeTab === 'waitlist' && g.waitlist)
-    return matchSearch && matchStatus && matchTab
-  }))
+  const filtered = [...visibleGuests]
+    .filter(g => {
+      if (!search) return true
+      const s = search.toLowerCase()
+      return g.full_name.toLowerCase().includes(s) || g.email?.toLowerCase().includes(s)
+    })
+    .filter(g => statusFilter === 'all' || g.status === statusFilter)
+    .filter(g => {
+      if (activeTab === 'vip')      return g.is_vip && !g.waitlist
+      if (activeTab === 'regular')  return !g.is_vip && !g.waitlist
+      if (activeTab === 'waitlist') return g.waitlist
+      return true
+    })
+    .sort((a, b) => {
+      if (a.is_vip && !b.is_vip) return -1
+      if (!a.is_vip && b.is_vip) return 1
+      return a.full_name.localeCompare(b.full_name)
+    })
 
   const selectedEvent = events.find(e => e.id === selectedEventId)
 
   return (
-    <div className="space-y-5 max-w-5xl">
+    <div className="max-w-5xl" style={{ padding: '28px 24px' }}>
 
-      {/* ── Header ── */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-gray-400 text-sm truncate">
-            {filtered.length} guest{filtered.length !== 1 ? 's' : ''}
-            {selectedEventId !== 'all' && selectedEvent ? ` · ${selectedEvent.title}` : ' · All events'}
-          </p>
+      {/* ── Header ──────────────────────────────────────────── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+            background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(30,94,255,0.12))',
+            border: '1px solid rgba(34,197,94,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 8px 24px rgba(34,197,94,0.12)',
+          }}>
+            <Users size={22} color="#22C55E" />
+          </div>
+          <div>
+            <h1 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+              Guests
+            </h1>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+              {visibleGuests.length} guest{visibleGuests.length !== 1 ? 's' : ''}
+              {selectedEventId !== 'all' && selectedEvent ? ` · ${selectedEvent.title}` : ' · All events'}
+            </p>
+          </div>
         </div>
         {selectedEventId !== 'all' && (
-          <Link href={`/dashboard/events/${selectedEventId}/guests/add`} className="btn-primary shrink-0">
-            <Plus className="w-4 h-4" /> Add Guest
+          <Link href={`/dashboard/events/${selectedEventId}/guests/add`} style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: '#1E5EFF', color: 'white', textDecoration: 'none',
+            padding: '10px 18px', borderRadius: 12, fontSize: 13, fontWeight: 700, flexShrink: 0,
+            boxShadow: '0 6px 20px rgba(30,94,255,0.25)',
+          }}>
+            <Plus size={14} /> Add Guest
           </Link>
         )}
       </div>
 
-      {/* ── Filters ── */}
-      <div className="bg-brand-charcoal rounded-xl border border-white/5 p-4 space-y-3">
-        {/* Search */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+      {/* ── Filters ──────────────────────────────────────────── */}
+      <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '16px', marginBottom: 10 }}>
+        <div style={{ position: 'relative', marginBottom: 10 }}>
+          <Search size={15} color="#4B5563" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
           <input
             type="text"
-            className="input pl-9 w-full"
             placeholder="Search guests by name or email…"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: '100%', padding: '10px 12px 10px 36px',
+              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: 12, color: 'white', fontSize: 13, outline: 'none',
+              fontFamily: 'inherit', boxSizing: 'border-box',
+            }}
           />
         </div>
-        {/* Event + Status selectors */}
-        <div className="flex gap-2">
-          <div className="relative flex-1">
+        <div style={{ display: 'flex', gap: 10 }}>
+          {/* Event selector */}
+          <div style={{ position: 'relative', flex: 1 }}>
             <select
-              className="appearance-none input pr-8 font-medium cursor-pointer"
               value={selectedEventId}
-              onChange={(e) => { setSelectedEventId(e.target.value); setActiveTab('all'); setSearch(''); setStatusFilter('all') }}
+              onChange={e => { setSelectedEventId(e.target.value); setActiveTab('all'); setSearch(''); setStatusFilter('all') }}
+              style={{ width: '100%', padding: '10px 32px 10px 12px', appearance: 'none', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
             >
               <option value="all">All Events</option>
-              {events.map((event) => <option key={event.id} value={event.id}>{event.title}</option>)}
+              {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
             </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+            <ChevronDown size={14} color="#4B5563" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
           </div>
-          <div className="relative flex-1">
+          {/* Status selector */}
+          <div style={{ position: 'relative', flex: 1 }}>
             <select
-              className="appearance-none input pr-8 cursor-pointer"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => setStatusFilter(e.target.value)}
+              style={{ width: '100%', padding: '10px 32px 10px 12px', appearance: 'none', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
             >
               <option value="all">All Statuses</option>
               <option value="invited">Invited</option>
@@ -146,144 +188,141 @@ export default function GuestsPageClient({
               <option value="checked_out">Checked Out</option>
               <option value="cancelled">Cancelled</option>
             </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+            <ChevronDown size={14} color="#4B5563" style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
           </div>
         </div>
       </div>
 
-      {/* ── Tabs ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {tabs.map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={clsx(
-              'flex items-center justify-between p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer',
-              activeTab === tab.key
-                ? tab.key === 'vip'
-                  ? 'bg-[#FFC74512] border-[#FFC74535] text-[#FFC745]'
-                  : 'bg-[#1E5EFF15] border-[#1E5EFF40] text-white'
-                : 'bg-brand-charcoal border-white/5 text-gray-400 hover:border-white/10 hover:text-gray-200'
-            )}
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <tab.icon className={clsx(
-                'w-3.5 h-3.5 shrink-0',
-                activeTab === tab.key
-                  ? tab.key === 'vip' ? 'text-[#FFC745]' : 'text-[#1E5EFF]'
-                  : 'text-gray-500'
-              )} />
-              <span className="text-sm font-medium truncate">{tab.label}</span>
-            </div>
-            <span className={clsx(
-              'ml-2 shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full',
-              activeTab === tab.key
-                ? tab.key === 'vip'
-                  ? 'bg-[#FFC74525] text-[#FFC745]'
-                  : 'bg-[#1E5EFF25] text-[#4D82FF]'
-                : 'bg-white/5 text-gray-500'
-            )}>
-              {tab.count}
-            </span>
-          </button>
-        ))}
+      {/* ── Tabs ──────────────────────────────────────────────── */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2" style={{ marginBottom: 20 }}>
+        {tabs.map(tab => {
+          const isActive = activeTab === tab.key
+          const isVip    = tab.key === 'vip'
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '12px 14px', borderRadius: 14, cursor: 'pointer', transition: 'all 0.15s',
+                background: isActive ? tab.activeColor : '#0C0E16',
+                border: isActive
+                  ? isVip ? '1px solid rgba(255,199,69,0.3)' : '1px solid rgba(30,94,255,0.3)'
+                  : '1px solid rgba(255,255,255,0.06)',
+              }}
+            >
+              <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? (isVip ? '#FFC745' : 'white') : '#6B7280' }}>{tab.label}</span>
+              <span style={{
+                marginLeft: 8, fontSize: 11, fontWeight: 800, padding: '2px 7px', borderRadius: 20, flexShrink: 0,
+                background: isActive ? (isVip ? 'rgba(255,199,69,0.2)' : 'rgba(30,94,255,0.2)') : 'rgba(255,255,255,0.05)',
+                color: isActive ? (isVip ? '#FFC745' : '#7DA4FF') : '#4B5563',
+              }}>{tab.count}</span>
+            </button>
+          )
+        })}
       </div>
 
       {/* VIP banner */}
       {activeTab === 'vip' && vipCount > 0 && (
-        <div className="flex items-center gap-3 p-3 rounded-lg bg-[#FFC74510] border border-[#FFC74525]">
-          <Crown className="w-4 h-4 text-[#FFC745] shrink-0" />
-          <p className="text-xs text-[#FFC745]">VIP guests have priority access and should be checked in before regular guests.</p>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '14px 18px', marginBottom: 12,
+          background: 'rgba(255,199,69,0.06)', border: '1px solid rgba(255,199,69,0.2)',
+          borderRadius: 14,
+        }}>
+          <Crown size={14} color="#FFC745" style={{ flexShrink: 0 }} />
+          <p style={{ color: '#FFC745', fontSize: 12, margin: 0, fontWeight: 600 }}>
+            VIP guests have priority access and should be checked in before regular guests.
+          </p>
         </div>
       )}
 
-      {/* ── Guest list ── */}
-      <div className="card">
+      {/* ── Count label ──────────────────────────────────────── */}
+      <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+        {filtered.length} {filtered.length === 1 ? 'guest' : 'guests'}
+      </p>
+
+      {/* ── Guest list ───────────────────────────────────────── */}
+      <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, overflow: 'hidden' }}>
         {visibleGuests.length === 0 ? (
-          <div className="text-center py-12">
-            <Users className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-            <p className="text-gray-400 font-medium text-sm">No guests yet</p>
-            <p className="text-gray-600 text-xs mt-1">{selectedEventId === 'all' ? 'Select an event and add guests to get started' : 'Add your first guest to this event'}</p>
+          <div style={{ textAlign: 'center', padding: '72px 24px' }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 18, margin: '0 auto 16px',
+              background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Users size={24} color="#22C55E" />
+            </div>
+            <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
+              No guests yet
+            </p>
+            <p style={{ color: '#4B5563', fontSize: 13, margin: '0 0 20px', lineHeight: 1.6 }}>
+              {selectedEventId === 'all' ? 'Select an event and add guests to get started' : 'Add your first guest to this event'}
+            </p>
             {selectedEventId !== 'all' && (
-              <Link href={`/dashboard/events/${selectedEventId}/guests/add`} className="btn-primary mt-4 justify-center">
-                <Plus className="w-4 h-4" /> Add Guest
+              <Link href={`/dashboard/events/${selectedEventId}/guests/add`} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: '#1E5EFF', color: 'white', textDecoration: 'none',
+                padding: '11px 24px', borderRadius: 12, fontSize: 13, fontWeight: 700,
+                boxShadow: '0 8px 24px rgba(30,94,255,0.25)',
+              }}>
+                <Plus size={14} /> Add Guest
               </Link>
             )}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500 text-sm">No guests match your filters.</p>
+          <div style={{ textAlign: 'center', padding: '48px 24px' }}>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>No guests match your filters.</p>
           </div>
         ) : (
           <>
-            {/* ── Mobile card list (hidden on md+) ── */}
-            <div className="md:hidden divide-y divide-white/5 -mx-6 px-6">
-              {filtered.map((guest) => {
+            {/* Mobile list */}
+            <div className="md:hidden">
+              {filtered.map(guest => {
                 const event = events.find(e => e.id === guest.event_id)
                 const isExpanded = expandedGuestId === guest.id
                 return (
-                  <div key={guest.id} className={clsx('py-3', guest.is_vip && 'bg-[#FFC74503]')}>
-
-                    {/* Always-visible row */}
+                  <div key={guest.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: guest.is_vip ? 'rgba(255,199,69,0.02)' : 'transparent' }}>
                     <div
-                      className="flex items-center gap-3 cursor-pointer"
+                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', cursor: 'pointer' }}
                       onClick={() => setExpandedGuestId(isExpanded ? null : guest.id)}
                     >
-                      {/* Avatar */}
-                      <div className="w-8 h-8 rounded-full bg-brand-charcoal-light border border-white/5 flex items-center justify-center shrink-0">
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 12, flexShrink: 0,
+                        background: guest.is_vip ? 'rgba(255,199,69,0.12)' : 'rgba(255,255,255,0.04)',
+                        border: `1px solid ${guest.is_vip ? 'rgba(255,199,69,0.25)' : 'rgba(255,255,255,0.06)'}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
                         {guest.is_vip
-                          ? <Crown className="w-3.5 h-3.5 text-[#FFC745]" />
-                          : <span className="text-xs font-semibold text-gray-400">{guest.full_name.charAt(0).toUpperCase()}</span>
+                          ? <Crown size={15} color="#FFC745" />
+                          : <span style={{ fontSize: 13, fontWeight: 700, color: '#4D82FF', fontFamily: 'var(--font-display)' }}>{guest.full_name.charAt(0).toUpperCase()}</span>
                         }
                       </div>
-
-                      {/* Name + status */}
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-white text-sm truncate leading-snug">{guest.full_name}</p>
-                        <span className={clsx(statusBadge[guest.status] ?? 'badge-gray', 'mt-0.5 inline-block')}>
-                          {guest.status.replace('_', ' ')}
-                        </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{guest.full_name}</p>
+                        <StatusPill status={guest.status} />
                       </div>
-
-                      {/* Actions — stop propagation so taps don't toggle expand */}
-                      <div className="flex items-center gap-0.5 shrink-0" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setSelectedQR(guest)} className="p-2 text-gray-400 hover:text-[#1E5EFF] transition-colors" aria-label="Show QR code">
-                          <QrCode className="w-4 h-4" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
+                        <button onClick={() => setSelectedQR(guest)} style={{ padding: 8, background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer' }}>
+                          <QrCode size={15} />
                         </button>
-                        <button onClick={() => openEdit(guest)} className="p-2 text-gray-500 hover:text-white transition-colors" aria-label="Edit guest">
-                          <Edit2 className="w-3.5 h-3.5" />
+                        <button onClick={() => openEdit(guest)} style={{ padding: 8, background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer' }}>
+                          <Edit2 size={13} />
                         </button>
-                        <button onClick={() => setDeleteGuest(guest)} className="p-2 text-gray-500 hover:text-red-400 transition-colors" aria-label="Delete guest">
-                          <Trash2 className="w-3.5 h-3.5" />
+                        <button onClick={() => setDeleteGuest(guest)} style={{ padding: 8, background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer' }}>
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </div>
-
-                    {/* Expanded details — revealed on tap */}
                     {isExpanded && (
-                      <div className="mt-2 ml-11 space-y-1.5 text-xs">
-                        {guest.email && (
-                          <p className="text-gray-400 truncate">{guest.email}</p>
+                      <div style={{ padding: '0 18px 14px 66px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {guest.email && <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>{guest.email}</p>}
+                        {selectedEventId === 'all' && event && <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>{event.title}</p>}
+                        {guest.waitlist && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(107,114,128,0.1)', color: '#6B7280', border: '1px solid rgba(107,114,128,0.2)', width: 'fit-content' }}>
+                            <Clock size={9} /> Waitlist{guest.waitlist_position ? ` #${guest.waitlist_position}` : ''}
+                          </span>
                         )}
-                        {selectedEventId === 'all' && event && (
-                          <p className="text-gray-500 truncate">{event.title}</p>
-                        )}
-                        <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
-                          {guest.is_vip && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-[#FFC74520] text-[#FFC745] border border-[#FFC74533]">
-                              <Crown className="w-2.5 h-2.5" /> VIP
-                            </span>
-                          )}
-                          {guest.waitlist && (
-                            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium bg-white/5 text-gray-400 border border-white/10">
-                              <Clock className="w-2.5 h-2.5" /> Waitlist
-                              {guest.waitlist_position ? ` #${guest.waitlist_position}` : ''}
-                            </span>
-                          )}
-                          {guest.plus_one && (
-                            <span className="text-gray-500">+1: {guest.plus_one_name || 'Guest'}</span>
-                          )}
-                        </div>
                       </div>
                     )}
                   </div>
@@ -291,64 +330,58 @@ export default function GuestsPageClient({
               })}
             </div>
 
-            {/* ── Desktop table (hidden below md) ── */}
-            <div className="hidden md:block overflow-x-auto -mx-6 px-6">
-              <table className="w-full min-w-[680px]">
+            {/* Desktop table */}
+            <div className="hidden md:block overflow-x-auto">
+              <table style={{ width: '100%', minWidth: 680, borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr className="border-b border-white/5">
-                    <th className="table-header">Name</th>
-                    {selectedEventId === 'all' && <th className="table-header">Event</th>}
-                    <th className="table-header">Email</th>
-                    <th className="table-header">Status</th>
-                    <th className="table-header">Access</th>
-                    <th className="table-header">QR</th>
-                    <th className="table-header">Actions</th>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                    {['Name', ...(selectedEventId === 'all' ? ['Event'] : []), 'Email', 'Status', 'Access', 'QR', 'Actions'].map(h => (
+                      <th key={h} style={{ padding: '12px 20px', textAlign: 'left', color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((guest) => {
+                  {filtered.map(guest => {
                     const event = events.find(e => e.id === guest.event_id)
                     return (
-                      <tr key={guest.id} className={clsx('border-b border-white/5 hover:bg-white/[0.02] transition-colors group', guest.is_vip && 'bg-[#FFC74504]')}>
-                        <td className="table-cell">
-                          <div className="flex items-center gap-2">
-                            {guest.is_vip && <Crown className="w-3 h-3 text-[#FFC745] shrink-0" />}
+                      <tr key={guest.id} className="guest-row" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: guest.is_vip ? 'rgba(255,199,69,0.02)' : 'transparent' }}>
+                        <td style={{ padding: '14px 20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {guest.is_vip && <Crown size={12} color="#FFC745" />}
                             <div>
-                              <p className="font-medium text-white">{guest.full_name}</p>
-                              {guest.plus_one && <p className="text-xs text-gray-500">+1: {guest.plus_one_name || 'Guest'}</p>}
+                              <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: 0 }}>{guest.full_name}</p>
+                              {guest.plus_one && <p style={{ color: '#4B5563', fontSize: 11, margin: '2px 0 0' }}>+1: {guest.plus_one_name || 'Guest'}</p>}
                             </div>
                           </div>
                         </td>
                         {selectedEventId === 'all' && (
-                          <td className="table-cell">
-                            <Link href={`/dashboard/events/${guest.event_id}`} className="text-xs text-gray-400 hover:text-[#1E5EFF] transition-colors">{event?.title ?? '—'}</Link>
+                          <td style={{ padding: '14px 20px' }}>
+                            <Link href={`/dashboard/events/${guest.event_id}`} style={{ color: '#6B7280', fontSize: 12, textDecoration: 'none' }}>{event?.title ?? '—'}</Link>
                           </td>
                         )}
-                        <td className="table-cell text-gray-400 text-sm">{guest.email || '—'}</td>
-                        <td className="table-cell">
-                          <span className={clsx(statusBadge[guest.status] ?? 'badge-gray')}>{guest.status.replace('_', ' ')}</span>
-                        </td>
-                        <td className="table-cell">
+                        <td style={{ padding: '14px 20px', color: '#6B7280', fontSize: 13 }}>{guest.email || '—'}</td>
+                        <td style={{ padding: '14px 20px' }}><StatusPill status={guest.status} /></td>
+                        <td style={{ padding: '14px 20px' }}>
                           {guest.is_vip ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#FFC74520] text-[#FFC745] border border-[#FFC74533]"><Crown className="w-3 h-3" /> VIP</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(255,199,69,0.12)', color: '#FFC745', border: '1px solid rgba(255,199,69,0.25)' }}><Crown size={9} /> VIP</span>
                           ) : guest.waitlist ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/5 text-gray-400 border border-white/10"><Clock className="w-3 h-3" /> Waitlist</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(107,114,128,0.1)', color: '#6B7280', border: '1px solid rgba(107,114,128,0.2)' }}><Clock size={9} /> Waitlist</span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#1E5EFF20] text-[#1E5EFF] border border-[#1E5EFF33]"><Users className="w-3 h-3" /> Regular</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(30,94,255,0.1)', color: '#4D82FF', border: '1px solid rgba(30,94,255,0.2)' }}><Users size={9} /> Regular</span>
                           )}
                         </td>
-                        <td className="table-cell">
-                          <button onClick={() => setSelectedQR(guest)} className="p-1.5 text-gray-400 hover:text-[#1E5EFF] transition-colors" aria-label="Show QR code">
-                            <QrCode className="w-4 h-4" />
+                        <td style={{ padding: '14px 20px' }}>
+                          <button onClick={() => setSelectedQR(guest)} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', padding: 4 }}>
+                            <QrCode size={15} />
                           </button>
                         </td>
-                        <td className="table-cell">
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onClick={() => openEdit(guest)} className="p-1.5 text-gray-500 hover:text-white transition-colors rounded-md hover:bg-white/5" aria-label="Edit guest">
-                              <Edit2 className="w-3.5 h-3.5" />
+                        <td style={{ padding: '14px 20px' }}>
+                          <div className="guest-actions" style={{ display: 'flex', alignItems: 'center', gap: 4, opacity: 0, transition: 'opacity 0.15s' }}>
+                            <button onClick={() => openEdit(guest)} style={{ padding: 6, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, color: '#6B7280', cursor: 'pointer' }}>
+                              <Edit2 size={12} />
                             </button>
-                            <button onClick={() => setDeleteGuest(guest)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors rounded-md hover:bg-red-500/5" aria-label="Delete guest">
-                              <Trash2 className="w-3.5 h-3.5" />
+                            <button onClick={() => setDeleteGuest(guest)} style={{ padding: 6, background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.12)', borderRadius: 8, color: '#EF4444', cursor: 'pointer' }}>
+                              <Trash2 size={12} />
                             </button>
                           </div>
                         </td>
@@ -364,73 +397,96 @@ export default function GuestsPageClient({
 
       {selectedQR && <QrModal guest={selectedQR} onClose={() => setSelectedQR(null)} />}
 
-      {/* EDIT MODAL */}
+      {/* Edit Modal */}
       {editGuest && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="card w-full max-w-md animate-slide-up">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Edit Guest</h3>
-              <button onClick={() => setEditGuest(null)} className="text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+          <div style={{ background: '#111318', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '24px', width: '100%', maxWidth: 440 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Edit Guest</h3>
+              <button onClick={() => setEditGuest(null)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', cursor: 'pointer', width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
             </div>
-            <div className="space-y-4">
-              <div><label className="label">Full Name *</label><input type="text" className="input" value={editForm.full_name} onChange={e => setEditForm(p => ({ ...p, full_name: e.target.value }))} /></div>
-              <div><label className="label">Email</label><input type="email" className="input" value={editForm.email} onChange={e => setEditForm(p => ({ ...p, email: e.target.value }))} /></div>
-              <div><label className="label">Phone</label><input type="tel" inputMode="tel" className="input" value={editForm.phone} onChange={e => setEditForm(p => ({ ...p, phone: e.target.value }))} /></div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {[
+                { label: 'Full Name *', key: 'full_name', type: 'text' },
+                { label: 'Email', key: 'email', type: 'email' },
+                { label: 'Phone', key: 'phone', type: 'tel' },
+              ].map(({ label, key, type }) => (
+                <div key={key}>
+                  <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{label}</label>
+                  <input
+                    type={type}
+                    value={(editForm as any)[key]}
+                    onChange={e => setEditForm(p => ({ ...p, [key]: e.target.value }))}
+                    style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 13, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                  />
+                </div>
+              ))}
               <div>
-                <label className="label">Gender</label>
-                <select className="input" value={editForm.gender} onChange={e => setEditForm(p => ({ ...p, gender: e.target.value }))}>
+                <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Gender</label>
+                <select
+                  value={editForm.gender}
+                  onChange={e => setEditForm(p => ({ ...p, gender: e.target.value }))}
+                  style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
+                >
                   <option value="">Not specified</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </select>
               </div>
-              <div className="flex gap-4">
-                <div className="flex items-center justify-between flex-1 p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
-                  <p className="text-sm text-white">VIP</p>
-                  <button type="button" onClick={() => setEditForm(p => ({ ...p, is_vip: !p.is_vip }))}
-                    className={`relative w-10 h-5 rounded-full transition-colors ${editForm.is_vip ? 'bg-[#FFC745]' : 'bg-white/10'}`}>
-                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editForm.is_vip ? 'translate-x-5' : ''}`} />
-                  </button>
-                </div>
-                <div className="flex items-center justify-between flex-1 p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
-                  <p className="text-sm text-white">Waitlist</p>
-                  <button type="button" onClick={() => setEditForm(p => ({ ...p, waitlist: !p.waitlist }))}
-                    className={`relative w-10 h-5 rounded-full transition-colors ${editForm.waitlist ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
-                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${editForm.waitlist ? 'translate-x-5' : ''}`} />
-                  </button>
-                </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                {[
+                  { label: 'VIP', key: 'is_vip', color: '#FFC745' },
+                  { label: 'Waitlist', key: 'waitlist', color: '#1E5EFF' },
+                ].map(({ label, key, color }) => (
+                  <div key={key} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12 }}>
+                    <span style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{label}</span>
+                    <button
+                      type="button"
+                      onClick={() => setEditForm(p => ({ ...p, [key]: !(p as any)[key] }))}
+                      style={{ position: 'relative', width: 40, height: 22, borderRadius: 11, border: 'none', cursor: 'pointer', background: (editForm as any)[key] ? color : 'rgba(255,255,255,0.1)', transition: 'background 0.2s' }}
+                    >
+                      <span style={{ position: 'absolute', top: 3, left: 3, width: 16, height: 16, borderRadius: '50%', background: 'white', transition: 'transform 0.2s', transform: (editForm as any)[key] ? 'translateX(18px)' : 'none', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="flex gap-3 justify-end mt-5">
-              <button onClick={() => setEditGuest(null)} className="btn-secondary">Cancel</button>
-              <button onClick={saveEdit} disabled={editSaving || !editForm.full_name} className="btn-primary">
-                {editSaving ? 'Saving...' : <><Check className="w-4 h-4" /> Save Changes</>}
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
+              <button onClick={() => setEditGuest(null)} style={{ padding: '10px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={saveEdit} disabled={editSaving || !editForm.full_name} style={{ padding: '10px 18px', background: '#1E5EFF', border: 'none', borderRadius: 12, color: 'white', fontSize: 13, fontWeight: 700, cursor: editSaving || !editForm.full_name ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: editSaving || !editForm.full_name ? 0.6 : 1 }}>
+                {editSaving ? 'Saving…' : <><Check size={14} /> Save Changes</>}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* DELETE CONFIRM */}
+      {/* Delete Confirm Modal */}
       {deleteGuest && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="card w-full max-w-sm animate-slide-up text-center">
-            <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
-              <Trash2 className="w-5 h-5 text-red-400" />
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+          <div style={{ background: '#111318', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '28px 24px', width: '100%', maxWidth: 380, textAlign: 'center' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Trash2 size={22} color="#EF4444" />
             </div>
-            <h3 className="font-semibold text-white mb-1" style={{ fontFamily: 'var(--font-display)' }}>Delete Guest</h3>
-            <p className="text-gray-400 text-sm mb-5">Are you sure you want to remove <span className="text-white font-medium">{deleteGuest.full_name}</span>? This cannot be undone.</p>
-            <div className="flex gap-3 justify-center">
-              <button onClick={() => setDeleteGuest(null)} className="btn-secondary">Cancel</button>
-              <button onClick={confirmDelete} disabled={deleting}
-                className="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-sm font-medium flex items-center gap-2 transition-all">
-                <Trash2 className="w-4 h-4" />{deleting ? 'Deleting…' : 'Delete'}
+            <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>Delete Guest</h3>
+            <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 24px', lineHeight: 1.6 }}>
+              Remove <span style={{ color: 'white', fontWeight: 700 }}>{deleteGuest.full_name}</span>? This cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+              <button onClick={() => setDeleteGuest(null)} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={confirmDelete} disabled={deleting} style={{ padding: '10px 20px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12, color: '#EF4444', fontSize: 13, fontWeight: 700, cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: deleting ? 0.6 : 1 }}>
+                <Trash2 size={13} />{deleting ? 'Deleting…' : 'Delete'}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        .guest-row:hover { background: rgba(255,255,255,0.02) !important; }
+        .guest-row:hover .guest-actions { opacity: 1 !important; }
+      `}</style>
     </div>
   )
 }

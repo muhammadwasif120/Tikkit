@@ -182,8 +182,27 @@ export default function AnalyticsClient({
   const upcomingEvents = events.filter(e => e.status === 'published' && new Date(e.date_start) > new Date())
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      <p className="text-gray-400 text-sm">Performance metrics and audience intelligence</p>
+    <div className="space-y-6 max-w-5xl" style={{ padding: '28px 24px' }}>
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 4 }}>
+        <div style={{
+          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+          background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(30,94,255,0.12))',
+          border: '1px solid rgba(168,85,247,0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 8px 24px rgba(168,85,247,0.15)',
+        }}>
+          <BarChart3 size={22} color="#A855F7" />
+        </div>
+        <div>
+          <h1 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+            Analytics
+          </h1>
+          <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+            Performance metrics and audience intelligence
+          </p>
+        </div>
+      </div>
 
       {/* Tab switcher */}
       <div className="grid grid-cols-3 gap-2">
