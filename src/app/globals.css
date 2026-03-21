@@ -15,24 +15,24 @@
 }
 @media (max-width: 767px) {
   :root {
-    --fs-2xs:  12px;
-    --fs-xs:   13px;
-    --fs-sm:   14px;
-    --fs-base: 15px;
-    --fs-md:   16px;
-    --fs-lg:   18px;
-    --fs-xl:   20px;
-    --fs-2xl:  23px;
+    --fs-2xs:  11px;
+    --fs-xs:   12px;
+    --fs-sm:   13px;
+    --fs-base: 14px;
+    --fs-md:   15px;
+    --fs-lg:   17px;
+    --fs-xl:   19px;
+    --fs-2xl:  22px;
   }
 }
 
 /* Tailwind utility-class font overrides on mobile */
 @media (max-width: 767px) {
-  .text-\[10px\] { font-size: 12px !important; }
-  .text-\[11px\] { font-size: 13px !important; }
-  .text-\[12px\] { font-size: 14px !important; }
-  .text-xs       { font-size: 14px !important; }
-  .text-sm       { font-size: 15px !important; }
+  .text-\[10px\] { font-size: 11px !important; }
+  .text-\[11px\] { font-size: 12px !important; }
+  .text-\[12px\] { font-size: 13px !important; }
+  .text-xs       { font-size: 13px !important; }
+  .text-sm       { font-size: 14px !important; }
 }
 
 /* ─── Design Tokens ───────────────────────────────────────────────── */
