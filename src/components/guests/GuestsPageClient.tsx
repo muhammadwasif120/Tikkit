@@ -107,11 +107,11 @@ export default function GuestsPageClient({
   const selectedEvent = events.find(e => e.id === selectedEventId)
 
   return (
-    <div className="max-w-5xl" style={{ padding: '28px 24px' }}>
+    <div className="max-w-5xl px-0 pt-2 pb-6 sm:px-6 sm:pt-7">
 
       {/* ── Header ──────────────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', flexWrap: 'wrap', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
           <div style={{
             width: 52, height: 52, borderRadius: 16, flexShrink: 0,
             background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(30,94,255,0.12))',
@@ -160,7 +160,7 @@ export default function GuestsPageClient({
             }}
           />
         </div>
-        <div style={{ display: 'flex', gap: 10 }}>
+        <div className="flex flex-col sm:flex-row gap-2">
           {/* Event selector */}
           <div style={{ position: 'relative', flex: 1 }}>
             <select
@@ -284,7 +284,7 @@ export default function GuestsPageClient({
                 return (
                   <div key={guest.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: guest.is_vip ? 'rgba(255,199,69,0.02)' : 'transparent' }}>
                     <div
-                      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 18px', cursor: 'pointer' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', cursor: 'pointer' }}
                       onClick={() => setExpandedGuestId(isExpanded ? null : guest.id)}
                     >
                       <div style={{
@@ -315,7 +315,7 @@ export default function GuestsPageClient({
                       </div>
                     </div>
                     {isExpanded && (
-                      <div style={{ padding: '0 18px 14px 66px', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      <div style={{ padding: '0 14px 12px 60px', display: 'flex', flexDirection: 'column', gap: 4 }}>
                         {guest.email && <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>{guest.email}</p>}
                         {selectedEventId === 'all' && event && <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>{event.title}</p>}
                         {guest.waitlist && (

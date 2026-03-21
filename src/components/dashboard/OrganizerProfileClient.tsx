@@ -270,7 +270,7 @@ export default function OrganizerProfileClient({
   const avatarTop = BANNER_H - AVATAR_H / 2  // 88px — half overlaps banner
 
   return (
-    <div className="max-w-5xl space-y-6" style={{ padding: '28px 24px' }}>
+    <div className="max-w-5xl space-y-6 px-0 pt-2 pb-6 sm:px-6 sm:pt-7">
 
       {/* Hidden file inputs */}
       <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
