@@ -2,6 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Responsive Font Sizes ──────────────────────────────────────── */
+:root {
+  --fs-2xs:  10px;   /* tiny badges, micro icons */
+  --fs-xs:   11px;   /* uppercase meta labels, counts */
+  --fs-sm:   12px;   /* secondary text, dates, events */
+  --fs-base: 13px;   /* primary body / list-row text  */
+  --fs-md:   14px;   /* emphasised body, event titles  */
+  --fs-lg:   16px;   /* sub-headings                   */
+  --fs-xl:   18px;   /* card values                    */
+  --fs-2xl:  24px;   /* page titles                    */
+}
+@media (max-width: 767px) {
+  :root {
+    --fs-2xs:  11px;
+    --fs-xs:   12px;
+    --fs-sm:   13px;
+    --fs-base: 14px;
+    --fs-md:   15px;
+    --fs-lg:   17px;
+    --fs-xl:   19px;
+    --fs-2xl:  22px;
+  }
+}
+
+/* Tailwind utility-class font overrides on mobile */
+@media (max-width: 767px) {
+  .text-\[10px\] { font-size: 11px !important; }
+  .text-\[11px\] { font-size: 12px !important; }
+  .text-\[12px\] { font-size: 13px !important; }
+  .text-xs       { font-size: 13px !important; }
+  .text-sm       { font-size: 14px !important; }
+}
+
 /* ─── Design Tokens ───────────────────────────────────────────────── */
 :root {
   /* Brand */
