@@ -47,7 +47,7 @@ function Pill({ color, children }: { color: string; children: React.ReactNode })
       display: 'inline-flex', alignItems: 'center', gap: 6,
       padding: '4px 10px', borderRadius: 999,
       background: `${color}18`, border: `1px solid ${color}35`,
-      fontSize: 11, fontWeight: 700, letterSpacing: '0.06em',
+      fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.06em',
       textTransform: 'uppercase', color,
     }}>{children}</span>
   )
@@ -101,7 +101,7 @@ function OrgStep1({ inView }: { inView: boolean }) {
       {/* Window chrome */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#080A10' }}>
         {['#FF5F57','#FEBC2E','#28C840'].map((c,i) => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
-        <span style={{ fontSize: 11, color: '#4B5563', marginLeft: 8, fontFamily: 'var(--font-body)' }}>tikkit.app/dashboard/events</span>
+        <span style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginLeft: 8, fontFamily: 'var(--font-body)' }}>tikkit.app/dashboard/events</span>
       </div>
       <div style={{ display: 'flex', height: 340 }}>
         {/* Sidebar */}
@@ -121,7 +121,7 @@ function OrgStep1({ inView }: { inView: boolean }) {
         </div>
         {/* Main area */}
         <div style={{ flex: 1, padding: 20, overflow: 'hidden' }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F2FF', marginBottom: 16, letterSpacing: '-0.3px' }}>Create New Event</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', marginBottom: 16, letterSpacing: '-0.3px' }}>Create New Event</div>
           {/* Form */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
@@ -131,11 +131,11 @@ function OrgStep1({ inView }: { inView: boolean }) {
               { label: 'Capacity', val: '150 guests' },
             ].map((f, i) => (
               <div key={i} style={{ opacity: inView ? 1 : 0, transform: inView ? 'translateX(0)' : 'translateX(-16px)', transition: `opacity 0.5s ease ${0.2 + i * 0.1}s, transform 0.5s ease ${0.2 + i * 0.1}s` }}>
-                <div style={{ fontSize: 10, color: '#4B5563', fontFamily: 'var(--font-body)', marginBottom: 3, fontWeight: 600 }}>{f.label}</div>
+                <div style={{ fontSize: 'var(--fs-2xs)', color: '#4B5563', fontFamily: 'var(--font-body)', marginBottom: 3, fontWeight: 600 }}>{f.label}</div>
                 <div style={{
                   background: '#0F1119', border: `1px solid ${f.color ? 'rgba(30,94,255,0.4)' : 'rgba(255,255,255,0.07)'}`,
                   borderRadius: 8, padding: '7px 10px',
-                  fontSize: 12, color: f.color ? '#F0F2FF' : '#6B7280',
+                  fontSize: 'var(--fs-sm)', color: f.color ? '#F0F2FF' : '#6B7280',
                   fontFamily: 'var(--font-body)',
                   boxShadow: f.color ? '0 0 0 3px rgba(30,94,255,0.12)' : 'none',
                 }}>{f.val}</div>
@@ -145,7 +145,7 @@ function OrgStep1({ inView }: { inView: boolean }) {
               marginTop: 4,
               background: 'linear-gradient(135deg,#1E5EFF,#1448CC)',
               borderRadius: 8, padding: '9px 14px',
-              fontSize: 12, fontWeight: 700, color: 'white',
+              fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'white',
               fontFamily: 'var(--font-display)', textAlign: 'center',
               boxShadow: '0 0 24px rgba(30,94,255,0.45)',
               opacity: inView ? 1 : 0,
@@ -177,14 +177,14 @@ function OrgStep2({ inView }: { inView: boolean }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#080A10' }}>
         {['#FF5F57','#FEBC2E','#28C840'].map((c,i) => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
-        <span style={{ fontSize: 11, color: '#4B5563', marginLeft: 8, fontFamily: 'var(--font-body)' }}>tikkit.app/dashboard/guests</span>
+        <span style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginLeft: 8, fontFamily: 'var(--font-body)' }}>tikkit.app/dashboard/guests</span>
       </div>
       <div style={{ padding: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px' }}>Guest List · 84 RSVPs</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px' }}>Guest List · 84 RSVPs</div>
           <div style={{ display: 'flex', gap: 8 }}>
             {[{ label: '62 Approved', c: '#22C55E' }, { label: '22 Pending', c: '#F59E0B' }].map((b,i) => (
-              <span key={i} style={{ fontSize: 10, fontWeight: 700, color: b.c, background: `${b.c}18`, borderRadius: 999, padding: '3px 8px', border: `1px solid ${b.c}30` }}>{b.label}</span>
+              <span key={i} style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: b.c, background: `${b.c}18`, borderRadius: 999, padding: '3px 8px', border: `1px solid ${b.c}30` }}>{b.label}</span>
             ))}
           </div>
         </div>
@@ -199,13 +199,13 @@ function OrgStep2({ inView }: { inView: boolean }) {
               transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`,
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ width: 28, height: 28, borderRadius: '50%', background: g.avatar, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white' }}>
+                <div style={{ width: 28, height: 28, borderRadius: '50%', background: g.avatar, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'white' }}>
                   {g.name[0]}
                 </div>
-                <span style={{ fontSize: 13, color: '#D1D5DB', fontFamily: 'var(--font-body)' }}>{g.name}</span>
+                <span style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', fontFamily: 'var(--font-body)' }}>{g.name}</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, color: g.color, background: `${g.color}18`, borderRadius: 999, padding: '2px 8px' }}>{g.status}</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: g.color, background: `${g.color}18`, borderRadius: 999, padding: '2px 8px' }}>{g.status}</span>
                 {g.status === 'Pending' && (
                   <div style={{ display: 'flex', gap: 4 }}>
                     <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(34,197,94,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
@@ -244,10 +244,10 @@ function OrgStep3({ inView }: { inView: boolean }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#080A10' }}>
         {['#FF5F57','#FEBC2E','#28C840'].map((c,i) => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
-        <span style={{ fontSize: 11, color: '#4B5563', marginLeft: 8, fontFamily: 'var(--font-body)' }}>tikkit.app/dashboard/scan</span>
+        <span style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginLeft: 8, fontFamily: 'var(--font-body)' }}>tikkit.app/dashboard/scan</span>
       </div>
       <div style={{ padding: 24, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px' }}>QR Check-In</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px' }}>QR Check-In</div>
         {/* Scanner frame */}
         <div style={{ position: 'relative', width: 160, height: 160, background: '#080A10', borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
           {/* Corner marks */}
@@ -284,8 +284,8 @@ function OrgStep3({ inView }: { inView: boolean }) {
         }}>
           <CheckCircle size={20} color="#22C55E" />
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: '#22C55E' }}>Aisha Malik — Checked In</div>
-            <div style={{ fontSize: 11, color: '#4B5563', fontFamily: 'var(--font-body)', marginTop: 2 }}>Table 4 · VIP · 9:14 PM</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-base)', fontWeight: 700, color: '#22C55E' }}>Aisha Malik — Checked In</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', fontFamily: 'var(--font-body)', marginTop: 2 }}>Table 4 · VIP · 9:14 PM</div>
           </div>
         </div>
         {/* Stats row */}
@@ -297,8 +297,8 @@ function OrgStep3({ inView }: { inView: boolean }) {
               opacity: inView ? 1 : 0,
               transition: `opacity 0.5s ease ${0.7 + i * 0.1}s`,
             }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: s.c }}>{s.n}</div>
-              <div style={{ fontSize: 10, color: '#4B5563', fontFamily: 'var(--font-body)' }}>{s.l}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-xl)', fontWeight: 800, color: s.c }}>{s.n}</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -321,10 +321,10 @@ function OrgStep4({ inView }: { inView: boolean }) {
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#080A10' }}>
         {['#FF5F57','#FEBC2E','#28C840'].map((c,i) => <div key={i} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
-        <span style={{ fontSize: 11, color: '#4B5563', marginLeft: 8, fontFamily: 'var(--font-body)' }}>tikkit.app/dashboard/analytics</span>
+        <span style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginLeft: 8, fontFamily: 'var(--font-body)' }}>tikkit.app/dashboard/analytics</span>
       </div>
       <div style={{ padding: 20 }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px', marginBottom: 14 }}>Event Analytics</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px', marginBottom: 14 }}>Event Analytics</div>
         {/* Stat row */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, marginBottom: 16 }}>
           {[{ n: 'PKR 480K', l: 'Revenue', c: '#22C55E' }, { n: '84%', l: 'Attendance', c: '#1E5EFF' }, { n: '4.8★', l: 'Rating', c: '#FFC745' }].map((s,i) => (
@@ -335,14 +335,14 @@ function OrgStep4({ inView }: { inView: boolean }) {
               transform: inView ? 'translateY(0)' : 'translateY(12px)',
               transition: `opacity 0.5s ease ${i * 0.1}s, transform 0.5s ease ${i * 0.1}s`,
             }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 800, color: s.c }}>{s.n}</div>
-              <div style={{ fontSize: 10, color: '#4B5563', fontFamily: 'var(--font-body)', marginTop: 2 }}>{s.l}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 800, color: s.c }}>{s.n}</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: '#4B5563', fontFamily: 'var(--font-body)', marginTop: 2 }}>{s.l}</div>
             </div>
           ))}
         </div>
         {/* Bar chart */}
         <div style={{ background: '#0F1119', borderRadius: 10, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div style={{ fontSize: 11, color: '#4B5563', fontFamily: 'var(--font-body)', marginBottom: 10, fontWeight: 600 }}>Check-ins by day</div>
+          <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', fontFamily: 'var(--font-body)', marginBottom: 10, fontWeight: 600 }}>Check-ins by day</div>
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 80 }}>
             {bars.map((h,i) => (
               <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
@@ -353,7 +353,7 @@ function OrgStep4({ inView }: { inView: boolean }) {
                   height: inView ? `${h}%` : '0%',
                   transition: `height 0.7s ease ${0.3 + i * 0.07}s`,
                 }} />
-                <span style={{ fontSize: 9, color: '#374151', fontFamily: 'var(--font-body)' }}>{days[i]}</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', color: '#374151', fontFamily: 'var(--font-body)' }}>{days[i]}</span>
               </div>
             ))}
           </div>
@@ -406,9 +406,9 @@ function AttStep1({ inView }: { inView: boolean }) {
         {/* Search */}
         <div style={{ background: '#0F1119', borderRadius: 10, padding: '8px 12px', display: 'flex', alignItems: 'center', gap: 8, border: '1px solid rgba(255,255,255,0.07)', marginBottom: 12 }}>
           <Search size={12} color="#4B5563" />
-          <span style={{ fontSize: 11, color: '#374151', fontFamily: 'var(--font-body)' }}>Find events near you…</span>
+          <span style={{ fontSize: 'var(--fs-xs)', color: '#374151', fontFamily: 'var(--font-body)' }}>Find events near you…</span>
         </div>
-        <div style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', fontFamily: 'var(--font-body)', marginBottom: 8, letterSpacing: '0.05em' }}>THIS WEEKEND</div>
+        <div style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#9CA3AF', fontFamily: 'var(--font-body)', marginBottom: 8, letterSpacing: '0.05em' }}>THIS WEEKEND</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {events.map((e, i) => (
             <div key={i} style={{
@@ -420,12 +420,12 @@ function AttStep1({ inView }: { inView: boolean }) {
               transition: `opacity 0.5s ease ${0.2 + i * 0.12}s, transform 0.5s ease ${0.2 + i * 0.12}s`,
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.2px', lineHeight: 1.3 }}>{e.name}</div>
-                <span style={{ fontSize: 9, color: e.color, background: `${e.color}18`, borderRadius: 4, padding: '2px 5px', fontWeight: 700, whiteSpace: 'nowrap', marginLeft: 6 }}>{e.cat}</span>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.2px', lineHeight: 1.3 }}>{e.name}</div>
+                <span style={{ fontSize: 'var(--fs-2xs)', color: e.color, background: `${e.color}18`, borderRadius: 4, padding: '2px 5px', fontWeight: 700, whiteSpace: 'nowrap', marginLeft: 6 }}>{e.cat}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
-                <span style={{ fontSize: 10, color: '#4B5563', fontFamily: 'var(--font-body)' }}>{e.date}</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', fontFamily: 'var(--font-body)' }}>{e.price}</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>{e.date}</span>
+                <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#9CA3AF', fontFamily: 'var(--font-body)' }}>{e.price}</span>
               </div>
             </div>
           ))}
@@ -444,10 +444,10 @@ function AttStep2({ inView }: { inView: boolean }) {
         <div style={{ borderRadius: 12, background: 'linear-gradient(135deg,#1E3A6E,#0A1A3A)', padding: '14px', marginBottom: 12, position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 70% 30%, rgba(30,94,255,0.3), transparent 60%)' }} />
           <div style={{ position: 'relative' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 800, color: '#F0F2FF', letterSpacing: '-0.3px', lineHeight: 1.25 }}>Rooftop Night<br />Karachi</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 800, color: '#F0F2FF', letterSpacing: '-0.3px', lineHeight: 1.25 }}>Rooftop Night<br />Karachi</div>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: '#9CA3AF' }}><Calendar size={9} />Sat 22 Mar</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: '#9CA3AF' }}><MapPin size={9} />DHA Phase 5</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-2xs)', color: '#9CA3AF' }}><Calendar size={9} />Sat 22 Mar</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-2xs)', color: '#9CA3AF' }}><MapPin size={9} />DHA Phase 5</div>
             </div>
             <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
               <div style={{ display: 'flex' }}>
@@ -455,33 +455,33 @@ function AttStep2({ inView }: { inView: boolean }) {
                   <div key={i} style={{ width: 18, height: 18, borderRadius: '50%', background: c, border: '2px solid #0A1A3A', marginLeft: i > 0 ? -6 : 0 }} />
                 ))}
               </div>
-              <span style={{ fontSize: 10, color: '#6B7280' }}>84 going</span>
+              <span style={{ fontSize: 'var(--fs-2xs)', color: '#6B7280' }}>84 going</span>
             </div>
           </div>
         </div>
         {/* Price & register */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <div>
-            <div style={{ fontSize: 10, color: '#4B5563', fontFamily: 'var(--font-body)' }}>Ticket Price</div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: '#FFC745' }}>PKR 2,500</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>Ticket Price</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#FFC745' }}>PKR 2,500</div>
           </div>
           <div style={{
             background: '#FFC745', borderRadius: 10, padding: '8px 14px',
-            fontSize: 11, fontWeight: 700, color: '#080A10', fontFamily: 'var(--font-display)',
+            fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#080A10', fontFamily: 'var(--font-display)',
             opacity: inView ? 1 : 0,
             transform: inView ? 'scale(1)' : 'scale(0.85)',
             transition: 'opacity 0.5s ease 0.5s, transform 0.5s ease 0.5s',
           }}>Register Now →</div>
         </div>
         {/* Pay via */}
-        <div style={{ fontSize: 10, color: '#374151', fontFamily: 'var(--font-body)', marginBottom: 6, fontWeight: 600 }}>Pay via</div>
+        <div style={{ fontSize: 'var(--fs-2xs)', color: '#374151', fontFamily: 'var(--font-body)', marginBottom: 6, fontWeight: 600 }}>Pay via</div>
         <div style={{ display: 'flex', gap: 6 }}>
           {['JazzCash','EasyPaisa','Bank'].map((p,i) => (
             <div key={i} style={{
               flex: 1, background: i === 0 ? 'rgba(255,199,69,0.12)' : '#0F1119',
               border: `1px solid ${i === 0 ? '#FFC74540' : 'rgba(255,255,255,0.06)'}`,
               borderRadius: 8, padding: '6px 4px', textAlign: 'center',
-              fontSize: 9, fontWeight: 700, color: i === 0 ? '#FFC745' : '#4B5563',
+              fontSize: 'var(--fs-2xs)', fontWeight: 700, color: i === 0 ? '#FFC745' : '#4B5563',
               fontFamily: 'var(--font-body)',
             }}>{p}</div>
           ))}
@@ -503,7 +503,7 @@ function AttStep3({ inView }: { inView: boolean }) {
   return (
     <PhoneFrame inView={inView}>
       <div style={{ padding: '0 12px 8px' }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 13, fontWeight: 700, color: '#F0F2FF', marginBottom: 10, textAlign: 'center' }}>Your Ticket</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-base)', fontWeight: 700, color: '#F0F2FF', marginBottom: 10, textAlign: 'center' }}>Your Ticket</div>
         {/* Ticket card */}
         <div style={{
           background: 'linear-gradient(135deg,#0F1420,#0A1030)',
@@ -511,10 +511,10 @@ function AttStep3({ inView }: { inView: boolean }) {
           borderRadius: 14, padding: '14px',
           boxShadow: '0 0 30px rgba(30,94,255,0.12)',
         }}>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 800, color: '#F0F2FF', marginBottom: 4 }}>Rooftop Night Karachi</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 800, color: '#F0F2FF', marginBottom: 4 }}>Rooftop Night Karachi</div>
           <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
-            <div style={{ fontSize: 10, color: '#6B7280' }}><Calendar size={9} style={{display:'inline',marginRight:3}} />Sat 22 Mar</div>
-            <div style={{ fontSize: 10, color: '#6B7280' }}><MapPin size={9} style={{display:'inline',marginRight:3}} />DHA Phase 5</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: '#6B7280' }}><Calendar size={9} style={{display:'inline',marginRight:3}} />Sat 22 Mar</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: '#6B7280' }}><MapPin size={9} style={{display:'inline',marginRight:3}} />DHA Phase 5</div>
           </div>
           {/* QR code */}
           <div style={{
@@ -533,12 +533,12 @@ function AttStep3({ inView }: { inView: boolean }) {
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: 10, color: '#4B5563', fontFamily: 'var(--font-body)' }}>Name</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 700, color: '#F0F2FF' }}>Aisha Malik</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>Name</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#F0F2FF' }}>Aisha Malik</div>
             </div>
             <div style={{
               background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)',
-              borderRadius: 8, padding: '4px 8px', fontSize: 10, fontWeight: 700, color: '#22C55E',
+              borderRadius: 8, padding: '4px 8px', fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#22C55E',
             }}>✓ APPROVED</div>
           </div>
         </div>
@@ -564,10 +564,10 @@ function AttStep4({ inView }: { inView: boolean }) {
             transform: inView ? 'scale(1)' : 'scale(0.7)',
             transition: 'opacity 0.5s ease 0.2s, transform 0.5s ease 0.2s',
           }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800, color: 'white' }}>A</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-2xl)', fontWeight: 800, color: 'white' }}>A</span>
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, color: '#F0F2FF' }}>Aisha Malik</div>
-          <div style={{ fontSize: 10, color: '#4B5563', fontFamily: 'var(--font-body)' }}>@aisha.malik</div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 700, color: '#F0F2FF' }}>Aisha Malik</div>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>@aisha.malik</div>
         </div>
         {/* Credit score */}
         <div style={{
@@ -579,15 +579,15 @@ function AttStep4({ inView }: { inView: boolean }) {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: 10, color: '#9CA3AF', fontFamily: 'var(--font-body)' }}>Guest Score</div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 800, color: '#FFC745' }}>94</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: '#9CA3AF', fontFamily: 'var(--font-body)' }}>Guest Score</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-2xl)', fontWeight: 800, color: '#FFC745' }}>94</div>
             </div>
             <Star size={28} color="#FFC745" fill="#FFC745" style={{ opacity: 0.8 }} />
           </div>
           <div style={{ marginTop: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 999, height: 4, overflow: 'hidden' }}>
             <div style={{ width: '94%', height: '100%', background: 'linear-gradient(90deg,#FFC745,#F97316)', borderRadius: 999, transition: 'width 1s ease 0.8s' }} />
           </div>
-          <div style={{ fontSize: 10, color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 4 }}>Excellent · Top 8% of guests</div>
+          <div style={{ fontSize: 'var(--fs-2xs)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 4 }}>Excellent · Top 8% of guests</div>
         </div>
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6 }}>
@@ -599,8 +599,8 @@ function AttStep4({ inView }: { inView: boolean }) {
               transform: inView ? 'translateY(0)' : 'translateY(10px)',
               transition: `opacity 0.5s ease ${0.5 + i * 0.1}s, transform 0.5s ease ${0.5 + i * 0.1}s`,
             }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 800, color: s.c }}>{s.n}</div>
-              <div style={{ fontSize: 9, color: '#374151', fontFamily: 'var(--font-body)' }}>{s.l}</div>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 800, color: s.c }}>{s.n}</div>
+              <div style={{ fontSize: 'var(--fs-2xs)', color: '#374151', fontFamily: 'var(--font-body)' }}>{s.l}</div>
             </div>
           ))}
         </div>
@@ -629,9 +629,9 @@ function FeatureStep({
         <Icon size={18} color={color} />
       </div>
       <div>
-        <div style={{ fontSize: 10, fontWeight: 700, color: color, letterSpacing: '0.08em', marginBottom: 4, fontFamily: 'var(--font-body)' }}>STEP {num}</div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px', marginBottom: 6 }}>{title}</div>
-        <div style={{ fontSize: 14, color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>{desc}</div>
+        <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: color, letterSpacing: '0.08em', marginBottom: 4, fontFamily: 'var(--font-body)' }}>STEP {num}</div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px', marginBottom: 6 }}>{title}</div>
+        <div style={{ fontSize: 'var(--fs-md)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>{desc}</div>
       </div>
     </div>
   )
@@ -887,7 +887,7 @@ export default function HowItWorksPage() {
             animation: heroInView.inView ? 'fadeIn 0.6s ease both' : 'none',
           }}>
             <Sparkles size={13} color="#1E5EFF" />
-            <span style={{ fontSize: 12, fontWeight: 700, color: '#1E5EFF', letterSpacing: '0.06em', fontFamily: 'var(--font-body)' }}>PRODUCT TOUR</span>
+            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#1E5EFF', letterSpacing: '0.06em', fontFamily: 'var(--font-body)' }}>PRODUCT TOUR</span>
           </div>
 
           <h1 style={{
@@ -965,7 +965,7 @@ export default function HowItWorksPage() {
             Your whole event,<br />
             <span className="gradient-text-blue">in one dashboard.</span>
           </h2>
-          <p style={{ fontSize: 17, color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
+          <p style={{ fontSize: 'var(--fs-lg)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
             From creating an event to reviewing post-night analytics — Tikkit keeps it all in one place so you can stay focused on what matters.
           </p>
         </div>
@@ -1039,7 +1039,7 @@ export default function HowItWorksPage() {
             Discover. Register.<br />
             <span className="gradient-text-gold">Show up.</span>
           </h2>
-          <p style={{ fontSize: 17, color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
+          <p style={{ fontSize: 'var(--fs-lg)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
             Find the city&apos;s best events, register in seconds, and walk in with a single QR scan. Build your guest reputation with every event.
           </p>
         </div>
@@ -1097,7 +1097,7 @@ export default function HowItWorksPage() {
             background: 'linear-gradient(135deg,#FFC745,#F97316)',
             color: '#111827', textDecoration: 'none',
             borderRadius: 14, padding: '16px 32px',
-            fontSize: 16, fontWeight: 800, fontFamily: 'var(--font-display)',
+            fontSize: 'var(--fs-lg)', fontWeight: 800, fontFamily: 'var(--font-display)',
             boxShadow: '0 0 30px rgba(255,199,69,0.3)',
             letterSpacing: '-0.2px',
           }}>
@@ -1120,7 +1120,7 @@ export default function HowItWorksPage() {
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(28px, 4vw, 36px)', fontWeight: 800, color: '#F0F2FF', marginBottom: 16, letterSpacing: '-1px' }}>
             Safe Payments in Pakistan
           </h2>
-          <p style={{ fontSize: 16, color: '#9CA3AF', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 680, margin: '0 auto 32px' }}>
+          <p style={{ fontSize: 'var(--fs-lg)', color: '#9CA3AF', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 680, margin: '0 auto 32px' }}>
             Unlike automated payment gateways that are vulnerable to regional scams and chargebacks, TIKKIT X secures your transaction using 100% Manual P2P Verification. By uploading your direct transfer screenshot (EasyPaisa, JazzCash, or Bank), the event Organizer personally verifies the funds. 
             <br/><br/>
             No bots. No delayed processing. Absolute cryptographic trust between you and the host.
@@ -1133,7 +1133,7 @@ export default function HowItWorksPage() {
             ].map(({ icon: Icon, title }, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Icon size={16} color="#22C55E" />
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#E5E7EB', fontFamily: 'var(--font-display)' }}>{title}</span>
+                <span style={{ fontSize: 'var(--fs-md)', fontWeight: 700, color: '#E5E7EB', fontFamily: 'var(--font-display)' }}>{title}</span>
               </div>
             ))}
           </div>
@@ -1173,7 +1173,7 @@ export default function HowItWorksPage() {
                 style={{
                   width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                   padding: '20px 24px', background: 'transparent', border: 'none', cursor: 'pointer',
-                  fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F2FF', textAlign: 'left',
+                  fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', textAlign: 'left',
                 }}
               >
                 {faq.q}
@@ -1184,7 +1184,7 @@ export default function HowItWorksPage() {
                 transition: 'all 0.4s cubic-bezier(0.4,0,0.2,1)',
                 padding: openFaq === i ? '0 24px 24px' : '0 24px',
               }}>
-                <p style={{ fontSize: 15, color: '#9CA3AF', fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 'var(--fs-md)', color: '#9CA3AF', fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>
                   {faq.a}
                 </p>
               </div>
@@ -1197,10 +1197,10 @@ export default function HowItWorksPage() {
       <div style={{ maxWidth: 1100, margin: '0 auto 80px', padding: '0 24px' }}>
         <GlassCard style={{ padding: '28px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }} className="hiw-switch-card">
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: '#F0F2FF', marginBottom: 4 }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-xl)', fontWeight: 700, color: '#F0F2FF', marginBottom: 4 }}>
               {activeTab === 'organizer' ? 'Curious how attendees experience it?' : 'Want to run your own events?'}
             </div>
-            <div style={{ fontSize: 14, color: '#6B7280', fontFamily: 'var(--font-body)' }}>
+            <div style={{ fontSize: 'var(--fs-md)', color: '#6B7280', fontFamily: 'var(--font-body)' }}>
               {activeTab === 'organizer' ? 'See the attendee journey from discovery to check-in.' : 'See how organizers create and manage events from the dashboard.'}
             </div>
           </div>
@@ -1212,7 +1212,7 @@ export default function HowItWorksPage() {
               border: `1px solid ${activeTab === 'organizer' ? 'rgba(255,199,69,0.3)' : 'rgba(30,94,255,0.3)'}`,
               color: activeTab === 'organizer' ? '#FFC745' : '#1E5EFF',
               borderRadius: 10, padding: '10px 20px',
-              fontSize: 14, fontWeight: 700, fontFamily: 'var(--font-display)',
+              fontSize: 'var(--fs-md)', fontWeight: 700, fontFamily: 'var(--font-display)',
             }}
           >
             {activeTab === 'organizer' ? <Ticket size={14} /> : <BarChart3 size={14} />}
@@ -1256,7 +1256,7 @@ export default function HowItWorksPage() {
             <span className="gradient-text">the right way?</span>
           </h2>
 
-          <p style={{ fontSize: 18, color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, marginBottom: 36 }}>
+          <p style={{ fontSize: 'var(--fs-xl)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, marginBottom: 36 }}>
             Join organizers across Pakistan who use Tikkit to manage events that people actually remember.
           </p>
 
@@ -1266,7 +1266,7 @@ export default function HowItWorksPage() {
               background: 'linear-gradient(135deg,#1E5EFF,#1448CC)',
               color: 'white', textDecoration: 'none',
               borderRadius: 14, padding: '16px 32px',
-              fontSize: 16, fontWeight: 700, fontFamily: 'var(--font-display)',
+              fontSize: 'var(--fs-lg)', fontWeight: 700, fontFamily: 'var(--font-display)',
               boxShadow: '0 0 40px rgba(30,94,255,0.4)',
               letterSpacing: '-0.2px',
             }}>
@@ -1278,7 +1278,7 @@ export default function HowItWorksPage() {
               border: '1px solid rgba(255,255,255,0.1)',
               color: '#9CA3AF', textDecoration: 'none',
               borderRadius: 14, padding: '16px 28px',
-              fontSize: 16, fontWeight: 600, fontFamily: 'var(--font-display)',
+              fontSize: 'var(--fs-lg)', fontWeight: 600, fontFamily: 'var(--font-display)',
             }}>
               ← Back to home
             </Link>
@@ -1293,7 +1293,7 @@ export default function HowItWorksPage() {
             ].map(({ icon: Icon, text }, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, opacity: ctaInView.inView ? 1 : 0, transition: `opacity 0.5s ease ${0.4 + i * 0.1}s` }}>
                 <Icon size={13} color="#4B5563" />
-                <span style={{ fontSize: 13, color: '#4B5563', fontFamily: 'var(--font-body)' }}>{text}</span>
+                <span style={{ fontSize: 'var(--fs-base)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>{text}</span>
               </div>
             ))}
           </div>

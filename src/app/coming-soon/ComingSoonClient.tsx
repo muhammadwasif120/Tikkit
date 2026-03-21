@@ -165,7 +165,7 @@ function CountdownBlock({ value, label }: { value: number; label: string }) {
         }} />
         {String(value).padStart(2, '0')}
       </div>
-      <span style={{ fontSize: 10, fontWeight: 600, color: '#4B5563', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+      <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 600, color: '#4B5563', letterSpacing: '0.12em', textTransform: 'uppercase' }}>
         {label}
       </span>
     </div>
@@ -291,7 +291,7 @@ export function ComingSoonClient({ initialCount }: Props) {
               animation: 'pulseDot 2s infinite',
             }} />
             <span style={{
-              fontSize: 11, fontWeight: 700, color: '#00E5FF',
+              fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#00E5FF',
               letterSpacing: '0.1em', textTransform: 'uppercase',
               fontFamily: "'Clash Display', sans-serif",
             }}>
@@ -353,7 +353,7 @@ export function ComingSoonClient({ initialCount }: Props) {
                   }} />
                 ))}
               </div>
-              <span style={{ fontSize: 13, color: '#9CA3AF' }}>
+              <span style={{ fontSize: 'var(--fs-base)', color: '#9CA3AF' }}>
                 <strong style={{ color: '#F0F2FF' }}>{count.toLocaleString()}</strong> people already on the list
               </span>
             </div>
@@ -414,12 +414,12 @@ export function ComingSoonClient({ initialCount }: Props) {
                 </div>
                 <div style={{
                   fontFamily: "'Clash Display', sans-serif",
-                  fontSize: 22, fontWeight: 700,
+                  fontSize: 'var(--fs-2xl)', fontWeight: 700,
                   color: '#F0F2FF', marginBottom: 10,
                 }}>
                   You're on the list!
                 </div>
-                <p style={{ fontSize: 14, color: '#6B7280', lineHeight: 1.6, maxWidth: 340, margin: '0 auto 20px' }}>
+                <p style={{ fontSize: 'var(--fs-md)', color: '#6B7280', lineHeight: 1.6, maxWidth: 340, margin: '0 auto 20px' }}>
                   We'll send you early access when we launch.
                   Tell a friend — the more the merrier.
                 </p>
@@ -428,7 +428,7 @@ export function ComingSoonClient({ initialCount }: Props) {
                   padding: '8px 16px', borderRadius: 100,
                   background: 'rgba(0,229,255,0.06)',
                   border: '1px solid rgba(0,229,255,0.15)',
-                  fontSize: 12, color: '#00E5FF', fontWeight: 600,
+                  fontSize: 'var(--fs-sm)', color: '#00E5FF', fontWeight: 600,
                 }}>
                   <Star size={12} fill="#00E5FF" />
                   #{count.toLocaleString()} on the waitlist
@@ -438,19 +438,19 @@ export function ComingSoonClient({ initialCount }: Props) {
               /* ─── Form state ────────────────────────── */
               <form onSubmit={handleSubmit} noValidate>
                 <div style={{
-                  fontSize: 17, fontWeight: 700,
+                  fontSize: 'var(--fs-lg)', fontWeight: 700,
                   fontFamily: "'Clash Display', sans-serif",
                   color: '#F0F2FF', marginBottom: 4, textAlign: 'left',
                 }}>
                   Get early access
                 </div>
-                <p style={{ fontSize: 13, color: '#4B5563', marginBottom: 24, textAlign: 'left' }}>
+                <p style={{ fontSize: 'var(--fs-base)', color: '#4B5563', marginBottom: 24, textAlign: 'left' }}>
                   Be the first to know when we go live.
                 </p>
 
                 {/* Role toggle */}
                 <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: '#6B7280', marginBottom: 8, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                  <label style={{ display: 'block', fontSize: 'var(--fs-sm)', fontWeight: 600, color: '#6B7280', marginBottom: 8, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                     I am a...
                   </label>
                   <div style={{ display: 'flex', gap: 8 }}>
@@ -468,7 +468,7 @@ export function ComingSoonClient({ initialCount }: Props) {
                             ? 'rgba(0,229,255,0.08)'
                             : 'rgba(255,255,255,0.03)',
                           color: role === r ? '#00E5FF' : '#6B7280',
-                          fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                          fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer',
                           transition: 'all 0.2s',
                           textTransform: 'capitalize',
                           boxShadow: role === r ? '0 0 16px rgba(0,229,255,0.1)' : 'none',
@@ -492,7 +492,7 @@ export function ComingSoonClient({ initialCount }: Props) {
                       width: '100%', padding: '13px 16px',
                       background: 'rgba(255,255,255,0.04)',
                       border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 12, color: '#F0F2FF', fontSize: 14,
+                      borderRadius: 12, color: '#F0F2FF', fontSize: 'var(--fs-md)',
                       outline: 'none', fontFamily: 'inherit',
                       transition: 'border-color 0.2s',
                       boxSizing: 'border-box',
@@ -514,7 +514,7 @@ export function ComingSoonClient({ initialCount }: Props) {
                       width: '100%', padding: '13px 16px',
                       background: 'rgba(255,255,255,0.04)',
                       border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 12, color: '#F0F2FF', fontSize: 14,
+                      borderRadius: 12, color: '#F0F2FF', fontSize: 'var(--fs-md)',
                       outline: 'none', fontFamily: 'inherit',
                       transition: 'border-color 0.2s',
                       boxSizing: 'border-box',
@@ -535,7 +535,7 @@ export function ComingSoonClient({ initialCount }: Props) {
                       width: '100%', padding: '13px 16px',
                       background: 'rgba(255,255,255,0.04)',
                       border: '1px solid rgba(255,255,255,0.08)',
-                      borderRadius: 12, color: '#F0F2FF', fontSize: 14,
+                      borderRadius: 12, color: '#F0F2FF', fontSize: 'var(--fs-md)',
                       outline: 'none', fontFamily: 'inherit',
                       transition: 'border-color 0.2s',
                       boxSizing: 'border-box',
@@ -551,7 +551,7 @@ export function ComingSoonClient({ initialCount }: Props) {
                     padding: '10px 14px', borderRadius: 10, marginBottom: 16,
                     background: 'rgba(239,68,68,0.08)',
                     border: '1px solid rgba(239,68,68,0.25)',
-                    fontSize: 13, color: '#FCA5A5',
+                    fontSize: 'var(--fs-base)', color: '#FCA5A5',
                   }}>
                     {error}
                   </div>
@@ -568,7 +568,7 @@ export function ComingSoonClient({ initialCount }: Props) {
                       : 'linear-gradient(135deg, #00E5FF 0%, #1E5EFF 100%)',
                     border: 'none', borderRadius: 12,
                     color: loading || !name.trim() || !email.trim() ? 'rgba(255,255,255,0.3)' : '#080A10',
-                    fontSize: 14, fontWeight: 700, cursor: loading || !name.trim() || !email.trim() ? 'not-allowed' : 'pointer',
+                    fontSize: 'var(--fs-md)', fontWeight: 700, cursor: loading || !name.trim() || !email.trim() ? 'not-allowed' : 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                     fontFamily: "'Clash Display', sans-serif",
                     transition: 'all 0.2s',
@@ -608,7 +608,7 @@ export function ComingSoonClient({ initialCount }: Props) {
         }}>
           <p style={{
             textAlign: 'center',
-            fontSize: 12, fontWeight: 600, color: '#374151',
+            fontSize: 'var(--fs-sm)', fontWeight: 600, color: '#374151',
             letterSpacing: '0.12em', textTransform: 'uppercase',
             marginBottom: 20,
           }}>
@@ -639,10 +639,10 @@ export function ComingSoonClient({ initialCount }: Props) {
                     <Icon size={15} color={f.color} />
                   </div>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#D1D5DB', fontFamily: "'Clash Display', sans-serif" }}>
+                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: '#D1D5DB', fontFamily: "'Clash Display', sans-serif" }}>
                       {f.title}
                     </div>
-                    <div style={{ fontSize: 11, color: '#4B5563' }}>{f.desc}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563' }}>{f.desc}</div>
                   </div>
                 </div>
               )
@@ -655,7 +655,7 @@ export function ComingSoonClient({ initialCount }: Props) {
           textAlign: 'center',
           padding: '24px',
           borderTop: '1px solid rgba(255,255,255,0.04)',
-          fontSize: 12, color: '#374151',
+          fontSize: 'var(--fs-sm)', color: '#374151',
         }}>
           © {new Date().getFullYear()} Tikkit X — Verified Globally. Trusted Locally. Optimized for the Scene.
         </footer>

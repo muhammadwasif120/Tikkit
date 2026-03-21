@@ -64,7 +64,7 @@ const avBg = (id: string) => AVBG[id.split('').reduce((a, c) => a + c.charCodeAt
 function SBadge({ status }: { status: string }) {
   const c = sc(status)
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 700, color: c, background: `${c}18`, border: `1px solid ${c}30`, borderRadius: 999, padding: '3px 9px', whiteSpace: 'nowrap' }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-xs)', fontWeight: 700, color: c, background: `${c}18`, border: `1px solid ${c}30`, borderRadius: 999, padding: '3px 9px', whiteSpace: 'nowrap' }}>
       <span style={{ width: 5, height: 5, borderRadius: '50%', background: c, flexShrink: 0 }} />
       {sl(status)}
     </span>
@@ -80,8 +80,8 @@ function StatCard({ icon: Icon, label, value, sub, color }: { icon: React.Elemen
         <Icon size={15} color={color} />
       </div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#F0F2FF', letterSpacing: '-1.5px', lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 7 }}>{label}</div>
-      {sub && <div style={{ fontSize: 11, color, fontFamily: 'var(--font-body)', marginTop: 4 }}>{sub}</div>}
+      <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 7 }}>{label}</div>
+      {sub && <div style={{ fontSize: 'var(--fs-xs)', color, fontFamily: 'var(--font-body)', marginTop: 4 }}>{sub}</div>}
     </div>
   )
 }
@@ -104,8 +104,8 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
       <div className="ms-panel">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F2FF' }}>Contact Organizer</div>
-            <div style={{ fontSize: 11, color: '#EF4444', fontFamily: 'var(--font-body)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF' }}>Contact Organizer</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: '#EF4444', fontFamily: 'var(--font-body)', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
               <Shield size={9} /> Sending as Tikkit Admin
             </div>
           </div>
@@ -117,19 +117,19 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
         {/* Org info */}
         <div style={{ padding: '14px 24px', background: 'rgba(30,94,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-            <div style={{ width: 38, height: 38, borderRadius: 10, background: avBg(org.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+            <div style={{ width: 38, height: 38, borderRadius: 10, background: avBg(org.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-base)', fontWeight: 700, color: 'white', flexShrink: 0 }}>
               {initials(org.name)}
             </div>
             <div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: '#F0F2FF' }}>{org.name}</div>
-              {org.username && <div style={{ fontSize: 12, color: '#6B7280' }}>@{org.username}</div>}
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 700, color: '#F0F2FF' }}>{org.name}</div>
+              {org.username && <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280' }}>@{org.username}</div>}
             </div>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)' }}>
               <Mail size={11} color="#4B5563" /> {org.email}
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)' }}>
               <Phone size={11} color="#4B5563" /> {org.phone}
             </div>
           </div>
@@ -138,15 +138,15 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
         {/* Compose */}
         <div style={{ padding: '20px 24px', flex: 1, display: 'flex', flexDirection: 'column', gap: 14, overflow: 'auto' }}>
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>FROM</div>
-            <div style={{ background: '#0F1119', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#4B5563', fontFamily: 'var(--font-body)' }}>admin@tikkit.app</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>FROM</div>
+            <div style={{ background: '#0F1119', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '8px 12px', fontSize: 'var(--fs-base)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>admin@tikkit.app</div>
           </div>
           <div>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>SUBJECT</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>SUBJECT</div>
             <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="e.g. Account Review Notice" className="ms-input" />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>MESSAGE</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>MESSAGE</div>
             <textarea value={message} onChange={e => setMessage(e.target.value)} placeholder="Type your message here..." className="ms-textarea" rows={6} />
           </div>
         </div>
@@ -160,14 +160,14 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
               background: sent ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg,#1E5EFF,#1448CC)',
               border: sent ? '1px solid rgba(34,197,94,0.35)' : 'none',
               color: sent ? '#22C55E' : 'white', borderRadius: 10, padding: '10px',
-              fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-display)',
+              fontSize: 'var(--fs-base)', fontWeight: 700, fontFamily: 'var(--font-display)',
               cursor: !subject || !message || sent ? 'default' : 'pointer',
               opacity: !subject || !message ? 0.45 : 1, transition: 'all 0.3s',
             }}
           >
             {sent ? <><CheckCircle size={13} /> Sent!</> : <><Send size={13} /> Send Message</>}
           </button>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', borderRadius: 10, padding: '10px 16px', fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', borderRadius: 10, padding: '10px 16px', fontSize: 'var(--fs-base)', fontWeight: 600, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
             Cancel
           </button>
         </div>
@@ -235,12 +235,12 @@ function OrgDetailView({
   const displayEvts = activeTab === 'active' ? activeEvts : activeTab === 'draft' ? draftEvts : pastEvts
 
   if (loading) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: '#374151', fontSize: 13, fontFamily: 'var(--font-body)' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, color: '#374151', fontSize: 'var(--fs-base)', fontFamily: 'var(--font-body)' }}>
       Loading profile…
     </div>
   )
   if (!profile) return (
-    <div style={{ textAlign: 'center', padding: 40, color: '#374151', fontSize: 13 }}>Profile not found</div>
+    <div style={{ textAlign: 'center', padding: 40, color: '#374151', fontSize: 'var(--fs-base)' }}>Profile not found</div>
   )
 
   const displayName = profile.company_name || profile.full_name
@@ -264,7 +264,7 @@ function OrgDetailView({
             <div style={{ position: 'relative' }}>
               <button
                 onClick={() => setStatusMenuOpen(s => !s)}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '6px 12px', color: '#F0F2FF', fontSize: 12, fontWeight: 600, fontFamily: 'var(--font-body)', cursor: 'pointer' }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 8, padding: '6px 12px', color: '#F0F2FF', fontSize: 'var(--fs-sm)', fontWeight: 600, fontFamily: 'var(--font-body)', cursor: 'pointer' }}
               >
                 <SBadge status={currentStatus} />
                 <ChevronRight size={11} style={{ transform: statusMenuOpen ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }} />
@@ -317,7 +317,7 @@ function OrgDetailView({
           ].map(({ icon: Icon, text }, i) => (
             <div key={i} className="od-info-item">
               <Icon size={11} color="#4B5563" style={{ flexShrink: 0 }} />
-              <span style={{ color: '#9CA3AF', fontSize: 12, fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{text}</span>
+              <span style={{ color: '#9CA3AF', fontSize: 'var(--fs-sm)', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{text}</span>
             </div>
           ))}
         </div>
@@ -353,20 +353,20 @@ function OrgDetailView({
                   <div className="od-event-hdr" onClick={() => toggleGuests(event.id)}>
                     <div className={`od-chevron${isExpanded ? ' open' : ''}`}><ChevronRight size={13} /></div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.title}</div>
-                      <div style={{ fontSize: 11, color: '#4B5563', marginTop: 2 }}>
+                      <div style={{ fontSize: 'var(--fs-md)', fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{event.title}</div>
+                      <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 2 }}>
                         {event.venue_name || 'Venue TBA'} · {fmtDate(event.date_start)}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexShrink: 0 }}>
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: 12, color: fillColor, marginBottom: 4 }}>{event.registered}/{event.capacity}</div>
+                        <div style={{ fontSize: 'var(--fs-sm)', color: fillColor, marginBottom: 4 }}>{event.registered}/{event.capacity}</div>
                         <div className="ms-bar" style={{ width: 80 }}>
                           <div style={{ height: '100%', width: `${Math.min(fill, 100)}%`, background: fillColor, borderRadius: 2 }} />
                         </div>
                       </div>
                       {event.attended > 0 && (
-                        <div style={{ fontSize: 11, color: '#22C55E', whiteSpace: 'nowrap' }}>{event.attended} attended</div>
+                        <div style={{ fontSize: 'var(--fs-xs)', color: '#22C55E', whiteSpace: 'nowrap' }}>{event.attended} attended</div>
                       )}
                       <SBadge status={mapEvtBadge(event.status)} />
                     </div>
@@ -376,16 +376,16 @@ function OrgDetailView({
                   {isExpanded && (
                     <div className="od-guest-list">
                       {guestLoading === event.id ? (
-                        <div style={{ padding: '24px', textAlign: 'center', color: '#374151', fontSize: 12, fontFamily: 'var(--font-body)' }}>Loading guests…</div>
+                        <div style={{ padding: '24px', textAlign: 'center', color: '#374151', fontSize: 'var(--fs-sm)', fontFamily: 'var(--font-body)' }}>Loading guests…</div>
                       ) : guests.length === 0 ? (
-                        <div style={{ padding: '24px', textAlign: 'center', color: '#374151', fontSize: 12, fontFamily: 'var(--font-body)' }}>No guests on this event yet</div>
+                        <div style={{ padding: '24px', textAlign: 'center', color: '#374151', fontSize: 'var(--fs-sm)', fontFamily: 'var(--font-body)' }}>No guests on this event yet</div>
                       ) : (
                         <>
                           <div style={{ padding: '10px 20px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: '#4B5563', fontFamily: 'var(--font-body)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#4B5563', fontFamily: 'var(--font-body)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                               {guests.length} Guest{guests.length !== 1 ? 's' : ''}
                             </span>
-                            <span style={{ fontSize: 11, color: '#374151', fontFamily: 'var(--font-body)' }}>
+                            <span style={{ fontSize: 'var(--fs-xs)', color: '#374151', fontFamily: 'var(--font-body)' }}>
                               {guests.filter(g => g.checked_in_at).length} checked in
                             </span>
                           </div>
@@ -406,23 +406,23 @@ function OrgDetailView({
                                   <tr key={g.id}>
                                     <td>
                                       <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                                        <span style={{ fontSize: 13, fontWeight: 500, color: '#F0F2FF', fontFamily: 'var(--font-body)' }}>{g.full_name}</span>
-                                        {g.is_vip && <span style={{ fontSize: 9, fontWeight: 800, color: '#FFC745', background: 'rgba(255,199,69,0.1)', border: '1px solid rgba(255,199,69,0.25)', borderRadius: 4, padding: '1px 5px', letterSpacing: '0.06em' }}>VIP</span>}
+                                        <span style={{ fontSize: 'var(--fs-base)', fontWeight: 500, color: '#F0F2FF', fontFamily: 'var(--font-body)' }}>{g.full_name}</span>
+                                        {g.is_vip && <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 800, color: '#FFC745', background: 'rgba(255,199,69,0.1)', border: '1px solid rgba(255,199,69,0.25)', borderRadius: 4, padding: '1px 5px', letterSpacing: '0.06em' }}>VIP</span>}
                                       </div>
                                     </td>
-                                    <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>{g.email || '—'}</td>
-                                    <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>{g.phone || '—'}</td>
+                                    <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)' }}>{g.email || '—'}</td>
+                                    <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)' }}>{g.phone || '—'}</td>
                                     <td>
-                                      <span style={{ fontSize: 11, fontWeight: 700, color: GUEST_SC[g.status] ?? '#6B7280', background: `${GUEST_SC[g.status] ?? '#6B7280'}18`, border: `1px solid ${GUEST_SC[g.status] ?? '#6B7280'}28`, borderRadius: 999, padding: '2px 8px', whiteSpace: 'nowrap' }}>
+                                      <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: GUEST_SC[g.status] ?? '#6B7280', background: `${GUEST_SC[g.status] ?? '#6B7280'}18`, border: `1px solid ${GUEST_SC[g.status] ?? '#6B7280'}28`, borderRadius: 999, padding: '2px 8px', whiteSpace: 'nowrap' }}>
                                         {GUEST_SL[g.status] ?? g.status}
                                       </span>
                                     </td>
                                     <td className="ms-hide">
-                                      <span style={{ fontSize: 10, fontWeight: 700, color: g.source === 'invited' ? '#4D82FF' : '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                                      <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: g.source === 'invited' ? '#4D82FF' : '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                                         {g.source === 'invited' ? 'Invited' : 'Applied'}
                                       </span>
                                     </td>
-                                    <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>
+                                    <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)' }}>
                                       {g.checked_in_at
                                         ? new Date(g.checked_in_at).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })
                                         : '—'}
@@ -455,7 +455,7 @@ function GrowthChip({ value }: { value: number | null }) {
   const pos = value > 0, neu = value === 0
   const color = neu ? '#4B5563' : pos ? '#22C55E' : '#EF4444'
   return (
-    <span style={{ fontSize: 10, fontWeight: 700, color, background: `${color}14`, border: `1px solid ${color}22`, borderRadius: 999, padding: '2px 7px', whiteSpace: 'nowrap', fontFamily: 'var(--font-body)' }}>
+    <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color, background: `${color}14`, border: `1px solid ${color}22`, borderRadius: 999, padding: '2px 7px', whiteSpace: 'nowrap', fontFamily: 'var(--font-body)' }}>
       {neu ? '—' : pos ? `↑ +${value}%` : `↓ ${value}%`}
     </span>
   )
@@ -474,7 +474,7 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
   if (loading || !data) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 280, flexDirection: 'column', gap: 12 }}>
       <div style={{ width: 28, height: 28, border: '2px solid rgba(30,94,255,0.2)', borderTopColor: '#1E5EFF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-      <div style={{ fontSize: 12, color: '#374151', fontFamily: 'var(--font-body)' }}>Crunching platform data…</div>
+      <div style={{ fontSize: 'var(--fs-sm)', color: '#374151', fontFamily: 'var(--font-body)' }}>Crunching platform data…</div>
     </div>
   )
 
@@ -505,8 +505,8 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
               <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#F0F2FF', letterSpacing: '-1.5px', lineHeight: 1 }}>{value.toLocaleString()}</div>
               {growth !== undefined && <GrowthChip value={growth} />}
             </div>
-            <div style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 6 }}>{label}</div>
-            <div style={{ fontSize: 11, color, fontFamily: 'var(--font-body)', marginTop: 3 }}>{sub}</div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 6 }}>{label}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color, fontFamily: 'var(--font-body)', marginTop: 3 }}>{sub}</div>
           </div>
         ))}
       </div>
@@ -517,7 +517,7 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
         <div className="ms-card">
           <div className="ms-card-hdr">
             <span className="ms-card-title">Registration Trend</span>
-            <span style={{ fontSize: 11, color: '#374151', fontFamily: 'var(--font-body)' }}>Last 6 months</span>
+            <span style={{ fontSize: 'var(--fs-xs)', color: '#374151', fontFamily: 'var(--font-body)' }}>Last 6 months</span>
           </div>
           <div style={{ padding: '20px 24px 16px', display: 'flex', gap: 10, alignItems: 'flex-end', height: 160 }}>
             {registrationTrend.map((t, i) => {
@@ -525,11 +525,11 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
               const h = maxTrend > 0 ? Math.max((t.count / maxTrend) * 100, t.count > 0 ? 6 : 0) : 0
               return (
                 <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, height: '100%' }}>
-                  <div style={{ fontSize: 10, color: t.count > 0 ? '#9CA3AF' : 'transparent', fontFamily: 'var(--font-body)', fontWeight: 600 }}>{t.count}</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: t.count > 0 ? '#9CA3AF' : 'transparent', fontFamily: 'var(--font-body)', fontWeight: 600 }}>{t.count}</div>
                   <div style={{ flex: 1, width: '100%', display: 'flex', alignItems: 'flex-end' }}>
                     <div style={{ width: '100%', height: `${h}%`, background: isLatest ? '#1E5EFF' : 'rgba(30,94,255,0.28)', borderRadius: '4px 4px 0 0', transition: 'height 0.5s ease', minHeight: 0 }} />
                   </div>
-                  <div style={{ fontSize: 10, color: isLatest ? '#4D82FF' : '#374151', fontFamily: 'var(--font-body)', fontWeight: isLatest ? 700 : 400 }}>{t.label}</div>
+                  <div style={{ fontSize: 'var(--fs-2xs)', color: isLatest ? '#4D82FF' : '#374151', fontFamily: 'var(--font-body)', fontWeight: isLatest ? 700 : 400 }}>{t.label}</div>
                 </div>
               )
             })}
@@ -553,9 +553,9 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <div style={{ width: 7, height: 7, borderRadius: 2, background: s.color, flexShrink: 0 }} />
-                      <span style={{ fontSize: 12, color: '#9CA3AF', fontFamily: 'var(--font-body)' }}>{s.label}</span>
+                      <span style={{ fontSize: 'var(--fs-sm)', color: '#9CA3AF', fontFamily: 'var(--font-body)' }}>{s.label}</span>
                     </div>
-                    <span style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)' }}>{count} <span style={{ color: '#374151' }}>({pct}%)</span></span>
+                    <span style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)' }}>{count} <span style={{ color: '#374151' }}>({pct}%)</span></span>
                   </div>
                   <div style={{ height: 5, background: 'rgba(255,255,255,0.05)', borderRadius: 3, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct}%`, background: s.color, borderRadius: 3, opacity: 0.75 }} />
@@ -608,20 +608,20 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
                     </td>
                     <td>
                       <div className="od-clickable" style={{ display: 'flex', alignItems: 'center', gap: 10 }} onClick={() => onOrgClick(org.id)}>
-                        <div style={{ width: 28, height: 28, borderRadius: 8, background: avBg(org.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{initials(org.name)}</div>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: avBg(org.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#fff', flexShrink: 0 }}>{initials(org.name)}</div>
                         <div>
-                          <div className="od-name-text" style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', transition: 'color 0.15s' }}>{org.name}</div>
-                          {org.username && <div style={{ fontSize: 11, color: '#4B5563' }}>@{org.username}</div>}
+                          <div className="od-name-text" style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', transition: 'color 0.15s' }}>{org.name}</div>
+                          {org.username && <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563' }}>@{org.username}</div>}
                         </div>
                       </div>
                     </td>
-                    <td style={{ fontSize: 13, color: '#9CA3AF' }}>{org.totalEvents}</td>
+                    <td style={{ fontSize: 'var(--fs-base)', color: '#9CA3AF' }}>{org.totalEvents}</td>
                     <td>
-                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 800, color: '#F0F2FF', letterSpacing: '-0.5px' }}>{org.totalRegistrations.toLocaleString()}</span>
+                      <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 800, color: '#F0F2FF', letterSpacing: '-0.5px' }}>{org.totalRegistrations.toLocaleString()}</span>
                     </td>
                     <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: org.avgFillRate >= 80 ? '#22C55E' : org.avgFillRate >= 50 ? '#F59E0B' : '#6B7280', minWidth: 36 }}>{org.avgFillRate}%</span>
+                        <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: org.avgFillRate >= 80 ? '#22C55E' : org.avgFillRate >= 50 ? '#F59E0B' : '#6B7280', minWidth: 36 }}>{org.avgFillRate}%</span>
                         <div className="ms-bar" style={{ width: 56 }}>
                           <div style={{ height: '100%', width: `${Math.min(org.avgFillRate, 100)}%`, background: org.avgFillRate >= 80 ? '#22C55E' : org.avgFillRate >= 50 ? '#F59E0B' : '#4B5563', borderRadius: 2 }} />
                         </div>
@@ -629,8 +629,8 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
                     </td>
                     <td className="ms-hide">
                       {org.liveEvents > 0
-                        ? <span style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.22)', borderRadius: 999, padding: '2px 8px' }}>{org.liveEvents} live</span>
-                        : <span style={{ color: '#2D3140', fontSize: 12 }}>—</span>
+                        ? <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#22C55E', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.22)', borderRadius: 999, padding: '2px 8px' }}>{org.liveEvents} live</span>
+                        : <span style={{ color: '#2D3140', fontSize: 'var(--fs-sm)' }}>—</span>
                       }
                     </td>
                   </tr>
@@ -647,7 +647,7 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
         <div className="ms-card">
           <div className="ms-card-hdr"><span className="ms-card-title">Category Performance</span></div>
           <div style={{ padding: '14px 20px 18px', display: 'flex', flexDirection: 'column', gap: 13 }}>
-            {categoryBreakdown.length === 0 && <div style={{ color: '#374151', fontSize: 12, textAlign: 'center', padding: 24 }}>No category data</div>}
+            {categoryBreakdown.length === 0 && <div style={{ color: '#374151', fontSize: 'var(--fs-sm)', textAlign: 'center', padding: 24 }}>No category data</div>}
             {categoryBreakdown.slice(0, 10).map((cat, i) => {
               const pct = Math.round((cat.registrations / maxCatRegs) * 100)
               const color = AN_COLORS[i % AN_COLORS.length]
@@ -655,13 +655,13 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
                 <div key={i}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 7, minWidth: 0 }}>
-                      {cat.icon && <span style={{ fontSize: 14, flexShrink: 0 }}>{cat.icon}</span>}
-                      <span style={{ fontSize: 12, color: '#D1D5DB', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.name}</span>
-                      <span style={{ fontSize: 10, color: '#374151', fontFamily: 'var(--font-body)', flexShrink: 0 }}>{cat.eventCount} events</span>
+                      {cat.icon && <span style={{ fontSize: 'var(--fs-md)', flexShrink: 0 }}>{cat.icon}</span>}
+                      <span style={{ fontSize: 'var(--fs-sm)', color: '#D1D5DB', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{cat.name}</span>
+                      <span style={{ fontSize: 'var(--fs-2xs)', color: '#374151', fontFamily: 'var(--font-body)', flexShrink: 0 }}>{cat.eventCount} events</span>
                     </div>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: '#9CA3AF' }}>{cat.registrations}</span>
-                      <span style={{ fontSize: 10, color: '#374151' }}>{cat.avgFillRate}% fill</span>
+                      <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: '#9CA3AF' }}>{cat.registrations}</span>
+                      <span style={{ fontSize: 'var(--fs-2xs)', color: '#374151' }}>{cat.avgFillRate}% fill</span>
                     </div>
                   </div>
                   <div style={{ height: 5, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}>
@@ -683,7 +683,7 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
             </div>
           </div>
           <div>
-            {topEvts.length === 0 && <div style={{ color: '#374151', fontSize: 12, textAlign: 'center', padding: 32 }}>No events yet</div>}
+            {topEvts.length === 0 && <div style={{ color: '#374151', fontSize: 'var(--fs-sm)', textAlign: 'center', padding: 32 }}>No events yet</div>}
             {topEvts.map((evt, i) => {
               const fillRate = (evt as any).fillRate as number | undefined
               const metric = topEvtTab === 'fill' ? `${fillRate ?? 0}%` : evt.registered.toLocaleString()
@@ -691,17 +691,17 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
               const barColor = topEvtTab === 'fill' ? ((fillRate ?? 0) >= 80 ? '#22C55E' : (fillRate ?? 0) >= 50 ? '#F59E0B' : '#6B7280') : '#1E5EFF'
               return (
                 <div key={evt.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '13px 20px', borderBottom: i < topEvts.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
-                  <div style={{ width: 22, height: 22, borderRadius: 6, background: avBg(evt.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, color: '#fff', flexShrink: 0 }}>{i + 1}</div>
+                  <div style={{ width: 22, height: 22, borderRadius: 6, background: avBg(evt.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-2xs)', fontWeight: 800, color: '#fff', flexShrink: 0 }}>{i + 1}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{evt.title}</div>
-                    <div style={{ fontSize: 11, color: '#4B5563', marginTop: 2 }}>{evt.org}</div>
+                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{evt.title}</div>
+                    <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 2 }}>{evt.org}</div>
                     <div style={{ height: 3, background: 'rgba(255,255,255,0.05)', borderRadius: 2, marginTop: 6, overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${barW}%`, background: barColor, borderRadius: 2, opacity: 0.8 }} />
                     </div>
                   </div>
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: '#F0F2FF', letterSpacing: '-0.5px' }}>{metric}</div>
-                    <div style={{ fontSize: 10, color: '#374151', fontFamily: 'var(--font-body)' }}>{evt.registered}/{evt.capacity}</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-xl)', fontWeight: 800, color: '#F0F2FF', letterSpacing: '-0.5px' }}>{metric}</div>
+                    <div style={{ fontSize: 'var(--fs-2xs)', color: '#374151', fontFamily: 'var(--font-body)' }}>{evt.registered}/{evt.capacity}</div>
                   </div>
                 </div>
               )
@@ -1149,10 +1149,10 @@ export default function MasterPage() {
           </nav>
 
           <div className="ms-sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ fontSize: 10, color: '#374151', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tikkit Internal · Confidential</div>
+            <div style={{ fontSize: 'var(--fs-2xs)', color: '#374151', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tikkit Internal · Confidential</div>
             <button
               onClick={() => { sessionStorage.removeItem('_ms'); setAuthed(false) }}
-              style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.12)', borderRadius: 8, padding: '7px 12px', color: '#4B5563', fontSize: 11, fontFamily: 'var(--font-body)', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}
+              style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.12)', borderRadius: 8, padding: '7px 12px', color: '#4B5563', fontSize: 'var(--fs-xs)', fontFamily: 'var(--font-body)', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}
               onMouseEnter={e => { (e.target as HTMLButtonElement).style.color = '#EF4444'; (e.target as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.3)' }}
               onMouseLeave={e => { (e.target as HTMLButtonElement).style.color = '#4B5563'; (e.target as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.12)' }}
             >
@@ -1172,17 +1172,17 @@ export default function MasterPage() {
               <button className="ms-ham" onClick={e => { e.stopPropagation(); setSidebarOpen(s => !s) }}>
                 <Menu size={15} />
               </button>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', letterSpacing: '-0.3px' }}>
                 {PAGE_TITLES[tab]}
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               {openQCount > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 7, padding: '4px 9px', fontSize: 11, fontWeight: 700, color: '#EF4444', fontFamily: 'var(--font-body)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 7, padding: '4px 9px', fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#EF4444', fontFamily: 'var(--font-body)' }}>
                   <AlertTriangle size={9} /> {openQCount} open
                 </div>
               )}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.18)', borderRadius: 7, padding: '4px 9px', fontSize: 11, fontWeight: 700, color: '#4D82FF', fontFamily: 'var(--font-body)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.18)', borderRadius: 7, padding: '4px 9px', fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#4D82FF', fontFamily: 'var(--font-body)' }}>
                 <Shield size={9} /> ADMIN
               </div>
             </div>
@@ -1207,7 +1207,7 @@ export default function MasterPage() {
                   <div className="ms-card">
                     <div className="ms-card-hdr">
                       <span className="ms-card-title">Recent Organizers</span>
-                      <button onClick={() => setTab('organizers')} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#4D82FF', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                      <button onClick={() => setTab('organizers')} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 'var(--fs-sm)', color: '#4D82FF', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 600 }}>
                         View all <ChevronRight size={12} />
                       </button>
                     </div>
@@ -1222,10 +1222,10 @@ export default function MasterPage() {
                       </thead>
                       <tbody>
                         {loading && (
-                          <tr><td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: '#374151', fontSize: 12 }}>Loading…</td></tr>
+                          <tr><td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: '#374151', fontSize: 'var(--fs-sm)' }}>Loading…</td></tr>
                         )}
                         {!loading && orgs.length === 0 && (
-                          <tr><td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: '#374151', fontSize: 12 }}>No organizers yet</td></tr>
+                          <tr><td colSpan={4} style={{ textAlign: 'center', padding: '24px', color: '#374151', fontSize: 'var(--fs-sm)' }}>No organizers yet</td></tr>
                         )}
                         {orgs.slice(0, 5).map(o => (
                           <tr key={o.id}>
@@ -1235,14 +1235,14 @@ export default function MasterPage() {
                                 style={{ display: 'flex', alignItems: 'center', gap: 10 }}
                                 onClick={() => { setSelectedOrgId(o.id); setTab('organizers') }}
                               >
-                                <div style={{ width: 30, height: 30, borderRadius: 8, background: avBg(o.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>{initials(o.name)}</div>
+                                <div style={{ width: 30, height: 30, borderRadius: 8, background: avBg(o.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-xs)', fontWeight: 700, color: 'white', flexShrink: 0 }}>{initials(o.name)}</div>
                                 <div>
-                                  <div className="od-name-text" style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', transition: 'color 0.15s' }}>{o.name}</div>
-                                  {o.username && <div style={{ fontSize: 11, color: '#4B5563' }}>@{o.username}</div>}
+                                  <div className="od-name-text" style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', transition: 'color 0.15s' }}>{o.name}</div>
+                                  {o.username && <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563' }}>@{o.username}</div>}
                                 </div>
                               </div>
                             </td>
-                            <td style={{ color: '#9CA3AF', fontSize: 12 }}>{o.events} <span style={{ color: '#4B5563' }}>({o.active} live)</span></td>
+                            <td style={{ color: '#9CA3AF', fontSize: 'var(--fs-sm)' }}>{o.events} <span style={{ color: '#4B5563' }}>({o.active} live)</span></td>
                             <td><SBadge status={getOrgStatus(o)} /></td>
                             <td>
                               <button onClick={e => { e.stopPropagation(); setContactTarget(o) }} className="ms-ib blue"><Mail size={12} /></button>
@@ -1257,7 +1257,7 @@ export default function MasterPage() {
                   <div className="ms-card">
                     <div className="ms-card-hdr">
                       <span className="ms-card-title">Recent Queries</span>
-                      <button onClick={() => setTab('queries')} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#4D82FF', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 600 }}>
+                      <button onClick={() => setTab('queries')} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 'var(--fs-sm)', color: '#4D82FF', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 600 }}>
                         View all <ChevronRight size={12} />
                       </button>
                     </div>
@@ -1268,8 +1268,8 @@ export default function MasterPage() {
                           <div key={q.id} className="ms-activity-row">
                             <div style={{ width: 7, height: 7, borderRadius: '50%', background: PC[q.priority], marginTop: 5, flexShrink: 0 }} />
                             <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 13, color: '#D1D5DB', fontFamily: 'var(--font-body)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
-                              <div style={{ fontSize: 11, color: '#4B5563', marginTop: 2, display: 'flex', gap: 8, alignItems: 'center' }}>
+                              <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', fontFamily: 'var(--font-body)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
+                              <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 2, display: 'flex', gap: 8, alignItems: 'center' }}>
                                 <span>{q.from}</span>
                                 <span>·</span>
                                 <span>{fmtDate(q.date)}</span>
@@ -1288,10 +1288,10 @@ export default function MasterPage() {
                   <div style={{ marginTop: 20, background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
                     <Flag size={16} color="#F97316" />
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: '#F0F2FF' }}>{flaggedEvtCount} flagged event{flaggedEvtCount > 1 ? 's' : ''} need{flaggedEvtCount === 1 ? 's' : ''} review</div>
-                      <div style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 2 }}>Review flagged events for policy violations or over-capacity issues.</div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 700, color: '#F0F2FF' }}>{flaggedEvtCount} flagged event{flaggedEvtCount > 1 ? 's' : ''} need{flaggedEvtCount === 1 ? 's' : ''} review</div>
+                      <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 2 }}>Review flagged events for policy violations or over-capacity issues.</div>
                     </div>
-                    <button onClick={() => setTab('events')} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: '#F97316', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
+                    <button onClick={() => setTab('events')} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: '#F97316', borderRadius: 8, padding: '8px 14px', fontSize: 'var(--fs-sm)', fontWeight: 700, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
                       Review <ArrowUpRight size={12} />
                     </button>
                   </div>
@@ -1353,19 +1353,19 @@ export default function MasterPage() {
                                   style={{ display: 'flex', alignItems: 'center', gap: 10 }}
                                   onClick={() => setSelectedOrgId(o.id)}
                                 >
-                                  <div style={{ width: 32, height: 32, borderRadius: 9, background: avBg(o.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: 'white', flexShrink: 0 }}>{initials(o.name)}</div>
+                                  <div style={{ width: 32, height: 32, borderRadius: 9, background: avBg(o.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 'var(--fs-sm)', fontWeight: 700, color: 'white', flexShrink: 0 }}>{initials(o.name)}</div>
                                   <div>
-                                    <div className="od-name-text" style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', transition: 'color 0.15s' }}>{o.name}</div>
-                                    {o.username && <div style={{ fontSize: 11, color: '#4B5563' }}>@{o.username}</div>}
+                                    <div className="od-name-text" style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap', transition: 'color 0.15s' }}>{o.name}</div>
+                                    {o.username && <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563' }}>@{o.username}</div>}
                                   </div>
                                 </div>
                               </td>
-                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>{o.email}</td>
+                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)' }}>{o.email}</td>
                               <td>
-                                <span style={{ fontSize: 13, color: '#F0F2FF', fontWeight: 600 }}>{o.events}</span>
-                                <span style={{ fontSize: 11, color: '#4B5563', marginLeft: 4 }}>({o.active} live)</span>
+                                <span style={{ fontSize: 'var(--fs-base)', color: '#F0F2FF', fontWeight: 600 }}>{o.events}</span>
+                                <span style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginLeft: 4 }}>({o.active} live)</span>
                               </td>
-                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12 }}>{fmtDate(o.joined)}</td>
+                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)' }}>{fmtDate(o.joined)}</td>
                               <td><SBadge status={os} /></td>
                               <td>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
@@ -1409,7 +1409,7 @@ export default function MasterPage() {
                   </div>
                 </div>
 
-                <div style={{ marginTop: 12, fontSize: 12, color: '#374151', fontFamily: 'var(--font-body)', paddingLeft: 2 }}>
+                <div style={{ marginTop: 12, fontSize: 'var(--fs-sm)', color: '#374151', fontFamily: 'var(--font-body)', paddingLeft: 2 }}>
                   Showing {filteredOrgs.length} of {liveOrgs.length} organizers
                 </div>
               </div>
@@ -1456,16 +1456,16 @@ export default function MasterPage() {
                           return (
                             <tr key={e.id}>
                               <td>
-                                <div style={{ fontWeight: 600, color: '#F0F2FF', fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 220 }}>{e.title}</div>
-                                <div style={{ fontSize: 11, color: '#4B5563', marginTop: 1 }}>{e.cat}</div>
+                                <div style={{ fontWeight: 600, color: '#F0F2FF', fontSize: 'var(--fs-base)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 220 }}>{e.title}</div>
+                                <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 1 }}>{e.cat}</div>
                               </td>
                               <td>
-                                <div style={{ fontSize: 13, color: '#D1D5DB' }}>{e.org}</div>
-                                {e.username && <div style={{ fontSize: 11, color: '#4B5563' }}>@{e.username}</div>}
+                                <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB' }}>{e.org}</div>
+                                {e.username && <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563' }}>@{e.username}</div>}
                               </td>
-                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(e.date)}</td>
+                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>{fmtDate(e.date)}</td>
                               <td>
-                                <div style={{ fontSize: 12, color: fillColor, marginBottom: 4 }}>{e.registered}/{e.capacity}</div>
+                                <div style={{ fontSize: 'var(--fs-sm)', color: fillColor, marginBottom: 4 }}>{e.registered}/{e.capacity}</div>
                                 <div className="ms-bar">
                                   <div style={{ height: '100%', width: `${Math.min(fill, 100)}%`, background: fillColor, borderRadius: 2, transition: 'width 0.5s ease' }} />
                                 </div>
@@ -1509,7 +1509,7 @@ export default function MasterPage() {
                     </table>
                   </div>
                 </div>
-                <div style={{ marginTop: 12, fontSize: 12, color: '#374151', fontFamily: 'var(--font-body)', paddingLeft: 2 }}>
+                <div style={{ marginTop: 12, fontSize: 'var(--fs-sm)', color: '#374151', fontFamily: 'var(--font-body)', paddingLeft: 2 }}>
                   {loading ? 'Loading events…' : `Showing ${filteredEvents.length} of ${events.length} events`}
                 </div>
               </div>
@@ -1527,8 +1527,8 @@ export default function MasterPage() {
                 <div style={{ background: 'rgba(30,94,255,0.06)', border: '1px solid rgba(30,94,255,0.18)', borderRadius: 12, padding: '14px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
                   <Clock size={15} color="#4D82FF" style={{ flexShrink: 0 }} />
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)' }}>Disputes system — foundation laid</div>
-                    <div style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 2 }}>Full messaging, resolution workflow, and SLA tracking coming next. Currently showing incoming queries with manual status management.</div>
+                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)' }}>Disputes system — foundation laid</div>
+                    <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 2 }}>Full messaging, resolution workflow, and SLA tracking coming next. Currently showing incoming queries with manual status management.</div>
                   </div>
                 </div>
 
@@ -1540,8 +1540,8 @@ export default function MasterPage() {
                     { label: 'Resolved',    count: MOCK_QUERIES.filter(q => getQStatus(q) === 'resolved').length,    color: '#22C55E' },
                   ].map(s => (
                     <div key={s.label} style={{ background: '#0D0F18', border: `1px solid ${s.color}22`, borderRadius: 12, padding: '16px 18px' }}>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 800, color: s.color, letterSpacing: '-1px' }}>{s.count}</div>
-                      <div style={{ fontSize: 12, color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 4 }}>{s.label}</div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-2xl)', fontWeight: 800, color: s.color, letterSpacing: '-1px' }}>{s.count}</div>
+                      <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 4 }}>{s.label}</div>
                     </div>
                   ))}
                 </div>
@@ -1579,20 +1579,20 @@ export default function MasterPage() {
                           const qs = getQStatus(q)
                           return (
                             <tr key={q.id}>
-                              <td style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: '#4B5563', whiteSpace: 'nowrap' }}>{q.id}</td>
+                              <td style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--fs-sm)', color: '#4B5563', whiteSpace: 'nowrap' }}>{q.id}</td>
                               <td>
-                                <div style={{ fontSize: 13, color: '#D1D5DB', whiteSpace: 'nowrap' }}>{q.from}</div>
-                                <div style={{ fontSize: 11, color: '#4B5563', marginTop: 1, textTransform: 'capitalize' }}>{q.fromType}</div>
+                                <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', whiteSpace: 'nowrap' }}>{q.from}</div>
+                                <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 1, textTransform: 'capitalize' }}>{q.fromType}</div>
                               </td>
                               <td style={{ maxWidth: 260 }}>
-                                <div style={{ fontSize: 13, color: '#F0F2FF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
+                                <div style={{ fontSize: 'var(--fs-base)', color: '#F0F2FF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
                               </td>
                               <td className="ms-hide">
-                                <span style={{ fontSize: 11, fontWeight: 700, color: PC[q.priority], background: `${PC[q.priority]}16`, border: `1px solid ${PC[q.priority]}30`, borderRadius: 999, padding: '2px 8px', textTransform: 'capitalize' }}>
+                                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: PC[q.priority], background: `${PC[q.priority]}16`, border: `1px solid ${PC[q.priority]}30`, borderRadius: 999, padding: '2px 8px', textTransform: 'capitalize' }}>
                                   {q.priority}
                                 </span>
                               </td>
-                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(q.date)}</td>
+                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>{fmtDate(q.date)}</td>
                               <td><SBadge status={qs} /></td>
                               <td>
                                 <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>

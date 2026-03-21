@@ -51,7 +51,7 @@ function ResetPasswordForm() {
     padding: '14px 44px 14px 16px',
     background: focused ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
     border: `1px solid ${focused ? 'rgba(30,94,255,0.45)' : 'rgba(255,255,255,0.07)'}`,
-    borderRadius: 12, color: '#F0F2FF', fontSize: 15, outline: 'none',
+    borderRadius: 12, color: '#F0F2FF', fontSize: 'var(--fs-md)', outline: 'none',
     boxSizing: 'border-box', fontFamily: 'var(--font-body)',
     transition: 'background .15s, border-color .15s',
   })
@@ -156,19 +156,19 @@ function ResetPasswordForm() {
                   <Check size={26} color="#22C55E" />
                 </div>
                 <h2 style={{
-                  color: '#F0F2FF', fontSize: 24, fontWeight: 700,
+                  color: '#F0F2FF', fontSize: 'var(--fs-2xl)', fontWeight: 700,
                   fontFamily: 'var(--font-display)', margin: '0 0 10px', letterSpacing: '-0.5px',
                 }}>
                   Password updated
                 </h2>
-                <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 28px', lineHeight: 1.65 }}>
+                <p style={{ color: '#6B7280', fontSize: 'var(--fs-md)', margin: '0 0 28px', lineHeight: 1.65 }}>
                   All done. Redirecting you to login in a moment…
                 </p>
                 <Link href="/auth/login" style={{
                   display: 'block', padding: '14px',
                   background: '#1E5EFF', color: 'white',
                   textDecoration: 'none', borderRadius: 12,
-                  fontSize: 15, fontWeight: 700, textAlign: 'center',
+                  fontSize: 'var(--fs-md)', fontWeight: 700, textAlign: 'center',
                   fontFamily: 'var(--font-display)',
                   boxShadow: '0 0 32px rgba(30,94,255,0.45)',
                 }}>
@@ -191,12 +191,12 @@ function ResetPasswordForm() {
                     <Lock size={20} color="#1E5EFF" />
                   </div>
                   <h2 style={{
-                    color: '#F0F2FF', fontSize: 26, fontWeight: 700,
+                    color: '#F0F2FF', fontSize: 'var(--fs-2xl)', fontWeight: 700,
                     fontFamily: 'var(--font-display)', margin: '0 0 8px', letterSpacing: '-0.75px',
                   }}>
                     Set new password
                   </h2>
-                  <p style={{ color: '#6B7280', fontSize: 14, margin: 0, lineHeight: 1.65 }}>
+                  <p style={{ color: '#6B7280', fontSize: 'var(--fs-md)', margin: 0, lineHeight: 1.65 }}>
                     Choose a strong password for your Tikkit account.
                   </p>
                 </div>
@@ -245,7 +245,7 @@ function ResetPasswordForm() {
                       borderRadius: 11,
                     }}>
                       <AlertCircle size={15} color="#F87171" style={{ flexShrink: 0, marginTop: 1 }} />
-                      <span style={{ color: '#FCA5A5', fontSize: 13, lineHeight: 1.5 }}>{error}</span>
+                      <span style={{ color: '#FCA5A5', fontSize: 'var(--fs-base)', lineHeight: 1.5 }}>{error}</span>
                     </div>
                   )}
 
@@ -260,7 +260,7 @@ function ResetPasswordForm() {
                         : '#1E5EFF',
                       color: loading || !password || !confirmPassword ? '#374151' : 'white',
                       border: 'none', borderRadius: 12,
-                      fontSize: 15, fontWeight: 700,
+                      fontSize: 'var(--fs-md)', fontWeight: 700,
                       cursor: loading ? 'not-allowed' : 'pointer',
                       fontFamily: 'var(--font-display)',
                       transition: 'all .2s',
@@ -277,7 +277,7 @@ function ResetPasswordForm() {
           </div>
 
           {/* Back to login */}
-          <p style={{ textAlign: 'center', marginTop: 20, color: '#4B5563', fontSize: 13 }}>
+          <p style={{ textAlign: 'center', marginTop: 20, color: '#4B5563', fontSize: 'var(--fs-base)' }}>
             Remembered it?{' '}
             <Link href="/auth/login" style={{ color: '#1E5EFF', textDecoration: 'none', fontWeight: 600 }}>
               Back to login
@@ -299,7 +299,7 @@ function PasswordField({ label, value, onChange, show, onToggle, placeholder }: 
   return (
     <div>
       <label style={{
-        display: 'block', color: '#6B7280', fontSize: 11, fontWeight: 700,
+        display: 'block', color: '#6B7280', fontSize: 'var(--fs-xs)', fontWeight: 700,
         marginBottom: 7, textTransform: 'uppercase' as const, letterSpacing: '.08em',
         fontFamily: 'var(--font-display)',
       }}>
@@ -319,7 +319,7 @@ function PasswordField({ label, value, onChange, show, onToggle, placeholder }: 
             padding: '14px 44px 14px 16px',
             background: focus ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
             border: `1px solid ${focus ? 'rgba(30,94,255,0.45)' : 'rgba(255,255,255,0.07)'}`,
-            borderRadius: 12, color: '#F0F2FF', fontSize: 15, outline: 'none',
+            borderRadius: 12, color: '#F0F2FF', fontSize: 'var(--fs-md)', outline: 'none',
             boxSizing: 'border-box' as const, fontFamily: 'var(--font-body)',
             transition: 'background .15s, border-color .15s',
           }}
