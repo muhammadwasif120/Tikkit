@@ -37,10 +37,10 @@ export default async function CommandPage() {
   const events = await getCommandEvents()
 
   return (
-    <div className="max-w-5xl" style={{ padding: '28px 24px' }}>
+    <div className="max-w-5xl px-0 pt-2 pb-6 sm:px-6 sm:pt-7">
 
       {/* ── Header ────────────────────────────────────────────── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 32 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 20 }}>
         <div style={{
           width: 52, height: 52, borderRadius: 16, flexShrink: 0,
           background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(30,94,255,0.15))',

@@ -107,7 +107,7 @@ async function DashboardData() {
   ]
 
   return (
-    <div className="space-y-6 max-w-5xl" style={{ padding: '28px 24px' }}>
+    <div className="space-y-6 max-w-5xl px-0 pt-2 pb-6 sm:px-6 sm:pt-7">
       {/* ── Header ── */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 4 }}>
         <div style={{
