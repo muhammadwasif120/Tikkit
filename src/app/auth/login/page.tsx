@@ -39,7 +39,7 @@ function Field({ Icon, type, placeholder, value, onChange, end, accent }: {
           padding: end ? '14px 44px 14px 42px' : '14px 16px 14px 42px',
           background: focus ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
           border: `1px solid ${borderColor}`,
-          borderRadius: 12, color: '#F0F2FF', fontSize: 15, outline: 'none',
+          borderRadius: 12, color: '#F0F2FF', fontSize: 'var(--fs-md)', outline: 'none',
           boxSizing: 'border-box' as const, fontFamily: 'var(--font-body)',
           transition: 'background .15s, border-color .15s',
         }}
@@ -151,7 +151,7 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         onClick={onBack}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          color: '#4B5563', fontSize: 13, padding: '0 0 28px',
+          color: '#4B5563', fontSize: 'var(--fs-base)', padding: '0 0 28px',
           display: 'flex', alignItems: 'center', gap: 5,
           fontFamily: 'var(--font-body)', transition: 'color .2s',
         }}
@@ -171,7 +171,7 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
       }}>
         {isOrg ? <Ticket size={11} color={accent} /> : <Sparkles size={11} color={accent} />}
         <span style={{
-          color: accent, fontSize: 11, fontWeight: 700,
+          color: accent, fontSize: 'var(--fs-xs)', fontWeight: 700,
           letterSpacing: '.08em', textTransform: 'uppercase' as const,
           fontFamily: 'var(--font-display)',
         }}>
@@ -187,7 +187,7 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
       }}>
         {tab === 'login' ? 'Welcome back' : (isOrg ? 'Run the scene' : 'Join the scene')}
       </h1>
-      <p style={{ color: '#6B7280', fontSize: 15, margin: '0 0 28px', lineHeight: 1.65, fontFamily: 'var(--font-body)' }}>
+      <p style={{ color: '#6B7280', fontSize: 'var(--fs-md)', margin: '0 0 28px', lineHeight: 1.65, fontFamily: 'var(--font-body)' }}>
         {tab === 'login'
           ? 'Sign in to your account.'
           : isOrg ? 'Create your organizer account.' : 'Create your free account.'}
@@ -207,7 +207,7 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
               borderRadius: 9,
               background: tab === t ? 'rgba(255,255,255,0.08)' : 'transparent',
               color: tab === t ? '#F0F2FF' : '#6B7280',
-              fontSize: 14, fontWeight: tab === t ? 700 : 500,
+              fontSize: 'var(--fs-md)', fontWeight: tab === t ? 700 : 500,
               transition: 'all .15s', fontFamily: 'var(--font-display)',
             }}
           >
@@ -235,7 +235,7 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         {tab === 'login' && (
           <div style={{ textAlign: 'right' }}>
             <a href="/auth/reset-password"
-              style={{ color: '#4B5563', fontSize: 13, textDecoration: 'none', fontFamily: 'var(--font-body)', transition: 'color .2s' }}
+              style={{ color: '#4B5563', fontSize: 'var(--fs-base)', textDecoration: 'none', fontFamily: 'var(--font-body)', transition: 'color .2s' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#9CA3AF')}
               onMouseLeave={e => (e.currentTarget.style.color = '#4B5563')}
             >
@@ -247,7 +247,7 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         {err && (
           <div style={{ display: 'flex', gap: 10, padding: '11px 14px', background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.15)', borderRadius: 11 }}>
             <AlertCircle size={15} color="#F87171" style={{ flexShrink: 0, marginTop: 1 }} />
-            <span style={{ color: '#FCA5A5', fontSize: 13, lineHeight: 1.5 }}>{err}</span>
+            <span style={{ color: '#FCA5A5', fontSize: 'var(--fs-base)', lineHeight: 1.5 }}>{err}</span>
           </div>
         )}
 
@@ -256,7 +256,7 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
           type="submit" disabled={disabled}
           style={{
             marginTop: 4, padding: '15px', border: 'none', borderRadius: 12,
-            fontSize: 15, fontWeight: 700,
+            fontSize: 'var(--fs-md)', fontWeight: 700,
             background: disabled ? 'rgba(255,255,255,0.05)' : btnBg,
             color: disabled ? '#374151' : btnClr,
             cursor: disabled ? 'not-allowed' : 'pointer',
@@ -273,12 +273,12 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
               : <><span>Create Account</span><ArrowRight size={16} /></>}
         </button>
 
-        <p style={{ textAlign: 'center', color: '#6B7280', fontSize: 14, margin: '4px 0 0', fontFamily: 'var(--font-body)' }}>
+        <p style={{ textAlign: 'center', color: '#6B7280', fontSize: 'var(--fs-md)', margin: '4px 0 0', fontFamily: 'var(--font-body)' }}>
           {tab === 'login' ? "Don't have an account? " : 'Already registered? '}
           <button
             type="button"
             onClick={() => reset(tab === 'login' ? 'signup' : 'login')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: accent, fontWeight: 700, fontSize: 14, padding: 0, fontFamily: 'var(--font-body)' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: accent, fontWeight: 700, fontSize: 'var(--fs-md)', padding: 0, fontFamily: 'var(--font-body)' }}
           >
             {tab === 'login' ? 'Sign up' : 'Sign in'}
           </button>
@@ -287,13 +287,13 @@ function AuthPanel({ mode, onBack }: { mode: Mode; onBack: () => void }) {
 
       {/* Perks */}
       <div className="auth-form-perks" style={{ marginTop: 28, paddingTop: 24, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <p style={{ color: '#374151', fontSize: 11, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' as const, margin: '0 0 14px', fontFamily: 'var(--font-display)' }}>
+        <p style={{ color: '#374151', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase' as const, margin: '0 0 14px', fontFamily: 'var(--font-display)' }}>
           What you get
         </p>
         {perks.map(p => (
           <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 10 }}>
             <div style={{ width: 5, height: 5, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}`, flexShrink: 0 }} />
-            <span style={{ color: '#9CA3AF', fontSize: 14, fontFamily: 'var(--font-body)' }}>{p}</span>
+            <span style={{ color: '#9CA3AF', fontSize: 'var(--fs-md)', fontFamily: 'var(--font-body)' }}>{p}</span>
           </div>
         ))}
       </div>
@@ -347,7 +347,7 @@ function RoleCard({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClic
           }}>
             {badgeIcon}
             <span style={{
-              color: accent, fontSize: 11, fontWeight: 700,
+              color: accent, fontSize: 'var(--fs-xs)', fontWeight: 700,
               letterSpacing: '.08em', textTransform: 'uppercase' as const,
               fontFamily: 'var(--font-display)',
             }}>
@@ -365,7 +365,7 @@ function RoleCard({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClic
             {title}
           </h2>
 
-          <p className="auth-card-sub" style={{ color: '#6B7280', fontSize: 15, margin: '0 0 28px', lineHeight: 1.7, fontFamily: 'var(--font-body)' }}>
+          <p className="auth-card-sub" style={{ color: '#6B7280', fontSize: 'var(--fs-md)', margin: '0 0 28px', lineHeight: 1.7, fontFamily: 'var(--font-body)' }}>
             {sub}
           </p>
 
@@ -373,7 +373,7 @@ function RoleCard({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClic
 
           <div className="auth-card-perks">
             <p style={{
-              color: '#374151', fontSize: 11, fontWeight: 700,
+              color: '#374151', fontSize: 'var(--fs-xs)', fontWeight: 700,
               letterSpacing: '.1em', textTransform: 'uppercase' as const,
               margin: '0 0 14px', fontFamily: 'var(--font-display)',
             }}>
@@ -382,14 +382,14 @@ function RoleCard({ badge, badgeIcon, accent, glowClr, title, sub, perks, onClic
             {perks.map(p => (
               <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 12 }}>
                 <div style={{ width: 5, height: 5, borderRadius: '50%', background: accent, boxShadow: `0 0 6px ${accent}`, flexShrink: 0 }} />
-                <span style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.5, fontFamily: 'var(--font-body)' }}>{p}</span>
+                <span style={{ color: '#9CA3AF', fontSize: 'var(--fs-md)', lineHeight: 1.5, fontFamily: 'var(--font-body)' }}>{p}</span>
               </div>
             ))}
           </div>
 
           <div className="auth-card-cta" style={{
             display: 'flex', alignItems: 'center', gap: 6, marginTop: 28,
-            color: accent, fontSize: 14, fontWeight: 600,
+            color: accent, fontSize: 'var(--fs-md)', fontWeight: 600,
             fontFamily: 'var(--font-display)',
             transition: 'gap .2s',
           }}>
@@ -561,7 +561,7 @@ export default function AuthPage() {
               }}>
                 How will you use Tikkit?
               </h1>
-              <p style={{ color: '#6B7280', fontSize: 16, margin: 0, lineHeight: 1.65, fontFamily: 'var(--font-body)' }}>
+              <p style={{ color: '#6B7280', fontSize: 'var(--fs-lg)', margin: 0, lineHeight: 1.65, fontFamily: 'var(--font-body)' }}>
                 Choose your path to get started.
               </p>
             </div>

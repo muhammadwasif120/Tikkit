@@ -90,10 +90,10 @@ function FloatingCard({
         <div className="fcard">
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: card.color, boxShadow: `0 0 10px ${card.color}`, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, fontWeight: 700, color: card.color, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>{card.status}</span>
+            <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: card.color, letterSpacing: '0.06em', textTransform: 'uppercase' as const }}>{card.status}</span>
           </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, fontWeight: 700, color: '#F0F2FF', marginBottom: 6, lineHeight: 1.25 }}>{card.name}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#6B7280', marginBottom: 14 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 700, color: '#F0F2FF', marginBottom: 6, lineHeight: 1.25 }}>{card.name}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 'var(--fs-sm)', color: '#6B7280', marginBottom: 14 }}>
             <Calendar size={11} /><span>{card.date}</span>
             <span style={{ opacity: 0.4 }}>·</span>
             <MapPin size={11} /><span>{card.location}</span>
@@ -105,7 +105,7 @@ function FloatingCard({
                   <div key={i} style={{ width: 22, height: 22, borderRadius: '50%', background: `hsl(${200 + i * 40},60%,55%)`, border: '2px solid #13151E', marginLeft: i > 0 ? -7 : 0 }} />
                 ))}
               </div>
-              <span style={{ fontSize: 12, color: '#9CA3AF' }}>{card.count} going</span>
+              <span style={{ fontSize: 'var(--fs-sm)', color: '#9CA3AF' }}>{card.count} going</span>
             </div>
             <QrCode size={18} color="rgba(255,255,255,0.18)" />
           </div>
