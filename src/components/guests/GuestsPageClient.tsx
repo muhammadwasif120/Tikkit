@@ -23,7 +23,7 @@ const STATUS_COLORS: Record<string, { bg: string; color: string; border: string 
 function StatusPill({ status }: { status: string }) {
   const c = STATUS_COLORS[status] ?? STATUS_COLORS.invited
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700, letterSpacing: '0.04em', background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>
+    <span style={{ display: 'inline-flex', alignItems: 'center', padding: '3px 9px', borderRadius: 20, fontSize: 'var(--fs-2xs)', fontWeight: 700, letterSpacing: '0.04em', background: c.bg, color: c.color, border: `1px solid ${c.border}` }}>
       {status.replace('_', ' ')}
     </span>
   )
@@ -122,10 +122,10 @@ export default function GuestsPageClient({
             <Users size={22} color="#22C55E" />
           </div>
           <div>
-            <h1 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+            <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
               Guests
             </h1>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+            <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
               {visibleGuests.length} guest{visibleGuests.length !== 1 ? 's' : ''}
               {selectedEventId !== 'all' && selectedEvent ? ` · ${selectedEvent.title}` : ' · All events'}
             </p>
@@ -135,7 +135,7 @@ export default function GuestsPageClient({
           <Link href={`/dashboard/events/${selectedEventId}/guests/add`} style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: '#1E5EFF', color: 'white', textDecoration: 'none',
-            padding: '10px 18px', borderRadius: 12, fontSize: 13, fontWeight: 700, flexShrink: 0,
+            padding: '10px 18px', borderRadius: 12, fontSize: 'var(--fs-base)', fontWeight: 700, flexShrink: 0,
             boxShadow: '0 6px 20px rgba(30,94,255,0.25)',
           }}>
             <Plus size={14} /> Add Guest
@@ -155,7 +155,7 @@ export default function GuestsPageClient({
             style={{
               width: '100%', padding: '10px 12px 10px 36px',
               background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 12, color: 'white', fontSize: 13, outline: 'none',
+              borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', outline: 'none',
               fontFamily: 'inherit', boxSizing: 'border-box',
             }}
           />
@@ -166,7 +166,7 @@ export default function GuestsPageClient({
             <select
               value={selectedEventId}
               onChange={e => { setSelectedEventId(e.target.value); setActiveTab('all'); setSearch(''); setStatusFilter('all') }}
-              style={{ width: '100%', padding: '10px 32px 10px 12px', appearance: 'none', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
+              style={{ width: '100%', padding: '10px 32px 10px 12px', appearance: 'none', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
             >
               <option value="all">All Events</option>
               {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
@@ -178,7 +178,7 @@ export default function GuestsPageClient({
             <select
               value={statusFilter}
               onChange={e => setStatusFilter(e.target.value)}
-              style={{ width: '100%', padding: '10px 32px 10px 12px', appearance: 'none', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
+              style={{ width: '100%', padding: '10px 32px 10px 12px', appearance: 'none', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', cursor: 'pointer', fontFamily: 'inherit', outline: 'none' }}
             >
               <option value="all">All Statuses</option>
               <option value="invited">Invited</option>
@@ -211,9 +211,9 @@ export default function GuestsPageClient({
                   : '1px solid rgba(255,255,255,0.06)',
               }}
             >
-              <span style={{ fontSize: 12, fontWeight: 700, color: isActive ? (isVip ? '#FFC745' : 'white') : '#6B7280' }}>{tab.label}</span>
+              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: isActive ? (isVip ? '#FFC745' : 'white') : '#6B7280' }}>{tab.label}</span>
               <span style={{
-                marginLeft: 8, fontSize: 11, fontWeight: 800, padding: '2px 7px', borderRadius: 20, flexShrink: 0,
+                marginLeft: 8, fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 7px', borderRadius: 20, flexShrink: 0,
                 background: isActive ? (isVip ? 'rgba(255,199,69,0.2)' : 'rgba(30,94,255,0.2)') : 'rgba(255,255,255,0.05)',
                 color: isActive ? (isVip ? '#FFC745' : '#7DA4FF') : '#4B5563',
               }}>{tab.count}</span>
@@ -231,14 +231,14 @@ export default function GuestsPageClient({
           borderRadius: 14,
         }}>
           <Crown size={14} color="#FFC745" style={{ flexShrink: 0 }} />
-          <p style={{ color: '#FFC745', fontSize: 12, margin: 0, fontWeight: 600 }}>
+          <p style={{ color: '#FFC745', fontSize: 'var(--fs-sm)', margin: 0, fontWeight: 600 }}>
             VIP guests have priority access and should be checked in before regular guests.
           </p>
         </div>
       )}
 
       {/* ── Count label ──────────────────────────────────────── */}
-      <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+      <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
         {filtered.length} {filtered.length === 1 ? 'guest' : 'guests'}
       </p>
 
@@ -253,17 +253,17 @@ export default function GuestsPageClient({
             }}>
               <Users size={24} color="#22C55E" />
             </div>
-            <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
+            <p style={{ color: 'white', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
               No guests yet
             </p>
-            <p style={{ color: '#4B5563', fontSize: 13, margin: '0 0 20px', lineHeight: 1.6 }}>
+            <p style={{ color: '#4B5563', fontSize: 'var(--fs-base)', margin: '0 0 20px', lineHeight: 1.6 }}>
               {selectedEventId === 'all' ? 'Select an event and add guests to get started' : 'Add your first guest to this event'}
             </p>
             {selectedEventId !== 'all' && (
               <Link href={`/dashboard/events/${selectedEventId}/guests/add`} style={{
                 display: 'inline-flex', alignItems: 'center', gap: 6,
                 background: '#1E5EFF', color: 'white', textDecoration: 'none',
-                padding: '11px 24px', borderRadius: 12, fontSize: 13, fontWeight: 700,
+                padding: '11px 24px', borderRadius: 12, fontSize: 'var(--fs-base)', fontWeight: 700,
                 boxShadow: '0 8px 24px rgba(30,94,255,0.25)',
               }}>
                 <Plus size={14} /> Add Guest
@@ -272,7 +272,7 @@ export default function GuestsPageClient({
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 24px' }}>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>No guests match your filters.</p>
+            <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0 }}>No guests match your filters.</p>
           </div>
         ) : (
           <>
@@ -295,11 +295,11 @@ export default function GuestsPageClient({
                       }}>
                         {guest.is_vip
                           ? <Crown size={15} color="#FFC745" />
-                          : <span style={{ fontSize: 13, fontWeight: 700, color: '#4D82FF', fontFamily: 'var(--font-display)' }}>{guest.full_name.charAt(0).toUpperCase()}</span>
+                          : <span style={{ fontSize: 'var(--fs-base)', fontWeight: 700, color: '#4D82FF', fontFamily: 'var(--font-display)' }}>{guest.full_name.charAt(0).toUpperCase()}</span>
                         }
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{guest.full_name}</p>
+                        <p style={{ color: 'white', fontSize: 'var(--fs-base)', fontWeight: 700, margin: '0 0 3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{guest.full_name}</p>
                         <StatusPill status={guest.status} />
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
@@ -316,10 +316,10 @@ export default function GuestsPageClient({
                     </div>
                     {isExpanded && (
                       <div style={{ padding: '0 14px 12px 60px', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                        {guest.email && <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>{guest.email}</p>}
-                        {selectedEventId === 'all' && event && <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>{event.title}</p>}
+                        {guest.email && <p style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', margin: 0 }}>{guest.email}</p>}
+                        {selectedEventId === 'all' && event && <p style={{ color: '#4B5563', fontSize: 'var(--fs-sm)', margin: 0 }}>{event.title}</p>}
                         {guest.waitlist && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(107,114,128,0.1)', color: '#6B7280', border: '1px solid rgba(107,114,128,0.2)', width: 'fit-content' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 8px', borderRadius: 20, fontSize: 'var(--fs-2xs)', fontWeight: 700, background: 'rgba(107,114,128,0.1)', color: '#6B7280', border: '1px solid rgba(107,114,128,0.2)', width: 'fit-content' }}>
                             <Clock size={9} /> Waitlist{guest.waitlist_position ? ` #${guest.waitlist_position}` : ''}
                           </span>
                         )}
@@ -336,7 +336,7 @@ export default function GuestsPageClient({
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                     {['Name', ...(selectedEventId === 'all' ? ['Event'] : []), 'Email', 'Status', 'Access', 'QR', 'Actions'].map(h => (
-                      <th key={h} style={{ padding: '12px 20px', textAlign: 'left', color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{h}</th>
+                      <th key={h} style={{ padding: '12px 20px', textAlign: 'left', color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -349,25 +349,25 @@ export default function GuestsPageClient({
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             {guest.is_vip && <Crown size={12} color="#FFC745" />}
                             <div>
-                              <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: 0 }}>{guest.full_name}</p>
-                              {guest.plus_one && <p style={{ color: '#4B5563', fontSize: 11, margin: '2px 0 0' }}>+1: {guest.plus_one_name || 'Guest'}</p>}
+                              <p style={{ color: 'white', fontSize: 'var(--fs-base)', fontWeight: 700, margin: 0 }}>{guest.full_name}</p>
+                              {guest.plus_one && <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', margin: '2px 0 0' }}>+1: {guest.plus_one_name || 'Guest'}</p>}
                             </div>
                           </div>
                         </td>
                         {selectedEventId === 'all' && (
                           <td style={{ padding: '14px 20px' }}>
-                            <Link href={`/dashboard/events/${guest.event_id}`} style={{ color: '#6B7280', fontSize: 12, textDecoration: 'none' }}>{event?.title ?? '—'}</Link>
+                            <Link href={`/dashboard/events/${guest.event_id}`} style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', textDecoration: 'none' }}>{event?.title ?? '—'}</Link>
                           </td>
                         )}
-                        <td style={{ padding: '14px 20px', color: '#6B7280', fontSize: 13 }}>{guest.email || '—'}</td>
+                        <td style={{ padding: '14px 20px', color: '#6B7280', fontSize: 'var(--fs-base)' }}>{guest.email || '—'}</td>
                         <td style={{ padding: '14px 20px' }}><StatusPill status={guest.status} /></td>
                         <td style={{ padding: '14px 20px' }}>
                           {guest.is_vip ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(255,199,69,0.12)', color: '#FFC745', border: '1px solid rgba(255,199,69,0.25)' }}><Crown size={9} /> VIP</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 'var(--fs-2xs)', fontWeight: 700, background: 'rgba(255,199,69,0.12)', color: '#FFC745', border: '1px solid rgba(255,199,69,0.25)' }}><Crown size={9} /> VIP</span>
                           ) : guest.waitlist ? (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(107,114,128,0.1)', color: '#6B7280', border: '1px solid rgba(107,114,128,0.2)' }}><Clock size={9} /> Waitlist</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 'var(--fs-2xs)', fontWeight: 700, background: 'rgba(107,114,128,0.1)', color: '#6B7280', border: '1px solid rgba(107,114,128,0.2)' }}><Clock size={9} /> Waitlist</span>
                           ) : (
-                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 10, fontWeight: 700, background: 'rgba(30,94,255,0.1)', color: '#4D82FF', border: '1px solid rgba(30,94,255,0.2)' }}><Users size={9} /> Regular</span>
+                            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 9px', borderRadius: 20, fontSize: 'var(--fs-2xs)', fontWeight: 700, background: 'rgba(30,94,255,0.1)', color: '#4D82FF', border: '1px solid rgba(30,94,255,0.2)' }}><Users size={9} /> Regular</span>
                           )}
                         </td>
                         <td style={{ padding: '14px 20px' }}>
@@ -402,7 +402,7 @@ export default function GuestsPageClient({
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
           <div style={{ background: '#111318', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: '24px', width: '100%', maxWidth: 440 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-              <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Edit Guest</h3>
+              <h3 style={{ color: 'white', fontSize: 'var(--fs-lg)', fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Edit Guest</h3>
               <button onClick={() => setEditGuest(null)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', cursor: 'pointer', width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={14} /></button>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -412,21 +412,21 @@ export default function GuestsPageClient({
                 { label: 'Phone', key: 'phone', type: 'tel' },
               ].map(({ label, key, type }) => (
                 <div key={key}>
-                  <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{label}</label>
+                  <label style={{ color: '#6B7280', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{label}</label>
                   <input
                     type={type}
                     value={(editForm as any)[key]}
                     onChange={e => setEditForm(p => ({ ...p, [key]: e.target.value }))}
-                    style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 13, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
                   />
                 </div>
               ))}
               <div>
-                <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Gender</label>
+                <label style={{ color: '#6B7280', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>Gender</label>
                 <select
                   value={editForm.gender}
                   onChange={e => setEditForm(p => ({ ...p, gender: e.target.value }))}
-                  style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
+                  style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', outline: 'none', fontFamily: 'inherit' }}
                 >
                   <option value="">Not specified</option>
                   <option value="male">Male</option>
@@ -440,7 +440,7 @@ export default function GuestsPageClient({
                   { label: 'Waitlist', key: 'waitlist', color: '#1E5EFF' },
                 ].map(({ label, key, color }) => (
                   <div key={key} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12 }}>
-                    <span style={{ color: 'white', fontSize: 13, fontWeight: 600 }}>{label}</span>
+                    <span style={{ color: 'white', fontSize: 'var(--fs-base)', fontWeight: 600 }}>{label}</span>
                     <button
                       type="button"
                       onClick={() => setEditForm(p => ({ ...p, [key]: !(p as any)[key] }))}
@@ -453,8 +453,8 @@ export default function GuestsPageClient({
               </div>
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
-              <button onClick={() => setEditGuest(null)} style={{ padding: '10px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={saveEdit} disabled={editSaving || !editForm.full_name} style={{ padding: '10px 18px', background: '#1E5EFF', border: 'none', borderRadius: 12, color: 'white', fontSize: 13, fontWeight: 700, cursor: editSaving || !editForm.full_name ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: editSaving || !editForm.full_name ? 0.6 : 1 }}>
+              <button onClick={() => setEditGuest(null)} style={{ padding: '10px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={saveEdit} disabled={editSaving || !editForm.full_name} style={{ padding: '10px 18px', background: '#1E5EFF', border: 'none', borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: editSaving || !editForm.full_name ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: editSaving || !editForm.full_name ? 0.6 : 1 }}>
                 {editSaving ? 'Saving…' : <><Check size={14} /> Save Changes</>}
               </button>
             </div>
@@ -469,13 +469,13 @@ export default function GuestsPageClient({
             <div style={{ width: 52, height: 52, borderRadius: 16, background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
               <Trash2 size={22} color="#EF4444" />
             </div>
-            <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>Delete Guest</h3>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 24px', lineHeight: 1.6 }}>
+            <h3 style={{ color: 'white', fontSize: 'var(--fs-lg)', fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>Delete Guest</h3>
+            <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: '0 0 24px', lineHeight: 1.6 }}>
               Remove <span style={{ color: 'white', fontWeight: 700 }}>{deleteGuest.full_name}</span>? This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
-              <button onClick={() => setDeleteGuest(null)} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={confirmDelete} disabled={deleting} style={{ padding: '10px 20px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12, color: '#EF4444', fontSize: 13, fontWeight: 700, cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: deleting ? 0.6 : 1 }}>
+              <button onClick={() => setDeleteGuest(null)} style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={confirmDelete} disabled={deleting} style={{ padding: '10px 20px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 12, color: '#EF4444', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: deleting ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: deleting ? 0.6 : 1 }}>
                 <Trash2 size={13} />{deleting ? 'Deleting…' : 'Delete'}
               </button>
             </div>

@@ -52,7 +52,7 @@ function StatusBadge({ status, paymentStatus }: { status: string; paymentStatus:
   return (
     <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', background: bg, border: `1px solid ${border}`, borderRadius: 20, whiteSpace: 'nowrap' }}>
       <Icon size={11} color={color} />
-      <span style={{ color, fontSize: 11, fontWeight: 700 }}>{label}</span>
+      <span style={{ color, fontSize: 'var(--fs-xs)', fontWeight: 700 }}>{label}</span>
     </div>
   )
 }
@@ -128,18 +128,18 @@ function RegistrationModal({
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
-            <h2 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>{reg.full_name}</h2>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{event?.title ?? 'Unknown event'}</p>
+            <h2 style={{ color: 'white', fontSize: 'var(--fs-xl)', fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>{reg.full_name}</h2>
+            <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0 }}>{event?.title ?? 'Unknown event'}</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <StatusBadge status={reg.status} paymentStatus={reg.payment_status} />
-            <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#9CA3AF', cursor: 'pointer', width: 32, height: 32, borderRadius: 8, fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
+            <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#9CA3AF', cursor: 'pointer', width: 32, height: 32, borderRadius: 8, fontSize: 'var(--fs-xl)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>×</button>
           </div>
         </div>
 
         {/* Applicant info */}
         <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '16px', marginBottom: 12 }}>
-          <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>Applicant Details</p>
+          <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>Applicant Details</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {[
               { icon: User,     label: 'Name',    value: reg.full_name },
@@ -149,8 +149,8 @@ function RegistrationModal({
             ].map(({ icon: Icon, label, value }) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <Icon size={14} color="#4B5563" style={{ flexShrink: 0 }} />
-                <span style={{ color: '#6B7280', fontSize: 13, width: 60, flexShrink: 0 }}>{label}</span>
-                <span style={{ color: '#E5E7EB', fontSize: 13 }}>{value}</span>
+                <span style={{ color: '#6B7280', fontSize: 'var(--fs-base)', width: 60, flexShrink: 0 }}>{label}</span>
+                <span style={{ color: '#E5E7EB', fontSize: 'var(--fs-base)' }}>{value}</span>
               </div>
             ))}
           </div>
@@ -161,14 +161,14 @@ function RegistrationModal({
           <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
               <Tag size={13} color="#4B5563" />
-              <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>Reference Code</p>
+              <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>Reference Code</p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <code style={{ color: '#E5E7EB', fontSize: 14, fontFamily: 'monospace', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: 6 }}>
+              <code style={{ color: '#E5E7EB', fontSize: 'var(--fs-md)', fontFamily: 'monospace', background: 'rgba(255,255,255,0.05)', padding: '4px 10px', borderRadius: 6 }}>
                 {reg.reference_code_entered ?? '(not entered)'}
               </code>
               {event.reference_code && (
-                <span style={{ fontSize: 12, color: reg.reference_code_entered === event.reference_code ? '#22C55E' : '#EF4444', fontWeight: 600 }}>
+                <span style={{ fontSize: 'var(--fs-sm)', color: reg.reference_code_entered === event.reference_code ? '#22C55E' : '#EF4444', fontWeight: 600 }}>
                   {reg.reference_code_entered === event.reference_code ? '✓ Correct' : '✗ Incorrect'}
                 </span>
               )}
@@ -181,7 +181,7 @@ function RegistrationModal({
           <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <FileText size={13} color="#4B5563" />
-              <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>ID Document</p>
+              <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>ID Document</p>
             </div>
             <img
               src={reg.id_document_url}
@@ -197,7 +197,7 @@ function RegistrationModal({
           <div style={{ background: '#0C0E16', border: '1px solid rgba(255,199,69,0.2)', borderRadius: 14, padding: '14px 16px', marginBottom: 12 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <CreditCard size={13} color="#FFC745" />
-              <p style={{ color: '#FFC745', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>Payment Submission</p>
+              <p style={{ color: '#FFC745', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>Payment Submission</p>
             </div>
             <img
               src={reg.payment_screenshot_url}
@@ -205,27 +205,27 @@ function RegistrationModal({
               onClick={() => setImgZoom(reg.payment_screenshot_url!)}
               style={{ width: '100%', maxHeight: 240, objectFit: 'cover', borderRadius: 10, cursor: 'zoom-in', border: '1px solid rgba(255,255,255,0.08)', marginBottom: 8 }}
             />
-            <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>Tap to zoom</p>
+            <p style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', margin: 0 }}>Tap to zoom</p>
           </div>
         )}
 
         {/* Notes from applicant */}
         {reg.notes && (
           <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px', marginBottom: 12 }}>
-            <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 6px' }}>Applicant Note</p>
-            <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0, lineHeight: 1.6 }}>{reg.notes}</p>
+            <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 6px' }}>Applicant Note</p>
+            <p style={{ color: '#9CA3AF', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.6 }}>{reg.notes}</p>
           </div>
         )}
 
         {/* Rejection note field */}
         {showReject && (
           <div style={{ marginBottom: 16 }}>
-            <label style={{ color: '#6B7280', fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>Reason for rejection (optional)</label>
+            <label style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', fontWeight: 600, display: 'block', marginBottom: 6 }}>Reason for rejection (optional)</label>
             <textarea
               value={rejectNote} onChange={e => setNote(e.target.value)}
               placeholder="Let the applicant know why they were declined..."
               rows={3}
-              style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 13, resize: 'none', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 'var(--fs-base)', resize: 'none', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
             />
           </div>
         )}
@@ -237,14 +237,14 @@ function RegistrationModal({
               <>
                 <button
                   onClick={() => setShowRej(true)}
-                  style={{ flex: 1, padding: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, color: '#EF4444', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}
+                  style={{ flex: 1, padding: '12px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, color: '#EF4444', fontSize: 'var(--fs-md)', fontWeight: 700, cursor: 'pointer' }}
                 >
                   Decline
                 </button>
                 <button
                   onClick={handleApprove}
                   disabled={!!loading}
-                  style={{ flex: 2, padding: '12px', background: '#22C55E', border: 'none', borderRadius: 12, color: 'white', fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: loading ? 0.7 : 1 }}
+                  style={{ flex: 2, padding: '12px', background: '#22C55E', border: 'none', borderRadius: 12, color: 'white', fontSize: 'var(--fs-md)', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: loading ? 0.7 : 1 }}
                 >
                   {loading === 'approve' ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <CheckCircle size={16} />}
                   {isPaymentReview ? 'Confirm Payment' : 'Approve'}
@@ -252,13 +252,13 @@ function RegistrationModal({
               </>
             ) : (
               <>
-                <button onClick={() => setShowRej(false)} style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                <button onClick={() => setShowRej(false)} style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 'var(--fs-md)', fontWeight: 600, cursor: 'pointer' }}>
                   Cancel
                 </button>
                 <button
                   onClick={handleReject}
                   disabled={!!loading}
-                  style={{ flex: 2, padding: '12px', background: '#EF4444', border: 'none', borderRadius: 12, color: 'white', fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: loading ? 0.7 : 1 }}
+                  style={{ flex: 2, padding: '12px', background: '#EF4444', border: 'none', borderRadius: 12, color: 'white', fontSize: 'var(--fs-md)', fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, opacity: loading ? 0.7 : 1 }}
                 >
                   {loading === 'reject' ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <XCircle size={16} />}
                   Confirm Rejection
@@ -365,10 +365,10 @@ export default function ApprovalsClient({
           <ClipboardCheck size={22} color="#1E5EFF" />
         </div>
         <div>
-          <h1 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+          <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
             Approvals
           </h1>
-          <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+          <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
             Review applications and payment submissions across all events
           </p>
         </div>
@@ -383,7 +383,7 @@ export default function ApprovalsClient({
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
           <AlertCircle size={16} color="#FFC745" style={{ flexShrink: 0 }} />
-          <p style={{ color: '#FFC745', fontSize: 13, fontWeight: 700, margin: 0 }}>
+          <p style={{ color: '#FFC745', fontSize: 'var(--fs-base)', fontWeight: 700, margin: 0 }}>
             {urgentCount} {urgentCount === 1 ? 'registration needs' : 'registrations need'} your attention
           </p>
         </div>
@@ -401,7 +401,7 @@ export default function ApprovalsClient({
             style={{
               width: '100%', padding: '10px 12px 10px 36px',
               background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 12, color: 'white', fontSize: 13, outline: 'none',
+              borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', outline: 'none',
               fontFamily: 'inherit', boxSizing: 'border-box',
             }}
           />
@@ -414,7 +414,7 @@ export default function ApprovalsClient({
               style={{
                 width: '100%', padding: '10px 32px 10px 12px', appearance: 'none',
                 background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: 12, color: 'white', fontSize: 13, cursor: 'pointer',
+                borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', cursor: 'pointer',
                 fontFamily: 'inherit', outline: 'none',
               }}
             >
@@ -449,12 +449,12 @@ export default function ApprovalsClient({
               }}
             >
               <span style={{
-                fontSize: 12, fontWeight: 700,
+                fontSize: 'var(--fs-sm)', fontWeight: 700,
                 color: isActive ? (isUrgent ? '#FFC745' : 'white') : '#6B7280',
                 truncate: true,
               }}>{f}</span>
               <span style={{
-                marginLeft: 8, fontSize: 11, fontWeight: 800, padding: '2px 7px', borderRadius: 20, flexShrink: 0,
+                marginLeft: 8, fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 7px', borderRadius: 20, flexShrink: 0,
                 background: isActive
                   ? isUrgent ? 'rgba(255,199,69,0.2)' : 'rgba(30,94,255,0.2)'
                   : 'rgba(255,255,255,0.05)',
@@ -468,7 +468,7 @@ export default function ApprovalsClient({
       </div>
 
       {/* ── Count label ──────────────────────────────────────── */}
-      <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+      <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
         {filtered.length} {filtered.length === 1 ? 'registration' : 'registrations'}
       </p>
 
@@ -483,10 +483,10 @@ export default function ApprovalsClient({
             }}>
               <ClipboardCheck size={24} color="#1E5EFF" />
             </div>
-            <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
+            <p style={{ color: 'white', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
               {search ? 'No results found' : `No ${filter.toLowerCase()} applications`}
             </p>
-            <p style={{ color: '#4B5563', fontSize: 13, margin: 0, lineHeight: 1.6 }}>
+            <p style={{ color: '#4B5563', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.6 }}>
               {!search && filter === 'All' ? 'Applications will appear here as people register for your events' : ''}
             </p>
           </div>
@@ -518,9 +518,9 @@ export default function ApprovalsClient({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                         {needsAttention && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFC745', flexShrink: 0 }} />}
-                        <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{reg.full_name}</p>
+                        <p style={{ color: 'white', fontSize: 'var(--fs-base)', fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{reg.full_name}</p>
                       </div>
-                      <p style={{ color: '#4B5563', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{eventMap[reg.event_id]?.title ?? '—'}</p>
+                      <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{eventMap[reg.event_id]?.title ?? '—'}</p>
                     </div>
                     <div style={{ flexShrink: 0 }}>
                       <StatusBadge status={reg.status} paymentStatus={reg.payment_status} />
@@ -536,7 +536,7 @@ export default function ApprovalsClient({
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                     {['Applicant', 'Event', 'Email', 'Status'].map(h => (
-                      <th key={h} style={{ padding: '12px 20px', textAlign: 'left', color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{h}</th>
+                      <th key={h} style={{ padding: '12px 20px', textAlign: 'left', color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -558,11 +558,11 @@ export default function ApprovalsClient({
                         <td style={{ padding: '14px 20px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                             {needsAttention && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFC745', flexShrink: 0 }} />}
-                            <span style={{ color: 'white', fontSize: 13, fontWeight: 700 }}>{reg.full_name}</span>
+                            <span style={{ color: 'white', fontSize: 'var(--fs-base)', fontWeight: 700 }}>{reg.full_name}</span>
                           </div>
                         </td>
-                        <td style={{ padding: '14px 20px', color: '#6B7280', fontSize: 13 }}>{event?.title ?? '—'}</td>
-                        <td style={{ padding: '14px 20px', color: '#6B7280', fontSize: 13 }}>{reg.email}</td>
+                        <td style={{ padding: '14px 20px', color: '#6B7280', fontSize: 'var(--fs-base)' }}>{event?.title ?? '—'}</td>
+                        <td style={{ padding: '14px 20px', color: '#6B7280', fontSize: 'var(--fs-base)' }}>{reg.email}</td>
                         <td style={{ padding: '14px 20px' }}>
                           <StatusBadge status={reg.status} paymentStatus={reg.payment_status} />
                         </td>

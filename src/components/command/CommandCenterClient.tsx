@@ -30,7 +30,7 @@ const CSS = `
   .cc-back-btn {
     display:inline-flex; align-items:center; gap:5px; padding:6px 12px;
     background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
-    border-radius:8px; color:#9CA3AF; font-size:12px; font-weight:600;
+    border-radius:8px; color:#9CA3AF; font-size:var(--fs-sm); font-weight:600;
     cursor:pointer; transition:color 0.15s, border-color 0.15s, background 0.15s;
     flex-shrink:0; white-space:nowrap;
   }
@@ -38,17 +38,17 @@ const CSS = `
 
   .cc-header-info { flex:1; min-width:0; }
   .cc-event-title {
-    color:white; font-size:16px; font-weight:900; margin:0 0 3px;
+    color:white; font-size:var(--fs-lg); font-weight:900; margin:0 0 3px;
     font-family:var(--font-display); letter-spacing:-0.3px;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  .cc-event-meta { color:#4B5563; font-size:11px; margin:0; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .cc-event-meta { color:#4B5563; font-size:var(--fs-xs); margin:0; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 
   .cc-live-badge {
     display:inline-flex; align-items:center; gap:5px; padding:3px 10px;
     border-radius:100px; background:rgba(34,197,94,0.1);
     border:1px solid rgba(34,197,94,0.25); color:#22C55E;
-    font-size:10px; font-weight:800; letter-spacing:0.04em;
+    font-size:var(--fs-2xs); font-weight:800; letter-spacing:0.04em;
   }
   .cc-live-dot {
     display:inline-block; width:6px; height:6px; border-radius:50%; background:#22C55E;
@@ -65,8 +65,8 @@ const CSS = `
     background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
     border-radius:10px; min-width:52px;
   }
-  .cc-stat-n { color:white; font-size:17px; font-weight:900; margin:0; font-family:var(--font-display); line-height:1.2; }
-  .cc-stat-l { color:#4B5563; font-size:9px; margin:0; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; }
+  .cc-stat-n { color:white; font-size:var(--fs-lg); font-weight:900; margin:0; font-family:var(--font-display); line-height:1.2; }
+  .cc-stat-l { color:#4B5563; font-size:var(--fs-2xs); margin:0; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; }
   .cc-stat.warn  { background:rgba(250,204,21,0.07); border-color:rgba(250,204,21,0.18); }
   .cc-stat.warn .cc-stat-n { color:#FACC15; }
 
@@ -75,7 +75,7 @@ const CSS = `
     padding:10px 20px 0; flex-shrink:0; gap:4px;
   }
   .cc-tab {
-    padding:8px 16px; border-radius:10px 10px 0 0; font-size:12px; font-weight:700;
+    padding:8px 16px; border-radius:10px 10px 0 0; font-size:var(--fs-sm); font-weight:700;
     color:#4B5563; cursor:pointer; border:none; background:none;
     border-bottom:2px solid transparent; transition:color 0.15s, border-color 0.15s;
     display:flex; align-items:center; gap:6px;
@@ -83,7 +83,7 @@ const CSS = `
   .cc-tab.active { color:white; border-color:#1E5EFF; }
   .cc-tab-badge {
     background:rgba(250,204,21,0.15); color:#FACC15; border:1px solid rgba(250,204,21,0.25);
-    padding:1px 7px; border-radius:8px; font-size:9px; font-weight:800;
+    padding:1px 7px; border-radius:8px; font-size:var(--fs-2xs); font-weight:800;
   }
 
   .cc-body { flex:1; overflow:hidden; display:flex; min-height:0; }
@@ -115,7 +115,7 @@ const CSS = `
     display:flex; align-items:center; justify-content:center;
   }
   .cc-section-label {
-    color:#374151; font-size:10px; font-weight:700; letter-spacing:0.07em;
+    color:#374151; font-size:var(--fs-2xs); font-weight:700; letter-spacing:0.07em;
     text-transform:uppercase; padding:0 0 8px; display:block;
   }
 `
@@ -219,8 +219,8 @@ export default function CommandCenterClient({ event, attendees: initial, recentM
             {attendees.length === 0 ? (
               <div className="cc-empty">
                 <div className="cc-empty-icon"><Users size={24} color="#374151" /></div>
-                <p style={{ fontSize: 14, color: '#4B5563', margin: 0, fontWeight: 600 }}>No attendees yet</p>
-                <p style={{ fontSize: 12, color: '#374151', margin: 0, textAlign: 'center', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 'var(--fs-md)', color: '#4B5563', margin: 0, fontWeight: 600 }}>No attendees yet</p>
+                <p style={{ fontSize: 'var(--fs-sm)', color: '#374151', margin: 0, textAlign: 'center', lineHeight: 1.6 }}>
                   Attendees appear here once they register
                 </p>
               </div>

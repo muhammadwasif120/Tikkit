@@ -51,10 +51,10 @@ export default async function CommandPage() {
           <Radio size={22} color="#A855F7" />
         </div>
         <div>
-          <h1 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+          <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
             Command Center
           </h1>
-          <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+          <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
             Real-time attendee management, approvals &amp; live guest chat
           </p>
         </div>
@@ -66,7 +66,7 @@ export default async function CommandPage() {
         border: '1px solid rgba(168,85,247,0.14)',
         borderRadius: 16, padding: '20px 24px', marginBottom: 28,
       }}>
-        <p style={{ color: '#A855F7', fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 14px' }}>
+        <p style={{ color: '#A855F7', fontSize: 'var(--fs-xs)', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 14px' }}>
           How it works
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
@@ -80,8 +80,8 @@ export default async function CommandPage() {
                 <Icon size={15} color={color} />
               </div>
               <div>
-                <p style={{ color: 'white', fontSize: 12, fontWeight: 700, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>{label}</p>
-                <p style={{ color: '#6B7280', fontSize: 11, margin: 0, lineHeight: 1.6 }}>{desc}</p>
+                <p style={{ color: 'white', fontSize: 'var(--fs-sm)', fontWeight: 700, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>{label}</p>
+                <p style={{ color: '#6B7280', fontSize: 'var(--fs-xs)', margin: 0, lineHeight: 1.6 }}>{desc}</p>
               </div>
             </div>
           ))}
@@ -90,7 +90,7 @@ export default async function CommandPage() {
 
       {/* ── Event list ───────────────────────────────────────── */}
       <div style={{ marginBottom: 12 }}>
-        <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+        <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
           {events.length} {events.length === 1 ? 'Event' : 'Events'}
         </p>
       </div>
@@ -109,16 +109,16 @@ export default async function CommandPage() {
           }}>
             <Radio size={28} color="#A855F7" />
           </div>
-          <p style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
+          <p style={{ color: 'white', fontSize: 'var(--fs-lg)', fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
             No events yet
           </p>
-          <p style={{ color: '#4B5563', fontSize: 13, margin: '0 0 24px', lineHeight: 1.6 }}>
+          <p style={{ color: '#4B5563', fontSize: 'var(--fs-base)', margin: '0 0 24px', lineHeight: 1.6 }}>
             Publish an event to start using the Command Center
           </p>
           <Link href="/dashboard/events/new" style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
             background: '#1E5EFF', color: 'white', textDecoration: 'none',
-            padding: '11px 24px', borderRadius: 12, fontSize: 13, fontWeight: 700,
+            padding: '11px 24px', borderRadius: 12, fontSize: 'var(--fs-base)', fontWeight: 700,
             boxShadow: '0 8px 24px rgba(30,94,255,0.25)',
           }}>
             Create your first event <ArrowRight size={14} />
@@ -159,14 +159,14 @@ export default async function CommandPage() {
                     <div style={{ flex: 1, minWidth: 0, padding: '14px 16px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                         <p style={{
-                          color: 'white', fontSize: 14, fontWeight: 800, margin: 0,
+                          color: 'white', fontSize: 'var(--fs-md)', fontWeight: 800, margin: 0,
                           fontFamily: 'var(--font-display)', letterSpacing: '-0.2px',
                           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                         }}>
                           {event.title}
                         </p>
                         <span style={{
-                          padding: '2px 8px', borderRadius: 100, fontSize: 9, fontWeight: 800,
+                          padding: '2px 8px', borderRadius: 100, fontSize: 'var(--fs-2xs)', fontWeight: 800,
                           letterSpacing: '0.07em', flexShrink: 0,
                           background: st.bg, color: st.color, border: `1px solid ${st.border}`,
                           display: 'inline-flex', alignItems: 'center', gap: 4,
@@ -176,11 +176,11 @@ export default async function CommandPage() {
                         </span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 11, fontWeight: 600 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
                           <Calendar size={10} color="#4B5563" />
                           {fmtDate(event.date_start)} · {fmtTime(event.date_start)}
                         </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 11, fontWeight: 600 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
                           <Users size={10} color="#4B5563" />
                           {event._count} {event._count === 1 ? 'attendee' : 'attendees'}
                         </span>
