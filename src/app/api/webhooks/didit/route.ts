@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
           webhook_received_at: new Date().toISOString(),
         },
       })
-      console.log(`didit webhook: user ${userId} ID verified ✓`)
     } catch (err) {
       console.error('didit webhook: updateVerificationStatus failed', err)
       return NextResponse.json({ error: 'Internal error' }, { status: 500 })

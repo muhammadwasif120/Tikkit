@@ -812,16 +812,9 @@ function NotFoundGate({ onAuth }: { onAuth: () => void }) {
 // ─── Master Dashboard ─────────────────────────────────────────────────────────
 
 export default function MasterPage() {
-  const [authed, setAuthed] = useState(false)
   const [tab, setTab] = useState<Tab>('overview')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && sessionStorage.getItem('_ms') === '1') {
-      setAuthed(true)
-    }
-  }, [])
 
   // Real data
   const [orgs, setOrgs] = useState<Org[]>([])
@@ -829,7 +822,6 @@ export default function MasterPage() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    if (!authed) return
     setLoading(true)
     Promise.all([getMasterOrganizers(), getMasterEvents()])
       .then(([orgsData, evtsData]) => {
@@ -837,7 +829,7 @@ export default function MasterPage() {
         setEvents(evtsData as Evt[])
       })
       .finally(() => setLoading(false))
-  }, [authed])
+  }, [])
 
   // Organizers state
   const [orgStatuses, setOrgStatuses] = useState<Record<string, OrgStatus>>({})
@@ -866,11 +858,11 @@ export default function MasterPage() {
   const [waitlistRole, setWaitlistRole] = useState<'all' | 'organizer' | 'guest' | 'both'>('all')
 
   useEffect(() => {
-    if (!authed || tab !== 'waitlist') return
+    if (tab !== 'waitlist') return
     if (waitlist.length > 0) return // already loaded
     setWaitlistLoading(true)
     getWaitlistEntries().then(setWaitlist).finally(() => setWaitlistLoading(false))
-  }, [authed, tab, waitlist.length])
+  }, [tab, waitlist.length])
 
   // Derived
   const liveOrgs = orgs.filter(o => !removedOrgs.has(o.id))
@@ -913,7 +905,6 @@ export default function MasterPage() {
     overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes', analytics: 'Analytics', waitlist: 'Waitlist',
   }
 
-  if (!authed) return <NotFoundGate onAuth={() => setAuthed(true)} />
 
   return (
     <>
@@ -1171,7 +1162,7 @@ export default function MasterPage() {
           <div className="ms-sidebar-footer" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ fontSize: 'var(--fs-2xs)', color: '#374151', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tikkit Internal · Confidential</div>
             <button
-              onClick={() => { sessionStorage.removeItem('_ms'); setAuthed(false) }}
+              onClick={async () => { const { createClient } = await import('@/lib/supabase/client'); await createClient().auth.signOut(); window.location.href = '/auth/login' }}
               style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.12)', borderRadius: 8, padding: '7px 12px', color: '#4B5563', fontSize: 'var(--fs-xs)', fontFamily: 'var(--font-body)', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}
               onMouseEnter={e => { (e.target as HTMLButtonElement).style.color = '#EF4444'; (e.target as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.3)' }}
               onMouseLeave={e => { (e.target as HTMLButtonElement).style.color = '#4B5563'; (e.target as HTMLButtonElement).style.borderColor = 'rgba(239,68,68,0.12)' }}

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 export type TopOrganizer = {
   id: string
@@ -56,6 +57,7 @@ export async function toggleFavouriteOrganizer(
   await (supabase as any)
     .from('organizer_favourites')
     .insert({ user_id: user.id, organizer_id: organizerId })
+  revalidatePath('/guest/explore')
   return { is_favourite: true }
 }
 

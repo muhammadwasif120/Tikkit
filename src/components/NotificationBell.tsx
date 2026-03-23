@@ -128,7 +128,6 @@ export default function NotificationBell() {
       .order('created_at', { ascending: false })
       .limit(30)
 
-    console.log('[Bell] loaded notifications:', data?.length, 'unread:', data?.filter(n => !n.read).length)
     if (data) setNotifications((data as any[]) || [])
     setLoading(false)
   }, [supabase])

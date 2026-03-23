@@ -8,7 +8,9 @@ export async function notifyVendorPaymentDue(
   vendorName: string,
   amount: number
 ) {
-  await createNotification(
-    Notifications.vendorPaymentDue(userId, eventId ?? '', vendorName, amount, 'PKR')
-  )
+  try {
+    await createNotification(
+      Notifications.vendorPaymentDue(userId, eventId ?? '', vendorName, amount, 'PKR')
+    )
+  } catch { /* fire-and-forget */ }
 }

@@ -7,9 +7,11 @@ export async function notifyEventGoingLive(
   eventId: string,
   eventTitle: string
 ) {
-  await createNotification(
-    Notifications.eventGoingLive(userId, eventId, eventTitle)
-  )
+  try {
+    await createNotification(
+      Notifications.eventGoingLive(userId, eventId, eventTitle)
+    )
+  } catch { /* fire-and-forget */ }
 }
 
 export async function notifyEventEnded(
@@ -18,7 +20,9 @@ export async function notifyEventEnded(
   eventTitle: string,
   totalAttendees: number
 ) {
-  await createNotification(
-    Notifications.eventEnded(userId, eventId, eventTitle, totalAttendees)
-  )
+  try {
+    await createNotification(
+      Notifications.eventEnded(userId, eventId, eventTitle, totalAttendees)
+    )
+  } catch { /* fire-and-forget */ }
 }
