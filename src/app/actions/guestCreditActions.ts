@@ -176,6 +176,7 @@ async function issueEventPass(
     guest_id:          profileId,
     event_id:          eventId,
     guest_record_id:   guestRecordId,
+    pass_type:         isVip ? 'vip' : 'attendance',
     event_title:       event.title,
     event_date:        event.date_start,
     venue_name:        event.venue_name ?? null,
@@ -317,4 +318,53 @@ export async function getPublicEvents(limit = 20) {
   }
 
   return data ?? []
+}
+
+// ─── Backfill attendance passes for confirmed registrations ───────────────────
+// Called on the passes page load — idempotent, safe to run repeatedly.
+// Issues an 'attendance' pass for every public_registration that is confirmed /
+// attended but doesn't yet have a pass in event_passes.
+export async function backfillAttendancePasses() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+
+  // All confirmed/attended registrations
+  const { data: regs } = await supabase
+    .from('public_registrations')
+    .select('id, event_id, event:events(id, title, date_start, venue_name, cover_image_url)')
+    .eq('guest_id', user.id)
+    .in('status', ['confirmed', 'checked_in', 'attended', 'eoi_approved', 'registered'])
+
+  if (!regs?.length) return
+
+  // Existing pass event IDs (to avoid duplicates)
+  const { data: existing } = await (supabase as any)
+    .from('event_passes')
+    .select('event_id')
+    .eq('guest_id', user.id)
+
+  const hasPass = new Set((existing ?? []).map((p: any) => p.event_id))
+
+  const toInsert = regs
+    .filter((r: any) => r.event_id && !hasPass.has(r.event_id))
+    .map((r: any) => {
+      const ev = r.event as any
+      return {
+        guest_id:          user.id,
+        event_id:          r.event_id,
+        guest_record_id:   r.id,
+        pass_type:         'attendance',
+        event_title:       ev?.title           ?? '',
+        event_date:        ev?.date_start      ?? null,
+        venue_name:        ev?.venue_name      ?? null,
+        cover_image_url:   ev?.cover_image_url ?? null,
+        was_vip:           false,
+        ticket_price_paid: 0,
+      }
+    })
+
+  if (toInsert.length === 0) return
+
+  await (supabase as any).from('event_passes').insert(toInsert)
 }
