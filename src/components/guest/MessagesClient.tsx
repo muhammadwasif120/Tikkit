@@ -382,8 +382,8 @@ export default function MessagesClient({
     <>
       {/* ── Mobile: list or thread ── */}
       <div
-        className="md:hidden"
-        style={{ height: 'calc(100svh - 76px - env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}
+        className="md:hidden flex flex-col"
+        style={{ height: 'calc(100svh - 76px - env(safe-area-inset-bottom))', overflow: 'hidden' }}
       >
         {mobileView === 'list' ? ThreadList : ChatThread}
       </div>
