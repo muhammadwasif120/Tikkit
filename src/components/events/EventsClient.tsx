@@ -2,11 +2,30 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Plus, CalendarDays, MapPin, Users, Edit2, Trash2, X, Check, ChevronDown, Lock, Eye } from 'lucide-react'
+import { Plus, CalendarDays, MapPin, Users, Edit2, Trash2, X, Check, ChevronDown, Lock, Eye, ChevronRight } from 'lucide-react'
 import { getEffectiveStatus } from '@/lib/eventStatus'
 import { format } from 'date-fns'
 import clsx from 'clsx'
 import Link from 'next/link'
+
+const COVER_GRADIENTS = [
+  'linear-gradient(135deg,#0F2027,#203A43,#2C5364)',
+  'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)',
+  'linear-gradient(135deg,#200122,#6f0000)',
+  'linear-gradient(135deg,#0d0d0d,#1a3a1a)',
+  'linear-gradient(135deg,#1f0033,#2d0050)',
+  'linear-gradient(135deg,#001233,#023e8a)',
+  'linear-gradient(135deg,#0a0f2e,#1a2a6c,#1E5EFF)',
+]
+const getGrad = (id: string) => COVER_GRADIENTS[id.charCodeAt(0) % COVER_GRADIENTS.length]
+
+const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string; label: string }> = {
+  published: { bg: 'rgba(34,197,94,0.1)',   color: '#22C55E', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
+  completed: { bg: 'rgba(75,85,99,0.1)',    color: '#6B7280', border: 'rgba(75,85,99,0.2)',    label: 'ENDED'    },
+  archived:  { bg: 'rgba(75,85,99,0.06)',   color: '#4B5563', border: 'rgba(75,85,99,0.12)',   label: 'ARCHIVED' },
+  draft:     { bg: 'rgba(250,204,21,0.1)',  color: '#FACC15', border: 'rgba(250,204,21,0.2)',  label: 'DRAFT'    },
+  cancelled: { bg: 'rgba(239,68,68,0.1)',   color: '#EF4444', border: 'rgba(239,68,68,0.2)',   label: 'CANCELLED'},
+}
 
 /* ─── Toggle ─── */
 function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
@@ -37,12 +56,6 @@ type Event = {
   female_ratio: number | null
 }
 
-const statusBadge: Record<string, string> = {
-  draft: 'badge-gray',
-  published: 'badge-green',
-  cancelled: 'badge-red',
-  completed: 'badge-blue',
-}
 
 export default function EventsClient({
   initialEvents,
@@ -111,22 +124,38 @@ export default function EventsClient({
   }
 
   return (
-    <div className="space-y-6 max-w-5xl">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-gray-400 text-sm">{events.length} total event{events.length !== 1 ? 's' : ''}</p>
+    <div className="space-y-5 max-w-5xl">
+
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+            background: 'rgba(30,94,255,0.12)', border: '1px solid rgba(30,94,255,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <CalendarDays size={20} color="#1E5EFF" />
+          </div>
+          <div>
+            <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+              Events
+            </h1>
+            <p style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', margin: 0 }}>
+              {events.length} total event{events.length !== 1 ? 's' : ''}
+            </p>
+          </div>
         </div>
         <Link href="/dashboard/events/new" className="btn-primary shrink-0">
-          <Plus className="w-4 h-4" /> <span className="hidden xs:inline">New </span>Event
+          <Plus className="w-4 h-4" /> <span className="hidden sm:inline">New </span>Event
         </Link>
       </div>
 
       {events.length === 0 ? (
-        <div className="card text-center py-16">
-          <CalendarDays className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400 font-medium">No events yet</p>
-          <p className="text-gray-600 text-sm mt-1 mb-5">Create your first event to get started</p>
-          <Link href="/dashboard/events/new" className="btn-primary justify-center">
+        <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '64px 24px', textAlign: 'center' }}>
+          <CalendarDays size={40} color="#374151" style={{ margin: '0 auto 12px' }} />
+          <p style={{ color: '#9CA3AF', fontWeight: 600, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>No events yet</p>
+          <p style={{ color: '#4B5563', fontSize: 'var(--fs-sm)', margin: '0 0 20px' }}>Create your first event to get started</p>
+          <Link href="/dashboard/events/new" className="btn-primary" style={{ display: 'inline-flex' }}>
             <Plus className="w-4 h-4" /> Create Event
           </Link>
         </div>
@@ -134,105 +163,143 @@ export default function EventsClient({
         const activeEvents   = events.filter(e => { const s = getEffectiveStatus(e); return s !== 'completed' && s !== 'archived' && s !== 'cancelled' })
         const archivedEvents = events.filter(e => { const s = getEffectiveStatus(e); return s === 'completed' || s === 'archived' || s === 'cancelled' })
 
-        const renderCard = (event: Event, archived: boolean) => (
-          <div key={event.id} className={clsx('card-hover flex items-start gap-3 group', archived && 'opacity-60')}>
-            <Link href={`/dashboard/events/${event.id}`} className="flex gap-3 flex-1 min-w-0">
-              {/* Thumbnail */}
-              {event.cover_image_url ? (
-                <img src={event.cover_image_url} alt={event.title} className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg object-cover shrink-0" />
-              ) : (
-                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-brand-charcoal-light border border-white/5 flex items-center justify-center shrink-0">
-                  <CalendarDays className="w-5 h-5 text-gray-500" />
-                </div>
-              )}
+        const renderCard = (event: Event, isArchived: boolean) => {
+          const effStatus = getEffectiveStatus(event)
+          const st = STATUS_CONFIG[effStatus] ?? STATUS_CONFIG.draft
+          const isLive = effStatus === 'published'
+          const pending = pendingCounts[event.id] ?? 0
 
-              {/* Content */}
-              <div className="min-w-0 flex-1">
-                {/* Title */}
-                <h3 className="font-semibold text-white text-sm sm:text-base leading-snug truncate mb-1">
-                  {event.title}
-                </h3>
+          return (
+            <div key={event.id} className="group" style={{ opacity: isArchived ? 0.65 : 1 }}>
+              <Link href={`/dashboard/events/${event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+                <div style={{
+                  background: '#0C0E16',
+                  border: `1px solid ${isLive ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                  borderRadius: 18, overflow: 'hidden',
+                  boxShadow: isLive ? '0 4px 24px rgba(34,197,94,0.06)' : 'none',
+                  transition: 'border-color 0.15s, box-shadow 0.15s',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px' }}>
 
-                {/* Badges row */}
-                <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
-                  <span className={clsx(statusBadge[event.status])}>{event.status}</span>
-                  {event.is_private && <span className="badge-yellow">Private</span>}
-                  {(pendingCounts[event.id] ?? 0) > 0 && (
-                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-500/10 text-orange-400 border border-orange-500/20">
-                      <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse shrink-0" />
-                      {pendingCounts[event.id]} pending
-                    </span>
-                  )}
-                </div>
+                    {/* Thumbnail */}
+                    <div style={{
+                      width: 72, height: 72, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
+                      background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : getGrad(event.id),
+                      position: 'relative',
+                    }}>
+                      {isLive && (
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(34,197,94,0.25), transparent)' }} />
+                      )}
+                    </div>
 
-                {/* Meta — stacks on mobile, row on sm+ */}
-                <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3 text-xs text-gray-500">
-                  {event.date_start && (
-                    <span className="flex items-center gap-1">
-                      <CalendarDays className="w-3 h-3 shrink-0" />
-                      {format(new Date(event.date_start), 'MMM d, yyyy · h:mm a')}
-                    </span>
-                  )}
-                  {event.venue_name && !event.secret_venue && (
-                    <span className="flex items-center gap-1 truncate">
-                      <MapPin className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{event.venue_name}</span>
-                    </span>
-                  )}
-                  {event.secret_venue && (
-                    <span className="flex items-center gap-1 text-brand-yellow">
-                      <MapPin className="w-3 h-3 shrink-0" />Secret Venue
-                    </span>
-                  )}
-                </div>
-              </div>
-            </Link>
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        color: 'white', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 6px',
+                        fontFamily: 'var(--font-display)', letterSpacing: '-0.2px',
+                      }}>
+                        {event.title}
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        {/* Status pill */}
+                        <span style={{
+                          padding: '2px 8px', borderRadius: 100, fontSize: 'var(--fs-2xs)', fontWeight: 800,
+                          letterSpacing: '0.07em', flexShrink: 0,
+                          background: st.bg, color: st.color, border: `1px solid ${st.border}`,
+                          display: 'inline-flex', alignItems: 'center', gap: 4,
+                        }}>
+                          {isLive && <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
+                          {st.label}
+                        </span>
+                        {/* Private badge */}
+                        {event.is_private && (
+                          <span style={{ padding: '2px 8px', borderRadius: 100, fontSize: 'var(--fs-2xs)', fontWeight: 700, background: 'rgba(255,199,69,0.1)', color: '#FFC745', border: '1px solid rgba(255,199,69,0.2)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                            <Lock size={9} /> Private
+                          </span>
+                        )}
+                        {/* Pending badge */}
+                        {pending > 0 && (
+                          <span style={{ padding: '2px 8px', borderRadius: 100, fontSize: 'var(--fs-2xs)', fontWeight: 700, background: 'rgba(249,115,22,0.1)', color: '#F97316', border: '1px solid rgba(249,115,22,0.2)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#F97316', animation: 'pulse 2s infinite', display: 'inline-block' }} />
+                            {pending} pending
+                          </span>
+                        )}
+                        {/* Date */}
+                        {event.date_start && (
+                          <span style={{ display: 'flex', alignItems: 'flex-start', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
+                            <CalendarDays size={10} color="#4B5563" style={{ marginTop: 2, flexShrink: 0 }} />
+                            <span>
+                              {format(new Date(event.date_start), 'MMM d, yyyy')}<br />
+                              {format(new Date(event.date_start), 'h:mm a')}
+                            </span>
+                          </span>
+                        )}
+                        {/* Venue */}
+                        {event.venue_name && !event.secret_venue && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>
+                            <MapPin size={10} color="#4B5563" />{event.venue_name}
+                          </span>
+                        )}
+                        {event.secret_venue && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#FFC745', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
+                            <MapPin size={10} color="#FFC745" />Secret Venue
+                          </span>
+                        )}
+                      </div>
+                    </div>
 
-            {/* Right — capacity + actions */}
-            <div className="flex flex-col items-end gap-2 shrink-0">
-              <div className="flex items-center gap-1 text-gray-500 text-xs">
-                <Users className="w-3 h-3" />
-                <span>{event.capacity}</span>
-              </div>
-              {!archived && (
-                <div className="flex items-center gap-0.5 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                  <button onClick={(e) => { e.preventDefault(); openEdit(event) }}
-                    className="p-1.5 text-gray-500 hover:text-white transition-colors rounded-md hover:bg-white/5"
-                    aria-label="Edit event">
-                    <Edit2 className="w-3.5 h-3.5" />
-                  </button>
-                  <button onClick={(e) => { e.preventDefault(); setDeleteEvent(event) }}
-                    className="p-1.5 text-gray-500 hover:text-red-400 transition-colors rounded-md hover:bg-red-500/5"
-                    aria-label="Delete event">
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
+                    {/* Right side — capacity + edit/delete + arrow */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                      {/* Capacity */}
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
+                        <Users size={11} color="#4B5563" />{event.capacity}
+                      </span>
+                      {/* Edit / Delete (hidden on mobile, hover on desktop) */}
+                      {!isArchived && (
+                        <div className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" style={{ display: 'flex', gap: 4 }}>
+                          <button
+                            onClick={(e) => { e.preventDefault(); openEdit(event) }}
+                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', cursor: 'pointer', width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+                          >
+                            <Edit2 size={12} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.preventDefault(); setDeleteEvent(event) }}
+                            style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', color: '#EF4444', cursor: 'pointer', width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+                          >
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      )}
+                      {/* Arrow */}
+                      <div style={{
+                        width: 30, height: 30, borderRadius: 10,
+                        background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.15)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <ChevronRight size={15} color="#1E5EFF" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              )}
+              </Link>
             </div>
-          </div>
-        )
+          )
+        }
 
         return (
-          <div className="space-y-6">
-            {/* Active events */}
-            {activeEvents.length > 0 && (
-              <div className="grid gap-4">
-                {activeEvents.map(e => renderCard(e, false))}
-              </div>
-            )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {activeEvents.map(e => renderCard(e, false))}
 
-            {/* Archived events */}
             {archivedEvents.length > 0 && (
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Archived</p>
-                  <div className="flex-1 h-px bg-white/5" />
-                  <span className="text-xs text-gray-600">{archivedEvents.length} event{archivedEvents.length !== 1 ? 's' : ''}</span>
+              <>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0 2px' }}>
+                  <p style={{ color: '#374151', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0, fontFamily: 'var(--font-display)', whiteSpace: 'nowrap' }}>Archived</p>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
+                  <span style={{ color: '#4B5563', fontSize: 'var(--fs-xs)' }}>{archivedEvents.length}</span>
                 </div>
-                <div className="grid gap-4">
-                  {archivedEvents.map(e => renderCard(e, true))}
-                </div>
-              </div>
+                {archivedEvents.map(e => renderCard(e, true))}
+              </>
             )}
           </div>
         )

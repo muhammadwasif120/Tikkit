@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'
 import { CalendarDays, MapPin, Users, ArrowLeft, Archive } from 'lucide-react'
+import { getEffectiveStatus } from '@/lib/eventStatus'
 import Link from 'next/link'
 import clsx from 'clsx'
 import EventActions from '@/components/events/EventActions'
@@ -12,11 +13,12 @@ import EventTicketTypes from '@/components/events/EventTicketTypes'
 import EventCoverAndDescription from '@/components/events/EventCoverAndDescription'
 import DashboardLoader from '@/components/layout/DashboardLoader'
 
-const statusBadge: Record<string, string> = {
-  draft: 'badge-gray',
-  published: 'badge-green',
-  cancelled: 'badge-red',
-  completed: 'badge-blue',
+const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string; label: string }> = {
+  published: { bg: 'rgba(34,197,94,0.1)',  color: '#22C55E', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
+  completed: { bg: 'rgba(75,85,99,0.1)',   color: '#6B7280', border: 'rgba(75,85,99,0.2)',    label: 'ENDED'    },
+  archived:  { bg: 'rgba(75,85,99,0.06)',  color: '#4B5563', border: 'rgba(75,85,99,0.12)',   label: 'ARCHIVED' },
+  draft:     { bg: 'rgba(250,204,21,0.1)', color: '#FACC15', border: 'rgba(250,204,21,0.2)',  label: 'DRAFT'    },
+  cancelled: { bg: 'rgba(239,68,68,0.1)',  color: '#EF4444', border: 'rgba(239,68,68,0.2)',   label: 'CANCELLED'},
 }
 
 async function EventDetailData({ params }: { params: Promise<{ id: string }> }) {
@@ -32,7 +34,10 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
 
   if (!event) notFound()
 
-  const isArchived = event.status === 'completed' || event.status === 'cancelled'
+  const effStatus  = getEffectiveStatus(event)
+  const isArchived = effStatus === 'completed' || effStatus === 'archived' || effStatus === 'cancelled'
+  const st = STATUS_CONFIG[effStatus] ?? STATUS_CONFIG.draft
+  const isLive = effStatus === 'published'
 
   // Fetch category details for display (read-only — locked after creation)
   const ev = event as any
@@ -79,48 +84,70 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
   return (
     <div className="max-w-5xl space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex items-start gap-3">
-          <Link href="/dashboard/events" className="text-gray-400 hover:text-white transition-colors mt-1">
-            <ArrowLeft className="w-5 h-5" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+
+        {/* Breadcrumb row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <Link href="/dashboard/events" className="hover:text-gray-400 transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#4B5563', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}
+          >
+            <ArrowLeft size={14} /> Events
           </Link>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                {event.title}
-              </h2>
-              <span className={clsx(statusBadge[event.status])}>{event.status}</span>
-              {!event.is_public && <span className="badge-yellow">Private</span>}
-              {category && (
-                <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
-                  style={{ background: `${category.color}18`, color: category.color, border: `1px solid ${category.color}30` }}
-                >
-                  <span>{category.icon}</span>
-                  <span>{category.name}</span>
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-4 text-xs text-gray-500">
-              <span className="flex items-center gap-1">
-                <CalendarDays className="w-3 h-3" />
-                {format(new Date(event.date_start), 'MMM d, yyyy · h:mm a')}
-              </span>
-              {event.venue_name && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  {event.venue_secret ? '🔒 Secret Venue' : event.venue_name}
-                </span>
-              )}
-              <span className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
-                {total} / {event.capacity} guests
-              </span>
-            </div>
-          </div>
+          {!isArchived && <EventActions event={event} />}
         </div>
-        {/* Actions menu — hidden for archived events */}
-        {!isArchived && <EventActions event={event} />}
+
+        {/* Title */}
+        <h1 style={{
+          color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900,
+          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px', lineHeight: 1.2,
+        }}>
+          {event.title}
+        </h1>
+
+        {/* Badges row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{
+            padding: '3px 10px', borderRadius: 100, fontSize: 'var(--fs-xs)', fontWeight: 800,
+            letterSpacing: '0.07em', background: st.bg, color: st.color, border: `1px solid ${st.border}`,
+            display: 'inline-flex', alignItems: 'center', gap: 5,
+          }}>
+            {isLive && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
+            {st.label}
+          </span>
+          {!event.is_public && (
+            <span style={{ padding: '3px 10px', borderRadius: 100, fontSize: 'var(--fs-xs)', fontWeight: 700, background: 'rgba(255,199,69,0.1)', color: '#FFC745', border: '1px solid rgba(255,199,69,0.2)' }}>
+              Private
+            </span>
+          )}
+          {category && (
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 5,
+              padding: '3px 10px', borderRadius: 100, fontSize: 'var(--fs-xs)', fontWeight: 700,
+              background: `${category.color}18`, color: category.color, border: `1px solid ${category.color}30`,
+            }}>
+              {category.icon} {category.name}
+            </span>
+          )}
+        </div>
+
+        {/* Meta row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
+            <CalendarDays size={13} color="#4B5563" />
+            {format(new Date(event.date_start), 'MMM d, yyyy')}
+            <span style={{ color: '#374151' }}>·</span>
+            {format(new Date(event.date_start), 'h:mm a')}
+          </span>
+          {event.venue_name && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
+              <MapPin size={13} color="#4B5563" />
+              {event.venue_secret ? '🔒 Secret Venue' : event.venue_name}
+            </span>
+          )}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
+            <Users size={13} color="#4B5563" />
+            {total} / {event.capacity} guests
+          </span>
+        </div>
       </div>
 
       {/* Archived banner */}

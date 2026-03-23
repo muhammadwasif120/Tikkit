@@ -284,10 +284,8 @@ export default function NotificationBell() {
                 <p className="text-xs text-gray-600 mt-1">They'll show up here as activity happens</p>
               </div>
             ) : (
-              notifications.map((n) => {
-                const config = TYPE_CONFIG[n.type]
-                return (
-                  <SwipeableRow key={n.id} onDismiss={() => dismiss(n.id)}>
+              notifications.map((n) => (
+                <SwipeableRow key={n.id} onDismiss={() => dismiss(n.id)}>
                   <div
                     onClick={() => !n.read && markRead(n.id)}
                     className={`flex items-start gap-3 px-4 py-3.5 transition-colors cursor-pointer group ${
@@ -295,8 +293,8 @@ export default function NotificationBell() {
                     }`}
                   >
                     {/* Icon */}
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-white/6 ${config.colour}`}>
-                      {config.icon}
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 bg-white/6 ${TYPE_CONFIG[n.type].colour}`}>
+                      {TYPE_CONFIG[n.type].icon}
                     </div>
 
                     {/* Content */}
@@ -306,7 +304,7 @@ export default function NotificationBell() {
                           {n.title}
                         </p>
                         {!n.read && (
-                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${config.dot}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${TYPE_CONFIG[n.type].dot}`} />
                         )}
                       </div>
                       <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{n.body}</p>
@@ -324,9 +322,8 @@ export default function NotificationBell() {
                       </button>
                     )}
                   </div>
-                  </SwipeableRow>
-                )
-              })
+                </SwipeableRow>
+              ))
             )}
           </div>
 

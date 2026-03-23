@@ -9,6 +9,7 @@ import {
 import { format } from 'date-fns'
 import clsx from 'clsx'
 import Link from 'next/link'
+import { getEffectiveStatus } from '@/lib/eventStatus'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 export type OrgProfile = {
@@ -36,11 +37,12 @@ export type EventWithStats = {
 }
 
 /* ─── Helpers ─────────────────────────────────────────────────────── */
-const statusBadge: Record<string, string> = {
-  draft:     'badge-gray',
-  published: 'badge-green',
-  cancelled: 'badge-red',
-  completed: 'badge-blue',
+const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string; label: string }> = {
+  published: { bg: 'rgba(34,197,94,0.1)',  color: '#22C55E', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
+  completed: { bg: 'rgba(75,85,99,0.1)',   color: '#6B7280', border: 'rgba(75,85,99,0.2)',    label: 'ENDED'    },
+  archived:  { bg: 'rgba(75,85,99,0.06)',  color: '#4B5563', border: 'rgba(75,85,99,0.12)',   label: 'ARCHIVED' },
+  draft:     { bg: 'rgba(250,204,21,0.1)', color: '#FACC15', border: 'rgba(250,204,21,0.2)',  label: 'DRAFT'    },
+  cancelled: { bg: 'rgba(239,68,68,0.1)',  color: '#EF4444', border: 'rgba(239,68,68,0.2)',   label: 'CANCELLED'},
 }
 
 const COVER_GRADIENTS = [
@@ -122,6 +124,8 @@ function NameEditor({ profileId, initial }: { profileId: string; initial: string
 function EventStatCard({ event }: { event: EventWithStats }) {
   const fillPct    = event.capacity > 0 ? Math.min(100, (event.guest_count      / event.capacity)   * 100) : 0
   const checkinPct = event.guest_count > 0 ? Math.min(100, (event.checked_in_count / event.guest_count) * 100) : 0
+  const effStatus  = getEffectiveStatus(event)
+  const st         = STATUS_CONFIG[effStatus] ?? STATUS_CONFIG.draft
 
   return (
     <Link href={`/dashboard/events/${event.id}`} className="card-hover flex gap-4 items-start group">
@@ -137,7 +141,17 @@ function EventStatCard({ event }: { event: EventWithStats }) {
           <h4 className="text-sm font-semibold text-white group-hover:text-[#1E5EFF] transition-colors leading-tight truncate">
             {event.title}
           </h4>
-          <span className={clsx(statusBadge[event.status] ?? 'badge-gray', 'shrink-0')}>{event.status}</span>
+          <span style={{
+            padding: '2px 8px', borderRadius: 100, fontSize: 11, fontWeight: 800,
+            letterSpacing: '0.07em', flexShrink: 0,
+            background: st.bg, color: st.color, border: `1px solid ${st.border}`,
+            display: 'inline-flex', alignItems: 'center', gap: 4,
+          }}>
+            {effStatus === 'published' && (
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', display: 'inline-block' }} />
+            )}
+            {st.label}
+          </span>
         </div>
 
         <div className="flex items-center gap-4 text-xs text-gray-500 mb-3 flex-wrap">
@@ -211,8 +225,14 @@ export default function OrganizerProfileClient({
   const [uploadError,    setUploadError]    = useState<string | null>(null)
   const [showPast, setShowPast] = useState(false)
 
-  const activeEvents = events.filter(e => e.status !== 'completed' && e.status !== 'cancelled')
-  const pastEvents   = events.filter(e => e.status === 'completed'  || e.status === 'cancelled')
+  const activeEvents = events.filter(e => {
+    const s = getEffectiveStatus(e)
+    return s === 'published' || s === 'draft'
+  })
+  const pastEvents = events.filter(e => {
+    const s = getEffectiveStatus(e)
+    return s === 'completed' || s === 'archived' || s === 'cancelled'
+  })
 
   const totalGuests   = events.reduce((s, e) => s + e.guest_count, 0)
   const totalAttended = events.reduce((s, e) => s + e.checked_in_count, 0)
@@ -270,11 +290,13 @@ export default function OrganizerProfileClient({
   const avatarTop = BANNER_H - AVATAR_H / 2  // 88px — half overlaps banner
 
   return (
-    <div className="max-w-5xl space-y-4 px-4 pt-0 pb-6 sm:px-6 sm:pt-2" style={{ overflowX: 'hidden' }}>
+    <div className="max-w-5xl space-y-6 px-0 pt-0 pb-6 sm:px-6 sm:pt-4" style={{ overflowX: 'hidden' }}>
 
-      {/* Hidden file inputs */}
-      <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
-      <input ref={logoInputRef}  type="file" accept="image/*" className="hidden" onChange={handleLogoChange}  />
+      {/* Hidden file inputs — wrapped with HTML hidden attr so space-y-* skips them */}
+      <div hidden>
+        <input ref={coverInputRef} type="file" accept="image/*" onChange={handleCoverChange} />
+        <input ref={logoInputRef}  type="file" accept="image/*" onChange={handleLogoChange}  />
+      </div>
 
       {/* ── Header ── */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>

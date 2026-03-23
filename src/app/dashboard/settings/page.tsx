@@ -321,8 +321,8 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      {/* Hidden file inputs for branding uploads */}
-      <div className="hidden">
+      {/* Hidden file inputs — HTML hidden attr so space-y-* skips them */}
+      <div hidden>
         <input ref={coverInputRef} type="file" accept="image/*" onChange={handleCoverUpload} />
         <input ref={logoInputRef}  type="file" accept="image/*" onChange={handleLogoUpload}  />
       </div>
