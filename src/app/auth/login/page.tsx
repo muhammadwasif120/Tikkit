@@ -504,7 +504,10 @@ export default function AuthPage() {
         }
         /* Responsive */
         @media (max-width: 640px) {
-          .auth-page { padding: 32px 16px 48px; justify-content: flex-start; }
+          .auth-page {
+            padding: max(32px, env(safe-area-inset-top) + 16px) 16px max(48px, env(safe-area-inset-bottom) + 24px);
+            justify-content: center;
+          }
           .auth-content.picker { max-width: 480px; }
           .auth-cards { grid-template-columns: 1fr; gap: 10px; }
           .auth-fbox { padding: 24px 20px; border-radius: 18px; }
