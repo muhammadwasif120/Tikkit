@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, CalendarDays, MapPin, Users, Edit2, Trash2, X, Check, ChevronDown, Lock, Eye } from 'lucide-react'
+import { getEffectiveStatus } from '@/lib/eventStatus'
 import { format } from 'date-fns'
 import clsx from 'clsx'
 import Link from 'next/link'
@@ -130,8 +131,8 @@ export default function EventsClient({
           </Link>
         </div>
       ) : (() => {
-        const activeEvents   = events.filter(e => e.status !== 'completed' && e.status !== 'cancelled')
-        const archivedEvents = events.filter(e => e.status === 'completed' || e.status === 'cancelled')
+        const activeEvents   = events.filter(e => { const s = getEffectiveStatus(e); return s !== 'completed' && s !== 'archived' && s !== 'cancelled' })
+        const archivedEvents = events.filter(e => { const s = getEffectiveStatus(e); return s === 'completed' || s === 'archived' || s === 'cancelled' })
 
         const renderCard = (event: Event, archived: boolean) => (
           <div key={event.id} className={clsx('card-hover flex items-start gap-3 group', archived && 'opacity-60')}>

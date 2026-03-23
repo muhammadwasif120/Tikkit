@@ -7,6 +7,7 @@ import ChatPanel from './ChatPanel'
 import { Users, MessageSquare, ChevronLeft, Calendar, Clock } from 'lucide-react'
 import type { CommandAttendee, ChatMessage } from '@/types/verification'
 import { updateRegistrationStatus } from '@/app/actions/commandActions'
+import { isLive as eventIsLive } from '@/lib/eventStatus'
 
 interface Props {
   event: { id: string; title: string; date_start: string; date_end: string | null; status: string }
@@ -128,7 +129,7 @@ export default function CommandCenterClient({ event, attendees: initial, recentM
 
   const pending  = attendees.filter(a => a.status === 'pending').length
   const approved = attendees.filter(a => ['approved','confirmed','checked_in'].includes(a.status)).length
-  const isLive   = event.status === 'published'
+  const isLive   = eventIsLive(event)
 
   const handleApprove = async (registrationId: string) => {
     setActioning(registrationId)

@@ -40,6 +40,66 @@ function timeAgo(date: string) {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
+// ─── Swipeable row ────────────────────────────────────────────────────────────
+
+const SWIPE_THRESHOLD = 80
+
+function SwipeableRow({ onDismiss, children }: { onDismiss: () => void; children: React.ReactNode }) {
+  const startX   = useRef(0)
+  const currentX = useRef(0)
+  const rowRef   = useRef<HTMLDivElement>(null)
+  const [dismissed, setDismissed] = useState(false)
+
+  const applyTranslate = (x: number) => {
+    if (!rowRef.current) return
+    const clamped = Math.min(0, x)           // only allow left swipe
+    rowRef.current.style.transform  = `translateX(${clamped}px)`
+    rowRef.current.style.opacity    = `${1 - Math.abs(clamped) / 200}`
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    startX.current   = e.touches[0].clientX
+    currentX.current = 0
+    if (rowRef.current) rowRef.current.style.transition = 'none'
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    currentX.current = e.touches[0].clientX - startX.current
+    applyTranslate(currentX.current)
+  }
+
+  const handleTouchEnd = () => {
+    if (!rowRef.current) return
+    rowRef.current.style.transition = 'transform 0.25s ease, opacity 0.25s ease'
+
+    if (currentX.current < -SWIPE_THRESHOLD) {
+      // Swipe confirmed — slide out then dismiss
+      rowRef.current.style.transform = 'translateX(-100%)'
+      rowRef.current.style.opacity   = '0'
+      setDismissed(true)
+      setTimeout(onDismiss, 240)
+    } else {
+      // Snap back
+      applyTranslate(0)
+      rowRef.current.style.opacity = '1'
+    }
+  }
+
+  if (dismissed) return null
+
+  return (
+    <div
+      ref={rowRef}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      style={{ transition: 'transform 0.25s ease, opacity 0.25s ease', willChange: 'transform' }}
+    >
+      {children}
+    </div>
+  )
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function NotificationBell() {
@@ -131,6 +191,12 @@ export default function NotificationBell() {
     await supabase.from('notifications').update({ read: true }).eq('id', id)
   }
 
+  // ── Dismiss (swipe away) ────────────────────────────────────────────────────
+  const dismiss = async (id: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== id))
+    await supabase.from('notifications').update({ dismissed: true }).eq('id', id)
+  }
+
   // ── Mark all as read ────────────────────────────────────────────────────────
   const markAllRead = async () => {
     const unreadIds = notifications.filter((n) => !n.read).map((n) => n.id)
@@ -155,14 +221,28 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown */}
+      {/* Mobile backdrop */}
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-80 rounded-xl border border-white/10 bg-[#1C1E26] shadow-2xl z-50 overflow-hidden animate-slide-up">
+        <div
+          className="fixed inset-0 z-40 sm:hidden bg-black/50"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* Panel — top sheet on mobile, dropdown on desktop */}
+      {open && (
+        <div className={[
+          'z-50 overflow-hidden border border-white/10 bg-[#1C1E26] shadow-2xl',
+          // Mobile: fixed full-width panel from top
+          'fixed top-16 left-2 right-2 rounded-2xl sm:rounded-xl',
+          // Desktop: absolute dropdown
+          'sm:absolute sm:top-full sm:left-auto sm:right-0 sm:mt-2 sm:w-80',
+        ].join(' ')}>
 
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <h3 className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>
                 Notifications
               </h3>
               {unreadCount > 0 && (
@@ -191,7 +271,7 @@ export default function NotificationBell() {
           </div>
 
           {/* List */}
-          <div className="max-h-96 overflow-y-auto divide-y divide-white/5">
+          <div className="max-h-[60vh] sm:max-h-96 overflow-y-auto divide-y divide-white/5">
             {loading ? (
               <div className="px-4 py-8 text-center">
                 <div className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin mx-auto mb-2" />
@@ -207,10 +287,10 @@ export default function NotificationBell() {
               notifications.map((n) => {
                 const config = TYPE_CONFIG[n.type]
                 return (
+                  <SwipeableRow key={n.id} onDismiss={() => dismiss(n.id)}>
                   <div
-                    key={n.id}
                     onClick={() => !n.read && markRead(n.id)}
-                    className={`flex items-start gap-3 px-4 py-3 transition-colors cursor-pointer group ${
+                    className={`flex items-start gap-3 px-4 py-3.5 transition-colors cursor-pointer group ${
                       n.read ? 'opacity-60 hover:opacity-80' : 'hover:bg-white/4'
                     }`}
                   >
@@ -244,6 +324,7 @@ export default function NotificationBell() {
                       </button>
                     )}
                   </div>
+                  </SwipeableRow>
                 )
               })
             )}

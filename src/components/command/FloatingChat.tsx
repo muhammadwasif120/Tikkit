@@ -10,6 +10,7 @@ import {
   Globe, Lock, Calendar, Users,
 } from 'lucide-react'
 import type { ChatMessage } from '@/types/verification'
+import { isLive as eventIsLive } from '@/lib/eventStatus'
 
 type EventRow = { id: string; title: string; date_start: string; status: string; cover_image_url: string | null; _count: number }
 type ReplyTo  = { userId: string; name: string }
@@ -114,7 +115,7 @@ export default function FloatingChat() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
 
-  const liveCount = events.filter(e => e.status === 'published').length
+  const liveCount = events.filter(e => eventIsLive(e)).length
 
   return (
     <>
@@ -178,7 +179,7 @@ export default function FloatingChat() {
                   <p style={{ color: '#374151', fontSize: 13, margin: 0, textAlign: 'center' }}>No published events yet</p>
                 </div>
               ) : events.map(ev => {
-                const isLive = ev.status === 'published'
+                const isLive = eventIsLive(ev)
                 return (
                   <button key={ev.id} onClick={() => handleSelectEvent(ev)} style={{
                     width: '100%', background: 'none', border: 'none', cursor: 'pointer',

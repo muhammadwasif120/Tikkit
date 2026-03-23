@@ -4,15 +4,21 @@ import { CalendarDays, Users, ClipboardList, Receipt, ScanLine, Building2, Layou
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import DashboardLoader from '@/components/layout/DashboardLoader'
+import { sortEvents } from '@/lib/sortEvents'
+import { syncEventStatuses } from '@/app/actions/eventStatusSync'
+import { getEffectiveStatus } from '@/lib/eventStatus'
 
 async function DashboardData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   // Fetch event IDs first (needed for guest + registration queries)
+  // Sync event statuses before reading (fire-and-forget)
+  syncEventStatuses().catch(() => {})
+
   const { data: eventRows } = await supabase
     .from('events')
-    .select('id, title, status, date_start, capacity')
+    .select('id, title, status, date_start, date_end, capacity')
     .eq('organizer_id', user!.id)
   const events = eventRows ?? []
   const eventIds = events.map(e => e.id)
@@ -49,12 +55,9 @@ async function DashboardData() {
   const pendingApprovals = (pendingApprovalsRes as { count: number | null }).count ?? 0
   const pendingInvoices  = (pendingInvoicesRes  as { count: number | null }).count ?? 0
 
-  const publishedEvents = events.filter(e => e.status === 'published').length
+  const publishedEvents = events.filter(e => getEffectiveStatus(e) === 'published').length
   const checkedIn = guests.filter(g => g.status === 'checked_in').length
-  const upcomingEvents = events
-    .filter(e => e.status === 'published' && new Date(e.date_start) > new Date())
-    .sort((a, b) => new Date(a.date_start).getTime() - new Date(b.date_start).getTime())
-    .slice(0, 5)
+  const upcomingEvents = sortEvents(events).slice(0, 5)
 
   const stats = [
     {

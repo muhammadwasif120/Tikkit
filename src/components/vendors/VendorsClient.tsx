@@ -230,11 +230,25 @@ export default function VendorsClient({
   return (
     <div className="space-y-6 max-w-5xl">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-400 text-sm">{vendors.length} vendors · {invoices.length} invoices</p>
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div style={{
+            width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+            background: 'rgba(30,94,255,0.12)', border: '1px solid rgba(30,94,255,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Building2 size={22} color="#1E5EFF" />
+          </div>
+          <div>
+            <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+              Vendors
+            </h1>
+            <p className="text-gray-400 text-sm" style={{ margin: 0, lineHeight: 1.6 }}>
+              {vendors.length} vendors<br />{invoices.length} invoices
+            </p>
+          </div>
         </div>
-        <button onClick={() => activeTab === 'vendors' ? openVendorModal() : openInvoiceModal()} className="btn-primary">
+        <button onClick={() => activeTab === 'vendors' ? openVendorModal() : openInvoiceModal()} className="btn-primary" style={{ flexShrink: 0 }}>
           <Plus className="w-4 h-4" />
           {activeTab === 'vendors' ? 'Add Vendor' : 'New Invoice'}
         </button>
