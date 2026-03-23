@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { User, Edit3, Star, Zap, TrendingUp, TrendingDown, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown, ShieldCheck } from 'lucide-react'
-import { updateGuestProfile, signOut, sendPasswordReset } from '@/app/actions/guestProfileActions'
+import { User, Edit3, Star, Zap, TrendingUp, TrendingDown, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown, ShieldCheck, Ticket, Trash2, Camera } from 'lucide-react'
+import { updateGuestProfile, signOut, sendPasswordReset, uploadProfilePhoto, deleteAccount, updateNotificationPrefs } from '@/app/actions/guestProfileActions'
 import { getCreditTier } from '@/lib/creditUtils'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
@@ -222,9 +222,22 @@ function getCyberAvatar(id: string) {
 }
 
 /* ─── Avatar Picker ──────────────────────────────────────────────── */
-function AvatarPicker({ current, onSelect, onClose }: {
-  current: string | null; onSelect: (id: string) => void; onClose: () => void
+function AvatarPicker({ current, onSelect, onClose, onPhotoUpload }: {
+  current: string | null
+  onSelect: (id: string) => void
+  onClose: () => void
+  onPhotoUpload: (file: File) => Promise<void>
 }) {
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try { await onPhotoUpload(file) } finally { setUploading(false) }
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }} />
@@ -233,14 +246,35 @@ function AvatarPicker({ current, onSelect, onClose }: {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <div>
             <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Choose Avatar</h3>
-            <p style={{ color: '#4B5563', fontSize: 12, margin: '4px 0 0' }}>Cyberpunk-themed — pick your identity</p>
+            <p style={{ color: '#4B5563', fontSize: 12, margin: '4px 0 0' }}>Upload a photo or pick a cyberpunk identity</p>
           </div>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#9CA3AF' }}>
             <X size={16} />
           </button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginTop: 16 }}>
+        {/* Photo upload button */}
+        <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileChange} />
+        <button
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          style={{
+            width: '100%', padding: '11px', marginBottom: 16, borderRadius: 14,
+            background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.2)',
+            color: uploading ? '#4B5563' : '#60A5FA', fontSize: 14, fontWeight: 600,
+            cursor: uploading ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}
+        >
+          {uploading
+            ? <><div style={{ width: 14, height: 14, border: '2px solid #4B5563', borderTopColor: '#60A5FA', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Uploading…</>
+            : <><Camera size={16} /> Upload Photo from Gallery</>
+          }
+        </button>
+
+        <p style={{ color: '#4B5563', fontSize: 11, margin: '0 0 12px', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.4px' }}>— or choose a persona —</p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
           {CYBER_AVATARS.map(avatar => {
             const selected = current === avatar.id
             return (
@@ -344,6 +378,7 @@ function EditSheet({ profile, email, onClose, onSave }: {
   profile: Profile; email: string; onClose: () => void; onSave: (p: Partial<Profile>) => void
 }) {
   const [full_name, setName]             = useState(profile.full_name ?? '')
+  const [phone, setPhone]               = useState(profile.phone ?? '')
   const [username, setUsername]          = useState(profile.username ?? '')
   const [instagram_handle, setInstagram] = useState(profile.instagram_handle ?? '')
   const [bio, setBio]                    = useState(profile.bio ?? '')
@@ -384,13 +419,14 @@ function EditSheet({ profile, email, onClose, onSave }: {
     try {
       const fd = new FormData()
       fd.append('full_name', full_name)
+      fd.append('phone', phone)
       fd.append('username', username)
       fd.append('instagram_handle', instagram_handle)
       fd.append('bio', bio)
       fd.append('is_discoverable', String(is_discoverable))
       const res = await updateGuestProfile(fd)
       if (res?.error) { setErr(res.error); return }
-      onSave({ full_name, username, instagram_handle, bio, is_discoverable })
+      onSave({ full_name, phone, username, instagram_handle, bio, is_discoverable })
       onClose()
     } catch { setErr('Failed to save. Try again.') }
     finally { setBusy(false) }
@@ -410,22 +446,59 @@ function EditSheet({ profile, email, onClose, onSave }: {
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
         </div>
 
-        {/* Locked identity fields */}
-        <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, marginBottom: 16 }}>
-          <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5 }}>
-            <Lock size={11} /> Identity — locked until OTP verified
-          </p>
-          {[
-            { label: 'Full Name', value: full_name || '—' },
-            { label: 'Email', value: email || '—' },
-            { label: 'Phone', value: profile.phone || '—' },
-          ].map(f => (
-            <div key={f.label} style={{ marginBottom: 8 }}>
-              <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{f.label}</p>
-              <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{f.value}</p>
+        {/* Identity fields — editable if not yet verified, locked once verified */}
+        {profile.is_id_verified ? (
+          <div style={{ padding: '12px 14px', background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 14, marginBottom: 16 }}>
+            <p style={{ color: '#22C55E', fontSize: 10, fontWeight: 700, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <ShieldCheck size={11} /> Identity Verified — details are locked
+            </p>
+            {[
+              { label: 'Full Name', value: profile.full_name || '—' },
+              { label: 'Email',     value: email || '—' },
+              { label: 'Phone',     value: profile.phone || '—' },
+            ].map(f => (
+              <div key={f.label} style={{ marginBottom: 8 }}>
+                <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>{f.label}</p>
+                <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0 }}>{f.value}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 10 }}>
+              <Lock size={11} color="#FFC745" />
+              <p style={{ color: '#FFC745', fontSize: 10, fontWeight: 700, margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Identity — complete Verification to lock these in
+              </p>
             </div>
-          ))}
-        </div>
+            {/* Editable name */}
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ color: '#6B7280', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>Full Name</label>
+              <input
+                value={full_name}
+                onChange={e => setName(e.target.value)}
+                placeholder="Your full name"
+                style={inputStyle}
+              />
+            </div>
+            {/* Editable phone */}
+            <div style={{ marginBottom: 10 }}>
+              <label style={{ color: '#6B7280', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>Phone</label>
+              <input
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                placeholder="+1 234 567 8900"
+                style={inputStyle}
+              />
+            </div>
+            {/* Email always locked */}
+            <div>
+              <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Email</p>
+              <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{email || '—'}</p>
+              <p style={{ color: '#374151', fontSize: 10, margin: '2px 0 0' }}>Email is managed by your account provider</p>
+            </div>
+          </div>
+        )}
 
         {/* Username with live check */}
         <div style={{ marginBottom: 14 }}>
@@ -450,7 +523,7 @@ function EditSheet({ profile, email, onClose, onSave }: {
             <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#4B5563', fontSize: 14, pointerEvents: 'none' }}>@</span>
             <input value={instagram_handle} onChange={e => setInstagram(e.target.value.replace('@',''))} placeholder="yourhandle" style={{ ...inputStyle, paddingLeft: 26 }} />
           </div>
-          <p style={{ color: '#4B5563', fontSize: 11, margin: '4px 0 0' }}>Optional — helps organizers know you. Full OAuth connect coming soon.</p>
+          <p style={{ color: '#4B5563', fontSize: 11, margin: '4px 0 0' }}>Optional — helps organizers find and recognise you.</p>
         </div>
 
         {/* Bio */}
@@ -668,7 +741,16 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
   const [showTx, setShowTx] = useState(false)
   const [showVerify, setShowVerify] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showNotifPrefs, setShowNotifPrefs] = useState(false)
+  const [deleteBusy, setDeleteBusy] = useState(false)
   const [avatarSaving, setAvatarSaving] = useState(false)
+  const [notifPrefs, setNotifPrefs] = useState({
+    registration_updates: true,
+    payment_reminders: true,
+    event_reminders: true,
+  })
+  const [notifSaving, setNotifSaving] = useState(false)
   const tier = getCreditTier(profile.credit_score)
   const supabase = createClient()
 
@@ -680,17 +762,26 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
   }
 
   const stats: { label: string; value: number; color: string; icon: React.ReactNode }[] = [
-    { label: 'Attended',  value: profile.total_attended,     color: '#10B981', icon: null },
-    { label: 'Streak',    value: profile.attendance_streak,  color: '#FFC745', icon: <Flame size={14} color="#FFC745" /> },
-    { label: 'No-shows',  value: profile.total_no_shows,     color: '#EF4444', icon: null },
+    { label: 'Attended',  value: profile.total_attended,    color: '#10B981', icon: null },
+    { label: 'Streak',    value: profile.attendance_streak, color: '#FFC745', icon: <Flame size={14} color="#FFC745" /> },
+    { label: 'No-shows',  value: profile.total_no_shows,    color: '#EF4444', icon: null },
+    { label: 'Score',     value: profile.social_score,      color: '#A855F7', icon: <Star size={14} color="#A855F7" /> },
   ]
 
   const handleAvatarSelect = async (avatarId: string) => {
     setAvatarSaving(true)
     const { error } = await supabase.from('profiles').update({ avatar_url: avatarId }).eq('id', profile.id)
-    if (!error) {
-      setProfile(p => ({ ...p, avatar_url: avatarId }))
-    }
+    if (!error) setProfile(p => ({ ...p, avatar_url: avatarId }))
+    setAvatarSaving(false)
+    setShowAvatarPicker(false)
+  }
+
+  const handlePhotoUpload = async (file: File) => {
+    setAvatarSaving(true)
+    const fd = new FormData()
+    fd.append('photo', file)
+    const res = await uploadProfilePhoto(fd)
+    if (res?.url) setProfile(p => ({ ...p, avatar_url: res.url! }))
     setAvatarSaving(false)
     setShowAvatarPicker(false)
   }
@@ -746,7 +837,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
           {stats.map(stat => (
             <div key={stat.label} style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '14px 10px', textAlign: 'center' }}>
               <p style={{ color: stat.color, fontSize: 24, fontWeight: 900, margin: '0 0 2px', fontFamily: 'var(--font-body)', fontVariantNumeric: 'tabular-nums', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
@@ -797,19 +888,71 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
         )}
 
         {/* Menu */}
-        <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, overflow: 'hidden', marginBottom: 24 }}>
-          {[
-            { icon: <Bell size={16} />, label: 'Notifications', href: '/guest/notifications' },
-            profile.instagram_handle
-              ? { icon: <Instagram size={16} />, label: `@${profile.instagram_handle}`, href: `https://instagram.com/${profile.instagram_handle}` }
-              : { icon: <Instagram size={16} />, label: 'Connect Instagram', href: '#', onClick: () => setShowEdit(true) },
-          ].map((item, i) => (
-            <a key={i} href={(item as any).href} onClick={(item as any).onClick} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', textDecoration: 'none', color: '#9CA3AF' }}>
-              <span style={{ color: '#4B5563' }}>{item.icon}</span>
-              <span style={{ flex: 1, fontSize: 14, color: '#D1D5DB' }}>{item.label}</span>
-              <ChevronRight size={14} />
+        <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, overflow: 'hidden', marginBottom: 12 }}>
+
+          {/* My Passes */}
+          <a href="/guest/passes" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', textDecoration: 'none' }}>
+            <span style={{ color: '#4B5563' }}><Ticket size={16} /></span>
+            <span style={{ flex: 1, fontSize: 14, color: '#D1D5DB' }}>My Passes</span>
+            <ChevronRight size={14} color="#4B5563" />
+          </a>
+
+          {/* Notification preferences — expandable */}
+          <button
+            onClick={() => setShowNotifPrefs(v => !v)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+          >
+            <span style={{ color: '#4B5563' }}><Bell size={16} /></span>
+            <span style={{ flex: 1, textAlign: 'left', fontSize: 14, color: '#D1D5DB' }}>Notifications</span>
+            <ChevronDown size={14} color="#4B5563" style={{ transform: showNotifPrefs ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+          </button>
+          {showNotifPrefs && (
+            <div style={{ padding: '4px 16px 14px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              {([
+                { key: 'registration_updates', label: 'Registration updates' },
+                { key: 'payment_reminders',    label: 'Payment reminders'    },
+                { key: 'event_reminders',      label: 'Event reminders'      },
+              ] as const).map(({ key, label }) => (
+                <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                  <span style={{ color: '#9CA3AF', fontSize: 13 }}>{label}</span>
+                  <button
+                    onClick={async () => {
+                      const updated = { ...notifPrefs, [key]: !notifPrefs[key] }
+                      setNotifPrefs(updated)
+                      setNotifSaving(true)
+                      await updateNotificationPrefs(updated)
+                      setNotifSaving(false)
+                    }}
+                    style={{
+                      width: 40, height: 22, borderRadius: 11, border: 'none',
+                      background: notifPrefs[key] ? '#1E5EFF' : 'rgba(255,255,255,0.1)',
+                      cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0,
+                    }}
+                  >
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'white', position: 'absolute', top: 3, left: notifPrefs[key] ? 21 : 3, transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)' }} />
+                  </button>
+                </div>
+              ))}
+              {notifSaving && <p style={{ color: '#4B5563', fontSize: 10, margin: '6px 0 0', textAlign: 'right' }}>Saving…</p>}
+            </div>
+          )}
+
+          {/* Instagram */}
+          {profile.instagram_handle ? (
+            <a href={`https://instagram.com/${profile.instagram_handle}`} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', textDecoration: 'none' }}>
+              <span style={{ color: '#4B5563' }}><Instagram size={16} /></span>
+              <span style={{ flex: 1, fontSize: 14, color: '#D1D5DB' }}>@{profile.instagram_handle}</span>
+              <ChevronRight size={14} color="#4B5563" />
             </a>
-          ))}
+          ) : (
+            <button onClick={() => setShowEdit(true)} style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <span style={{ color: '#4B5563' }}><Instagram size={16} /></span>
+              <span style={{ flex: 1, textAlign: 'left', fontSize: 14, color: '#D1D5DB' }}>Connect Instagram</span>
+              <ChevronRight size={14} color="#4B5563" />
+            </button>
+          )}
+
+          {/* Verification */}
           <button
             onClick={() => setShowVerify(true)}
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
@@ -818,11 +961,13 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
               <ShieldCheck size={16} />
             </span>
             <span style={{ flex: 1, textAlign: 'left', fontSize: 14, color: '#D1D5DB' }}>Verification</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: profile.is_id_verified && profile.is_payment_verified ? '#22C55E' : '#4B5563', marginRight: 4 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: profile.is_id_verified && profile.is_payment_verified ? '#22C55E' : '#FFC745', marginRight: 4 }}>
               {profile.is_id_verified && profile.is_payment_verified ? 'Verified ✓' : 'Not verified'}
             </span>
             <ChevronRight size={14} color="#4B5563" />
           </button>
+
+          {/* Sign out */}
           <button
             onClick={() => signOut()}
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', color: '#EF4444', fontSize: 14 }}
@@ -831,6 +976,15 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
             <span style={{ flex: 1, textAlign: 'left' }}>Sign Out</span>
           </button>
         </div>
+
+        {/* Delete account */}
+        <button
+          onClick={() => setShowDeleteConfirm(true)}
+          style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px', background: 'none', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 14, cursor: 'pointer', fontFamily: 'var(--font-body)', color: '#6B7280', fontSize: 13, marginBottom: 32 }}
+        >
+          <Trash2 size={14} />
+          Delete Account
+        </button>
       </div>
 
       {showAvatarPicker && (
@@ -838,6 +992,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
           current={profile.avatar_url}
           onSelect={handleAvatarSelect}
           onClose={() => setShowAvatarPicker(false)}
+          onPhotoUpload={handlePhotoUpload}
         />
       )}
 
@@ -848,6 +1003,41 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
           onClose={() => setShowEdit(false)}
           onSave={updates => setProfile(p => ({ ...p, ...updates }))}
         />
+      )}
+
+      {showDeleteConfirm && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 20px' }}>
+          <div style={{ background: '#13151E', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 24, padding: '28px 24px', width: '100%', maxWidth: 400, textAlign: 'center' }}>
+            <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Trash2 size={22} color="#EF4444" />
+            </div>
+            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>Delete Account?</h3>
+            <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 20px', lineHeight: 1.5 }}>
+              Your personal details will be removed and you'll be signed out. Event history is retained anonymously. This cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                style={{ flex: 1, padding: '12px', borderRadius: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#9CA3AF', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
+              >
+                Cancel
+              </button>
+              <button
+                disabled={deleteBusy}
+                onClick={async () => {
+                  setDeleteBusy(true)
+                  await deleteAccount()
+                }}
+                style={{ flex: 1, padding: '12px', borderRadius: 14, background: deleteBusy ? 'rgba(239,68,68,0.2)' : '#EF4444', border: 'none', color: 'white', fontSize: 14, fontWeight: 700, cursor: deleteBusy ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+              >
+                {deleteBusy
+                  ? <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Deleting…</>
+                  : 'Delete Account'
+                }
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {showVerify && (

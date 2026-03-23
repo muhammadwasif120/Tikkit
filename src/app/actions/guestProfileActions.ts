@@ -129,9 +129,12 @@ export async function updateGuestProfile(formData: FormData) {
     return { error: 'Could not update profile' }
   }
 
-  // Also sync full_name to base profiles table
-  if (full_name) {
-    await supabase.from('profiles').update({ full_name }).eq('id', user.id)
+  // Sync editable identity fields to base profiles table
+  const profileUpdate: Record<string, string> = {}
+  if (full_name) profileUpdate.full_name = full_name
+  if (phone)     profileUpdate.phone_number = phone
+  if (Object.keys(profileUpdate).length > 0) {
+    await supabase.from('profiles').update(profileUpdate).eq('id', user.id)
   }
 
   _revalidatePath('/guest/profile')
@@ -153,5 +156,73 @@ export async function sendPasswordReset() {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`,
   })
   if (error) return { error: error.message }
+  return { success: true }
+}
+
+export async function uploadProfilePhoto(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const file = formData.get('photo') as File
+  if (!file || file.size === 0) return { error: 'No file provided' }
+  if (file.size > 5 * 1024 * 1024) return { error: 'Max file size is 5MB' }
+  if (!file.type.startsWith('image/')) return { error: 'Must be an image file' }
+
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+  const path = `avatars/${user.id}.${ext}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('tikkit-uploads')
+    .upload(path, file, { upsert: true, contentType: file.type })
+
+  if (uploadError) return { error: 'Upload failed. Please try again.' }
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('tikkit-uploads')
+    .getPublicUrl(path)
+
+  await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id)
+
+  _revalidatePath('/guest/profile')
+  return { success: true, url: publicUrl }
+}
+
+export async function deleteAccount() {
+  const supabase = await _createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  // Soft-delete: wipe personal data, keep anonymised records intact
+  await supabase.from('profiles').update({
+    full_name: null,
+    phone_number: null,
+    avatar_url: null,
+  }).eq('id', user.id)
+
+  await (supabase as any).from('guest_profiles').upsert({
+    id: user.id,
+    username: null,
+    bio: null,
+    instagram_handle: null,
+    is_discoverable: false,
+    updated_at: new Date().toISOString(),
+  })
+
+  await supabase.auth.signOut()
+  _redirect('/auth/login')
+}
+
+export async function updateNotificationPrefs(prefs: Record<string, boolean>) {
+  const supabase = await _createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  await (supabase as any).from('guest_profiles').upsert({
+    id: user.id,
+    notification_prefs: prefs,
+    updated_at: new Date().toISOString(),
+  })
+
   return { success: true }
 }
