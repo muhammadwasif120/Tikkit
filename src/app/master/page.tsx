@@ -14,8 +14,9 @@ import {
   getMasterOrganizers, getMasterEvents, setOrgAdminStatus,
   getMasterOrgProfile, getMasterOrgEvents, getMasterEventGuests,
   getMasterAnalytics, getWaitlistEntries,
+  getSupportQueries, updateSupportQueryStatus,
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
-  type PlatformAnalytics, type WaitlistEntry,
+  type PlatformAnalytics, type WaitlistEntry, type SupportQuery,
 } from '@/app/actions/masterActions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -23,20 +24,9 @@ import {
 type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'analytics' | 'waitlist'
 type OrgStatus = 'active' | 'review' | 'suspended'
 type EventStatus = 'live' | 'draft' | 'flagged' | 'suspended' | 'ended'
-type QueryStatus = 'open' | 'in_progress' | 'resolved'
-type QueryPriority = 'high' | 'medium' | 'low'
 
 type Org = MasterOrg
 type Evt = MasterEvt & { status: EventStatus }
-interface Query { id: string; from: string; fromType: 'organizer' | 'attendee'; subject: string; status: QueryStatus; priority: QueryPriority; date: string }
-
-const MOCK_QUERIES: Query[] = [
-  { id: 'Q-001', from: 'Nightlife Karachi',          fromType: 'organizer', subject: 'Event suspension appeal — Underground Rave', status: 'open',        priority: 'high',   date: '2026-03-17' },
-  { id: 'Q-002', from: 'Aisha Malik (@aisha.malik)', fromType: 'attendee',  subject: 'Refund request — BeatDrop Vol. 3',          status: 'open',        priority: 'high',   date: '2026-03-16' },
-  { id: 'Q-003', from: 'Omar Productions',           fromType: 'organizer', subject: 'Payout delay — February events',            status: 'in_progress', priority: 'medium', date: '2026-03-14' },
-  { id: 'Q-004', from: 'Ali Raza (@ali.raza)',        fromType: 'attendee',  subject: 'QR code not scanning at door',              status: 'resolved',    priority: 'low',    date: '2026-03-10' },
-  { id: 'Q-005', from: 'Dusk Experiences',            fromType: 'organizer', subject: 'Account verification request',              status: 'in_progress', priority: 'medium', date: '2026-03-09' },
-]
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -847,9 +837,10 @@ export default function MasterPage() {
   const [openEvtMenu, setOpenEvtMenu] = useState<string | null>(null)
   const [evtMenuPos, setEvtMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 })
 
-  // Queries state
-  const [queryStatuses, setQueryStatuses] = useState<Record<string, QueryStatus>>({})
-  const [queryFilter, setQueryFilter] = useState<'all' | QueryStatus>('all')
+  // Queries state — real DB data
+  const [queries, setQueries] = useState<SupportQuery[]>([])
+  const [queriesLoading, setQueriesLoading] = useState(false)
+  const [queryFilter, setQueryFilter] = useState<'all' | SupportQuery['status']>('all')
 
   // Waitlist state
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([])
@@ -864,6 +855,13 @@ export default function MasterPage() {
     getWaitlistEntries().then(setWaitlist).finally(() => setWaitlistLoading(false))
   }, [tab, waitlist.length])
 
+  useEffect(() => {
+    if (tab !== 'queries') return
+    if (queries.length > 0) return // already loaded
+    setQueriesLoading(true)
+    getSupportQueries().then(setQueries).finally(() => setQueriesLoading(false))
+  }, [tab, queries.length])
+
   // Derived
   const liveOrgs = orgs.filter(o => !removedOrgs.has(o.id))
   const getOrgStatus = (o: Org): OrgStatus => orgStatuses[o.id] ?? o.status
@@ -873,7 +871,11 @@ export default function MasterPage() {
     setOrgAdminStatus(id, s) // persist to DB — fire and forget
   }
   const getEvtStatus = (e: Evt): EventStatus => eventStatuses[e.id] ?? e.status
-  const getQStatus = (q: Query): QueryStatus => queryStatuses[q.id] ?? q.status
+
+  const setQueryStatus = (id: string, s: SupportQuery['status']) => {
+    setQueries(prev => prev.map(q => q.id === id ? { ...q, status: s } : q))
+    updateSupportQueryStatus(id, s) // persist to DB — fire and forget
+  }
 
   const filteredOrgs = liveOrgs
     .filter(o => orgFilter === 'all' || getOrgStatus(o) === orgFilter)
@@ -883,10 +885,10 @@ export default function MasterPage() {
     .filter(e => eventFilter === 'all' || getEvtStatus(e) === eventFilter)
     .filter(e => !eventSearch || e.title.toLowerCase().includes(eventSearch.toLowerCase()) || e.org.toLowerCase().includes(eventSearch.toLowerCase()))
 
-  const filteredQueries = MOCK_QUERIES
-    .filter(q => queryFilter === 'all' || getQStatus(q) === queryFilter)
+  const filteredQueries = queries
+    .filter(q => queryFilter === 'all' || q.status === queryFilter)
 
-  const openQCount = MOCK_QUERIES.filter(q => getQStatus(q) === 'open').length
+  const openQCount = queries.filter(q => q.status === 'open').length
   const reviewOrgCount = liveOrgs.filter(o => getOrgStatus(o) === 'review').length
   const flaggedEvtCount = events.filter(e => getEvtStatus(e) === 'flagged').length
   const liveEvtCount = events.filter(e => getEvtStatus(e) === 'live').length
@@ -1273,23 +1275,23 @@ export default function MasterPage() {
                       </button>
                     </div>
                     <div>
-                      {MOCK_QUERIES.map(q => {
-                        const qs = getQStatus(q)
-                        return (
-                          <div key={q.id} className="ms-activity-row">
-                            <div style={{ width: 7, height: 7, borderRadius: '50%', background: PC[q.priority], marginTop: 5, flexShrink: 0 }} />
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                              <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', fontFamily: 'var(--font-body)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
-                              <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 2, display: 'flex', gap: 8, alignItems: 'center' }}>
-                                <span>{q.from}</span>
-                                <span>·</span>
-                                <span>{fmtDate(q.date)}</span>
-                              </div>
+                      {queries.length === 0 && (
+                        <div style={{ padding: '20px 0', textAlign: 'center', color: '#4B5563', fontSize: 'var(--fs-sm)' }}>No queries yet</div>
+                      )}
+                      {queries.slice(0, 5).map(q => (
+                        <div key={q.id} className="ms-activity-row">
+                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: PC[q.priority], marginTop: 5, flexShrink: 0 }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', fontFamily: 'var(--font-body)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
+                            <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 2, display: 'flex', gap: 8, alignItems: 'center' }}>
+                              <span>{q.from_name}</span>
+                              <span>·</span>
+                              <span>{fmtDate(q.created_at)}</span>
                             </div>
-                            <SBadge status={qs} />
                           </div>
-                        )
-                      })}
+                          <SBadge status={q.status} />
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -1667,9 +1669,9 @@ export default function MasterPage() {
                 {/* Stats row */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
                   {[
-                    { label: 'Open',        count: MOCK_QUERIES.filter(q => getQStatus(q) === 'open').length,        color: '#EF4444' },
-                    { label: 'In Progress', count: MOCK_QUERIES.filter(q => getQStatus(q) === 'in_progress').length, color: '#F59E0B' },
-                    { label: 'Resolved',    count: MOCK_QUERIES.filter(q => getQStatus(q) === 'resolved').length,    color: '#22C55E' },
+                    { label: 'Open',        count: queries.filter(q => q.status === 'open').length,        color: '#EF4444' },
+                    { label: 'In Progress', count: queries.filter(q => q.status === 'in_progress').length, color: '#F59E0B' },
+                    { label: 'Resolved',    count: queries.filter(q => q.status === 'resolved').length,    color: '#22C55E' },
                   ].map(s => (
                     <div key={s.label} style={{ background: '#0D0F18', border: `1px solid ${s.color}22`, borderRadius: 12, padding: '16px 18px' }}>
                       <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-2xl)', fontWeight: 800, color: s.color, letterSpacing: '-1px' }}>{s.count}</div>
@@ -1704,51 +1706,50 @@ export default function MasterPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {filteredQueries.length === 0 && (
+                        {queriesLoading && (
+                          <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#4B5563' }}>Loading…</td></tr>
+                        )}
+                        {!queriesLoading && filteredQueries.length === 0 && (
                           <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No queries found</td></tr>
                         )}
-                        {filteredQueries.map(q => {
-                          const qs = getQStatus(q)
-                          return (
-                            <tr key={q.id}>
-                              <td style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--fs-sm)', color: '#4B5563', whiteSpace: 'nowrap' }}>{q.id}</td>
-                              <td>
-                                <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', whiteSpace: 'nowrap' }}>{q.from}</div>
-                                <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 1, textTransform: 'capitalize' }}>{q.fromType}</div>
-                              </td>
-                              <td style={{ maxWidth: 260 }}>
-                                <div style={{ fontSize: 'var(--fs-base)', color: '#F0F2FF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
-                              </td>
-                              <td className="ms-hide">
-                                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: PC[q.priority], background: `${PC[q.priority]}16`, border: `1px solid ${PC[q.priority]}30`, borderRadius: 999, padding: '2px 8px', textTransform: 'capitalize' }}>
-                                  {q.priority}
-                                </span>
-                              </td>
-                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>{fmtDate(q.date)}</td>
-                              <td><SBadge status={qs} /></td>
-                              <td>
-                                <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>
-                                  {qs === 'open' && (
-                                    <button title="Mark in progress" className="ms-ib amber" onClick={() => setQueryStatuses(s => ({...s,[q.id]:'in_progress'}))}><Clock size={11} /></button>
-                                  )}
-                                  {qs === 'in_progress' && (
-                                    <button title="Mark resolved" className="ms-ib green" onClick={() => setQueryStatuses(s => ({...s,[q.id]:'resolved'}))}><CheckCircle size={11} /></button>
-                                  )}
-                                  {qs === 'resolved' && (
-                                    <button title="Re-open" className="ms-ib amber" onClick={() => setQueryStatuses(s => ({...s,[q.id]:'open'}))}><RefreshCw size={11} /></button>
-                                  )}
-                                  {/* Contact the sender if they are an organizer */}
-                                  {q.fromType === 'organizer' && (() => {
-                                    const org = orgs.find((o: Org) => o.name === q.from)
-                                    return org ? (
-                                      <button title="Contact" className="ms-ib blue" onClick={() => setContactTarget(org)}><Mail size={11} /></button>
-                                    ) : null
-                                  })()}
-                                </div>
-                              </td>
-                            </tr>
-                          )
-                        })}
+                        {filteredQueries.map(q => (
+                          <tr key={q.id}>
+                            <td style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--fs-sm)', color: '#4B5563', whiteSpace: 'nowrap' }}>{q.id}</td>
+                            <td>
+                              <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', whiteSpace: 'nowrap' }}>{q.from_name}</div>
+                              <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 1, textTransform: 'capitalize' }}>{q.from_type}</div>
+                            </td>
+                            <td style={{ maxWidth: 260 }}>
+                              <div style={{ fontSize: 'var(--fs-base)', color: '#F0F2FF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
+                            </td>
+                            <td className="ms-hide">
+                              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: PC[q.priority], background: `${PC[q.priority]}16`, border: `1px solid ${PC[q.priority]}30`, borderRadius: 999, padding: '2px 8px', textTransform: 'capitalize' }}>
+                                {q.priority}
+                              </span>
+                            </td>
+                            <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>{fmtDate(q.created_at)}</td>
+                            <td><SBadge status={q.status} /></td>
+                            <td>
+                              <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>
+                                {q.status === 'open' && (
+                                  <button title="Mark in progress" className="ms-ib amber" onClick={() => setQueryStatus(q.id, 'in_progress')}><Clock size={11} /></button>
+                                )}
+                                {q.status === 'in_progress' && (
+                                  <button title="Mark resolved" className="ms-ib green" onClick={() => setQueryStatus(q.id, 'resolved')}><CheckCircle size={11} /></button>
+                                )}
+                                {q.status === 'resolved' && (
+                                  <button title="Re-open" className="ms-ib amber" onClick={() => setQueryStatus(q.id, 'open')}><RefreshCw size={11} /></button>
+                                )}
+                                {q.from_type === 'organizer' && (() => {
+                                  const org = orgs.find((o: Org) => o.id === q.from_id || o.name === q.from_name)
+                                  return org ? (
+                                    <button title="Contact" className="ms-ib blue" onClick={() => setContactTarget(org)}><Mail size={11} /></button>
+                                  ) : null
+                                })()}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
