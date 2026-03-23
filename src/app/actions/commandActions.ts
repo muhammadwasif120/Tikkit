@@ -292,7 +292,7 @@ export async function sendGuestMessage(eventId: string, message: string): Promis
     .select('id, status')
     .eq('event_id', eventId)
     .eq('email', user.email!)
-    .in('status', ['confirmed', 'checked_in', 'attended', 'registered', 'eoi_approved', 'payment_pending'])
+    .in('status', ['confirmed', 'checked_in', 'attended', 'registered', 'approved', 'eoi_submitted', 'eoi_approved', 'payment_pending', 'pending'])
     .single()
 
   if (!reg) return { error: 'You are not registered for this event' }
@@ -373,4 +373,90 @@ export async function getGuestChatMessages(eventId: string): Promise<{
     messages,
     event: { id: ev.id, title: ev.title, organizer_name: organizerName },
   }
+}
+
+/**
+ * Fetch all event threads for the guest inbox.
+ * Returns one entry per registered event with the last visible message.
+ */
+export async function getGuestInbox(): Promise<{
+  eventId: string
+  eventTitle: string
+  coverImageUrl: string | null
+  dateStart: string | null
+  organizerName: string
+  lastMessage: { text: string; createdAt: string; role: string } | null
+  status: string
+}[]> {
+  const supabase = await createClient()
+  const admin = createAdminClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
+  // All registered events (by email)
+  const { data: regs } = await (supabase as any)
+    .from('public_registrations')
+    .select('id, event_id, status, event:events(id, title, cover_image_url, date_start, organizer_id)')
+    .eq('email', user.email!)
+    .not('status', 'eq', 'rejected')
+    .order('created_at', { ascending: false })
+
+  if (!regs?.length) return []
+
+  const eventIds: string[] = [...new Set((regs as any[]).map((r: any) => r.event_id).filter(Boolean))]
+
+  // Batch-fetch organizer names
+  const organizerIds = [...new Set((regs as any[]).map((r: any) => r.event?.organizer_id).filter(Boolean))]
+  const { data: orgProfiles } = await (admin as any)
+    .from('profiles')
+    .select('id, full_name, company_name')
+    .in('id', organizerIds)
+  const orgMap: Record<string, string> = {}
+  for (const p of orgProfiles ?? []) {
+    orgMap[p.id] = p.company_name ?? p.full_name ?? 'Organizer'
+  }
+
+  // Fetch last visible message per event in one query
+  const { data: allMsgs } = await (admin as any)
+    .from('event_chats')
+    .select('id, event_id, user_id, role, message, recipient_user_id, created_at')
+    .in('event_id', eventIds)
+    .order('created_at', { ascending: false })
+    .limit(500)
+
+  // Take last message per event_id that the guest can see
+  const lastMsgMap: Record<string, any> = {}
+  for (const msg of allMsgs ?? []) {
+    if (lastMsgMap[msg.event_id]) continue
+    const isOwn = msg.user_id === user.id
+    const isOrgBroadcast = msg.role === 'organizer' && !msg.recipient_user_id
+    const isPrivateToMe = msg.role === 'organizer' && msg.recipient_user_id === user.id
+    if (isOwn || isOrgBroadcast || isPrivateToMe) {
+      lastMsgMap[msg.event_id] = msg
+    }
+  }
+
+  // De-duplicate by event_id (keep first occurrence = most recent registration)
+  const seen = new Set<string>()
+  return (regs as any[])
+    .filter((r: any) => {
+      if (!r.event_id || seen.has(r.event_id)) return false
+      seen.add(r.event_id)
+      return true
+    })
+    .map((r: any) => {
+      const ev = r.event as any
+      const lastMsg = lastMsgMap[r.event_id] ?? null
+      return {
+        eventId: r.event_id,
+        eventTitle: ev?.title ?? 'Unknown Event',
+        coverImageUrl: ev?.cover_image_url ?? null,
+        dateStart: ev?.date_start ?? null,
+        organizerName: orgMap[ev?.organizer_id] ?? 'Organizer',
+        lastMessage: lastMsg
+          ? { text: lastMsg.message, createdAt: lastMsg.created_at, role: lastMsg.role }
+          : null,
+        status: r.status,
+      }
+    })
 }

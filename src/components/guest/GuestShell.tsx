@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Compass, User, Bell } from 'lucide-react'
+import { Compass, User, Bell, MessageSquare } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import AddToHomeScreen from '@/components/guest/AddToHomeScreen'
 
@@ -29,17 +29,19 @@ function TikkitXTabIcon({ active }: { active: boolean }) {
 }
 
 /* ── Tab definitions ─────────────────────────────────────────────── */
-type TabIcon = 'compass' | 'x' | 'user'
+type TabIcon = 'compass' | 'x' | 'messages' | 'user'
 const TABS: { href: string; label: string; icon: TabIcon }[] = [
-  { href: '/guest/explore', label: 'Explore',   icon: 'compass' },
-  { href: '/guest/tikkit',  label: 'My Tikkit', icon: 'x'       },
-  { href: '/guest/profile', label: 'Profile',   icon: 'user'    },
+  { href: '/guest/explore',   label: 'Explore',   icon: 'compass'   },
+  { href: '/guest/tikkit',    label: 'My Tikkit', icon: 'x'         },
+  { href: '/guest/messages',  label: 'Messages',  icon: 'messages'  },
+  { href: '/guest/profile',   label: 'Profile',   icon: 'user'      },
 ]
 
 function NavIcon({ type, active }: { type: TabIcon; active: boolean }) {
-  if (type === 'x')       return <TikkitXTabIcon active={active} />
-  if (type === 'compass') return <Compass size={20} color={active ? '#1E5EFF' : '#4B5563'} strokeWidth={active ? 2.2 : 1.8} />
-  return                         <User    size={20} color={active ? '#1E5EFF' : '#4B5563'} strokeWidth={active ? 2.2 : 1.8} />
+  if (type === 'x')        return <TikkitXTabIcon active={active} />
+  if (type === 'compass')  return <Compass      size={20} color={active ? '#1E5EFF' : '#4B5563'} strokeWidth={active ? 2.2 : 1.8} />
+  if (type === 'messages') return <MessageSquare size={20} color={active ? '#1E5EFF' : '#4B5563'} strokeWidth={active ? 2.2 : 1.8} />
+  return                          <User          size={20} color={active ? '#1E5EFF' : '#4B5563'} strokeWidth={active ? 2.2 : 1.8} />
 }
 
 /* ── Shell ───────────────────────────────────────────────────────── */
@@ -171,8 +173,8 @@ export default function GuestShell({
         </aside>
 
         {/* ── Main content ── */}
-        <main style={{ flex: 1, overflowY: 'auto', display: 'flex', justifyContent: 'center' }}>
-          <div style={{ width: '100%', maxWidth: 600, paddingTop: 24 }}>
+        <main style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ width: '100%', padding: '24px 32px 40px' }}>
             {children}
           </div>
         </main>

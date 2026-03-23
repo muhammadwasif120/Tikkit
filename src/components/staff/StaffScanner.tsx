@@ -201,6 +201,24 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
       return
     }
 
+    // Multi-day ticket: check today is a valid day
+    const ticketDays: string[] | null = (guest as any).ticket_days ?? null
+    if (ticketDays && ticketDays.length > 0) {
+      const todayStr = new Date().toISOString().slice(0, 10)
+      if (!ticketDays.includes(todayStr)) {
+        const fmtDay = (d: string) =>
+          new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })
+        setResult({
+          success: false,
+          message: `Not valid today — ticket is for: ${ticketDays.map(fmtDay).join(', ')}`,
+          guestName: guest.full_name,
+          isVip: guest.is_vip,
+        })
+        setTimeout(resetForNextScan, OVERLAY_DURATION)
+        return
+      }
+    }
+
     if (guest.status === 'checked_in') {
       setResult({
         success: false, message: 'Already checked in.',

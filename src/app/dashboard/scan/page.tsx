@@ -17,6 +17,7 @@ type ScanResult = {
   email?: string
   ticketType?: string
   checkedInAt?: string
+  validDays?: string[]
 }
 
 function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: () => void }) {
@@ -103,6 +104,18 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
                     </div>
                   )}
                 </div>
+                {result.validDays && result.validDays.length > 0 && (
+                  <div className="bg-white/5 rounded-lg px-3 py-2 mt-1">
+                    <p className="text-xs text-gray-500 mb-1">Ticket valid for</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {result.validDays.map(day => (
+                        <span key={day} className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-300 border border-blue-500/20">
+                          {new Date(day + 'T12:00:00').toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </>
           )}
@@ -199,6 +212,24 @@ export default function ScannerPage() {
       })
       setTimeout(resetForNextScan, OVERLAY_DURATION)
       return
+    }
+
+    // Multi-day ticket: check today is a valid day
+    const ticketDays: string[] | null = (guest as any).ticket_days ?? null
+    if (ticketDays && ticketDays.length > 0) {
+      const todayStr = new Date().toISOString().slice(0, 10)
+      if (!ticketDays.includes(todayStr)) {
+        setResult({
+          success: false,
+          message: 'Ticket not valid today.',
+          guestName: guest.full_name,
+          isVip: guest.is_vip,
+          email: guest.email,
+          validDays: ticketDays,
+        })
+        setTimeout(resetForNextScan, OVERLAY_DURATION)
+        return
+      }
     }
 
     if (currentScanType === 'entry' && guest.status === 'checked_in') {

@@ -281,8 +281,8 @@ export default function PassesClient({ passes, newPassIds = [] }: { passes: Pass
           ))}
         </div>
 
-        {/* 2-col grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        {/* Responsive grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
           {sorted.map((pass, i) => (
             <PassCard
               key={pass.id} pass={pass} index={i}

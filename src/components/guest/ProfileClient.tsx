@@ -788,7 +788,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
 
   return (
     <>
-      <div style={{ padding: '16px' }}>
+      <div style={{ padding: '16px', maxWidth: 640, margin: '0 auto' }}>
         {/* Avatar + name card */}
         <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 22, padding: '20px', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: profile.bio ? 14 : 0 }}>

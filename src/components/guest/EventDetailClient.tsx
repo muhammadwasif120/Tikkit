@@ -300,6 +300,21 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
   )
 }
 
+/* ─── Multi-day helper ───────────────────────────────────────────── */
+function getEventDays(dateStart: string, dateEnd: string | null): string[] {
+  const start = new Date(dateStart)
+  const end   = dateEnd ? new Date(dateEnd) : start
+  const startDay = new Date(start.getFullYear(), start.getMonth(), start.getDate())
+  const endDay   = new Date(end.getFullYear(),   end.getMonth(),   end.getDate())
+  const days: string[] = []
+  const cur = new Date(startDay)
+  while (cur <= endDay) {
+    days.push(cur.toISOString().slice(0, 10))
+    cur.setDate(cur.getDate() + 1)
+  }
+  return days
+}
+
 /* ─── Register Sheet ─────────────────────────────────────────────── */
 function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
   event: Event; onClose: () => void; onSuccess: (status: string) => void
@@ -311,8 +326,16 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
   const isPaid = (event.ticket_price ?? 0) > 0
   const account = event.payment_accounts?.[0]
 
+  const allDays = getEventDays(event.date_start, event.date_end)
+  const isMultiDay = allDays.length > 1
+  const [selectedDays, setSelectedDays] = useState<string[]>(isMultiDay ? [] : allDays)
+
+  const toggleDay = (day: string) =>
+    setSelectedDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day])
+
   const handleSubmit = async () => {
     if (!userProfile?.email) { setErr('Profile email missing. Please update your profile.'); return }
+    if (isMultiDay && selectedDays.length === 0) { setErr('Please select at least one day to attend.'); return }
     setBusy(true); setErr(null)
     try {
       const fd = new FormData()
@@ -321,6 +344,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
       fd.append('email', userProfile!.email)
       fd.append('phone', '')
       fd.append('note', note.trim())
+      if (isMultiDay) fd.append('ticket_days', JSON.stringify(selectedDays))
       const action = isEOI ? submitEOI : registerForEvent
       const res = await action(fd)
       if (res?.error) { setErr(res.error); return }
@@ -402,6 +426,51 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
               </div>
             )}
           </div>
+          {/* Day picker for multi-day events */}
+          {isMultiDay && (
+            <div>
+              <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Which day(s) will you attend?
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {allDays.map((day, i) => {
+                  const d = new Date(day + 'T12:00:00')
+                  const checked = selectedDays.includes(day)
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => toggleDay(day)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: 10,
+                        padding: '10px 13px', borderRadius: 12, cursor: 'pointer',
+                        background: checked ? 'rgba(30,94,255,0.1)' : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${checked ? 'rgba(30,94,255,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                        transition: 'all 0.15s', textAlign: 'left',
+                      }}
+                    >
+                      <div style={{
+                        width: 18, height: 18, borderRadius: 5, flexShrink: 0,
+                        background: checked ? '#1E5EFF' : 'transparent',
+                        border: `2px solid ${checked ? '#1E5EFF' : 'rgba(255,255,255,0.2)'}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        transition: 'all 0.15s',
+                      }}>
+                        {checked && <span style={{ color: 'white', fontSize: 11, fontWeight: 900, lineHeight: 1 }}>✓</span>}
+                      </div>
+                      <div>
+                        <span style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Day {i + 1}</span>
+                        <span style={{ color: checked ? 'white' : '#9CA3AF', fontSize: 13, fontWeight: 600 }}>
+                          {d.toLocaleDateString('en-PK', { weekday: 'long', day: 'numeric', month: 'long' })}
+                        </span>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           {isEOI && (
             <div>
               <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Why do you want to attend?</label>

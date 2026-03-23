@@ -8,12 +8,15 @@ export async function registerForEvent(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const eventId = formData.get('eventId') as string
-  const name    = formData.get('name')    as string
-  const email   = formData.get('email')   as string
-  const phone   = formData.get('phone')   as string
+  const eventId        = formData.get('eventId')     as string
+  const name           = formData.get('name')        as string
+  const email          = formData.get('email')       as string
+  const phone          = formData.get('phone')       as string
+  const ticketDaysRaw  = formData.get('ticket_days') as string | null
+  const ticketDays: string[] | null = ticketDaysRaw ? JSON.parse(ticketDaysRaw) : null
 
   if (!eventId || !name || !email) return { error: 'Missing required fields' }
+  if (ticketDays !== null && ticketDays.length === 0) return { error: 'Please select at least one day' }
 
   const { data: eventData } = await supabase
     .from('events')
@@ -47,24 +50,24 @@ export async function registerForEvent(formData: FormData) {
   const { error } = await supabase
     .from('public_registrations')
     .insert({
-      event_id:  eventId,
-      full_name: name,
-      email:     email.toLowerCase().trim(),
-      phone:     phone || null,
-      status:    'approved',
-      
-      
+      event_id:    eventId,
+      full_name:   name,
+      email:       email.toLowerCase().trim(),
+      phone:       phone || null,
+      status:      'approved',
+      ticket_days: ticketDays,
     } as any)
 
   if (error) return { error: 'Could not complete registration. Please try again.' }
 
   await supabase.from('guests').insert({
-    event_id: eventId,
+    event_id:    eventId,
     name,
-    email:    email.toLowerCase().trim(),
-    phone:    phone || null,
-    status:   'registered',
-    source:   'public_registration',
+    email:       email.toLowerCase().trim(),
+    phone:       phone || null,
+    status:      'registered',
+    source:      'public_registration',
+    ticket_days: ticketDays,
   } as any)
 
   await createNotification(Notifications.newRegistration(event.organizer_id, eventId, name, event.title))
@@ -78,13 +81,16 @@ export async function submitEOI(formData: FormData) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const eventId = formData.get('eventId') as string
-  const name    = formData.get('name')    as string
-  const email   = formData.get('email')   as string
-  const phone   = formData.get('phone')   as string
-  const note    = formData.get('note')    as string
+  const eventId        = formData.get('eventId')     as string
+  const name           = formData.get('name')        as string
+  const email          = formData.get('email')       as string
+  const phone          = formData.get('phone')       as string
+  const note           = formData.get('note')        as string
+  const ticketDaysRaw  = formData.get('ticket_days') as string | null
+  const ticketDays: string[] | null = ticketDaysRaw ? JSON.parse(ticketDaysRaw) : null
 
   if (!eventId || !name || !email) return { error: 'Missing required fields' }
+  if (ticketDays !== null && ticketDays.length === 0) return { error: 'Please select at least one day' }
 
   const { data: eventData } = await supabase
     .from('events')
@@ -108,12 +114,13 @@ export async function submitEOI(formData: FormData) {
   const { error } = await supabase
     .from('public_registrations')
     .insert({
-      event_id:  eventId,
-      full_name: name,
-      email:     email.toLowerCase().trim(),
-      phone:     phone || null,
-      notes:     note || null,
-      status:    'pending',
+      event_id:    eventId,
+      full_name:   name,
+      email:       email.toLowerCase().trim(),
+      phone:       phone || null,
+      notes:       note || null,
+      status:      'pending',
+      ticket_days: ticketDays,
     } as any)
 
   if (error) { console.error("EOI insert error:", JSON.stringify(error)); return { error: error.message ?? "Could not submit application. Please try again." } }

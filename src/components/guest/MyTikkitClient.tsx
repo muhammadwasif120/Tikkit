@@ -5,7 +5,7 @@ import Link from 'next/link'
 import {
   Ticket, Clock, CheckCircle, AlertCircle, Lock,
   MapPin, Calendar, Upload, X, FileImage, Loader,
-  Award, Zap, Star, Flame, CreditCard, Heart, MessageCircle,
+  Award, Zap, Star, Flame, CreditCard, Heart,
 } from 'lucide-react'
 import QRCode from 'qrcode'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
@@ -28,6 +28,7 @@ type Registration = {
   id: string; status: string; payment_status?: string; payment_accounts?: any[]
   payment_screenshot_url: string | null
   created_at: string
+  ticket_days: string[] | null
   event: EventInfo | null
   pass: Pass | null
 }
@@ -180,6 +181,20 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
           <p style={{ color: '#6B7280', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Guest</p>
           <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>{guestName}</p>
         </div>
+
+        {/* Selected days for multi-day tickets */}
+        {reg.ticket_days && reg.ticket_days.length > 0 && (
+          <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
+            <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Valid for</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+              {reg.ticket_days.map(day => (
+                <span key={day} style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)', color: '#818CF8', fontSize: 11, fontWeight: 600 }}>
+                  {new Date(day + 'T12:00:00').toLocaleDateString('en-PK', { weekday: 'short', day: 'numeric', month: 'short' })}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         {ev.venue_name && !ev.secret_venue && (
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, color: '#6B7280', fontSize: 12 }}>
@@ -490,37 +505,6 @@ function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
             </button>
           )}
 
-          {/* Chat link */}
-          <div style={{ marginTop: 8 }}>
-            <Link
-              href={`/guest/events/${ev.id}/chat`}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 5,
-                padding: '7px 14px', borderRadius: 10,
-                background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)',
-                color: '#818CF8', fontSize: 12, fontWeight: 600, textDecoration: 'none',
-              }}
-            >
-              <MessageCircle size={13} /> Chat
-            </Link>
-          </div>
-        </div>
-      )}
-
-      {/* Chat link for pending/verifying states (no primary action) */}
-      {!isPast && !isConfirmed && !isPayNow && reg.status !== 'rejected' && (
-        <div style={{ padding: '0 14px 14px' }}>
-          <Link
-            href={`/guest/events/${ev.id}/chat`}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              padding: '7px 14px', borderRadius: 10,
-              background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)',
-              color: '#818CF8', fontSize: 12, fontWeight: 600, textDecoration: 'none',
-            }}
-          >
-            <MessageCircle size={13} /> Chat
-          </Link>
         </div>
       )}
 
@@ -642,12 +626,12 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
       </div>
 
       {/* Cards */}
-      <div style={{ padding: '14px 16px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ padding: '14px 16px 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 12 }}>
         {tab === 'saved' ? (
           favEvents.length > 0
             ? favEvents.map(ev => <FavCard key={ev.id} event={ev} onRemove={handleRemoveFav} />)
             : (
-              <div style={{ padding: '64px 0', textAlign: 'center', animation: 'revealUp 0.3s ease' }}>
+              <div style={{ padding: '64px 0', textAlign: 'center', animation: 'revealUp 0.3s ease', gridColumn: '1 / -1' }}>
                 <Heart size={36} color="#4B5563" style={{ marginBottom: 14, opacity: 0.4 }} />
                 <p style={{ color: '#9CA3AF', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No saved events</p>
                 <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 20px' }}>Tap the ❤️ on any event to save it here.</p>
@@ -668,7 +652,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
               />
             ))
           : (
-            <div style={{ padding: '64px 0', textAlign: 'center', animation: 'revealUp 0.3s ease' }}>
+            <div style={{ padding: '64px 0', textAlign: 'center', animation: 'revealUp 0.3s ease', gridColumn: '1 / -1' }}>
               {tab === 'upcoming'
                 ? <>
                     <Ticket size={36} color="#4B5563" style={{ marginBottom: 14, opacity: 0.4 }} />
