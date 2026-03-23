@@ -31,9 +31,9 @@ async function AnalyticsData() {
 
   return (
     <AnalyticsClient
-      events={events ?? []}
+      events={(events ?? []).map((e: any) => ({ ...e, ticket_price: e.ticket_price ?? 0 }))}
       guests={guests ?? []}
-      scanLogs={scanLogs ?? []}
+      scanLogs={(scanLogs ?? []).map((s: any) => ({ ...s, scanned_at: s.scanned_at ?? '' }))}
       discountCodes={discountCodes ?? []}
     />
   )

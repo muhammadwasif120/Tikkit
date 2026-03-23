@@ -5,7 +5,6 @@ import { format } from 'date-fns'
 import { CalendarDays, MapPin, Users, ArrowLeft, Archive } from 'lucide-react'
 import { getEffectiveStatus } from '@/lib/eventStatus'
 import Link from 'next/link'
-import clsx from 'clsx'
 import EventActions from '@/components/events/EventActions'
 import GuestTable from '@/components/guests/GuestTable'
 import EventPaymentSetup from '@/components/events/EventPaymentSetup'
@@ -209,11 +208,11 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
         <>
           <EventTicketTypes
             eventId={event.id}
-            initialTicketTypes={ticketTypes ?? []}
+            initialTicketTypes={(ticketTypes ?? []).map((t: any) => ({ ...t, price: t.price ?? 0 }))}
           />
           <EventPaymentSetup
             eventId={event.id}
-            allAccounts={allPaymentAccounts ?? []}
+            allAccounts={(allPaymentAccounts ?? []).map((a: any) => ({ ...a, is_default: false }))}
             linkedAccountIds={linkedAccountIds}
           />
         </>

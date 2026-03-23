@@ -92,6 +92,7 @@ function buildApprovedEmail({ name, eventTitle, organizer, requireIdVerification
   return baseTemplate(content)
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function buildRejectedEmail({ name, eventTitle, organizer }: any) {
   const content = `
     <div style="margin-bottom:20px;">${badge('Registration Update', '#9CA3AF', 'rgba(156,163,175,0.15)')}</div>
@@ -174,6 +175,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await req.json()
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { type, name, email, eventTitle, organizer } = body
 
     if (!type || !email) {

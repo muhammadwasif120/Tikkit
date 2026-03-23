@@ -110,8 +110,8 @@ export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
   const [loading,     setLoading]     = useState(false)
   const [diditUrl,    setDiditUrl]    = useState<string | null>(null)
   const [payproUrl,   setPayproUrl]   = useState<string | null>(null)
-  const [idDone,      setIdDone]      = useState(profile.is_id_verified)
-  const [paymentDone, setPaymentDone] = useState(profile.is_payment_verified)
+  const [idDone]      = useState(profile.is_id_verified)
+  const [paymentDone] = useState(profile.is_payment_verified)
   const [initiated,   setInitiated]   = useState(false)
 
   const step = idDone && paymentDone ? 3 : idDone ? 2 : 1

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { User, Phone, Mail, Lock, LogOut, Star, Zap, Award, ChevronRight, Check, Eye, EyeOff, Shield, Edit2, Flame } from 'lucide-react'
+import { User, Phone, Mail, Lock, LogOut, Zap, Award, ChevronRight, Check, Eye, EyeOff, Shield, Edit2, Flame } from 'lucide-react'
 
 type Profile = { full_name: string; email: string; phone_number: string | null } | null
 type GuestProfile = {
@@ -222,7 +222,7 @@ function SaveBtn({ saving, onClick, label = 'Save Changes' }: { saving: boolean;
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function GuestProfileClient({ userId, userEmail, profile, guestProfile, passCount }: {
+export default function GuestProfileClient({ userEmail, profile, guestProfile, passCount }: {
   userId: string; userEmail: string
   profile: Profile; guestProfile: GuestProfile; passCount: number
 }) {
@@ -248,6 +248,7 @@ export default function GuestProfileClient({ userId, userEmail, profile, guestPr
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: `linear-gradient(135deg, ${tier.color}25, ${tier.color}08)`, border: `2px solid ${tier.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {guestProfile?.avatar_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img src={guestProfile.avatar_url} alt={displayName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
           ) : (
             <span style={{ color: tier.color, fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-display)' }}>{initials}</span>
@@ -271,7 +272,7 @@ export default function GuestProfileClient({ userId, userEmail, profile, guestPr
           { icon: Zap,   label: 'Credits',  value: score.toLocaleString(), color: tier.color },
           { icon: Award, label: 'Passes',   value: passCount,              color: '#A855F7'  },
           { icon: Flame, label: 'Streak',   value: guestProfile?.attendance_streak ?? 0,         color: '#F97316' },
-        ].map(({ icon: Icon, label, value, color }) => (
+        ].map(({ label, value, color }) => (
           <div key={label} style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '12px', textAlign: 'center' }}>
             <p style={{ color, fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-display)', margin: '0 0 2px', letterSpacing: '-0.3px' }}>{value}</p>
             <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{label}</p>

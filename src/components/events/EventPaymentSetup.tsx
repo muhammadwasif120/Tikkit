@@ -66,7 +66,7 @@ export default function EventPaymentSetup({
     setTimeout(() => setSaved(false), 3000)
   }
 
-  const dirty = !saved // show Save button whenever state has changed
+
 
   return (
     <div className="card space-y-4">

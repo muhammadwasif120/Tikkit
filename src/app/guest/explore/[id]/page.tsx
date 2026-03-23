@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id: idOrSlug } = await params
   const supabase = await createClient()
 
-  let eventId = idOrSlug
+  const eventId = idOrSlug
   if (!isUUID(idOrSlug)) {
     // Resolve slug → id
     const { data } = await supabase
@@ -205,7 +205,7 @@ async function EventData({ idOrSlug }: { idOrSlug: string }) {
       ) : null}
       <EventDetailClient
         event={enrichedEvent as any}
-        existingReg={existingReg}
+        existingReg={existingReg as any}
         isLoggedIn={!!user}
         userProfile={userProfile}
         isFavourited={isFavourited}

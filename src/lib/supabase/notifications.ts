@@ -10,8 +10,8 @@ export async function createNotification(payload: NotificationPayload) {
     type:     payload.type,
     title:    payload.title,
     body:     payload.body,
-    metadata: payload.metadata ?? {},
-  })
+    metadata: (payload.metadata ?? {}) as any,
+  } as any)
   if (error) console.error('[notifications] insert error:', error.message)
 }
 
@@ -25,8 +25,8 @@ export async function createNotifications(payloads: NotificationPayload[]) {
       type:     p.type,
       title:    p.title,
       body:     p.body,
-      metadata: p.metadata ?? {},
-    }))
+      metadata: (p.metadata ?? {}) as any,
+    } as any))
   )
   if (error) console.error('[notifications] bulk insert error:', error.message)
 }

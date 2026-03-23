@@ -3,9 +3,9 @@
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  User, Lock, Users, Bell, Save, Check,
+  Lock, Users, Bell, Save, Check,
   Eye, EyeOff, UserPlus, UserMinus, LogIn, LogOut,
-  CreditCard, Zap, Flag, Plus, Trash2, Link2,
+  CreditCard, Zap, Flag, Trash2, Link2,
   Copy, ExternalLink, Shield, Crown, AlertCircle,
   Clock, RefreshCw, ChevronDown, Phone, Building2,
   Camera, Loader2, ImageIcon, AtSign, X, ShieldCheck, ArrowRight,
@@ -149,7 +149,7 @@ export default function SettingsPage() {
 
       const { data: prof } = await supabase.from('profiles').select('*').eq('id', user.id).single()
       if (prof) {
-        setProfile(prof)
+        setProfile(prof as any)
         setFullName(prof.full_name ?? '')
         setPhoneNumber(prof.phone_number ?? '')
         setCompanyName(prof.company_name ?? '')
@@ -166,12 +166,12 @@ export default function SettingsPage() {
         .select('*')
         .eq('organizer_id', user.id)
         .order('created_at', { ascending: false })
-      setInvites(inv ?? [])
+      setInvites((inv as any) ?? [])
 
       // (payment accounts loaded inside PaymentAccountsSection)
     }
     loadData()
-  }, [])
+  }, [supabase])
 
   const saveProfile = async () => {
     if (!profile) return
@@ -282,7 +282,7 @@ export default function SettingsPage() {
     setCreating(true)
     try {
       const invite = await createTeamInvite(inviteLabel.trim(), inviteRole, inviteExpiry)
-      setInvites(prev => [invite, ...prev])
+      setInvites(prev => [invite as any, ...prev])
       setInviteLabel('')
     } catch (e) { console.error(e) }
     setCreating(false)

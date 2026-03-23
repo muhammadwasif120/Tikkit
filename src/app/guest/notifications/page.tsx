@@ -17,7 +17,7 @@ async function NotificationsData() {
     .order('reviewed_at', { ascending: false })
     .limit(30)
 
-  return <GuestNotificationsClient registrations={registrations ?? []} />
+  return <GuestNotificationsClient registrations={(registrations ?? []).map((r: any) => ({ ...r, status: r.status ?? 'pending' }))} />
 }
 
 export default function GuestNotificationsPage() {

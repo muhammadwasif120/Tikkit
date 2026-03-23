@@ -41,7 +41,7 @@ async function insertGuest(supabase: any, eventId: string, data: {
   plus_one_name?: string; waitlist?: boolean
 }) {
   // 1. Insert into guests table
-  const { data: guest, error: guestError } = await supabase.from('guests').insert({
+  const { error: guestError } = await supabase.from('guests').insert({
     event_id:       eventId,
     full_name:      data.full_name,
     email:          data.email || null,
@@ -168,11 +168,24 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
     if (isCSV) { const text = await file.text(); setImportRows(parseCSV(text)) }
     else {
       try {
-        const XLSX = await import('xlsx')
+        const ExcelJS = await import('exceljs')
         const buffer = await file.arrayBuffer()
-        const workbook = XLSX.read(buffer, { type: 'array' })
-        const sheet = workbook.Sheets[workbook.SheetNames[0]]
-        const json: Record<string, string>[] = XLSX.utils.sheet_to_json(sheet, { defval: '' })
+        const workbook = new ExcelJS.Workbook()
+        await workbook.xlsx.load(buffer)
+        const worksheet = workbook.worksheets[0]
+        
+        const json: Record<string, string>[] = []
+        let headers: string[] = []
+        worksheet.eachRow((row, rowNumber) => {
+          const values = Array.isArray(row.values) ? row.values.slice(1).map(v => typeof v === 'object' && v ? (v as any).result || (v as any).text || String(v) : String(v || '')) : []
+          if (rowNumber === 1) {
+            headers = values
+          } else {
+            const rowData: Record<string, string> = {}
+            headers.forEach((h, i) => { rowData[h] = values[i] || '' })
+            json.push(rowData)
+          }
+        })
         const rows: ImportRow[] = json.map(row => {
           const keys = Object.keys(row).reduce((acc, k) => { acc[k.toLowerCase().replace(/\s+/g,'_')] = String(row[k]); return acc }, {} as Record<string, string>)
           const full_name = keys['full_name'] || keys['name'] || ''
@@ -247,7 +260,7 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
               <div>
                 <label className="label">Email</label>
                 <input type="email" className="input" placeholder="guest@example.com" value={form.email} onChange={e => update('email', e.target.value)} />
-                <p className="text-xs text-gray-600 mt-1">If they have a Tikkit account, they'll be notified</p>
+                <p className="text-xs text-gray-600 mt-1">If they have a Tikkit account, they&apos;ll be notified</p>
               </div>
               <div>
                 <label className="label">Phone</label>

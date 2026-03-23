@@ -40,7 +40,7 @@ export async function getCommandCenterData(eventId: string): Promise<{
 
   // Public registrations do not enforce a user_id link in this schema structure
   const userIds: string[] = []
-  let profileMap: Record<string, any> = {}
+  const profileMap: Record<string, any> = {}
 
   if (userIds.length > 0) {
     const { data: profiles } = await (admin as any)
@@ -55,14 +55,15 @@ export async function getCommandCenterData(eventId: string): Promise<{
 
   const attendees: CommandAttendee[] = (registrations ?? []).map((r: any) => {
     // There are no user_ids for pure public registrations in this table
-    const profile = null 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const profile: any = null 
     return {
       registration_id: r.id,
       user_id: null,
       full_name: r.full_name,
       email: r.email,
       phone_number: r.phone ?? null,
-      avatar_url: profile?.avatar_url ?? null,
+      avatar_url: null,
       status: r.status,
       payment_status: r.payment_status ?? null,
       payment_screenshot_url: r.payment_screenshot_url ?? null,
@@ -83,7 +84,7 @@ export async function getCommandCenterData(eventId: string): Promise<{
 
   // Hydrate with sender names
   const msgUserIds = [...new Set((rawMessages ?? []).map((m: any) => m.user_id))]
-  let senderMap: Record<string, { full_name: string; avatar_url: string | null }> = {}
+  const senderMap: Record<string, { full_name: string; avatar_url: string | null }> = {}
 
   if (msgUserIds.length > 0) {
     const { data: senders } = await (admin as any)
@@ -144,7 +145,7 @@ export async function getEventChatMessages(eventId: string): Promise<{
     .limit(50)
 
   const userIds = [...new Set((rawMessages ?? []).map((m: any) => m.user_id))]
-  let nameMap: Record<string, string> = {}
+  const nameMap: Record<string, string> = {}
   if (userIds.length > 0) {
     const { data: profiles } = await (admin as any)
       .from('profiles').select('id, full_name').in('id', userIds)

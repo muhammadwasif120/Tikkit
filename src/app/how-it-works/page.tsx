@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
-  Ticket, ArrowRight, ArrowLeft, Users, QrCode, BarChart3,
+  Ticket, ArrowRight, Users, QrCode, BarChart3,
   CreditCard, MapPin, Calendar, CheckCircle, Sparkles,
-  Zap, Shield, Bell, Search, Star, Clock, ChevronRight,
-  ScanLine, TrendingUp, UserCheck, Package, X, ChevronDown, Lock, ThumbsUp
+  Zap, Shield, Search, Star, ChevronRight,
+  ScanLine, TrendingUp, UserCheck, X, ChevronDown, Lock,
 } from 'lucide-react'
 import PublicNav from '@/components/layout/PublicNav'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
@@ -29,6 +29,7 @@ function useInView(threshold = 0.15, once = true) {
   return { ref, inView }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function useScrollY() {
   const [y, setY] = useState(0)
   useEffect(() => {
@@ -640,10 +641,10 @@ function FeatureStep({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function HowItWorksPage() {
-  const scrollY = useScrollY()
+  // const scrollY = useScrollY()
   const [activeTab, setActiveTab] = useState<'organizer' | 'attendee'>('organizer')
   const [openFaq, setOpenFaq] = useState<number | null>(null)
-  const heroRef = useRef<HTMLDivElement>(null)
+  // const heroRef = useRef<HTMLDivElement>(null)
 
   // Organizer step refs
   const org1 = useInView(0.2)

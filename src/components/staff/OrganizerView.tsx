@@ -13,7 +13,7 @@ type Invite = { token: string; label: string; role: string; organizer_id: string
 type Event = { id: string; title: string; date_start: string; status: string }
 type Guest = {
   id: string; full_name: string; email: string; status: string
-  is_vip: boolean; ticket_type: string | null; event_id: string; created_at: string
+  is_vip: boolean; event_id: string; created_at: string
 }
 
 type Tab = 'overview' | 'events' | 'guests' | 'scanner' | 'approvals'
@@ -58,14 +58,14 @@ export default function OrganizerView({ invite, events }: { invite: Invite; even
           supabase.from('vendor_invoices').select('*').in('event_id', eventIds),
           supabase.from('public_registrations').select('*').in('event_id', eventIds).eq('status', 'pending').order('created_at', { ascending: false }),
         ])
-        setGuests(g ?? [])
+        setGuests((g ?? []) as any)
         setInvoices(inv ?? [])
         setRegistrations(reg ?? [])
       }
       setLoading(false)
     }
     load()
-  }, [])
+  }, [events, supabase])
 
   const checkedIn        = guests.filter(g => g.status === 'checked_in').length
   const pendingApprovals = registrations.length

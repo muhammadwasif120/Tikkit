@@ -52,7 +52,7 @@ export default function FloatingChat() {
     if (!open || events.length) return
     setLoadingEvents(true)
     getCommandEvents().then(data => { setEvents(data); setLoadingEvents(false) })
-  }, [open])
+  }, [open, events.length])
 
   // Fetch messages when event selected
   useEffect(() => {
@@ -61,7 +61,7 @@ export default function FloatingChat() {
     getEventChatMessages(selectedEvent.id).then(({ messages: msgs }) => {
       setMessages(msgs); setLoadingMsgs(false)
     })
-  }, [selectedEvent?.id])
+  }, [selectedEvent])
 
   // Realtime subscription for selected event
   useEffect(() => {
@@ -80,7 +80,7 @@ export default function FloatingChat() {
       )
       .subscribe()
     return () => { supabase.removeChannel(ch) }
-  }, [selectedEvent?.id])
+  }, [selectedEvent, supabase])
 
   // Scroll to bottom on new messages
   useEffect(() => {

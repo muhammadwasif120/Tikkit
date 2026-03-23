@@ -92,6 +92,7 @@ export default function AnalyticsClient({
     })
   }, [selectedEventId, scanLogs])
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const selectedEventData = eventStats.find(e => e.id === selectedEventId)
   const peakHour = arrivalData.reduce((a, b) => (a.count > b.count ? a : b), { hour: 0, count: 0, pct: 0 })
 
@@ -533,7 +534,7 @@ export default function AnalyticsClient({
             <div className="mb-4">
               <label className="label">Message</label>
               <textarea className="input min-h-36 resize-none font-mono text-xs" value={emailBody} onChange={(e) => setEmailBody(e.target.value)} />
-              <p className="text-xs text-gray-600 mt-1">Use {'{name}'} to personalise with guest's first name</p>
+              <p className="text-xs text-gray-600 mt-1">Use {'{name}'} to personalise with guest&apos;s first name</p>
             </div>
 
             <div className="mb-5">

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { CheckCircle, XCircle, Clock, Search, ChevronDown, CreditCard, FileText, AlertCircle, User, Mail, Phone, Calendar, Tag, Loader2, ClipboardCheck } from 'lucide-react'
-import { approvePaymentSubmission, rejectPaymentSubmission } from '@/app/actions/paymentAccountActions'
+
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 type Event = {
@@ -183,6 +183,7 @@ function RegistrationModal({
               <FileText size={13} color="#4B5563" />
               <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>ID Document</p>
             </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={reg.id_document_url}
               alt="ID document"
@@ -199,6 +200,7 @@ function RegistrationModal({
               <CreditCard size={13} color="#FFC745" />
               <p style={{ color: '#FFC745', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>Payment Submission</p>
             </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={reg.payment_screenshot_url}
               alt="Payment screenshot"
@@ -272,6 +274,7 @@ function RegistrationModal({
       {/* Image zoom */}
       {imgZoom && (
         <div onClick={() => setImgZoom(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, cursor: 'zoom-out' }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={imgZoom} alt="Full view" style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 12, objectFit: 'contain' }} />
         </div>
       )}
@@ -282,6 +285,7 @@ function RegistrationModal({
 }
 
 // ── Status icon for list rows ─────────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function StatusIcon({ status, paymentStatus }: { status: string; paymentStatus: string }) {
   let Icon = Clock, color = '#4B5563'
   if (status === 'rejected')                                           { Icon = XCircle;    color = '#EF4444' }
@@ -303,7 +307,7 @@ export default function ApprovalsClient({
   registrations: Registration[]
   events: Event[]
 }) {
-  const [registrations, setRegistrations] = useState(initialRegistrations)
+  const [registrations] = useState(initialRegistrations)
   const [selected, setSelected]           = useState<Registration | null>(null)
   const [filter, setFilter]               = useState<Filter>('All')
   const [search, setSearch]               = useState('')

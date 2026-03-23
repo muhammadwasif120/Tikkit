@@ -48,9 +48,7 @@ const GRADIENTS = [
 function getGradient(id: string) { return GRADIENTS[id.charCodeAt(0) % GRADIENTS.length] }
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
-function fmtDate(iso: string) {
-  return new Date(iso).toLocaleDateString('en-PK', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-}
+
 function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
@@ -145,6 +143,7 @@ function QRModal({ regId, guestName, event, onClose }: {
           style={{ background: 'white', borderRadius: 20, padding: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', filter: bright ? 'brightness(1.15)' : 'brightness(1)', transition: 'filter 0.2s', marginBottom: 16 }}
         >
           {qrSrc
+            // eslint-disable-next-line @next/next/no-img-element
             ? <img src={qrSrc} alt="QR Code" style={{ width: 200, height: 200, display: 'block' }} />
             : <div style={{ width: 200, height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Loader size={32} color="#080A10" className="animate-spin" />
@@ -248,6 +247,7 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
 
             {preview ? (
               <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(16,185,129,0.25)' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={preview} alt="Screenshot preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
                 <button
                   onClick={() => { setFile(null); setPreview(null) }}

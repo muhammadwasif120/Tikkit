@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
-  Ticket, Clock, CheckCircle, AlertCircle, Lock,
+  Ticket, Clock, AlertCircle, Lock,
   MapPin, Calendar, Upload, X, FileImage, Loader,
   Award, Zap, Star, Flame, CreditCard, Heart,
 } from 'lucide-react'
@@ -179,7 +179,10 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
             }}
           >
             {qrSrc
-              ? <img src={qrSrc} alt="QR Code" style={{ width: 220, height: 220, display: 'block', borderRadius: 8 }} />
+              ? <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qrSrc} alt="QR Code" style={{ width: 220, height: 220, display: 'block', borderRadius: 8 }} />
+                </>
               : <div style={{ width: 220, height: 220, background: '#E5E7EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Loader size={24} color="#9CA3AF" style={{ animation: 'spin 1s linear infinite' }} />
                 </div>
@@ -313,6 +316,7 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
 
             {preview ? (
               <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(16,185,129,0.25)' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={preview} alt="Screenshot preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
                 <button
                   onClick={() => { setFile(null); setPreview(null) }}
@@ -384,7 +388,7 @@ const PASS_CFG: Record<string, { color: string; bg: string; label: string }> = {
 }
 
 /* ─── Registration Card ──────────────────────────────────────────── */
-function RegCard({ reg, guestName, creditScore, onPay, onViewTicket }: {
+function RegCard({ reg, onPay, onViewTicket }: {
   reg: Registration
   guestName: string
   creditScore: number
@@ -688,7 +692,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
                 : <>
                     <Award size={36} color="#4B5563" style={{ marginBottom: 14, opacity: 0.4 }} />
                     <p style={{ color: '#9CA3AF', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No past events yet</p>
-                    <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Events you've attended will appear here with your collectible passes.</p>
+                    <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Events you&apos;ve attended will appear here with your collectible passes.</p>
                   </>
               }
             </div>

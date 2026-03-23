@@ -8,6 +8,7 @@ import {
   ArrowRight, AlertCircle, Sparkles, ChevronLeft,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
+import Link from 'next/link'
 
 type Mode    = null | 'organizer' | 'attendee'
 type SubMode = 'login' | 'signup'
@@ -548,9 +549,9 @@ export default function AuthPage() {
 
           {/* Logo */}
           <div className="auth-logo" style={{ textAlign: 'center', marginBottom: 40 }}>
-            <a href="/" style={{ display: 'inline-flex', textDecoration: 'none' }}>
+            <Link href="/" style={{ display: 'inline-flex', textDecoration: 'none' }}>
               <TikkitXLogo size="lg" />
-            </a>
+            </Link>
           </div>
 
           {/* Picker heading */}

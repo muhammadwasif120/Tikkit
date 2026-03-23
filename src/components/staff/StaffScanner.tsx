@@ -32,7 +32,6 @@ type Guest = {
   email: string
   status: string
   is_vip: boolean
-  ticket_type: string | null
   checked_in_at: string | null
   qr_code: string
 }
@@ -205,14 +204,14 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
       setGuestsLoading(true)
       const { data } = await supabase
         .from('guests')
-        .select('id, full_name, email, status, is_vip, ticket_type, checked_in_at, qr_code')
+        .select('id, full_name, email, status, is_vip, checked_in_at, qr_code')
         .eq('event_id', eventId)
         .order('full_name')
-      setGuests(data ?? [])
+      setGuests((data ?? []) as any)
       setGuestsLoading(false)
     }
     load()
-  }, [eventId, activeTab])
+  }, [eventId, activeTab, supabase])
 
   const resetForNextScan = useCallback(() => {
     setResult(null)

@@ -203,9 +203,7 @@ export default function RegistrationFlow({
       return
     }
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('payment-screenshots')
-      .getPublicUrl(path)
+    // Intentionally skipped publicUrl extraction since we store uploadData.path
 
     // Create payment submission
     const { data: submission, error: subError } = await supabase
@@ -278,7 +276,7 @@ export default function RegistrationFlow({
           </div>
           {isPaymentSubmitted && (
             <div className="text-xs text-gray-500 bg-white/5 rounded-lg px-4 py-3">
-              You'll receive a confirmation email once your payment is verified.
+              You&apos;ll receive a confirmation email once your payment is verified.
             </div>
           )}
         </div>
@@ -303,12 +301,12 @@ export default function RegistrationFlow({
             </p>
             {isPaid && (
               <p className="text-gray-500 text-xs mt-2">
-                If approved, you'll receive an email with a payment link to complete your registration.
+                If approved, you&apos;ll receive an email with a payment link to complete your registration.
               </p>
             )}
             {!isPaid && (
               <p className="text-gray-500 text-xs mt-2">
-                If approved, you'll receive a confirmation email with your QR code.
+                If approved, you&apos;ll receive a confirmation email with your QR code.
               </p>
             )}
           </div>
@@ -477,6 +475,7 @@ export default function RegistrationFlow({
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Upload Payment Screenshot *</p>
             {screenshotPreview ? (
               <div className="relative rounded-xl overflow-hidden border border-white/10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={screenshotPreview} alt="Payment screenshot" className="w-full max-h-64 object-contain bg-black/40" />
                 <button type="button" onClick={removeScreenshot}
                   className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 hover:bg-red-500/80 flex items-center justify-center transition-colors">

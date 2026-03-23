@@ -22,8 +22,15 @@ async function ApprovalsData() {
 
   return (
     <ApprovalsClient
-      registrations={registrations ?? []}
-      events={events ?? []}
+      registrations={(registrations ?? []).map((r: any) => ({
+        ...r,
+        id_document_url: r.id_document_url ?? null,
+        reference_code_entered: r.reference_code_entered ?? null
+      }))}
+      events={(events ?? []).map((e: any) => ({
+        ...e,
+        registration_mode: e.registration_mode ?? 'approval'
+      }))}
     />
   )
 }

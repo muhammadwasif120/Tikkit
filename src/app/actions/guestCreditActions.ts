@@ -135,7 +135,7 @@ export async function awardExitScanCredits(guestRecordId: string, eventId: strin
     })
   }
 
-  await issueEventPass(profileId, guestRecordId, eventId, isVip, guest.ticket_price_paid)
+  await issueEventPass(profileId, guestRecordId, eventId, isVip, guest.ticket_price_paid ?? 0)
 
   return { success: true, pointsAwarded: totalPoints, newScore, passes: txns }
 }

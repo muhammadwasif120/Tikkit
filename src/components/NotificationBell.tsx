@@ -26,8 +26,12 @@ const TYPE_CONFIG: Record<NotificationType, { icon: React.ReactNode; colour: str
   entry_scan:          { icon: <LogIn className="w-4 h-4" />,      colour: 'text-blue-400',   dot: 'bg-blue-400' },
   exit_scan:           { icon: <LogOut className="w-4 h-4" />,     colour: 'text-gray-400',   dot: 'bg-gray-400' },
   vendor_payment_due:  { icon: <CreditCard className="w-4 h-4" />, colour: 'text-yellow-400', dot: 'bg-yellow-400' },
-  event_going_live:    { icon: <Zap className="w-4 h-4" />,        colour: 'text-purple-400', dot: 'bg-purple-400' },
-  event_ended:         { icon: <Flag className="w-4 h-4" />,       colour: 'text-orange-400', dot: 'bg-orange-400' },
+  event_going_live:              { icon: <Zap className="w-4 h-4" />,        colour: 'text-purple-400', dot: 'bg-purple-400' },
+  event_ended:                   { icon: <Flag className="w-4 h-4" />,       colour: 'text-orange-400', dot: 'bg-orange-400' },
+  new_registration:              { icon: <UserPlus className="w-4 h-4" />,   colour: 'text-green-400',  dot: 'bg-green-400' },
+  eoi_submitted:                 { icon: <Flag className="w-4 h-4" />,       colour: 'text-blue-400',   dot: 'bg-blue-400' },
+  eoi_approved:                  { icon: <Check className="w-4 h-4" />,      colour: 'text-green-400',  dot: 'bg-green-400' },
+  eoi_approved_payment_required: { icon: <CreditCard className="w-4 h-4" />, colour: 'text-yellow-400', dot: 'bg-yellow-400' },
 }
 
 function timeAgo(date: string) {
@@ -125,7 +129,7 @@ export default function NotificationBell() {
       .limit(30)
 
     console.log('[Bell] loaded notifications:', data?.length, 'unread:', data?.filter(n => !n.read).length)
-    setNotifications(data ?? [])
+    if (data) setNotifications((data as any[]) || [])
     setLoading(false)
   }, [supabase])
 
@@ -281,7 +285,7 @@ export default function NotificationBell() {
               <div className="px-4 py-10 text-center">
                 <Bell className="w-8 h-8 text-gray-700 mx-auto mb-3" />
                 <p className="text-sm text-gray-500">No notifications yet</p>
-                <p className="text-xs text-gray-600 mt-1">They'll show up here as activity happens</p>
+                <p className="text-xs text-gray-600 mt-1">They&apos;ll show up here as activity happens</p>
               </div>
             ) : (
               notifications.map((n) => (

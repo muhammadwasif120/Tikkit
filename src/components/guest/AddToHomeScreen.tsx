@@ -186,7 +186,7 @@ export default function AddToHomeScreen() {
                   <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#9CA3AF' }}>
                     <Share size={13} />
                   </div>
-                  <span style={{ color: '#9CA3AF', fontSize: 12 }}>Select <strong style={{ color: 'white' }}>"Add to Home Screen"</strong></span>
+                  <span style={{ color: '#9CA3AF', fontSize: 12 }}>Select <strong style={{ color: 'white' }}>&quot;Add to Home Screen&quot;</strong></span>
                 </div>
               </div>
             ) : (

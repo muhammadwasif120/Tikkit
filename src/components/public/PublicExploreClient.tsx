@@ -206,59 +206,7 @@ const CSS = `
   }
 `
 
-/* ─── Hero visual (desktop) ──────────────────────────────────────── */
-function HeroVisual({ events, catMap }: { events: Event[]; catMap: Record<string, Category> }) {
-  const preview = events.slice(0, 3)
-  return (
-    <div style={{ position: 'relative', height: 360 }}>
-      {/* Glow blob */}
-      <div style={{ position: 'absolute', top: '30%', left: '50%', transform: 'translate(-50%,-50%)', width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,94,255,0.18), transparent 70%)', pointerEvents: 'none' }} />
 
-      {preview.map((ev, i) => {
-        const cat = ev.category_id ? catMap[ev.category_id] ?? null : null
-        const isFree = !ev.ticket_price || ev.ticket_price === 0
-        const offsets = [
-          { top: 0,    left: 40,  rotate: -4, zIndex: 1, scale: 0.88 },
-          { top: 30,   left: 0,   rotate: 2,  zIndex: 3, scale: 1    },
-          { top: 10,   left: 120, rotate: 5,  zIndex: 2, scale: 0.92 },
-        ]
-        const o = offsets[i]
-        return (
-          <div key={ev.id} style={{
-            position: 'absolute',
-            top: o.top,
-            left: o.left,
-            width: 260,
-            borderRadius: 16,
-            overflow: 'hidden',
-            background: '#0C0E16',
-            border: i === 1 ? '1px solid rgba(30,94,255,0.4)' : '1px solid rgba(255,255,255,0.07)',
-            boxShadow: i === 1 ? '0 8px 40px rgba(30,94,255,0.2)' : '0 4px 20px rgba(0,0,0,0.4)',
-            transform: `rotate(${o.rotate}deg) scale(${o.scale})`,
-            transformOrigin: 'center center',
-            zIndex: o.zIndex,
-          }}>
-            <div style={{ height: 110, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : grad(ev.id), position: 'relative' }}>
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(12,14,22,0.9) 0%, transparent 60%)' }} />
-              <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 5 }}>
-                {cat && <span style={{ background: `${cat.color}22`, border: `1px solid ${cat.color}40`, color: cat.color, fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 20 }}>{cat.icon} {cat.name}</span>}
-                <span style={{ background: isFree ? 'rgba(34,197,94,0.85)' : 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 20 }}>
-                  {isFree ? 'FREE' : `PKR ${ev.ticket_price!.toLocaleString('en-PK')}`}
-                </span>
-              </div>
-            </div>
-            <div style={{ padding: '10px 12px 12px' }}>
-              <p style={{ color: 'white', fontSize: 12, fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.title}</p>
-              <p style={{ color: '#6B7280', fontSize: 10, margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Clock size={9} color="#818CF8" /> {fmtDate(ev.date_start)}
-              </p>
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
 
 /* ─── Event Card ─────────────────────────────────────────────────── */
 function EventCard({ event, category, featured = false }: { event: Event; category: Category | null; featured?: boolean }) {
@@ -479,7 +427,7 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
             </div>
 
             <h1 className="pe-hero-h1">
-              What's happening<br />
+              What&apos;s happening<br />
               <span className="pe-accent">near you</span>
             </h1>
 

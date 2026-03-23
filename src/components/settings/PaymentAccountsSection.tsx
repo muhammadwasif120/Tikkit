@@ -61,7 +61,7 @@ export default function PaymentAccountsSection({
         .select('*')
         .eq('organizer_id', user.id)
         .order('created_at', { ascending: false })
-      setAccounts(data ?? [])
+      setAccounts((data ?? []) as any)
       setLoading(false)
     }
     load()

@@ -151,7 +151,10 @@ export default function ActionCard({ attendee, onApprove, onReject, actioning }:
         <div className="ac-head">
           <div className="ac-avatar" style={{ background: attendee.avatar_url ? 'transparent' : grad }}>
             {attendee.avatar_url
-              ? <img src={attendee.avatar_url} alt={attendee.full_name ?? ''} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+              ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={attendee.avatar_url} alt={attendee.full_name ?? ''} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                )
               : initials
             }
           </div>
@@ -194,6 +197,7 @@ export default function ActionCard({ attendee, onApprove, onReject, actioning }:
 
                 {attendee.payment_screenshot_url && (
                   <div className="ac-screenshot" onClick={() => setLightbox(true)}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={attendee.payment_screenshot_url} alt="Payment screenshot" />
                     <span className="ac-ss-label">Payment Screenshot</span>
                     <button className="ac-ss-zoom" onClick={e => { e.stopPropagation(); setLightbox(true) }}>
@@ -239,6 +243,7 @@ export default function ActionCard({ attendee, onApprove, onReject, actioning }:
       {/* Lightbox */}
       {lightbox && attendee.payment_screenshot_url && (
         <div className="ac-lightbox" onClick={() => setLightbox(false)}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={attendee.payment_screenshot_url} alt="Payment" onClick={e => e.stopPropagation()} />
         </div>
       )}

@@ -18,7 +18,7 @@ const statusBadge: Record<string, string> = {
 
 type Tab = 'all' | 'vip' | 'regular' | 'waitlist'
 
-export default function GuestTable({ guests, eventId }: { guests: Guest[]; eventId: string }) {
+export default function GuestTable({ guests }: { guests: Guest[]; eventId: string }) {
   const [search, setSearch] = useState('')
   const [selectedQR, setSelectedQR] = useState<Guest | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>('all')

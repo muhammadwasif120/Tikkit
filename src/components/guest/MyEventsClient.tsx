@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import Link from 'next/link'
 import {
   Calendar, MapPin, Clock, Upload, X, CheckCircle,
-  AlertCircle, ChevronRight, Ticket, FileImage, Loader,
+  AlertCircle, Ticket, FileImage, Loader,
   CreditCard,
 } from 'lucide-react'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
@@ -167,6 +167,7 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
         >
           {preview ? (
             <div style={{ position: 'relative' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={preview} alt="Payment screenshot" style={{ width: '100%', maxHeight: 280, objectFit: 'cover', display: 'block', borderRadius: 16 }} />
               <div style={{ position: 'absolute', top: 8, right: 8 }}>
                 <button onClick={e => { e.stopPropagation(); setFile(null); setPreview(null) }} style={{ background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: 8, padding: 6, cursor: 'pointer', color: 'white', display: 'flex' }}>
@@ -264,9 +265,9 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
         {/* Actions */}
         <div style={{ display: 'flex', gap: 8 }}>
           {displayStatus === 'eoi_approved' && (
-            <Link href="/guest/tikkit" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', border: 'none', borderRadius: 12, background: '#EF4444', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', fontFamily: 'var(--font-body)' }}>
+            <button onClick={() => onPay(reg)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '10px', border: 'none', borderRadius: 12, background: '#EF4444', color: 'white', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
               <CreditCard size={13} /> Pay Now
-            </Link>
+            </button>
           )}
           {isConfirmed && !past && (
             <Link href="/guest/tikkit" style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'rgba(30,94,255,0.15)', border: '1px solid rgba(30,94,255,0.25)', color: '#818CF8', fontSize: 13, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>

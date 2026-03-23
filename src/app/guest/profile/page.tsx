@@ -60,7 +60,7 @@ async function ProfileData() {
     <ProfileClient
       profile={profile}
       email={p?.email ?? user.email ?? ''}
-      transactions={txRes.data ?? []}
+      transactions={(txRes.data ?? []).map((tx: any) => ({ ...tx, amount: tx.points, reason: tx.note ?? tx.type }))}
       pastEvents={(pastEventsRes.data ?? []) as any[]}
     />
   )

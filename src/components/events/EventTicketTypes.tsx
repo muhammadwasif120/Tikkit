@@ -44,6 +44,7 @@ const TIER_META: Record<string, {
   },
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const tierIcon = (name: string) => {
   if (name === 'VIP') return Star
   if (name === 'Discounted') return Tag
@@ -125,7 +126,7 @@ export default function EventTicketTypes({
       setSaving(false)
       return
     }
-    if (data) setTiers(prev => prev.map(x => x.id === t.id ? data : x))
+    if (data) setTiers(prev => prev.map(x => x.id === t.id ? (data as any) : x))
     setSaving(false)
     setEditingId(null)
   }
@@ -149,7 +150,7 @@ export default function EventTicketTypes({
     const nameMap = { standard: 'Standard', vip: 'VIP', discounted: 'Discounted' }
 
     // Build insert payload — only include discount fields if they exist in the DB
-    const payload: Record<string, unknown> = {
+    const payload: any = {
       event_id:  eventId,
       name:      nameMap[key],
       price:     isDisc ? finalPrice : orig,
@@ -171,7 +172,7 @@ export default function EventTicketTypes({
     if (error) {
       // Retry without discount columns if they don't exist in the schema yet
       if (error.code === 'PGRST204' || error.message?.includes('original_price') || error.message?.includes('discount')) {
-        const fallbackPayload: Record<string, unknown> = {
+        const fallbackPayload: any = {
           event_id: eventId,
           name:     nameMap[key],
           price:    isDisc ? finalPrice : orig,
@@ -233,7 +234,6 @@ export default function EventTicketTypes({
       <div className="space-y-3">
         {tiers.map(t => {
           const meta = TIER_META[t.name] ?? TIER_META.Standard
-          const Icon = tierIcon(t.name)
           const isEditing = editingId === t.id
           const isDisc = t.name === 'Discounted'
 

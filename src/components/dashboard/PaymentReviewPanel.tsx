@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   CreditCard, CheckCircle, XCircle, Clock, Eye,
-  X, ZoomIn, Check,
+  X, Check,
 } from 'lucide-react'
 import { approvePaymentSubmission, rejectPaymentSubmission } from '@/app/actions/paymentAccountActions'
 import clsx from 'clsx'
@@ -58,7 +58,7 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
         .eq('event_id', eventId)
         .order('submitted_at', { ascending: false })
 
-      setSubmissions(data ?? [])
+      setSubmissions((data ?? []) as any)
       setLoading(false)
     }
     load()
@@ -70,7 +70,7 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [eventId])
+  }, [eventId, supabase])
 
   const getScreenshotUrl = async (path: string) => {
     const { data } = await supabase.storage.from('payment-screenshots').createSignedUrl(path, 60)
@@ -115,6 +115,7 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
           <button className="absolute top-4 right-4 text-white/60 hover:text-white">
             <X className="w-6 h-6" />
           </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={lightboxUrl} alt="Payment screenshot" className="max-w-full max-h-[90vh] rounded-xl object-contain" onClick={e => e.stopPropagation()} />
         </div>
       )}
@@ -152,7 +153,7 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
           <div className="text-center py-12">
             <CreditCard className="w-10 h-10 text-gray-600 mx-auto mb-3" />
             <p className="text-gray-400">No payment submissions yet</p>
-            <p className="text-xs text-gray-600 mt-1">They'll appear here once guests submit their screenshots</p>
+            <p className="text-xs text-gray-600 mt-1">They&apos;ll appear here once guests submit their screenshots</p>
           </div>
         ) : (
           <>
@@ -233,7 +234,7 @@ function SubmissionCard({
           <Eye className="w-3.5 h-3.5" /> View Screenshot
         </button>
         {sub.notes && (
-          <span className="text-xs text-gray-500 italic truncate">"{sub.notes}"</span>
+          <span className="text-xs text-gray-500 italic truncate">&quot;{sub.notes}&quot;</span>
         )}
         <span className="text-xs text-gray-600 ml-auto shrink-0">
           {new Date(sub.submitted_at).toLocaleDateString('en-PK', { dateStyle: 'medium' })}

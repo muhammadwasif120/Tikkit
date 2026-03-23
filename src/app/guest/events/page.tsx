@@ -15,7 +15,7 @@ async function MyEventsData() {
     .eq('email', user.email!)
     .order('created_at', { ascending: false })
 
-  return <MyEventsClient registrations={registrations ?? []} />
+  return <MyEventsClient registrations={(registrations ?? []).map((r: any) => ({ ...r, status: r.status ?? 'pending', payment_status: r.payment_status ?? 'not_required' }))} />
 }
 
 export default function MyEventsPage() {

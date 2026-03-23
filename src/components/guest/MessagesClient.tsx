@@ -59,7 +59,7 @@ export default function MessagesClient({
       if (val) stored[t.eventId] = val
     }
     setLastRead(stored)
-  }, [])
+  }, [threads])
 
   // Mark selected thread as read
   useEffect(() => {
@@ -99,7 +99,7 @@ export default function MessagesClient({
         .subscribe()
     )
     return () => { channels.forEach(c => supabase.removeChannel(c)) }
-  }, [threads, userId])
+  }, [threads, userId, supabase])
 
   const selectThread = async (eventId: string) => {
     setSelectedId(eventId)

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import {
-  Ticket, QrCode, Users, CreditCard, BarChart3,
+  QrCode, Users, CreditCard, BarChart3,
   Building2, CheckCircle, ArrowRight, Zap, Shield,
   Bell, ClipboardCheck, Menu, X, MapPin, Calendar,
 } from 'lucide-react'
@@ -980,7 +980,7 @@ export default function LandingPage() {
           <div>
             <div className="sec-label">Why Tikkit</div>
             <h2 className="why-h2">
-              Pakistan's event scene is booming. The tools haven't caught up.{' '}
+              Pakistan&apos;s event scene is booming. The tools haven&apos;t caught up.{' '}
               <span style={{ color: 'var(--blue)' }}>Until now.</span>
             </h2>
             <p className="why-sub">
@@ -1013,7 +1013,7 @@ export default function LandingPage() {
             <span className="gold">spreadsheet.</span>
           </h2>
           <p className="cta-sub">
-            Create your first event in two minutes. It's free, and it actually works.
+            Create your first event in two minutes. It&apos;s free, and it actually works.
           </p>
           <div className="cta-actions">
             <Link href="/auth/login" className="btn-primary-lg">

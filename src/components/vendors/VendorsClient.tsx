@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   Plus, X, Check, ChevronDown, Building2, Tag, FileText,
-  DollarSign, Calendar, AlertCircle, CheckCircle, Clock,
+  AlertCircle, CheckCircle, Clock,
   Edit2, Trash2, Link as LinkIcon, Search
 } from 'lucide-react'
 import { notifyVendorPaymentDue } from '@/app/actions/vendorNotificationActions'
@@ -115,10 +115,10 @@ export default function VendorsClient({
     setVendorSaving(true)
     if (editingVendor) {
       const { data } = await supabase.from('vendors').update({ ...vendorForm }).eq('id', editingVendor.id).select().single()
-      if (data) setVendors(prev => prev.map(v => v.id === data.id ? data : v))
+      if (data) setVendors(prev => prev.map(v => v.id === data.id ? (data as any) : v))
     } else {
       const { data } = await supabase.from('vendors').insert({ ...vendorForm, organizer_id: userId }).select().single()
-      if (data) setVendors(prev => [data, ...prev])
+      if (data) setVendors(prev => [data as any, ...prev])
     }
     setVendorSaving(false)
     setVendorModal(false)
@@ -161,7 +161,7 @@ export default function VendorsClient({
     if (editingInvoice) {
       const { data } = await supabase.from('vendor_invoices').update(payload).eq('id', editingInvoice.id).select().single()
       if (data) {
-        setInvoices(prev => prev.map(i => i.id === data.id ? data : i))
+        setInvoices(prev => prev.map(i => i.id === data.id ? (data as any) : i))
         // Notify if status changed to pending or overdue
         if ((data.status === 'pending' || data.status === 'overdue') &&
             data.status !== editingInvoice.status) {
@@ -172,7 +172,7 @@ export default function VendorsClient({
     } else {
       const { data } = await supabase.from('vendor_invoices').insert(payload).select().single()
       if (data) {
-        setInvoices(prev => [...prev, data])
+        setInvoices(prev => [...prev, data as any])
         // Notify on new pending or overdue invoice
         if (data.status === 'pending' || data.status === 'overdue') {
           const vendor = vendors.find(v => v.id === data.vendor_id)
@@ -190,7 +190,7 @@ export default function VendorsClient({
       .update({ status: 'paid', paid_at: new Date().toISOString() })
       .eq('id', invoice.id).select().single()
     if (data) {
-      setInvoices(prev => prev.map(i => i.id === data.id ? data : i))
+      setInvoices(prev => prev.map(i => i.id === data.id ? (data as any) : i))
       // Dismiss the payment due notification now that it's been paid
       const vendor = vendors.find(v => v.id === invoice.vendor_id)
       if (vendor) await dismissVendorPaymentNotification(invoice.event_id, vendor.name)

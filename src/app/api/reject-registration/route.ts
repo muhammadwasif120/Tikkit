@@ -4,6 +4,7 @@ import { createNotification, Notifications } from '@/lib/supabase/notifications'
 
 export async function POST(req: NextRequest) {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { registrationId, notes } = await req.json()
     if (!registrationId) return NextResponse.json({ error: 'registrationId required' }, { status: 400 })
 

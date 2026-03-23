@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { User, Edit3, Star, Zap, TrendingUp, TrendingDown, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown, ShieldCheck, Ticket, Trash2, Camera } from 'lucide-react'
+import { Edit3, Star, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown, ShieldCheck, Ticket, Trash2, Camera } from 'lucide-react'
 import { updateGuestProfile, signOut, sendPasswordReset, uploadProfilePhoto, deleteAccount, updateNotificationPrefs } from '@/app/actions/guestProfileActions'
 import { getCreditTier } from '@/lib/creditUtils'
 import { format } from 'date-fns'
@@ -328,6 +328,7 @@ function AvatarDisplay({ url, initials, tier, size = 64 }: { url: string | null;
     }
   }
   if (url) {
+    {/* eslint-disable-next-line @next/next/no-img-element */}
     return <img src={url} alt="" style={{ width: size, height: size, borderRadius: size * 0.3, objectFit: 'cover', border: `2px solid ${tier.border}`, flexShrink: 0 }} />
   }
   return (
@@ -571,14 +572,14 @@ function EditSheet({ profile, email, onClose, onSave }: {
   )
 }
 
-/* ─── Credit Score Card ──────────────────────────────────────────── */
+const MILESTONES = [100, 200, 500, 1000]
+
 function CreditScoreCard({ score }: { score: number }) {
   const tier = getCreditTier(score)
   const [fireworks, setFireworks] = useState(false)
   const [animated, setAnimated] = useState(false)
   const prevScore = useRef(score)
 
-  const MILESTONES = [100, 200, 500, 1000]
   const nextMilestone = MILESTONES.find(m => m > score)
   const progress = nextMilestone ? Math.min((score / nextMilestone) * 100, 100) : 100
 
@@ -690,7 +691,10 @@ function PastEventsSection({ events }: { events: PastEvent[] }) {
                 background: eventGradient(ev.id),
               }}>
                 {ev.cover_image_url && (
-                  <img src={ev.cover_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ev.cover_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </>
                 )}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -1013,7 +1017,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
             </div>
             <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>Delete Account?</h3>
             <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 20px', lineHeight: 1.5 }}>
-              Your personal details will be removed and you'll be signed out. Event history is retained anonymously. This cannot be undone.
+              Your personal details will be removed and you&apos;ll be signed out. Event history is retained anonymously. This cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
               <button

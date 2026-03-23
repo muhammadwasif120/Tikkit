@@ -5,12 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   Search, MapPin, Clock, Lock, Flame, Zap, Star, CalendarDays,
-  Building2, Users, Heart,
+  Building2, Heart,
 } from 'lucide-react'
 import { toggleFavouriteOrganizer } from '@/app/actions/organizerActions'
 import { toggleEventFavourite } from '@/app/actions/eventFavouriteActions'
 import type { TopOrganizer } from '@/app/actions/organizerActions'
-import type { EventCategory } from '@/app/actions/behaviourActions'
+
 
 /* ─── Types ──────────────────────────────────────────────────── */
 type Organizer = {
@@ -197,7 +197,7 @@ function TopOrganizersStrip({
   userId: string | null
 }) {
   const [organizers, setOrganizers] = useState(initial)
-  const [pending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
 
   if (!organizers.length) return null
 
@@ -532,7 +532,8 @@ export default function ExploreClient({
     if (!userId) return
     setFavIds(prev => {
       const next = new Set(prev)
-      next.has(eventId) ? next.delete(eventId) : next.add(eventId)
+      if (next.has(eventId)) next.delete(eventId)
+      else next.add(eventId)
       return next
     })
     startFavTransition(async () => {
@@ -540,7 +541,8 @@ export default function ExploreClient({
       // Sync if server disagrees
       setFavIds(prev => {
         const next = new Set(prev)
-        res.favourited ? next.add(eventId) : next.delete(eventId)
+        if (res.favourited) next.add(eventId)
+        else next.delete(eventId)
         return next
       })
     })

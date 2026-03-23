@@ -20,11 +20,11 @@ export async function submitPaymentScreenshot(formData: FormData) {
   if (screenshot.size > 5 * 1024 * 1024) return { error: 'File too large (max 5MB)' }
 
   // Verify this registration belongs to the current user and is in eoi_approved state
-  const { data: reg, error: regError } = await supabase
+  const { data: reg, error: regError } = await (supabase as any)
     .from('public_registrations')
-    .select('id, status, guest_id, event_id')
+    .select('id, status, email, event_id')
     .eq('id', registrationId)
-    .eq('guest_id', user.id)
+    .eq('email', user.email)
     .single()
 
   if (regError || !reg) return { error: 'Registration not found' }
@@ -56,7 +56,7 @@ export async function submitPaymentScreenshot(formData: FormData) {
       payment_submitted_at: new Date().toISOString(),
     })
     .eq('id', registrationId)
-    .eq('guest_id', user.id)
+    .eq('email', user.email!)
 
   if (updateError) return { error: 'Could not update registration status' }
 
@@ -70,10 +70,10 @@ export async function submitPaymentScreenshot(formData: FormData) {
   if (event) {
     await supabase.from('notifications').insert({
       user_id: event.organizer_id,
-      type: 'payment_submitted',
+      type: 'guest_signup',
       title: 'Payment Screenshot Received',
       body: `A guest has submitted a payment screenshot for ${event.title}`,
-      data: { registration_id: registrationId, event_id: reg.event_id },
+      metadata: { registration_id: registrationId, event_id: reg.event_id } as any,
     })
   }
 
@@ -195,7 +195,7 @@ export async function deleteAccount() {
 
   // Soft-delete: wipe personal data, keep anonymised records intact
   await supabase.from('profiles').update({
-    full_name: null,
+    full_name: 'Deleted User',
     phone_number: null,
     avatar_url: null,
   }).eq('id', user.id)

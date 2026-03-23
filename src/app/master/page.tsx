@@ -6,7 +6,7 @@ import {
   LayoutDashboard, Users, Calendar, MessageSquare,
   Shield, Mail, Phone, CheckCircle, Search, ArrowUpRight,
   MoreHorizontal, Flag, Trash2, Send, X, Menu,
-  UserX, UserCheck, TrendingUp, ExternalLink, RefreshCw,
+  UserCheck, TrendingUp, ExternalLink, RefreshCw,
   Eye, Ban, AlertTriangle, Clock, ChevronRight, ChevronLeft, BarChart2, Star, Download,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
@@ -256,7 +256,10 @@ function OrgDetailView({
         {/* Banner */}
         <div className="od-banner">
           {profile.cover_image_url
-            ? <img src={profile.cover_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ? <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={profile.cover_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </>
             : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${avatarBg}40 0%, #080A14 100%)` }} />
           }
           {/* Status actions in top-right of banner */}
@@ -284,7 +287,10 @@ function OrgDetailView({
         <div className="od-profile-hdr">
           <div className="od-avatar-wrap">
             {profile.logo_url
-              ? <img src={profile.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ? <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={profile.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                </>
               : <div className="od-avatar-initials" style={{ background: avatarBg }}>{initials(displayName)}</div>
             }
           </div>
@@ -864,7 +870,7 @@ export default function MasterPage() {
     if (waitlist.length > 0) return // already loaded
     setWaitlistLoading(true)
     getWaitlistEntries().then(setWaitlist).finally(() => setWaitlistLoading(false))
-  }, [authed, tab])
+  }, [authed, tab, waitlist.length])
 
   // Derived
   const liveOrgs = orgs.filter(o => !removedOrgs.has(o.id))

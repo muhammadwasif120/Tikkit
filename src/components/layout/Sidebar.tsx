@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, Users, ScanLine,
-  Building2, BarChart3, Settings, LogOut, Ticket, ClipboardCheck, X, UserCircle,
+  Building2, BarChart3, Settings, LogOut, ClipboardCheck, X, UserCircle,
   Radio,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'

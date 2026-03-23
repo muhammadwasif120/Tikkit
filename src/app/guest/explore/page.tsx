@@ -41,10 +41,12 @@ async function ExploreData() {
       .not('status', 'in', '("rejected","cancelled")')
       .order('created_at', { ascending: false })
       .limit(10)
-    return (data ?? []).filter(r => {
-      const eventDate = (r as any).event?.date_start
-      return eventDate && new Date(eventDate) >= new Date()
-    })
+    return (data ?? [])
+      .filter(r => {
+        const eventDate = (r as any).event?.date_start
+        return eventDate && new Date(eventDate) >= new Date()
+      })
+      .map((r: any) => ({ ...r, status: r.status ?? 'pending' }))
   })() : []
 
   // Sort events by user's category interest scores (personalised feed)

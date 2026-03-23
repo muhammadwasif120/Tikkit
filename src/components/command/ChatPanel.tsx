@@ -163,6 +163,7 @@ const CSS = `
   .cp-send:disabled { opacity:0.35; cursor:not-allowed; box-shadow:none; }
 `
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default function ChatPanel({ eventId, initialMessages, organizerName }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [input, setInput] = useState('')

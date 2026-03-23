@@ -6,6 +6,7 @@ import { createNotification, Notifications } from '@/lib/supabase/notifications'
 
 export async function registerForEvent(formData: FormData) {
   const supabase = await createClient()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: { user } } = await supabase.auth.getUser()
 
   const eventId        = formData.get('eventId')     as string
@@ -79,6 +80,7 @@ export async function registerForEvent(formData: FormData) {
 
 export async function submitEOI(formData: FormData) {
   const supabase = await createClient()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: { user } } = await supabase.auth.getUser()
 
   const eventId        = formData.get('eventId')     as string

@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCommandEvents } from '@/app/actions/commandActions'
-import { Radio, Calendar, Users, ChevronRight, Zap, MessageSquare, Shield, ArrowRight } from 'lucide-react'
+import { Radio, Calendar, Users, ChevronRight, MessageSquare, Shield, ArrowRight } from 'lucide-react'
 import { sortEvents } from '@/lib/sortEvents'
 import { getEffectiveStatus } from '@/lib/eventStatus'
 

@@ -217,7 +217,7 @@ export default function ScannerPage() {
       if (data?.[0]) setEventId(data[0].id)
     }
     loadEvents()
-  }, [])
+  }, [supabase])
 
   const resetForNextScan = useCallback(() => {
     setResult(null)

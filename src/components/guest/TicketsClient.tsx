@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Ticket, MapPin, Calendar, CheckCircle } from 'lucide-react'
+import Link from 'next/link'
 import QRCode from 'qrcode'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
@@ -28,80 +29,7 @@ function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
 function msUntil(iso: string) { return new Date(iso).getTime() - Date.now() }
-/* ─── Confetti ───────────────────────────────────────────────────── */
-function Confetti({ active }: { active: boolean }) {
-  const colors = ['#1E5EFF','#EAB308','#EF4444','#10B981','#A855F7','#F97316']
-  if (!active) return null
-  return (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
-      {Array.from({ length: 60 }).map((_, i) => (
-        <div key={i} style={{
-          position: 'absolute',
-          left: `${Math.random() * 100}%`,
-          top: `-10px`,
-          width: `${6 + Math.random() * 8}px`,
-          height: `${6 + Math.random() * 8}px`,
-          borderRadius: Math.random() > 0.5 ? '50%' : '2px',
-          background: colors[Math.floor(Math.random() * colors.length)],
-          animation: `confettiFall ${1.5 + Math.random() * 2}s ease-in forwards`,
-          animationDelay: `${Math.random() * 0.8}s`,
-          transform: `rotate(${Math.random() * 360}deg)`,
-        }} />
-      ))}
-    </div>
-  )
-}
 
-/* ─── Ticket tear animation ──────────────────────────────────────── */
-function TicketTear({ onComplete }: { onComplete: () => void }) {
-  const [stage, setStage] = useState(0) // 0=idle 1=tearing 2=done
-
-  useEffect(() => {
-    setStage(1)
-    const t1 = setTimeout(() => setStage(2), 600)
-    const t2 = setTimeout(() => onComplete(), 900)
-    return () => { clearTimeout(t1); clearTimeout(t2) }
-  }, [])
-
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 300,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
-    }}>
-      <div style={{
-        width: 280, height: 140, position: 'relative',
-        transform: stage === 1 ? 'scale(1.05)' : 'scale(1)',
-        transition: 'transform 0.3s ease',
-      }}>
-        {/* Top half */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
-          background: 'linear-gradient(135deg,#1E3A5F,#1E5EFF)',
-          borderRadius: '16px 16px 0 0',
-          transform: stage === 1 ? 'translateY(-20px) rotate(-2deg)' : 'none',
-          transition: 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Ticket size={28} color="rgba(255,255,255,0.6)" />
-        </div>
-        {/* Tear line */}
-        <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 2, background: 'rgba(255,255,255,0.15)', zIndex: 1 }} />
-        {/* Bottom half */}
-        <div style={{
-          position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%',
-          background: 'linear-gradient(135deg,#1E5EFF,#818CF8)',
-          borderRadius: '0 0 16px 16px',
-          transform: stage === 1 ? 'translateY(20px) rotate(2deg)' : 'none',
-          transition: 'transform 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 700, letterSpacing: '2px' }}>UNLOCKED</span>
-        </div>
-      </div>
-    </div>
-  )
-}
 
 /* ─── QR Card ────────────────────────────────────────────────────── */
 function QRTicketCard({ ticket }: { ticket: TicketData }) {
@@ -181,7 +109,10 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
             }}
           >
             {qrSrc
-              ? <img src={qrSrc} alt="QR" style={{ width: 196, height: 196, display: 'block', borderRadius: 8 }} />
+              ? <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={qrSrc} alt="QR" style={{ width: 196, height: 196, display: 'block', borderRadius: 8 }} />
+                </>
               : <div style={{ width: 196, height: 196, background: '#E5E7EB', borderRadius: 8 }} />
             }
           </div>
@@ -220,9 +151,9 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
         <Ticket size={48} color="#1E5EFF" style={{ opacity: 0.25, marginBottom: 16 }} />
         <h3 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No tickets yet</h3>
         <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px' }}>Register and get confirmed for events to see your tickets here.</p>
-        <a href="/guest/explore" style={{ display: 'inline-block', padding: '12px 24px', borderRadius: 14, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
+        <Link href="/guest/explore" style={{ display: 'inline-block', padding: '12px 24px', borderRadius: 14, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
           Explore Events
-        </a>
+        </Link>
       </div>
     )
   }

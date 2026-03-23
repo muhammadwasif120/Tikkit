@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import { joinPlatformWaitlist } from '@/app/actions/waitlistActions'
 import {
-  Zap, Users, QrCode, BarChart3, CheckCircle,
+  Users, QrCode, BarChart3, CheckCircle,
   ArrowRight, Sparkles, Star,
 } from 'lucide-react'
 
@@ -34,11 +34,13 @@ function ParticleCanvas() {
     const colors = ['rgba(30,94,255,', 'rgba(0,229,255,', 'rgba(136,0,204,']
 
     function resize() {
+      if (!canvas || !ctx) return
       w = canvas.width = window.innerWidth
       h = canvas.height = window.innerHeight
     }
 
     function init() {
+      if (!canvas || !ctx) return
       particles.length = 0
       const count = Math.floor((w * h) / 14000)
       for (let i = 0; i < count; i++) {
@@ -55,6 +57,7 @@ function ParticleCanvas() {
     }
 
     function draw() {
+      if (!canvas || !ctx) return
       ctx.clearRect(0, 0, w, h)
       for (const p of particles) {
         p.x += p.vx
@@ -331,7 +334,7 @@ export function ComingSoonClient({ initialCount }: Props) {
             margin: '0 auto 40px',
             animation: 'fadeUp 0.6s ease 0.2s both',
           }}>
-            Pakistan's first all-in-one event management platform.
+            Pakistan&apos;s first all-in-one event management platform.
             Guest lists, QR check-in, payments, vendors — all in one place.
           </p>
 
@@ -417,10 +420,10 @@ export function ComingSoonClient({ initialCount }: Props) {
                   fontSize: 'var(--fs-2xl)', fontWeight: 700,
                   color: '#F0F2FF', marginBottom: 10,
                 }}>
-                  You're on the list!
+                  You&apos;re on the list!
                 </div>
                 <p style={{ fontSize: 'var(--fs-md)', color: '#6B7280', lineHeight: 1.6, maxWidth: 340, margin: '0 auto 20px' }}>
-                  We'll send you early access when we launch.
+                  We&apos;ll send you early access when we launch.
                   Tell a friend — the more the merrier.
                 </p>
                 <div style={{
@@ -612,7 +615,7 @@ export function ComingSoonClient({ initialCount }: Props) {
             letterSpacing: '0.12em', textTransform: 'uppercase',
             marginBottom: 20,
           }}>
-            What's coming
+            What&apos;s coming
           </p>
           <div style={{
             display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center',

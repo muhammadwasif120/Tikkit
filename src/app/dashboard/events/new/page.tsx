@@ -107,7 +107,7 @@ export default function NewEventPage() {
           .order('created_at', { ascending: false }),
         getEventCategories(),
       ])
-      setPaymentAccounts(data ?? [])
+      setPaymentAccounts((data ?? []).map((a: any) => ({ ...a, is_default: false })))
       setCategories(cats)
     }
     load()
@@ -166,7 +166,7 @@ export default function NewEventPage() {
         reference_code:          form.reference_code || null,
         category_id:             form.category_id || null,
         status:                  'draft',
-      })
+      } as any)
       .select()
       .single()
 
@@ -189,7 +189,7 @@ export default function NewEventPage() {
     }
 
     // 2. Insert enabled ticket tiers
-    const inserts: object[] = []
+    const inserts: any[] = []
 
     if (tiers.standard.enabled) {
       inserts.push({

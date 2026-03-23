@@ -24,7 +24,7 @@ async function PassesData() {
     .filter((p: any) => p.issued_at >= oneDayAgo)
     .map((p: any) => p.id)
 
-  return <PassesClient passes={passes ?? []} newPassIds={newPassIds} />
+  return <PassesClient passes={(passes ?? []).map((p: any) => ({ ...p, pass_type: p.pass_type ?? 'qr', metadata: p.metadata ?? {} }))} newPassIds={newPassIds} />
 }
 
 export default function PassesPage() {

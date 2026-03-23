@@ -110,7 +110,7 @@ export default function PublicNav({ activePage }: Props) {
         </Link>
 
         <div className="pub-nav-links">
-          <a href="/#features" className={`pub-nav-link${activePage === 'home' ? ' active' : ''}`}>Features</a>
+          <Link href="/#features" className={`pub-nav-link${activePage === 'home' ? ' active' : ''}`}>Features</Link>
           <Link href="/how-it-works" className={`pub-nav-link${activePage === 'how-it-works' ? ' active' : ''}`}>How it works</Link>
           <Link href="/explore" className={`pub-nav-link${activePage === 'explore' ? ' active' : ''}`}>Explore</Link>
         </div>
@@ -133,7 +133,7 @@ export default function PublicNav({ activePage }: Props) {
             <X size={24} />
           </button>
         </div>
-        <a href="/#features" className="pub-mmenu-link" onClick={() => setMenuOpen(false)}>Features</a>
+        <Link href="/#features" className="pub-mmenu-link" onClick={() => setMenuOpen(false)}>Features</Link>
         <Link href="/how-it-works" className="pub-mmenu-link" onClick={() => setMenuOpen(false)}>How it works</Link>
         <Link href="/explore" className={`pub-mmenu-link${activePage === 'explore' ? ' active' : ''}`} onClick={() => setMenuOpen(false)}>Explore</Link>
         <div className="pub-mmenu-actions">

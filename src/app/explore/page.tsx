@@ -46,7 +46,7 @@ export default async function ExplorePage() {
   }
 
   // Batch registration counts (depends on events result — unavoidable)
-  let regCounts: Record<string, number> = {}
+  const regCounts: Record<string, number> = {}
   const events = rawEvents ?? []
   if (events.length > 0) {
     const { data: regRows } = await admin

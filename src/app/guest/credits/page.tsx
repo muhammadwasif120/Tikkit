@@ -25,7 +25,11 @@ async function CreditsData() {
   return (
     <CreditsClient
       profile={profileRes.data}
-      transactions={txRes.data ?? []}
+      transactions={(txRes.data ?? []).map((tx: any) => ({
+        ...tx,
+        amount: tx.points,
+        reason: tx.note ?? tx.type,
+      }))}
     />
   )
 }

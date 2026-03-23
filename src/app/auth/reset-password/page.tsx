@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Ticket, Eye, EyeOff, Lock, Check, AlertCircle, ChevronLeft } from 'lucide-react'
+import { Eye, EyeOff, Lock, Check, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
@@ -18,14 +18,15 @@ function ResetPasswordForm() {
   const [loading,         setLoading]         = useState(false)
   const [error,           setError]           = useState<string | null>(null)
   const [done,            setDone]            = useState(false)
-  const [sessionReady,    setSessionReady]    = useState(false)
+
 
   useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') setSessionReady(true)
+      // Handle password recovery state if needed
     })
     return () => subscription.unsubscribe()
-  }, [])
+  }, [supabase.auth])
 
   const strengthLevel = password.length === 0 ? 0
     : password.length < 6  ? 1
@@ -46,15 +47,6 @@ function ResetPasswordForm() {
     else { setDone(true); setTimeout(() => router.push('/auth/login'), 3000) }
   }
 
-  const inputStyle = (focused: boolean): React.CSSProperties => ({
-    display: 'block', width: '100%',
-    padding: '14px 44px 14px 16px',
-    background: focused ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
-    border: `1px solid ${focused ? 'rgba(30,94,255,0.45)' : 'rgba(255,255,255,0.07)'}`,
-    borderRadius: 12, color: '#F0F2FF', fontSize: 'var(--fs-md)', outline: 'none',
-    boxSizing: 'border-box', fontFamily: 'var(--font-body)',
-    transition: 'background .15s, border-color .15s',
-  })
 
   return (
     <>

@@ -26,8 +26,8 @@ async function VendorsData() {
 
   return (
     <VendorsClient
-      vendors={vendors ?? []}
-      invoices={invoices ?? []}
+      vendors={(vendors ?? []).map((v: any) => ({ ...v, category: v.category ?? 'General' }))}
+      invoices={(invoices ?? []).map((i: any) => ({ ...i, status: i.status ?? 'pending' }))}
       events={events ?? []}
       userId={user!.id}
     />

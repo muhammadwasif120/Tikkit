@@ -54,7 +54,7 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [eventId, userId])
+  }, [eventId, userId, organizerName, supabase])
 
   const handleSend = async () => {
     const trimmed = input.trim()

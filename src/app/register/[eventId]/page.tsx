@@ -94,7 +94,7 @@ async function RegistrationData({ eventId }: { eventId: string }) {
             <p className="text-gray-400 text-sm mt-1">No more spots available for this event.</p>
           </div>
         ) : (
-          <PublicRegistrationForm event={event} ticketTypes={ticketTypes ?? []} />
+          <PublicRegistrationForm event={event} ticketTypes={(ticketTypes ?? []).map((t: any) => ({ ...t, price: t.price ?? 0 }))} />
         )}
 
         {typeof window === 'undefined' ? (

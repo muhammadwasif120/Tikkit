@@ -15,7 +15,7 @@ export async function syncEventStatuses(): Promise<void> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return
 
-  const now = new Date().toISOString()
+
 
   // 1. published → completed (12 h after date_end)
   await (supabase as any)

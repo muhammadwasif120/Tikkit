@@ -5,7 +5,6 @@ import { createClient } from '@/lib/supabase/client'
 import { Plus, CalendarDays, MapPin, Users, Edit2, Trash2, X, Check, ChevronDown, Lock, Eye, ChevronRight } from 'lucide-react'
 import { getEffectiveStatus } from '@/lib/eventStatus'
 import { format } from 'date-fns'
-import clsx from 'clsx'
 import Link from 'next/link'
 
 const COVER_GRADIENTS = [
@@ -101,8 +100,8 @@ export default function EventsClient({
       description: editForm.description || null,
       venue_name: editForm.venue_name || null,
       venue_address: editForm.venue_address || null,
-      date_start: editForm.date_start || null,
-      date_end: editForm.date_end || null,
+      date_start: editForm.date_start || undefined,
+      date_end: editForm.date_end || undefined,
       capacity: parseInt(editForm.capacity) || 0,
       status: editForm.status,
       budget: parseFloat(editForm.budget) || 0,
@@ -160,11 +159,11 @@ export default function EventsClient({
           </Link>
         </div>
       ) : (() => {
-        const activeEvents   = events.filter(e => { const s = getEffectiveStatus(e); return s !== 'completed' && s !== 'archived' && s !== 'cancelled' })
-        const archivedEvents = events.filter(e => { const s = getEffectiveStatus(e); return s === 'completed' || s === 'archived' || s === 'cancelled' })
+        const activeEvents   = events.filter(e => { const s = getEffectiveStatus(e as any); return s !== 'completed' && s !== 'archived' && s !== 'cancelled' })
+        const archivedEvents = events.filter(e => { const s = getEffectiveStatus(e as any); return s === 'completed' || s === 'archived' || s === 'cancelled' })
 
         const renderCard = (event: Event, isArchived: boolean) => {
-          const effStatus = getEffectiveStatus(event)
+          const effStatus = getEffectiveStatus(event as any)
           const st = STATUS_CONFIG[effStatus] ?? STATUS_CONFIG.draft
           const isLive = effStatus === 'published'
           const pending = pendingCounts[event.id] ?? 0
