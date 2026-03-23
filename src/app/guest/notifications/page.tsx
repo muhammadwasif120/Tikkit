@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import GuestNotificationsClient from '@/components/guest/GuestNotificationsClient'
-import CyberLoader from '@/components/guest/CyberLoader'
+import GuestLoader from '@/components/guest/GuestLoader'
 
 async function NotificationsData() {
   const supabase = await createClient()
@@ -22,7 +22,7 @@ async function NotificationsData() {
 
 export default function GuestNotificationsPage() {
   return (
-    <Suspense fallback={<CyberLoader />}>
+    <Suspense fallback={<GuestLoader />}>
       <NotificationsData />
     </Suspense>
   )

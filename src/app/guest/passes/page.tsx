@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PassesClient from '@/components/guest/PassesClient'
-import CyberLoader from '@/components/guest/CyberLoader'
+import GuestLoader from '@/components/guest/GuestLoader'
 
 async function PassesData() {
   const supabase = await createClient()
@@ -25,7 +25,7 @@ async function PassesData() {
 
 export default function PassesPage() {
   return (
-    <Suspense fallback={<CyberLoader />}>
+    <Suspense fallback={<GuestLoader />}>
       <PassesData />
     </Suspense>
   )

@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGuestChatMessages } from '@/app/actions/commandActions'
 import GuestChatPanel from '@/components/guest/GuestChatPanel'
-import CyberLoader from '@/components/guest/CyberLoader'
+import GuestLoader from '@/components/guest/GuestLoader'
 
 async function ChatData({ eventId }: { eventId: string }) {
   const supabase = await createClient()
@@ -31,7 +31,7 @@ export default async function GuestChatPage({
 }) {
   const { id } = await params
   return (
-    <Suspense fallback={<CyberLoader />}>
+    <Suspense fallback={<GuestLoader />}>
       <ChatData eventId={id} />
     </Suspense>
   )

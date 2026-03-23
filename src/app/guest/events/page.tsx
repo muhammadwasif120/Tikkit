@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import MyEventsClient from '@/components/guest/MyEventsClient'
-import CyberLoader from '@/components/guest/CyberLoader'
+import GuestLoader from '@/components/guest/GuestLoader'
 
 async function MyEventsData() {
   const supabase = await createClient()
@@ -20,7 +20,7 @@ async function MyEventsData() {
 
 export default function MyEventsPage() {
   return (
-    <Suspense fallback={<CyberLoader />}>
+    <Suspense fallback={<GuestLoader />}>
       <MyEventsData />
     </Suspense>
   )

@@ -2,7 +2,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import ProfileClient from '@/components/guest/ProfileClient'
-import CyberLoader from '@/components/guest/CyberLoader'
+import GuestLoader from '@/components/guest/GuestLoader'
 
 async function ProfileData() {
   const supabase = await createClient()
@@ -68,7 +68,7 @@ async function ProfileData() {
 
 export default function ProfilePage() {
   return (
-    <Suspense fallback={<CyberLoader />}>
+    <Suspense fallback={<GuestLoader />}>
       <ProfileData />
     </Suspense>
   )

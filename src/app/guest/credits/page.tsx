@@ -3,7 +3,7 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import CreditsClient from '@/components/guest/CreditsClient'
-import CyberLoader from '@/components/guest/CyberLoader'
+import GuestLoader from '@/components/guest/GuestLoader'
 
 async function CreditsData() {
   const supabase = await createClient()
@@ -32,7 +32,7 @@ async function CreditsData() {
 
 export default function CreditsPage() {
   return (
-    <Suspense fallback={<CyberLoader />}>
+    <Suspense fallback={<GuestLoader />}>
       <CreditsData />
     </Suspense>
   )
