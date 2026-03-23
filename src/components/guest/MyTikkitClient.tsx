@@ -100,15 +100,32 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
   const ev = reg.event!
   const [qrSrc, setQrSrc] = useState('')
   const [bright, setBright] = useState(false)
+  const [isOnline, setIsOnline] = useState(typeof window !== 'undefined' ? navigator.onLine : true)
   const ticketCode = `TIKKIT-${reg.id.replace(/-/g,'').slice(0,16).toUpperCase()}`
+  const cacheKey = `qr_${reg.id}`
+
+  // Track online/offline
+  useEffect(() => {
+    const up = () => setIsOnline(true)
+    const down = () => setIsOnline(false)
+    window.addEventListener('online', up)
+    window.addEventListener('offline', down)
+    return () => { window.removeEventListener('online', up); window.removeEventListener('offline', down) }
+  }, [])
 
   useEffect(() => {
-    QRCode.toDataURL(ticketCode, {
+    // Use cached QR value if available (works offline), otherwise cache now
+    const cached = typeof window !== 'undefined' ? localStorage.getItem(cacheKey) : null
+    const qrValue = cached ?? ticketCode
+    if (!cached && typeof window !== 'undefined') {
+      localStorage.setItem(cacheKey, ticketCode)
+    }
+    QRCode.toDataURL(qrValue, {
       width: 260, margin: 2,
       color: { dark: '#080A10', light: '#FFFFFF' },
       errorCorrectionLevel: 'H',
     }).then(setQrSrc)
-  }, [ticketCode])
+  }, [ticketCode, cacheKey])
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
@@ -174,6 +191,12 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
           <p style={{ color: '#4B5563', fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.5px' }}>
             {ticketCode}
           </p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 6 }}>
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: isOnline ? '#10B981' : '#F59E0B', flexShrink: 0 }} />
+            <span style={{ fontSize: 10, color: isOnline ? '#10B981' : '#F59E0B' }}>
+              {isOnline ? 'Live' : 'Offline · Cached QR'}
+            </span>
+          </div>
         </div>
 
         {/* Guest chip */}

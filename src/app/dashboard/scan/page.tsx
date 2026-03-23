@@ -3,7 +3,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Html5Qrcode } from 'html5-qrcode'
-import { CheckCircle, XCircle, ScanLine, X, LogIn, LogOut, Crown, Wifi, Camera, Hash } from 'lucide-react'
+import { CheckCircle, XCircle, ScanLine, X, LogIn, LogOut, Crown, Wifi, WifiOff, Camera, Hash, RefreshCw } from 'lucide-react'
+import { syncOfflineCheckins } from '@/app/actions/qrActions'
+import { isQRToken, verifyQRToken, importKeyBase64, QRPayload } from '@/lib/qrCrypto'
 
 
 const OVERLAY_DURATION = 8000
@@ -137,6 +139,15 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
   )
 }
 
+type OfflineCheckin = { guestId: string; eventId: string; scannedAt: string; name: string }
+
+function getOfflineQueue(): OfflineCheckin[] {
+  try { return JSON.parse(localStorage.getItem('tikkit_checkin_queue') ?? '[]') } catch { return [] }
+}
+function saveOfflineQueue(q: OfflineCheckin[]) {
+  localStorage.setItem('tikkit_checkin_queue', JSON.stringify(q))
+}
+
 export default function ScannerPage() {
   const supabase = createClient()
   const scannerRef = useRef<Html5Qrcode | null>(null)
@@ -147,6 +158,9 @@ export default function ScannerPage() {
   const [scanType, setScanType] = useState<'entry' | 'exit'>('entry')
   const [scanCount, setScanCount] = useState(0)
   const [pendingStart, setPendingStart] = useState(false)
+  const [isOnline, setIsOnline] = useState(true)
+  const [pendingSync, setPendingSync] = useState(0)
+  const [syncing, setSyncing] = useState(false)
 
   const cooldownRef = useRef(false)
   const lastScanRef = useRef('')
@@ -155,6 +169,39 @@ export default function ScannerPage() {
 
   useEffect(() => { eventIdRef.current = eventId }, [eventId])
   useEffect(() => { scanTypeRef.current = scanType }, [scanType])
+
+  // Online/offline detection + queue sync on reconnect
+  useEffect(() => {
+    const online = () => {
+      setIsOnline(true)
+      const queue = getOfflineQueue()
+      if (queue.length > 0) {
+        setSyncing(true)
+        syncOfflineCheckins(queue.map(q => ({ guestId: q.guestId, eventId: q.eventId, scannedAt: q.scannedAt })))
+          .then(({ synced }) => {
+            if (synced > 0) saveOfflineQueue(getOfflineQueue().filter(q => !queue.find(x => x.guestId === q.guestId && x.scannedAt === q.scannedAt)))
+            setPendingSync(getOfflineQueue().length)
+          })
+          .finally(() => setSyncing(false))
+      }
+    }
+    const offline = () => setIsOnline(false)
+    setIsOnline(navigator.onLine)
+    setPendingSync(getOfflineQueue().length)
+    window.addEventListener('online', online)
+    window.addEventListener('offline', offline)
+    return () => { window.removeEventListener('online', online); window.removeEventListener('offline', offline) }
+  }, [])
+
+  // Cache event scan key when event is selected and online
+  useEffect(() => {
+    if (!eventId || !isOnline) return
+    import('@/app/actions/qrActions').then(({ getEventScanKey }) => {
+      getEventScanKey(eventId).then(res => {
+        if (res) localStorage.setItem(`scan_key_${eventId}`, res.keyB64)
+      })
+    })
+  }, [eventId, isOnline])
 
   useEffect(() => {
     const loadEvents = async () => {
@@ -185,15 +232,77 @@ export default function ScannerPage() {
     cooldownRef.current = true
     lastScanRef.current = qrCode
 
-    const { data: { user } } = await supabase.auth.getUser()
     const currentEventId = eventIdRef.current
     const currentScanType = scanTypeRef.current
 
-    const { data: guest } = await supabase
-      .from('guests')
-      .select('*')
-      .eq('qr_code', qrCode)
+    // ── OFFLINE PATH ─────────────────────────────────────────────────
+    if (!navigator.onLine && isQRToken(qrCode)) {
+      const keyB64 = localStorage.getItem(`scan_key_${currentEventId}`)
+      if (!keyB64) {
+        setResult({ success: false, message: 'Offline — no cached key for this event. Connect to internet first.' })
+        setTimeout(resetForNextScan, OVERLAY_DURATION)
+        return
+      }
+      try {
+        const key = await importKeyBase64(keyB64)
+        const payload: QRPayload | null = await verifyQRToken(qrCode, key)
+        if (!payload) {
+          setResult({ success: false, message: 'Invalid or expired QR code.' })
+          setTimeout(resetForNextScan, OVERLAY_DURATION)
+          return
+        }
+        if (payload.eid !== currentEventId) {
+          setResult({ success: false, message: 'QR is for a different event.' })
+          setTimeout(resetForNextScan, OVERLAY_DURATION)
+          return
+        }
+        // Day validation
+        if (payload.days && payload.days.length > 0) {
+          const today = new Date().toISOString().slice(0, 10)
+          if (!payload.days.includes(today)) {
+            setResult({ success: false, message: 'Ticket not valid today.', guestName: payload.name, validDays: payload.days })
+            setTimeout(resetForNextScan, OVERLAY_DURATION)
+            return
+          }
+        }
+        // Queue for sync
+        const now = new Date().toISOString()
+        const queue = getOfflineQueue()
+        if (!queue.find(q => q.guestId === payload.gid)) {
+          queue.push({ guestId: payload.gid, eventId: currentEventId, scannedAt: now, name: payload.name })
+          saveOfflineQueue(queue)
+          setPendingSync(queue.length)
+        }
+        setScanCount(c => c + 1)
+        setResult({ success: true, message: 'Entry queued (offline) ✓', guestName: payload.name, scanType: currentScanType })
+        setTimeout(resetForNextScan, OVERLAY_DURATION)
+        return
+      } catch {
+        setResult({ success: false, message: 'Offline verification failed.' })
+        setTimeout(resetForNextScan, OVERLAY_DURATION)
+        return
+      }
+    }
+
+    // ── ONLINE PATH ───────────────────────────────────────────────────
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Support both new JWT tokens (extract gid) and legacy qr_code field
+    let filterField = 'qr_code'
+    let filterValue = qrCode
+    if (isQRToken(qrCode)) {
+      try {
+        const parts = qrCode.split('.')
+        const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/'))) as QRPayload
+        filterField = 'id'
+        filterValue = payload.gid
+      } catch { /* fall through to qr_code lookup */ }
+    }
+
+    const { data: guest } = await (supabase as any)
+      .from('guests').select('*')
       .eq('event_id', currentEventId)
+      .eq(filterField, filterValue)
       .single()
 
     if (!guest) {
@@ -352,6 +461,32 @@ export default function ScannerPage() {
           <p className="text-gray-400 text-sm mt-1">Scan guest QR codes for entry and exit</p>
         </div>
 
+        {/* Offline / sync banners */}
+        {!isOnline && (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
+            <WifiOff className="w-4 h-4 text-amber-400 shrink-0" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-amber-400">Offline Mode</p>
+              <p className="text-xs text-amber-400/70">QR codes will be verified locally and queued for sync.</p>
+            </div>
+            {pendingSync > 0 && (
+              <span className="text-xs font-bold text-amber-400 bg-amber-500/20 px-2 py-0.5 rounded-full">{pendingSync} queued</span>
+            )}
+          </div>
+        )}
+        {isOnline && syncing && (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/30">
+            <RefreshCw className="w-4 h-4 text-blue-400 animate-spin shrink-0" />
+            <p className="text-sm text-blue-400">Syncing offline check-ins…</p>
+          </div>
+        )}
+        {isOnline && !syncing && pendingSync > 0 && (
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-green-500/10 border border-green-500/30">
+            <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
+            <p className="text-sm text-green-400">{pendingSync} check-in(s) pending sync — will sync automatically.</p>
+          </div>
+        )}
+
         <div className="card space-y-4">
           <div>
             <label className="label">Select Event</label>
@@ -407,8 +542,10 @@ export default function ScannerPage() {
         <div className={`card overflow-hidden p-0 ${!scanning ? 'hidden' : ''}`}>
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-xs text-green-400 font-medium">Live</span>
+              <span className={`w-2 h-2 rounded-full animate-pulse ${isOnline ? 'bg-green-400' : 'bg-amber-400'}`} />
+              <span className={`text-xs font-medium ${isOnline ? 'text-green-400' : 'text-amber-400'}`}>
+                {isOnline ? 'Live' : 'Offline'}
+              </span>
               <span className="text-xs text-gray-600">·</span>
               <span className="text-xs text-gray-400 capitalize">{scanType}</span>
             </div>
@@ -420,7 +557,7 @@ export default function ScannerPage() {
                 </div>
               )}
               <div className="flex items-center gap-1 text-xs text-gray-500">
-                <Wifi className="w-3 h-3" />
+                {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
                 <span className="truncate max-w-[120px]">{selectedEvent?.title}</span>
               </div>
             </div>
