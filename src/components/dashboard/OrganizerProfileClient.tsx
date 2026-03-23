@@ -270,47 +270,45 @@ export default function OrganizerProfileClient({
   const avatarTop = BANNER_H - AVATAR_H / 2  // 88px — half overlaps banner
 
   return (
-    <div className="max-w-5xl space-y-6 px-0 pt-2 pb-6 sm:px-6 sm:pt-7">
+    <div className="max-w-5xl space-y-4 px-4 pt-0 pb-6 sm:px-6 sm:pt-2" style={{ overflowX: 'hidden' }}>
 
       {/* Hidden file inputs */}
       <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverChange} />
       <input ref={logoInputRef}  type="file" accept="image/*" className="hidden" onChange={handleLogoChange}  />
 
       {/* ── Header ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-            background: 'linear-gradient(135deg, rgba(30,94,255,0.2), rgba(34,197,94,0.1))',
-            border: '1px solid rgba(30,94,255,0.25)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 24px rgba(30,94,255,0.15)',
-          }}>
-            <UserCircle size={22} color="#1E5EFF" />
-          </div>
-          <div>
-            <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+          background: 'linear-gradient(135deg, rgba(30,94,255,0.2), rgba(34,197,94,0.1))',
+          border: '1px solid rgba(30,94,255,0.25)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 8px 24px rgba(30,94,255,0.15)',
+        }}>
+          <UserCircle size={22} color="#1E5EFF" />
+        </div>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+            <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
               Profile
             </h1>
-            <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
-              Your public identity and event portfolio
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          {profile.username && (
-            <Link
-              href={`/organizer/${profile.username}`}
-              target="_blank"
-              className="flex items-center gap-1.5 text-xs text-[#1E5EFF] hover:text-white border border-[#1E5EFF]/30 hover:border-white/25 rounded-lg px-3 py-1.5 transition-all"
-            >
-              <ExternalLink size={12} /> View Public Profile
+            {profile.username && (
+              <Link
+                href={`/organizer/${profile.username}`}
+                target="_blank"
+                className="flex items-center gap-1.5 text-xs text-[#1E5EFF] hover:text-white border border-[#1E5EFF]/30 hover:border-white/25 rounded-lg px-2.5 py-1 transition-all"
+              >
+                <ExternalLink size={12} /> <span className="hidden sm:inline">View Public Profile</span>
+              </Link>
+            )}
+            <Link href="/dashboard/settings"
+              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-2.5 py-1 transition-all">
+              <Settings size={13} /> <span className="hidden sm:inline">Edit Details</span>
             </Link>
-          )}
-          <Link href="/dashboard/settings"
-            className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-all">
-            <Settings size={13} /> Edit Details
-          </Link>
+          </div>
+          <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5, whiteSpace: 'nowrap' }}>
+            Public identity and event portfolio
+          </p>
         </div>
       </div>
 

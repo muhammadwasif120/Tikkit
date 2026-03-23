@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getCommandEvents } from '@/app/actions/commandActions'
 import { Radio, Calendar, Users, ChevronRight, Zap, MessageSquare, Shield, ArrowRight } from 'lucide-react'
+import { sortEvents } from '@/lib/sortEvents'
+import { getEffectiveStatus } from '@/lib/eventStatus'
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-PK', { weekday: 'short', day: 'numeric', month: 'short' })
@@ -24,9 +26,10 @@ const COVER_GRADIENTS = [
 function getGrad(id: string) { return COVER_GRADIENTS[id.charCodeAt(0) % COVER_GRADIENTS.length] }
 
 const STATUS_MAP: Record<string, { bg: string; color: string; border: string; label: string }> = {
-  published: { bg: 'rgba(34,197,94,0.1)',  color: '#22C55E', border: 'rgba(34,197,94,0.25)', label: 'LIVE' },
-  completed: { bg: 'rgba(75,85,99,0.1)',   color: '#6B7280', border: 'rgba(75,85,99,0.2)',   label: 'ENDED' },
-  draft:     { bg: 'rgba(250,204,21,0.1)', color: '#FACC15', border: 'rgba(250,204,21,0.2)', label: 'DRAFT' },
+  published: { bg: 'rgba(34,197,94,0.1)',  color: '#22C55E', border: 'rgba(34,197,94,0.25)', label: 'LIVE'     },
+  completed: { bg: 'rgba(75,85,99,0.1)',   color: '#6B7280', border: 'rgba(75,85,99,0.2)',   label: 'ENDED'    },
+  archived:  { bg: 'rgba(75,85,99,0.06)',  color: '#4B5563', border: 'rgba(75,85,99,0.12)',  label: 'ARCHIVED' },
+  draft:     { bg: 'rgba(250,204,21,0.1)', color: '#FACC15', border: 'rgba(250,204,21,0.2)', label: 'DRAFT'    },
 }
 
 export default async function CommandPage() {
@@ -34,7 +37,8 @@ export default async function CommandPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const events = await getCommandEvents()
+  const rawEvents = await getCommandEvents()
+  const events = sortEvents(rawEvents)
 
   return (
     <div className="max-w-5xl px-0 pt-2 pb-6 sm:px-6 sm:pt-7">
@@ -127,8 +131,9 @@ export default async function CommandPage() {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {events.map(event => {
-            const st = STATUS_MAP[event.status] ?? STATUS_MAP.completed
-            const isLive = event.status === 'published'
+            const effectiveStatus = getEffectiveStatus(event)
+            const st = STATUS_MAP[effectiveStatus] ?? STATUS_MAP.completed
+            const isLive = effectiveStatus === 'published'
 
             return (
               <Link key={event.id} href={`/dashboard/command/${event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
@@ -140,12 +145,13 @@ export default async function CommandPage() {
                   cursor: 'pointer',
                   boxShadow: isLive ? '0 4px 24px rgba(168,85,247,0.08)' : 'none',
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 14px' }}>
                     {/* Cover thumbnail */}
                     <div style={{
                       width: 72, height: 72, flexShrink: 0,
                       background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : getGrad(event.id),
                       position: 'relative',
+                      borderRadius: 12, overflow: 'hidden',
                     }}>
                       {isLive && (
                         <div style={{
@@ -156,15 +162,15 @@ export default async function CommandPage() {
                     </div>
 
                     {/* Info */}
-                    <div style={{ flex: 1, minWidth: 0, padding: '14px 16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                        <p style={{
-                          color: 'white', fontSize: 'var(--fs-md)', fontWeight: 800, margin: 0,
-                          fontFamily: 'var(--font-display)', letterSpacing: '-0.2px',
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                        }}>
-                          {event.title}
-                        </p>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{
+                        color: 'white', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 6px',
+                        fontFamily: 'var(--font-display)', letterSpacing: '-0.2px',
+                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      }}>
+                        {event.title}
+                      </p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                         <span style={{
                           padding: '2px 8px', borderRadius: 100, fontSize: 'var(--fs-2xs)', fontWeight: 800,
                           letterSpacing: '0.07em', flexShrink: 0,
@@ -174,8 +180,6 @@ export default async function CommandPage() {
                           {isLive && <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
                           {st.label}
                         </span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
                           <Calendar size={10} color="#4B5563" />
                           {fmtDate(event.date_start)} · {fmtTime(event.date_start)}

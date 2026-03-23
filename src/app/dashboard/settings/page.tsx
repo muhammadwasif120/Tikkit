@@ -320,11 +320,12 @@ export default function SettingsPage() {
   const inactiveInvites = invites.filter(i => i.revoked || isExpired(i))
 
   return (
-    <div className="max-w-2xl space-y-8">
+    <div className="max-w-2xl space-y-6">
       {/* Hidden file inputs for branding uploads */}
-      <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
-      <input ref={logoInputRef}  type="file" accept="image/*" className="hidden" onChange={handleLogoUpload}  />
-
+      <div className="hidden">
+        <input ref={coverInputRef} type="file" accept="image/*" onChange={handleCoverUpload} />
+        <input ref={logoInputRef}  type="file" accept="image/*" onChange={handleLogoUpload}  />
+      </div>
 
       {/* Profile + Password */}
       <div className="card space-y-5">

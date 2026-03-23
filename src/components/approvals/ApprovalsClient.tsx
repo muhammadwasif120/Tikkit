@@ -45,7 +45,7 @@ function StatusBadge({ status, paymentStatus }: { status: string; paymentStatus:
   if (status === 'rejected')                                          { label = 'Declined';          color = '#EF4444'; bg = 'rgba(239,68,68,0.1)';    border = 'rgba(239,68,68,0.2)';    Icon = XCircle       }
   else if (status === 'approved' && paymentStatus === 'confirmed')   { label = 'Confirmed';          color = '#22C55E'; bg = 'rgba(34,197,94,0.1)';   border = 'rgba(34,197,94,0.2)';    Icon = CheckCircle   }
   else if (status === 'approved' && paymentStatus === 'not_required'){ label = 'Approved';           color = '#22C55E'; bg = 'rgba(34,197,94,0.1)';   border = 'rgba(34,197,94,0.2)';    Icon = CheckCircle   }
-  else if (status === 'approved' && paymentStatus === 'pending')     { label = 'Awaiting Payment';   color = '#FFC745'; bg = 'rgba(255,199,69,0.1)';  border = 'rgba(255,199,69,0.2)';   Icon = AlertCircle   }
+  else if (status === 'approved' && paymentStatus === 'pending')     { label = 'Awaiting';           color = '#FFC745'; bg = 'rgba(255,199,69,0.1)';  border = 'rgba(255,199,69,0.2)';   Icon = AlertCircle   }
   else if (status === 'approved' && paymentStatus === 'submitted')   { label = 'Payment Submitted';  color = '#F97316'; bg = 'rgba(249,115,22,0.1)';  border = 'rgba(249,115,22,0.2)';   Icon = CreditCard    }
   else if (status === 'pending')                                      { label = 'Pending Review';     color = '#6B7280'; bg = 'rgba(107,114,128,0.1)'; border = 'rgba(107,114,128,0.15)'; Icon = Clock         }
 
@@ -431,12 +431,12 @@ export default function ApprovalsClient({
         {FILTERS.map((f, i) => {
           const isActive  = filter === f
           const isUrgent  = f === 'Pending' || f === 'Payment Review'
-          const isLast    = i === FILTERS.length - 1
+          const isFirst   = i === 0
           return (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={isLast ? 'col-span-2 sm:col-span-1' : undefined}
+              className={isFirst ? 'col-span-2 sm:col-span-1' : undefined}
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '12px 14px', borderRadius: 14, cursor: 'pointer', transition: 'all 0.15s',
@@ -451,8 +451,10 @@ export default function ApprovalsClient({
               <span style={{
                 fontSize: 'var(--fs-sm)', fontWeight: 700,
                 color: isActive ? (isUrgent ? '#FFC745' : 'white') : '#6B7280',
-                truncate: true,
-              }}>{f}</span>
+              }}>
+                <span className="sm:hidden">{f === 'Payment Review' ? 'Pay Review' : f}</span>
+                <span className="hidden sm:inline">{f}</span>
+              </span>
               <span style={{
                 marginLeft: 8, fontSize: 'var(--fs-xs)', fontWeight: 800, padding: '2px 7px', borderRadius: 20, flexShrink: 0,
                 background: isActive
@@ -507,14 +509,6 @@ export default function ApprovalsClient({
                       background: needsAttention ? 'rgba(255,199,69,0.02)' : 'transparent',
                     }}
                   >
-                    <div style={{
-                      width: 36, height: 36, borderRadius: 12, flexShrink: 0,
-                      background: needsAttention ? 'rgba(255,199,69,0.1)' : 'rgba(255,255,255,0.04)',
-                      border: `1px solid ${needsAttention ? 'rgba(255,199,69,0.2)' : 'rgba(255,255,255,0.06)'}`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <StatusIcon status={reg.status} paymentStatus={reg.payment_status} />
-                    </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
                         {needsAttention && <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#FFC745', flexShrink: 0 }} />}

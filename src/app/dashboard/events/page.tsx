@@ -2,18 +2,22 @@ import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import EventsClient from '@/components/events/EventsClient'
 import DashboardLoader from '@/components/layout/DashboardLoader'
+import { sortEvents } from '@/lib/sortEvents'
+import { syncEventStatuses } from '@/app/actions/eventStatusSync'
 
 async function EventsData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: events } = await supabase
+  syncEventStatuses().catch(() => {})
+
+  const { data: rawEvents } = await supabase
     .from('events')
     .select('*')
     .eq('organizer_id', user!.id)
-    .order('date_start', { ascending: false })
+  const events = sortEvents(rawEvents ?? [])
 
-  const eventIds = (events ?? []).map(e => e.id)
+  const eventIds = events.map(e => e.id)
 
   // Fetch registrations that need organiser attention:
   //  • status = 'pending'           → EOI awaiting review
@@ -29,7 +33,7 @@ async function EventsData() {
     pendingCounts[row.event_id] = (pendingCounts[row.event_id] ?? 0) + 1
   }
 
-  return <EventsClient initialEvents={events ?? []} pendingCounts={pendingCounts} />
+  return <EventsClient initialEvents={events} pendingCounts={pendingCounts} />
 }
 
 export default function EventsPage() {
