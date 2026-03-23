@@ -7,20 +7,20 @@ import {
   Shield, Mail, Phone, CheckCircle, Search, ArrowUpRight,
   MoreHorizontal, Flag, Trash2, Send, X, Menu,
   UserX, UserCheck, TrendingUp, ExternalLink, RefreshCw,
-  Eye, Ban, AlertTriangle, Clock, ChevronRight, ChevronLeft, BarChart2,
+  Eye, Ban, AlertTriangle, Clock, ChevronRight, ChevronLeft, BarChart2, Star, Download,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import {
   getMasterOrganizers, getMasterEvents, setOrgAdminStatus,
   getMasterOrgProfile, getMasterOrgEvents, getMasterEventGuests,
-  getMasterAnalytics,
+  getMasterAnalytics, getWaitlistEntries,
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
-  type PlatformAnalytics,
+  type PlatformAnalytics, type WaitlistEntry,
 } from '@/app/actions/masterActions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'analytics'
+type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'analytics' | 'waitlist'
 type OrgStatus = 'active' | 'review' | 'suspended'
 type EventStatus = 'live' | 'draft' | 'flagged' | 'suspended' | 'ended'
 type QueryStatus = 'open' | 'in_progress' | 'resolved'
@@ -853,6 +853,19 @@ export default function MasterPage() {
   const [queryStatuses, setQueryStatuses] = useState<Record<string, QueryStatus>>({})
   const [queryFilter, setQueryFilter] = useState<'all' | QueryStatus>('all')
 
+  // Waitlist state
+  const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([])
+  const [waitlistLoading, setWaitlistLoading] = useState(false)
+  const [waitlistSearch, setWaitlistSearch] = useState('')
+  const [waitlistRole, setWaitlistRole] = useState<'all' | 'organizer' | 'guest' | 'both'>('all')
+
+  useEffect(() => {
+    if (!authed || tab !== 'waitlist') return
+    if (waitlist.length > 0) return // already loaded
+    setWaitlistLoading(true)
+    getWaitlistEntries().then(setWaitlist).finally(() => setWaitlistLoading(false))
+  }, [authed, tab])
+
   // Derived
   const liveOrgs = orgs.filter(o => !removedOrgs.has(o.id))
   const getOrgStatus = (o: Org): OrgStatus => orgStatuses[o.id] ?? o.status
@@ -887,10 +900,11 @@ export default function MasterPage() {
     { id: 'events'     as Tab, icon: Calendar,        label: 'Events',             badge: flaggedEvtCount > 0 ? flaggedEvtCount : undefined },
     { id: 'analytics'  as Tab, icon: BarChart2,       label: 'Analytics'           },
     { id: 'queries'    as Tab, icon: MessageSquare,   label: 'Queries & Disputes', badge: openQCount > 0 ? openQCount : undefined },
+    { id: 'waitlist'   as Tab, icon: Star,            label: 'Waitlist',           badge: waitlist.length > 0 ? waitlist.length : undefined },
   ]
 
   const PAGE_TITLES: Record<Tab, string> = {
-    overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes', analytics: 'Analytics',
+    overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes', analytics: 'Analytics', waitlist: 'Waitlist',
   }
 
   if (!authed) return <NotFoundGate onAuth={() => setAuthed(true)} />
@@ -1521,6 +1535,127 @@ export default function MasterPage() {
             )}
 
             {/* ════════════════════════════════════════════════════ QUERIES */}
+            {tab === 'waitlist' && (() => {
+              const filtered = waitlist.filter(w => {
+                const matchRole = waitlistRole === 'all' || w.role === waitlistRole
+                const q = waitlistSearch.toLowerCase()
+                const matchSearch = !q || w.full_name.toLowerCase().includes(q) || w.email.toLowerCase().includes(q) || (w.phone ?? '').includes(q)
+                return matchRole && matchSearch
+              })
+              const roleColor: Record<string, string> = { organizer: '#1E5EFF', guest: '#22C55E', both: '#8B5CF6' }
+              const orgCount  = waitlist.filter(w => w.role === 'organizer').length
+              const guestCount = waitlist.filter(w => w.role === 'guest').length
+              const bothCount  = waitlist.filter(w => w.role === 'both').length
+
+              const exportCSV = () => {
+                const rows = [['Name','Email','Phone','Role','Signed Up'], ...filtered.map(w => [w.full_name, w.email, w.phone ?? '', w.role, new Date(w.created_at).toLocaleDateString()])]
+                const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+                const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'tikkit-waitlist.csv'; a.click()
+              }
+
+              return (
+                <div>
+                  {/* Stats row */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
+                    {[
+                      { label: 'Total Signups',  value: waitlist.length,  color: '#00E5FF' },
+                      { label: 'Organizers',     value: orgCount,         color: '#1E5EFF' },
+                      { label: 'Guests',         value: guestCount,       color: '#22C55E' },
+                      { label: 'Both',           value: bothCount,        color: '#8B5CF6' },
+                    ].map(s => (
+                      <div key={s.label} style={{ background: '#0D0F18', border: `1px solid ${s.color}22`, borderRadius: 12, padding: '16px 18px' }}>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-2xl)', fontWeight: 800, color: s.color, letterSpacing: '-1px' }}>
+                          {waitlistLoading ? '—' : s.value}
+                        </div>
+                        <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 4 }}>{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="ms-card">
+                    <div className="ms-card-hdr">
+                      <span className="ms-card-title">Waitlist Signups</span>
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                        {/* Role filter pills */}
+                        <div className="ms-pills">
+                          {(['all','organizer','guest','both'] as const).map(r => (
+                            <button key={r} className={`ms-pill${waitlistRole === r ? ' pa' : ''}`} onClick={() => setWaitlistRole(r)}>
+                              {r === 'all' ? 'All' : r.charAt(0).toUpperCase() + r.slice(1)}
+                            </button>
+                          ))}
+                        </div>
+                        {/* Search */}
+                        <div style={{ position: 'relative' }}>
+                          <Search size={12} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: '#4B5563' }} />
+                          <input
+                            value={waitlistSearch}
+                            onChange={e => setWaitlistSearch(e.target.value)}
+                            placeholder="Search name / email…"
+                            className="ms-input"
+                            style={{ paddingLeft: 28, width: 200, fontSize: 'var(--fs-sm)' }}
+                          />
+                        </div>
+                        {/* Export CSV */}
+                        <button
+                          onClick={exportCSV}
+                          style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.22)', color: '#00E5FF', borderRadius: 8, padding: '6px 12px', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
+                        >
+                          <Download size={12} /> Export CSV
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ overflowX: 'auto' }}>
+                      {waitlistLoading ? (
+                        <div style={{ padding: '40px', textAlign: 'center', color: '#374151' }}>Loading…</div>
+                      ) : (
+                        <table className="ms-tbl" style={{ minWidth: 640 }}>
+                          <thead>
+                            <tr>
+                              <th>#</th>
+                              <th>Name</th>
+                              <th>Email</th>
+                              <th className="ms-hide">Phone</th>
+                              <th>Role</th>
+                              <th className="ms-hide">Signed Up</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {filtered.length === 0 && (
+                              <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No entries found</td></tr>
+                            )}
+                            {filtered.map((w, i) => (
+                              <tr key={w.id}>
+                                <td style={{ color: '#4B5563', fontSize: 'var(--fs-sm)' }}>{i + 1}</td>
+                                <td>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: roleColor[w.role] ?? '#374151', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                                      {w.full_name.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()}
+                                    </div>
+                                    <span style={{ color: '#F0F2FF', fontSize: 'var(--fs-base)', fontFamily: 'var(--font-body)' }}>{w.full_name}</span>
+                                  </div>
+                                </td>
+                                <td style={{ color: '#9CA3AF', fontSize: 'var(--fs-sm)', fontFamily: 'var(--font-body)' }}>{w.email}</td>
+                                <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)' }}>{w.phone ?? '—'}</td>
+                                <td>
+                                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 'var(--fs-xs)', fontWeight: 700, color: roleColor[w.role] ?? '#6B7280', background: `${roleColor[w.role] ?? '#6B7280'}18`, border: `1px solid ${roleColor[w.role] ?? '#6B7280'}30`, borderRadius: 999, padding: '3px 9px', textTransform: 'capitalize' }}>
+                                    {w.role === 'both' ? 'Organizer & Guest' : w.role}
+                                  </span>
+                                </td>
+                                <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>
+                                  {new Date(w.created_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: '2-digit' })}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+
             {tab === 'queries' && (
               <div>
                 {/* Foundation notice */}

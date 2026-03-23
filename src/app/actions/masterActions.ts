@@ -434,6 +434,28 @@ export async function getMasterAnalytics(): Promise<PlatformAnalytics> {
   }
 }
 
+// ─── Waitlist ─────────────────────────────────────────────────────────────────
+
+export type WaitlistEntry = {
+  id: string
+  full_name: string
+  email: string
+  phone: string | null
+  role: 'organizer' | 'guest' | 'both'
+  source: string
+  created_at: string
+}
+
+export async function getWaitlistEntries(): Promise<WaitlistEntry[]> {
+  const supabase = createAdminClient()
+  const { data, error } = await (supabase as any)
+    .from('platform_waitlist')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) return []
+  return data as WaitlistEntry[]
+}
+
 // ─── Mutations ───────────────────────────────────────────────────────────────
 
 export async function setOrgAdminStatus(
