@@ -684,10 +684,10 @@ export default function EventDetailClient({
             </div>
           </div>
         </div>
-      </div>
+        {/* ↑ closes ed-hero */}
 
-      {/* Right column: content + CTA */}
-      <div className="ed-content-col" style={{ display: 'flex', flexDirection: 'column' }}>
+        {/* Right column: content + CTA — must be inside ed-root for the grid to work */}
+        <div className="ed-content-col" style={{ display: 'flex', flexDirection: 'column' }}>
 
         {/* Status banner for existing registrations */}
         {regStatus && <StatusBanner status={regStatus} paymentStatus={paymentStatus} />}
@@ -797,6 +797,9 @@ export default function EventDetailClient({
           </button>
         </div>
       </div>
+      {/* ↑ closes ed-content-col */}
+      </div>
+      {/* ↑ closes ed-root grid */}
 
       {/* Sheets & modals */}
       <div className="ed-sheets-container">
