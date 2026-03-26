@@ -32,7 +32,7 @@ export default function PublicRegistrationForm({
   ticketTypes: TicketType[]
 }) {
   const supabase = createClient()
-  const [form, setForm] = useState({ full_name: '', email: '', phone: '', gender: '' })
+  const [form, setForm] = useState({ full_name: '', email: '', phone: '', gender: '', referenceCode: '' })
   const [selectedTicketTypeId, setSelectedTicketTypeId] = useState<string>(
     ticketTypes.length === 1 ? ticketTypes[0].id : ''
   )
@@ -84,6 +84,7 @@ export default function PublicRegistrationForm({
         phone:          form.phone || null,
         gender:         form.gender || null,
         status:         isOpen ? 'approved' : 'pending',
+        reference_code_entered: form.referenceCode || null,
       })
 
     if (insertError) {
@@ -270,6 +271,15 @@ export default function PublicRegistrationForm({
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
           </div>
         </div>
+
+        {event.require_reference_code && (
+          <div>
+            <label className="block text-xs font-medium text-gray-400 mb-1.5">Reference Code <span className="text-gray-500 font-normal">(optional)</span></label>
+            <input type="text" placeholder="Enter code"
+              className="w-full bg-[#0F1117] border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white font-mono uppercase tracking-widest placeholder-gray-600 focus:outline-none focus:border-[#1E5EFF] transition-colors"
+              value={form.referenceCode} onChange={e => setForm(p => ({ ...p, referenceCode: e.target.value.toUpperCase() }))} />
+          </div>
+        )}
 
         {error && (
           <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3">

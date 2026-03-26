@@ -132,6 +132,7 @@ export default function SettingsPage() {
   const [inviteRole, setInviteRole] = useState<'staff' | 'organizer'>('staff')
   const [inviteExpiry, setInviteExpiry] = useState<string | null>('7d')
   const [creating, setCreating] = useState(false)
+  const [inviteError, setInviteError] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
   // Notifications
@@ -280,11 +281,15 @@ export default function SettingsPage() {
   const createInvite = async () => {
     if (!inviteLabel.trim()) return
     setCreating(true)
+    setInviteError(null)
     try {
       const invite = await createTeamInvite(inviteLabel.trim(), inviteRole, inviteExpiry)
       setInvites(prev => [invite as any, ...prev])
       setInviteLabel('')
-    } catch (e) { console.error(e) }
+    } catch (e) {
+      console.error(e)
+      setInviteError(e instanceof Error ? e.message : 'Failed to create invite link')
+    }
     setCreating(false)
   }
 
@@ -679,10 +684,15 @@ export default function SettingsPage() {
                   </select>
                 </div>
               </div>
-              <div className="flex justify-end">
+              <div className="flex flex-col items-end gap-2">
                 <button onClick={createInvite} disabled={creating || !inviteLabel.trim()} className="btn-primary">
                   {creating ? 'Creating...' : <><Link2 className="w-4 h-4" /> Generate Link</>}
                 </button>
+                {inviteError && (
+                  <p className="text-xs text-red-400 flex items-center gap-1">
+                    <AlertCircle className="w-3 h-3 shrink-0" /> {inviteError}
+                  </p>
+                )}
               </div>
             </div>
 

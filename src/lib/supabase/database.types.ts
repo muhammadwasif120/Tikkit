@@ -967,6 +967,7 @@ export type Database = {
           notes: string | null
           payment_screenshot_url: string | null
           payment_status: string | null
+          reference_code_entered: string | null
           payment_submission_id: string | null
           payment_token: string | null
           phone: string | null
@@ -985,6 +986,7 @@ export type Database = {
           notes?: string | null
           payment_screenshot_url?: string | null
           payment_status?: string | null
+          reference_code_entered?: string | null
           payment_submission_id?: string | null
           payment_token?: string | null
           phone?: string | null
@@ -1003,6 +1005,7 @@ export type Database = {
           notes?: string | null
           payment_screenshot_url?: string | null
           payment_status?: string | null
+          reference_code_entered?: string | null
           payment_submission_id?: string | null
           payment_token?: string | null
           phone?: string | null
