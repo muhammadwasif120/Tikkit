@@ -40,6 +40,7 @@ export default function EventPaymentSetup({
   const [selected, setSelected] = useState<Set<string>>(new Set(initialLinked))
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   const toggleAccount = (id: string) => {
     setSelected(prev => {
@@ -60,10 +61,15 @@ export default function EventPaymentSetup({
 
   const handleSave = async () => {
     setSaving(true)
-    await setEventPaymentAccounts(eventId, collectPayment ? Array.from(selected) : [])
+    setSaveError('')
+    try {
+      await setEventPaymentAccounts(eventId, collectPayment ? Array.from(selected) : [])
+      setSaved(true)
+      setTimeout(() => setSaved(false), 3000)
+    } catch {
+      setSaveError('Something went wrong. Please try again.')
+    }
     setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 3000)
   }
 
 
@@ -143,6 +149,9 @@ export default function EventPaymentSetup({
             </p>
           )}
 
+          {saveError && (
+            <p className="text-xs text-orange-400 px-3 py-2 bg-orange-500/8 border border-orange-500/20 rounded-lg">{saveError}</p>
+          )}
           <div className="flex justify-end">
             <button onClick={handleSave} disabled={saving}
               className={clsx('btn-primary', saved && 'bg-green-600 hover:bg-green-700 border-green-600')}>

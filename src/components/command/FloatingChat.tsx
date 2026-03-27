@@ -366,6 +366,7 @@ export default function FloatingChat() {
 
       {/* Floating trigger button */}
       <button
+        data-tour="floating-chat"
         onClick={() => setOpen(o => !o)}
         style={{
           position: 'fixed', bottom: 20, right: 20, zIndex: 9999,

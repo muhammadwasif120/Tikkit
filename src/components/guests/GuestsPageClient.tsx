@@ -46,6 +46,7 @@ export default function GuestsPageClient({
   const [editGuest, setEditGuest]           = useState<Guest | null>(null)
   const [editForm, setEditForm]             = useState({ full_name: '', email: '', phone: '', gender: '', is_vip: false, waitlist: false })
   const [editSaving, setEditSaving]         = useState(false)
+  const [editError, setEditError]           = useState('')
   const [deleteGuest, setDeleteGuest]       = useState<Guest | null>(null)
   const [deleting, setDeleting]             = useState(false)
   const [expandedGuestId, setExpandedGuestId] = useState<string | null>(null)
@@ -57,10 +58,19 @@ export default function GuestsPageClient({
 
   const saveEdit = async () => {
     if (!editGuest) return
+    if (!editForm.full_name.trim()) {
+      setEditError('Please enter the guest\'s name. You can add more details later.')
+      return
+    }
+    setEditError('')
     setEditSaving(true)
-    const { data } = await supabase.from('guests').update({ full_name: editForm.full_name, email: editForm.email || null, phone: editForm.phone || null, gender: editForm.gender || null, is_vip: editForm.is_vip, waitlist: editForm.waitlist }).eq('id', editGuest.id).select().single()
-    if (data) setGuests(prev => prev.map(g => g.id === data.id ? data : g))
+    const { data, error } = await supabase.from('guests').update({ full_name: editForm.full_name, email: editForm.email || null, phone: editForm.phone || null, gender: editForm.gender || null, is_vip: editForm.is_vip, waitlist: editForm.waitlist }).eq('id', editGuest.id).select().single()
     setEditSaving(false)
+    if (error || !data) {
+      setEditError('Something went wrong. Please try again.')
+      return
+    }
+    setGuests(prev => prev.map(g => g.id === data.id ? data : g))
     setEditGuest(null)
   }
 
@@ -452,9 +462,14 @@ export default function GuestsPageClient({
                 ))}
               </div>
             </div>
+            {editError && (
+              <p style={{ color: '#F97316', fontSize: 'var(--fs-sm)', marginTop: 8, marginBottom: 0, padding: '8px 12px', background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 8 }}>
+                {editError}
+              </p>
+            )}
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 20 }}>
-              <button onClick={() => setEditGuest(null)} style={{ padding: '10px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-              <button onClick={saveEdit} disabled={editSaving || !editForm.full_name} style={{ padding: '10px 18px', background: '#1E5EFF', border: 'none', borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: editSaving || !editForm.full_name ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: editSaving || !editForm.full_name ? 0.6 : 1 }}>
+              <button onClick={() => { setEditGuest(null); setEditError('') }} style={{ padding: '10px 18px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, color: '#6B7280', fontSize: 'var(--fs-base)', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={saveEdit} disabled={editSaving} style={{ padding: '10px 18px', background: '#1E5EFF', border: 'none', borderRadius: 12, color: 'white', fontSize: 'var(--fs-base)', fontWeight: 700, cursor: editSaving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: 6, opacity: editSaving ? 0.6 : 1 }}>
                 {editSaving ? 'Saving…' : <><Check size={14} /> Save Changes</>}
               </button>
             </div>

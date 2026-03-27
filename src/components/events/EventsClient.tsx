@@ -72,6 +72,7 @@ export default function EventsClient({
     budget: '', is_private: false, secret_venue: false,
   })
   const [editSaving, setEditSaving] = useState(false)
+  const [editError, setEditError] = useState('')
   const [deleteEvent, setDeleteEvent] = useState<Event | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -94,8 +95,13 @@ export default function EventsClient({
 
   const saveEdit = async () => {
     if (!editEvent) return
+    if (!editForm.title.trim()) {
+      setEditError('Please fill in the event title. You can add more details later.')
+      return
+    }
+    setEditError('')
     setEditSaving(true)
-    const { data } = await supabase.from('events').update({
+    const { data, error } = await supabase.from('events').update({
       title: editForm.title,
       description: editForm.description || null,
       venue_name: editForm.venue_name || null,
@@ -108,8 +114,12 @@ export default function EventsClient({
       is_private: editForm.is_private,
       secret_venue: editForm.secret_venue,
     }).eq('id', editEvent.id).select().single()
-    if (data) setEvents(prev => prev.map(e => e.id === data.id ? data : e))
     setEditSaving(false)
+    if (error || !data) {
+      setEditError('Something went wrong. Please try again.')
+      return
+    }
+    setEvents(prev => prev.map(e => e.id === data.id ? data : e))
     setEditEvent(null)
   }
 
@@ -395,9 +405,14 @@ export default function EventsClient({
               </div>
             </div>
 
+            {editError && (
+              <p style={{ color: '#F97316', fontSize: 'var(--fs-sm)', marginTop: 10, marginBottom: 0, padding: '8px 12px', background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 8 }}>
+                {editError}
+              </p>
+            )}
             <div className="flex gap-3 justify-end mt-5">
-              <button onClick={() => setEditEvent(null)} className="btn-secondary">Cancel</button>
-              <button onClick={saveEdit} disabled={editSaving || !editForm.title} className="btn-primary">
+              <button onClick={() => { setEditEvent(null); setEditError('') }} className="btn-secondary">Cancel</button>
+              <button onClick={saveEdit} disabled={editSaving} className="btn-primary">
                 {editSaving ? 'Saving...' : <><Check className="w-4 h-4" /> Save Changes</>}
               </button>
             </div>

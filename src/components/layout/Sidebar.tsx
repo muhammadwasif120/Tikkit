@@ -16,14 +16,14 @@ import clsx from 'clsx'
 type Profile = Database['public']['Tables']['profiles']['Row']
 
 const navItems = [
-  { href: '/dashboard',           label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/events',    label: 'Events',    icon: CalendarDays },
-  { href: '/dashboard/guests',    label: 'Guests',    icon: Users },
-  { href: '/dashboard/approvals', label: 'Approvals', icon: ClipboardCheck },
-  { href: '/dashboard/command',   label: 'Command',   icon: Radio },
-  { href: '/dashboard/scan',      label: 'Scanner',   icon: ScanLine },
-  { href: '/dashboard/vendors',   label: 'Vendors',   icon: Building2 },
-  { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
+  { href: '/dashboard',           label: 'Dashboard', icon: LayoutDashboard, exact: true, tour: 'nav-dashboard' },
+  { href: '/dashboard/events',    label: 'Events',    icon: CalendarDays,                 tour: 'nav-events' },
+  { href: '/dashboard/guests',    label: 'Guests',    icon: Users,                        tour: 'nav-guests' },
+  { href: '/dashboard/approvals', label: 'Approvals', icon: ClipboardCheck,               tour: 'nav-approvals' },
+  { href: '/dashboard/command',   label: 'Command',   icon: Radio,                        tour: 'nav-command' },
+  { href: '/dashboard/scan',      label: 'Scanner',   icon: ScanLine,                     tour: 'nav-scan' },
+  { href: '/dashboard/vendors',   label: 'Vendors',   icon: Building2,                    tour: 'nav-vendors' },
+  { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3,                    tour: 'nav-analytics' },
 ]
 
 type Props = {
@@ -76,6 +76,7 @@ export default function Sidebar({ profile, open, onClose }: Props) {
             key={item.href}
             href={item.href}
             onClick={handleNavClick}
+            data-tour={item.tour}
             className={clsx(isActive(item.href, item.exact) ? 'sidebar-link-active' : 'sidebar-link')}
           >
             <item.icon className="w-4 h-4 shrink-0" />
@@ -105,7 +106,7 @@ export default function Sidebar({ profile, open, onClose }: Props) {
 
       {/* Profile footer */}
       <div className="p-3 border-t border-white/[0.04] shrink-0">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+        <div data-tour="profile-footer" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
           <Link href="/dashboard/profile" onClick={handleNavClick} style={{ textDecoration: 'none', flexShrink: 0 }}>
             <div style={{
               width: 32, height: 32, borderRadius: '50%',

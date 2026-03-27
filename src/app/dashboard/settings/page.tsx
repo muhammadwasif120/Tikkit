@@ -8,7 +8,7 @@ import {
   CreditCard, Zap, Flag, Trash2, Link2,
   Copy, ExternalLink, Shield, Crown, AlertCircle,
   Clock, RefreshCw, ChevronDown, Phone, Building2,
-  Camera, Loader2, ImageIcon, AtSign, X, ShieldCheck, ArrowRight,
+  Camera, Loader2, ImageIcon, AtSign, X, ShieldCheck, ArrowRight, MapPin,
 } from 'lucide-react'
 import Link from 'next/link'
 import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInvite } from '@/app/actions/teamActions'
@@ -861,6 +861,30 @@ export default function SettingsPage() {
           <Link href="/dashboard/verify" className="flex items-center gap-1.5 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors shrink-0">
             Manage <ArrowRight className="w-3.5 h-3.5" />
           </Link>
+        </div>
+      </div>
+
+      {/* Guided Tour */}
+      <div className="card">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
+              <MapPin className="w-5 h-5 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Guided Tour</p>
+              <p className="text-xs text-gray-500 mt-0.5">Replay the app walkthrough to explore all features</p>
+            </div>
+          </div>
+          <button
+            onClick={() => {
+              localStorage.removeItem('tikkit_tour_v1')
+              window.dispatchEvent(new Event('tikkit:start-tour'))
+            }}
+            className="flex items-center gap-1.5 text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors shrink-0"
+          >
+            Start Tour <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </div>

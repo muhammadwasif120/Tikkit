@@ -67,6 +67,7 @@ function RegistrationModal({
   onAction: () => void
 }) {
   const [loading, setLoading]   = useState<'approve' | 'reject' | null>(null)
+  const [actionError, setActionError] = useState('')
   const [rejectNote, setNote]   = useState('')
   const [showReject, setShowRej] = useState(false)
   const [imgZoom, setImgZoom]   = useState<string | null>(null)
@@ -76,6 +77,7 @@ function RegistrationModal({
 
   const handleApprove = async () => {
     setLoading('approve')
+    setActionError('')
     try {
       if (isPaymentReview) {
         const res = await fetch('/api/confirm-payment', {
@@ -83,36 +85,37 @@ function RegistrationModal({
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ registrationId: reg.id }),
         })
-        if (!res.ok) throw new Error(await res.text())
+        if (!res.ok) throw new Error('failed')
       } else {
         const res = await fetch('/api/approve-registration', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ registrationId: reg.id }),
         })
-        if (!res.ok) throw new Error(await res.text())
+        if (!res.ok) throw new Error('failed')
       }
       onAction()
       onClose()
-    } catch (e: any) {
-      alert('Error: ' + e.message)
+    } catch {
+      setActionError('Something went wrong. Please try again.')
     }
     setLoading(null)
   }
 
   const handleReject = async () => {
     setLoading('reject')
+    setActionError('')
     try {
       const res = await fetch('/api/reject-registration', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ registrationId: reg.id, notes: rejectNote }),
       })
-      if (!res.ok) throw new Error(await res.text())
+      if (!res.ok) throw new Error('failed')
       onAction()
       onClose()
-    } catch (e: any) {
-      alert('Error: ' + e.message)
+    } catch {
+      setActionError('Something went wrong. Please try again.')
     }
     setLoading(null)
   }
@@ -230,6 +233,13 @@ function RegistrationModal({
               style={{ width: '100%', padding: '10px 12px', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 'var(--fs-base)', resize: 'none', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
             />
           </div>
+        )}
+
+        {/* Action error */}
+        {actionError && (
+          <p style={{ color: '#F97316', fontSize: 'var(--fs-sm)', marginBottom: 12, padding: '8px 12px', background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 8 }}>
+            {actionError}
+          </p>
         )}
 
         {/* Action buttons */}

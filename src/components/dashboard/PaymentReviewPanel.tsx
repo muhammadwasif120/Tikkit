@@ -44,6 +44,7 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
   const [rejectingId, setRejectingId] = useState<string | null>(null)
   const [rejectNote, setRejectNote] = useState('')
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [actionError, setActionError] = useState('')
 
   useEffect(() => {
     const load = async () => {
@@ -84,17 +85,27 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
 
   const handleApprove = async (sub: Submission) => {
     setActionLoading(sub.id)
-    await approvePaymentSubmission(sub.id, sub.registration_id)
-    setSubmissions(prev => prev.map(s => s.id === sub.id ? { ...s, status: 'approved' } : s))
+    setActionError('')
+    try {
+      await approvePaymentSubmission(sub.id, sub.registration_id)
+      setSubmissions(prev => prev.map(s => s.id === sub.id ? { ...s, status: 'approved' } : s))
+    } catch {
+      setActionError('Something went wrong. Please try again.')
+    }
     setActionLoading(null)
   }
 
   const handleReject = async (sub: Submission) => {
     setActionLoading(sub.id)
-    await rejectPaymentSubmission(sub.id, sub.registration_id, rejectNote)
-    setSubmissions(prev => prev.map(s => s.id === sub.id ? { ...s, status: 'rejected', notes: rejectNote } : s))
-    setRejectingId(null)
-    setRejectNote('')
+    setActionError('')
+    try {
+      await rejectPaymentSubmission(sub.id, sub.registration_id, rejectNote)
+      setSubmissions(prev => prev.map(s => s.id === sub.id ? { ...s, status: 'rejected', notes: rejectNote } : s))
+      setRejectingId(null)
+      setRejectNote('')
+    } catch {
+      setActionError('Something went wrong. Please try again.')
+    }
     setActionLoading(null)
   }
 
@@ -132,8 +143,11 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
               value={rejectNote}
               onChange={e => setRejectNote(e.target.value)}
             />
+            {actionError && (
+              <p className="text-xs text-orange-400 px-3 py-2 bg-orange-500/8 border border-orange-500/20 rounded-lg">{actionError}</p>
+            )}
             <div className="flex gap-2 justify-end">
-              <button onClick={() => { setRejectingId(null); setRejectNote('') }} className="btn-secondary">Cancel</button>
+              <button onClick={() => { setRejectingId(null); setRejectNote(''); setActionError('') }} className="btn-secondary">Cancel</button>
               <button
                 disabled={!!actionLoading}
                 onClick={() => {

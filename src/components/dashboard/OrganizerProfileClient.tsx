@@ -75,34 +75,44 @@ function NameEditor({ profileId, initial }: { profileId: string; initial: string
   const [name, setName]       = useState(initial ?? '')
   const [saving, setSaving]   = useState(false)
   const [saved, setSaved]     = useState(false)
+  const [saveErr, setSaveErr] = useState('')
 
   const save = async () => {
-    if (!draft.trim()) return
+    if (!draft.trim()) {
+      setSaveErr('Please enter your name.')
+      return
+    }
+    setSaveErr('')
     setSaving(true)
-    await supabase.from('profiles').update({ full_name: draft.trim() }).eq('id', profileId)
+    const { error } = await supabase.from('profiles').update({ full_name: draft.trim() }).eq('id', profileId)
+    setSaving(false)
+    if (error) { setSaveErr('Something went wrong. Please try again.'); return }
     setName(draft.trim())
-    setSaved(true); setSaving(false); setEditing(false)
+    setSaved(true); setEditing(false)
     setTimeout(() => setSaved(false), 3000)
   }
 
   if (editing) {
     return (
-      <div className="flex items-center gap-2 min-w-0">
-        <input
-          className="input text-sm py-1.5 flex-1 min-w-0"
-          value={draft}
-          onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') save() }}
-          autoFocus
-        />
-        <button onClick={save} disabled={saving || !draft.trim()}
-          className="flex items-center gap-1 text-xs font-semibold text-white bg-[#1E5EFF] hover:bg-[#1448CC] disabled:opacity-50 rounded-lg px-3 py-1.5 transition-colors shrink-0">
-          {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
-        </button>
-        <button onClick={() => { setEditing(false); setDraft(name) }}
-          className="p-1.5 text-gray-500 hover:text-white transition-colors shrink-0">
-          <X size={14} />
-        </button>
+      <div className="flex flex-col gap-1 min-w-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <input
+            className="input text-sm py-1.5 flex-1 min-w-0"
+            value={draft}
+            onChange={e => { setDraft(e.target.value); setSaveErr('') }}
+            onKeyDown={e => { if (e.key === 'Enter') save() }}
+            autoFocus
+          />
+          <button onClick={save} disabled={saving}
+            className="flex items-center gap-1 text-xs font-semibold text-white bg-[#1E5EFF] hover:bg-[#1448CC] disabled:opacity-50 rounded-lg px-3 py-1.5 transition-colors shrink-0">
+            {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
+          </button>
+          <button onClick={() => { setEditing(false); setDraft(name); setSaveErr('') }}
+            className="p-1.5 text-gray-500 hover:text-white transition-colors shrink-0">
+            <X size={14} />
+          </button>
+        </div>
+        {saveErr && <p className="text-xs text-orange-400">{saveErr}</p>}
       </div>
     )
   }
