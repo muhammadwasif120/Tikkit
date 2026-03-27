@@ -77,6 +77,7 @@ export default function VendorsClient({
     contact_phone: '', notes: '', event_ids: [] as string[],
   })
   const [vendorSaving, setVendorSaving] = useState(false)
+  const [vendorError, setVendorError] = useState<string | null>(null)
 
   // Invoice modal
   const [invoiceModal, setInvoiceModal] = useState(false)
@@ -86,6 +87,7 @@ export default function VendorsClient({
     status: 'pending' as Invoice['status'],
   })
   const [invoiceSaving, setInvoiceSaving] = useState(false)
+  const [invoiceError, setInvoiceError] = useState<string | null>(null)
 
   // Filters
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -107,17 +109,32 @@ export default function VendorsClient({
       setEditingVendor(null)
       setVendorForm({ name: '', category: 'Other', contact_name: '', contact_email: '', contact_phone: '', notes: '', event_ids: [] })
     }
+    setVendorError(null)
     setVendorModal(true)
   }
 
   const saveVendor = async () => {
     if (!vendorForm.name) return
     setVendorSaving(true)
+    setVendorError(null)
+
+    const payload = {
+      name:          vendorForm.name,
+      category:      vendorForm.category,
+      contact_name:  vendorForm.contact_name  || null,
+      contact_email: vendorForm.contact_email || null,
+      contact_phone: vendorForm.contact_phone || null,
+      notes:         vendorForm.notes         || null,
+      event_ids:     vendorForm.event_ids,
+    }
+
     if (editingVendor) {
-      const { data } = await supabase.from('vendors').update({ ...vendorForm }).eq('id', editingVendor.id).select().single()
+      const { data, error } = await supabase.from('vendors').update(payload).eq('id', editingVendor.id).select().single()
+      if (error) { setVendorError(error.message); setVendorSaving(false); return }
       if (data) setVendors(prev => prev.map(v => v.id === data.id ? (data as any) : v))
     } else {
-      const { data } = await supabase.from('vendors').insert({ ...vendorForm, organizer_id: userId }).select().single()
+      const { data, error } = await supabase.from('vendors').insert({ ...payload, organizer_id: userId }).select().single()
+      if (error) { setVendorError(error.message); setVendorSaving(false); return }
       if (data) setVendors(prev => [data as any, ...prev])
     }
     setVendorSaving(false)
@@ -142,12 +159,14 @@ export default function VendorsClient({
       setEditingInvoice(null)
       setInvoiceForm({ vendor_id: '', event_id: '', amount: '', description: '', due_date: '', status: 'pending' })
     }
+    setInvoiceError(null)
     setInvoiceModal(true)
   }
 
   const saveInvoice = async () => {
     if (!invoiceForm.vendor_id || !invoiceForm.amount) return
     setInvoiceSaving(true)
+    setInvoiceError(null)
 
     const payload = {
       vendor_id:   invoiceForm.vendor_id,
@@ -159,10 +178,10 @@ export default function VendorsClient({
     }
 
     if (editingInvoice) {
-      const { data } = await supabase.from('vendor_invoices').update(payload).eq('id', editingInvoice.id).select().single()
+      const { data, error } = await supabase.from('vendor_invoices').update(payload).eq('id', editingInvoice.id).select().single()
+      if (error) { setInvoiceError(error.message); setInvoiceSaving(false); return }
       if (data) {
         setInvoices(prev => prev.map(i => i.id === data.id ? (data as any) : i))
-        // Notify if status changed to pending or overdue
         if ((data.status === 'pending' || data.status === 'overdue') &&
             data.status !== editingInvoice.status) {
           const vendor = vendors.find(v => v.id === data.vendor_id)
@@ -170,10 +189,10 @@ export default function VendorsClient({
         }
       }
     } else {
-      const { data } = await supabase.from('vendor_invoices').insert(payload).select().single()
+      const { data, error } = await supabase.from('vendor_invoices').insert(payload).select().single()
+      if (error) { setInvoiceError(error.message); setInvoiceSaving(false); return }
       if (data) {
         setInvoices(prev => [...prev, data as any])
-        // Notify on new pending or overdue invoice
         if (data.status === 'pending' || data.status === 'overdue') {
           const vendor = vendors.find(v => v.id === data.vendor_id)
           if (vendor) await notifyVendorPaymentDue(userId, data.event_id, vendor.name, data.amount)
@@ -546,6 +565,9 @@ export default function VendorsClient({
               </div>
             </div>
 
+            {vendorError && (
+              <p className="text-red-400 text-sm mt-3">{vendorError}</p>
+            )}
             <div className="flex gap-3 justify-end mt-5">
               <button onClick={() => setVendorModal(false)} className="btn-secondary">Cancel</button>
               <button onClick={saveVendor} disabled={vendorSaving || !vendorForm.name} className="btn-primary">
@@ -624,6 +646,9 @@ export default function VendorsClient({
               </div>
             </div>
 
+            {invoiceError && (
+              <p className="text-red-400 text-sm mt-3">{invoiceError}</p>
+            )}
             <div className="flex gap-3 justify-end mt-5">
               <button onClick={() => setInvoiceModal(false)} className="btn-secondary">Cancel</button>
               <button onClick={saveInvoice} disabled={invoiceSaving || !invoiceForm.vendor_id || !invoiceForm.amount} className="btn-primary">

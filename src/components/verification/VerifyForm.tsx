@@ -113,15 +113,17 @@ export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
   const [idDone]      = useState(profile.is_id_verified)
   const [paymentDone] = useState(profile.is_payment_verified)
   const [initiated,   setInitiated]   = useState(false)
+  const [initError,   setInitError]   = useState('')
 
   const step = idDone && paymentDone ? 3 : idDone ? 2 : 1
   const stepState = (n: number) => step > n ? 'done' : step === n ? 'active' : 'idle'
 
   const handleInitiate = async () => {
     setLoading(true)
+    setInitError('')
     const result = await initiateVerification()
     setLoading(false)
-    if (result.error) { alert(result.error); return }
+    if (result.error) { setInitError('Something went wrong. Please try again.'); return }
     setInitiated(true)
     if (result.diditSessionUrl)   setDiditUrl(result.diditSessionUrl)
     if (result.payproPaymentUrl)  setPayproUrl(result.payproPaymentUrl)
@@ -193,6 +195,9 @@ export default function VerifyForm({ profile }: { profile: VerifiedProfile }) {
             </div>
           </div>
 
+          {initError && (
+            <p style={{ color: '#F97316', fontSize: 12, padding: '8px 12px', background: 'rgba(249,115,22,0.08)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 8, marginBottom: 10 }}>{initError}</p>
+          )}
           {idDone ? (
             <button className="vf-btn vf-btn-success" disabled>
               <CheckCircle2 size={15} /> ID Verified

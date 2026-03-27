@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
 import FloatingChat from '@/components/command/FloatingChat'
+import GuidedTour from '@/components/onboarding/GuidedTour'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
@@ -34,6 +35,7 @@ export default function DashboardShell({
         </main>
       </div>
       <FloatingChat />
+      <GuidedTour />
     </div>
   )
 }

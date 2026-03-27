@@ -38,16 +38,11 @@ export async function updateSession(request: NextRequest) {
   '/register',
   '/organizer',     // Public organizer profiles
   '/master',        // Internal admin — security by obscurity, no public links
-  '/coming-soon',   // Public marketing waitlist page
+  '/staff',         // Staff/organizer invite links — token-gated, no auth required
 ]
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (isPublic) {
-    // Root → coming soon (temporary while platform is pre-launch)
-    if (pathname === '/') {
-      return NextResponse.redirect(new URL('/coming-soon', request.url))
-    }
-
     // Already logged in + hitting login → redirect to their home
     if (user && pathname === '/auth/login') {
       const { data: profile } = await supabase

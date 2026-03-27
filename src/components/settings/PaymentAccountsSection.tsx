@@ -48,6 +48,7 @@ export default function PaymentAccountsSection({
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   /* ── Load accounts directly via Supabase client ── */
@@ -91,10 +92,14 @@ export default function PaymentAccountsSection({
     setShowForm(true)
   }
 
-  const cancelForm = () => { setShowForm(false); setEditingId(null); setForm(EMPTY_FORM) }
+  const cancelForm = () => { setShowForm(false); setEditingId(null); setForm(EMPTY_FORM); setSaveError('') }
 
   const handleSave = async () => {
-    if (!form.label || !form.account_title || !form.account_number) return
+    if (!form.label || !form.account_title || !form.account_number) {
+      setSaveError('Please fill in the label, account title, and account number. You can add more details later.')
+      return
+    }
+    setSaveError('')
     setSaving(true)
     try {
       if (editingId) {
@@ -125,7 +130,7 @@ export default function PaymentAccountsSection({
         setAccounts(prev => [created, ...prev])
       }
       cancelForm()
-    } catch (e) { console.error(e) }
+    } catch { setSaveError('Something went wrong. Please try again.') }
     setSaving(false)
   }
 
@@ -272,6 +277,11 @@ export default function PaymentAccountsSection({
                 </div>
               </div>
 
+              {saveError && (
+                <p className="text-xs text-orange-400 py-2 px-3 rounded-lg bg-orange-500/8 border border-orange-500/20">
+                  {saveError}
+                </p>
+              )}
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={cancelForm} className="btn-secondary">
                   <X className="w-4 h-4" /> Cancel
@@ -279,7 +289,7 @@ export default function PaymentAccountsSection({
                 <button
                   type="button"
                   onClick={handleSave}
-                  disabled={saving || !form.label || !form.account_title || !form.account_number}
+                  disabled={saving}
                   className="btn-primary"
                 >
                   {saving ? 'Saving...' : <><Check className="w-4 h-4" /> {editingId ? 'Update' : 'Save Account'}</>}

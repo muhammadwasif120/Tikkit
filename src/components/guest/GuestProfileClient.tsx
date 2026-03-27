@@ -72,7 +72,7 @@ function EditProfileSheet({ guestProfile, onClose, onSaved }: { guestProfile: Gu
     setSaving(true)
     const { error: err } = await supabase.from('guest_profiles').update({ username: username || null, bio: bio || null, city: city || null, updated_at: new Date().toISOString() }).eq('id', (await supabase.auth.getUser()).data.user!.id)
     setSaving(false)
-    if (err) { setError(err.message); return }
+    if (err) { setError('Something went wrong. Please try again.'); return }
     onSaved()
     onClose()
   }
@@ -115,7 +115,7 @@ function ChangePhoneSheet({ current, onClose, onSaved }: { current: string | nul
     const { data: { user } } = await supabase.auth.getUser()
     const { error: err } = await supabase.from('profiles').update({ phone_number: phone }).eq('id', user!.id)
     setSaving(false)
-    if (err) { setError(err.message); return }
+    if (err) { setError('Something went wrong. Please try again.'); return }
     onSaved(phone)
     onClose()
   }
@@ -148,7 +148,7 @@ function ChangePasswordSheet({ onClose }: { onClose: () => void }) {
     setSaving(true)
     const { error: err } = await supabase.auth.updateUser({ password })
     setSaving(false)
-    if (err) { setError(err.message); return }
+    if (err) { setError('Something went wrong. Please try again.'); return }
     setDone(true)
     setTimeout(onClose, 1500)
   }
