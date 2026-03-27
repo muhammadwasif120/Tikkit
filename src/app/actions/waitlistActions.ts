@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function joinPlatformWaitlist(data: {
   full_name: string
@@ -8,7 +8,7 @@ export async function joinPlatformWaitlist(data: {
   phone?: string
   role: 'organizer' | 'guest' | 'both'
 }) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { error } = await (supabase as any)
     .from('platform_waitlist')
@@ -31,7 +31,7 @@ export async function joinPlatformWaitlist(data: {
 }
 
 export async function getWaitlistCount(): Promise<number> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   const { count } = await (supabase as any)
     .from('platform_waitlist')

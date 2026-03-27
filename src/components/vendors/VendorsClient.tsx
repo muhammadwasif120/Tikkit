@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import {
   Plus, X, Check, ChevronDown, Building2, Tag, FileText,
   AlertCircle, CheckCircle, Clock,
   Edit2, Trash2, Link as LinkIcon, Search
 } from 'lucide-react'
+import { saveVendorAction, deleteVendorAction, saveInvoiceAction, deleteInvoiceAction, markInvoicePaidAction } from '@/app/actions/vendorActions'
 import { notifyVendorPaymentDue } from '@/app/actions/vendorNotificationActions'
 import { dismissVendorPaymentNotification } from '@/app/actions/approvalDismissAction'
 import clsx from 'clsx'
@@ -64,7 +64,6 @@ export default function VendorsClient({
   events: Event[]
   userId: string
 }) {
-  const supabase = createClient()
   const [activeTab, setActiveTab] = useState<Tab>('vendors')
   const [vendors, setVendors] = useState<Vendor[]>(initialVendors)
   const [invoices, setInvoices] = useState<Invoice[]>(initialInvoices)
@@ -118,7 +117,8 @@ export default function VendorsClient({
     setVendorSaving(true)
     setVendorError(null)
 
-    const payload = {
+    const result = await saveVendorAction({
+      id:            editingVendor?.id,
       name:          vendorForm.name,
       category:      vendorForm.category,
       contact_name:  vendorForm.contact_name  || null,
@@ -126,23 +126,22 @@ export default function VendorsClient({
       contact_phone: vendorForm.contact_phone || null,
       notes:         vendorForm.notes         || null,
       event_ids:     vendorForm.event_ids,
-    }
+    })
 
-    if (editingVendor) {
-      const { data, error } = await supabase.from('vendors').update(payload).eq('id', editingVendor.id).select().single()
-      if (error) { setVendorError(error.message); setVendorSaving(false); return }
-      if (data) setVendors(prev => prev.map(v => v.id === data.id ? (data as any) : v))
-    } else {
-      const { data, error } = await supabase.from('vendors').insert({ ...payload, organizer_id: userId }).select().single()
-      if (error) { setVendorError(error.message); setVendorSaving(false); return }
-      if (data) setVendors(prev => [data as any, ...prev])
+    if (result.error) { setVendorError(result.error); setVendorSaving(false); return }
+    if (result.data) {
+      if (editingVendor) {
+        setVendors(prev => prev.map(v => v.id === result.data!.id ? (result.data as any) : v))
+      } else {
+        setVendors(prev => [result.data as any, ...prev])
+      }
     }
     setVendorSaving(false)
     setVendorModal(false)
   }
 
   const deleteVendor = async (id: string) => {
-    await supabase.from('vendors').delete().eq('id', id)
+    await deleteVendorAction(id)
     setVendors(prev => prev.filter(v => v.id !== id))
   }
 
@@ -168,31 +167,28 @@ export default function VendorsClient({
     setInvoiceSaving(true)
     setInvoiceError(null)
 
-    const payload = {
+    const result = await saveInvoiceAction({
+      id:          editingInvoice?.id,
       vendor_id:   invoiceForm.vendor_id,
       event_id:    invoiceForm.event_id || null,
       amount:      parseFloat(invoiceForm.amount),
       description: invoiceForm.description || null,
       due_date:    invoiceForm.due_date || null,
       status:      invoiceForm.status,
-    }
+    })
 
-    if (editingInvoice) {
-      const { data, error } = await supabase.from('vendor_invoices').update(payload).eq('id', editingInvoice.id).select().single()
-      if (error) { setInvoiceError(error.message); setInvoiceSaving(false); return }
-      if (data) {
-        setInvoices(prev => prev.map(i => i.id === data.id ? (data as any) : i))
+    if (result.error) { setInvoiceError(result.error); setInvoiceSaving(false); return }
+    if (result.data) {
+      const data = result.data as any
+      if (editingInvoice) {
+        setInvoices(prev => prev.map(i => i.id === data.id ? data : i))
         if ((data.status === 'pending' || data.status === 'overdue') &&
             data.status !== editingInvoice.status) {
           const vendor = vendors.find(v => v.id === data.vendor_id)
           if (vendor) await notifyVendorPaymentDue(userId, data.event_id, vendor.name, data.amount)
         }
-      }
-    } else {
-      const { data, error } = await supabase.from('vendor_invoices').insert(payload).select().single()
-      if (error) { setInvoiceError(error.message); setInvoiceSaving(false); return }
-      if (data) {
-        setInvoices(prev => [...prev, data as any])
+      } else {
+        setInvoices(prev => [...prev, data])
         if (data.status === 'pending' || data.status === 'overdue') {
           const vendor = vendors.find(v => v.id === data.vendor_id)
           if (vendor) await notifyVendorPaymentDue(userId, data.event_id, vendor.name, data.amount)
@@ -205,19 +201,16 @@ export default function VendorsClient({
   }
 
   const markPaid = async (invoice: Invoice) => {
-    const { data } = await supabase.from('vendor_invoices')
-      .update({ status: 'paid', paid_at: new Date().toISOString() })
-      .eq('id', invoice.id).select().single()
-    if (data) {
-      setInvoices(prev => prev.map(i => i.id === data.id ? (data as any) : i))
-      // Dismiss the payment due notification now that it's been paid
+    const result = await markInvoicePaidAction(invoice.id)
+    if (result.data) {
+      setInvoices(prev => prev.map(i => i.id === result.data!.id ? (result.data as any) : i))
       const vendor = vendors.find(v => v.id === invoice.vendor_id)
       if (vendor) await dismissVendorPaymentNotification(invoice.event_id, vendor.name)
     }
   }
 
   const deleteInvoice = async (id: string) => {
-    await supabase.from('vendor_invoices').delete().eq('id', id)
+    await deleteInvoiceAction(id)
     setInvoices(prev => prev.filter(i => i.id !== id))
   }
 

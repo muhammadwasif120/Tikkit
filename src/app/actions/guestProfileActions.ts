@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { redirect } from 'next/navigation'
 
 export async function submitPaymentScreenshot(formData: FormData) {
   const supabase = await createClient()
@@ -82,16 +83,8 @@ export async function submitPaymentScreenshot(formData: FormData) {
 }
 
 
-// ─────────────────────────────────────────────────────────────────
-// FILE: src/app/actions/guestProfileActions.ts
-// ─────────────────────────────────────────────────────────────────
-
-import { createClient as _createClient } from '@/lib/supabase/server'
-import { revalidatePath as _revalidatePath } from 'next/cache'
-import { redirect as _redirect } from 'next/navigation'
-
 export async function updateGuestProfile(formData: FormData) {
-  const supabase = await _createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
@@ -137,14 +130,14 @@ export async function updateGuestProfile(formData: FormData) {
     await supabase.from('profiles').update(profileUpdate).eq('id', user.id)
   }
 
-  _revalidatePath('/guest/profile')
+  revalidatePath('/guest/profile')
   return { success: true }
 }
 
 export async function signOut() {
-  const supabase = await _createClient()
+  const supabase = await createClient()
   await supabase.auth.signOut()
-  _redirect('/auth/login')
+  redirect('/auth/login')
 }
 // Add this to /src/app/actions/guestProfileActions.ts
 
@@ -153,7 +146,7 @@ export async function sendPasswordReset() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user?.email) return { error: 'No email found' }
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`,
   })
   if (error) return { error: error.message }
   return { success: true }
@@ -184,12 +177,12 @@ export async function uploadProfilePhoto(formData: FormData) {
 
   await supabase.from('profiles').update({ avatar_url: publicUrl }).eq('id', user.id)
 
-  _revalidatePath('/guest/profile')
+  revalidatePath('/guest/profile')
   return { success: true, url: publicUrl }
 }
 
 export async function deleteAccount() {
-  const supabase = await _createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
@@ -210,11 +203,11 @@ export async function deleteAccount() {
   })
 
   await supabase.auth.signOut()
-  _redirect('/auth/login')
+  redirect('/auth/login')
 }
 
 export async function updateNotificationPrefs(prefs: Record<string, boolean>) {
-  const supabase = await _createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 

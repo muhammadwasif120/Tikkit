@@ -8,9 +8,11 @@ export async function notifyEntryScan(
   guestName: string,
   isVip: boolean
 ) {
-  await createNotification(
-    Notifications.entryScan(userId, eventId, guestName, isVip)
-  )
+  try {
+    await createNotification(
+      Notifications.entryScan(userId, eventId, guestName, isVip)
+    )
+  } catch { /* fire-and-forget */ }
 }
 
 export async function notifyExitScan(
@@ -18,7 +20,9 @@ export async function notifyExitScan(
   eventId: string,
   guestName: string
 ) {
-  await createNotification(
-    Notifications.exitScan(userId, eventId, guestName)
-  )
+  try {
+    await createNotification(
+      Notifications.exitScan(userId, eventId, guestName)
+    )
+  } catch { /* fire-and-forget */ }
 }

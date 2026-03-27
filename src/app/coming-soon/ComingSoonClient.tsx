@@ -122,19 +122,25 @@ function ParticleCanvas() {
 
 function useCountdown(target: Date) {
   const calc = () => {
-    const diff = Math.max(0, target.getTime() - Date.now())
+    const diff = target.getTime() - Date.now()
+    if (diff <= 0) return { days: 0, hours: 0, mins: 0, secs: 0, launched: true }
     return {
       days:  Math.floor(diff / 86400000),
       hours: Math.floor((diff % 86400000) / 3600000),
       mins:  Math.floor((diff % 3600000) / 60000),
       secs:  Math.floor((diff % 60000) / 1000),
+      launched: false,
     }
   }
-  // Initialize to zeros to avoid SSR/client hydration mismatch
-  const [time, setTime] = useState({ days: 0, hours: 0, mins: 0, secs: 0 })
+  // Initialize with launched:false to avoid SSR/client hydration mismatch
+  const [time, setTime] = useState({ days: 0, hours: 0, mins: 0, secs: 0, launched: false })
   useEffect(() => {
     setTime(calc())
-    const id = setInterval(() => setTime(calc()), 1000)
+    const id = setInterval(() => {
+      const t = calc()
+      setTime(t)
+      if (t.launched) clearInterval(id)
+    }, 1000)
     return () => clearInterval(id)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -363,19 +369,38 @@ export function ComingSoonClient({ initialCount }: Props) {
           )}
 
           {/* Countdown */}
-          <div style={{
-            display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-            gap: 12, marginBottom: 56,
-            animation: 'fadeUp 0.6s ease 0.3s both',
-          }}>
-            <CountdownBlock value={countdown.days}  label="Days"    />
-            <div style={{ paddingTop: 12, fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.15)', lineHeight: 1 }}>:</div>
-            <CountdownBlock value={countdown.hours} label="Hours"   />
-            <div style={{ paddingTop: 12, fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.15)', lineHeight: 1 }}>:</div>
-            <CountdownBlock value={countdown.mins}  label="Minutes" />
-            <div style={{ paddingTop: 12, fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.15)', lineHeight: 1 }}>:</div>
-            <CountdownBlock value={countdown.secs}  label="Seconds" />
-          </div>
+          {countdown.launched ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+              marginBottom: 56, animation: 'fadeUp 0.6s ease 0.3s both',
+            }}>
+              <div style={{
+                background: 'linear-gradient(135deg, #1E5EFF22, #8B5CF622)',
+                border: '1px solid rgba(30,94,255,0.3)',
+                borderRadius: 16, padding: '18px 36px', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 32, marginBottom: 4 }}>🚀</div>
+                <div style={{ fontFamily: "'Clash Display', sans-serif", fontSize: 22, fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
+                  We&apos;re Live!
+                </div>
+                <div style={{ color: '#6B7280', fontSize: 14, marginTop: 4 }}>Tikkit is now available — download the app</div>
+              </div>
+            </div>
+          ) : (
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+              gap: 12, marginBottom: 56,
+              animation: 'fadeUp 0.6s ease 0.3s both',
+            }}>
+              <CountdownBlock value={countdown.days}  label="Days"    />
+              <div style={{ paddingTop: 12, fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.15)', lineHeight: 1 }}>:</div>
+              <CountdownBlock value={countdown.hours} label="Hours"   />
+              <div style={{ paddingTop: 12, fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.15)', lineHeight: 1 }}>:</div>
+              <CountdownBlock value={countdown.mins}  label="Minutes" />
+              <div style={{ paddingTop: 12, fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.15)', lineHeight: 1 }}>:</div>
+              <CountdownBlock value={countdown.secs}  label="Seconds" />
+            </div>
+          )}
 
           {/* ─── FORM CARD ─────────────────────────────────── */}
           <div style={{

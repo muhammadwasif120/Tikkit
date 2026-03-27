@@ -74,7 +74,6 @@ export async function POST(req: NextRequest) {
           webhook_received_at: new Date().toISOString(),
         },
       })
-      console.log(`paypro webhook: user ${userId} payment verified ✓ (txn: ${TransactionID})`)
     } catch (err) {
       console.error('paypro webhook: updateVerificationStatus failed', err)
       return NextResponse.json({ error: 'Internal error' }, { status: 500 })

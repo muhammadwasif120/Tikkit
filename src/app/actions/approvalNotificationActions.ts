@@ -8,9 +8,11 @@ export async function notifyGuestApproved(
   guestName: string,
   eventTitle: string
 ) {
-  await createNotification(
-    Notifications.guestSignup(userId, eventId, guestName, eventTitle)
-  )
+  try {
+    await createNotification(
+      Notifications.guestSignup(userId, eventId, guestName, eventTitle)
+    )
+  } catch { /* fire-and-forget */ }
 }
 
 export async function notifyGuestRejected(
@@ -19,7 +21,9 @@ export async function notifyGuestRejected(
   guestName: string,
   eventTitle: string
 ) {
-  await createNotification(
-    Notifications.guestCancellation(userId, eventId, guestName, eventTitle)
-  )
+  try {
+    await createNotification(
+      Notifications.guestCancellation(userId, eventId, guestName, eventTitle)
+    )
+  } catch { /* fire-and-forget */ }
 }

@@ -456,6 +456,68 @@ export async function getWaitlistEntries(): Promise<WaitlistEntry[]> {
   return data as WaitlistEntry[]
 }
 
+// ─── Support Queries ─────────────────────────────────────────────────────────
+
+export type SupportQuery = {
+  id: string
+  from_name: string
+  from_type: 'organizer' | 'attendee'
+  from_id: string | null
+  subject: string
+  body: string | null
+  status: 'open' | 'in_progress' | 'resolved'
+  priority: 'high' | 'medium' | 'low'
+  resolved_at: string | null
+  created_at: string
+}
+
+export async function getSupportQueries(): Promise<SupportQuery[]> {
+  const supabase = createAdminClient()
+  const { data, error } = await (supabase as any)
+    .from('support_queries')
+    .select('*')
+    .order('created_at', { ascending: false })
+  if (error) return []
+  return (data ?? []) as SupportQuery[]
+}
+
+export async function updateSupportQueryStatus(
+  id: string,
+  status: 'open' | 'in_progress' | 'resolved'
+): Promise<{ error?: string }> {
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('support_queries')
+    .update({
+      status,
+      resolved_at: status === 'resolved' ? new Date().toISOString() : null,
+    })
+    .eq('id', id)
+  return { error: error?.message }
+}
+
+export async function createSupportQuery(query: {
+  from_name: string
+  from_type: 'organizer' | 'attendee'
+  from_id?: string | null
+  subject: string
+  body?: string
+  priority?: 'high' | 'medium' | 'low'
+}): Promise<{ error?: string }> {
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('support_queries')
+    .insert({
+      from_name: query.from_name,
+      from_type: query.from_type,
+      from_id: query.from_id ?? null,
+      subject: query.subject,
+      body: query.body ?? null,
+      priority: query.priority ?? 'medium',
+    })
+  return { error: error?.message }
+}
+
 // ─── Mutations ───────────────────────────────────────────────────────────────
 
 export async function setOrgAdminStatus(

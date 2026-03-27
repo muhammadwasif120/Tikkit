@@ -117,14 +117,7 @@ export default function RegistrationFlow({
     setStep1Loading(true)
     setStep1Error(null)
 
-    // Reference code check
-    if (event.require_reference_code && event.reference_code) {
-      if (form.referenceCode.toUpperCase() !== event.reference_code.toUpperCase()) {
-        setStep1Error('Invalid reference code.')
-        setStep1Loading(false)
-        return
-      }
-    }
+    // Reference code is now optional but captured if provided.
 
     // Determine initial status
     // Free + Open → registered immediately
@@ -142,6 +135,7 @@ export default function RegistrationFlow({
         phone: form.phone || null,
         status,
         payment_status,
+        reference_code_entered: form.referenceCode || null,
       })
       .select()
       .single()
@@ -377,9 +371,9 @@ export default function RegistrationFlow({
             </div>
             {event.require_reference_code && (
               <div>
-                <label className="label">Reference Code *</label>
+                <label className="label">Reference Code <span className="text-gray-600">(optional)</span></label>
                 <input type="text" className="input font-mono uppercase tracking-widest" placeholder="Enter code"
-                  required value={form.referenceCode}
+                  value={form.referenceCode}
                   onChange={e => setForm(p => ({ ...p, referenceCode: e.target.value.toUpperCase() }))} />
               </div>
             )}

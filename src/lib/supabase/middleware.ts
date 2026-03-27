@@ -38,6 +38,7 @@ export async function updateSession(request: NextRequest) {
   '/register',
   '/organizer',     // Public organizer profiles
   '/master',        // Internal admin — security by obscurity, no public links
+  '/coming-soon',   // Public marketing waitlist page
   '/staff',         // Staff/organizer invite links — token-gated, no auth required
 ]
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))

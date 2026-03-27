@@ -627,10 +627,23 @@ export default function EventDetailClient({
 
   return (
     <>
-      <div style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
+      <style>{`
+        @media (min-width: 768px) {
+          .ed-root { display: grid !important; grid-template-columns: 1fr 420px; grid-template-rows: 1fr; min-height: 100svh; max-width: 1200px !important; margin: 0 auto !important; padding-bottom: 0 !important; }
+          .ed-hero { position: sticky !important; top: 0; height: 100svh !important; }
+          .ed-content-col { overflow-y: auto; max-height: 100svh; padding-bottom: 32px !important; }
+          .ed-cta-fixed { position: static !important; transform: none !important; width: auto !important; padding: 0 20px 24px !important; background: transparent !important; bottom: auto !important; }
+          .ed-cta-btn { border-radius: 14px !important; }
+          .ed-sheets-container > div { max-width: 520px !important; }
+        }
+        @media (min-width: 1024px) {
+          .ed-root { grid-template-columns: 1fr 480px; }
+        }
+      `}</style>
+      <div className="ed-root" style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
 
         {/* Hero */}
-        <div style={{ position: 'relative', height: 280, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : gradient, overflow: 'hidden' }}>
+        <div className="ed-hero" style={{ position: 'relative', height: 280, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : gradient, overflow: 'hidden' }}>
           {/* Noise texture */}
           <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 40%, rgba(8,10,16,0.95) 100%)' }} />
@@ -671,12 +684,16 @@ export default function EventDetailClient({
             </div>
           </div>
         </div>
+        {/* ↑ closes ed-hero */}
+
+        {/* Right column: content + CTA — must be inside ed-root for the grid to work */}
+        <div className="ed-content-col" style={{ display: 'flex', flexDirection: 'column' }}>
 
         {/* Status banner for existing registrations */}
         {regStatus && <StatusBanner status={regStatus} paymentStatus={paymentStatus} />}
 
         {/* Main content */}
-        <div style={{ padding: '20px 16px 0', animation: 'revealUp 0.4s ease' }}>
+        <div style={{ padding: '20px 16px 0', flex: 1, animation: 'revealUp 0.4s ease' }}>
 
           {/* Title + organiser */}
           <div style={{ marginBottom: 16 }}>
@@ -763,62 +780,60 @@ export default function EventDetailClient({
             </a>
           )}
         </div>
+
+        {/* CTA — fixed on mobile, inline on desktop */}
+        <div className="ed-cta-fixed" style={{ position: 'fixed', bottom: 76, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '12px 16px 12px', background: 'linear-gradient(to top, #080A10 60%, transparent)', zIndex: 50 }}>
+          <button
+            className="ed-cta-btn"
+            onClick={() => {
+              if (!isLoggedIn) { router.push('/auth/login'); return }
+              if ((cta as any).action === 'pay') { setShowPaySheet(true); return }
+              if ((cta as any).action === 'ticket') { setShowQRModal(true); return }
+              if (!cta.disabled) setShowSheet(true)
+            }}
+            disabled={cta.disabled}
+            style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? '#6B7280' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}>
+            {cta.label}
+          </button>
+        </div>
       </div>
-
-      {/* Fixed CTA */}
-      <div style={{ position: 'fixed', bottom: 76, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '12px 16px 12px', background: 'linear-gradient(to top, #080A10 60%, transparent)', zIndex: 50 }}>
-        <button
-          onClick={() => {
-            if (!isLoggedIn) { router.push('/auth/login'); return }
-            if ((cta as any).action === 'pay') { setShowPaySheet(true); return }
-            if ((cta as any).action === 'ticket') { setShowQRModal(true); return }
-            if (!cta.disabled) setShowSheet(true)
-          }}
-          disabled={cta.disabled}
-          style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? '#6B7280' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}>
-          {cta.label}
-        </button>
+      {/* ↑ closes ed-content-col */}
       </div>
+      {/* ↑ closes ed-root grid */}
 
-      {/* Register / EOI sheet */}
-      {showSheet && (
-        <RegisterSheet
-          event={event} isEOI={isEOI} userProfile={userProfile}
-          onClose={() => setShowSheet(false)}
-          onSuccess={status => { setShowSheet(false); setRegStatus(status); setShowSuccess(true) }}
-        />
-      )}
-
-      {/* Pay sheet */}
-      {showPaySheet && existingReg && (
-        <PaySheet
-          regId={existingReg.id}
-          event={event}
-          onClose={() => setShowPaySheet(false)}
-          onSuccess={() => {
-            setShowPaySheet(false)
-            setPaymentStatus('submitted')
-            setRegStatus(prev => prev === 'approved' ? 'approved' : prev)
-            setShowPaySuccess(true)
-          }}
-        />
-      )}
-
-      {/* QR modal */}
-      {showQRModal && existingReg && (
-        <QRModal
-          regId={existingReg.id}
-          guestName={userProfile?.full_name ?? 'Guest'}
-          event={event}
-          onClose={() => setShowQRModal(false)}
-        />
-      )}
-
-      {/* Success overlay */}
-      {showSuccess && <SuccessOverlay isEOI={isEOI} onClose={() => setShowSuccess(false)} />}
-
-      {/* Payment success overlay */}
-      {showPaySuccess && <PaymentSuccessOverlay onClose={() => setShowPaySuccess(false)} />}
+      {/* Sheets & modals */}
+      <div className="ed-sheets-container">
+        {showSheet && (
+          <RegisterSheet
+            event={event} isEOI={isEOI} userProfile={userProfile}
+            onClose={() => setShowSheet(false)}
+            onSuccess={status => { setShowSheet(false); setRegStatus(status); setShowSuccess(true) }}
+          />
+        )}
+        {showPaySheet && existingReg && (
+          <PaySheet
+            regId={existingReg.id}
+            event={event}
+            onClose={() => setShowPaySheet(false)}
+            onSuccess={() => {
+              setShowPaySheet(false)
+              setPaymentStatus('submitted')
+              setRegStatus(prev => prev === 'approved' ? 'approved' : prev)
+              setShowPaySuccess(true)
+            }}
+          />
+        )}
+        {showQRModal && existingReg && (
+          <QRModal
+            regId={existingReg.id}
+            guestName={userProfile?.full_name ?? 'Guest'}
+            event={event}
+            onClose={() => setShowQRModal(false)}
+          />
+        )}
+        {showSuccess && <SuccessOverlay isEOI={isEOI} onClose={() => setShowSuccess(false)} />}
+        {showPaySuccess && <PaymentSuccessOverlay onClose={() => setShowPaySuccess(false)} />}
+      </div>
     </>
   )
 }
