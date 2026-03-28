@@ -74,11 +74,11 @@ const NAV = [
   { id: 'anal',   label: 'Analytics', icon: BarChart3,       tourId: 'demo-nav-anal' },
 ]
 
-function DemoSidebar({ active, setActive }: { active: string; setActive: (s: string) => void }) {
+function DemoSidebarContent({ active, setActive, onClose }: { active: string; setActive: (s: string) => void; onClose: () => void }) {
   return (
     <aside style={{ width: 240, background: '#0D0F18', display: 'flex', flexDirection: 'column', height: '100%', borderRight: '1px solid rgba(255,255,255,0.04)', flexShrink: 0 }}>
       {/* Logo */}
-      <div style={{ height: 64, display: 'flex', alignItems: 'center', padding: '0 20px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+      <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg,#2B6FFF,#1448CC)', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 0 16px rgba(30,94,255,0.4)' }}>
             <Star size={15} color="#fff" fill="#fff" />
@@ -86,17 +86,21 @@ function DemoSidebar({ active, setActive }: { active: string; setActive: (s: str
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, color: '#fff', letterSpacing: '-0.4px' }}>Tikkit</span>
           <span style={{ fontSize: 9, background: 'rgba(255,199,69,0.12)', border: '1px solid rgba(255,199,69,0.25)', color: '#FFC745', padding: '2px 7px', borderRadius: 99, fontWeight: 700, letterSpacing: '0.06em' }}>DEMO</span>
         </div>
+        {/* Close button — mobile only */}
+        <button onClick={onClose} className="lg:hidden" style={{ background: 'transparent', border: 'none', color: '#6B7280', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }}>
+          <X size={18} />
+        </button>
       </div>
       {/* Nav */}
       <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto' }}>
         <p style={{ fontSize: 10, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '0 12px', marginBottom: 8 }}>Main Menu</p>
         {NAV.map(item => {
           const Icon = item.icon
-          const isActive = active === item.id
+          const isActiveItem = active === item.id
           return (
-            <button id={item.tourId} key={item.id} onClick={() => setActive(item.id)}
-              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', background: isActive ? 'rgba(30,94,255,0.12)' : 'transparent', color: isActive ? '#4D82FF' : '#9CA3AF', fontFamily: 'var(--font-display)', fontSize: 13.5, fontWeight: isActive ? 700 : 500, transition: 'all 0.15s', boxShadow: isActive ? 'inset 3px 0 0 #1E5EFF' : 'none' }}>
-              <Icon size={15} color={isActive ? '#1E5EFF' : '#4B5563'} />
+            <button id={item.tourId} key={item.id} onClick={() => { setActive(item.id); onClose() }}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', borderRadius: 10, border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left', background: isActiveItem ? 'rgba(30,94,255,0.12)' : 'transparent', color: isActiveItem ? '#4D82FF' : '#9CA3AF', fontFamily: 'var(--font-display)', fontSize: 13.5, fontWeight: isActiveItem ? 700 : 500, transition: 'all 0.15s', boxShadow: isActiveItem ? 'inset 3px 0 0 #1E5EFF' : 'none' }}>
+              <Icon size={15} color={isActiveItem ? '#1E5EFF' : '#4B5563'} />
               {item.label}
             </button>
           )
@@ -126,20 +130,48 @@ function DemoSidebar({ active, setActive }: { active: string; setActive: (s: str
   )
 }
 
-function DemoTopBar({ section, onStartTour }: { section: string; onStartTour: () => void }) {
+function DemoSidebar({ active, setActive, open, onClose }: { active: string; setActive: (s: string) => void; open: boolean; onClose: () => void }) {
+  return (
+    <>
+      {/* Desktop — always visible */}
+      <div className="hidden lg:flex" style={{ flexShrink: 0 }}>
+        <DemoSidebarContent active={active} setActive={setActive} onClose={onClose} />
+      </div>
+      {/* Mobile backdrop */}
+      <div
+        onClick={onClose}
+        className="lg:hidden"
+        style={{ position: 'fixed', inset: 0, zIndex: 40, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', opacity: open ? 1 : 0, pointerEvents: open ? 'auto' : 'none', transition: 'opacity 0.25s' }}
+      />
+      {/* Mobile drawer */}
+      <div
+        className="lg:hidden"
+        style={{ position: 'fixed', inset: '0 auto 0 0', zIndex: 50, transform: open ? 'translateX(0)' : 'translateX(-100%)', transition: 'transform 0.3s ease' }}
+      >
+        <DemoSidebarContent active={active} setActive={setActive} onClose={onClose} />
+      </div>
+    </>
+  )
+}
+
+function DemoTopBar({ section, onStartTour, onMenuClick }: { section: string; onStartTour: () => void; onMenuClick: () => void }) {
   const titles: Record<string, string> = { dash: 'Dashboard', events: 'Events', guests: 'Guests', appr: 'Approvals', scan: 'Scanner', vend: 'Vendors', anal: 'Analytics' }
   return (
-    <div style={{ height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 24px', borderBottom: '1px solid rgba(255,255,255,0.04)', background: '#080A10', flexShrink: 0 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.4px' }}>{titles[section] ?? 'Dashboard'}</h1>
-        <span style={{ fontSize: 10, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22C55E', padding: '3px 10px', borderRadius: 99, fontWeight: 700, letterSpacing: '0.08em' }}>LIVE DEMO</span>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        <button onClick={onStartTour} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.2)', color: '#4D82FF', borderRadius: 9, padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-display)' }}>
-          <Sparkles size={12} /> Replay Tour
+    <div style={{ height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', background: '#080A10', flexShrink: 0, gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+        {/* Hamburger — mobile only */}
+        <button onClick={onMenuClick} className="lg:hidden" style={{ background: 'transparent', border: 'none', color: '#9CA3AF', cursor: 'pointer', padding: '4px 2px', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+          <Menu size={20} />
         </button>
-        <Link href="/register" style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#1E5EFF', color: '#fff', textDecoration: 'none', borderRadius: 9, padding: '8px 16px', fontSize: 13, fontWeight: 700, fontFamily: 'var(--font-display)', boxShadow: '0 0 20px rgba(30,94,255,0.3)' }}>
-          Get Started <ArrowRight size={13} />
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.4px', whiteSpace: 'nowrap' }}>{titles[section] ?? 'Dashboard'}</h1>
+        <span style={{ fontSize: 9, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', color: '#22C55E', padding: '2px 8px', borderRadius: 99, fontWeight: 700, letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>LIVE DEMO</span>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        <button onClick={onStartTour} style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.2)', color: '#4D82FF', borderRadius: 9, padding: '6px 12px', fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-display)', whiteSpace: 'nowrap' }}>
+          <Sparkles size={11} /> <span className="hidden sm:inline">Replay </span>Tour
+        </button>
+        <Link href="/register" style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#1E5EFF', color: '#fff', textDecoration: 'none', borderRadius: 9, padding: '7px 13px', fontSize: 12, fontWeight: 700, fontFamily: 'var(--font-display)', boxShadow: '0 0 20px rgba(30,94,255,0.3)', whiteSpace: 'nowrap' }}>
+          Get Started <ArrowRight size={12} />
         </Link>
       </div>
     </div>
@@ -201,7 +233,7 @@ function DashboardScreen() {
           )
         })}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="demo-dash-grid">
         <Card style={{ padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: '#fff', margin: 0 }}>Upcoming Events</h3>
@@ -609,6 +641,7 @@ export default function DemoPage() {
   const [active, setActive] = useState('dash')
   const [tourStep, setTourStep] = useState(0)
   const [tourActive, setTourActive] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     const t = setTimeout(() => setTourActive(true), 900)
@@ -639,30 +672,39 @@ export default function DemoPage() {
         @keyframes scanLine { 0%,100%{top:8%} 50%{top:88%} }
         * { box-sizing: border-box; }
         html, body { margin: 0; padding: 0; overflow: hidden; height: 100%; background: #080A10; }
+        .demo-main-pad { padding: 28px; }
+        .demo-announce-text { font-size: 13px; }
+        .demo-announce-link { display: flex; }
+        .demo-dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 768px) {
+          .demo-main-pad { padding: 16px 14px; }
+          .demo-announce-text { font-size: 11px; }
+          .demo-announce-link { display: none; }
+          .demo-dash-grid { grid-template-columns: 1fr !important; }
+        }
       `}</style>
       {/* Announcement bar */}
-      <div style={{ background: 'linear-gradient(90deg, rgba(30,94,255,0.15), rgba(30,94,255,0.08))', borderBottom: '1px solid rgba(30,94,255,0.15)', padding: '8px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, flexShrink: 0 }}>
-        <span style={{ fontSize: 13, color: '#9CA3AF' }}>
+      <div style={{ background: 'linear-gradient(90deg, rgba(30,94,255,0.15), rgba(30,94,255,0.08))', borderBottom: '1px solid rgba(30,94,255,0.15)', padding: '7px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, flexShrink: 0 }}>
+        <span className="demo-announce-text" style={{ color: '#9CA3AF' }}>
           👋 You're viewing an interactive demo of the Tikkit organizer dashboard.
         </span>
-        <Link href="/register" style={{ fontSize: 13, fontWeight: 700, color: '#4D82FF', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+        <Link href="/register" className="demo-announce-link" style={{ fontSize: 13, fontWeight: 700, color: '#4D82FF', textDecoration: 'none', alignItems: 'center', gap: 4 }}>
           Sign up free <ArrowRight size={12} />
         </Link>
       </div>
       {/* Dashboard shell */}
-      <div style={{ display: 'flex', height: 'calc(100vh - 41px)', overflow: 'hidden' }}>
-        <div className="hidden lg:flex" style={{ flexShrink: 0 }}>
-          <DemoSidebar active={active} setActive={setActive} />
-        </div>
+      <div style={{ display: 'flex', height: 'calc(100dvh - 41px)', overflow: 'hidden' }}>
+        <DemoSidebar active={active} setActive={setActive} open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <DemoTopBar section={active} onStartTour={startTour} />
-          <main style={{ flex: 1, overflowY: 'auto', padding: '28px 28px', background: '#080A10' }}>
+          <DemoTopBar section={active} onStartTour={startTour} onMenuClick={() => setSidebarOpen(true)} />
+          <main style={{ flex: 1, overflowY: 'auto', background: '#080A10' }} className="demo-main-pad">
             <div style={{ maxWidth: 900 }}>
               <Screen />
             </div>
           </main>
         </div>
       </div>
+
       {tourActive && (
         <TourOverlay step={tourStep} total={TOUR_STEPS.length} onNext={next} onPrev={prev} onDismiss={dismiss} />
       )}

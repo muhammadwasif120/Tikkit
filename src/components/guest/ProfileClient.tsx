@@ -1056,14 +1056,15 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
             <div style={{ width: 36, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, margin: '0 auto 16px' }} />
             <p style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: '0 0 20px', fontFamily: 'var(--font-display)' }}>Identity &amp; Payment Verification</p>
             <VerifyForm profile={{
-              id:                     profile.id,
-              full_name:              profile.full_name,
-              email:                  initialEmail,
-              is_id_verified:         profile.is_id_verified,
-              is_payment_verified:    profile.is_payment_verified,
-              didit_verification_id:  null,
-              payment_method_token:   null,
-              social_score:           profile.social_score,
+              id:                 profile.id,
+              full_name:          profile.full_name,
+              cnic_number:        null,
+              cnic_expiry:        null,
+              cnic_image_url:     null,
+              cnic_status:        'none',
+              cnic_submitted_at:  null,
+              cnic_reject_reason: null,
+              social_score:       profile.social_score,
             }} />
           </div>
         </div>

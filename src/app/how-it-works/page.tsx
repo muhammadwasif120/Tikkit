@@ -7,6 +7,7 @@ import {
   CreditCard, MapPin, Calendar, CheckCircle, Sparkles,
   Zap, Shield, Search, Star, ChevronRight,
   ScanLine, TrendingUp, UserCheck, X, ChevronDown, Lock,
+  Smartphone, Share2, HardDrive, Plus, MoreVertical,
 } from 'lucide-react'
 import PublicNav from '@/components/layout/PublicNav'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
@@ -663,6 +664,7 @@ export default function HowItWorksPage() {
   const orgSectionInView = useInView(0.05)
   const attSectionInView = useInView(0.05)
   const ctaInView = useInView(0.05)
+  const pwaInView = useInView(0.1)
 
   const orgSteps = [
     { ref: org1, mockup: OrgStep1, icon: Calendar, title: 'Create your event in minutes', desc: 'Set the date, venue, capacity, ticket price, and guest mode. Go live in under two minutes.', color: '#1E5EFF', num: '01' },
@@ -901,7 +903,7 @@ export default function HowItWorksPage() {
             opacity: heroInView.inView ? 1 : 0,
             animation: heroInView.inView ? 'fadeUp 0.7s ease 0.1s both' : 'none',
           }}>
-            See Tikkit<br />
+            See Tikkit X<br />
             <span className="gradient-text">in action.</span>
           </h1>
 
@@ -967,7 +969,7 @@ export default function HowItWorksPage() {
             <span className="gradient-text-blue">in one dashboard.</span>
           </h2>
           <p style={{ fontSize: 'var(--fs-lg)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
-            From creating an event to reviewing post-night analytics — Tikkit keeps it all in one place so you can stay focused on what matters.
+            From creating an event to reviewing post-night analytics — Tikkit X keeps it all in one place so you can stay focused on what matters.
           </p>
         </div>
 
@@ -1223,6 +1225,188 @@ export default function HowItWorksPage() {
         </GlassCard>
       </div>
 
+      {/* ── PWA Install Guide ── */}
+      <section ref={pwaInView.ref} style={{ maxWidth: 1100, margin: '0 auto 100px', padding: '0 24px' }}>
+
+        {/* Header */}
+        <div style={{
+          textAlign: 'center', marginBottom: 56,
+          opacity: pwaInView.inView ? 1 : 0,
+          transform: pwaInView.inView ? 'translateY(0)' : 'translateY(24px)',
+          transition: 'opacity 0.6s ease, transform 0.6s ease',
+        }}>
+          {/* No-storage badge */}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 99, padding: '6px 16px', marginBottom: 24 }}>
+            <HardDrive size={13} color="#22C55E" />
+            <span style={{ fontSize: 11, fontWeight: 700, color: '#22C55E', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Zero Storage Required</span>
+          </div>
+
+          <h2 style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(28px, 4vw, 44px)',
+            fontWeight: 800, letterSpacing: '-1.2px',
+            color: '#F0F2FF', lineHeight: 1.15, marginBottom: 16,
+          }}>
+            Add to your phone.<br />
+            <span className="gradient-text">No App Store. No storage. Just tap.</span>
+          </h2>
+
+          <p style={{ fontSize: 'var(--fs-lg)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 12px' }}>
+            Tikkit X installs as a web app — no Play Store, no App Store, no 200MB download.
+            Perfect for phones that are already full.
+          </p>
+          <p style={{ fontSize: 'var(--fs-md)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>
+            Works on every iPhone, Android, and tablet.
+          </p>
+        </div>
+
+        {/* Storage callout banner */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(255,199,69,0.06), rgba(255,199,69,0.02))',
+          border: '1px solid rgba(255,199,69,0.15)',
+          borderRadius: 16, padding: '18px 28px',
+          display: 'flex', alignItems: 'center', gap: 16,
+          marginBottom: 48, flexWrap: 'wrap',
+          opacity: pwaInView.inView ? 1 : 0,
+          transition: 'opacity 0.6s ease 0.15s',
+        }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(255,199,69,0.12)', border: '1px solid rgba(255,199,69,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <HardDrive size={18} color="#FFC745" />
+          </div>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 700, color: '#FFC745', margin: '0 0 2px' }}>
+              No storage? No problem.
+            </p>
+            <p style={{ fontSize: 'var(--fs-sm)', color: '#9CA3AF', fontFamily: 'var(--font-body)', margin: 0, lineHeight: 1.5 }}>
+              Traditional apps take 100–500MB of your phone's storage. Tikkit X takes <strong style={{ color: '#F0F2FF' }}>zero bytes</strong> — it lives in your browser, just like a website, but feels like an app.
+            </p>
+          </div>
+        </div>
+
+        {/* iOS + Android cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+
+          {/* iOS Card */}
+          <div style={{
+            background: 'rgba(13,15,24,0.85)', border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 20, overflow: 'hidden',
+            opacity: pwaInView.inView ? 1 : 0,
+            transform: pwaInView.inView ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 0.6s ease 0.2s, transform 0.6s ease 0.2s',
+          }}>
+            {/* Card header */}
+            <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#1C1C1E,#2C2C2E)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Smartphone size={18} color="#F0F2FF" />
+              </div>
+              <div>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', margin: 0 }}>iPhone / iPad</p>
+                <p style={{ fontSize: 'var(--fs-xs)', color: '#6B7280', margin: 0 }}>Safari · iOS 14+</p>
+              </div>
+              <div style={{ marginLeft: 'auto', fontSize: 10, fontWeight: 700, color: '#22C55E', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', padding: '3px 8px', borderRadius: 99 }}>0 MB</div>
+            </div>
+
+            {/* Steps */}
+            <div style={{ padding: '20px 24px' }}>
+              {[
+                { icon: <Share2 size={14} color="#1E5EFF" />, step: '1', text: <>Open <strong style={{ color: '#F0F2FF' }}>tikkitx.com</strong> in Safari</> },
+                { icon: <Share2 size={14} color="#1E5EFF" />, step: '2', text: <>Tap the <strong style={{ color: '#F0F2FF' }}>Share</strong> button at the bottom of Safari (the box with an arrow)</> },
+                { icon: <Plus size={14} color="#1E5EFF" />, step: '3', text: <>Scroll down and tap <strong style={{ color: '#F0F2FF' }}>"Add to Home Screen"</strong></> },
+                { icon: <CheckCircle size={14} color="#22C55E" />, step: '4', text: <>Tap <strong style={{ color: '#F0F2FF' }}>Add</strong> — Tikkit X appears on your home screen like any app</> },
+              ].map(({ icon, step, text }, i) => (
+                <div key={i} style={{ display: 'flex', gap: 14, marginBottom: i < 3 ? 18 : 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#1E5EFF', fontFamily: 'var(--font-display)' }}>{step}</span>
+                    </div>
+                    {i < 3 && <div style={{ width: 1, flex: 1, background: 'rgba(30,94,255,0.12)', margin: '4px 0' }} />}
+                  </div>
+                  <div style={{ paddingTop: 5, paddingBottom: i < 3 ? 8 : 0 }}>
+                    <p style={{ fontSize: 'var(--fs-sm)', color: '#9CA3AF', fontFamily: 'var(--font-body)', lineHeight: 1.55, margin: 0 }}>{text}</p>
+                  </div>
+                </div>
+              ))}
+              <div style={{ marginTop: 20, padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10 }}>
+                <p style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', fontFamily: 'var(--font-body)', margin: 0 }}>
+                  💡 Must use <strong style={{ color: '#6B7280' }}>Safari</strong> — Chrome on iOS doesn't support Add to Home Screen.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Android Card */}
+          <div style={{
+            background: 'rgba(13,15,24,0.85)', border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 20, overflow: 'hidden',
+            opacity: pwaInView.inView ? 1 : 0,
+            transform: pwaInView.inView ? 'translateY(0)' : 'translateY(20px)',
+            transition: 'opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s',
+          }}>
+            {/* Card header */}
+            <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 12, background: 'linear-gradient(135deg,#1B3A4B,#0F2733)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Smartphone size={18} color="#22C55E" />
+              </div>
+              <div>
+                <p style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', margin: 0 }}>Android</p>
+                <p style={{ fontSize: 'var(--fs-xs)', color: '#6B7280', margin: 0 }}>Chrome · Any Android</p>
+              </div>
+              <div style={{ marginLeft: 'auto', fontSize: 10, fontWeight: 700, color: '#22C55E', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', padding: '3px 8px', borderRadius: 99 }}>0 MB</div>
+            </div>
+
+            {/* Steps */}
+            <div style={{ padding: '20px 24px' }}>
+              {[
+                { step: '1', text: <>Open <strong style={{ color: '#F0F2FF' }}>tikkitx.com</strong> in Chrome</> },
+                { step: '2', text: <>Tap the <strong style={{ color: '#F0F2FF' }}>three-dot menu</strong> (⋮) in the top right corner</> },
+                { step: '3', text: <>Tap <strong style={{ color: '#F0F2FF' }}>"Add to Home screen"</strong> or <strong style={{ color: '#F0F2FF' }}>"Install app"</strong></> },
+                { step: '4', text: <>Tap <strong style={{ color: '#F0F2FF' }}>Install</strong> — Tikkit X appears on your home screen instantly</> },
+              ].map(({ step, text }, i) => (
+                <div key={i} style={{ display: 'flex', gap: 14, marginBottom: i < 3 ? 18 : 0 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: 11, fontWeight: 800, color: '#22C55E', fontFamily: 'var(--font-display)' }}>{step}</span>
+                    </div>
+                    {i < 3 && <div style={{ width: 1, flex: 1, background: 'rgba(34,197,94,0.1)', margin: '4px 0' }} />}
+                  </div>
+                  <div style={{ paddingTop: 5, paddingBottom: i < 3 ? 8 : 0 }}>
+                    <p style={{ fontSize: 'var(--fs-sm)', color: '#9CA3AF', fontFamily: 'var(--font-body)', lineHeight: 1.55, margin: 0 }}>{text}</p>
+                  </div>
+                </div>
+              ))}
+              <div style={{ marginTop: 20, padding: '12px 14px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10 }}>
+                <p style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', fontFamily: 'var(--font-body)', margin: 0 }}>
+                  💡 Also works on Samsung Internet, Firefox, and Edge for Android.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom perks row */}
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 16, marginTop: 32,
+          opacity: pwaInView.inView ? 1 : 0,
+          transition: 'opacity 0.6s ease 0.4s',
+        }}>
+          {[
+            { icon: HardDrive, color: '#22C55E', title: 'Zero Storage', desc: 'Takes up no space on your phone. None.' },
+            { icon: Zap, color: '#FFC745', title: 'Instant Access', desc: 'Opens in under a second from your home screen.' },
+            { icon: Shield, color: '#1E5EFF', title: 'Always Up to Date', desc: 'No updates to install — always the latest version.' },
+            { icon: Smartphone, color: '#A78BFA', title: 'Feels Like an App', desc: 'Full screen, no browser bar, works offline.' },
+          ].map(({ icon: Icon, color, title, desc }, i) => (
+            <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 14, padding: '18px 20px' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 9, background: `${color}12`, border: `1px solid ${color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+                <Icon size={15} color={color} />
+              </div>
+              <p style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 700, color: '#F0F2FF', margin: '0 0 4px' }}>{title}</p>
+              <p style={{ fontSize: 'var(--fs-xs)', color: '#6B7280', fontFamily: 'var(--font-body)', margin: 0, lineHeight: 1.5 }}>{desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── CTA ── */}
       <section
         className="hiw-cta"
@@ -1258,7 +1442,7 @@ export default function HowItWorksPage() {
           </h2>
 
           <p style={{ fontSize: 'var(--fs-xl)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, marginBottom: 36 }}>
-            Join organizers across Pakistan who use Tikkit to manage events that people actually remember.
+            Join organizers across Pakistan who use Tikkit X to manage events that people actually remember.
           </p>
 
           <div className="hiw-cta-actions">
@@ -1290,7 +1474,7 @@ export default function HowItWorksPage() {
             {[
               { icon: Shield, text: 'No credit card required' },
               { icon: Zap, text: 'Live in 2 minutes' },
-              { icon: Users, text: 'Trusted by 500+ organizers' },
+              { icon: Users, text: 'Built for Pakistani organizers' },
             ].map(({ icon: Icon, text }, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 7, opacity: ctaInView.inView ? 1 : 0, transition: `opacity 0.5s ease ${0.4 + i * 0.1}s` }}>
                 <Icon size={13} color="#4B5563" />
@@ -1307,7 +1491,7 @@ export default function HowItWorksPage() {
           <Link href="/" className="footer-brand">
             <TikkitXLogo size="sm" />
           </Link>
-          <p className="footer-copy">© {new Date().getFullYear()} Tikkit. Built in Pakistan 🇵🇰</p>
+          <p className="footer-copy">© {new Date().getFullYear()} Tikkit X. Built in Pakistan 🇵🇰</p>
           <div className="footer-links">
             <Link href="/auth/login" className="footer-link">Log in</Link>
             <Link href="/auth/login" className="footer-link">Sign up</Link>
