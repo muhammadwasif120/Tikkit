@@ -13,6 +13,7 @@ import {
 import Link from 'next/link'
 import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInvite } from '@/app/actions/teamActions'
 import PaymentAccountsSection from '@/components/settings/PaymentAccountsSection'
+import ReportProblemSection from '@/components/shared/ReportProblemSection'
 import clsx from 'clsx'
 
 type NotifPrefs = {
@@ -887,6 +888,16 @@ export default function SettingsPage() {
           </button>
         </div>
       </div>
+
+      {/* Report a Problem */}
+      {profile && (
+        <ReportProblemSection
+          userId={profile.id}
+          userName={profile.company_name || profile.full_name || profile.email}
+          userType="organizer"
+          variant="card"
+        />
+      )}
     </div>
   )
 }

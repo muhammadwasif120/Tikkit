@@ -465,6 +465,7 @@ export type SupportQuery = {
   from_id: string | null
   subject: string
   body: string | null
+  category: string | null
   status: 'open' | 'in_progress' | 'resolved'
   priority: 'high' | 'medium' | 'low'
   resolved_at: string | null
@@ -502,10 +503,11 @@ export async function createSupportQuery(query: {
   from_id?: string | null
   subject: string
   body?: string
+  category?: string
   priority?: 'high' | 'medium' | 'low'
-}): Promise<{ error?: string }> {
+}): Promise<{ error?: string; id?: string }> {
   const supabase = createAdminClient()
-  const { error } = await (supabase as any)
+  const { data, error } = await (supabase as any)
     .from('support_queries')
     .insert({
       from_name: query.from_name,
@@ -513,9 +515,12 @@ export async function createSupportQuery(query: {
       from_id: query.from_id ?? null,
       subject: query.subject,
       body: query.body ?? null,
+      category: query.category ?? 'other',
       priority: query.priority ?? 'medium',
     })
-  return { error: error?.message }
+    .select('id')
+    .single()
+  return { error: error?.message, id: data?.id }
 }
 
 // ─── Mutations ───────────────────────────────────────────────────────────────

@@ -1702,15 +1702,6 @@ export default function MasterPage() {
 
             {tab === 'queries' && (
               <div>
-                {/* Foundation notice */}
-                <div style={{ background: 'rgba(30,94,255,0.06)', border: '1px solid rgba(30,94,255,0.18)', borderRadius: 12, padding: '14px 18px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <Clock size={15} color="#4D82FF" style={{ flexShrink: 0 }} />
-                  <div>
-                    <div style={{ fontSize: 'var(--fs-base)', fontWeight: 600, color: '#F0F2FF', fontFamily: 'var(--font-body)' }}>Disputes system — foundation laid</div>
-                    <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 2 }}>Full messaging, resolution workflow, and SLA tracking coming next. Currently showing incoming queries with manual status management.</div>
-                  </div>
-                </div>
-
                 {/* Stats row */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
                   {[
@@ -1725,9 +1716,37 @@ export default function MasterPage() {
                   ))}
                 </div>
 
+                {/* Category breakdown chips */}
+                {(() => {
+                  const catLabels: Record<string, { label: string; color: string }> = {
+                    ticket_registration:  { label: 'Ticket / Registration',     color: '#1E5EFF' },
+                    event_cancellation:   { label: 'Cancellation / Refund',      color: '#EF4444' },
+                    organizer_dispute:    { label: 'Organizer Dispute',          color: '#F97316' },
+                    attendee_dispute:     { label: 'Attendee Complaint',         color: '#F97316' },
+                    account_access:       { label: 'Account Access',             color: '#8B5CF6' },
+                    payment_billing:      { label: 'Payment & Billing',          color: '#F59E0B' },
+                    technical_bug:        { label: 'Technical Bug',              color: '#06B6D4' },
+                    feature_request:      { label: 'Feature Request',            color: '#FACC15' },
+                    other:                { label: 'Other',                      color: '#6B7280' },
+                  }
+                  const cats = Object.entries(catLabels).map(([key, meta]) => ({
+                    key, ...meta, count: queries.filter(q => (q.category ?? 'other') === key).length,
+                  })).filter(c => c.count > 0)
+                  if (cats.length === 0) return null
+                  return (
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
+                      {cats.map(c => (
+                        <div key={c.key} style={{ background: `${c.color}10`, border: `1px solid ${c.color}28`, borderRadius: 20, padding: '4px 12px', fontSize: 12, color: c.color, fontWeight: 600, fontFamily: 'var(--font-body)' }}>
+                          {c.label} <span style={{ opacity: 0.7 }}>({c.count})</span>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                })()}
+
                 <div className="ms-card">
                   <div className="ms-card-hdr">
-                    <span className="ms-card-title">All Queries</span>
+                    <span className="ms-card-title">All Reports</span>
                     <div className="ms-pills">
                       {(['all','open','in_progress','resolved'] as const).map(f => {
                         const active = f === queryFilter
@@ -1738,11 +1757,12 @@ export default function MasterPage() {
                   </div>
 
                   <div style={{ overflowX: 'auto' }}>
-                    <table className="ms-tbl" style={{ minWidth: 680 }}>
+                    <table className="ms-tbl" style={{ minWidth: 720 }}>
                       <thead>
                         <tr>
                           <th>ID</th>
                           <th>From</th>
+                          <th>Category</th>
                           <th>Subject</th>
                           <th className="ms-hide">Priority</th>
                           <th className="ms-hide">Date</th>
@@ -1752,49 +1772,68 @@ export default function MasterPage() {
                       </thead>
                       <tbody>
                         {queriesLoading && (
-                          <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#4B5563' }}>Loading…</td></tr>
+                          <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#4B5563' }}>Loading…</td></tr>
                         )}
                         {!queriesLoading && filteredQueries.length === 0 && (
-                          <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No queries found</td></tr>
+                          <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No reports found</td></tr>
                         )}
-                        {filteredQueries.map(q => (
-                          <tr key={q.id}>
-                            <td style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--fs-sm)', color: '#4B5563', whiteSpace: 'nowrap' }}>{q.id}</td>
-                            <td>
-                              <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', whiteSpace: 'nowrap' }}>{q.from_name}</div>
-                              <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 1, textTransform: 'capitalize' }}>{q.from_type}</div>
-                            </td>
-                            <td style={{ maxWidth: 260 }}>
-                              <div style={{ fontSize: 'var(--fs-base)', color: '#F0F2FF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
-                            </td>
-                            <td className="ms-hide">
-                              <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: PC[q.priority], background: `${PC[q.priority]}16`, border: `1px solid ${PC[q.priority]}30`, borderRadius: 999, padding: '2px 8px', textTransform: 'capitalize' }}>
-                                {q.priority}
-                              </span>
-                            </td>
-                            <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>{fmtDate(q.created_at)}</td>
-                            <td><SBadge status={q.status} /></td>
-                            <td>
-                              <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>
-                                {q.status === 'open' && (
-                                  <button title="Mark in progress" className="ms-ib amber" onClick={() => setQueryStatus(q.id, 'in_progress')}><Clock size={11} /></button>
-                                )}
-                                {q.status === 'in_progress' && (
-                                  <button title="Mark resolved" className="ms-ib green" onClick={() => setQueryStatus(q.id, 'resolved')}><CheckCircle size={11} /></button>
-                                )}
-                                {q.status === 'resolved' && (
-                                  <button title="Re-open" className="ms-ib amber" onClick={() => setQueryStatus(q.id, 'open')}><RefreshCw size={11} /></button>
-                                )}
-                                {q.from_type === 'organizer' && (() => {
-                                  const org = orgs.find((o: Org) => o.id === q.from_id || o.name === q.from_name)
-                                  return org ? (
-                                    <button title="Contact" className="ms-ib blue" onClick={() => setContactTarget(org)}><Mail size={11} /></button>
-                                  ) : null
-                                })()}
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
+                        {filteredQueries.map(q => {
+                          const catMap: Record<string, { label: string; color: string }> = {
+                            ticket_registration:  { label: 'Ticket / Reg.',        color: '#1E5EFF' },
+                            event_cancellation:   { label: 'Cancellation',         color: '#EF4444' },
+                            organizer_dispute:    { label: 'Org. Dispute',         color: '#F97316' },
+                            attendee_dispute:     { label: 'Attendee',             color: '#F97316' },
+                            account_access:       { label: 'Account',              color: '#8B5CF6' },
+                            payment_billing:      { label: 'Payment',              color: '#F59E0B' },
+                            technical_bug:        { label: 'Bug',                  color: '#06B6D4' },
+                            feature_request:      { label: 'Feature',              color: '#FACC15' },
+                            other:                { label: 'Other',                color: '#6B7280' },
+                          }
+                          const cat = catMap[q.category ?? 'other'] ?? catMap.other
+                          return (
+                            <tr key={q.id}>
+                              <td style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--fs-sm)', color: '#4B5563', whiteSpace: 'nowrap' }}>{q.id}</td>
+                              <td>
+                                <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', whiteSpace: 'nowrap' }}>{q.from_name}</div>
+                                <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 1, textTransform: 'capitalize' }}>{q.from_type}</div>
+                              </td>
+                              <td>
+                                <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, background: `${cat.color}14`, border: `1px solid ${cat.color}30`, borderRadius: 6, padding: '2px 7px', whiteSpace: 'nowrap', fontFamily: 'var(--font-body)' }}>
+                                  {cat.label}
+                                </span>
+                              </td>
+                              <td style={{ maxWidth: 220 }}>
+                                <div style={{ fontSize: 'var(--fs-base)', color: '#F0F2FF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
+                              </td>
+                              <td className="ms-hide">
+                                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: PC[q.priority], background: `${PC[q.priority]}16`, border: `1px solid ${PC[q.priority]}30`, borderRadius: 999, padding: '2px 8px', textTransform: 'capitalize' }}>
+                                  {q.priority}
+                                </span>
+                              </td>
+                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>{fmtDate(q.created_at)}</td>
+                              <td><SBadge status={q.status} /></td>
+                              <td>
+                                <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>
+                                  {q.status === 'open' && (
+                                    <button title="Mark in progress" className="ms-ib amber" onClick={() => setQueryStatus(q.id, 'in_progress')}><Clock size={11} /></button>
+                                  )}
+                                  {q.status === 'in_progress' && (
+                                    <button title="Mark resolved" className="ms-ib green" onClick={() => setQueryStatus(q.id, 'resolved')}><CheckCircle size={11} /></button>
+                                  )}
+                                  {q.status === 'resolved' && (
+                                    <button title="Re-open" className="ms-ib amber" onClick={() => setQueryStatus(q.id, 'open')}><RefreshCw size={11} /></button>
+                                  )}
+                                  {q.from_type === 'organizer' && (() => {
+                                    const org = orgs.find((o: Org) => o.id === q.from_id || o.name === q.from_name)
+                                    return org ? (
+                                      <button title="Contact" className="ms-ib blue" onClick={() => setContactTarget(org)}><Mail size={11} /></button>
+                                    ) : null
+                                  })()}
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        })}
                       </tbody>
                     </table>
                   </div>

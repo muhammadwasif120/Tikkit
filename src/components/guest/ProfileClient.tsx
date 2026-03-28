@@ -7,6 +7,7 @@ import { getCreditTier } from '@/lib/creditUtils'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
 import VerifyForm from '@/components/verification/VerifyForm'
+import ReportProblemSection from '@/components/shared/ReportProblemSection'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type Profile = {
@@ -745,6 +746,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
   const [showAvatarPicker, setShowAvatarPicker] = useState(false)
   const [showTx, setShowTx] = useState(false)
   const [showVerify, setShowVerify] = useState(false)
+  const [showReport, setShowReport] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showNotifPrefs, setShowNotifPrefs] = useState(false)
   const [deleteBusy, setDeleteBusy] = useState(false)
@@ -971,6 +973,16 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
             <ChevronRight size={14} color="#4B5563" />
           </button>
 
+          {/* Report a Problem */}
+          <button
+            onClick={() => setShowReport(true)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', color: '#F97316', fontSize: 14 }}
+          >
+            <AlertCircle size={16} />
+            <span style={{ flex: 1, textAlign: 'left' }}>Report a Problem</span>
+            <ChevronRight size={14} color="#4B5563" />
+          </button>
+
           {/* Sign out */}
           <button
             onClick={() => signOut()}
@@ -1040,6 +1052,32 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
                 }
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showReport && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          onClick={() => setShowReport(false)}
+        >
+          <div
+            style={{ background: '#0D0F18', borderRadius: '24px 24px 0 0', border: '1px solid rgba(255,255,255,0.08)', width: '100%', maxWidth: 560, padding: '20px 20px 40px', maxHeight: '90vh', overflowY: 'auto' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ width: 36, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, margin: '0 auto 16px' }} />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <p style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Report a Problem</p>
+              <button onClick={() => setShowReport(false)} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', padding: 4 }}>
+                <X size={18} />
+              </button>
+            </div>
+            <ReportProblemSection
+              userId={profile.id}
+              userName={profile.full_name || profile.username || 'Guest'}
+              userType="attendee"
+              variant="inline"
+            />
           </div>
         </div>
       )}
