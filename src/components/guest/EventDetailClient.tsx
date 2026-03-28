@@ -631,14 +631,17 @@ export default function EventDetailClient({
         @media (min-width: 768px) {
           .ed-root { display: grid !important; grid-template-columns: 1fr 420px; grid-template-rows: 1fr; min-height: 100svh; max-width: 1200px !important; margin: 0 auto !important; padding-bottom: 0 !important; }
           .ed-hero { position: sticky !important; top: 0; height: 100svh !important; }
+          .ed-hero-btns { display: none !important; }
           .ed-content-col { overflow-y: auto; max-height: 100svh; padding-bottom: 32px !important; }
-          .ed-cta-fixed { position: static !important; transform: none !important; width: auto !important; padding: 0 20px 24px !important; background: transparent !important; bottom: auto !important; }
+          .ed-desktop-topbar { display: flex !important; }
+          .ed-cta-fixed { position: static !important; transform: none !important; width: auto !important; padding: 12px 20px 24px !important; background: transparent !important; bottom: auto !important; margin-top: auto !important; }
           .ed-cta-btn { border-radius: 14px !important; }
           .ed-sheets-container > div { max-width: 520px !important; }
         }
         @media (min-width: 1024px) {
           .ed-root { grid-template-columns: 1fr 480px; }
         }
+        .ed-desktop-topbar { display: none; }
       `}</style>
       <div className="ed-root" style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
 
@@ -648,8 +651,8 @@ export default function EventDetailClient({
           <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 40%, rgba(8,10,16,0.95) 100%)' }} />
 
-          {/* Back + actions */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* Back + actions — mobile only (hidden on desktop via .ed-hero-btns) */}
+          <div className="ed-hero-btns" style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <button onClick={() => router.back()} style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
               <ArrowLeft size={18} />
             </button>
@@ -689,6 +692,31 @@ export default function EventDetailClient({
         {/* Right column: content + CTA — must be inside ed-root for the grid to work */}
         <div className="ed-content-col" style={{ display: 'flex', flexDirection: 'column' }}>
 
+        {/* Desktop topbar — back + actions (hidden on mobile) */}
+        <div className="ed-desktop-topbar" style={{ alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+          <button onClick={() => router.back()} style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#9CA3AF' }}>
+            <ArrowLeft size={16} />
+          </button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => {
+                if (!isLoggedIn) { router.push('/auth/login'); return }
+                setLiked(l => !l)
+                startFavTransition(async () => {
+                  const res = await toggleEventFavourite(event.id)
+                  setLiked(res.favourited)
+                })
+              }}
+              style={{ width: 36, height: 36, borderRadius: 10, background: liked ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)', border: `1px solid ${liked ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.08)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              <Heart size={15} color={liked ? '#EF4444' : '#9CA3AF'} fill={liked ? '#EF4444' : 'none'} />
+            </button>
+            <button onClick={() => navigator.share?.({ title: event.title, url: window.location.href })} style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#9CA3AF' }}>
+              <Share2 size={15} />
+            </button>
+          </div>
+        </div>
+
         {/* Status banner for existing registrations */}
         {regStatus && <StatusBanner status={regStatus} paymentStatus={paymentStatus} />}
 
@@ -719,7 +747,9 @@ export default function EventDetailClient({
               { icon: <Calendar size={14} color="#818CF8" />, label: 'Date',     value: `${days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d away`}`, sub: new Date(event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) },
               { icon: <Clock    size={14} color="#818CF8" />, label: 'Time',     value: fmtTime(event.date_start), sub: event.date_end ? `until ${fmtTime(event.date_end)}` : '' },
               { icon: <MapPin   size={14} color="#818CF8" />, label: 'Venue',    value: event.secret_venue && !isConfirmedGuest ? 'Secret' : (event.venue_name ?? 'TBA'), sub: event.secret_venue && !isConfirmedGuest ? 'Revealed upon confirmation' : (event.venue_address ?? '') },
-              { icon: <Users    size={14} color="#818CF8" />, label: 'Capacity', value: event.capacity ? `${event.registered_count} / ${event.capacity}` : 'Unlimited', sub: spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 20 ? `${spotsLeft} spots left` : '' },
+              { icon: <Users    size={14} color="#818CF8" />, label: 'Capacity',
+                value: isFull ? 'Sold Out' : spotsLeft !== null ? `${spotsLeft} left` : 'Unlimited',
+                sub: event.capacity ? `${event.registered_count} of ${event.capacity} registered` : '' },
             ].map((item, i) => (
               <div key={i} style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '12px 13px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
@@ -782,7 +812,7 @@ export default function EventDetailClient({
         </div>
 
         {/* CTA — fixed on mobile, inline on desktop */}
-        <div className="ed-cta-fixed" style={{ position: 'fixed', bottom: 76, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '12px 16px 12px', background: 'linear-gradient(to top, #080A10 60%, transparent)', zIndex: 50 }}>
+        <div className="ed-cta-fixed" style={{ position: 'fixed', bottom: 76, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '12px 16px 12px', background: 'linear-gradient(to top, #080A10 70%, transparent)', zIndex: 50, marginTop: 'auto' }}>
           <button
             className="ed-cta-btn"
             onClick={() => {
