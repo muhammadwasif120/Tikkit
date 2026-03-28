@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { X, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const TOUR_KEY = 'tikkit_tour_v1'
 
@@ -38,19 +39,48 @@ export default function GuidedTour() {
   const [highlight, setHighlight] = useState<HighlightRect | null>(null)
 
   useEffect(() => {
+    const supabase = createClient()
+
+    const markSeen = async () => {
+      localStorage.setItem(TOUR_KEY, '1')
+      // Persist to account so it doesn't re-trigger on other devices/browsers
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase.auth.updateUser({ data: { tour_seen: true } })
+      }
+    }
+
     const start = () => {
-      localStorage.setItem(TOUR_KEY, '1') // mark seen immediately so it never re-triggers
+      markSeen()
       setStep(0)
       setActive(true)
     }
 
-    if (!localStorage.getItem(TOUR_KEY)) {
-      const t = setTimeout(start, 1400)
-      return () => clearTimeout(t)
+    let autoTimer: ReturnType<typeof setTimeout> | null = null
+
+    const checkAndMaybeStart = async () => {
+      // Fast local check first — already seen
+      if (localStorage.getItem(TOUR_KEY)) return
+
+      // Authoritative check: user account metadata (works across devices)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.user_metadata?.tour_seen) {
+        localStorage.setItem(TOUR_KEY, '1') // sync locally
+        return
+      }
+
+      // First time ever — show after short delay
+      autoTimer = setTimeout(start, 1400)
     }
 
+    checkAndMaybeStart()
+
+    // Always allow manual replay via event (e.g. from Settings)
     window.addEventListener('tikkit:start-tour', start)
-    return () => window.removeEventListener('tikkit:start-tour', start)
+    return () => {
+      window.removeEventListener('tikkit:start-tour', start)
+      if (autoTimer) clearTimeout(autoTimer)
+    }
   }, [])
 
   useEffect(() => {

@@ -53,7 +53,7 @@ export default function Sidebar({ profile, open, onClose }: Props) {
   }
 
   const sidebarContent = (
-    <aside className="w-60 bg-brand-charcoal flex flex-col h-full border-r border-white/[0.04]">
+    <aside className="w-60 bg-brand-charcoal flex flex-col h-full border-r border-white/[0.04]" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
       {/* Logo */}
       <div className="h-16 flex items-center justify-between px-5 border-b border-white/[0.04] shrink-0">
         <div className="flex items-center gap-2.5">
