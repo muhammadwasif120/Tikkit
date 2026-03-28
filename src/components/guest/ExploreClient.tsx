@@ -359,7 +359,10 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
   const isFull = spotsLeft !== null && spotsLeft <= 0
 
   return (
-    <Link href={`/guest/explore/${event.slug || event.id}`} style={{ textDecoration: 'none', display: 'block', opacity: 0, animation: 'revealUp 0.35s ease forwards', animationDelay: `${index * 55}ms` }}>
+    <div
+      onClick={() => router.push(`/guest/explore/${event.slug || event.id}`)}
+      style={{ textDecoration: 'none', display: 'block', opacity: 0, animation: 'revealUp 0.35s ease forwards', animationDelay: `${index * 55}ms`, cursor: 'pointer' }}
+    >
       <div style={{ display: 'flex', gap: 11, padding: '11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
         {/* Date column */}
         <div style={{ flexShrink: 0, width: 42, textAlign: 'center', paddingTop: 1 }}>
@@ -389,12 +392,12 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
           <h3 style={{ color: 'white', fontSize: 13, fontWeight: 800, margin: '0 0 1px', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {event.title}
           </h3>
-          {/* Organizer link — must be a span (not <a>) since EventRow is already inside <Link> */}
+          {/* Organizer link */}
           {orgUsername ? (
             <span
               role="link"
               tabIndex={0}
-              onClick={e => { e.preventDefault(); e.stopPropagation(); router.push(`/organizer/${orgUsername}`) }}
+              onClick={e => { e.stopPropagation(); router.push(`/organizer/${orgUsername}`) }}
               onKeyDown={e => e.key === 'Enter' && router.push(`/organizer/${orgUsername}`)}
               style={{ color: '#818CF8', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic', cursor: 'pointer', display: 'inline-block' }}
             >
@@ -433,7 +436,7 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
 
         {/* Heart / Save button */}
         <button
-          onClick={e => { e.preventDefault(); e.stopPropagation(); onToggleFav(event.id) }}
+          onClick={e => { e.stopPropagation(); onToggleFav(event.id) }}
           style={{ alignSelf: 'center', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 2px 6px 6px', display: 'flex' }}
         >
           <Heart
@@ -446,7 +449,7 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
           />
         </button>
       </div>
-    </Link>
+    </div>
   )
 }
 
