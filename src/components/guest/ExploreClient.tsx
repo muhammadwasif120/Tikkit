@@ -169,7 +169,7 @@ function MyEventsStrip({ myEvents }: { myEvents: MyEvent[] }) {
           const ev = reg.event; if (!ev) return null
           const dot = resolveStatusDot(reg.status)
           return (
-            <Link key={reg.id} href="/guest/tikkit" style={{ textDecoration: 'none', flexShrink: 0, width: 120, opacity: 0, animation: 'revealUp 0.3s ease forwards', animationDelay: `${i * 50}ms` }}>
+            <Link key={reg.id} href={ev.slug ? `/guest/explore/${ev.slug}` : ev.id ? `/guest/explore/${ev.id}` : '/guest/tikkit'} style={{ textDecoration: 'none', flexShrink: 0, width: 120, opacity: 0, animation: 'revealUp 0.3s ease forwards', animationDelay: `${i * 50}ms` }}>
               <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
                 <div style={{ height: 64, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : getGradient(ev.id), position: 'relative' }}>
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent)' }} />
