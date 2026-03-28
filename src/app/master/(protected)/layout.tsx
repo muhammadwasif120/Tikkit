@@ -5,7 +5,7 @@ export default async function MasterLayout({ children }: { children: React.React
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/auth/login')
+  if (!user) redirect('/master/login')
 
   const { data: profile } = await supabase
     .from('profiles')
