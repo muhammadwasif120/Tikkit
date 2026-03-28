@@ -92,7 +92,7 @@ function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus
   if (!s) return null
   const Icon = s.icon
   return (
-    <div style={{ margin: '16px 16px 0', padding: '13px 15px', borderRadius: 16, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+    <div style={{ margin: '16px 20px 0', padding: '13px 15px', borderRadius: 16, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
       <Icon size={18} color={s.color} style={{ flexShrink: 0, marginTop: 1 }} />
       <div>
         <p style={{ color: s.color, fontSize: 13, fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>{s.label}</p>
@@ -628,19 +628,54 @@ export default function EventDetailClient({
   return (
     <>
       <style>{`
+        @keyframes revealUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+        @keyframes sheetSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         @media (min-width: 768px) {
-          .ed-root { display: grid !important; grid-template-columns: 1fr 420px; grid-template-rows: 1fr; min-height: 100svh; max-width: 1200px !important; margin: 0 auto !important; padding-bottom: 0 !important; }
-          .ed-hero { position: sticky !important; top: 0; height: 100svh !important; }
-          .ed-content-col { overflow-y: auto; max-height: 100svh; padding-bottom: 32px !important; }
-          .ed-cta-fixed { position: static !important; transform: none !important; width: auto !important; padding: 0 20px 24px !important; background: transparent !important; bottom: auto !important; }
+          .ed-root {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 100svh !important;
+            overflow: hidden !important;
+            padding-bottom: 0 !important;
+            margin: 0 !important;
+          }
+          .ed-hero {
+            position: static !important;
+            flex: 1 !important;
+            height: 100svh !important;
+            min-width: 0 !important;
+          }
+          .ed-content-col {
+            width: 440px !important;
+            flex-shrink: 0 !important;
+            overflow-y: auto !important;
+            height: 100svh !important;
+            display: flex !important;
+            flex-direction: column !important;
+            padding-bottom: 0 !important;
+            border-left: 1px solid rgba(255,255,255,0.05) !important;
+          }
+          .ed-content-inner { flex: 1; }
+          .ed-cta-fixed {
+            position: sticky !important;
+            bottom: 0 !important;
+            transform: none !important;
+            width: auto !important;
+            left: auto !important;
+            padding: 12px 20px 20px !important;
+            background: linear-gradient(to top, #080A10 80%, transparent) !important;
+            z-index: 10 !important;
+          }
           .ed-cta-btn { border-radius: 14px !important; }
-          .ed-sheets-container > div { max-width: 520px !important; }
         }
-        @media (min-width: 1024px) {
-          .ed-root { grid-template-columns: 1fr 480px; }
+        @media (min-width: 1280px) {
+          .ed-content-col { width: 480px !important; }
         }
       `}</style>
-      <div className="ed-root" style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
+      <div className="ed-root" style={{ background: '#080A10', minHeight: '100svh', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
 
         {/* Hero */}
         <div className="ed-hero" style={{ position: 'relative', height: 280, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : gradient, overflow: 'hidden' }}>
@@ -693,7 +728,7 @@ export default function EventDetailClient({
         {regStatus && <StatusBanner status={regStatus} paymentStatus={paymentStatus} />}
 
         {/* Main content */}
-        <div style={{ padding: '20px 16px 0', flex: 1, animation: 'revealUp 0.4s ease' }}>
+        <div className="ed-content-inner" style={{ padding: '20px 20px 0', flex: 1, animation: 'revealUp 0.4s ease' }}>
 
           {/* Title + organiser */}
           <div style={{ marginBottom: 16 }}>
