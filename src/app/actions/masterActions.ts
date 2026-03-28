@@ -531,3 +531,74 @@ export async function setOrgAdminStatus(
     .eq('id', orgId)
   return { error: error?.message }
 }
+
+// ─── CNIC Verifications ──────────────────────────────────────────────────────
+
+export type CnicVerification = {
+  id: string
+  full_name: string | null
+  email: string
+  role: string
+  cnic_number: string
+  cnic_expiry: string
+  cnic_image_url: string
+  cnic_status: 'pending' | 'verified' | 'rejected'
+  cnic_submitted_at: string
+  cnic_reject_reason: string | null
+}
+
+export async function getMasterCnicVerifications(): Promise<CnicVerification[]> {
+  const supabase = createAdminClient()
+  const { data, error } = await (supabase as any)
+    .from('profiles')
+    .select('id, full_name, email, role, cnic_number, cnic_expiry, cnic_image_url, cnic_status, cnic_submitted_at, cnic_reject_reason')
+    .in('cnic_status', ['pending', 'verified', 'rejected'])
+    .not('cnic_number', 'is', null)
+    .order('cnic_submitted_at', { ascending: false })
+  if (error) { console.error('getMasterCnicVerifications:', error); return [] }
+  return (data ?? []) as CnicVerification[]
+}
+
+export async function approveCnicVerification(userId: string): Promise<{ error?: string }> {
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('profiles')
+    .update({
+      cnic_status: 'verified',
+      is_id_verified: true,
+      cnic_reject_reason: null,
+      social_score: (supabase as any).rpc
+        ? undefined
+        : undefined,
+    })
+    .eq('id', userId)
+  if (error) return { error: error.message }
+
+  // Award +100 social score for CNIC verification (idempotent via RPC)
+  await (supabase as any).rpc('upsert_category_score', {
+    p_user_id: userId,
+    p_category_id: null,
+    p_delta: 0,
+  }).catch(() => {})
+
+  // Direct increment of social_score
+  await (supabase as any)
+    .from('profiles')
+    .update({ cnic_status: 'verified', is_id_verified: true })
+    .eq('id', userId)
+
+  return {}
+}
+
+export async function rejectCnicVerification(userId: string, reason: string): Promise<{ error?: string }> {
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('profiles')
+    .update({
+      cnic_status: 'rejected',
+      is_id_verified: false,
+      cnic_reject_reason: reason || 'Could not verify — please resubmit a clearer photo.',
+    })
+    .eq('id', userId)
+  return { error: error?.message }
+}

@@ -8,6 +8,7 @@ import {
   MoreHorizontal, Flag, Trash2, Send, X, Menu,
   UserCheck, TrendingUp, ExternalLink, RefreshCw,
   Eye, Ban, AlertTriangle, Clock, ChevronRight, ChevronLeft, BarChart2, Star, Download,
+  ShieldCheck, ShieldX, ZoomIn,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import {
@@ -15,13 +16,14 @@ import {
   getMasterOrgProfile, getMasterOrgEvents, getMasterEventGuests,
   getMasterAnalytics, getWaitlistEntries,
   getSupportQueries, updateSupportQueryStatus,
+  getMasterCnicVerifications, approveCnicVerification, rejectCnicVerification,
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
-  type PlatformAnalytics, type WaitlistEntry, type SupportQuery,
+  type PlatformAnalytics, type WaitlistEntry, type SupportQuery, type CnicVerification,
 } from '@/app/actions/masterActions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'analytics' | 'waitlist'
+type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'analytics' | 'waitlist' | 'verifications'
 type OrgStatus = 'active' | 'review' | 'suspended'
 type EventStatus = 'live' | 'draft' | 'flagged' | 'suspended' | 'ended'
 
@@ -862,6 +864,46 @@ export default function MasterPage() {
     getSupportQueries().then(setQueries).finally(() => setQueriesLoading(false))
   }, [tab, queries.length])
 
+  // CNIC verifications state
+  const [cnicVerifications, setCnicVerifications] = useState<CnicVerification[]>([])
+  const [cnicLoading, setCnicLoading] = useState(false)
+  const [cnicFilter, setCnicFilter] = useState<'all' | 'pending' | 'verified' | 'rejected'>('all')
+  const [reviewCnic, setReviewCnic] = useState<CnicVerification | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
+  const [cnicAction, setCnicAction] = useState<'idle' | 'approving' | 'rejecting'>('idle')
+  const [showRejectInput, setShowRejectInput] = useState(false)
+  const [imageZoomed, setImageZoomed] = useState(false)
+
+  useEffect(() => {
+    if (tab !== 'verifications') return
+    setCnicLoading(true)
+    getMasterCnicVerifications().then(setCnicVerifications).finally(() => setCnicLoading(false))
+  }, [tab])
+
+  const handleApproveCnic = async (userId: string) => {
+    setCnicAction('approving')
+    const { error } = await approveCnicVerification(userId)
+    if (!error) {
+      setCnicVerifications(prev => prev.map(v => v.id === userId ? { ...v, cnic_status: 'verified' } : v))
+      setReviewCnic(prev => prev?.id === userId ? { ...prev, cnic_status: 'verified' } : prev)
+    }
+    setCnicAction('idle')
+    setShowRejectInput(false)
+  }
+
+  const handleRejectCnic = async (userId: string) => {
+    if (!rejectReason.trim()) { setShowRejectInput(true); return }
+    setCnicAction('rejecting')
+    const { error } = await rejectCnicVerification(userId, rejectReason)
+    if (!error) {
+      setCnicVerifications(prev => prev.map(v => v.id === userId ? { ...v, cnic_status: 'rejected', cnic_reject_reason: rejectReason } : v))
+      setReviewCnic(prev => prev?.id === userId ? { ...prev, cnic_status: 'rejected', cnic_reject_reason: rejectReason } : prev)
+    }
+    setCnicAction('idle')
+    setShowRejectInput(false)
+    setRejectReason('')
+  }
+
   // Derived
   const liveOrgs = orgs.filter(o => !removedOrgs.has(o.id))
   const getOrgStatus = (o: Org): OrgStatus => orgStatuses[o.id] ?? o.status
@@ -893,18 +935,21 @@ export default function MasterPage() {
   const flaggedEvtCount = events.filter(e => getEvtStatus(e) === 'flagged').length
   const liveEvtCount = events.filter(e => getEvtStatus(e) === 'live').length
   const totalRegistered = events.reduce((a, e) => a + e.registered, 0)
+  const pendingCnicCount = cnicVerifications.filter(v => v.cnic_status === 'pending').length
 
   const NAV = [
-    { id: 'overview'   as Tab, icon: LayoutDashboard, label: 'Overview' },
-    { id: 'organizers' as Tab, icon: Users,           label: 'Organizers',         badge: reviewOrgCount > 0 ? reviewOrgCount : undefined },
-    { id: 'events'     as Tab, icon: Calendar,        label: 'Events',             badge: flaggedEvtCount > 0 ? flaggedEvtCount : undefined },
-    { id: 'analytics'  as Tab, icon: BarChart2,       label: 'Analytics'           },
-    { id: 'queries'    as Tab, icon: MessageSquare,   label: 'Queries & Disputes', badge: openQCount > 0 ? openQCount : undefined },
-    { id: 'waitlist'   as Tab, icon: Star,            label: 'Waitlist',           badge: waitlist.length > 0 ? waitlist.length : undefined },
+    { id: 'overview'       as Tab, icon: LayoutDashboard, label: 'Overview' },
+    { id: 'organizers'     as Tab, icon: Users,           label: 'Organizers',         badge: reviewOrgCount > 0 ? reviewOrgCount : undefined },
+    { id: 'events'         as Tab, icon: Calendar,        label: 'Events',             badge: flaggedEvtCount > 0 ? flaggedEvtCount : undefined },
+    { id: 'analytics'      as Tab, icon: BarChart2,       label: 'Analytics'           },
+    { id: 'queries'        as Tab, icon: MessageSquare,   label: 'Queries & Disputes', badge: openQCount > 0 ? openQCount : undefined },
+    { id: 'waitlist'       as Tab, icon: Star,            label: 'Waitlist',           badge: waitlist.length > 0 ? waitlist.length : undefined },
+    { id: 'verifications'  as Tab, icon: ShieldCheck,     label: 'Verifications',      badge: pendingCnicCount > 0 ? pendingCnicCount : undefined },
   ]
 
   const PAGE_TITLES: Record<Tab, string> = {
-    overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes', analytics: 'Analytics', waitlist: 'Waitlist',
+    overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes',
+    analytics: 'Analytics', waitlist: 'Waitlist', verifications: 'Verifications',
   }
 
 
@@ -1757,12 +1802,223 @@ export default function MasterPage() {
               </div>
             )}
 
+            {/* ── Verifications Tab ── */}
+            {tab === 'verifications' && (
+              <div>
+                {/* Filter pills */}
+                <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+                  {(['all', 'pending', 'verified', 'rejected'] as const).map(f => {
+                    const count = f === 'all' ? cnicVerifications.length : cnicVerifications.filter(v => v.cnic_status === f).length
+                    const active = cnicFilter === f
+                    const col = f === 'pending' ? '#F59E0B' : f === 'verified' ? '#22C55E' : f === 'rejected' ? '#EF4444' : '#6B7280'
+                    return (
+                      <button key={f} onClick={() => setCnicFilter(f)} style={{
+                        padding: '5px 14px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                        fontFamily: 'var(--font-body)', transition: 'all 0.15s',
+                        background: active ? `${col}18` : 'rgba(255,255,255,0.03)',
+                        border: `1px solid ${active ? col + '45' : 'rgba(255,255,255,0.08)'}`,
+                        color: active ? col : '#6B7280',
+                      }}>
+                        {f.charAt(0).toUpperCase() + f.slice(1)} <span style={{ opacity: 0.7 }}>({count})</span>
+                      </button>
+                    )
+                  })}
+                  <button onClick={() => { setCnicLoading(true); getMasterCnicVerifications().then(setCnicVerifications).finally(() => setCnicLoading(false)) }}
+                    style={{ marginLeft: 'auto', padding: '5px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <RefreshCw size={11} /> Refresh
+                  </button>
+                </div>
+
+                {/* Table */}
+                {cnicLoading ? (
+                  <div style={{ padding: '48px 0', textAlign: 'center', color: '#4B5563', fontSize: 13 }}>Loading verifications…</div>
+                ) : cnicVerifications.filter(v => cnicFilter === 'all' || v.cnic_status === cnicFilter).length === 0 ? (
+                  <div style={{ padding: '64px 0', textAlign: 'center' }}>
+                    <ShieldCheck size={32} color="#2D3140" style={{ margin: '0 auto 12px' }} />
+                    <p style={{ color: '#4B5563', fontSize: 14, fontWeight: 600 }}>No verifications found</p>
+                    <p style={{ color: '#374151', fontSize: 12, marginTop: 4 }}>
+                      {cnicFilter === 'pending' ? 'No CNICs awaiting review.' : 'Change filter to see other statuses.'}
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                      <thead>
+                        <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                          {['User', 'Role', 'CNIC Number', 'Expiry', 'Submitted', 'Status', ''].map(h => (
+                            <th key={h} style={{ padding: '8px 12px', textAlign: 'left', color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', fontFamily: 'var(--font-body)', whiteSpace: 'nowrap' }}>{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cnicVerifications
+                          .filter(v => cnicFilter === 'all' || v.cnic_status === cnicFilter)
+                          .map(v => {
+                            const statusCol = v.cnic_status === 'verified' ? '#22C55E' : v.cnic_status === 'rejected' ? '#EF4444' : '#F59E0B'
+                            const statusLabel = v.cnic_status === 'verified' ? 'Verified' : v.cnic_status === 'rejected' ? 'Rejected' : 'Pending'
+                            const name = v.full_name || v.email || '—'
+                            return (
+                              <tr key={v.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.12s' }}
+                                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
+                                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                                <td style={{ padding: '12px 12px' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <div style={{ width: 30, height: 30, borderRadius: 8, background: avBg(v.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                                      {initials(name)}
+                                    </div>
+                                    <div>
+                                      <p style={{ color: '#E5E7EB', fontSize: 13, fontWeight: 600, margin: 0, fontFamily: 'var(--font-body)' }}>{name}</p>
+                                      <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{v.email}</p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td style={{ padding: '12px 12px' }}>
+                                  <span style={{ background: v.role === 'organizer' ? 'rgba(30,94,255,0.12)' : 'rgba(139,92,246,0.12)', color: v.role === 'organizer' ? '#4D82FF' : '#A78BFA', border: `1px solid ${v.role === 'organizer' ? 'rgba(30,94,255,0.25)' : 'rgba(139,92,246,0.25)'}`, borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-body)' }}>
+                                    {v.role === 'organizer' ? 'Organizer' : 'Attendee'}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '12px 12px', color: '#9CA3AF', fontFamily: 'monospace', fontSize: 12, letterSpacing: '0.04em' }}>{v.cnic_number || '—'}</td>
+                                <td style={{ padding: '12px 12px', color: '#6B7280', fontSize: 12 }}>{v.cnic_expiry || '—'}</td>
+                                <td style={{ padding: '12px 12px', color: '#6B7280', fontSize: 12, whiteSpace: 'nowrap' }}>{v.cnic_submitted_at ? fmtDate(v.cnic_submitted_at) : '—'}</td>
+                                <td style={{ padding: '12px 12px' }}>
+                                  <span style={{ background: `${statusCol}14`, border: `1px solid ${statusCol}30`, color: statusCol, borderRadius: 6, padding: '2px 8px', fontSize: 11, fontWeight: 700, fontFamily: 'var(--font-body)' }}>
+                                    {statusLabel}
+                                  </span>
+                                </td>
+                                <td style={{ padding: '12px 12px', textAlign: 'right' }}>
+                                  <button onClick={() => { setReviewCnic(v); setRejectReason(''); setShowRejectInput(false); setImageZoomed(false) }}
+                                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#9CA3AF', borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                                    <Eye size={11} /> Review
+                                  </button>
+                                </td>
+                              </tr>
+                            )
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         </main>
       </div>
 
       {/* Contact panel */}
       {contactTarget && <ContactPanel org={contactTarget} onClose={() => setContactTarget(null)} />}
+
+      {/* CNIC Review Modal */}
+      {reviewCnic && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+          onClick={e => { if (e.target === e.currentTarget) { setReviewCnic(null); setImageZoomed(false) } }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }} />
+          <div style={{ position: 'relative', background: '#0C0E16', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto', zIndex: 1 }}>
+            {/* Modal header */}
+            <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <ShieldCheck size={16} color="#4D82FF" />
+                </div>
+                <div>
+                  <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>CNIC Review</p>
+                  <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>{reviewCnic.full_name || reviewCnic.email}</p>
+                </div>
+              </div>
+              <button onClick={() => { setReviewCnic(null); setImageZoomed(false) }} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', padding: 4, borderRadius: 6 }}>
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Meta row */}
+            <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {[
+                { label: 'CNIC Number', value: reviewCnic.cnic_number, mono: true },
+                { label: 'Expiry Date', value: reviewCnic.cnic_expiry },
+                { label: 'Role', value: reviewCnic.role === 'organizer' ? 'Organizer' : 'Attendee' },
+                { label: 'Submitted', value: reviewCnic.cnic_submitted_at ? fmtDate(reviewCnic.cnic_submitted_at) : '—' },
+              ].map(({ label, value, mono }) => (
+                <div key={label}>
+                  <p style={{ color: '#4B5563', fontSize: 11, margin: '0 0 3px', fontWeight: 600, letterSpacing: '0.05em', fontFamily: 'var(--font-body)' }}>{label.toUpperCase()}</p>
+                  <p style={{ color: '#E5E7EB', fontSize: 13, margin: 0, fontFamily: mono ? 'monospace' : 'var(--font-body)', letterSpacing: mono ? '0.06em' : 'normal' }}>{value || '—'}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* CNIC image */}
+            <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                <p style={{ color: '#4B5563', fontSize: 11, margin: 0, fontWeight: 600, letterSpacing: '0.05em', fontFamily: 'var(--font-body)' }}>CNIC DOCUMENT</p>
+                <button onClick={() => setImageZoomed(!imageZoomed)} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#9CA3AF', borderRadius: 6, padding: '3px 8px', fontSize: 11, cursor: 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <ZoomIn size={10} /> {imageZoomed ? 'Fit' : 'Zoom'}
+                </button>
+              </div>
+              {reviewCnic.cnic_image_url ? (
+                <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', background: '#080A10', cursor: 'zoom-in' }} onClick={() => setImageZoomed(!imageZoomed)}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={reviewCnic.cnic_image_url} alt="CNIC document" style={{ width: '100%', height: imageZoomed ? 'auto' : 200, objectFit: imageZoomed ? 'contain' : 'cover', display: 'block', transition: 'height 0.2s' }} />
+                </div>
+              ) : (
+                <div style={{ height: 120, background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <p style={{ color: '#374151', fontSize: 13 }}>No image on file</p>
+                </div>
+              )}
+            </div>
+
+            {/* Reject reason (if already rejected) */}
+            {reviewCnic.cnic_status === 'rejected' && reviewCnic.cnic_reject_reason && (
+              <div style={{ padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(239,68,68,0.04)' }}>
+                <p style={{ color: '#EF4444', fontSize: 11, fontWeight: 700, margin: '0 0 4px', letterSpacing: '0.05em' }}>REJECT REASON</p>
+                <p style={{ color: '#F87171', fontSize: 13, margin: 0 }}>{reviewCnic.cnic_reject_reason}</p>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{ padding: '16px 24px' }}>
+              {reviewCnic.cnic_status === 'verified' ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 10, padding: '10px 14px' }}>
+                  <CheckCircle size={15} color="#22C55E" />
+                  <p style={{ color: '#22C55E', fontSize: 13, fontWeight: 600, margin: 0 }}>This CNIC has been verified</p>
+                </div>
+              ) : (
+                <>
+                  {/* Reject reason input */}
+                  {showRejectInput && (
+                    <div style={{ marginBottom: 12 }}>
+                      <textarea
+                        placeholder="Reason for rejection (shown to user)…"
+                        value={rejectReason}
+                        onChange={e => setRejectReason(e.target.value)}
+                        rows={2}
+                        style={{ width: '100%', background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, padding: '8px 12px', color: '#F87171', fontSize: 13, fontFamily: 'var(--font-body)', resize: 'none', outline: 'none', boxSizing: 'border-box' }}
+                      />
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                      onClick={() => handleApproveCnic(reviewCnic.id)}
+                      disabled={cnicAction !== 'idle'}
+                      style={{ flex: 1, padding: '10px 0', borderRadius: 10, background: cnicAction !== 'idle' ? 'rgba(34,197,94,0.06)' : 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', fontSize: 13, fontWeight: 700, cursor: cnicAction !== 'idle' ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background 0.15s' }}>
+                      <ShieldCheck size={14} /> {cnicAction === 'approving' ? 'Approving…' : 'Approve'}
+                    </button>
+                    <button
+                      onClick={() => handleRejectCnic(reviewCnic.id)}
+                      disabled={cnicAction !== 'idle'}
+                      style={{ flex: 1, padding: '10px 0', borderRadius: 10, background: cnicAction !== 'idle' ? 'rgba(239,68,68,0.04)' : 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.22)', color: '#EF4444', fontSize: 13, fontWeight: 700, cursor: cnicAction !== 'idle' ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, transition: 'background 0.15s' }}>
+                      <ShieldX size={14} /> {cnicAction === 'rejecting' ? 'Rejecting…' : showRejectInput ? 'Confirm Reject' : 'Reject'}
+                    </button>
+                  </div>
+                  {showRejectInput && (
+                    <button onClick={() => { setShowRejectInput(false); setRejectReason('') }} style={{ marginTop: 8, width: '100%', padding: '6px 0', background: 'none', border: 'none', color: '#4B5563', fontSize: 12, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                      Cancel
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
