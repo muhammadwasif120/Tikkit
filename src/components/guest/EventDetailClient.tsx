@@ -656,7 +656,8 @@ export default function EventDetailClient({
             display: flex !important;
             flex-direction: column !important;
             padding-bottom: 0 !important;
-            border-left: 1px solid rgba(255,255,255,0.05) !important;
+            border-right: 1px solid rgba(255,255,255,0.05) !important;
+            order: -1 !important;
           }
           .ed-content-inner { flex: 1; }
           .ed-cta-fixed {
@@ -672,7 +673,7 @@ export default function EventDetailClient({
           .ed-cta-btn { border-radius: 14px !important; }
         }
         @media (min-width: 1280px) {
-          .ed-content-col { width: 480px !important; }
+          .ed-content-col { width: 480px !important; order: -1 !important; }
         }
       `}</style>
       <div className="ed-root" style={{ background: '#080A10', minHeight: '100svh', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
