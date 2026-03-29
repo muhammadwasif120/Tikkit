@@ -796,7 +796,17 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
 
   return (
     <>
-      <div style={{ padding: '16px', maxWidth: 640, margin: '0 auto' }}>
+      <style>{`
+        .prof-wrap  { padding: 16px; max-width: 640px; margin: 0 auto; }
+        .prof-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+        @media (min-width: 768px) {
+          .prof-wrap  { max-width: 1000px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+          .prof-stats { grid-template-columns: repeat(4, 1fr); }
+        }
+      `}</style>
+      <div className="prof-wrap">
+        {/* ── LEFT COLUMN: Identity + Stats + Credit ── */}
+        <div className="prof-left">
         {/* Avatar + name card */}
         <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 22, padding: '20px', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: profile.bio ? 14 : 0 }}>
@@ -845,7 +855,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
         </div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
+        <div className="prof-stats">
           {stats.map(stat => (
             <div key={stat.label} style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '14px 10px', textAlign: 'center' }}>
               <p style={{ color: stat.color, fontSize: 24, fontWeight: 900, margin: '0 0 2px', fontFamily: 'var(--font-body)', fontVariantNumeric: 'tabular-nums', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
@@ -858,7 +868,10 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
 
         {/* Credit Score */}
         <CreditScoreCard score={profile.credit_score} />
+        </div>{/* end prof-left */}
 
+        {/* ── RIGHT COLUMN: History + Menu ── */}
+        <div className="prof-right">
         {/* Past Events */}
         <PastEventsSection events={pastEvents} />
 
@@ -1018,6 +1031,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
           <Trash2 size={14} />
           Delete Account
         </button>
+        </div>{/* end prof-right */}
       </div>
 
       {showAvatarPicker && (

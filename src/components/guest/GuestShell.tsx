@@ -178,7 +178,7 @@ export default function GuestShell({
         {/* ── Main content ── */}
         <main style={{ flex: 1, overflowY: 'auto', minWidth: 0 }}>
           {isEventDetail ? children : (
-            <div style={{ width: '100%', padding: '24px 32px 40px' }}>
+            <div style={{ width: '100%', maxWidth: 1280, margin: '0 auto', padding: '24px 32px 40px' }}>
               {children}
             </div>
           )}
