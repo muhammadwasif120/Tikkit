@@ -609,10 +609,10 @@ export default function ExploreClient({
         .exp-hero-inner  { border-radius: 20px; overflow: hidden; position: relative; height: 215px; }
 
         @media (min-width: 768px) {
-          /* Layout: side-by-side */
-          .exp-grid      { display: grid; grid-template-columns: 1fr 340px; gap: 28px; align-items: start; padding: 0; }
-          .exp-sidebar   { order: 2; position: sticky; top: 0; }
-          .exp-main      { order: 1; }
+          /* Layout: side-by-side — featured left, events right */
+          .exp-grid      { display: grid; grid-template-columns: 340px 1fr; gap: 28px; align-items: start; padding: 0; }
+          .exp-sidebar   { order: 1; position: sticky; top: 0; }
+          .exp-main      { order: 2; }
 
           /* Search + filters lose side padding (container already has it) */
           .exp-search-wrap { padding: 0 0 8px; }
