@@ -57,6 +57,9 @@ export default function GuestShell({
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(href + '/')
 
+  // Event detail pages need full-bleed layout (no padding wrapper, no paddingBottom on mobile main)
+  const isEventDetail = /^\/guest\/explore\/.+/.test(pathname)
+
   return (
     <>
       {/* ══════════════════════════════════════════
@@ -173,10 +176,12 @@ export default function GuestShell({
         </aside>
 
         {/* ── Main content ── */}
-        <main style={{ flex: 1, overflowY: 'auto' }}>
-          <div style={{ width: '100%', padding: '24px 32px 40px' }}>
-            {children}
-          </div>
+        <main style={{ flex: 1, overflowY: 'auto', minWidth: 0 }}>
+          {isEventDetail ? children : (
+            <div style={{ width: '100%', padding: '24px 32px 40px' }}>
+              {children}
+            </div>
+          )}
         </main>
       </div>
 
@@ -192,7 +197,7 @@ export default function GuestShell({
           maxWidth: 480,
         }}
       >
-        {/* Top bar */}
+        {/* Top bar — hidden on event detail (hero has its own controls) */}
         <header
           className="glass-bar sticky top-0 z-50 flex items-center justify-between border-b"
           style={{
@@ -200,6 +205,7 @@ export default function GuestShell({
             paddingRight:  20,
             paddingBottom: 12,
             paddingLeft:   20,
+            display:       isEventDetail ? 'none' : undefined,
           }}
         >
           <TikkitXLogo size="md" variant="text-only" />
@@ -227,7 +233,7 @@ export default function GuestShell({
         </header>
 
         {/* Page content */}
-        <main style={{ paddingBottom: 88 }}>{children}</main>
+        <main style={{ paddingBottom: isEventDetail ? 0 : 88 }}>{children}</main>
 
         {/* PWA install nudge — mobile only */}
         <AddToHomeScreen />

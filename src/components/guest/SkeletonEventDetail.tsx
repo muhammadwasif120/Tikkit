@@ -1,64 +1,107 @@
 /* ─── Skeleton loader for Event Detail page ──────────────────────── */
 export default function SkeletonEventDetail() {
   return (
-    <div className="skeleton-screen" style={{ background: '#080A10', minHeight: '100svh', maxWidth: 480, margin: '0 auto', paddingBottom: 160 }}>
+    <>
+      <style>{`
+        @media (min-width: 768px) {
+          .sk-root {
+            display: flex !important;
+            flex-direction: row !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: 100svh !important;
+            overflow: hidden !important;
+            padding-bottom: 0 !important;
+            margin: 0 !important;
+          }
+          .sk-content {
+            width: 440px !important;
+            flex-shrink: 0 !important;
+            height: 100svh !important;
+            overflow: hidden !important;
+            padding: 24px 20px !important;
+            border-right: 1px solid rgba(255,255,255,0.05) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 16px !important;
+          }
+          .sk-hero {
+            flex: 1 !important;
+            height: 100svh !important;
+          }
+          .sk-cta {
+            position: sticky !important;
+            bottom: 0 !important;
+            padding: 12px 20px 20px !important;
+            background: linear-gradient(to top, #080A10 80%, transparent) !important;
+          }
+          .sk-mobile-hero { display: none !important; }
+        }
+        @media (min-width: 1280px) {
+          .sk-content { width: 480px !important; }
+        }
+      `}</style>
 
-      {/* Hero image */}
-      <div className="skeleton" style={{ height: 280, borderRadius: 0 }} />
+      <div className="sk-root" style={{ background: '#080A10', minHeight: '100svh', paddingBottom: 120, fontFamily: 'var(--font-body)' }}>
 
-      <div style={{ padding: '20px 16px 0' }}>
+        {/* Content column (left on desktop, stacked on mobile) */}
+        <div className="sk-content" style={{ padding: '20px 20px 0', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-        {/* Title + organiser */}
-        <div className="skeleton-card" style={{ marginBottom: 20 }}>
-          <div className="skeleton skeleton-title" style={{ width: '85%', height: 28, marginBottom: 8 }} />
-          <div className="skeleton skeleton-title" style={{ width: '60%', height: 24, marginBottom: 10 }} />
-          <div className="skeleton skeleton-text" style={{ width: 140 }} />
-        </div>
+          {/* Mobile hero */}
+          <div className="sk-mobile-hero skeleton" style={{ height: 280, borderRadius: 0, margin: '-20px -20px 0' }} />
 
-        {/* Key info grid 2×2 */}
-        <div className="skeleton-card" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} style={{
-              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(30,94,255,0.07)',
-              borderRadius: 14, padding: '12px 13px',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
-                <div className="skeleton skeleton-circle" style={{ width: 14, height: 14 }} />
-                <div className="skeleton skeleton-text" style={{ width: 40, height: 8 }} />
+          {/* Title + organiser */}
+          <div style={{ paddingTop: 4 }}>
+            <div className="skeleton" style={{ width: '85%', height: 28, borderRadius: 8, marginBottom: 8 }} />
+            <div className="skeleton" style={{ width: 140, height: 12, borderRadius: 6 }} />
+          </div>
+
+          {/* 2×2 info grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '12px 13px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
+                  <div className="skeleton" style={{ width: 14, height: 14, borderRadius: '50%' }} />
+                  <div className="skeleton" style={{ width: 40, height: 8, borderRadius: 4 }} />
+                </div>
+                <div className="skeleton" style={{ width: '70%', height: 14, borderRadius: 4, marginBottom: 5 }} />
+                <div className="skeleton" style={{ width: '50%', height: 9, borderRadius: 4 }} />
               </div>
-              <div className="skeleton skeleton-text" style={{ width: '70%', height: 14, marginBottom: 5 }} />
-              <div className="skeleton skeleton-text" style={{ width: '50%', height: 9 }} />
-            </div>
-          ))}
+            ))}
+          </div>
+
+          {/* Countdown bar */}
+          <div style={{ background: '#0E1018', border: '1px solid rgba(129,140,248,0.12)', borderRadius: 14, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="skeleton" style={{ width: 100, height: 12, borderRadius: 4 }} />
+            <div className="skeleton" style={{ width: 60, height: 20, borderRadius: 4 }} />
+          </div>
+
+          {/* Price */}
+          <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '13px 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className="skeleton" style={{ width: 80, height: 12, borderRadius: 4 }} />
+            <div className="skeleton" style={{ width: 110, height: 20, borderRadius: 4 }} />
+          </div>
+
+          {/* Description */}
+          <div>
+            <div className="skeleton" style={{ width: 50, height: 14, borderRadius: 4, marginBottom: 10 }} />
+            <div className="skeleton" style={{ width: '100%', height: 11, borderRadius: 4, marginBottom: 6 }} />
+            <div className="skeleton" style={{ width: '95%', height: 11, borderRadius: 4, marginBottom: 6 }} />
+            <div className="skeleton" style={{ width: '75%', height: 11, borderRadius: 4 }} />
+          </div>
+
+          {/* Spacer pushes CTA to bottom on desktop */}
+          <div style={{ flex: 1 }} />
+
+          {/* CTA */}
+          <div className="sk-cta" style={{ padding: '12px 0 0' }}>
+            <div className="skeleton" style={{ height: 54, borderRadius: 16, width: '100%' }} />
+          </div>
         </div>
 
-        {/* Countdown bar */}
-        <div className="skeleton-card" style={{
-          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(30,94,255,0.07)',
-          borderRadius: 14, padding: '14px 16px', marginBottom: 16,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
-          <div className="skeleton skeleton-text" style={{ width: 90 }} />
-          <div className="skeleton skeleton-text" style={{ width: 70, height: 18 }} />
-        </div>
-
-        {/* Description */}
-        <div className="skeleton-card" style={{ marginBottom: 20 }}>
-          <div className="skeleton skeleton-text" style={{ width: 60, marginBottom: 10 }} />
-          <div className="skeleton skeleton-text" style={{ width: '100%', marginBottom: 6 }} />
-          <div className="skeleton skeleton-text" style={{ width: '95%', marginBottom: 6 }} />
-          <div className="skeleton skeleton-text" style={{ width: '80%', marginBottom: 6 }} />
-          <div className="skeleton skeleton-text" style={{ width: '70%' }} />
-        </div>
+        {/* Hero image column (right on desktop, hidden on mobile — shown inline above) */}
+        <div className="sk-hero skeleton" style={{ height: 280 }} />
       </div>
-
-      {/* Fixed CTA */}
-      <div style={{
-        position: 'fixed', bottom: 76, left: '50%', transform: 'translateX(-50%)',
-        width: '100%', maxWidth: 480, padding: '12px 16px',
-      }}>
-        <div className="skeleton" style={{ height: 54, borderRadius: 16 }} />
-      </div>
-    </div>
+    </>
   )
 }
