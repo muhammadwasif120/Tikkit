@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import {
   Search, MapPin, Clock, Lock, Flame, Zap, Star, CalendarDays,
-  Building2, Heart,
+  Building2, Heart, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 import { toggleFavouriteOrganizer } from '@/app/actions/organizerActions'
 import { toggleEventFavourite } from '@/app/actions/eventFavouriteActions'
@@ -341,6 +341,161 @@ function TopOrganizersStrip({
   )
 }
 
+/* ─── Desktop Hero Carousel ─────────────────────────────────── */
+function DesktopHeroCarousel({ slides }: { slides: Event[] }) {
+  const [idx, setIdx] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const count = slides.length
+
+  useEffect(() => {
+    if (paused || count <= 1) return
+    timerRef.current = setInterval(() => setIdx(i => (i + 1) % count), 5500)
+    return () => { if (timerRef.current) clearInterval(timerRef.current) }
+  }, [paused, count])
+
+  const prev = (e: React.MouseEvent) => { e.preventDefault(); setIdx(i => (i - 1 + count) % count) }
+  const next = (e: React.MouseEvent) => { e.preventDefault(); setIdx(i => (i + 1) % count) }
+
+  if (!slides.length) return null
+
+  return (
+    <div
+      className="exp-desktop-hero"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      style={{ position: 'relative', borderRadius: 22, overflow: 'hidden', height: 420, marginBottom: 28, boxShadow: '0 24px 80px rgba(0,0,0,0.7)' }}
+    >
+      {/* Slides */}
+      {slides.map((ev, i) => {
+        const days = daysUntil(ev.date_start)
+        const organiser = ev.organizer?.company_name ?? ev.organizer?.full_name ?? 'Unknown Organizer'
+        return (
+          <div
+            key={ev.id}
+            style={{
+              position: 'absolute', inset: 0,
+              background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : getGradient(ev.id),
+              opacity: i === idx ? 1 : 0,
+              transition: 'opacity 0.8s ease',
+              pointerEvents: i === idx ? 'auto' : 'none',
+            }}
+          >
+            {/* Noise */}
+            <div style={{ position: 'absolute', inset: 0, opacity: 0.025, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
+            {/* Gradient overlay — dark left + bottom */}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.15) 75%, transparent 100%)' }} />
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%)' }} />
+
+            {/* Content */}
+            <Link
+              href={`/guest/explore/${ev.slug || ev.id}`}
+              style={{ position: 'absolute', inset: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '40px 48px' }}
+            >
+              {/* Top badges */}
+              <div style={{ position: 'absolute', top: 28, left: 48, display: 'flex', gap: 8, alignItems: 'center' }}>
+                <span style={{ padding: '5px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', color: 'rgba(255,255,255,0.9)', fontSize: 10, fontWeight: 800, letterSpacing: '1.5px' }}>
+                  FEATURED
+                </span>
+                <span style={{ padding: '5px 12px', borderRadius: 8, background: days <= 1 ? 'rgba(239,68,68,0.9)' : 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)', color: 'white', fontSize: 10, fontWeight: 800, letterSpacing: '0.8px' }}>
+                  {days <= 0 ? 'TODAY' : days === 1 ? 'TOMORROW' : `IN ${days} DAYS`}
+                </span>
+              </div>
+
+              {/* Tags */}
+              {(ev.tags ?? []).length > 0 && (
+                <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                  {(ev.tags ?? []).slice(0, 3).map(tag => (
+                    <span key={tag} style={{ padding: '3px 10px', borderRadius: 7, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Title */}
+              <h2 style={{ color: 'white', fontSize: 40, fontWeight: 900, margin: '0 0 14px', fontFamily: 'var(--font-display)', letterSpacing: '-1px', lineHeight: 1.05, maxWidth: 560 }}>
+                {ev.title}
+              </h2>
+
+              {/* Meta */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22, flexWrap: 'wrap' }}>
+                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <CalendarDays size={13} style={{ opacity: 0.7 }} />
+                  {fmtDay(ev.date_start)} · {fmtTime(ev.date_start)}
+                </span>
+                {ev.venue_name && !ev.secret_venue && (
+                  <>
+                    <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
+                    <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <MapPin size={12} style={{ opacity: 0.7 }} />{ev.venue_name}
+                    </span>
+                  </>
+                )}
+                <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
+                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>by {organiser}</span>
+              </div>
+
+              {/* CTA row */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 12, background: '#1E5EFF', color: 'white', fontSize: 14, fontWeight: 800, boxShadow: '0 4px 20px rgba(30,94,255,0.5)' }}>
+                  View Event →
+                </span>
+                <span style={{ padding: '9px 16px', borderRadius: 12, background: (ev.ticket_price ?? 0) === 0 ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', border: `1px solid ${(ev.ticket_price ?? 0) === 0 ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.12)'}`, color: (ev.ticket_price ?? 0) === 0 ? '#10B981' : 'white', fontSize: 14, fontWeight: 800 }}>
+                  {(ev.ticket_price ?? 0) === 0 ? 'FREE' : `PKR ${ev.ticket_price!.toLocaleString('en-PK')}`}
+                </span>
+              </div>
+            </Link>
+          </div>
+        )
+      })}
+
+      {/* Prev / Next arrows */}
+      {count > 1 && (
+        <>
+          <button
+            onClick={prev}
+            style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button
+            onClick={next}
+            style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
+          >
+            <ChevronRight size={18} />
+          </button>
+        </>
+      )}
+
+      {/* Dot indicators */}
+      {count > 1 && (
+        <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 10 }}>
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              style={{ height: 6, width: i === idx ? 28 : 6, borderRadius: 3, background: i === idx ? 'white' : 'rgba(255,255,255,0.3)', border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.35s ease' }}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Slide counter */}
+      <div style={{ position: 'absolute', top: 28, right: 28, zIndex: 10, padding: '4px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 700, letterSpacing: '0.5px' }}>
+        {idx + 1} / {count}
+      </div>
+
+      {/* Progress bar */}
+      {count > 1 && !paused && (
+        <div key={idx} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, zIndex: 10 }}>
+          <div style={{ height: '100%', background: 'rgba(30,94,255,0.8)', animation: 'heroProgress 5.5s linear forwards' }} />
+        </div>
+      )}
+    </div>
+  )
+}
+
 /* ─── Event Row ──────────────────────────────────────────────── */
 function EventRow({ event, index, isFavourited, onToggleFav }: {
   event: Event; index: number
@@ -608,20 +763,28 @@ export default function ExploreClient({
         .exp-hero-wrap   { margin: 14px 16px 0; }
         .exp-hero-inner  { border-radius: 20px; overflow: hidden; position: relative; height: 215px; }
 
+        /* Desktop carousel — hidden on mobile */
+        .exp-desktop-hero { display: none; }
+
+        @keyframes heroProgress {
+          from { width: 0%; }
+          to   { width: 100%; }
+        }
+
         @media (min-width: 768px) {
-          /* Layout: side-by-side — featured left, events right */
-          .exp-grid      { display: grid; grid-template-columns: 340px 1fr; gap: 28px; align-items: start; padding: 0; }
-          .exp-sidebar   { order: 1; position: sticky; top: 0; }
-          .exp-main      { order: 2; }
+          /* Full-width carousel above grid, strips right, events left */
+          .exp-desktop-hero { display: block; }
+          .exp-hero-wrap    { display: none !important; }
+
+          /* Layout */
+          .exp-grid      { display: grid; grid-template-columns: 1fr 300px; gap: 28px; align-items: start; padding: 0; }
+          .exp-sidebar   { order: 2; position: sticky; top: 0; }
+          .exp-main      { order: 1; }
 
           /* Search + filters lose side padding (container already has it) */
           .exp-search-wrap { padding: 0 0 8px; }
           .exp-pills-wrap  { padding: 0 0 0; flex-wrap: wrap; overflow: visible; }
           .exp-tags-wrap   { padding: 4px 0 0; flex-wrap: wrap; overflow: visible; }
-
-          /* Hero scales up */
-          .exp-hero-wrap   { margin: 0 0 16px; }
-          .exp-hero-inner  { height: 260px !important; border-radius: 14px !important; }
 
           /* Organizer cards → 2-col grid */
           .exp-org-scroll  { display: grid; grid-template-columns: repeat(2, 1fr); overflow: visible; padding: 0; gap: 10px; }
@@ -736,6 +899,11 @@ export default function ExploreClient({
             )
           })}
         </div>
+      )}
+
+      {/* ── Desktop full-width hero carousel (hidden on mobile) ── */}
+      {!isFiltering && events.length > 0 && (
+        <DesktopHeroCarousel slides={events.slice(0, 5)} />
       )}
 
       {/* ── 2-column grid (sidebar first = top on mobile, right on desktop) ── */}
