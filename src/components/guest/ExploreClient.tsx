@@ -777,7 +777,7 @@ export default function ExploreClient({
           .exp-hero-wrap    { display: none !important; }
 
           /* Layout */
-          .exp-grid      { display: grid; grid-template-columns: 1fr 300px; gap: 28px; align-items: start; padding: 0; }
+          .exp-grid      { display: grid; grid-template-columns: 3fr 2fr; gap: 28px; align-items: start; padding: 0; }
           .exp-sidebar   { order: 2; position: sticky; top: 0; }
           .exp-main      { order: 1; }
 
