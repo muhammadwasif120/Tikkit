@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { DM_Sans } from 'next/font/google'
+import { cookies } from 'next/headers'
 import './globals.css'
+import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -51,9 +53,15 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const VALID_THEMES: AppTheme[] = ['noir', 'corporate', 'pulse']
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies()
+  const raw = cookieStore.get('tikkit-theme')?.value ?? 'noir'
+  const theme: AppTheme = VALID_THEMES.includes(raw as AppTheme) ? (raw as AppTheme) : 'noir'
+
   return (
-    <html lang="en" className={dmSans.variable}>
+    <html lang="en" className={dmSans.variable} data-theme={theme}>
       <head>
         {/* Fonts */}
         <link rel="preconnect" href="https://api.fontshare.com" />
@@ -74,7 +82,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="msapplication-TileColor" content="#1E5EFF" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <ThemeProvider initialTheme={theme}>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   )
 }

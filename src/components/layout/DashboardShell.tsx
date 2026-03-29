@@ -19,7 +19,7 @@ export default function DashboardShell({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen bg-[#080A10] overflow-hidden">
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--guest-bg)' }}>
       <Sidebar
         profile={profile}
         open={sidebarOpen}

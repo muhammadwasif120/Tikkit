@@ -1,13 +1,14 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Edit3, Star, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown, ShieldCheck, Ticket, Trash2, Camera } from 'lucide-react'
+import { Edit3, Star, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown, ShieldCheck, Ticket, Trash2, Camera, Palette } from 'lucide-react'
 import { updateGuestProfile, signOut, sendPasswordReset, uploadProfilePhoto, deleteAccount, updateNotificationPrefs } from '@/app/actions/guestProfileActions'
 import { getCreditTier } from '@/lib/creditUtils'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
 import VerifyForm from '@/components/verification/VerifyForm'
 import ReportProblemSection from '@/components/shared/ReportProblemSection'
+import { ThemePicker } from '@/components/theme/ThemePicker'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type Profile = {
@@ -749,6 +750,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
   const [showReport, setShowReport] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showNotifPrefs, setShowNotifPrefs] = useState(false)
+  const [showTheme, setShowTheme]           = useState(false)
   const [deleteBusy, setDeleteBusy] = useState(false)
   const [avatarSaving, setAvatarSaving] = useState(false)
   const [notifPrefs, setNotifPrefs] = useState({
@@ -972,6 +974,21 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
             </span>
             <ChevronRight size={14} color="#4B5563" />
           </button>
+
+          {/* Appearance — expandable theme picker */}
+          <button
+            onClick={() => setShowTheme(v => !v)}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+          >
+            <span style={{ color: '#4B5563' }}><Palette size={16} /></span>
+            <span style={{ flex: 1, textAlign: 'left', fontSize: 14, color: '#D1D5DB' }}>Appearance</span>
+            <ChevronDown size={14} color="#4B5563" style={{ transform: showTheme ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
+          </button>
+          {showTheme && (
+            <div style={{ padding: '12px 14px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+              <ThemePicker />
+            </div>
+          )}
 
           {/* Report a Problem */}
           <button

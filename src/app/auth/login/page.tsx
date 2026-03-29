@@ -65,15 +65,16 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const btnGlow  = isOrg ? 'rgba(30,94,255,0.4)' : 'rgba(255,199,69,0.35)'
   const expRole  = isOrg ? 'organizer' : 'guest'
 
-  const [tab,  setTab]  = useState<SubMode>('login')
-  const [name, setName] = useState('')
-  const [email,setEmail]= useState('')
-  const [pw,   setPw]   = useState('')
-  const [show, setShow] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const [err,  setErr]  = useState<string | null>(null)
+  const [tab,    setTab]    = useState<SubMode>('login')
+  const [name,   setName]   = useState('')
+  const [email,  setEmail]  = useState('')
+  const [pw,     setPw]     = useState('')
+  const [show,   setShow]   = useState(false)
+  const [busy,   setBusy]   = useState(false)
+  const [err,    setErr]    = useState<string | null>(null)
+  const [agreed, setAgreed] = useState(false)
 
-  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setTab(t) }
+  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setAgreed(false); setTab(t) }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -83,6 +84,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
       if (tab === 'signup') {
         if (!name.trim())  { setErr('Enter your name'); return }
         if (pw.length < 8) { setErr('Password must be at least 8 characters'); return }
+        if (!agreed)       { setErr('Please agree to the Terms & Conditions to continue'); return }
 
         const { data, error } = await supabase.auth.signUp({
           email: email.trim().toLowerCase(),
@@ -138,7 +140,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
     }
   }
 
-  const disabled = busy || !email.trim() || !pw
+  const disabled = busy || !email.trim() || !pw || (tab === 'signup' && !agreed)
 
   return (
     <div>
@@ -231,6 +233,33 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
             </button>
           }
         />
+
+        {tab === 'signup' && (
+          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
+            <div
+              onClick={() => setAgreed(v => !v)}
+              style={{
+                width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 1,
+                background: agreed ? accent : 'rgba(255,255,255,0.04)',
+                border: `1.5px solid ${agreed ? accent : 'rgba(255,255,255,0.15)'}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all .15s', cursor: 'pointer',
+              }}
+            >
+              {agreed && (
+                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                  <path d="M1 4L3.5 6.5L9 1" stroke={isOrg ? '#fff' : '#000'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </div>
+            <span style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.6, fontFamily: 'var(--font-body)' }}>
+              I agree to the{' '}
+              <Link href="/terms" target="_blank" style={{ color: accent, textDecoration: 'none', fontWeight: 600 }}>Terms &amp; Conditions</Link>
+              {' '}and{' '}
+              <Link href="/privacy" target="_blank" style={{ color: accent, textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</Link>
+            </span>
+          </label>
+        )}
 
         {tab === 'login' && (
           <div style={{ textAlign: 'right' }}>

@@ -41,6 +41,10 @@ export async function updateSession(request: NextRequest) {
   '/coming-soon',   // Public marketing waitlist page
   '/demo',          // Interactive organizer demo — no auth required
   '/staff',         // Staff/organizer invite links — token-gated, no auth required
+  '/corporate',     // Public marketing landing page
+  '/pulse',         // Public marketing landing page
+  '/privacy',       // Public privacy policy
+  '/terms',         // Public terms & conditions
 ]
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 

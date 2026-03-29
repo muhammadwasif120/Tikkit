@@ -10,13 +10,15 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          blue: "#1E5EFF",
-          "blue-dark": "#1244CC",
-          "blue-light": "#4D82FF",
+          // Use RGB CSS vars so Tailwind opacity modifiers work (bg-brand-blue/10 etc.)
+          blue: "rgb(var(--brand-blue-rgb) / <alpha-value>)",
+          "blue-dark": "rgb(var(--brand-blue-dark-rgb) / <alpha-value>)",
+          "blue-light": "rgb(var(--brand-blue-light-rgb) / <alpha-value>)",
           gold: "#FFC745",
           "gold-dark": "#E5A800",
-          charcoal: "#0D0F18",
-          "charcoal-light": "#161820",
+          // CSS vars for surface colors (no opacity modifier needed)
+          charcoal: "var(--brand-charcoal)",
+          "charcoal-light": "var(--brand-charcoal-light)",
           muted: "#6B7280",
         }
       },

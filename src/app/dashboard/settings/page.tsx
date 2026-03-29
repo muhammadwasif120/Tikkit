@@ -8,12 +8,13 @@ import {
   CreditCard, Zap, Flag, Trash2, Link2,
   Copy, ExternalLink, Shield, Crown, AlertCircle,
   Clock, RefreshCw, ChevronDown, Phone, Building2,
-  Camera, Loader2, ImageIcon, AtSign, X, ShieldCheck, ArrowRight, MapPin,
+  Camera, Loader2, ImageIcon, AtSign, X, ShieldCheck, ArrowRight, MapPin, Palette,
 } from 'lucide-react'
 import Link from 'next/link'
 import { createTeamInvite, revokeTeamInvite, deleteTeamInvite, reactivateTeamInvite } from '@/app/actions/teamActions'
 import PaymentAccountsSection from '@/components/settings/PaymentAccountsSection'
 import ReportProblemSection from '@/components/shared/ReportProblemSection'
+import { ThemePicker } from '@/components/theme/ThemePicker'
 import clsx from 'clsx'
 
 type NotifPrefs = {
@@ -887,6 +888,20 @@ export default function SettingsPage() {
             Start Tour <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
+      </div>
+
+      {/* Appearance */}
+      <div className="card space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center shrink-0">
+            <Palette className="w-4 h-4 text-brand-blue" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>Appearance</p>
+            <p className="text-xs text-gray-500">Choose the visual theme for your dashboard</p>
+          </div>
+        </div>
+        <ThemePicker />
       </div>
 
       {/* Report a Problem */}
