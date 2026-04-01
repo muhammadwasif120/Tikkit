@@ -5,17 +5,24 @@ export default function robots(): MetadataRoute.Robots {
 
   const allowPublicRules = [
     '/',
+    '/explore',
     '/how-it-works',
     '/corporate',
     '/pulse',
     '/coming-soon',
+    '/privacy',
+    '/terms',
+    '/organizer/',
+    '/guest/explore/',
   ]
 
   const disallowPrivateRules = [
     '/dashboard/',
     '/api/',
     '/auth/',
-    '/guest/',
+    '/guest/profile',
+    '/guest/settings',
+    '/guest/my-events',
     '/staff/',
     '/master/',
     '/register/',

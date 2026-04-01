@@ -3,14 +3,19 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Explore Live Events Pakistan',
-  description: 'Discover the best upcoming concerts, private parties, corporate networking, and exclusive experiences playing near you.',
+  description: 'Discover the best upcoming concerts, private parties, corporate networking, and exclusive experiences in Karachi, Lahore, Islamabad, and across Pakistan.',
+  alternates: { canonical: 'https://www.tikkitx.com/explore' },
   openGraph: {
     title: 'Explore Live Events Pakistan | Tikkit',
-    description: 'Discover the best upcoming concerts, private parties, corporate networking, and exclusive experiences playing near you.',
+    description: 'Discover the best upcoming concerts, private parties, corporate networking, and exclusive experiences across Pakistan.',
+    url: 'https://www.tikkitx.com/explore',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Explore Live Events in Pakistan — Tikkit' }],
   },
   twitter: {
+    card: 'summary_large_image',
     title: 'Explore Live Events Pakistan | Tikkit',
-    description: 'Discover the best upcoming concerts, private parties, corporate networking, and exclusive experiences playing near you.',
+    description: 'Discover the best upcoming concerts, private parties, corporate networking, and exclusive experiences across Pakistan.',
+    images: ['/og-image.jpg'],
   },
 }
 import { createClient } from '@/lib/supabase/server'

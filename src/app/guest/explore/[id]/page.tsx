@@ -63,21 +63,24 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 function buildMetadata(ev: any, slugOrId: string): Metadata {
   const plainDescription = stripHtml(ev.description) || `Register for ${ev.title} on Tikkit.`
+  const canonicalUrl = `https://www.tikkitx.com/guest/explore/${slugOrId}`
   return {
     title: `${ev.title} - Tikkit`,
     description: plainDescription,
-    alternates: { canonical: `https://tikkitx.com/guest/explore/${slugOrId}` },
+    alternates: { canonical: canonicalUrl },
     openGraph: {
       title: ev.title,
       description: plainDescription,
-      url: `https://tikkitx.com/guest/explore/${slugOrId}`,
-      images: ev.cover_image_url ? [{ url: ev.cover_image_url }] : [],
+      url: canonicalUrl,
+      images: ev.cover_image_url
+        ? [{ url: ev.cover_image_url, width: 1200, height: 630, alt: ev.title }]
+        : [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit Event Platform' }],
     },
     twitter: {
       card: 'summary_large_image',
       title: ev.title,
       description: plainDescription,
-      images: ev.cover_image_url ? [ev.cover_image_url] : [],
+      images: ev.cover_image_url ? [ev.cover_image_url] : ['/og-image.jpg'],
     },
   }
 }
@@ -171,18 +174,48 @@ async function EventData({ idOrSlug }: { idOrSlug: string }) {
   return (
     <>
       {typeof window === 'undefined' ? (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Event',
+        <>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                  {
+                    '@type': 'ListItem',
+                    position: 1,
+                    name: 'Home',
+                    item: 'https://www.tikkitx.com',
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 2,
+                    name: 'Explore Events',
+                    item: 'https://www.tikkitx.com/explore',
+                  },
+                  {
+                    '@type': 'ListItem',
+                    position: 3,
+                    name: enrichedEvent.title,
+                    item: `https://www.tikkitx.com/guest/explore/${slugOrId}`,
+                  },
+                ],
+              }),
+            }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Event',
               name: enrichedEvent.title,
               description: stripHtml(enrichedEvent.description) || `Register for ${enrichedEvent.title} on Tikkit.`,
               image: enrichedEvent.cover_image_url ? [enrichedEvent.cover_image_url] : [],
               startDate: enrichedEvent.date_start,
               endDate: enrichedEvent.date_end,
-              url: `https://tikkitx.com/guest/explore/${slugOrId}`,
+              url: `https://www.tikkitx.com/guest/explore/${slugOrId}`,
               eventStatus: 'https://schema.org/EventScheduled',
               eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
               location: {
@@ -192,7 +225,7 @@ async function EventData({ idOrSlug }: { idOrSlug: string }) {
               },
               offers: {
                 '@type': 'Offer',
-                url: `https://tikkitx.com/guest/explore/${slugOrId}`,
+                url: `https://www.tikkitx.com/guest/explore/${slugOrId}`,
                 price: enrichedEvent.ticket_price || 0,
                 priceCurrency: 'PKR',
                 availability: 'https://schema.org/InStock',
@@ -204,6 +237,7 @@ async function EventData({ idOrSlug }: { idOrSlug: string }) {
             }),
           }}
         />
+        </>
       ) : null}
       <EventDetailClient
         event={enrichedEvent as any}

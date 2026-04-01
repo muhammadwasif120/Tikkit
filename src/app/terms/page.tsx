@@ -1,9 +1,24 @@
 import Link from 'next/link'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
-export const metadata = {
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
   title: 'Terms & Conditions — Tikkit X',
-  description: 'The terms governing your use of the Tikkit X platform.',
+  description: 'The terms and conditions governing your use of the Tikkit X event management platform in Pakistan.',
+  alternates: { canonical: 'https://www.tikkitx.com/terms' },
+  openGraph: {
+    title: 'Terms & Conditions — Tikkit X',
+    description: 'The terms and conditions governing your use of the Tikkit X event management platform.',
+    url: 'https://www.tikkitx.com/terms',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit X Terms & Conditions' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Terms & Conditions — Tikkit X',
+    description: 'The terms and conditions governing your use of the Tikkit X event management platform.',
+    images: ['/og-image.jpg'],
+  },
 }
 
 export default function TermsPage() {

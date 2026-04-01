@@ -1,9 +1,24 @@
 import Link from 'next/link'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
-export const metadata = {
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
   title: 'Privacy Policy — Tikkit X',
-  description: 'How Tikkit X collects, uses, and protects your personal data.',
+  description: 'How Tikkit X collects, uses, and protects your personal data in compliance with Pakistan\'s data protection practices.',
+  alternates: { canonical: 'https://www.tikkitx.com/privacy' },
+  openGraph: {
+    title: 'Privacy Policy — Tikkit X',
+    description: 'How Tikkit X collects, uses, and protects your personal data.',
+    url: 'https://www.tikkitx.com/privacy',
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit X Privacy Policy' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Privacy Policy — Tikkit X',
+    description: 'How Tikkit X collects, uses, and protects your personal data.',
+    images: ['/og-image.jpg'],
+  },
 }
 
 export default function PrivacyPolicyPage() {

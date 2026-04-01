@@ -61,6 +61,38 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="en" className={dmSans.variable} data-theme={theme}>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://www.tikkitx.com/#organization",
+                  "name": "Tikkit X",
+                  "url": "https://www.tikkitx.com",
+                  "logo": "https://www.tikkitx.com/icons/favicon-32.png",
+                  "description": "Event management and ticketing platform for Pakistan."
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://www.tikkitx.com/#website",
+                  "url": "https://www.tikkitx.com",
+                  "name": "Tikkit",
+                  "publisher": {
+                    "@id": "https://www.tikkitx.com/#organization"
+                  },
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": "https://www.tikkitx.com/explore?q={search_term_string}",
+                    "query-input": "required name=search_term_string"
+                  }
+                }
+              ]
+            })
+          }}
+        />
         {/* Fonts */}
         <link rel="preconnect" href="https://api.fontshare.com" />
         <link

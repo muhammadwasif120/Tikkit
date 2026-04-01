@@ -43,14 +43,14 @@ function useCountUp(target: number, inView: boolean, duration = 1400) {
 // ─── Data ───────────────────────────────────────────────────────────────────
 
 const features = [
-  { icon: Users,         color: '#1E5EFF', glow: 'rgba(30,94,255,0.3)',   title: 'Guest Lists',           desc: 'Add guests manually or let them self-register. RSVPs, gender ratios, waitlists — all in one place.' },
-  { icon: QrCode,        color: '#A855F7', glow: 'rgba(168,85,247,0.3)',  title: 'QR Check-In',           desc: 'Every guest gets a unique QR code. Scan at the door — no paper lists, no confusion, no drama.' },
-  { icon: CreditCard,    color: '#22C55E', glow: 'rgba(34,197,94,0.3)',   title: 'Upfront Payments',      desc: 'Collect via JazzCash, EasyPaisa, or bank transfer. Screenshot verification with one-tap approval.' },
-  { icon: ClipboardCheck,color: '#F59E0B', glow: 'rgba(245,158,11,0.3)', title: 'Smart Approvals',       desc: 'Run expression-of-interest events. Guests apply, you decide who walks in. Full control, always.' },
-  { icon: Building2,     color: '#EC4899', glow: 'rgba(236,72,153,0.3)', title: 'Vendor Tracking',       desc: 'Every vendor, invoice, and payment in one dashboard. Know exactly where your budget is going.' },
-  { icon: Bell,          color: '#06B6D4', glow: 'rgba(6,182,212,0.3)',   title: 'Real-Time Alerts',      desc: 'Notified the moment a guest registers, checks in, or cancels. Stay across your event effortlessly.' },
-  { icon: Shield,        color: '#8B5CF6', glow: 'rgba(139,92,246,0.3)', title: 'Team Access',           desc: 'Invite staff via shareable link. Scanner-only access — your data and settings stay locked.' },
-  { icon: BarChart3,     color: '#F97316', glow: 'rgba(249,115,22,0.3)', title: 'Event Analytics',       desc: 'Attendance rates, revenue breakdown, check-in timelines. Every number to run a better next event.' },
+  { icon: Users,         color: '#1E5EFF', glow: 'rgba(30,94,255,0.3)',   title: 'Your List, Your Rules',      desc: 'Add guests manually or open it up. RSVPs, waitlists, gender ratios — you decide who gets in and how.' },
+  { icon: QrCode,        color: '#A855F7', glow: 'rgba(168,85,247,0.3)',  title: 'One Scan. In.',               desc: 'Unique QR for every guest. Your team scans at the door. No clipboards, no confusion, no chaos.' },
+  { icon: CreditCard,    color: '#22C55E', glow: 'rgba(34,197,94,0.3)',   title: 'Get Paid Before the Night',   desc: 'JazzCash, EasyPaisa, bank transfer. Screenshot verified with one tap. Money moves before they show up.' },
+  { icon: ClipboardCheck,color: '#F59E0B', glow: 'rgba(245,158,11,0.3)', title: 'You Pick the Room',           desc: 'Open it up or make them apply. Expression of interest, curated entry. Your event, your vibe, always.' },
+  { icon: Building2,     color: '#EC4899', glow: 'rgba(236,72,153,0.3)', title: 'Know Where Every Rupee Goes', desc: 'Every vendor, invoice, and payment in one place. No more chasing photographers or guessing your spend.' },
+  { icon: Bell,          color: '#06B6D4', glow: 'rgba(6,182,212,0.3)',   title: 'Always in the Loop',          desc: 'The moment someone RSVPs, checks in, or cancels — you know. Zero surprises on the night.' },
+  { icon: Shield,        color: '#8B5CF6', glow: 'rgba(139,92,246,0.3)', title: 'Your Crew. Your Control.',    desc: 'Shareable scanner links for staff. They scan at the door. Your data and settings stay locked.' },
+  { icon: BarChart3,     color: '#F97316', glow: 'rgba(249,115,22,0.3)', title: 'The Numbers Don\'t Lie',      desc: 'Attendance, revenue, check-in timelines. Every number you need to run an even better next night.' },
 ]
 
 const eventTypes = [
@@ -60,10 +60,10 @@ const eventTypes = [
 ]
 
 const steps = [
-  { n: '01', title: 'Create your event', desc: 'Set the date, venue, capacity, ticket price, and registration mode. Two minutes, done.' },
-  { n: '02', title: 'Share the link',    desc: 'One link for guests. Collect payments upfront or approve applications yourself.' },
-  { n: '03', title: 'Scan at the door',  desc: 'Your team scans QR codes on their phones. Real-time check-in, zero chaos at the door.' },
-  { n: '04', title: 'Review and repeat', desc: 'See who came, what you earned, how it went. Use the data to do it better next time.' },
+  { n: '01', title: 'Post the event',   desc: 'Set the date, venue, capacity, and price. Two minutes and it\'s live.' },
+  { n: '02', title: 'Send the link',    desc: 'One link. Guests register, pay, and get their QR ticket. That\'s it.' },
+  { n: '03', title: 'Scan them in',     desc: 'Your team scans QR codes on their phones. Live check-in. Zero chaos.' },
+  { n: '04', title: 'Review the night', desc: 'Revenue, attendance, timing. Everything you need to make the next one better.' },
 ]
 
 const heroCards = [
@@ -72,11 +72,11 @@ const heroCards = [
 ]
 
 const whyList = [
-  'JazzCash & EasyPaisa built right in',
-  'Designed for private, boutique events',
-  'Works on every phone — no app download',
-  'Staff access via shareable links, no accounts',
-  'Built by people who throw events in Pakistan',
+  'JazzCash & EasyPaisa. Native, not bolted on.',
+  'Built for events you curate, not just host.',
+  'Works on every phone. No app, no friction.',
+  'Scanner links for staff. No accounts, no drama.',
+  'Built by people who\'ve thrown events in Pakistan.',
 ]
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -896,23 +896,23 @@ export default function HomeClient() {
         <div className="hero-content">
           <div className="hero-badge" aria-label="New">
             <div className="badge-dot" aria-hidden="true" />
-            Made for organizers who take it seriously
+            Pakistan&apos;s event infrastructure. Finally.
           </div>
 
           <h1 className="hero-h1">
-            Run events like<br />
-            <span className="accent">you mean it.</span>
+            Your night.<br />
+            <span className="accent">Your rules.</span>
           </h1>
 
           <p className="hero-sub">
-            Stop juggling WhatsApp threads, spreadsheets, and bank screenshots.
-            Tikkit handles <strong>guest lists, QR check-in, payments,</strong> and everything
-            in between — so you can actually enjoy the night.
+            The DHA rooftop. The brand launch in Gulberg. The invite-only night nobody talks about online.
+            That&apos;s your world. Tikkit is how you run it —{' '}
+            <strong>guest lists, QR check-in, payments,</strong> all handled.
           </p>
 
           <div className="hero-cta">
             <Link href="/auth/login" className="btn-primary-lg">
-              Start for free <ArrowRight size={16} />
+              Host your first event <ArrowRight size={16} />
             </Link>
             <Link href="/how-it-works" className="btn-gold-lg">
               See how it works
@@ -945,19 +945,19 @@ export default function HomeClient() {
       {/* ── Stats ── */}
       <div className="stats-band">
         <div className="stats-inner">
-          <StatItem target={100} unit="%" label="Built for Pakistan — PKR, JazzCash, EasyPaisa, all native." />
-          <StatItem target={2}   unit="min" label="Average time to create and publish your first event." />
-          <StatItem target={0}   unit=" chaos" label="At the door. QR scanning means no lists, no confusion." />
+          <StatItem target={100} unit="%" label="PKR, JazzCash, EasyPaisa. Pakistan-native, always." />
+          <StatItem target={2}   unit="min" label="From blank page to your event going live." />
+          <StatItem target={0}   unit=" chaos" label="At the door. Every single time." />
         </div>
       </div>
 
       {/* ── Features ── */}
       <section className="section" id="features">
-        <div className="sec-label">The full toolkit</div>
-        <h2 className="sec-h2">One platform. Every part of your event.</h2>
+        <div className="sec-label">The arsenal</div>
+        <h2 className="sec-h2">Everything you need. Nothing you don&apos;t.</h2>
         <p className="sec-sub">
-          Stop stitching together WhatsApp groups, spreadsheets, and bank transfers.
-          Tikkit covers it all.
+          Your guests get the experience. You get the control.
+          From first RSVP to last check-in — one platform.
         </p>
         <div className="feat-grid">
           {features.map((f, i) => <FeatureCard key={f.title} feature={f} index={i} />)}
@@ -966,9 +966,9 @@ export default function HomeClient() {
 
       {/* ── How it works ── */}
       <section className="section" id="how-it-works" style={{ paddingTop: 0 }}>
-        <div className="sec-label">How it flows</div>
-        <h2 className="sec-h2">Zero learning curve. Maximum control.</h2>
-        <p className="sec-sub">From idea to check-in in four steps. No training, no manual.</p>
+        <div className="sec-label">The process</div>
+        <h2 className="sec-h2">Up in two minutes. Running in four.</h2>
+        <p className="sec-sub">No onboarding call. No tutorial. You figure it out in the time it takes to finish your chai.</p>
         <div className="steps-grid">
           {steps.map((s, i) => <StepCard key={s.n} step={s} index={i} />)}
         </div>
@@ -980,12 +980,12 @@ export default function HomeClient() {
           <div>
             <div className="sec-label">Why Tikkit</div>
             <h2 className="why-h2">
-              Pakistan&apos;s event scene is booming. The tools haven&apos;t caught up.{' '}
-              <span style={{ color: 'var(--blue)' }}>Until now.</span>
+              Pakistan&apos;s event scene doesn&apos;t sleep.{' '}
+              <span style={{ color: 'var(--blue)' }}>Your tools should keep up.</span>
             </h2>
             <p className="why-sub">
-              From rooftop nights in DHA to corporate galas in Karachi, organizers have been
-              managing hundreds of guests over WhatsApp threads and Google Sheets. Tikkit ends that era.
+              From the invite-only night in Clifton to the brand launch in Gulberg — organizers across
+              Pakistan were running major events on WhatsApp threads and Google Sheets. That era is over.
             </p>
           </div>
           <div className="why-list">
@@ -1006,18 +1006,18 @@ export default function HomeClient() {
         <div className="cta-inner">
           <div className="cta-badge">
             <Zap size={12} color="#1E5EFF" aria-hidden="true" />
-            Free to start — no credit card
+            Free to start. Always.
           </div>
           <h2 className="cta-h2">
-            Your next event deserves better than a{' '}
-            <span className="gold">spreadsheet.</span>
+            Your next night deserves better than a{' '}
+            <span className="gold">group chat.</span>
           </h2>
           <p className="cta-sub">
-            Create your first event in two minutes. It&apos;s free, and it actually works.
+            Publish your first event in two minutes. It&apos;s free. It&apos;s real. It&apos;s yours.
           </p>
           <div className="cta-actions">
             <Link href="/auth/login" className="btn-primary-lg">
-              Create your first event <ArrowRight size={16} />
+              Host your first event <ArrowRight size={16} />
             </Link>
             <Link href="/explore" className="btn-gold-lg">
               Explore events →

@@ -1,11 +1,52 @@
 import { Suspense } from 'react'
 import { notFound } from 'next/navigation'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import PublicOrganizerProfile, {
   type PublicProfile,
   type PublicEvent,
 } from '@/components/organizer/PublicOrganizerProfile'
 import SkeletonEventDetail from '@/components/guest/SkeletonEventDetail'
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ username: string }>
+}): Promise<Metadata> {
+  const { username } = await params
+  const supabase = await createClient()
+
+  const { data: rows } = await (supabase as any)
+    .rpc('get_public_organizer_profile', { p_lookup: username })
+  const profile = (rows as any[])?.[0] ?? null
+  if (!profile) return { title: 'Organizer Not Found — Tikkit' }
+
+  const displayName = profile.company_name || profile.full_name || username
+  const canonicalUrl = `https://www.tikkitx.com/organizer/${username}`
+  const description = `Discover events hosted by ${displayName} on Tikkit — Pakistan's premier event platform.`
+
+  return {
+    title: `${displayName} — Events on Tikkit`,
+    description,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      title: `${displayName} — Events on Tikkit`,
+      description,
+      url: canonicalUrl,
+      images: profile.logo_url || profile.cover_image_url
+        ? [{ url: profile.logo_url || profile.cover_image_url, alt: displayName }]
+        : [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit Event Organizer' }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${displayName} — Events on Tikkit`,
+      description,
+      images: profile.logo_url || profile.cover_image_url
+        ? [profile.logo_url || profile.cover_image_url]
+        : ['/og-image.jpg'],
+    },
+  }
+}
 
 async function OrganizerData({ username }: { username: string }) {
   const supabase = await createClient()
@@ -69,7 +110,35 @@ async function OrganizerData({ username }: { username: string }) {
     created_at:      profile.created_at,
   }
 
-  return <PublicOrganizerProfile profile={publicProfile} events={enrichedEvents} />
+  const displayName = publicProfile.company_name || publicProfile.full_name || username
+  const canonicalUrl = `https://www.tikkitx.com/organizer/${username}`
+
+  const profileSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    '@id': canonicalUrl,
+    url: canonicalUrl,
+    name: `${displayName} on Tikkit`,
+    mainEntity: {
+      '@type': 'Organization',
+      '@id': `${canonicalUrl}#organizer`,
+      name: displayName,
+      url: canonicalUrl,
+      ...(publicProfile.logo_url ? { logo: publicProfile.logo_url } : {}),
+      ...(publicProfile.cover_image_url ? { image: publicProfile.cover_image_url } : {}),
+      memberOf: { '@id': 'https://www.tikkitx.com/#organization' },
+    },
+  }
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(profileSchema) }}
+      />
+      <PublicOrganizerProfile profile={publicProfile} events={enrichedEvents} />
+    </>
+  )
 }
 
 export default async function OrganizerProfilePage({

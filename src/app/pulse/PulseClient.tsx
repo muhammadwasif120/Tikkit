@@ -42,25 +42,25 @@ function useCountUp(target: number, inView: boolean, duration = 1600) {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const features = [
-  { icon: CalendarDays, color: '#6B8F71', bg: 'rgba(107,143,113,0.12)', title: 'Seamless Registration',    desc: 'Open, invite-only, or approval-based. One link — guests register, pay, and receive their personal QR pass. No spreadsheets.' },
-  { icon: CheckCircle,  color: '#6B8F71', bg: 'rgba(107,143,113,0.12)', title: 'Verified Attendance',      desc: 'Cryptographically signed QR codes create an immutable attendance record — the foundation for credentials and certificates.' },
-  { icon: WifiOff,      color: '#C2785C', bg: 'rgba(194,120,92,0.12)',  title: 'Works Offline',            desc: 'Running a retreat in the mountains? Your check-in works without internet and syncs automatically when connectivity returns.' },
-  { icon: CreditCard,   color: '#C2785C', bg: 'rgba(194,120,92,0.12)',  title: 'Payments Made Simple',     desc: 'Accept JazzCash, EasyPaisa, bank transfer, or card. Every transaction tracked in one dashboard — no more screenshot chaos.' },
-  { icon: Store,        color: '#6B8F71', bg: 'rgba(107,143,113,0.12)', title: 'Vendor Marketplace',       desc: 'Find verified photographers, caterers, and venue partners through TIKKIT X. Every vendor carries a verified event history.' },
-  { icon: BarChart2,    color: '#C2785C', bg: 'rgba(194,120,92,0.12)',  title: 'Post-Experience Insights', desc: 'Attendance patterns, repeat participants, revenue trends, and feedback — understand your community deeply.' },
+  { icon: CalendarDays, color: '#6B8F71', bg: 'rgba(107,143,113,0.12)', title: 'One Link. Done.',                  desc: 'Open, curated, or approval-based. Guests register, pay, and get their QR pass — all through a single link you share anywhere.' },
+  { icon: CheckCircle,  color: '#6B8F71', bg: 'rgba(107,143,113,0.12)', title: 'Attendance That Counts',           desc: 'Every scan creates a verified attendance record — the foundation for certificates, credentials, and community tracking.' },
+  { icon: WifiOff,      color: '#C2785C', bg: 'rgba(194,120,92,0.12)',  title: 'The Mountains Don\'t Have WiFi. That\'s Fine.', desc: 'Your check-in works without signal and syncs when you\'re back online. Built for retreats that go off the grid.' },
+  { icon: CreditCard,   color: '#C2785C', bg: 'rgba(194,120,92,0.12)',  title: 'No More Screenshot Chaos',         desc: 'JazzCash, EasyPaisa, bank transfer — all accepted, all tracked. Your dashboard is the only place you need to look.' },
+  { icon: Store,        color: '#6B8F71', bg: 'rgba(107,143,113,0.12)', title: 'Verified Partners, Not Blind Luck', desc: 'Find photographers, caterers, and venue partners with verified event histories. Tikkit vets them so you don\'t have to.' },
+  { icon: BarChart2,    color: '#C2785C', bg: 'rgba(194,120,92,0.12)',  title: 'Know Your Community',              desc: 'Who comes back. What they love. How the numbers move. Understanding your participants is how you grow them.' },
 ]
 
 const useCases = [
-  { icon: Mountain,  title: 'Yoga & Wellness Retreats',     desc: 'Multi-day registration, dietary preferences, mountain-ready offline check-in.' },
-  { icon: BookOpen,  title: 'Workshops & Masterclasses',    desc: 'Skills-based sessions, attendance verification, foundation for future credentials.' },
-  { icon: Compass,   title: 'Travel & Adventure Trips',     desc: 'Group trip management, activity sign-ups, participant tracking in remote locations.' },
-  { icon: Award,     title: 'Professional Development',     desc: 'Training sessions, CPD tracking foundations, and verified participation records.' },
+  { icon: Mountain,  title: 'Yoga & Wellness Retreats',     desc: 'Multi-day retreats, dietary preferences, offline check-in for mountain venues. Everything a wellness host needs.' },
+  { icon: BookOpen,  title: 'Workshops & Masterclasses',    desc: 'Skills sessions, attendance records, the foundation for CPD certificates. Your knowledge deserves a proper home.' },
+  { icon: Compass,   title: 'Travel & Adventure Trips',     desc: 'Group trips, activity slots, participant tracking that works in the middle of nowhere. Your adventure, managed.' },
+  { icon: Award,     title: 'Professional Development',     desc: 'Training sessions, CPD tracking, verified records. The administrative backbone for serious learning.' },
 ]
 
 const steps = [
-  { n: '1', title: 'Design Your Experience', desc: 'Create your event in minutes. Set capacity, pricing, and requirements. As open or curated as you want.', color: '#6B8F71' },
-  { n: '2', title: 'Welcome Participants',   desc: 'Share your link on Instagram or WhatsApp. Guests register, pay, and receive their personal QR pass.',     color: '#C2785C' },
-  { n: '3', title: 'Be Present',             desc: 'Scan at the door and go. Your dashboard handles the rest. Review analytics and grow your community after.',color: '#D4A574' },
+  { n: '1', title: 'Build the Space',    desc: 'Create your retreat in minutes. Set capacity, pricing, requirements. As open or as curated as you want.', color: '#6B8F71' },
+  { n: '2', title: 'Open the Door',      desc: 'Drop your link on Instagram or WhatsApp. Participants register, pay, and get their QR pass — no friction.', color: '#C2785C' },
+  { n: '3', title: 'Arrive. Breathe. Begin.', desc: 'Scan at the door. Your dashboard handles everything else. Review insights and grow your community after.', color: '#D4A574' },
 ]
 
 const experienceTypes = [
@@ -74,9 +74,9 @@ const heroCards = [
 ]
 
 const testimonials = [
-  { name: 'Sana M.',    role: 'Retreat Host',       text: 'Registration used to take me hours. Now it literally handles itself.' },
-  { name: 'Zara K.',    role: 'Yoga Instructor',    text: 'My participants love getting the QR pass. It feels professional and legit.' },
-  { name: 'Bilal A.',   role: 'Workshop Facilitator',text: 'Finally a platform that understands small, intentional events.' },
+  { name: 'Sana M.',    role: 'Retreat Host',        text: 'Registration used to take me hours. Now it literally handles itself.' },
+  { name: 'Zara K.',    role: 'Yoga Instructor',     text: 'My participants love getting the QR pass. It feels professional and legit.' },
+  { name: 'Bilal A.',   role: 'Workshop Facilitator', text: 'Finally someone built something for us. Not for conferences. For this.' },
 ]
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -398,7 +398,7 @@ export default function PulsePage() {
           {/* Left */}
           <div style={{ flex: 1, animation: 'pulseFadeUp 0.7s ease both' }}>
             <div className="pulse-label">
-              <Leaf size={11} /> For Experience Creators
+              <Leaf size={11} /> For Hosts Who Lead with Intention
             </div>
             <h1 style={{
               fontFamily: 'var(--font-display)', fontWeight: 300, lineHeight: 1.05,
@@ -409,7 +409,7 @@ export default function PulsePage() {
               <span style={{ color: '#6B8F71', fontWeight: 700 }}>Worth Showing<br />Up For</span>
             </h1>
             <p style={{ fontSize: 18, color: '#7A7A7A', lineHeight: 1.8, marginBottom: 40, maxWidth: 460 }}>
-              For retreat hosts, workshop leaders, and experience creators who want seamless registration, verified attendance, and the freedom to focus on what they do best.
+              Your retreat shouldn&apos;t run on Instagram DMs and spreadsheet tabs. You built something worth showing up for — the admin should match.
             </p>
             <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
               <a href="mailto:pulse@tikkitx.com" className="pulse-btn-primary" style={{ fontSize: 15, padding: '16px 36px' }}>
@@ -421,7 +421,7 @@ export default function PulsePage() {
             </div>
             {/* Trust chips */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 36 }}>
-              {['Effortless Registration', 'Offline Check-In', 'Verified Attendance', 'Built for Creators'].map(t => (
+              {['Registration That Disappears', 'Works in the Mountains', 'Attendance That\'s Real', 'Built for Creators'].map(t => (
                 <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#7A7A7A', padding: '5px 12px', borderRadius: 100, background: '#fff', border: '1px solid #E8E2DA', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                   <CheckCircle size={11} color="#6B8F71" /> {t}
                 </div>

@@ -42,12 +42,12 @@ function useCountUp(target: number, inView: boolean, duration = 1600) {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const features = [
-  { icon: Users,        color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',  title: 'Smart Invitations',       desc: 'Invite-only, open registration, or approval-based. Manage every guest list with precision — from board dinners to town halls.' },
-  { icon: QrCode,       color: '#64B5F6', glow: 'rgba(100,181,246,0.3)', title: 'QR Verified Check-In',    desc: 'Cryptographically signed QR codes that work without WiFi. Know exactly who arrived and when. No paper lists, ever.' },
-  { icon: BarChart2,    color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',  title: 'Live Analytics Dashboard',desc: 'Attendance velocity, capacity monitoring, demographic breakdowns — all updating in real time while your event runs.' },
-  { icon: Briefcase,    color: '#64B5F6', glow: 'rgba(100,181,246,0.3)', title: 'Vendor Coordination',     desc: 'Book photographers, AV, catering, and security through one platform. Invoices, payments, and performance tracked centrally.' },
-  { icon: ShieldCheck,  color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',  title: 'Identity Verification',   desc: 'CNIC-verified guest lists ensure only authorised attendees enter. Eliminate gatecrashers at high-stakes corporate functions.' },
-  { icon: FileText,     color: '#64B5F6', glow: 'rgba(100,181,246,0.3)', title: 'Post-Event Reports',      desc: 'Attendance summaries, dwell time, vendor reviews, and financials — exported in one click for your leadership team.' },
+  { icon: Users,        color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',  title: 'Invitations That Mean It',      desc: 'Invite-only, open, or approval-based. From board dinners to 500-person town halls — every guest list managed with precision.' },
+  { icon: QrCode,       color: '#64B5F6', glow: 'rgba(100,181,246,0.3)', title: 'Check-In Without the Clipboard', desc: 'Cryptographic QR codes that work offline. Know exactly who arrived and when. No paper, no guessing, no gatecrashers.' },
+  { icon: BarChart2,    color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',  title: 'The Room, Live',                desc: 'Attendance velocity, capacity, demographic breakdowns — updating in real time as your event runs. Your team always knows the score.' },
+  { icon: Briefcase,    color: '#64B5F6', glow: 'rgba(100,181,246,0.3)', title: 'Every Vendor. One Dashboard.',  desc: 'Photographers, AV, catering, security. Invoices, payments, performance — tracked centrally. No missed calls, no lost receipts.' },
+  { icon: ShieldCheck,  color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',  title: 'Only the Right People Get In',  desc: 'CNIC-verified guest lists for high-stakes functions. Gatecrashers are not a possibility when identity is verified at registration.' },
+  { icon: FileText,     color: '#64B5F6', glow: 'rgba(100,181,246,0.3)', title: 'The Report That Writes Itself', desc: 'Attendance, dwell time, vendor scores, financials — one click, PDF ready for leadership the same night.' },
 ]
 
 const securityPoints = [
@@ -60,16 +60,16 @@ const securityPoints = [
 ]
 
 const useCases = [
-  { icon: CalendarDays, title: 'Annual Dinners & Galas',       desc: 'Tiered seating, VIP management, and full vendor coordination for flagship events.' },
-  { icon: Building2,    title: 'Team Retreats & Offsites',     desc: 'Multi-day scheduling, activity sign-ups, and headcount tracking in one dashboard.' },
-  { icon: Users,        title: 'Conferences & Seminars',       desc: 'Speaker management, session registration, and verified CPD attendance certificates.' },
-  { icon: Briefcase,    title: 'Product Launches & Roadshows', desc: 'Branded invitations, approval-based access, and post-event engagement analytics.' },
+  { icon: CalendarDays, title: 'Annual Dinners & Galas',       desc: 'Tiered seating, VIP access tiers, full vendor coordination. The night that defines the year — done properly.' },
+  { icon: Building2,    title: 'Team Retreats & Offsites',     desc: 'Multi-day scheduling, activity sign-ups, headcount tracking. Everyone accounted for, every step of the way.' },
+  { icon: Users,        title: 'Conferences & Seminars',       desc: 'Session registration, speaker management, verified CPD records. Serious events run on serious infrastructure.' },
+  { icon: Briefcase,    title: 'Product Launches & Roadshows', desc: 'Approval-only access, branded invitations, post-launch analytics. Make the launch match the product.' },
 ]
 
 const steps = [
-  { n: '01', title: 'Create your event',   desc: 'Set registration mode, capacity, ticket tiers, and add vendors. Two minutes from blank to published.' },
-  { n: '02', title: 'Invite your guests',  desc: 'Share your event link. Guests register and receive cryptographically verified QR tickets.' },
-  { n: '03', title: 'Run and analyse',     desc: 'Check in guests with one scan. Monitor live. Export detailed analytics for leadership after.' },
+  { n: '01', title: 'Build the event',         desc: 'Registration type, capacity, tiers, vendors. Two minutes from blank screen to live event.' },
+  { n: '02', title: 'Send the invitations',    desc: 'One link. Guests register and receive their verified QR ticket. Works for 20 or 2,000.' },
+  { n: '03', title: 'Run it. Then review it.', desc: 'One scan per guest. Monitor live. Export the analytics report for leadership the same night.' },
 ]
 
 const companyTypes = [
@@ -388,12 +388,12 @@ export default function CorporatePage() {
               fontSize: 'clamp(2.4rem, 5.5vw, 4.2rem)', color: '#fff',
               letterSpacing: '-0.025em', marginBottom: 24,
             }}>
-              Corporate Events,<br />
-              <span style={{ color: '#4A90D9' }}>Managed</span><br />
-              Intelligently.
+              Corporate Events.<br />
+              <span style={{ color: '#4A90D9' }}>Executed</span><br />
+              Flawlessly.
             </h1>
             <p style={{ fontSize: 18, color: '#94A3B8', lineHeight: 1.75, marginBottom: 40, maxWidth: 480 }}>
-              From team retreats to annual conferences — verified check-in, live analytics, and enterprise-grade security. One platform for the events that matter.
+              Town halls. Leadership galas. Annual conferences. When the room matters, the details can&apos;t slip. One platform that makes sure they don&apos;t.
             </p>
             <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
               <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary" style={{ fontSize: 15, padding: '15px 32px' }}>
@@ -470,17 +470,17 @@ export default function CorporatePage() {
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
-              Corporate Events Deserve Better<br />Than Spreadsheets
+              Your Events Represent the Organisation.<br />Your Tools Should Too.
             </h2>
             <p style={{ fontSize: 17, color: '#64748B', maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
-              The way most organisations manage events hasn't changed in decades. That ends here.
+              The board dinner is flawless on the night. The chaos that got it there shouldn&apos;t exist.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
             {[
-              { icon: FileText,  title: 'Manual Guest Lists',   body: 'RSVPs across email threads and WhatsApp groups. No single source of truth. No way to verify who actually showed up.' },
-              { icon: BarChart2, title: 'No Check-In Data',     body: 'Events end with no record of who attended, when they arrived, or how long they stayed. Leadership asks — you guess.' },
-              { icon: Users,     title: 'Vendor Chaos',         body: 'Coordinating photographers, caterers, and AV through scattered messages. No accountability, no audit trail.' },
+              { icon: FileText,  title: 'Guest Lists Built in Threads',       body: 'RSVPs scattered across email and WhatsApp. No master list. No way to know who\'s confirmed, who\'s a maybe, or who just walked in.' },
+              { icon: BarChart2, title: 'The Event Ends. The Data Doesn\'t Exist.', body: 'You ran a 400-person gala. Leadership asks for the report. You have a signup sheet and a vague feeling.' },
+              { icon: Users,     title: 'Vendors on WhatsApp. Bills in the Inbox.', body: 'Photographers, catering, AV — all coordinated through scattered messages. No paper trail. No accountability.' },
             ].map(({ icon: Icon, title, body }) => {
               const { ref, inView } = useInView()
               return (
@@ -508,10 +508,10 @@ export default function CorporatePage() {
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
             <div className="corp-section-label"><TrendingUp size={11} /> Platform Features</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
-              Everything Your Events Team Needs
+              One Platform. From Invite to Export.
             </h2>
             <p style={{ fontSize: 17, color: '#64748B', maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-              One platform covering every stage of your corporate event lifecycle.
+              From the first guest invite to the post-event leadership report — everything runs in one place.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
@@ -526,7 +526,7 @@ export default function CorporatePage() {
           <div style={{ textAlign: 'center', marginBottom: 64 }}>
             <div className="corp-section-label"><Clock size={11} /> Process</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
-              Three Steps to a Smarter Event
+              From Brief to Report. In Three Steps.
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24, position: 'relative' }}>
@@ -556,10 +556,10 @@ export default function CorporatePage() {
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <div className="corp-section-label"><ShieldCheck size={11} /> Enterprise Security</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
-              Built for Your Security Team
+              Your IT Team Already Has Questions.<br />Here Are the Answers.
             </h2>
             <p style={{ fontSize: 17, color: '#64748B', lineHeight: 1.7 }}>
-              Your employee data deserves the same rigour as your core business systems.
+              We built this knowing your security team would push back. Every answer is already in the platform.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 12 }}>
@@ -586,7 +586,7 @@ export default function CorporatePage() {
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 14 }}>
-              Built for Every Corporate Event
+              Whatever the Brief, We&apos;ve Handled It.
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 16 }}>
@@ -617,10 +617,10 @@ export default function CorporatePage() {
             <Zap size={11} /> Get Started
           </div>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem,4.5vw,3.2rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.025em', marginBottom: 20 }}>
-            Ready to Upgrade Your Corporate Events?
+            Your Next Event Should Be the Best One Yet.
           </h2>
           <p style={{ fontSize: 18, color: '#64748B', marginBottom: 40, lineHeight: 1.7 }}>
-            Join organisations that have moved beyond spreadsheets and WhatsApp groups.
+            Corporate teams across Pakistan are running events on Tikkit. Time to see what a proper platform feels like.
           </p>
           <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary" style={{ fontSize: 16, padding: '17px 40px', animation: 'corpGlow 3s ease infinite' }}>
             Book a Demo <ArrowRight size={18} />

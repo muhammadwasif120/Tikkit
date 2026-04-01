@@ -3,4 +3,5 @@
 node_modules/
 .next/
 out/
-*.log
+*.logSEO-REPORT.html
+.agent/
