@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
@@ -72,11 +73,10 @@ function EventRow({ event, dim }: { event: PublicEvent; dim?: boolean }) {
       {/* Thumbnail */}
       <div style={{
         width: 60, height: 60, borderRadius: 12, overflow: 'hidden',
-        flexShrink: 0, background: getCardGradient(event.id),
+        flexShrink: 0, background: getCardGradient(event.id), position: 'relative',
       }}>
         {event.cover_image_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={event.cover_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <Image src={event.cover_image_url} alt={`${event.title} cover`} fill style={{ objectFit: 'cover' }} sizes="60px" />
         )}
       </div>
 
@@ -177,8 +177,7 @@ export default function PublicOrganizerProfile({
 
           {/* Cover image */}
           {profile.cover_image_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={profile.cover_image_url} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+            <Image src={profile.cover_image_url} alt="" fill style={{ objectFit: 'cover' }} sizes="100vw" priority />
           )}
 
           {/* Grid texture */}
@@ -210,8 +209,7 @@ export default function PublicOrganizerProfile({
               boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
             }}>
               {profile.logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <Image src={profile.logo_url} alt={`${displayName} logo`} width={76} height={76} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
               ) : (
                 <span style={{ fontSize: 28, fontWeight: 900, color: 'white', fontFamily: 'var(--font-display)' }}>{initials}</span>
               )}
@@ -235,8 +233,7 @@ export default function PublicOrganizerProfile({
         {/* Mobile: banner + logo (hidden on desktop via .op-mobile-banner/.op-mobile-logo) */}
         <div className="op-mobile-banner" style={{ position: 'relative', height: 200, background: getGradient(profile.id), overflow: 'hidden' }}>
           {profile.cover_image_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={profile.cover_image_url} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+            <Image src={profile.cover_image_url} alt="" fill style={{ objectFit: 'cover' }} sizes="100vw" />
           )}
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(8,10,16,0.8))' }} />
           <button
@@ -254,8 +251,7 @@ export default function PublicOrganizerProfile({
           <div className="op-mobile-logo" style={{ padding: '0 16px' }}>
             <div style={{ marginTop: -38, marginBottom: 12, width: 76, height: 76, borderRadius: 20, overflow: 'hidden', background: 'linear-gradient(135deg, rgba(30,94,255,0.25), rgba(129,140,248,0.15))', border: '3px solid #080A10', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {profile.logo_url
-                // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={profile.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ? <Image src={profile.logo_url} alt={`${displayName} logo`} width={76} height={76} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                 : <span style={{ fontSize: 26, fontWeight: 900, color: 'white', fontFamily: 'var(--font-display)' }}>{initials}</span>
               }
             </div>

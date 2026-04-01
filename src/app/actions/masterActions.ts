@@ -1,6 +1,25 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
+import { safeDecrypt } from '@/lib/encrypt'
+
+// ─── Auth guard ───────────────────────────────────────────────────────────────
+// Server actions are called directly via POST — they bypass all layout-level
+// auth checks. Every sensitive action must call this before touching any data.
+async function requireAdmin(): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('Unauthorized')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile || profile.role !== 'admin') throw new Error('Forbidden')
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,6 +60,7 @@ function mapEventStatus(s: string): MasterEvt['status'] {
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
 export async function getMasterOrganizers(): Promise<MasterOrg[]> {
+  await requireAdmin()
   const supabase = createAdminClient()
 
   const [{ data: profiles }, { data: events }] = await Promise.all([
@@ -77,6 +97,7 @@ export async function getMasterOrganizers(): Promise<MasterOrg[]> {
 }
 
 export async function getMasterEvents(): Promise<MasterEvt[]> {
+  await requireAdmin()
   const supabase = createAdminClient()
 
   const { data: events } = await supabase
@@ -164,6 +185,7 @@ export type EventGuest = {
 // ─── Detail queries ──────────────────────────────────────────────────────────
 
 export async function getMasterOrgProfile(orgId: string): Promise<OrgProfile | null> {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { data } = await supabase
     .from('profiles')
@@ -188,6 +210,7 @@ export async function getMasterOrgProfile(orgId: string): Promise<OrgProfile | n
 }
 
 export async function getMasterOrgEvents(orgId: string): Promise<OrgEvent[]> {
+  await requireAdmin()
   const supabase = createAdminClient()
 
   const { data: events } = await supabase
@@ -234,6 +257,7 @@ export async function getMasterOrgEvents(orgId: string): Promise<OrgEvent[]> {
 }
 
 export async function getMasterEventGuests(eventId: string): Promise<EventGuest[]> {
+  await requireAdmin()
   const supabase = createAdminClient()
 
   const [{ data: invited }, { data: registered }] = await Promise.all([
@@ -308,8 +332,11 @@ export type PlatformAnalytics = {
 }
 
 export async function getMasterAnalytics(): Promise<PlatformAnalytics> {
+  await requireAdmin()
   const supabase = createAdminClient()
 
+  // NOTE: These 4 bulk queries + JS aggregation is intentional — avoids N+1.
+  // A future optimisation would be Supabase RPCs/views for server-side aggregation.
   const now = new Date()
   const startOfMonth     = new Date(now.getFullYear(), now.getMonth(), 1)
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
@@ -349,20 +376,31 @@ export async function getMasterAnalytics(): Promise<PlatformAnalytics> {
     allRegDates.push((r as any).created_at)
   }
 
-  // ── KPIs ──
-  const totalOrganizers   = (profiles ?? []).length
-  const newOrgsThisMonth  = (profiles ?? []).filter(p => new Date((p as any).created_at) >= startOfMonth).length
-  const newOrgsLastMonth  = (profiles ?? []).filter(p => { const d = new Date((p as any).created_at); return d >= startOfLastMonth && d < startOfMonth }).length
-  const orgGrowth         = newOrgsLastMonth === 0 ? null : Math.round(((newOrgsThisMonth - newOrgsLastMonth) / newOrgsLastMonth) * 100)
+  // ── KPIs — single-pass counters ──
+  let newOrgsThisMonth = 0, newOrgsLastMonth = 0
+  for (const p of profiles ?? []) {
+    const d = new Date((p as any).created_at)
+    if (d >= startOfMonth) newOrgsThisMonth++
+    else if (d >= startOfLastMonth) newOrgsLastMonth++
+  }
+  const totalOrganizers = (profiles ?? []).length
+  const orgGrowth       = newOrgsLastMonth === 0 ? null : Math.round(((newOrgsThisMonth - newOrgsLastMonth) / newOrgsLastMonth) * 100)
 
-  const totalEvents       = evts.length
-  const newEventsThisMonth = evts.filter(e => new Date(e.created_at) >= startOfMonth).length
-  const liveEvents        = evts.filter(e => e.status === 'published').length
+  let newEventsThisMonth = 0, liveEvents = 0
+  for (const e of evts) {
+    if (new Date(e.created_at) >= startOfMonth) newEventsThisMonth++
+    if (e.status === 'published') liveEvents++
+  }
+  const totalEvents = evts.length
 
   const totalRegistrations = Object.values(regMap).reduce((a, b) => a + b, 0)
-  const newRegsThisMonth   = allRegDates.filter(d => new Date(d) >= startOfMonth).length
-  const newRegsLastMonth   = allRegDates.filter(d => { const dt = new Date(d); return dt >= startOfLastMonth && dt < startOfMonth }).length
-  const regGrowth          = newRegsLastMonth === 0 ? null : Math.round(((newRegsThisMonth - newRegsLastMonth) / newRegsLastMonth) * 100)
+  let newRegsThisMonth = 0, newRegsLastMonth = 0
+  for (const d of allRegDates) {
+    const dt = new Date(d)
+    if (dt >= startOfMonth) newRegsThisMonth++
+    else if (dt >= startOfLastMonth) newRegsLastMonth++
+  }
+  const regGrowth = newRegsLastMonth === 0 ? null : Math.round(((newRegsThisMonth - newRegsLastMonth) / newRegsLastMonth) * 100)
 
   const eventsWithCap = evts.filter(e => e.capacity > 0)
   const avgFillRate   = eventsWithCap.length > 0
@@ -414,15 +452,19 @@ export async function getMasterAnalytics(): Promise<PlatformAnalytics> {
   const topEventsByFill = [...eventsList].filter(e => e.capacity > 0).sort((a, b) => b.fillRate - a.fillRate).slice(0, 6)
   const topEventsByRegs = [...eventsList].sort((a, b) => b.registered - a.registered).slice(0, 6)
 
-  // ── Registration trend (last 6 months) ──
-  const registrationTrend = Array.from({ length: 6 }, (_, i) => {
+  // ── Registration trend (last 6 months) — single pass over allRegDates ──
+  const trendBuckets = Array.from({ length: 6 }, (_, i) => {
     const start = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
     const end   = new Date(now.getFullYear(), now.getMonth() - (5 - i) + 1, 1)
-    return {
-      label: start.toLocaleDateString('en-PK', { month: 'short', year: '2-digit' }),
-      count: allRegDates.filter(d => { const dt = new Date(d); return dt >= start && dt < end }).length,
-    }
+    return { start, end, label: start.toLocaleDateString('en-PK', { month: 'short', year: '2-digit' }), count: 0 }
   })
+  for (const d of allRegDates) {
+    const dt = new Date(d)
+    for (const bucket of trendBuckets) {
+      if (dt >= bucket.start && dt < bucket.end) { bucket.count++; break }
+    }
+  }
+  const registrationTrend = trendBuckets.map(({ label, count }) => ({ label, count }))
 
   // ── Status distribution ──
   const statusDistribution: Record<string, number> = { draft: 0, published: 0, completed: 0, cancelled: 0 }
@@ -447,6 +489,7 @@ export type WaitlistEntry = {
 }
 
 export async function getWaitlistEntries(): Promise<WaitlistEntry[]> {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { data, error } = await (supabase as any)
     .from('platform_waitlist')
@@ -473,6 +516,7 @@ export type SupportQuery = {
 }
 
 export async function getSupportQueries(): Promise<SupportQuery[]> {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { data, error } = await (supabase as any)
     .from('support_queries')
@@ -486,6 +530,7 @@ export async function updateSupportQueryStatus(
   id: string,
   status: 'open' | 'in_progress' | 'resolved'
 ): Promise<{ error?: string }> {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { error } = await (supabase as any)
     .from('support_queries')
@@ -529,6 +574,7 @@ export async function setOrgAdminStatus(
   orgId: string,
   status: 'active' | 'review' | 'suspended'
 ): Promise<{ error?: string }> {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { error } = await supabase
     .from('profiles')
@@ -553,6 +599,7 @@ export type CnicVerification = {
 }
 
 export async function getMasterCnicVerifications(): Promise<CnicVerification[]> {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { data, error } = await (supabase as any)
     .from('profiles')
@@ -561,10 +608,26 @@ export async function getMasterCnicVerifications(): Promise<CnicVerification[]> 
     .not('cnic_number', 'is', null)
     .order('cnic_submitted_at', { ascending: false })
   if (error) { console.error('getMasterCnicVerifications:', error); return [] }
-  return (data ?? []) as CnicVerification[]
+
+  // Generate short-lived (1 hour) signed URLs on demand — never store long-lived URLs
+  // Also decrypt CNIC numbers (stored encrypted at rest)
+  const rows = (data ?? []) as CnicVerification[]
+  await Promise.all(rows.map(async (row) => {
+    row.cnic_number = safeDecrypt(row.cnic_number) ?? row.cnic_number
+    if (!row.cnic_image_url) return
+    // If still an old full URL (https://...), leave as-is for backward compat
+    if (row.cnic_image_url.startsWith('http')) return
+    const { data: signed } = await (supabase as any).storage
+      .from('cnic-documents')
+      .createSignedUrl(row.cnic_image_url, 60 * 60)  // 1 hour
+    if (signed?.signedUrl) row.cnic_image_url = signed.signedUrl
+  }))
+
+  return rows
 }
 
 export async function approveCnicVerification(userId: string): Promise<{ error?: string }> {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { error } = await (supabase as any)
     .from('profiles')
@@ -572,30 +635,14 @@ export async function approveCnicVerification(userId: string): Promise<{ error?:
       cnic_status: 'verified',
       is_id_verified: true,
       cnic_reject_reason: null,
-      social_score: (supabase as any).rpc
-        ? undefined
-        : undefined,
     })
     .eq('id', userId)
   if (error) return { error: error.message }
-
-  // Award +100 social score for CNIC verification (idempotent via RPC)
-  await (supabase as any).rpc('upsert_category_score', {
-    p_user_id: userId,
-    p_category_id: null,
-    p_delta: 0,
-  }).catch(() => {})
-
-  // Direct increment of social_score
-  await (supabase as any)
-    .from('profiles')
-    .update({ cnic_status: 'verified', is_id_verified: true })
-    .eq('id', userId)
-
   return {}
 }
 
 export async function rejectCnicVerification(userId: string, reason: string): Promise<{ error?: string }> {
+  await requireAdmin()
   const supabase = createAdminClient()
   const { error } = await (supabase as any)
     .from('profiles')

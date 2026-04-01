@@ -3,8 +3,14 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { createNotification, Notifications } from '@/lib/supabase/notifications'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 export async function registerForEvent(formData: FormData) {
+  const ip = await getClientIp()
+  if (!checkRateLimit(`register:${ip}`, 5, 600_000)) {
+    return { error: 'Too many registration attempts. Please try again later.' }
+  }
+
   const supabase = await createClient()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: { user } } = await supabase.auth.getUser()
@@ -14,7 +20,10 @@ export async function registerForEvent(formData: FormData) {
   const email          = formData.get('email')       as string
   const phone          = formData.get('phone')       as string
   const ticketDaysRaw  = formData.get('ticket_days') as string | null
-  const ticketDays: string[] | null = ticketDaysRaw ? JSON.parse(ticketDaysRaw) : null
+  let ticketDays: string[] | null = null
+  if (ticketDaysRaw) {
+    try { ticketDays = JSON.parse(ticketDaysRaw) } catch { return { error: 'Invalid ticket selection' } }
+  }
 
   if (!eventId || !name || !email) return { error: 'Missing required fields' }
   if (ticketDays !== null && ticketDays.length === 0) return { error: 'Please select at least one day' }
@@ -79,6 +88,11 @@ export async function registerForEvent(formData: FormData) {
 }
 
 export async function submitEOI(formData: FormData) {
+  const ip = await getClientIp()
+  if (!checkRateLimit(`eoi:${ip}`, 5, 600_000)) {
+    return { error: 'Too many submission attempts. Please try again later.' }
+  }
+
   const supabase = await createClient()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: { user } } = await supabase.auth.getUser()
@@ -89,7 +103,10 @@ export async function submitEOI(formData: FormData) {
   const phone          = formData.get('phone')       as string
   const note           = formData.get('note')        as string
   const ticketDaysRaw  = formData.get('ticket_days') as string | null
-  const ticketDays: string[] | null = ticketDaysRaw ? JSON.parse(ticketDaysRaw) : null
+  let ticketDays: string[] | null = null
+  if (ticketDaysRaw) {
+    try { ticketDays = JSON.parse(ticketDaysRaw) } catch { return { error: 'Invalid ticket selection' } }
+  }
 
   if (!eventId || !name || !email) return { error: 'Missing required fields' }
   if (ticketDays !== null && ticketDays.length === 0) return { error: 'Please select at least one day' }

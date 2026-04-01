@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { encrypt, safeDecrypt } from '@/lib/encrypt'
 
 export interface CnicProfile {
   id: string
@@ -29,7 +30,9 @@ export async function getCnicStatus(): Promise<CnicProfile | null> {
     .eq('id', user.id)
     .single()
 
-  return (data ?? { id: user.id, cnic_status: 'none', social_score: 0 }) as CnicProfile
+  const profile = (data ?? { id: user.id, cnic_status: 'none', social_score: 0 }) as CnicProfile
+  if (profile.cnic_number) profile.cnic_number = safeDecrypt(profile.cnic_number)
+  return profile
 }
 
 /**
@@ -78,20 +81,13 @@ export async function submitCnicVerification(params: {
     return { error: 'Something went wrong. Please try again.' }
   }
 
-  // Get signed URL (valid 10 years — for admin review)
-  const { data: signedData } = await (admin as any).storage
-    .from('cnic-documents')
-    .createSignedUrl(fileName, 60 * 60 * 24 * 365 * 10)
-
-  const imageUrl = signedData?.signedUrl ?? fileName
-
-  // Save to profile
+  // Save to profile — encrypt CNIC number at rest
   const { error: updateError } = await (admin as any)
     .from('profiles')
     .update({
-      cnic_number: cnicNumber.trim(),
+      cnic_number: encrypt(cnicNumber.trim()),
       cnic_expiry: cnicExpiry.trim(),
-      cnic_image_url: imageUrl,
+      cnic_image_url: fileName,  // store path only; signed URLs generated on demand
       cnic_status: 'pending',
       cnic_submitted_at: new Date().toISOString(),
     })

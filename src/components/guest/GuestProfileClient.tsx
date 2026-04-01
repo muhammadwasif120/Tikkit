@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { User, Phone, Mail, Lock, LogOut, Zap, Award, ChevronRight, Check, Eye, EyeOff, Shield, Edit2, Flame } from 'lucide-react'
@@ -248,8 +249,7 @@ export default function GuestProfileClient({ userEmail, profile, guestProfile, p
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: `linear-gradient(135deg, ${tier.color}25, ${tier.color}08)`, border: `2px solid ${tier.color}35`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {guestProfile?.avatar_url ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={guestProfile.avatar_url} alt={displayName} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+            <Image src={guestProfile.avatar_url} alt={displayName} width={64} height={64} style={{ borderRadius: '50%', objectFit: 'cover', width: '100%', height: '100%' }} />
           ) : (
             <span style={{ color: tier.color, fontSize: 22, fontWeight: 800, fontFamily: 'var(--font-display)' }}>{initials}</span>
           )}

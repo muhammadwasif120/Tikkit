@@ -6,6 +6,7 @@ import EventDetailClient from '@/components/guest/EventDetailClient'
 import SkeletonEventDetail from '@/components/guest/SkeletonEventDetail'
 import { getUserFavouriteEventIds } from '@/app/actions/eventFavouriteActions'
 import { isUUID } from '@/lib/slugify'
+import { stripHtml } from '@/lib/sanitize'
 
 // ─── Resolve slug OR uuid to an event row ─────────────────────────────────────
 async function resolveEvent(idOrSlug: string) {
@@ -61,20 +62,21 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 }
 
 function buildMetadata(ev: any, slugOrId: string): Metadata {
+  const plainDescription = stripHtml(ev.description) || `Register for ${ev.title} on Tikkit.`
   return {
     title: `${ev.title} - Tikkit`,
-    description: ev.description || `Register for ${ev.title} on Tikkit.`,
+    description: plainDescription,
     alternates: { canonical: `https://tikkitx.com/guest/explore/${slugOrId}` },
     openGraph: {
       title: ev.title,
-      description: ev.description || `Register for ${ev.title} on Tikkit.`,
+      description: plainDescription,
       url: `https://tikkitx.com/guest/explore/${slugOrId}`,
       images: ev.cover_image_url ? [{ url: ev.cover_image_url }] : [],
     },
     twitter: {
       card: 'summary_large_image',
       title: ev.title,
-      description: ev.description || `Register for ${ev.title} on Tikkit.`,
+      description: plainDescription,
       images: ev.cover_image_url ? [ev.cover_image_url] : [],
     },
   }
@@ -176,7 +178,7 @@ async function EventData({ idOrSlug }: { idOrSlug: string }) {
               '@context': 'https://schema.org',
               '@type': 'Event',
               name: enrichedEvent.title,
-              description: enrichedEvent.description || `Register for ${enrichedEvent.title} on Tikkit.`,
+              description: stripHtml(enrichedEvent.description) || `Register for ${enrichedEvent.title} on Tikkit.`,
               image: enrichedEvent.cover_image_url ? [enrichedEvent.cover_image_url] : [],
               startDate: enrichedEvent.date_start,
               endDate: enrichedEvent.date_end,

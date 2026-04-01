@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createNotification, Notifications } from '@/lib/supabase/notifications'
+import { verifyCsrfOrigin } from '@/lib/csrf'
 
 export async function POST(req: NextRequest) {
+  const csrf = verifyCsrfOrigin(req)
+  if (csrf) return csrf
   try {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { registrationId, notes } = await req.json()

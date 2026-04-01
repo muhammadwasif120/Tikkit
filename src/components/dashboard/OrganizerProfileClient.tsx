@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import {
   Check, Edit3, X, Loader2, Camera,
@@ -139,10 +140,9 @@ function EventStatCard({ event }: { event: EventWithStats }) {
 
   return (
     <Link href={`/dashboard/events/${event.id}`} className="card-hover flex gap-4 items-start group">
-      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0" style={{ background: getCardGradient(event.id) }}>
+      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 relative" style={{ background: getCardGradient(event.id) }}>
         {event.cover_image_url && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={event.cover_image_url} alt="" className="w-full h-full object-cover" />
+          <Image src={event.cover_image_url} alt={`${event.title} cover`} fill style={{ objectFit: 'cover' }} sizes="56px" />
         )}
       </div>
 
@@ -414,8 +414,7 @@ export default function OrganizerProfileClient({
               }}
             >
               {profile.logo_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={profile.logo_url} alt="Logo" className="w-full h-full object-cover" />
+                <Image src={profile.logo_url} alt={`${profile.company_name || profile.full_name || 'Organizer'} logo`} width={80} height={80} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
               ) : (
                 <span className="text-2xl font-black text-[#1E5EFF]" style={{ fontFamily: 'var(--font-display)' }}>
                   {initials}

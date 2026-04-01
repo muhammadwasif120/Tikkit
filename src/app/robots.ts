@@ -1,23 +1,24 @@
 import { MetadataRoute } from 'next'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://tikkitx.com'
+  const baseUrl = 'https://www.tikkitx.com'
 
   const allowPublicRules = [
     '/',
-    '/guest/explore',
-    '/register/*',
     '/how-it-works',
-    '/guest/events',
+    '/corporate',
+    '/pulse',
+    '/coming-soon',
   ]
 
   const disallowPrivateRules = [
-    '/dashboard/*',
-    '/api/*',
-    '/auth/*',
-    '/guest/profile',
-    '/guest/tickets',
-    '/staff/*',
+    '/dashboard/',
+    '/api/',
+    '/auth/',
+    '/guest/',
+    '/staff/',
+    '/master/',
+    '/register/',
   ]
 
   return {

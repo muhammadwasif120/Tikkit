@@ -108,6 +108,7 @@ function QRModal({ regId, guestName, event, onClose }: {
 }) {
   const [qrSrc, setQrSrc] = useState('')
   const [bright, setBright] = useState(false)
+  const closeRef = useRef<HTMLButtonElement>(null)
   const ticketCode = `TIKKIT-${regId.replace(/-/g, '').slice(0, 16).toUpperCase()}`
 
   useEffect(() => {
@@ -118,11 +119,18 @@ function QRModal({ regId, guestName, event, onClose }: {
     }).then(setQrSrc)
   }, [ticketCode])
 
+  useEffect(() => { closeRef.current?.focus() }, [])
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="qr-modal-title" style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}>
       <div style={{ position: 'relative', background: '#0E1018', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 28, padding: '28px 24px 24px', width: 'calc(100% - 48px)', maxWidth: 340, animation: 'popIn 0.35s cubic-bezier(0.34,1.56,0.64,1)' }}>
         {/* Close */}
-        <button onClick={onClose} style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 7, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
+        <button ref={closeRef} onClick={onClose} aria-label="Close ticket" style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 7, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
           <X size={15} />
         </button>
 
@@ -132,7 +140,7 @@ function QRModal({ regId, guestName, event, onClose }: {
             <Ticket size={12} color="#10B981" />
             <span style={{ color: '#10B981', fontSize: 11, fontWeight: 800, letterSpacing: '0.5px' }}>YOUR TICKET</span>
           </div>
-          <h3 style={{ color: 'white', fontSize: 16, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>{event.title}</h3>
+          <h3 id="qr-modal-title" style={{ color: 'white', fontSize: 16, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>{event.title}</h3>
           <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>{new Date(event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })} · {fmtTime(event.date_start)}</p>
           {event.venue_name && <p style={{ color: '#6B7280', fontSize: 12, margin: '2px 0 0' }}>{event.venue_name}</p>}
         </div>
@@ -174,7 +182,15 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
   const account = event.payment_accounts?.[0]
+
+  useEffect(() => { closeRef.current?.focus() }, [])
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
@@ -200,8 +216,8 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
+    <div role="dialog" aria-modal="true" aria-labelledby="pay-sheet-title" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+      <div onClick={onClose} aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
       <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
         {/* Handle */}
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 0' }} />
@@ -209,10 +225,10 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
-            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>Complete Payment</h3>
+            <h3 id="pay-sheet-title" style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>Complete Payment</h3>
             <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{event.title}</p>
           </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
+          <button ref={closeRef} onClick={onClose} aria-label="Close payment sheet" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
             <X size={16} />
           </button>
         </div>
@@ -323,12 +339,20 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const closeRef = useRef<HTMLButtonElement>(null)
   const isPaid = (event.ticket_price ?? 0) > 0
   const account = event.payment_accounts?.[0]
 
   const allDays = getEventDays(event.date_start, event.date_end)
   const isMultiDay = allDays.length > 1
   const [selectedDays, setSelectedDays] = useState<string[]>(isMultiDay ? [] : allDays)
+
+  useEffect(() => { closeRef.current?.focus() }, [])
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
 
   const toggleDay = (day: string) =>
     setSelectedDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day])
@@ -367,8 +391,8 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
+    <div role="dialog" aria-modal="true" aria-labelledby="register-sheet-title" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+      <div onClick={onClose} aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
       <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
         {/* Handle */}
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 0' }} />
@@ -376,12 +400,12 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
-            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>
+            <h3 id="register-sheet-title" style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>
               {isEOI ? 'Express Interest' : 'Register'}
             </h3>
             <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{event.title}</p>
           </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
+          <button ref={closeRef} onClick={onClose} aria-label="Close registration sheet" style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
             <X size={16} />
           </button>
         </div>
@@ -505,8 +529,16 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
 
 /* ─── Success overlay ────────────────────────────────────────────── */
 function SuccessOverlay({ isEOI, onClose }: { isEOI: boolean; onClose: () => void }) {
+  const btnRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => { btnRef.current?.focus() }, [])
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="success-overlay-title" style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
       <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '36px 28px', maxWidth: 320, width: '90%', textAlign: 'center', animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
         <div style={{ width: 64, height: 64, borderRadius: 20, background: isEOI ? 'rgba(168,85,247,0.12)' : 'rgba(30,94,255,0.12)', border: `1px solid ${isEOI ? 'rgba(168,85,247,0.25)' : 'rgba(30,94,255,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
           {isEOI
@@ -514,7 +546,7 @@ function SuccessOverlay({ isEOI, onClose }: { isEOI: boolean; onClose: () => voi
             : <Ticket size={28} color="#1E5EFF" />
           }
         </div>
-        <h3 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>
+        <h3 id="success-overlay-title" style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>
           {isEOI ? 'Interest Submitted!' : "You're Registered!"}
         </h3>
         <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px', lineHeight: 1.5 }}>
@@ -522,7 +554,7 @@ function SuccessOverlay({ isEOI, onClose }: { isEOI: boolean; onClose: () => voi
             ? 'The organizer will review your application and notify you in-app.'
             : 'Your QR ticket is ready — tap View Ticket to see it.'}
         </p>
-        <button onClick={onClose} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+        <button ref={btnRef} onClick={onClose} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
           Got it
         </button>
       </div>

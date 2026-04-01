@@ -3,7 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { deriveEventKey, exportKeyBase64, signQRPayload, QRPayload } from '@/lib/qrCrypto'
 
-const QR_SECRET = process.env.QR_SIGNING_SECRET ?? 'tikkit-dev-secret-change-in-prod'
+function getQrSecret(): string {
+  const secret = process.env.QR_SIGNING_SECRET
+  if (!secret) throw new Error('QR_SIGNING_SECRET environment variable is not set')
+  return secret
+}
+const QR_SECRET = getQrSecret()
 
 export async function generateGuestQRToken(guestId: string): Promise<string | null> {
   const supabase = await createClient()

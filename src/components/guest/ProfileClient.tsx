@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { Edit3, Star, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown, ShieldCheck, Ticket, Trash2, Camera, Palette } from 'lucide-react'
 import { updateGuestProfile, signOut, sendPasswordReset, uploadProfilePhoto, deleteAccount, updateNotificationPrefs } from '@/app/actions/guestProfileActions'
 import { getCreditTier } from '@/lib/creditUtils'
@@ -330,8 +331,7 @@ function AvatarDisplay({ url, initials, tier, size = 64 }: { url: string | null;
     }
   }
   if (url) {
-    {/* eslint-disable-next-line @next/next/no-img-element */}
-    return <img src={url} alt="" style={{ width: size, height: size, borderRadius: size * 0.3, objectFit: 'cover', border: `2px solid ${tier.border}`, flexShrink: 0 }} />
+    return <Image src={url} alt="" width={size} height={size} style={{ borderRadius: size * 0.3, objectFit: 'cover', border: `2px solid ${tier.border}`, flexShrink: 0 }} />
   }
   return (
     <div style={{
@@ -690,13 +690,10 @@ function PastEventsSection({ events }: { events: PastEvent[] }) {
             <div key={reg.id} style={{ display: 'flex', gap: 12, padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
               <div style={{
                 width: 44, height: 44, borderRadius: 10, overflow: 'hidden', flexShrink: 0,
-                background: eventGradient(ev.id),
+                background: eventGradient(ev.id), position: 'relative',
               }}>
                 {ev.cover_image_url && (
-                  <>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={ev.cover_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </>
+                  <Image src={ev.cover_image_url} alt="" fill style={{ objectFit: 'cover' }} sizes="44px" />
                 )}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>

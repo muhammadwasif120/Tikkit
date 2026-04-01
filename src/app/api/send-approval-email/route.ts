@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { verifyCsrfOrigin } from '@/lib/csrf'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.EMAIL_FROM ?? 'Tikkit <noreply@tikkit.app>'
@@ -167,6 +168,8 @@ function buildPaymentRejectedEmail({ name, eventTitle, notes }: any) {
 // ─── Route handler ───────────────────────────────────────────────────────────
 
 export async function POST(req: NextRequest) {
+  const csrf = verifyCsrfOrigin(req)
+  if (csrf) return csrf
   try {
     // SECURITY PATCH: Prevent malicious email hijacking
     const { createClient } = await import('@/lib/supabase/server')

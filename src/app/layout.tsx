@@ -15,13 +15,11 @@ export const viewport: Viewport = {
   themeColor: '#1E5EFF',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: 'cover',
 }
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://tikkitx.com'),
+  metadataBase: new URL('https://www.tikkitx.com'),
   title: {
     template: '%s | Tikkit',
     default: 'Tikkit | Host & Discover Exclusive Events in Pakistan',
@@ -33,7 +31,7 @@ export const metadata: Metadata = {
     siteName: 'Tikkit',
     title: 'Tikkit | Host & Discover Exclusive Events in Pakistan',
     description: 'The premier platform to discover, register, and host exclusive events nationwide across Pakistan.',
-    url: 'https://tikkitx.com',
+    url: 'https://www.tikkitx.com',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit Event Platform Preview' }],
   },
   twitter: {

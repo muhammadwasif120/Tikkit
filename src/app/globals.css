@@ -330,8 +330,8 @@ body {
 
 /* ─── Skeleton Loader ─────────────────────────────────────────────── */
 @keyframes neonShimmer {
-  0%   { background-position: -800px 0; }
-  100% { background-position:  800px 0; }
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
 }
 @keyframes scanLine {
   0%   { transform: translateY(-4px); opacity: 0; }
@@ -345,19 +345,27 @@ body {
 }
 
 .skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
     105deg,
-    rgba(255,255,255,0.03) 0%,
-    rgba(255,255,255,0.03) 28%,
-    rgba(30, 94,255,0.16)  43%,
-    rgba(168,85,247,0.12)  50%,
-    rgba(30, 94,255,0.16)  57%,
-    rgba(255,255,255,0.03) 72%,
-    rgba(255,255,255,0.03) 100%
+    transparent 0%,
+    transparent 30%,
+    rgba(30, 94,255,0.18) 45%,
+    rgba(168,85,247,0.14) 50%,
+    rgba(30, 94,255,0.18) 55%,
+    transparent 70%,
+    transparent 100%
   );
-  background-size: 1600px 100%;
   animation: neonShimmer 2s linear infinite;
-  border-radius: 8px;
+  will-change: transform;
 }
 
 .skeleton-rounded { border-radius: 12px; }

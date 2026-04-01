@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { CheckCircle, XCircle, AlertCircle, CreditCard, Bell, ChevronRight } from 'lucide-react'
 
@@ -102,8 +103,7 @@ export default function GuestNotificationsClient({ registrations }: { registrati
                   {/* Cover image + event date */}
                   {reg.event?.cover_image_url && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={reg.event.cover_image_url} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover' }} />
+                      <Image src={reg.event.cover_image_url} alt="" width={36} height={36} style={{ borderRadius: 8, objectFit: 'cover' }} />
                       <span style={{ color: '#4B5563', fontSize: 12 }}>
                         {new Date(reg.event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
