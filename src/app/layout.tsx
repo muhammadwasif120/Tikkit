@@ -109,7 +109,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   ],
                   "sameAs": [
                     "https://www.instagram.com/tikkitx",
-                    "https://www.twitter.com/tikkitx"
+                    "https://www.twitter.com/tikkitx",
+                    "https://www.linkedin.com/company/tikkit-x/"
                   ],
                   "contactPoint": {
                     "@type": "ContactPoint",
