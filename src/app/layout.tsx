@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import './globals.css'
 import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
 import { Analytics } from '@vercel/analytics/react'
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -158,6 +159,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {children}
         </ThemeProvider>
         <Analytics />
+        <GoogleAnalytics gaId="G-V4KC6Q8TCQ" />
       </body>
     </html>
   )
