@@ -12,6 +12,8 @@ export default function robots(): MetadataRoute.Robots {
     '/coming-soon',
     '/privacy',
     '/terms',
+    '/demo',
+    '/compare/',
     '/organizer/',
     '/guest/explore/',
   ]
