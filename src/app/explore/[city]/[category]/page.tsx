@@ -99,11 +99,25 @@ export default async function CityCategoryExplorePage({ params }: Props) {
   const catName = targetCat ? targetCat.name : categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)
   const cityName = city.charAt(0).toUpperCase() + city.slice(1)
 
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tikkitx.com' },
+      { '@type': 'ListItem', position: 2, name: 'Explore Events', item: 'https://www.tikkitx.com/explore' },
+      { '@type': 'ListItem', position: 3, name: `Events in ${cityName}`, item: `https://www.tikkitx.com/explore/${resolvedParams.city}` },
+      { '@type': 'ListItem', position: 4, name: `${catName} in ${cityName}`, item: `https://www.tikkitx.com/explore/${resolvedParams.city}/${resolvedParams.category}` },
+    ],
+  }
+
   return (
-    <PublicExploreClient
-      events={enrichedEvents}
-      categories={categories ?? []}
-      titleOverride={`${catName} in ${cityName}`}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <PublicExploreClient
+        events={enrichedEvents}
+        categories={categories ?? []}
+        titleOverride={`${catName} in ${cityName}`}
+      />
+    </>
   )
 }

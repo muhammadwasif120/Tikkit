@@ -31,6 +31,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function CityExplorePage({ params }: Props) {
   const resolvedParams = await params
   const city = resolvedParams.city.replace(/-/g, ' ')
+  const cityDisplay = city.charAt(0).toUpperCase() + city.slice(1)
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tikkitx.com' },
+      { '@type': 'ListItem', position: 2, name: 'Explore Events', item: 'https://www.tikkitx.com/explore' },
+      { '@type': 'ListItem', position: 3, name: `Events in ${cityDisplay}`, item: `https://www.tikkitx.com/explore/${resolvedParams.city}` },
+    ],
+  }
 
   const supabase = await createClient()
   const admin = createAdminClient()
@@ -92,10 +102,13 @@ export default async function CityExplorePage({ params }: Props) {
   }))
 
   return (
-    <PublicExploreClient
-      events={enrichedEvents}
-      categories={categories ?? []}
-      titleOverride={`Events in ${city.charAt(0).toUpperCase() + city.slice(1)}`}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <PublicExploreClient
+        events={enrichedEvents}
+        categories={categories ?? []}
+        titleOverride={`Events in ${cityDisplay}`}
+      />
+    </>
   )
 }

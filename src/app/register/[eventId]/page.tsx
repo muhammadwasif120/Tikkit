@@ -19,18 +19,20 @@ export async function generateMetadata({ params }: { params: Promise<{ eventId: 
   if (!event) return { title: 'Registration Not Found' }
 
   return {
-    title: `Register for ${event.title} - Tikkit`,
-    description: event.description || `Secure your spot for ${event.title} on Tikkit.`,
+    title: `Register for ${event.title} — Tikkit`,
+    description: event.description || `Secure your spot for ${event.title}. Register now on Tikkit — Pakistan's event ticketing platform.`,
+    alternates: { canonical: `https://www.tikkitx.com/register/${eventId}` },
     openGraph: {
       title: `Register for ${event.title}`,
       description: event.description || `Secure your spot for ${event.title} on Tikkit.`,
-      images: event.cover_image_url ? [{ url: event.cover_image_url }] : [],
+      images: event.cover_image_url ? [{ url: event.cover_image_url, width: 1200, height: 630 }] : [{ url: '/og-image.jpg', width: 1200, height: 630 }],
     },
     twitter: {
       card: 'summary_large_image',
+      site: '@tikkitx',
       title: `Register for ${event.title}`,
       description: event.description || `Secure your spot for ${event.title} on Tikkit.`,
-      images: event.cover_image_url ? [event.cover_image_url] : [],
+      images: event.cover_image_url ? [event.cover_image_url] : ['/og-image.jpg'],
     },
   }
 }

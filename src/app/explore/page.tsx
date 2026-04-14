@@ -2,19 +2,21 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Explore Events in Pakistan',
-  description: 'Browse upcoming concerts, private parties, corporate networking events, and exclusive experiences in Karachi, Lahore, Islamabad, and across Pakistan.',
+  title: 'Explore Events in Pakistan — Concerts, Parties & More | Tikkit',
+  description: 'Browse upcoming concerts, private parties, corporate networking events, and exclusive experiences in Lahore, Karachi, Islamabad, and across Pakistan. Buy tickets online.',
+  keywords: ['events in Pakistan', 'buy tickets Pakistan', 'concerts Pakistan', 'events Lahore', 'events Karachi', 'events Islamabad', 'upcoming events Pakistan', 'things to do Pakistan'],
   alternates: { canonical: 'https://www.tikkitx.com/explore' },
   openGraph: {
-    title: 'Explore Events in Pakistan | Tikkit',
-    description: 'Browse upcoming concerts, private parties, corporate networking events, and exclusive experiences in Karachi, Lahore, Islamabad, and across Pakistan.',
+    title: 'Explore Events in Pakistan — Concerts, Parties & More | Tikkit',
+    description: 'Browse upcoming concerts, private parties, corporate events, and exclusive experiences in Lahore, Karachi, Islamabad and across Pakistan.',
     url: 'https://www.tikkitx.com/explore',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Explore Events in Pakistan — Tikkit' }],
   },
   twitter: {
     card: 'summary_large_image',
+    site: '@tikkitx',
     title: 'Explore Events in Pakistan | Tikkit',
-    description: 'Browse upcoming concerts, private parties, corporate networking events, and exclusive experiences across Pakistan.',
+    description: 'Concerts, parties, corporate events across Lahore, Karachi & Islamabad. Buy tickets online.',
     images: ['/og-image.jpg'],
   },
 }
@@ -23,6 +25,15 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import PublicExploreClient from '@/components/public/PublicExploreClient'
 
 export const revalidate = 120 // re-fetch every 2 minutes
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tikkitx.com' },
+    { '@type': 'ListItem', position: 2, name: 'Explore Events', item: 'https://www.tikkitx.com/explore' },
+  ],
+}
 
 export default async function ExplorePage() {
   const supabase = await createClient()
@@ -85,9 +96,12 @@ export default async function ExplorePage() {
   }))
 
   return (
-    <PublicExploreClient
-      events={enrichedEvents}
-      categories={categories ?? []}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <PublicExploreClient
+        events={enrichedEvents}
+        categories={categories ?? []}
+      />
+    </>
   )
 }

@@ -3,6 +3,7 @@ import { DM_Sans } from 'next/font/google'
 import { cookies } from 'next/headers'
 import './globals.css'
 import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
+import { Analytics } from '@vercel/analytics/react'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -22,22 +23,29 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://www.tikkitx.com'),
   title: {
     template: '%s | Tikkit',
-    default: 'Tikkit | Host & Discover Exclusive Events in Pakistan',
+    default: 'Tikkit — Buy Tickets for Events in Pakistan | Lahore · Karachi · Islamabad',
   },
-  description: 'The premier platform to discover, register, and host exclusive events nationwide across Pakistan.',
+  description: "Pakistan's #1 event ticketing platform. Buy tickets for concerts, parties, tech conferences & corporate events in Lahore, Karachi & Islamabad. Dynamic QR entry, instant booking.",
   applicationName: 'Tikkit',
+  keywords: ['event tickets Pakistan', 'buy tickets Lahore', 'concerts Karachi', 'events Islamabad', 'event management Pakistan', 'ticket booking Pakistan', 'online tickets Pakistan'],
+  authors: [{ name: 'Tikkit X', url: 'https://www.tikkitx.com' }],
+  creator: 'Tikkit X',
+  publisher: 'Tikkit X',
   openGraph: {
     type: 'website',
     siteName: 'Tikkit',
-    title: 'Tikkit | Host & Discover Exclusive Events in Pakistan',
-    description: 'The premier platform to discover, register, and host exclusive events nationwide across Pakistan.',
+    title: 'Tikkit — Buy Tickets for Events in Pakistan | Lahore · Karachi · Islamabad',
+    description: "Pakistan's #1 event ticketing platform. Buy tickets for concerts, parties, tech conferences & corporate events in Lahore, Karachi & Islamabad.",
     url: 'https://www.tikkitx.com',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit Event Platform Preview' }],
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit — Event Ticketing Platform Pakistan' }],
+    locale: 'en_PK',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Tikkit | Host & Discover Exclusive Events',
-    description: 'The premier platform to discover, register, and host exclusive events nationwide across Pakistan.',
+    site: '@tikkitx',
+    creator: '@tikkitx',
+    title: 'Tikkit — Buy Tickets for Events in Pakistan',
+    description: "Pakistan's #1 event ticketing platform. Concerts, parties, corporate events in Lahore, Karachi & Islamabad.",
     images: ['/og-image.jpg'],
   },
   icons: {
@@ -49,6 +57,17 @@ export const metadata: Metadata = {
       { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
 }
 
 const VALID_THEMES: AppTheme[] = ['noir', 'corporate', 'pulse']
@@ -59,7 +78,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const theme: AppTheme = VALID_THEMES.includes(raw as AppTheme) ? (raw as AppTheme) : 'noir'
 
   return (
-    <html lang="en" className={dmSans.variable} data-theme={theme}>
+    <html lang="en-PK" className={dmSans.variable} data-theme={theme}>
       <head>
         <script
           type="application/ld+json"
@@ -71,9 +90,31 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   "@type": "Organization",
                   "@id": "https://www.tikkitx.com/#organization",
                   "name": "Tikkit X",
+                  "alternateName": "Tikkit",
                   "url": "https://www.tikkitx.com",
-                  "logo": "https://www.tikkitx.com/icons/favicon-32.png",
-                  "description": "Event management and ticketing platform for Pakistan."
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://www.tikkitx.com/tikkit-logo.svg",
+                    "width": 600,
+                    "height": 120
+                  },
+                  "description": "Pakistan's #1 event ticketing and management platform. Buy and sell tickets for concerts, corporate events, parties, and experiences in Lahore, Karachi, and Islamabad.",
+                  "foundingLocation": { "@type": "Place", "name": "Lahore, Pakistan" },
+                  "areaServed": [
+                    { "@type": "City", "name": "Lahore" },
+                    { "@type": "City", "name": "Karachi" },
+                    { "@type": "City", "name": "Islamabad" },
+                    { "@type": "Country", "name": "Pakistan" }
+                  ],
+                  "sameAs": [
+                    "https://www.instagram.com/tikkitx",
+                    "https://www.twitter.com/tikkitx"
+                  ],
+                  "contactPoint": {
+                    "@type": "ContactPoint",
+                    "contactType": "customer support",
+                    "availableLanguage": ["English", "Urdu"]
+                  }
                 },
                 {
                   "@type": "WebSite",
@@ -116,6 +157,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider initialTheme={theme}>
           {children}
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   )
