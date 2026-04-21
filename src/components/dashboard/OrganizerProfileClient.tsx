@@ -46,25 +46,8 @@ const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string;
   cancelled: { bg: 'rgba(239,68,68,0.1)',  color: '#EF4444', border: 'rgba(239,68,68,0.2)',   label: 'CANCELLED'},
 }
 
-const COVER_GRADIENTS = [
-  'linear-gradient(135deg, #0a0f2e 0%, #1a2a6c 50%, #1E5EFF 100%)',
-  'linear-gradient(135deg, #0d001a 0%, #2d0050 50%, #7c3aed 100%)',
-  'linear-gradient(135deg, #001233 0%, #023e8a 50%, #0077b6 100%)',
-  'linear-gradient(135deg, #0f2027 0%, #2c5364 50%, #203a43 100%)',
-  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-]
-function getGradient(id: string) { return COVER_GRADIENTS[id.charCodeAt(0) % COVER_GRADIENTS.length] }
-
-function getCardGradient(id: string) {
-  const CARD_GRADIENTS = [
-    'linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%)',
-    'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-    'linear-gradient(135deg, #200122 0%, #6f0000 100%)',
-    'linear-gradient(135deg, #1f0033 0%, #2d0050 100%)',
-    'linear-gradient(135deg, #001233 0%, #023e8a 100%)',
-  ]
-  return CARD_GRADIENTS[id.charCodeAt(0) % CARD_GRADIENTS.length]
-}
+function getGradient(id: string) { return `var(--event-gradient-${id.charCodeAt(0) % 8})` }
+function getCardGradient(id: string) { return `var(--event-gradient-${id.charCodeAt(0) % 8})` }
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 

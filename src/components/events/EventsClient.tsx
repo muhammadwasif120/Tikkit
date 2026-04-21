@@ -7,21 +7,12 @@ import { getEffectiveStatus } from '@/lib/eventStatus'
 import { format } from 'date-fns'
 import Link from 'next/link'
 
-const COVER_GRADIENTS = [
-  'linear-gradient(135deg,#0F2027,#203A43,#2C5364)',
-  'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)',
-  'linear-gradient(135deg,#200122,#6f0000)',
-  'linear-gradient(135deg,#0d0d0d,#1a3a1a)',
-  'linear-gradient(135deg,#1f0033,#2d0050)',
-  'linear-gradient(135deg,#001233,#023e8a)',
-  'linear-gradient(135deg,#0a0f2e,#1a2a6c,#1E5EFF)',
-]
-const getGrad = (id: string) => COVER_GRADIENTS[id.charCodeAt(0) % COVER_GRADIENTS.length]
+const getGrad = (id: string) => `var(--event-gradient-${id.charCodeAt(0) % 8})`
 
 const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string; label: string }> = {
   published: { bg: 'rgba(34,197,94,0.1)',   color: '#22C55E', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
-  completed: { bg: 'rgba(75,85,99,0.1)',    color: '#6B7280', border: 'rgba(75,85,99,0.2)',    label: 'ENDED'    },
-  archived:  { bg: 'rgba(75,85,99,0.06)',   color: '#4B5563', border: 'rgba(75,85,99,0.12)',   label: 'ARCHIVED' },
+  completed: { bg: 'rgba(75,85,99,0.1)',    color: 'var(--text-muted)', border: 'rgba(75,85,99,0.2)',    label: 'ENDED'    },
+  archived:  { bg: 'rgba(75,85,99,0.06)',   color: 'var(--text-muted)', border: 'rgba(75,85,99,0.12)',   label: 'ARCHIVED' },
   draft:     { bg: 'rgba(250,204,21,0.1)',  color: '#FACC15', border: 'rgba(250,204,21,0.2)',  label: 'DRAFT'    },
   cancelled: { bg: 'rgba(239,68,68,0.1)',   color: '#EF4444', border: 'rgba(239,68,68,0.2)',   label: 'CANCELLED'},
 }
@@ -30,7 +21,8 @@ const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string;
 function Toggle({ on, onToggle }: { on: boolean; onToggle: () => void }) {
   return (
     <button type="button" onClick={onToggle}
-      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${on ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
+      style={{ background: on ? 'var(--brand-blue)' : 'var(--guest-surface-2)', border: '1px solid var(--guest-border)' }}
+      className="relative w-10 h-5 rounded-full transition-colors shrink-0">
       <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-5' : ''}`} />
     </button>
   )
@@ -146,10 +138,10 @@ export default function EventsClient({
             <CalendarDays size={20} color="#1E5EFF" />
           </div>
           <div>
-            <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+            <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
               Events
             </h1>
-            <p style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', margin: 0 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', margin: 0 }}>
               {events.length} total event{events.length !== 1 ? 's' : ''}
             </p>
           </div>
@@ -160,10 +152,10 @@ export default function EventsClient({
       </div>
 
       {events.length === 0 ? (
-        <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '64px 24px', textAlign: 'center' }}>
-          <CalendarDays size={40} color="#374151" style={{ margin: '0 auto 12px' }} />
-          <p style={{ color: '#9CA3AF', fontWeight: 600, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>No events yet</p>
-          <p style={{ color: '#4B5563', fontSize: 'var(--fs-sm)', margin: '0 0 20px' }}>Create your first event to get started</p>
+        <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 18, padding: '64px 24px', textAlign: 'center' }}>
+          <CalendarDays size={40} color="var(--text-muted)" style={{ margin: '0 auto 12px' }} />
+          <p style={{ color: 'var(--text-primary)', fontWeight: 600, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>No events yet</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', margin: '0 0 20px' }}>Create your first event to get started</p>
           <Link href="/dashboard/events/new" className="btn-primary" style={{ display: 'inline-flex' }}>
             <Plus className="w-4 h-4" /> Create Event
           </Link>
@@ -182,8 +174,8 @@ export default function EventsClient({
             <div key={event.id} className="group" style={{ opacity: isArchived ? 0.65 : 1 }}>
               <Link href={`/dashboard/events/${event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                 <div style={{
-                  background: '#0C0E16',
-                  border: `1px solid ${isLive ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                  background: 'var(--surface-card)',
+                  border: `1px solid ${isLive ? 'rgba(34,197,94,0.2)' : 'var(--guest-border)'}`,
                   borderRadius: 18, overflow: 'hidden',
                   boxShadow: isLive ? '0 4px 24px rgba(34,197,94,0.06)' : 'none',
                   transition: 'border-color 0.15s, box-shadow 0.15s',
@@ -204,7 +196,7 @@ export default function EventsClient({
                     {/* Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{
-                        color: 'white', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 6px',
+                        color: 'var(--text-primary)', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 6px',
                         fontFamily: 'var(--font-display)', letterSpacing: '-0.2px',
                       }}>
                         {event.title}
@@ -235,7 +227,7 @@ export default function EventsClient({
                         )}
                         {/* Date */}
                         {event.date_start && (
-                          <span style={{ display: 'flex', alignItems: 'flex-start', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
+                          <span style={{ display: 'flex', alignItems: 'flex-start', gap: 4, color: 'var(--text-muted)', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
                             <CalendarDays size={10} color="#4B5563" style={{ marginTop: 2, flexShrink: 0 }} />
                             <span>
                               {format(new Date(event.date_start), 'MMM d, yyyy')}<br />
@@ -245,7 +237,7 @@ export default function EventsClient({
                         )}
                         {/* Venue */}
                         {event.venue_name && !event.secret_venue && (
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 'var(--fs-xs)', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 140 }}>
                             <MapPin size={10} color="#4B5563" />{event.venue_name}
                           </span>
                         )}
@@ -260,7 +252,7 @@ export default function EventsClient({
                     {/* Right side — capacity + edit/delete + arrow */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                       {/* Capacity */}
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
                         <Users size={11} color="#4B5563" />{event.capacity}
                       </span>
                       {/* Edit / Delete (hidden on mobile, hover on desktop) */}
@@ -268,7 +260,7 @@ export default function EventsClient({
                         <div className="sm:opacity-0 sm:group-hover:opacity-100 transition-opacity" style={{ display: 'flex', gap: 4 }}>
                           <button
                             onClick={(e) => { e.preventDefault(); openEdit(event) }}
-                            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', cursor: 'pointer', width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
+                            style={{ background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', color: 'var(--text-muted)', cursor: 'pointer', width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.15s' }}
                           >
                             <Edit2 size={12} />
                           </button>
@@ -303,9 +295,9 @@ export default function EventsClient({
             {archivedEvents.length > 0 && (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '8px 0 2px' }}>
-                  <p style={{ color: '#374151', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0, fontFamily: 'var(--font-display)', whiteSpace: 'nowrap' }}>Archived</p>
-                  <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.05)' }} />
-                  <span style={{ color: '#4B5563', fontSize: 'var(--fs-xs)' }}>{archivedEvents.length}</span>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0, fontFamily: 'var(--font-display)', whiteSpace: 'nowrap' }}>Archived</p>
+                  <div style={{ flex: 1, height: 1, background: 'var(--guest-border)' }} />
+                  <span style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-xs)' }}>{archivedEvents.length}</span>
                 </div>
                 {archivedEvents.map(e => renderCard(e, true))}
               </>

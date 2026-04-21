@@ -38,7 +38,7 @@ export default function GuestLoader() {
           key={i}
           style={{
             display: 'flex', gap: 12, padding: '12px 0',
-            borderBottom: '1px solid rgba(255,255,255,0.04)',
+            borderBottom: '1px solid var(--guest-border)',
             alignItems: 'center',
           }}
         >

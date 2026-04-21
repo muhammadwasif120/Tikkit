@@ -79,7 +79,7 @@ export default function GuestTable({ guests }: { guests: Guest[]; eventId: strin
               activeTab === tab.key
                 ? tab.key === 'vip'
                   ? 'bg-[#FFC74520] text-[#FFC745] border border-[#FFC74533]'
-                  : 'bg-[#1E5EFF] text-white'
+                  : 'bg-brand-blue text-white'
                 : 'text-gray-400 hover:text-white'
             )}
           >
@@ -185,7 +185,7 @@ export default function GuestTable({ guests }: { guests: Guest[]; eventId: strin
                       <Clock className="w-3 h-3" /> Waitlist
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#1E5EFF20] text-[#1E5EFF] border border-[#1E5EFF33]">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-brand-blue/10 text-brand-blue border border-brand-blue/20">
                       <Users className="w-3 h-3" /> Regular
                     </span>
                   )}
@@ -193,7 +193,7 @@ export default function GuestTable({ guests }: { guests: Guest[]; eventId: strin
                 <td className="table-cell">
                   <button
                     onClick={() => setSelectedQR(guest)}
-                    className="p-1.5 text-gray-400 hover:text-[#1E5EFF] transition-colors"
+                    className="p-1.5 text-gray-400 hover:text-brand-blue transition-colors"
                     title="Show QR code"
                   >
                     <QrCode className="w-4 h-4" />

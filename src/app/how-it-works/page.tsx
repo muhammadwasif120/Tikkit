@@ -903,7 +903,7 @@ export default function HowItWorksPage() {
             opacity: heroInView.inView ? 1 : 0,
             animation: heroInView.inView ? 'fadeUp 0.7s ease 0.1s both' : 'none',
           }}>
-            See Tikkit X<br />
+            See TIKKIT X<br />
             <span className="gradient-text">in action.</span>
           </h1>
 
@@ -969,7 +969,7 @@ export default function HowItWorksPage() {
             <span className="gradient-text-blue">in one dashboard.</span>
           </h2>
           <p style={{ fontSize: 'var(--fs-lg)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 500, margin: '0 auto' }}>
-            From creating an event to reviewing post-night analytics — Tikkit X keeps it all in one place so you can stay focused on what matters.
+            From creating an event to reviewing post-night analytics — TIKKIT X keeps it all in one place so you can stay focused on what matters.
           </p>
         </div>
 
@@ -1252,7 +1252,7 @@ export default function HowItWorksPage() {
           </h2>
 
           <p style={{ fontSize: 'var(--fs-lg)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 12px' }}>
-            Tikkit X installs as a web app — no Play Store, no App Store, no 200MB download.
+            TIKKIT X installs as a web app — no Play Store, no App Store, no 200MB download.
             Perfect for phones that are already full.
           </p>
           <p style={{ fontSize: 'var(--fs-md)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>
@@ -1278,7 +1278,7 @@ export default function HowItWorksPage() {
               No storage? No problem.
             </p>
             <p style={{ fontSize: 'var(--fs-sm)', color: '#9CA3AF', fontFamily: 'var(--font-body)', margin: 0, lineHeight: 1.5 }}>
-              Traditional apps take 100–500MB of your phone's storage. Tikkit X takes <strong style={{ color: '#F0F2FF' }}>zero bytes</strong> — it lives in your browser, just like a website, but feels like an app.
+              Traditional apps take 100–500MB of your phone's storage. TIKKIT X takes <strong style={{ color: '#F0F2FF' }}>zero bytes</strong> — it lives in your browser, just like a website, but feels like an app.
             </p>
           </div>
         </div>
@@ -1312,7 +1312,7 @@ export default function HowItWorksPage() {
                 { icon: <Share2 size={14} color="#1E5EFF" />, step: '1', text: <>Open <strong style={{ color: '#F0F2FF' }}>tikkitx.com</strong> in Safari</> },
                 { icon: <Share2 size={14} color="#1E5EFF" />, step: '2', text: <>Tap the <strong style={{ color: '#F0F2FF' }}>Share</strong> button at the bottom of Safari (the box with an arrow)</> },
                 { icon: <Plus size={14} color="#1E5EFF" />, step: '3', text: <>Scroll down and tap <strong style={{ color: '#F0F2FF' }}>"Add to Home Screen"</strong></> },
-                { icon: <CheckCircle size={14} color="#22C55E" />, step: '4', text: <>Tap <strong style={{ color: '#F0F2FF' }}>Add</strong> — Tikkit X appears on your home screen like any app</> },
+                { icon: <CheckCircle size={14} color="#22C55E" />, step: '4', text: <>Tap <strong style={{ color: '#F0F2FF' }}>Add</strong> — TIKKIT X appears on your home screen like any app</> },
               ].map(({ icon, step, text }, i) => (
                 <div key={i} style={{ display: 'flex', gap: 14, marginBottom: i < 3 ? 18 : 0 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
@@ -1360,7 +1360,7 @@ export default function HowItWorksPage() {
                 { step: '1', text: <>Open <strong style={{ color: '#F0F2FF' }}>tikkitx.com</strong> in Chrome</> },
                 { step: '2', text: <>Tap the <strong style={{ color: '#F0F2FF' }}>three-dot menu</strong> (⋮) in the top right corner</> },
                 { step: '3', text: <>Tap <strong style={{ color: '#F0F2FF' }}>"Add to Home screen"</strong> or <strong style={{ color: '#F0F2FF' }}>"Install app"</strong></> },
-                { step: '4', text: <>Tap <strong style={{ color: '#F0F2FF' }}>Install</strong> — Tikkit X appears on your home screen instantly</> },
+                { step: '4', text: <>Tap <strong style={{ color: '#F0F2FF' }}>Install</strong> — TIKKIT X appears on your home screen instantly</> },
               ].map(({ step, text }, i) => (
                 <div key={i} style={{ display: 'flex', gap: 14, marginBottom: i < 3 ? 18 : 0 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
@@ -1442,7 +1442,7 @@ export default function HowItWorksPage() {
           </h2>
 
           <p style={{ fontSize: 'var(--fs-xl)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, marginBottom: 36 }}>
-            Join organizers across Pakistan who use Tikkit X to manage events that people actually remember.
+            Join organizers across Pakistan who use TIKKIT X to manage events that people actually remember.
           </p>
 
           <div className="hiw-cta-actions">
@@ -1491,7 +1491,7 @@ export default function HowItWorksPage() {
           <Link href="/" className="footer-brand">
             <TikkitXLogo size="sm" />
           </Link>
-          <p className="footer-copy">© {new Date().getFullYear()} Tikkit X. Built in Pakistan 🇵🇰</p>
+          <p className="footer-copy">© {new Date().getFullYear()} TIKKIT X. Built in Pakistan 🇵🇰</p>
           <div className="footer-links">
             <Link href="/auth/login" className="footer-link">Log in</Link>
             <Link href="/auth/login" className="footer-link">Sign up</Link>

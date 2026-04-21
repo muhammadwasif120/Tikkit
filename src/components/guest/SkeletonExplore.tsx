@@ -39,16 +39,16 @@ export default function SkeletonExplore() {
 
       {/* Divider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 16px', marginBottom: 16 }}>
-        <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.04)' }} />
+        <div style={{ height: 1, flex: 1, background: 'var(--guest-border)' }} />
         <div className="skeleton skeleton-text" style={{ width: 70, height: 9 }} />
-        <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.04)' }} />
+        <div style={{ height: 1, flex: 1, background: 'var(--guest-border)' }} />
       </div>
 
       {/* Event list rows — staggered */}
       {[1, 2, 3, 4, 5].map(i => (
         <div key={i} className="skeleton-card" style={{
           display: 'flex', gap: 11, padding: '11px 16px',
-          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          borderBottom: '1px solid var(--guest-border)',
         }}>
           {/* Date col */}
           <div style={{ flexShrink: 0, width: 42, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, paddingTop: 2 }}>

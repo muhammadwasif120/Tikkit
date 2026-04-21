@@ -115,18 +115,18 @@ async function DashboardData() {
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 4 }}>
         <div style={{
           width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-          background: 'linear-gradient(135deg, rgba(30,94,255,0.2), rgba(168,85,247,0.12))',
-          border: '1px solid rgba(30,94,255,0.25)',
+          background: 'linear-gradient(135deg, rgba(var(--brand-blue-rgb),0.2), rgba(var(--brand-blue-rgb),0.08))',
+          border: '1px solid rgba(var(--brand-blue-rgb),0.25)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 8px 24px rgba(30,94,255,0.15)',
+          boxShadow: '0 8px 24px rgba(var(--brand-blue-rgb),0.15)',
         }}>
-          <LayoutDashboard size={22} color="#1E5EFF" />
+          <LayoutDashboard size={22} color="var(--brand-blue)" />
         </div>
         <div>
-          <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+          <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
             Dashboard
           </h1>
-          <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
             {"Here's what's happening across your events."}
           </p>
         </div>

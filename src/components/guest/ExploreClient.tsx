@@ -34,18 +34,8 @@ type MyEvent = {
   event: { id: string; slug?: string | null; title: string; date_start: string; cover_image_url: string | null; venue_name: string | null } | null
 }
 
-/* ─── Auto-gradients when no cover image ────────────────────── */
-const GRADIENTS = [
-  'linear-gradient(135deg, #0F2027 0%, #203A43 50%, #2C5364 100%)',
-  'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-  'linear-gradient(135deg, #200122 0%, #6f0000 100%)',
-  'linear-gradient(135deg, #0d0d0d 0%, #1a3a1a 50%, #0a2a0a 100%)',
-  'linear-gradient(135deg, #1f0033 0%, #0d001a 50%, #2d0050 100%)',
-  'linear-gradient(135deg, #0a0a0a 0%, #1a1500 50%, #2a2000 100%)',
-  'linear-gradient(135deg, #001233 0%, #001845 50%, #023e8a 100%)',
-  'linear-gradient(135deg, #1a0000 0%, #3d0000 50%, #1a0000 100%)',
-]
-function getGradient(id: string) { return GRADIENTS[id.charCodeAt(0) % GRADIENTS.length] }
+/* ─── Auto-gradients when no cover image (CSS var — theme-adaptive) ── */
+function getGradient(id: string) { return `var(--event-gradient-${id.charCodeAt(0) % 8})` }
 
 /* ─── Organizer avatar initials ─────────────────────────────── */
 function orgInitials(o: TopOrganizer) {
@@ -153,14 +143,14 @@ function MyEventsStrip({ myEvents }: { myEvents: MyEvent[] }) {
       confirmed: '#10B981', registered: '#10B981',
       eoi_submitted: '#EAB308', eoi_approved: '#EF4444', payment_pending: '#818CF8',
     }
-    return map[status] ?? '#9CA3AF'
+    return map[status] ?? 'var(--text-secondary)'
   }
   return (
     <div style={{ margin: '20px 0 0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', marginBottom: 11 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{ width: 3, height: 13, borderRadius: 2, background: '#FF6B35' }} />
-          <span style={{ color: 'white', fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>MY EVENTS</span>
+          <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>MY EVENTS</span>
         </div>
         <Link href="/guest/tikkit" style={{ color: '#818CF8', fontSize: 10, fontWeight: 800, textDecoration: 'none', letterSpacing: '0.5px' }}>SEE ALL →</Link>
       </div>
@@ -170,14 +160,14 @@ function MyEventsStrip({ myEvents }: { myEvents: MyEvent[] }) {
           const dot = resolveStatusDot(reg.status)
           return (
             <Link key={reg.id} href={ev.slug ? `/guest/explore/${ev.slug}` : ev.id ? `/guest/explore/${ev.id}` : '/guest/tikkit'} style={{ textDecoration: 'none', flexShrink: 0, width: 120, opacity: 0, animation: 'revealUp 0.3s ease forwards', animationDelay: `${i * 50}ms` }}>
-              <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--guest-border)' }}>
                 <div style={{ height: 64, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : getGradient(ev.id), position: 'relative' }}>
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent)' }} />
                   <div style={{ position: 'absolute', bottom: 5, right: 6, width: 6, height: 6, borderRadius: '50%', background: dot, boxShadow: `0 0 5px ${dot}` }} />
                 </div>
                 <div style={{ padding: '6px 8px 8px', background: 'var(--guest-surface)' }}>
-                  <p style={{ color: 'white', fontSize: 10, fontWeight: 700, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>{ev.title}</p>
-                  <p style={{ color: '#6B7280', fontSize: 9, margin: 0, fontWeight: 600 }}>{fmtDay(ev.date_start)} · {fmtTime(ev.date_start)}</p>
+                  <p style={{ color: 'var(--text-primary)', fontSize: 10, fontWeight: 700, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>{ev.title}</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 9, margin: 0, fontWeight: 600 }}>{fmtDay(ev.date_start)} · {fmtTime(ev.date_start)}</p>
                 </div>
               </div>
             </Link>
@@ -230,7 +220,7 @@ function TopOrganizersStrip({
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
           <div style={{ width: 3, height: 13, borderRadius: 2, background: '#FFC745' }} />
           <Building2 size={12} color="#FFC745" />
-          <span className="exp-section-lbl" style={{ color: 'white', fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>
+          <span className="exp-section-lbl" style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>
             TOP ORGANIZERS
           </span>
         </div>
@@ -253,7 +243,7 @@ function TopOrganizersStrip({
             >
               <div style={{
                 borderRadius: 16, overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.07)',
+                border: '1px solid var(--guest-border)',
                 background: 'var(--guest-surface)',
                 position: 'relative',
               }}>
@@ -272,11 +262,11 @@ function TopOrganizersStrip({
                 <div style={{
                   position: 'absolute', top: 24, left: '50%', transform: 'translateX(-50%)',
                   width: 40, height: 40, borderRadius: 12,
-                  border: '2px solid rgba(255,255,255,0.12)',
-                  background: org.logo_url ? `url(${org.logo_url}) center/cover` : '#1A1F2E',
+                  border: '2px solid var(--guest-border)',
+                  background: org.logo_url ? `url(${org.logo_url}) center/cover` : 'var(--guest-surface-2)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   overflow: 'hidden',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
                 }}>
                   {!org.logo_url && (
                     <span style={{ color: '#818CF8', fontSize: 12, fontWeight: 900, fontFamily: 'var(--font-display)' }}>
@@ -310,16 +300,16 @@ function TopOrganizersStrip({
 
                 {/* Info */}
                 <div style={{ padding: '26px 8px 10px', textAlign: 'center' }}>
-                  <p style={{
-                    color: 'white', fontSize: 10, fontWeight: 800,
+                  <p className="exp-org-name" style={{
+                    color: 'var(--text-primary)', fontSize: 10, fontWeight: 800,
                     margin: '0 0 3px', fontFamily: 'var(--font-display)',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
                     {name}
                   </p>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
-                    <CalendarDays size={8} color="#6B7280" />
-                    <span style={{ color: '#6B7280', fontSize: 9, fontWeight: 700 }}>
+                    <CalendarDays size={8} color="var(--text-muted)" />
+                    <span style={{ color: 'var(--text-muted)', fontSize: 9, fontWeight: 700 }}>
                       {org.upcoming_event_count} event{org.upcoming_event_count !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -438,7 +428,7 @@ function DesktopHeroCarousel({ slides }: { slides: Event[] }) {
 
               {/* CTA row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 12, background: '#1E5EFF', color: 'white', fontSize: 14, fontWeight: 800, boxShadow: '0 4px 20px rgba(30,94,255,0.5)' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 12, background: 'var(--brand-blue)', color: '#FFFFFF', fontSize: 14, fontWeight: 800, boxShadow: '0 4px 20px rgba(var(--brand-blue-rgb),0.5)' }}>
                   View Event →
                 </span>
                 <span style={{ padding: '9px 16px', borderRadius: 12, background: (ev.ticket_price ?? 0) === 0 ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', border: `1px solid ${(ev.ticket_price ?? 0) === 0 ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.12)'}`, color: (ev.ticket_price ?? 0) === 0 ? '#10B981' : 'white', fontSize: 14, fontWeight: 800 }}>
@@ -489,7 +479,7 @@ function DesktopHeroCarousel({ slides }: { slides: Event[] }) {
       {/* Progress bar */}
       {count > 1 && !paused && (
         <div key={idx} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, zIndex: 10 }}>
-          <div style={{ height: '100%', background: 'rgba(30,94,255,0.8)', animation: 'heroProgress 5.5s linear forwards' }} />
+          <div style={{ height: '100%', background: 'rgba(var(--brand-blue-rgb),0.8)', animation: 'heroProgress 5.5s linear forwards' }} />
         </div>
       )}
     </div>
@@ -506,10 +496,10 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
   const orgName = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Unknown Organizer'
   const orgUsername = event.organizer?.username
   const spotsLeft = (event.capacity && event.registered_count !== undefined) ? event.capacity - event.registered_count : null
-  const modeCfg: Record<string, { label: string; color: string }> = {
-    expression_of_interest: { label: 'APPLY',       color: '#A855F7' },
-    open:                   { label: 'REGISTER',    color: '#1E5EFF' },
-    invite_only:            { label: 'INVITE ONLY', color: '#4B5563' },
+  const modeCfg: Record<string, { label: string; color: string; bg: string }> = {
+    expression_of_interest: { label: 'APPLY',       color: '#A855F7',           bg: 'rgba(168,85,247,0.10)'            },
+    open:                   { label: 'REGISTER',    color: 'var(--brand-blue)', bg: 'rgba(var(--brand-blue-rgb),0.10)' },
+    invite_only:            { label: 'INVITE ONLY', color: 'var(--text-muted)', bg: 'rgba(107,114,128,0.09)'           },
   }
   const mode = modeCfg[event.registration_mode] ?? modeCfg.open
   const isFull = spotsLeft !== null && spotsLeft <= 0
@@ -519,18 +509,18 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
       onClick={() => router.push(`/guest/explore/${event.slug || event.id}`)}
       style={{ textDecoration: 'none', display: 'block', opacity: 0, animation: 'revealUp 0.35s ease forwards', animationDelay: `${index * 55}ms`, cursor: 'pointer' }}
     >
-      <div className="exp-row-pad" style={{ display: 'flex', gap: 11, padding: '11px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+      <div className="exp-row-pad" style={{ display: 'flex', gap: 11, padding: '11px 0', borderBottom: '1px solid var(--guest-border)' }}>
         {/* Date column */}
         <div className="exp-date-col" style={{ flexShrink: 0, width: 42, textAlign: 'center', paddingTop: 1 }}>
           <p style={{ color: '#818CF8', fontSize: 8, fontWeight: 800, margin: '0 0 1px', letterSpacing: '0.8px' }}>{fmtDay(event.date_start)}</p>
-          <p className="exp-date-day" style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{new Date(event.date_start).getDate()}</p>
-          <p style={{ color: '#6B7280', fontSize: 8, margin: '1px 0 0', fontWeight: 700, letterSpacing: '0.3px' }}>
+          <p className="exp-date-day" style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{new Date(event.date_start).getDate()}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 8, margin: '1px 0 0', fontWeight: 700, letterSpacing: '0.3px' }}>
             {new Date(event.date_start).toLocaleDateString('en-PK', { month: 'short' }).toUpperCase()}
           </p>
         </div>
 
         {/* Thumbnail */}
-        <div className="exp-row-thumb" style={{ flexShrink: 0, width: 68, height: 68, borderRadius: 12, overflow: 'hidden', background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : getGradient(event.id), border: '1px solid rgba(255,255,255,0.06)', position: 'relative' }}>
+        <div className="exp-row-thumb" style={{ flexShrink: 0, width: 68, height: 68, borderRadius: 12, overflow: 'hidden', background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : getGradient(event.id), border: '1px solid var(--guest-border)', position: 'relative' }}>
           {!event.cover_image_url && (
             <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.2 }}>
               <CalendarDays size={22} color="white" />
@@ -545,7 +535,7 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
 
         {/* Info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 className="exp-row-title" style={{ color: 'white', fontSize: 13, fontWeight: 800, margin: '0 0 1px', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <h3 className="exp-row-title" style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 800, margin: '0 0 1px', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', lineHeight: 1.25, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {event.title}
           </h3>
           {/* Organizer link */}
@@ -560,14 +550,14 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
               {orgName} →
             </span>
           ) : (
-            <p style={{ color: '#6B7280', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic' }}>{orgName}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: '0 0 5px', fontStyle: 'italic' }}>{orgName}</p>
           )}
           <div className="exp-row-meta" style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#9CA3AF', fontSize: 10 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--text-secondary)', fontSize: 10 }}>
               <Clock size={9} />{fmtTime(event.date_start)}
             </span>
-            <span style={{ width: 2, height: 2, borderRadius: '50%', background: '#4B5563', flexShrink: 0 }} />
-            <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#9CA3AF', fontSize: 10 }}>
+            <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'var(--text-muted)', flexShrink: 0 }} />
+            <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--text-secondary)', fontSize: 10 }}>
               <MapPin size={9} />
               {event.secret_venue
                 ? <span style={{ color: '#FFC745', display: 'flex', alignItems: 'center', gap: 2 }}><Lock size={8} />Secret</span>
@@ -575,12 +565,12 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
             </span>
           </div>
           <div style={{ display: 'flex', gap: 5, alignItems: 'center', flexWrap: 'wrap' }}>
-            <span className="exp-row-badge" style={{ padding: '2px 6px', borderRadius: 5, background: `${mode.color}18`, color: mode.color, fontSize: 8, fontWeight: 800, letterSpacing: '0.4px' }}>
+            <span className="exp-row-badge" style={{ padding: '2px 6px', borderRadius: 5, background: mode.bg, color: mode.color, fontSize: 8, fontWeight: 800, letterSpacing: '0.4px' }}>
               {mode.label}
             </span>
             {(event.ticket_price ?? 0) === 0
               ? <span className="exp-row-badge" style={{ padding: '2px 6px', borderRadius: 5, background: 'rgba(16,185,129,0.1)', color: '#10B981', fontSize: 8, fontWeight: 800 }}>FREE</span>
-              : <span style={{ color: '#6B7280', fontSize: 10, fontWeight: 700 }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
+              : <span style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
             }
             {spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 15 && (
               <span className="exp-row-badge" style={{ padding: '2px 6px', borderRadius: 5, background: 'rgba(239,68,68,0.1)', color: '#EF4444', fontSize: 8, fontWeight: 800 }}>
@@ -627,9 +617,9 @@ function CategoryPills({
         style={{
           flexShrink: 0,
           padding: '5px 10px', borderRadius: 20,
-          background: !selectedCategoryId ? 'rgba(129,140,248,0.15)' : 'rgba(255,255,255,0.04)',
-          border: `1px solid ${!selectedCategoryId ? 'rgba(129,140,248,0.4)' : 'rgba(255,255,255,0.08)'}`,
-          color: !selectedCategoryId ? '#818CF8' : '#6B7280',
+          background: !selectedCategoryId ? 'rgba(129,140,248,0.15)' : 'var(--guest-surface-2)',
+          border: `1px solid ${!selectedCategoryId ? 'rgba(129,140,248,0.4)' : 'var(--guest-border)'}`,
+          color: !selectedCategoryId ? '#818CF8' : 'var(--text-muted)',
           fontSize: 10, fontWeight: 800, letterSpacing: '0.3px',
           cursor: 'pointer', fontFamily: 'var(--font-body)',
           transition: 'all 0.15s',
@@ -647,9 +637,9 @@ function CategoryPills({
               flexShrink: 0,
               display: 'flex', alignItems: 'center', gap: 4,
               padding: '5px 10px', borderRadius: 20,
-              background: active ? `${cat.color}18` : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${active ? `${cat.color}50` : 'rgba(255,255,255,0.08)'}`,
-              color: active ? cat.color : '#6B7280',
+              background: active ? `${cat.color}18` : 'var(--guest-surface-2)',
+              border: `1px solid ${active ? `${cat.color}50` : 'var(--guest-border)'}`,
+              color: active ? cat.color : 'var(--text-muted)',
               fontSize: 10, fontWeight: 800, letterSpacing: '0.3px',
               cursor: 'pointer', fontFamily: 'var(--font-body)',
               transition: 'all 0.15s',
@@ -823,7 +813,7 @@ export default function ExploreClient({
         <div className="guest-search">
           <Search
             size={14}
-            style={{ flexShrink: 0, color: focused ? '#818CF8' : '#4B5563', transition: 'color 0.2s' }}
+            style={{ flexShrink: 0, color: focused ? '#818CF8' : 'var(--text-muted)', transition: 'color 0.2s' }}
           />
           <input
             value={query}
@@ -833,14 +823,14 @@ export default function ExploreClient({
             placeholder="Search events, venues, organizers..."
             style={{
               flex: 1, background: 'none', border: 'none', outline: 'none',
-              color: 'white', fontSize: 13, fontFamily: 'var(--font-body)',
+              color: 'var(--text-primary)', fontSize: 13, fontFamily: 'var(--font-body)',
             }}
           />
           {query && (
             <button
               onClick={() => setQuery('')}
               className="cursor-pointer"
-              style={{ background: 'none', border: 'none', color: '#6B7280', padding: 0, fontSize: 18, lineHeight: 1 }}
+              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', padding: 0, fontSize: 18, lineHeight: 1 }}
             >
               ×
             </button>
@@ -854,9 +844,9 @@ export default function ExploreClient({
           onClick={() => setSelectedCategoryId(null)}
           style={{
             flexShrink: 0, padding: '5px 10px', borderRadius: 20,
-            background: !selectedCategoryId ? 'rgba(129,140,248,0.15)' : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${!selectedCategoryId ? 'rgba(129,140,248,0.4)' : 'rgba(255,255,255,0.08)'}`,
-            color: !selectedCategoryId ? '#818CF8' : '#6B7280',
+            background: !selectedCategoryId ? 'rgba(var(--brand-blue-rgb),0.15)' : 'var(--guest-surface-2)',
+            border: `1px solid ${!selectedCategoryId ? 'rgba(var(--brand-blue-rgb),0.4)' : 'var(--guest-border)'}`,
+            color: !selectedCategoryId ? 'var(--brand-blue)' : 'var(--text-muted)',
             fontSize: 10, fontWeight: 800, letterSpacing: '0.3px',
             cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.15s',
           }}
@@ -870,9 +860,9 @@ export default function ExploreClient({
               style={{
                 flexShrink: 0, display: 'flex', alignItems: 'center', gap: 4,
                 padding: '5px 10px', borderRadius: 20,
-                background: active ? `${cat.color}18` : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${active ? `${cat.color}50` : 'rgba(255,255,255,0.08)'}`,
-                color: active ? cat.color : '#6B7280',
+                background: active ? `${cat.color}18` : 'var(--guest-surface-2)',
+                border: `1px solid ${active ? `${cat.color}50` : 'var(--guest-border)'}`,
+                color: active ? cat.color : 'var(--text-muted)',
                 fontSize: 10, fontWeight: 800, letterSpacing: '0.3px',
                 cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.15s',
               }}
@@ -956,7 +946,7 @@ export default function ExploreClient({
               <div className="exp-strip-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', marginBottom: 11 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                   <div style={{ width: 3, height: 13, borderRadius: 2, background: '#FF6B35' }} />
-                  <span className="exp-section-lbl" style={{ color: 'white', fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>MY EVENTS</span>
+                  <span className="exp-section-lbl" style={{ color: 'var(--text-primary)', fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>MY EVENTS</span>
                 </div>
                 <Link href="/guest/tikkit" style={{ color: '#818CF8', fontSize: 10, fontWeight: 800, textDecoration: 'none', letterSpacing: '0.5px' }}>SEE ALL →</Link>
               </div>
@@ -969,14 +959,14 @@ export default function ExploreClient({
                     : reg.status === 'payment_pending' ? '#818CF8' : '#9CA3AF'
                   return (
                     <Link key={reg.id} href={ev.slug ? `/guest/explore/${ev.slug}` : ev.id ? `/guest/explore/${ev.id}` : '/guest/tikkit'} className="exp-myev-card" style={{ textDecoration: 'none', opacity: 0, animation: 'revealUp 0.3s ease forwards', animationDelay: `${i * 50}ms` }}>
-                      <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)' }}>
+                      <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid var(--guest-border)' }}>
                         <div style={{ height: 64, background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : getGradient(ev.id), position: 'relative' }}>
                           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.55), transparent)' }} />
                           <div style={{ position: 'absolute', bottom: 5, right: 6, width: 6, height: 6, borderRadius: '50%', background: dot, boxShadow: `0 0 5px ${dot}` }} />
                         </div>
                         <div style={{ padding: '6px 8px 8px', background: 'var(--guest-surface)' }}>
-                          <p style={{ color: 'white', fontSize: 10, fontWeight: 700, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>{ev.title}</p>
-                          <p style={{ color: '#6B7280', fontSize: 9, margin: 0, fontWeight: 600 }}>{fmtDay(ev.date_start)} · {fmtTime(ev.date_start)}</p>
+                          <p style={{ color: 'var(--text-primary)', fontSize: 10, fontWeight: 700, margin: '0 0 1px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>{ev.title}</p>
+                          <p style={{ color: 'var(--text-muted)', fontSize: 9, margin: 0, fontWeight: 600 }}>{fmtDay(ev.date_start)} · {fmtTime(ev.date_start)}</p>
                         </div>
                       </div>
                     </Link>
@@ -997,23 +987,23 @@ export default function ExploreClient({
         <div className="exp-main">
           {!isFiltering && (
             <div className="exp-all-divider" style={{ padding: '18px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.04)' }} />
-              <span style={{ color: '#6B7280', fontSize: 9, fontWeight: 900, letterSpacing: '2px', fontFamily: 'var(--font-display)' }}>ALL EVENTS</span>
-              <div style={{ height: 1, flex: 1, background: 'rgba(255,255,255,0.04)' }} />
+              <div style={{ height: 1, flex: 1, background: 'var(--guest-border)' }} />
+              <span style={{ color: 'var(--text-muted)', fontSize: 9, fontWeight: 900, letterSpacing: '2px', fontFamily: 'var(--font-display)' }}>ALL EVENTS</span>
+              <div style={{ height: 1, flex: 1, background: 'var(--guest-border)' }} />
             </div>
           )}
 
           {isFiltering ? (
             <div className="exp-filter-pad" style={{ padding: '14px 16px 0' }}>
-              <p className="exp-filter-lbl" style={{ color: '#6B7280', fontSize: 10, fontWeight: 800, letterSpacing: '0.8px', margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>
+              <p className="exp-filter-lbl" style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 800, letterSpacing: '0.8px', margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>
                 {filtered.length} RESULT{filtered.length !== 1 ? 'S' : ''}
               </p>
               {filtered.length > 0
                 ? filtered.map((e, i) => <EventRow key={e.id} event={e} index={i} isFavourited={favIds.has(e.id)} onToggleFav={handleToggleFav} />)
                 : (
                   <div style={{ padding: '60px 0', textAlign: 'center' }}>
-                    <Search size={32} style={{ opacity: 0.15, color: 'white', display: 'block', margin: '0 auto 12px' }} />
-                    <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>
+                    <Search size={32} style={{ opacity: 0.15, color: 'var(--text-muted)', display: 'block', margin: '0 auto 12px' }} />
+                    <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>
                       No events match &ldquo;{query || selectedTag || categories.find(c => c.id === selectedCategoryId)?.name}&rdquo;
                     </p>
                   </div>
@@ -1026,10 +1016,10 @@ export default function ExploreClient({
                 <div key={group.key}>
                   <div className="exp-group-header" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '14px 16px 0' }}>
                     {group.icon}
-                    <span className="exp-group-lbl" style={{ color: '#9CA3AF', fontSize: 10, fontWeight: 900, fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>
+                    <span className="exp-group-lbl" style={{ color: 'var(--text-secondary)', fontSize: 10, fontWeight: 900, fontFamily: 'var(--font-display)', letterSpacing: '1px' }}>
                       {group.label.toUpperCase()}
                     </span>
-                    <span style={{ color: '#4B5563', fontSize: 10, fontWeight: 700 }}>· {group.events.length}</span>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }}>· {group.events.length}</span>
                   </div>
                   <div className="exp-group-rows" style={{ padding: '0 16px' }}>
                     {group.events.map((e, i) => <EventRow key={e.id} event={e} index={i} isFavourited={favIds.has(e.id)} onToggleFav={handleToggleFav} />)}
@@ -1038,8 +1028,8 @@ export default function ExploreClient({
               ))}
               {groups.length === 0 && (
                 <div style={{ padding: '80px 20px', textAlign: 'center' }}>
-                  <CalendarDays size={36} style={{ opacity: 0.12, color: 'white', display: 'block', margin: '0 auto 14px' }} />
-                  <p style={{ color: '#6B7280', fontSize: 13, fontWeight: 700, margin: 0 }}>No upcoming events</p>
+                  <CalendarDays size={36} style={{ opacity: 0.12, color: 'var(--text-muted)', display: 'block', margin: '0 auto 14px' }} />
+                  <p style={{ color: 'var(--text-muted)', fontSize: 13, fontWeight: 700, margin: 0 }}>No upcoming events</p>
                 </div>
               )}
             </div>

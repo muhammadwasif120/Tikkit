@@ -11,14 +11,14 @@ export default function SkeletonTikkit() {
 
       {/* Tab bar */}
       <div style={{ display: 'flex', gap: 0, marginBottom: 16 }}>
-        <div className="skeleton" style={{ flex: 1, height: 36, borderRadius: 0, borderBottom: '2px solid rgba(30,94,255,0.35)' }} />
+        <div className="skeleton" style={{ flex: 1, height: 36, borderRadius: 0, borderBottom: '2px solid rgba(var(--brand-blue-rgb),0.35)' }} />
         <div className="skeleton" style={{ flex: 1, height: 36, borderRadius: 0 }} />
       </div>
 
       {/* Registration cards — staggered */}
       {[1, 2, 3].map(i => (
         <div key={i} className="skeleton-card" style={{
-          background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(30,94,255,0.08)',
+          background: 'var(--guest-surface)', border: '1px solid rgba(var(--brand-blue-rgb),0.08)',
           borderRadius: 20, overflow: 'hidden', marginBottom: 12,
         }}>
           {/* Cover */}

@@ -17,16 +17,16 @@ type GuestProfile = {
 function getTier(score: number) {
   if (score >= 1000) return { label: 'Elite',    color: '#FFC745' }
   if (score >= 500)  return { label: 'VIP',      color: '#A855F7' }
-  if (score >= 200)  return { label: 'Regular',  color: '#1E5EFF' }
+  if (score >= 200)  return { label: 'Regular',  color: 'var(--brand-blue)' }
   if (score >= 50)   return { label: 'Rising',   color: '#22C55E' }
-  return               { label: 'Newcomer', color: '#6B7280' }
+  return               { label: 'Newcomer', color: 'var(--text-muted)' }
 }
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
-      <p style={{ color: '#4B5563', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 8px', paddingLeft: 4 }}>{title}</p>
-      <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden' }}>{children}</div>
+      <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 8px', paddingLeft: 4 }}>{title}</p>
+      <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 16, overflow: 'hidden' }}>{children}</div>
     </div>
   )
 }
@@ -38,20 +38,20 @@ function SettingsRow({ icon: Icon, label, value, onClick, danger = false, last =
     <button onClick={onClick} style={{
       width: '100%', display: 'flex', alignItems: 'center', gap: 12,
       padding: '14px 16px', background: 'none', border: 'none', cursor: onClick ? 'pointer' : 'default',
-      borderBottom: last ? 'none' : '1px solid rgba(255,255,255,0.04)',
+      borderBottom: last ? 'none' : '1px solid var(--guest-border)',
       transition: 'background 0.15s', textAlign: 'left',
     }}
-      onMouseEnter={e => onClick && ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.02)')}
+      onMouseEnter={e => onClick && ((e.currentTarget as HTMLElement).style.background = 'var(--guest-surface-2)')}
       onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'none')}
     >
-      <div style={{ width: 34, height: 34, borderRadius: 10, background: danger ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <Icon size={16} color={danger ? '#EF4444' : '#6B7280'} />
+      <div style={{ width: 34, height: 34, borderRadius: 10, background: danger ? 'rgba(239,68,68,0.1)' : 'var(--guest-surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <Icon size={16} color={danger ? '#EF4444' : 'var(--text-muted)'} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <p style={{ color: danger ? '#EF4444' : 'white', fontSize: 14, fontWeight: 500, margin: 0 }}>{label}</p>
-        {value && <p style={{ color: '#4B5563', fontSize: 12, margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>}
+        <p style={{ color: danger ? '#EF4444' : 'var(--text-primary)', fontSize: 14, fontWeight: 500, margin: 0 }}>{label}</p>
+        {value && <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>}
       </div>
-      {onClick && <ChevronRight size={16} color={danger ? '#EF4444' : '#4B5563'} />}
+      {onClick && <ChevronRight size={16} color={danger ? '#EF4444' : 'var(--text-muted)'} />}
     </button>
   )
 }
@@ -83,15 +83,15 @@ function EditProfileSheet({ guestProfile, onClose, onSaved }: { guestProfile: Gu
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <Field label="Username" prefix="@">
           <input type="text" value={username} onChange={e => setUsername(e.target.value.toLowerCase())} placeholder="yourhandle"
-            style={{ width: '100%', padding: '11px 12px 11px 28px', background: '#0F1117', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+            style={{ width: '100%', padding: '11px 12px 11px 28px', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
         </Field>
         <Field label="Bio">
           <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell organizers a bit about yourself..." rows={3}
-            style={{ width: '100%', padding: '11px 12px', background: '#0F1117', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 14, outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+            style={{ width: '100%', padding: '11px 12px', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 14, outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }} />
         </Field>
         <Field label="City">
           <input type="text" value={city} onChange={e => setCity(e.target.value)} placeholder="e.g. Karachi"
-            style={{ width: '100%', padding: '11px 12px', background: '#0F1117', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+            style={{ width: '100%', padding: '11px 12px', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
         </Field>
         {error && <p style={{ color: '#FCA5A5', fontSize: 13, margin: 0 }}>{error}</p>}
         <SaveBtn saving={saving} onClick={save} />
@@ -125,7 +125,7 @@ function ChangePhoneSheet({ current, onClose, onSaved }: { current: string | nul
     <Sheet onClose={onClose} title="Phone Number">
       <Field label="Phone">
         <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="03001234567"
-          style={{ width: '100%', padding: '11px 12px', background: '#0F1117', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+          style={{ width: '100%', padding: '11px 12px', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
       </Field>
       {error && <p style={{ color: '#FCA5A5', fontSize: 13, margin: '8px 0 0' }}>{error}</p>}
       <div style={{ marginTop: 14 }}><SaveBtn saving={saving} onClick={save} /></div>
@@ -161,22 +161,22 @@ function ChangePasswordSheet({ onClose }: { onClose: () => void }) {
           <div style={{ width: 48, height: 48, background: 'rgba(34,197,94,0.12)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
             <Check size={22} color="#22C55E" />
           </div>
-          <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: 0 }}>Password updated!</p>
+          <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 700, margin: 0 }}>Password updated!</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Field label="New Password">
             <div style={{ position: 'relative' }}>
               <input type={show ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 8 characters"
-                style={{ width: '100%', padding: '11px 40px 11px 12px', background: '#0F1117', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+                style={{ width: '100%', padding: '11px 40px 11px 12px', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
               <button onClick={() => setShow(!show)} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-                {show ? <EyeOff size={16} color="#4B5563" /> : <Eye size={16} color="#4B5563" />}
+                {show ? <EyeOff size={16} color="var(--text-muted)" /> : <Eye size={16} color="var(--text-muted)" />}
               </button>
             </div>
           </Field>
           <Field label="Confirm Password">
             <input type={show ? 'text' : 'password'} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="Repeat password"
-              style={{ width: '100%', padding: '11px 12px', background: '#0F1117', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
+              style={{ width: '100%', padding: '11px 12px', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 14, outline: 'none', boxSizing: 'border-box' }} />
           </Field>
           {error && <p style={{ color: '#FCA5A5', fontSize: 13, margin: 0 }}>{error}</p>}
           <SaveBtn saving={saving} onClick={save} label="Update Password" />
@@ -190,9 +190,9 @@ function ChangePasswordSheet({ onClose }: { onClose: () => void }) {
 function Sheet({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={onClose}>
-      <div style={{ background: '#13151E', borderRadius: '20px 20px 0 0', border: '1px solid rgba(255,255,255,0.07)', width: '100%', maxWidth: 480, padding: '20px 20px 40px' }} onClick={e => e.stopPropagation()}>
-        <div style={{ width: 36, height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2, margin: '0 auto 16px' }} />
-        <p style={{ color: 'white', fontSize: 16, fontWeight: 700, margin: '0 0 18px' }}>{title}</p>
+      <div style={{ background: 'var(--surface-card)', borderRadius: '20px 20px 0 0', border: '1px solid var(--guest-border)', width: '100%', maxWidth: 480, padding: '20px 20px 40px' }} onClick={e => e.stopPropagation()}>
+        <div style={{ width: 36, height: 4, background: 'var(--guest-border)', borderRadius: 2, margin: '0 auto 16px' }} />
+        <p style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 700, margin: '0 0 18px' }}>{title}</p>
         {children}
       </div>
     </div>
@@ -202,9 +202,9 @@ function Sheet({ title, children, onClose }: { title: string; children: React.Re
 function Field({ label, prefix, children }: { label: string; prefix?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{label}</label>
+      <label style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>{label}</label>
       <div style={{ position: 'relative' }}>
-        {prefix && <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#4B5563', fontSize: 14, pointerEvents: 'none' }}>{prefix}</span>}
+        {prefix && <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', fontSize: 14, pointerEvents: 'none' }}>{prefix}</span>}
         {children}
       </div>
     </div>
@@ -214,8 +214,8 @@ function Field({ label, prefix, children }: { label: string; prefix?: string; ch
 function SaveBtn({ saving, onClick, label = 'Save Changes' }: { saving: boolean; onClick: () => void; label?: string }) {
   return (
     <button onClick={onClick} disabled={saving} style={{
-      width: '100%', padding: '13px', background: saving ? 'rgba(30,94,255,0.4)' : '#1E5EFF',
-      color: 'white', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
+      width: '100%', padding: '13px', background: saving ? 'rgba(var(--brand-blue-rgb),0.4)' : 'var(--brand-blue)',
+      color: '#FFFFFF', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer',
     }}>
       {saving ? 'Saving...' : label}
     </button>
@@ -255,14 +255,14 @@ export default function GuestProfileClient({ userEmail, profile, guestProfile, p
           )}
         </div>
         <div style={{ flex: 1 }}>
-          <h2 style={{ color: 'white', fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-display)', margin: '0 0 2px', letterSpacing: '-0.4px' }}>{displayName}</h2>
-          {guestProfile?.username && <p style={{ color: '#4B5563', fontSize: 13, margin: '0 0 6px' }}>@{guestProfile.username}</p>}
+          <h2 style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 800, fontFamily: 'var(--font-display)', margin: '0 0 2px', letterSpacing: '-0.4px' }}>{displayName}</h2>
+          {guestProfile?.username && <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 6px' }}>@{guestProfile.username}</p>}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', background: `${tier.color}15`, border: `1px solid ${tier.color}28`, borderRadius: 20 }}>
             <span style={{ color: tier.color, fontSize: 11, fontWeight: 700 }}>{tier.label}</span>
           </div>
         </div>
-        <button onClick={() => setSheet('profile')} style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(255,255,255,0.05)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Edit2 size={15} color="#6B7280" />
+        <button onClick={() => setSheet('profile')} style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--guest-surface-2)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Edit2 size={15} color="var(--text-muted)" />
         </button>
       </div>
 
@@ -273,18 +273,18 @@ export default function GuestProfileClient({ userEmail, profile, guestProfile, p
           { icon: Award, label: 'Passes',   value: passCount,              color: '#A855F7'  },
           { icon: Flame, label: 'Streak',   value: guestProfile?.attendance_streak ?? 0,         color: '#F97316' },
         ].map(({ label, value, color }) => (
-          <div key={label} style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, padding: '12px', textAlign: 'center' }}>
+          <div key={label} style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 12, padding: '12px', textAlign: 'center' }}>
             <p style={{ color, fontSize: 18, fontWeight: 800, fontFamily: 'var(--font-display)', margin: '0 0 2px', letterSpacing: '-0.3px' }}>{value}</p>
-            <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{label}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{label}</p>
           </div>
         ))}
       </div>
 
       {/* Organizer-visible stats */}
-      <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px', marginBottom: 20 }}>
+      <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '14px 16px', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
-          <Shield size={12} color="#4B5563" />
-          <span style={{ color: '#4B5563', fontSize: 12 }}>Public stats — visible to organizers</span>
+          <Shield size={12} color="var(--text-muted)" />
+          <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Public stats — visible to organizers</span>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
           {[
@@ -294,8 +294,8 @@ export default function GuestProfileClient({ userEmail, profile, guestProfile, p
             { label: 'NS Rate',   value: `${nsRate}%`                        },
           ].map(({ label, value }) => (
             <div key={label} style={{ textAlign: 'center' }}>
-              <p style={{ color: '#E5E7EB', fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{value}</p>
-              <p style={{ color: '#4B5563', fontSize: 11, margin: 0 }}>{label}</p>
+              <p style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 700, margin: '0 0 2px' }}>{value}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{label}</p>
             </div>
           ))}
         </div>

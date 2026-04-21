@@ -14,16 +14,9 @@ function fmtTime(iso: string) {
   return new Date(iso).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit', hour12: true })
 }
 
-const COVER_GRADIENTS = [
-  'linear-gradient(135deg,#0F2027,#203A43,#2C5364)',
-  'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)',
-  'linear-gradient(135deg,#200122,#6f0000)',
-  'linear-gradient(135deg,#0d0d0d,#1a3a1a)',
-  'linear-gradient(135deg,#1f0033,#2d0050)',
-  'linear-gradient(135deg,#001233,#023e8a)',
-  'linear-gradient(135deg,#0a0f2e,#1a2a6c,#1E5EFF)',
-]
-function getGrad(id: string) { return COVER_GRADIENTS[id.charCodeAt(0) % COVER_GRADIENTS.length] }
+function getGrad(id: string) {
+  return `var(--event-gradient-${id.charCodeAt(0) % 8})`
+}
 
 const STATUS_MAP: Record<string, { bg: string; color: string; border: string; label: string }> = {
   published: { bg: 'rgba(34,197,94,0.1)',  color: '#22C55E', border: 'rgba(34,197,94,0.25)', label: 'LIVE'     },
@@ -55,10 +48,10 @@ export default async function CommandPage() {
           <Radio size={22} color="#A855F7" />
         </div>
         <div>
-          <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+          <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
             Command Center
           </h1>
-          <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
             Real-time attendee management, approvals &amp; live guest chat
           </p>
         </div>
@@ -84,8 +77,8 @@ export default async function CommandPage() {
                 <Icon size={15} color={color} />
               </div>
               <div>
-                <p style={{ color: 'white', fontSize: 'var(--fs-sm)', fontWeight: 700, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>{label}</p>
-                <p style={{ color: '#6B7280', fontSize: 'var(--fs-xs)', margin: 0, lineHeight: 1.6 }}>{desc}</p>
+                <p style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-sm)', fontWeight: 700, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>{label}</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-xs)', margin: 0, lineHeight: 1.6 }}>{desc}</p>
               </div>
             </div>
           ))}
@@ -94,7 +87,7 @@ export default async function CommandPage() {
 
       {/* ── Event list ───────────────────────────────────────── */}
       <div style={{ marginBottom: 12 }}>
-        <p style={{ color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-xs)', fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 12px' }}>
           {events.length} {events.length === 1 ? 'Event' : 'Events'}
         </p>
       </div>
@@ -103,7 +96,7 @@ export default async function CommandPage() {
         /* Empty state */
         <div style={{
           textAlign: 'center', padding: '72px 24px',
-          background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)',
+          background: 'var(--surface-card)', border: '1px solid var(--guest-border)',
           borderRadius: 20,
         }}>
           <div style={{
@@ -113,17 +106,17 @@ export default async function CommandPage() {
           }}>
             <Radio size={28} color="#A855F7" />
           </div>
-          <p style={{ color: 'white', fontSize: 'var(--fs-lg)', fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
+          <p style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-lg)', fontWeight: 800, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
             No events yet
           </p>
-          <p style={{ color: '#4B5563', fontSize: 'var(--fs-base)', margin: '0 0 24px', lineHeight: 1.6 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-base)', margin: '0 0 24px', lineHeight: 1.6 }}>
             Publish an event to start using the Command Center
           </p>
           <Link href="/dashboard/events/new" style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
-            background: '#1E5EFF', color: 'white', textDecoration: 'none',
+            background: 'var(--brand-blue)', color: '#FFFFFF', textDecoration: 'none',
             padding: '11px 24px', borderRadius: 12, fontSize: 'var(--fs-base)', fontWeight: 700,
-            boxShadow: '0 8px 24px rgba(30,94,255,0.25)',
+            boxShadow: '0 8px 24px rgba(var(--brand-blue-rgb),0.25)',
           }}>
             Create your first event <ArrowRight size={14} />
           </Link>
@@ -138,8 +131,8 @@ export default async function CommandPage() {
             return (
               <Link key={event.id} href={`/dashboard/command/${event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
                 <div className={`cc-event-card${isLive ? ' cc-live' : ''}`} style={{
-                  background: '#0C0E16',
-                  border: `1px solid ${isLive ? 'rgba(168,85,247,0.18)' : 'rgba(255,255,255,0.06)'}`,
+                  background: 'var(--surface-card)',
+                  border: `1px solid ${isLive ? 'rgba(168,85,247,0.18)' : 'var(--guest-border)'}`,
                   borderRadius: 18, padding: '0', overflow: 'hidden',
                   transition: 'border-color 0.15s, box-shadow 0.15s',
                   cursor: 'pointer',
@@ -164,7 +157,7 @@ export default async function CommandPage() {
                     {/* Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{
-                        color: 'white', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 6px',
+                        color: 'var(--text-primary)', fontSize: 'var(--fs-md)', fontWeight: 800, margin: '0 0 6px',
                         fontFamily: 'var(--font-display)', letterSpacing: '-0.2px',
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>
@@ -180,12 +173,12 @@ export default async function CommandPage() {
                           {isLive && <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
                           {st.label}
                         </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
-                          <Calendar size={10} color="#4B5563" />
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
+                          <Calendar size={10} color="var(--text-muted)" />
                           {fmtDate(event.date_start)} · {fmtTime(event.date_start)}
                         </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#4B5563', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
-                          <Users size={10} color="#4B5563" />
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
+                          <Users size={10} color="var(--text-muted)" />
                           {event._count} {event._count === 1 ? 'attendee' : 'attendees'}
                         </span>
                       </div>

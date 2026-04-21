@@ -313,12 +313,12 @@ function SignupNudge({ variant = 'default' }: { variant?: 'default' | 'gold' }) 
         </div>
         <div style={{ minWidth: 0 }}>
           <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>
-            {isGold ? 'Get personalised event picks' : 'Ready to RSVP?'}
+            {isGold ? 'Your feed should know you by now.' : 'Seen something you want in?'}
           </p>
           <p style={{ color: '#9CA3AF', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
             {isGold
-              ? 'Sign up once and Tikkit learns what events you love — automatically surfacing the best ones for you.'
-              : 'Create a free account, RSVP in 30 seconds, and get your QR ticket instantly.'}
+              ? 'Create an account once. Tikkit tracks what you love and surfaces the next one before you think to look.'
+              : 'Free account. 30 seconds. QR ticket in your pocket. That\'s the whole process.'}
           </p>
         </div>
       </div>
@@ -328,7 +328,7 @@ function SignupNudge({ variant = 'default' }: { variant?: 'default' | 'gold' }) 
         padding: '11px 24px', borderRadius: 24,
         display: 'inline-flex', alignItems: 'center', gap: 6,
       }}>
-        {isGold ? 'Get personalised feed' : 'Join free & RSVP'}
+        {isGold ? 'Build my feed' : 'Get my access'}
         <ArrowRight size={14} />
       </Link>
     </div>
@@ -337,10 +337,10 @@ function SignupNudge({ variant = 'default' }: { variant?: 'default' | 'gold' }) 
 
 /* ─── Why join strip ─────────────────────────────────────────────── */
 const WHY = [
-  { icon: Zap,        color: '#FFC745', title: 'RSVP in 30 seconds',  desc: 'Fill your name, hit confirm. QR ticket ready instantly.' },
-  { icon: QrCode,     color: '#A855F7', title: 'One QR, one scan',    desc: 'Show your ticket at the door. No screenshots, no confusion.' },
-  { icon: CreditCard, color: '#22C55E', title: 'Safe payments',       desc: 'JazzCash, EasyPaisa or bank transfer — all verified in-app.' },
-  { icon: Sparkles,   color: '#1E5EFF', title: 'Your event feed',     desc: 'The more you explore, the smarter your recommendations get.' },
+  { icon: Zap,        color: '#FFC745', title: '30 seconds. You\'re in.', desc: 'Hit confirm. Your QR ticket lands instantly. No waiting, no follow-up DM.' },
+  { icon: QrCode,     color: '#A855F7', title: 'One QR at the door.',     desc: 'Show your ticket, get scanned, walk in. No screenshots. No "let me check the list".' },
+  { icon: CreditCard, color: '#22C55E', title: 'Payments that feel safe.', desc: 'JazzCash, EasyPaisa, bank transfer — all verified in the app before you step out.' },
+  { icon: Sparkles,   color: '#1E5EFF', title: 'A feed that learns you.',  desc: 'The more events you attend, the sharper your recommendations get. The algorithm works for you.' },
 ]
 
 function WhyStrip() {
@@ -349,9 +349,9 @@ function WhyStrip() {
       <div style={{ textAlign: 'center', marginBottom: 36 }}>
         <p style={{ color: '#1E5EFF', fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', margin: '0 0 10px' }}>WHY TIKKIT</p>
         <h2 style={{ color: 'white', fontSize: 'clamp(22px,3vw,32px)', fontWeight: 900, margin: '0 0 10px', fontFamily: 'var(--font-display)', letterSpacing: '-0.6px' }}>
-          Your ticket to the scene.
+          The access you actually want.
         </h2>
-        <p style={{ color: '#6B7280', fontSize: 14, margin: 0 }}>Free forever for guests. No credit card needed.</p>
+        <p style={{ color: '#6B7280', fontSize: 14, margin: 0 }}>Free for guests. Always. No card, no catch.</p>
       </div>
       <div className="pe-why-grid">
         {WHY.map(({ icon: Icon, color, title, desc }) => (
@@ -374,16 +374,17 @@ function FinalCTA({ totalEvents }: { totalEvents: number }) {
     <div style={{ position: 'relative', overflow: 'hidden', background: 'linear-gradient(135deg, rgba(30,94,255,0.14), rgba(139,92,246,0.1))', border: '1px solid rgba(30,94,255,0.2)', borderRadius: 28, padding: 'clamp(40px,5vw,72px) clamp(24px,5vw,80px)', textAlign: 'center', marginBottom: 48 }}>
       <div style={{ position: 'absolute', top: -60, right: -60, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(30,94,255,0.2), transparent 70%)', pointerEvents: 'none' }} />
       <div style={{ position: 'absolute', bottom: -60, left: -60, width: 240, height: 240, borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,85,247,0.15), transparent 70%)', pointerEvents: 'none' }} />
-      <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', margin: '0 0 16px' }}>JOIN THE SCENE</p>
+      <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, letterSpacing: '2.5px', margin: '0 0 16px' }}>YOU BELONG HERE</p>
       <h2 style={{ color: 'white', fontSize: 'clamp(28px,4vw,48px)', fontWeight: 900, margin: '0 0 12px', fontFamily: 'var(--font-display)', letterSpacing: '-1px', lineHeight: 1.1 }}>
-        {totalEvents}+ events. One free account.
+        {totalEvents}+ events.<br />Zero reasons to miss them.
       </h2>
       <p style={{ color: '#9CA3AF', fontSize: 15, margin: '0 0 32px', lineHeight: 1.7 }}>
-        RSVP instantly. Get your QR ticket.<br />Your personalised event feed awaits.
+        One free account. Instant RSVP. QR ticket in seconds.<br />
+        A feed that gets sharper every time you show up.
       </p>
       <div className="pe-cta-btns">
         <Link href="/auth/login" className="pe-cta-primary" style={{ background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, textDecoration: 'none', padding: '14px 40px', borderRadius: 30, display: 'inline-flex', alignItems: 'center', gap: 8, boxShadow: '0 0 32px rgba(30,94,255,0.4)' }}>
-          Create free account <ArrowRight size={16} />
+          Get my free account <ArrowRight size={16} />
         </Link>
         <Link href="/auth/login" style={{ color: '#6B7280', fontSize: 13, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
           Already on Tikkit? <span style={{ color: '#818CF8', marginLeft: 4 }}>Sign in →</span>
@@ -423,22 +424,22 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
           <div className="pe-hero-content">
             <div className="pe-hero-badge">
               <span className="pe-badge-dot" />
-              Upcoming events across Pakistan
+              The scene. Live. Right now.
             </div>
 
             <h1 className="pe-hero-h1">
-              What&apos;s happening<br />
-              <span className="pe-accent">near you</span>
+              Find your<br />
+              <span className="pe-accent">next night.</span>
             </h1>
 
             <p className="pe-hero-sub">
-              Browse top events — from underground nights to massive concerts.
-              RSVP free in 30 seconds.
+              Private rooftops in DHA. Brand launches in Gulberg. Underground nights in Karachi.
+              The ones worth showing up to — all in one place.
             </p>
 
             <div className="pe-hero-cta">
               <Link href="/auth/login" className="pe-btn-primary">
-                Join free <ArrowRight size={16} />
+                Get your access <ArrowRight size={16} />
               </Link>
               <Link href="/auth/login" className="pe-btn-outline">
                 Sign in
@@ -448,8 +449,8 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
             <div className="pe-hero-stats">
               {[
                 { n: `${events.length}+`, label: 'live events' },
-                { n: 'Free',              label: 'to sign up'  },
-                { n: '30s',              label: 'to RSVP'     },
+                { n: 'Free',              label: 'forever for guests' },
+                { n: '30s',              label: 'RSVP & done'  },
               ].map(s => (
                 <div key={s.label} style={{ textAlign: 'center' }}>
                   <p className="pe-stat-n">{s.n}</p>
@@ -491,8 +492,8 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
 
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px 0', color: '#4B5563' }}>
-              <p style={{ fontSize: 16, fontWeight: 600, margin: '0 0 6px', color: '#6B7280' }}>No events in this category yet</p>
-              <p style={{ fontSize: 13, margin: 0 }}>Check back soon or browse all events above</p>
+              <p style={{ fontSize: 16, fontWeight: 600, margin: '0 0 6px', color: '#6B7280' }}>Nothing here yet — but it&apos;s coming.</p>
+              <p style={{ fontSize: 13, margin: 0 }}>Check back soon or see everything above.</p>
             </div>
           ) : (
             <>
@@ -548,7 +549,7 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '24px 0 48px' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
             <TikkitXLogo size="sm" />
-            <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>© 2026 Tikkit. All rights reserved.</p>
+            <p style={{ color: '#4B5563', fontSize: 12, margin: 0 }}>© {new Date().getFullYear()} TIKKIT X. All rights reserved.</p>
             <div style={{ display: 'flex', gap: 20 }}>
               <Link href="/auth/login" style={{ color: '#6B7280', fontSize: 13, textDecoration: 'none' }}>Sign in</Link>
               <Link href="/auth/login" style={{ color: '#6B7280', fontSize: 13, textDecoration: 'none' }}>Join free</Link>

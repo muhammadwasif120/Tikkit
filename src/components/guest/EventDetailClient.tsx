@@ -36,16 +36,8 @@ type ExistingReg = {
   id: string; status: string; payment_status: string | null
 } | null
 
-/* ─── Gradients ──────────────────────────────────────────────────── */
-const GRADIENTS = [
-  'linear-gradient(135deg,#0F2027,#203A43,#2C5364)',
-  'linear-gradient(135deg,#1a1a2e,#16213e,#0f3460)',
-  'linear-gradient(135deg,#200122,#6f0000)',
-  'linear-gradient(135deg,#0d0d0d,#1a3a1a,#0a2a0a)',
-  'linear-gradient(135deg,#1f0033,#2d0050)',
-  'linear-gradient(135deg,#001233,#023e8a)',
-]
-function getGradient(id: string) { return GRADIENTS[id.charCodeAt(0) % GRADIENTS.length] }
+/* ─── Gradients (CSS var — theme-adaptive) ───────────────────────── */
+function getGradient(id: string) { return `var(--event-gradient-${id.charCodeAt(0) % 6})` }
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
 
@@ -86,7 +78,7 @@ function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus
     payment_pending: { label: 'Payment Verifying',     sub: 'Screenshot received, awaiting confirmation',        color: '#818CF8', bg: 'rgba(129,140,248,0.08)', border: 'rgba(129,140,248,0.2)', icon: Loader      },
     confirmed:       { label: "You're Confirmed",      sub: 'Tap "View Ticket" below to see your QR code',      color: '#10B981', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', icon: CheckCircle  },
     registered:      { label: 'Registered',            sub: 'Tap "View Ticket" below to see your QR code',      color: '#10B981', bg: 'rgba(16,185,129,0.08)', border: 'rgba(16,185,129,0.2)', icon: CheckCircle  },
-    rejected:        { label: 'Not Approved',          sub: 'Your application was not approved',                 color: '#6B7280', bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.15)', icon: X          },
+    rejected:        { label: 'Not Approved',          sub: 'Your application was not approved',                 color: 'var(--text-muted)', bg: 'rgba(107,114,128,0.08)', border: 'rgba(107,114,128,0.15)', icon: X          },
   }
   const s = cfg[key]
   if (!s) return null
@@ -128,9 +120,9 @@ function QRModal({ regId, guestName, event, onClose }: {
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="qr-modal-title" style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}>
-      <div style={{ position: 'relative', background: '#0E1018', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 28, padding: '28px 24px 24px', width: 'calc(100% - 48px)', maxWidth: 340, animation: 'popIn 0.35s cubic-bezier(0.34,1.56,0.64,1)' }}>
+      <div style={{ position: 'relative', background: 'var(--surface-card)', border: '1px solid var(--guest-border-hover)', borderRadius: 28, padding: '28px 24px 24px', width: 'calc(100% - 48px)', maxWidth: 340, animation: 'popIn 0.35s cubic-bezier(0.34,1.56,0.64,1)' }}>
         {/* Close */}
-        <button ref={closeRef} onClick={onClose} aria-label="Close ticket" style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 7, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
+        <button ref={closeRef} onClick={onClose} aria-label="Close ticket" style={{ position: 'absolute', top: 16, right: 16, background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, padding: 7, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
           <X size={15} />
         </button>
 
@@ -140,9 +132,9 @@ function QRModal({ regId, guestName, event, onClose }: {
             <Ticket size={12} color="#10B981" />
             <span style={{ color: '#10B981', fontSize: 11, fontWeight: 800, letterSpacing: '0.5px' }}>YOUR TICKET</span>
           </div>
-          <h3 id="qr-modal-title" style={{ color: 'white', fontSize: 16, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>{event.title}</h3>
-          <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>{new Date(event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })} · {fmtTime(event.date_start)}</p>
-          {event.venue_name && <p style={{ color: '#6B7280', fontSize: 12, margin: '2px 0 0' }}>{event.venue_name}</p>}
+          <h3 id="qr-modal-title" style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>{event.title}</h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0 }}>{new Date(event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })} · {fmtTime(event.date_start)}</p>
+          {event.venue_name && <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: '2px 0 0' }}>{event.venue_name}</p>}
         </div>
 
         {/* QR Code */}
@@ -160,13 +152,13 @@ function QRModal({ regId, guestName, event, onClose }: {
         </div>
 
         {/* Tap hint */}
-        <p style={{ color: '#4B5563', fontSize: 11, textAlign: 'center', margin: '0 0 14px' }}>Tap QR to brighten for scanning</p>
+        <p style={{ color: 'var(--text-muted)', fontSize: 11, textAlign: 'center', margin: '0 0 14px' }}>Tap QR to brighten for scanning</p>
 
         {/* Guest chip */}
-        <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14, padding: '10px 14px', textAlign: 'center' }}>
-          <p style={{ color: '#6B7280', fontSize: 10, fontWeight: 700, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Guest</p>
-          <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>{guestName}</p>
-          <p style={{ color: '#4B5563', fontSize: 10, margin: 0, fontFamily: 'monospace', letterSpacing: '0.5px' }}>{ticketCode}</p>
+        <div style={{ background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '10px 14px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, margin: '0 0 3px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Guest</p>
+          <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>{guestName}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: 0, fontFamily: 'monospace', letterSpacing: '0.5px' }}>{ticketCode}</p>
         </div>
       </div>
     </div>
@@ -218,17 +210,17 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="pay-sheet-title" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
-      <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
+      <div style={{ position: 'relative', background: 'var(--surface-card)', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
         {/* Handle */}
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 0' }} />
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '14px auto 0' }} />
 
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
-            <h3 id="pay-sheet-title" style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>Complete Payment</h3>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{event.title}</p>
+            <h3 id="pay-sheet-title" style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>Complete Payment</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>{event.title}</p>
           </div>
-          <button ref={closeRef} onClick={onClose} aria-label="Close payment sheet" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
+          <button ref={closeRef} onClick={onClose} aria-label="Close payment sheet" style={{ background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
             <X size={16} />
           </button>
         </div>
@@ -236,11 +228,11 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
         <div style={{ padding: '16px 20px 0', display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Bank details */}
           {account && (
-            <div style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.18)' }}>
+            <div style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(var(--brand-blue-rgb),0.07)', border: '1px solid rgba(var(--brand-blue-rgb),0.18)' }}>
               <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, margin: '0 0 10px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Transfer Details</p>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ color: '#6B7280', fontSize: 12 }}>Amount</span>
-                <span style={{ color: 'white', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)' }}>PKR {(event.ticket_price ?? 0).toLocaleString('en-PK')}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Amount</span>
+                <span style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)' }}>PKR {(event.ticket_price ?? 0).toLocaleString('en-PK')}</span>
               </div>
               <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 8 }} />
               {[
@@ -249,8 +241,8 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
                 { label: 'Account Title', value: account.account_title },
               ].map(row => (
                 <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                  <span style={{ color: '#6B7280', fontSize: 12 }}>{row.label}</span>
-                  <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{row.value}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{row.label}</span>
+                  <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 600 }}>{row.value}</span>
                 </div>
               ))}
             </div>
@@ -258,7 +250,7 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
 
           {/* Screenshot upload */}
           <div>
-            <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Upload Payment Screenshot</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Upload Payment Screenshot</p>
             <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
 
             {preview ? (
@@ -267,7 +259,7 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
                 <img src={preview} alt="Screenshot preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
                 <button
                   onClick={() => { setFile(null); setPreview(null) }}
-                  style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 5, cursor: 'pointer', color: 'white', display: 'flex' }}
+                  style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.7)', border: '1px solid var(--guest-border-hover)', borderRadius: 8, padding: 5, cursor: 'pointer', color: 'white', display: 'flex' }}
                 >
                   <X size={14} />
                 </button>
@@ -278,14 +270,14 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
             ) : (
               <button
                 onClick={() => fileRef.current?.click()}
-                style={{ width: '100%', padding: '20px 16px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(255,255,255,0.1)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'all 0.2s' }}
+                style={{ width: '100%', padding: '20px 16px', borderRadius: 14, background: 'var(--guest-surface-2)', border: '2px dashed var(--guest-border)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'all 0.2s' }}
               >
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(var(--brand-blue-rgb),0.1)', border: '1px solid rgba(var(--brand-blue-rgb),0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <FileImage size={20} color="#818CF8" />
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>Attach Screenshot</p>
-                  <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>Tap to select from your gallery</p>
+                  <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>Attach Screenshot</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>Tap to select from your gallery</p>
                 </div>
               </button>
             )}
@@ -303,7 +295,7 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
           <button
             onClick={handleSubmit}
             disabled={busy || !file}
-            style={{ width: '100%', padding: '14px', borderRadius: 14, background: busy || !file ? 'rgba(255,255,255,0.06)' : '#EF4444', border: 'none', color: busy || !file ? '#6B7280' : 'white', fontSize: 15, fontWeight: 800, cursor: busy || !file ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}
+            style={{ width: '100%', padding: '14px', borderRadius: 14, background: busy || !file ? 'rgba(255,255,255,0.06)' : '#EF4444', border: 'none', color: busy || !file ? 'var(--text-muted)' : 'white', fontSize: 15, fontWeight: 800, cursor: busy || !file ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}
           >
             {busy
               ? <><Loader size={16} className="animate-spin" /> Submitting…</>
@@ -385,52 +377,52 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
   }
 
   const inputStyle = {
-    width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-    borderRadius: 12, padding: '11px 13px', color: 'white', fontSize: 14,
+    width: '100%', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)',
+    borderRadius: 12, padding: '11px 13px', color: 'var(--text-primary)', fontSize: 14,
     fontFamily: 'var(--font-body)', outline: 'none', boxSizing: 'border-box' as const,
   }
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="register-sheet-title" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
-      <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
+      <div style={{ position: 'relative', background: 'var(--surface-card)', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
         {/* Handle */}
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 0' }} />
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '14px auto 0' }} />
 
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
-            <h3 id="register-sheet-title" style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>
+            <h3 id="register-sheet-title" style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>
               {isEOI ? 'Express Interest' : 'Register'}
             </h3>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{event.title}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>{event.title}</p>
           </div>
-          <button ref={closeRef} onClick={onClose} aria-label="Close registration sheet" style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
+          <button ref={closeRef} onClick={onClose} aria-label="Close registration sheet" style={{ background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
             <X size={16} />
           </button>
         </div>
 
         {/* Payment info for paid events */}
         {isPaid && account && (
-          <div style={{ margin: '16px 20px 0', padding: '13px 15px', borderRadius: 14, background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.15)' }}>
+          <div style={{ margin: '16px 20px 0', padding: '13px 15px', borderRadius: 14, background: 'rgba(var(--brand-blue-rgb),0.07)', border: '1px solid rgba(var(--brand-blue-rgb),0.15)' }}>
             <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, margin: '0 0 8px', letterSpacing: '0.5px' }}>PAYMENT DETAILS</p>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-              <span style={{ color: '#6B7280', fontSize: 12 }}>Amount</span>
-              <span style={{ color: 'white', fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-display)' }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Amount</span>
+              <span style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 800, fontFamily: 'var(--font-display)' }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-              <span style={{ color: '#6B7280', fontSize: 12 }}>Bank</span>
-              <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{account.bank_name}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Bank</span>
+              <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 600 }}>{account.bank_name}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-              <span style={{ color: '#6B7280', fontSize: 12 }}>Account</span>
-              <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{account.account_number}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Account</span>
+              <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 600 }}>{account.account_number}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ color: '#6B7280', fontSize: 12 }}>Title</span>
-              <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{account.account_title}</span>
+              <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Title</span>
+              <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 600 }}>{account.account_title}</span>
             </div>
-            <p style={{ color: '#6B7280', fontSize: 11, margin: '10px 0 0', lineHeight: 1.5 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: '10px 0 0', lineHeight: 1.5 }}>
               {isEOI ? "If approved, you'll be asked to submit your payment screenshot." : 'Make payment and upload screenshot on the next step.'}
             </p>
           </div>
@@ -439,10 +431,10 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
         {/* Form */}
         <div style={{ padding: '16px 20px 0', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {/* Profile card */}
-          <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
-            <p style={{ color: '#6B7280', fontSize: 10, fontWeight: 700, margin: '0 0 6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Registering as</p>
-            <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>{userProfile?.full_name || 'No name set'}</p>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{userProfile?.email}</p>
+          <div style={{ padding: '12px 14px', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 14 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, margin: '0 0 6px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Registering as</p>
+            <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>{userProfile?.full_name || 'No name set'}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>{userProfile?.email}</p>
             {!userProfile?.full_name && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#EAB308', fontSize: 11, margin: '6px 0 0' }}>
                 <AlertCircle size={11} />
@@ -453,7 +445,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
           {/* Day picker for multi-day events */}
           {isMultiDay && (
             <div>
-              <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <label style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Which day(s) will you attend?
               </label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -468,23 +460,23 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
                       style={{
                         display: 'flex', alignItems: 'center', gap: 10,
                         padding: '10px 13px', borderRadius: 12, cursor: 'pointer',
-                        background: checked ? 'rgba(30,94,255,0.1)' : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${checked ? 'rgba(30,94,255,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                        background: checked ? 'rgba(var(--brand-blue-rgb),0.1)' : 'var(--guest-surface-2)',
+                        border: `1px solid ${checked ? 'rgba(var(--brand-blue-rgb),0.35)' : 'var(--guest-border)'}`,
                         transition: 'all 0.15s', textAlign: 'left',
                       }}
                     >
                       <div style={{
                         width: 18, height: 18, borderRadius: 5, flexShrink: 0,
-                        background: checked ? '#1E5EFF' : 'transparent',
-                        border: `2px solid ${checked ? '#1E5EFF' : 'rgba(255,255,255,0.2)'}`,
+                        background: checked ? 'var(--brand-blue)' : 'transparent',
+                        border: `2px solid ${checked ? 'var(--brand-blue)' : 'var(--guest-border)'}`,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         transition: 'all 0.15s',
                       }}>
-                        {checked && <span style={{ color: 'white', fontSize: 11, fontWeight: 900, lineHeight: 1 }}>✓</span>}
+                        {checked && <span style={{ color: '#FFFFFF', fontSize: 11, fontWeight: 900, lineHeight: 1 }}>✓</span>}
                       </div>
                       <div>
-                        <span style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Day {i + 1}</span>
-                        <span style={{ color: checked ? 'white' : '#9CA3AF', fontSize: 13, fontWeight: 600 }}>
+                        <span style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block' }}>Day {i + 1}</span>
+                        <span style={{ color: checked ? 'var(--text-primary)' : 'var(--text-secondary)', fontSize: 13, fontWeight: 600 }}>
                           {d.toLocaleDateString('en-PK', { weekday: 'long', day: 'numeric', month: 'long' })}
                         </span>
                       </div>
@@ -497,7 +489,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
 
           {isEOI && (
             <div>
-              <label style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Why do you want to attend?</label>
+              <label style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Why do you want to attend?</label>
               <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Tell the organizer about yourself..." rows={3}
                 style={{ ...inputStyle, resize: 'none' }} />
             </div>
@@ -513,7 +505,7 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
           <button
             onClick={handleSubmit}
             disabled={busy}
-            style={{ width: '100%', padding: '14px', border: 'none', borderRadius: 14, background: busy ? 'rgba(255,255,255,0.06)' : (isEOI ? '#A855F7' : '#1E5EFF'), color: busy ? '#6B7280' : 'white', fontSize: 15, fontWeight: 800, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}>
+            style={{ width: '100%', padding: '14px', border: 'none', borderRadius: 14, background: busy ? 'var(--guest-surface-2)' : (isEOI ? '#A855F7' : 'var(--brand-blue)'), color: busy ? 'var(--text-muted)' : 'white', fontSize: 15, fontWeight: 800, cursor: busy ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-body)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}>
             {busy
               ? <><Loader size={16} className="animate-spin" /> Please wait…</>
               : isEOI
@@ -539,22 +531,22 @@ function SuccessOverlay({ isEOI, onClose }: { isEOI: boolean; onClose: () => voi
 
   return (
     <div role="dialog" aria-modal="true" aria-labelledby="success-overlay-title" style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
-      <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '36px 28px', maxWidth: 320, width: '90%', textAlign: 'center', animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
-        <div style={{ width: 64, height: 64, borderRadius: 20, background: isEOI ? 'rgba(168,85,247,0.12)' : 'rgba(30,94,255,0.12)', border: `1px solid ${isEOI ? 'rgba(168,85,247,0.25)' : 'rgba(30,94,255,0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+      <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 24, padding: '36px 28px', maxWidth: 320, width: '90%', textAlign: 'center', animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
+        <div style={{ width: 64, height: 64, borderRadius: 20, background: isEOI ? 'rgba(168,85,247,0.12)' : 'rgba(var(--brand-blue-rgb),0.12)', border: `1px solid ${isEOI ? 'rgba(168,85,247,0.25)' : 'rgba(var(--brand-blue-rgb),0.25)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
           {isEOI
             ? <Users size={28} color="#A855F7" />
-            : <Ticket size={28} color="#1E5EFF" />
+            : <Ticket size={28} color="var(--brand-blue)" />
           }
         </div>
-        <h3 id="success-overlay-title" style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>
+        <h3 id="success-overlay-title" style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>
           {isEOI ? 'Interest Submitted!' : "You're Registered!"}
         </h3>
-        <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px', lineHeight: 1.5 }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: '0 0 24px', lineHeight: 1.5 }}>
           {isEOI
             ? 'The organizer will review your application and notify you in-app.'
             : 'Your QR ticket is ready — tap View Ticket to see it.'}
         </p>
-        <button ref={btnRef} onClick={onClose} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: '#1E5EFF', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+        <button ref={btnRef} onClick={onClose} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: 'var(--brand-blue)', color: '#FFFFFF', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
           Got it
         </button>
       </div>
@@ -566,12 +558,12 @@ function SuccessOverlay({ isEOI, onClose }: { isEOI: boolean; onClose: () => voi
 function PaymentSuccessOverlay({ onClose }: { onClose: () => void }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)' }}>
-      <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 24, padding: '36px 28px', maxWidth: 320, width: '90%', textAlign: 'center', animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
+      <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 24, padding: '36px 28px', maxWidth: 320, width: '90%', textAlign: 'center', animation: 'popIn 0.4s cubic-bezier(0.34,1.56,0.64,1)' }}>
         <div style={{ width: 64, height: 64, borderRadius: 20, background: 'rgba(129,140,248,0.12)', border: '1px solid rgba(129,140,248,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
           <CreditCard size={28} color="#818CF8" />
         </div>
-        <h3 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>Screenshot Submitted!</h3>
-        <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px', lineHeight: 1.5 }}>
+        <h3 style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 900, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>Screenshot Submitted!</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: '0 0 24px', lineHeight: 1.5 }}>
           The organizer will verify your payment and confirm your spot shortly.
         </p>
         <button onClick={onClose} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: 14, background: '#818CF8', color: 'white', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
@@ -632,7 +624,7 @@ export default function EventDetailClient({
   }, [event.id])
 
   const ctaLabel = () => {
-    if (!isLoggedIn) return { label: 'Sign in to Register', color: '#1E5EFF', disabled: false }
+    if (!isLoggedIn) return { label: 'Sign in to Register', color: 'var(--brand-blue)', disabled: false }
 
     // Actual DB status values
     if (regStatus === 'pending') return { label: 'Interest Submitted', color: '#EAB308', disabled: true }
@@ -648,12 +640,12 @@ export default function EventDetailClient({
     if (regStatus === 'eoi_approved') return { label: 'Pay Now →', color: '#EF4444', disabled: false, action: 'pay' }
     if (regStatus === 'payment_pending') return { label: 'Payment Verifying…', color: '#818CF8', disabled: true }
     if (regStatus === 'confirmed' || regStatus === 'registered') return { label: 'View Ticket →', color: '#10B981', disabled: false, action: 'ticket' }
-    if (regStatus === 'rejected') return { label: 'Not Approved', color: '#4B5563', disabled: true }
+    if (regStatus === 'rejected') return { label: 'Not Approved', color: 'var(--text-muted)', disabled: true }
 
-    if (isFull) return { label: 'Sold Out', color: '#4B5563', disabled: true }
-    if (isInviteOnly) return { label: 'Invite Only', color: '#4B5563', disabled: true }
+    if (isFull) return { label: 'Sold Out', color: 'var(--text-muted)', disabled: true }
+    if (isInviteOnly) return { label: 'Invite Only', color: 'var(--text-muted)', disabled: true }
     if (isEOI) return { label: 'Express Interest', color: '#A855F7', disabled: false }
-    return { label: 'Register Now', color: '#1E5EFF', disabled: false }
+    return { label: 'Register Now', color: 'var(--brand-blue)', disabled: false }
   }
   const cta = ctaLabel()
 
@@ -699,7 +691,7 @@ export default function EventDetailClient({
             width: auto !important;
             left: auto !important;
             padding: 12px 20px 20px !important;
-            background: linear-gradient(to top, #080A10 80%, transparent) !important;
+            background: linear-gradient(to top, var(--guest-bg) 80%, transparent) !important;
             z-index: 10 !important;
           }
           .ed-cta-btn { border-radius: 14px !important; }
@@ -708,7 +700,7 @@ export default function EventDetailClient({
           .ed-content-col { width: 480px !important; order: -1 !important; }
         }
       `}</style>
-      <div className="ed-root" style={{ background: '#080A10', minHeight: '100svh', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
+      <div className="ed-root" style={{ background: 'var(--guest-bg)', minHeight: '100svh', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
 
         {/* Hero */}
         <div className="ed-hero" style={{ position: 'relative', height: 280, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : gradient, overflow: 'hidden' }}>
@@ -718,7 +710,7 @@ export default function EventDetailClient({
 
           {/* Back + actions */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, padding: 'calc(env(safe-area-inset-top) + 14px) 16px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <button onClick={() => router.back()} style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
+            <button onClick={() => router.back()} style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: '1px solid var(--guest-border-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
               <ArrowLeft size={18} />
             </button>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -735,7 +727,7 @@ export default function EventDetailClient({
               >
                 <Heart size={16} color={liked ? '#EF4444' : 'white'} fill={liked ? '#EF4444' : 'none'} />
               </button>
-              <button onClick={() => navigator.share?.({ title: event.title, url: window.location.href })} style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
+              <button onClick={() => navigator.share?.({ title: event.title, url: window.location.href })} style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', border: '1px solid var(--guest-border-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'white' }}>
                 <Share2 size={16} />
               </button>
             </div>
@@ -765,7 +757,7 @@ export default function EventDetailClient({
 
           {/* Title + organiser */}
           <div style={{ marginBottom: 16 }}>
-            <h1 style={{ color: 'white', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.8px', lineHeight: 1.15 }}>
+            <h1 style={{ color: 'var(--text-primary)', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.8px', lineHeight: 1.15 }}>
               {event.title}
             </h1>
             {event.organizer?.username ? (
@@ -777,7 +769,7 @@ export default function EventDetailClient({
                 <ExternalLink size={11} color="#818CF8" style={{ opacity: 0.7 }} />
               </a>
             ) : (
-              <p style={{ color: '#6B7280', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>
             )}
           </div>
 
@@ -789,26 +781,26 @@ export default function EventDetailClient({
               { icon: <MapPin   size={14} color="#818CF8" />, label: 'Venue',    value: event.secret_venue && !isConfirmedGuest ? 'Secret' : (event.venue_name ?? 'TBA'), sub: event.secret_venue && !isConfirmedGuest ? 'Revealed upon confirmation' : (event.venue_address ?? '') },
               { icon: <Users    size={14} color="#818CF8" />, label: 'Capacity', value: event.capacity ? `${event.registered_count} / ${event.capacity}` : 'Unlimited', sub: spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 20 ? `${spotsLeft} spots left` : '' },
             ].map((item, i) => (
-              <div key={i} style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '12px 13px' }}>
+              <div key={i} style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '12px 13px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
                   {item.icon}
-                  <span style={{ color: '#6B7280', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
                 </div>
-                <p style={{ color: item.label === 'Venue' && event.secret_venue && !isConfirmedGuest ? '#FFC745' : 'white', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: 'var(--font-display)' }}>
+                <p style={{ color: item.label === 'Venue' && event.secret_venue && !isConfirmedGuest ? '#FFC745' : 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: 'var(--font-display)' }}>
                   {item.label === 'Venue' && event.secret_venue && !isConfirmedGuest
                     ? <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Lock size={11} />{item.value}</span>
                     : item.value
                   }
                 </p>
-                {item.sub && <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>{item.sub}</p>}
+                {item.sub && <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{item.sub}</p>}
               </div>
             ))}
           </div>
 
           {/* Countdown */}
           {countdown > 0 && (
-            <div style={{ background: '#0E1018', border: '1px solid rgba(129,140,248,0.15)', borderRadius: 14, padding: '14px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#6B7280', fontSize: 12, fontWeight: 600 }}>Event starts in</span>
+            <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '14px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>Event starts in</span>
               <span style={{ color: '#818CF8', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
                 {fmtCountdown(countdown)}
               </span>
@@ -817,9 +809,9 @@ export default function EventDetailClient({
 
           {/* Price */}
           {isPaid && (
-            <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '13px 15px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: '#6B7280', fontSize: 12, fontWeight: 600 }}>Ticket Price</span>
-              <span style={{ color: 'white', fontSize: 20, fontWeight: 900, fontFamily: 'var(--font-display)' }}>
+            <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '13px 15px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>Ticket Price</span>
+              <span style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 900, fontFamily: 'var(--font-display)' }}>
                 PKR {event.ticket_price!.toLocaleString('en-PK')}
               </span>
             </div>
@@ -828,29 +820,29 @@ export default function EventDetailClient({
           {/* Description */}
           {event.description && (
             <div style={{ marginBottom: 20 }}>
-              <h3 style={{ color: 'white', fontSize: 14, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>About</h3>
-              <p style={{ color: '#9CA3AF', fontSize: 14, lineHeight: 1.7, margin: 0 }}>{event.description}</p>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>About</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, margin: 0 }}>{event.description}</p>
             </div>
           )}
 
           {/* Venue map link */}
           {(!event.secret_venue || isConfirmedGuest) && event.venue_address && (
             <a href={`https://maps.google.com/?q=${encodeURIComponent(event.venue_address)}`} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 15px', background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, marginBottom: 16, textDecoration: 'none' }}>
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 15px', background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, marginBottom: 16, textDecoration: 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <MapPin size={16} color="#818CF8" />
                 <div>
-                  <p style={{ color: 'white', fontSize: 13, fontWeight: 600, margin: '0 0 1px' }}>{event.venue_name}</p>
-                  <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>{event.venue_address}</p>
+                  <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, margin: '0 0 1px' }}>{event.venue_name}</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{event.venue_address}</p>
                 </div>
               </div>
-              <ExternalLink size={14} color="#6B7280" />
+              <ExternalLink size={14} color="var(--text-muted)" />
             </a>
           )}
         </div>
 
         {/* CTA — fixed on mobile, inline on desktop */}
-        <div className="ed-cta-fixed" style={{ position: 'fixed', bottom: 76, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '12px 16px 12px', background: 'linear-gradient(to top, #080A10 60%, transparent)', zIndex: 50 }}>
+        <div className="ed-cta-fixed" style={{ position: 'fixed', bottom: 76, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '12px 16px 12px', background: 'linear-gradient(to top, var(--guest-bg) 60%, transparent)', zIndex: 50 }}>
           <button
             className="ed-cta-btn"
             onClick={() => {
@@ -860,7 +852,7 @@ export default function EventDetailClient({
               if (!cta.disabled) setShowSheet(true)
             }}
             disabled={cta.disabled}
-            style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? '#6B7280' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}>
+            style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? 'var(--text-muted)' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}>
             {cta.label}
           </button>
         </div>

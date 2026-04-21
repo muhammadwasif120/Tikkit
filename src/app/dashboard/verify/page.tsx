@@ -50,10 +50,10 @@ export default async function VerifyPage() {
           <ShieldCheck size={22} color={isVerified ? '#22C55E' : isPending ? '#FFC745' : '#1E5EFF'} />
         </div>
         <div>
-          <h1 style={{ color: 'white', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+          <h1 style={{ color: 'var(--text-primary)', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
             Identity Verification
           </h1>
-          <p style={{ color: '#6B7280', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0, lineHeight: 1.5 }}>
             {isVerified
               ? 'Your identity has been verified — all features unlocked.'
               : isPending
@@ -66,7 +66,7 @@ export default async function VerifyPage() {
       {/* ── Status badge ── */}
       {(isVerified || isPending) && (
         <div style={{
-          background: '#0C0E16', border: `1px solid ${isVerified ? 'rgba(34,197,94,0.15)' : 'rgba(255,199,69,0.15)'}`,
+          background: 'var(--surface-card)', border: `1px solid ${isVerified ? 'rgba(34,197,94,0.15)' : 'rgba(255,199,69,0.15)'}`,
           borderRadius: 14, padding: '14px 18px', marginBottom: 24,
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
@@ -76,7 +76,7 @@ export default async function VerifyPage() {
               {isVerified ? 'Verified' : 'Under Review'}
             </p>
             {profile.cnic_number && (
-              <p style={{ color: '#4B5563', fontSize: 12, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.04em' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '0.04em' }}>
                 {profile.cnic_number}
               </p>
             )}
@@ -93,12 +93,12 @@ export default async function VerifyPage() {
       {/* ── Why cards ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(175px, 1fr))', gap: 12, marginTop: 32 }}>
         {WHY_CARDS.map(({ icon: Icon, color, title, text }) => (
-          <div key={title} style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '18px' }}>
+          <div key={title} style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 16, padding: '18px' }}>
             <div style={{ width: 34, height: 34, borderRadius: 10, marginBottom: 12, background: `${color}15`, border: `1px solid ${color}28`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <Icon size={16} color={color} />
             </div>
-            <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>{title}</p>
-            <p style={{ color: '#6B7280', fontSize: 12, margin: 0, lineHeight: 1.65 }}>{text}</p>
+            <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>{title}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0, lineHeight: 1.65 }}>{text}</p>
           </div>
         ))}
       </div>

@@ -41,15 +41,7 @@ type FavEvent = {
 }
 
 /* ─── Helpers ────────────────────────────────────────────────────── */
-const GRADIENTS = [
-  'linear-gradient(135deg,#0F2027,#2C5364)',
-  'linear-gradient(135deg,#1a1a2e,#0f3460)',
-  'linear-gradient(135deg,#200122,#6f0000)',
-  'linear-gradient(135deg,#0d0d0d,#1a3a1a)',
-  'linear-gradient(135deg,#1f0033,#2d0050)',
-  'linear-gradient(135deg,#001233,#023e8a)',
-]
-function grad(id: string) { return GRADIENTS[id.charCodeAt(0) % GRADIENTS.length] }
+function grad(id: string) { return `var(--event-gradient-${id.charCodeAt(0) % 6})` }
 
 function fmtDate(iso: string) {
   const d = new Date(iso)
@@ -69,10 +61,10 @@ const STATUS: Record<string, { label: string; color: string; bg: string; border:
   eoi_approved:    { label: 'Pay Now',         color: '#EF4444', bg: 'rgba(239,68,68,0.1)',    border: 'rgba(239,68,68,0.2)'    },
   payment_pending: { label: 'Verifying',       color: '#818CF8', bg: 'rgba(129,140,248,0.1)',  border: 'rgba(129,140,248,0.2)'  },
   confirmed:       { label: 'Confirmed',       color: '#10B981', bg: 'rgba(16,185,129,0.1)',   border: 'rgba(16,185,129,0.2)'   },
-  rejected:        { label: 'Not Approved',    color: '#4B5563', bg: 'rgba(75,85,99,0.1)',     border: 'rgba(75,85,99,0.15)'    },
+  rejected:        { label: 'Not Approved',    color: 'var(--text-muted)', bg: 'rgba(107,114,128,0.10)',  border: 'rgba(107,114,128,0.15)' },
   attended:        { label: 'Attended',        color: '#818CF8', bg: 'rgba(129,140,248,0.1)',  border: 'rgba(129,140,248,0.2)'  },
   no_show:         { label: 'No Show',         color: '#EF4444', bg: 'rgba(239,68,68,0.1)',    border: 'rgba(239,68,68,0.2)'    },
-  refunded:        { label: 'Refunded',        color: '#6B7280', bg: 'rgba(107,114,128,0.1)',  border: 'rgba(107,114,128,0.15)' },
+  refunded:        { label: 'Refunded',        color: 'var(--text-muted)', bg: 'rgba(107,114,128,0.10)',  border: 'rgba(107,114,128,0.15)' },
 }
 
 /* ─── Confetti ───────────────────────────────────────────────────── */
@@ -137,7 +129,7 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
 
       {/* Card */}
       <div style={{
-        position: 'relative', background: '#0E1018', borderRadius: 28,
+        position: 'relative', background: 'var(--surface-card)', borderRadius: 28,
         padding: '24px 20px 28px', border: '1px solid rgba(255,255,255,0.1)',
         width: '100%', maxWidth: 340,
         animation: 'revealUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
@@ -146,7 +138,7 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
         {/* Close */}
         <button
           onClick={onClose}
-          style={{ position: 'absolute', top: 16, right: 16, background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}
+          style={{ position: 'absolute', top: 16, right: 16, background: 'var(--guest-border)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}
         >
           <X size={15} />
         </button>
@@ -156,10 +148,10 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
           <p style={{ color: '#10B981', fontSize: 10, fontWeight: 800, margin: '0 0 5px', textTransform: 'uppercase', letterSpacing: '1px' }}>
             ✓ Your Ticket
           </p>
-          <h3 style={{ color: 'white', fontSize: 19, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px', lineHeight: 1.2 }}>
+          <h3 style={{ color: 'var(--text-primary)', fontSize: 19, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px', lineHeight: 1.2 }}>
             {ev.title}
           </h3>
-          <p style={{ color: '#6B7280', fontSize: 12, margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0, display: 'flex', alignItems: 'center', gap: 4 }}>
             <Calendar size={10} /> {fmtDate(ev.date_start)} · {fmtTime(ev.date_start)}
           </p>
         </div>
@@ -184,14 +176,14 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
                   <img src={qrSrc} alt="QR Code" style={{ width: 220, height: 220, display: 'block', borderRadius: 8 }} />
                 </>
               : <div style={{ width: 220, height: 220, background: '#E5E7EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Loader size={24} color="#9CA3AF" style={{ animation: 'spin 1s linear infinite' }} />
+                  <Loader size={24} color="var(--text-secondary)" style={{ animation: 'spin 1s linear infinite' }} />
                 </div>
             }
           </div>
-          <p style={{ color: '#6B7280', fontSize: 11, margin: '10px 0 3px' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: '10px 0 3px' }}>
             Tap QR to boost brightness · Show at entry
           </p>
-          <p style={{ color: '#4B5563', fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.5px' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.5px' }}>
             {ticketCode}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, marginTop: 6 }}>
@@ -203,18 +195,18 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
         </div>
 
         {/* Guest chip */}
-        <div style={{ padding: '10px 14px', background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 14, textAlign: 'center' }}>
-          <p style={{ color: '#6B7280', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Guest</p>
-          <p style={{ color: 'white', fontSize: 15, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>{guestName}</p>
+        <div style={{ padding: '10px 14px', background: 'rgba(var(--brand-blue-rgb),0.07)', border: '1px solid rgba(var(--brand-blue-rgb),0.15)', borderRadius: 14, textAlign: 'center' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Guest</p>
+          <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>{guestName}</p>
         </div>
 
         {/* Selected days for multi-day tickets */}
         {reg.ticket_days && reg.ticket_days.length > 0 && (
-          <div style={{ marginTop: 10, padding: '10px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14 }}>
-            <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Valid for</p>
+          <div style={{ marginTop: 10, padding: '10px 14px', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 14 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, margin: '0 0 6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Valid for</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {reg.ticket_days.map(day => (
-                <span key={day} style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)', color: '#818CF8', fontSize: 11, fontWeight: 600 }}>
+                <span key={day} style={{ padding: '3px 9px', borderRadius: 20, background: 'rgba(var(--brand-blue-rgb),0.1)', border: '1px solid rgba(var(--brand-blue-rgb),0.2)', color: '#818CF8', fontSize: 11, fontWeight: 600 }}>
                   {new Date(day + 'T12:00:00').toLocaleDateString('en-PK', { weekday: 'short', day: 'numeric', month: 'short' })}
                 </span>
               ))}
@@ -223,7 +215,7 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
         )}
 
         {ev.venue_name && !ev.secret_venue && (
-          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, color: '#6B7280', fontSize: 12 }}>
+          <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 12 }}>
             <MapPin size={11} />
             <span>{ev.venue_name}</span>
           </div>
@@ -269,7 +261,7 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
-      <div style={{ position: 'relative', background: '#0E1018', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid rgba(255,255,255,0.08)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
+      <div style={{ position: 'relative', background: 'var(--surface-card)', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
 
         {/* Handle */}
         <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 0' }} />
@@ -277,10 +269,10 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
           <div>
-            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>Complete Payment</h3>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{reg.event?.title}</p>
+            <h3 style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>Complete Payment</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>{reg.event?.title}</p>
           </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#6B7280', display: 'flex' }}>
+          <button onClick={onClose} style={{ background: 'var(--guest-border)', border: '1px solid var(--guest-border)', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
             <X size={16} />
           </button>
         </div>
@@ -289,21 +281,21 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
 
           {/* Bank details */}
           {account && (
-            <div style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.18)' }}>
+            <div style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(var(--brand-blue-rgb),0.07)', border: '1px solid rgba(var(--brand-blue-rgb),0.18)' }}>
               <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, margin: '0 0 10px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Transfer Details</p>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ color: '#6B7280', fontSize: 12 }}>Amount</span>
-                <span style={{ color: 'white', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)' }}>PKR {(ticketPrice ?? 0).toLocaleString('en-PK')}</span>
+                <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Amount</span>
+                <span style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)' }}>PKR {(ticketPrice ?? 0).toLocaleString('en-PK')}</span>
               </div>
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 8 }} />
+              <div style={{ height: 1, background: 'var(--guest-border)', marginBottom: 8 }} />
               {[
                 { label: 'Bank',          value: account.bank_name || account.label },
                 { label: 'Account #',     value: account.account_number },
                 { label: 'Account Title', value: account.account_title },
               ].filter(r => r.value).map(row => (
                 <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                  <span style={{ color: '#6B7280', fontSize: 12 }}>{row.label}</span>
-                  <span style={{ color: 'white', fontSize: 12, fontWeight: 600 }}>{row.value}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{row.label}</span>
+                  <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 600 }}>{row.value}</span>
                 </div>
               ))}
             </div>
@@ -311,7 +303,7 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
 
           {/* Screenshot upload */}
           <div>
-            <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Upload Payment Screenshot</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, margin: '0 0 8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Upload Payment Screenshot</p>
             <input ref={ref} type="file" accept="image/*" onChange={handleFile} style={{ display: 'none' }} />
 
             {preview ? (
@@ -320,25 +312,25 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
                 <img src={preview} alt="Screenshot preview" style={{ width: '100%', maxHeight: 200, objectFit: 'cover', display: 'block' }} />
                 <button
                   onClick={() => { setFile(null); setPreview(null) }}
-                  style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 5, cursor: 'pointer', color: 'white', display: 'flex' }}
+                  style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: 5, cursor: 'pointer', color: 'var(--text-primary)', display: 'flex' }}
                 >
                   <X size={14} />
                 </button>
                 <div style={{ position: 'absolute', bottom: 8, left: 8 }}>
-                  <span style={{ background: 'rgba(16,185,129,0.9)', color: 'white', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6 }}>✓ Ready to submit</span>
+                  <span style={{ background: 'rgba(16,185,129,0.9)', color: 'var(--text-primary)', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6 }}>✓ Ready to submit</span>
                 </div>
               </div>
             ) : (
               <button
                 onClick={() => ref.current?.click()}
-                style={{ width: '100%', padding: '20px 16px', borderRadius: 14, background: 'rgba(255,255,255,0.03)', border: '2px dashed rgba(255,255,255,0.1)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'all 0.2s' }}
+                style={{ width: '100%', padding: '20px 16px', borderRadius: 14, background: 'var(--guest-surface-2)', border: '2px dashed var(--guest-border)', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, transition: 'all 0.2s' }}
               >
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: 'rgba(var(--brand-blue-rgb),0.1)', border: '1px solid rgba(var(--brand-blue-rgb),0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <FileImage size={20} color="#818CF8" />
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>Attach Screenshot</p>
-                  <p style={{ color: '#6B7280', fontSize: 11, margin: 0 }}>Tap to select from your gallery</p>
+                  <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>Attach Screenshot</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>Tap to select from your gallery</p>
                 </div>
               </button>
             )}
@@ -356,7 +348,7 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
           <button
             onClick={handleSubmit}
             disabled={busy || !file}
-            style={{ width: '100%', padding: '14px', borderRadius: 14, background: busy || !file ? 'rgba(255,255,255,0.06)' : '#EF4444', border: 'none', color: busy || !file ? '#6B7280' : 'white', fontSize: 15, fontWeight: 800, cursor: busy || !file ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}
+            style={{ width: '100%', padding: '14px', borderRadius: 14, background: busy || !file ? 'var(--guest-border)' : '#EF4444', border: 'none', color: busy || !file ? 'var(--text-muted)' : 'white', fontSize: 15, fontWeight: 800, cursor: busy || !file ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'all 0.2s' }}
           >
             {busy
               ? <><Loader size={16} className="animate-spin" /> Submitting…</>
@@ -379,7 +371,7 @@ const PASS_ICONS: Record<string, React.ReactNode> = {
   streak_5:    <Zap    size={14} />,
 }
 const PASS_CFG: Record<string, { color: string; bg: string; label: string }> = {
-  attendance:  { color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)', label: 'Attendance'  },
+  attendance:  { color: 'var(--text-secondary)', bg: 'rgba(156,163,175,0.1)', label: 'Attendance'  },
   early_bird:  { color: '#34D399', bg: 'rgba(52,211,153,0.1)',  label: 'Early Bird'  },
   vip:         { color: '#FFC745', bg: 'rgba(255,199,69,0.1)',  label: 'VIP'         },
   first_timer: { color: '#60A5FA', bg: 'rgba(96,165,250,0.1)',  label: 'First Timer' },
@@ -428,7 +420,7 @@ function RegCard({ reg, onPay, onViewTicket }: {
   const passIcon = pass ? (PASS_ICONS[pass.pass_type] ?? PASS_ICONS.attendance) : null
 
   return (
-    <div style={{ background: '#0E1018', border: `1px solid ${isPast ? 'rgba(255,255,255,0.04)' : st.border}`, borderRadius: 20, overflow: 'hidden', opacity: isPast && !pass ? 0.5 : 1, transition: 'opacity 0.2s' }}>
+    <div style={{ background: 'var(--surface-card)', border: `1px solid ${isPast ? 'var(--guest-border)' : st.border}`, borderRadius: 20, overflow: 'hidden', opacity: isPast && !pass ? 0.5 : 1, transition: 'opacity 0.2s' }}>
 
       {/* Cover — tap to view event details (upcoming only) */}
       {(() => {
@@ -453,7 +445,7 @@ function RegCard({ reg, onPay, onViewTicket }: {
 
             {/* Title */}
             <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14 }}>
-              <h3 style={{ color: 'white', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
+              <h3 style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', lineHeight: 1.2 }}>
                 {ev.title}
               </h3>
             </div>
@@ -467,10 +459,10 @@ function RegCard({ reg, onPay, onViewTicket }: {
       {/* Info row */}
       <div style={{ padding: '10px 14px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#6B7280', fontSize: 11 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 11 }}>
             <Calendar size={10} />{fmtDate(ev.date_start)} · {fmtTime(ev.date_start)}
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#6B7280', fontSize: 11 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 11 }}>
             <MapPin size={10} />
             {ev.secret_venue
               ? isConfirmed
@@ -542,12 +534,12 @@ function RegCard({ reg, onPay, onViewTicket }: {
 
       {/* Pass details for past events */}
       {isPast && pass && passCfg && (
-        <div style={{ padding: '0 14px 14px', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: 10 }}>
+        <div style={{ padding: '0 14px 14px', borderTop: '1px solid var(--guest-border)', paddingTop: 10 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 12, background: passCfg.bg, border: `1px solid ${passCfg.color}25` }}>
             <span style={{ color: passCfg.color, display: 'flex' }}>{passIcon}</span>
             <div>
               <p style={{ color: passCfg.color, fontSize: 12, fontWeight: 700, margin: '0 0 1px' }}>Collectible Pass</p>
-              <p style={{ color: '#9CA3AF', fontSize: 11, margin: 0 }}>{passCfg.label}</p>
+              <p style={{ color: 'var(--text-secondary)', fontSize: 11, margin: 0 }}>{passCfg.label}</p>
             </div>
           </div>
         </div>
@@ -559,30 +551,30 @@ function RegCard({ reg, onPay, onViewTicket }: {
 /* ─── Fav Card ───────────────────────────────────────────────────── */
 function FavCard({ event, onRemove }: { event: FavEvent; onRemove: (id: string) => void }) {
   return (
-    <div style={{ position: 'relative', background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden' }}>
+    <div style={{ position: 'relative', background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 16, overflow: 'hidden' }}>
       <Link href={`/guest/explore/${event.slug || event.id}`} style={{ textDecoration: 'none', display: 'block' }}>
         {/* Cover */}
         <div style={{ height: 80, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : grad(event.id), position: 'relative' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(14,16,24,1) 0%, transparent 60%)' }} />
           <div style={{ position: 'absolute', bottom: 10, left: 14, right: 44 }}>
-            <h3 style={{ color: 'white', fontSize: 14, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <h3 style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {event.title}
             </h3>
           </div>
         </div>
         {/* Meta row */}
         <div style={{ padding: '8px 14px 12px', display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#6B7280', fontSize: 11 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 11 }}>
             <Calendar size={10} />{fmtDate(event.date_start)} · {fmtTime(event.date_start)}
           </span>
           {event.venue_name && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#6B7280', fontSize: 11 }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 11 }}>
               <MapPin size={10} />{event.venue_name}
             </span>
           )}
           {(event.ticket_price ?? 0) === 0
             ? <span style={{ padding: '2px 7px', borderRadius: 5, background: 'rgba(16,185,129,0.1)', color: '#10B981', fontSize: 9, fontWeight: 800 }}>FREE</span>
-            : <span style={{ color: '#6B7280', fontSize: 11, fontWeight: 700 }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
+            : <span style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700 }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
           }
         </div>
       </Link>
@@ -625,14 +617,14 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
       <Confetti active={successMsg} />
 
       {successMsg && (
-        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 999, padding: '11px 20px', background: '#10B981', borderRadius: 14, color: 'white', fontSize: 14, fontWeight: 700, boxShadow: '0 8px 24px rgba(16,185,129,0.4)', animation: 'revealUp 0.3s ease', whiteSpace: 'nowrap' }}>
+        <div style={{ position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)', zIndex: 999, padding: '11px 20px', background: '#10B981', borderRadius: 14, color: 'var(--text-primary)', fontSize: 14, fontWeight: 700, boxShadow: '0 8px 24px rgba(16,185,129,0.4)', animation: 'revealUp 0.3s ease', whiteSpace: 'nowrap' }}>
           ✓ Screenshot submitted!
         </div>
       )}
 
       {/* Credit chip */}
       <div style={{ padding: '14px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ color: 'white', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>My Tikkit</h2>
+        <h2 style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>My Tikkit</h2>
         <Link href="/guest/profile" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 20, background: tier.bg, border: `1px solid ${tier.border}`, textDecoration: 'none' }}>
           <Zap size={11} color={tier.color} />
           <span style={{ color: tier.color, fontSize: 11, fontWeight: 800 }}>{creditScore} · {tier.label}</span>
@@ -646,7 +638,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
           { key: 'past',     label: `Past${past.length > 0 ? ` (${past.length})` : ''}` },
           { key: 'saved',    label: favEvents.length > 0 ? `❤️ Saved (${favEvents.length})` : '❤️ Saved' },
         ] as const).map(({ key, label }) => (
-          <button key={key} onClick={() => setTab(key)} style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: `2px solid ${tab === key ? '#1E5EFF' : 'rgba(255,255,255,0.06)'}`, color: tab === key ? 'white' : '#6B7280', fontSize: 12, fontWeight: tab === key ? 700 : 500, transition: 'all 0.15s' }}>
+          <button key={key} onClick={() => setTab(key)} style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: `2px solid ${tab === key ? 'var(--brand-blue)' : 'var(--guest-border)'}`, color: tab === key ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: 12, fontWeight: tab === key ? 700 : 500, transition: 'all 0.15s' }}>
             {label}
           </button>
         ))}
@@ -659,10 +651,10 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
             ? favEvents.map(ev => <FavCard key={ev.id} event={ev} onRemove={handleRemoveFav} />)
             : (
               <div style={{ padding: '64px 0', textAlign: 'center', animation: 'revealUp 0.3s ease', gridColumn: '1 / -1' }}>
-                <Heart size={36} color="#4B5563" style={{ marginBottom: 14, opacity: 0.4 }} />
-                <p style={{ color: '#9CA3AF', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No saved events</p>
-                <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 20px' }}>Tap the ❤️ on any event to save it here.</p>
-                <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
+                <Heart size={36} color="var(--text-muted)" style={{ marginBottom: 14, opacity: 0.4 }} />
+                <p style={{ color: 'var(--text-secondary)', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No saved events</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 20px' }}>Tap the ❤️ on any event to save it here.</p>
+                <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: 'var(--brand-blue)', color: '#FFFFFF', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
                   Explore Events
                 </Link>
               </div>
@@ -682,17 +674,17 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
             <div style={{ padding: '64px 0', textAlign: 'center', animation: 'revealUp 0.3s ease', gridColumn: '1 / -1' }}>
               {tab === 'upcoming'
                 ? <>
-                    <Ticket size={36} color="#4B5563" style={{ marginBottom: 14, opacity: 0.4 }} />
-                    <p style={{ color: '#9CA3AF', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No upcoming events</p>
-                    <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 20px' }}>Register for events to see them here.</p>
-                    <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
+                    <Ticket size={36} color="var(--text-muted)" style={{ marginBottom: 14, opacity: 0.4 }} />
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No upcoming events</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 20px' }}>Register for events to see them here.</p>
+                    <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: 'var(--brand-blue)', color: '#FFFFFF', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
                       Explore Events
                     </Link>
                   </>
                 : <>
-                    <Award size={36} color="#4B5563" style={{ marginBottom: 14, opacity: 0.4 }} />
-                    <p style={{ color: '#9CA3AF', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No past events yet</p>
-                    <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>Events you&apos;ve attended will appear here with your collectible passes.</p>
+                    <Award size={36} color="var(--text-muted)" style={{ marginBottom: 14, opacity: 0.4 }} />
+                    <p style={{ color: 'var(--text-secondary)', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No past events yet</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>Events you&apos;ve attended will appear here with your collectible passes.</p>
                   </>
               }
             </div>

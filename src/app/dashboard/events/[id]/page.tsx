@@ -87,7 +87,7 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
 
         {/* Breadcrumb row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <Link href="/dashboard/events" className="hover:text-gray-400 transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#4B5563', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}
+          <Link href="/dashboard/events" className="hover:text-gray-400 transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}
           >
             <ArrowLeft size={14} /> Events
           </Link>
@@ -96,7 +96,7 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
 
         {/* Title */}
         <h1 style={{
-          color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900,
+          color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 900,
           margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px', lineHeight: 1.2,
         }}>
           {event.title}
@@ -130,20 +130,20 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
 
         {/* Meta row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
-            <CalendarDays size={13} color="#4B5563" />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
+            <CalendarDays size={13} color="var(--text-muted)" />
             {format(new Date(event.date_start), 'MMM d, yyyy')}
-            <span style={{ color: '#374151' }}>·</span>
+            <span style={{ color: 'var(--text-muted)' }}>·</span>
             {format(new Date(event.date_start), 'h:mm a')}
           </span>
           {event.venue_name && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
-              <MapPin size={13} color="#4B5563" />
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
+              <MapPin size={13} color="var(--text-muted)" />
               {event.venue_secret ? '🔒 Secret Venue' : event.venue_name}
             </span>
           )}
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
-            <Users size={13} color="#4B5563" />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
+            <Users size={13} color="var(--text-muted)" />
             {total} / {event.capacity} guests
           </span>
         </div>

@@ -383,7 +383,7 @@ export function ComingSoonClient({ initialCount }: Props) {
                 <div style={{ fontFamily: "'Clash Display', sans-serif", fontSize: 22, fontWeight: 800, color: 'white', letterSpacing: '-0.5px' }}>
                   We&apos;re Live!
                 </div>
-                <div style={{ color: '#6B7280', fontSize: 14, marginTop: 4 }}>Tikkit is now available — download the app</div>
+                <div style={{ color: '#6B7280', fontSize: 14, marginTop: 4 }}>TIKKIT X is now available — download the app</div>
               </div>
             </div>
           ) : (
@@ -685,7 +685,7 @@ export function ComingSoonClient({ initialCount }: Props) {
           borderTop: '1px solid rgba(255,255,255,0.04)',
           fontSize: 'var(--fs-sm)', color: '#374151',
         }}>
-          © {new Date().getFullYear()} Tikkit X — Verified Globally. Trusted Locally. Optimized for the Scene.
+          © {new Date().getFullYear()} TIKKIT X — Verified Globally. Trusted Locally. Optimized for the Scene.
         </footer>
       </div>
 

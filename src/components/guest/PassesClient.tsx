@@ -26,7 +26,7 @@ const PASS_CONFIG: Record<string, { label: string; rarity: string; desc: string 
   perfect_score: { label: 'Perfect Attendance', rarity: 'Legendary', desc: 'Never missed a registered event' },
 }
 const RARITY_CONFIG: Record<string, { color: string; bg: string; border: string; glow: string; order: number }> = {
-  Common:    { color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)', border: 'rgba(156,163,175,0.2)', glow: 'rgba(156,163,175,0)',    order: 0 },
+  Common:    { color: 'var(--text-secondary)', bg: 'rgba(156,163,175,0.1)', border: 'rgba(156,163,175,0.2)', glow: 'rgba(156,163,175,0)',    order: 0 },
   Uncommon:  { color: '#34D399', bg: 'rgba(52,211,153,0.1)',  border: 'rgba(52,211,153,0.2)',  glow: 'rgba(52,211,153,0.1)',  order: 1 },
   Rare:      { color: '#60A5FA', bg: 'rgba(96,165,250,0.1)',  border: 'rgba(96,165,250,0.25)', glow: 'rgba(96,165,250,0.15)', order: 2 },
   Epic:      { color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.25)', glow: 'rgba(168,85,247,0.2)',  order: 3 },
@@ -89,7 +89,7 @@ function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }} />
       <div style={{
         position: 'relative', width: '100%', maxWidth: 480,
-        background: '#13151E', borderRadius: '28px 28px 0 0',
+        background: 'var(--surface-card-2)', borderRadius: '28px 28px 0 0',
         border: `1px solid ${rarity.border}`,
         boxShadow: glow ? `0 -20px 80px ${rarity.glow}` : 'none',
         animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)',
@@ -102,20 +102,20 @@ function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
           height: 160, position: 'relative',
           background: pass.event?.cover_image_url
             ? `url(${pass.event.cover_image_url}) center/cover`
-            : `linear-gradient(135deg, ${rarity.bg.replace('0.1', '0.3')}, #080A10)`,
+            : `linear-gradient(135deg, ${rarity.bg.replace('0.1', '0.3')}, var(--guest-bg))`,
         }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #13151E 0%, transparent 60%)' }} />
           {/* Rarity shimmer sweep */}
           <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(105deg, transparent 35%, ${rarity.glow} 50%, transparent 65%)`, animation: 'shimmerSwipe 2.5s infinite', overflow: 'hidden' }} />
           {/* Close */}
-          <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'white', display: 'flex' }}>
+          <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'var(--text-primary)', display: 'flex' }}>
             <X size={16} />
           </button>
           {/* Pass icon badge */}
           <div style={{
             position: 'absolute', bottom: -32, left: '50%', transform: 'translateX(-50%)',
             width: 72, height: 72, borderRadius: 22,
-            background: `linear-gradient(135deg, ${rarity.bg.replace('0.1','0.4')}, #13151E)`,
+            background: `linear-gradient(135deg, ${rarity.bg.replace('0.1','0.4')}, var(--surface-card-2))`,
             border: `2px solid ${rarity.border}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             boxShadow: `0 0 30px ${rarity.glow}`,
@@ -128,21 +128,21 @@ function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
           <span style={{ display: 'inline-block', padding: '3px 10px', borderRadius: 20, background: rarity.bg, border: `1px solid ${rarity.border}`, color: rarity.color, fontSize: 11, fontWeight: 700, letterSpacing: '0.5px', marginBottom: 8 }}>
             {cfg.rarity}
           </span>
-          <h2 style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+          <h2 style={{ color: 'var(--text-primary)', fontSize: 22, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
             {cfg.label}
           </h2>
-          <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 20px' }}>{cfg.desc}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 20px' }}>{cfg.desc}</p>
 
-          <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '14px 16px', textAlign: 'left', marginBottom: 20 }}>
-            <p style={{ color: '#4B5563', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px' }}>Event</p>
-            <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: '0 0 8px' }}>{pass.event?.title ?? 'Unknown Event'}</p>
-            <p style={{ color: '#6B7280', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, margin: 0 }}>
+          <div style={{ background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 16, padding: '14px 16px', textAlign: 'left', marginBottom: 20 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 4px' }}>Event</p>
+            <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 700, margin: '0 0 8px' }}>{pass.event?.title ?? 'Unknown Event'}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4, margin: 0 }}>
               <Calendar size={11} />
               {pass.event?.date_start ? new Date(pass.event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
             </p>
           </div>
 
-          <p style={{ color: '#4B5563', fontSize: 11, margin: '0 0 16px' }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: '0 0 16px' }}>
             Issued {new Date(pass.issued_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
 
@@ -182,7 +182,7 @@ function PassCard({ pass, index, onClick, isNew }: { pass: Pass; index: number; 
       <button
         onClick={onClick}
         style={{
-          background: '#13151E', border: `1px solid ${rarity.border}`,
+          background: 'var(--surface-card-2)', border: `1px solid ${rarity.border}`,
           borderRadius: 18, padding: 0, cursor: 'pointer', textAlign: 'left',
           overflow: 'hidden', width: '100%',
           boxShadow: `0 4px 20px ${rarity.glow}`,
@@ -195,9 +195,9 @@ function PassCard({ pass, index, onClick, isNew }: { pass: Pass; index: number; 
         onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'none'; (e.currentTarget as HTMLElement).style.boxShadow = `0 4px 20px ${rarity.glow}` }}
       >
         {/* Mini cover */}
-        <div style={{ height: 70, background: pass.event?.cover_image_url ? `url(${pass.event.cover_image_url}) center/cover` : `linear-gradient(135deg, ${rarity.bg.replace('0.1','0.3')}, #080A10)`, position: 'relative' }}>
+        <div style={{ height: 70, background: pass.event?.cover_image_url ? `url(${pass.event.cover_image_url}) center/cover` : `linear-gradient(135deg, ${rarity.bg.replace('0.1','0.3')}, var(--guest-bg))`, position: 'relative' }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, #13151E 0%, transparent 70%)' }} />
-          {isNew && <div style={{ position: 'absolute', top: 8, right: 8, padding: '2px 7px', borderRadius: 20, background: '#EF4444', color: 'white', fontSize: 9, fontWeight: 700 }}>NEW</div>}
+          {isNew && <div style={{ position: 'absolute', top: 8, right: 8, padding: '2px 7px', borderRadius: 20, background: '#EF4444', color: '#FFFFFF', fontSize: 9, fontWeight: 700 }}>NEW</div>}
         </div>
         <div style={{ padding: '10px 12px 14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -206,8 +206,8 @@ function PassCard({ pass, index, onClick, isNew }: { pass: Pass; index: number; 
             </div>
             <span style={{ padding: '2px 7px', borderRadius: 20, background: rarity.bg, color: rarity.color, fontSize: 9, fontWeight: 700 }}>{cfg.rarity}</span>
           </div>
-          <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: '0 0 3px', fontFamily: 'var(--font-display)', lineHeight: 1.3 }}>{cfg.label}</p>
-          <p style={{ color: '#6B7280', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pass.event?.title ?? '—'}</p>
+          <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: '0 0 3px', fontFamily: 'var(--font-display)', lineHeight: 1.3 }}>{cfg.label}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pass.event?.title ?? '—'}</p>
         </div>
       </button>
     </>
@@ -237,9 +237,9 @@ export default function PassesClient({ passes, newPassIds = [] }: { passes: Pass
   if (passes.length === 0) {
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center' }}>
-        <Award size={48} color="#1E5EFF" style={{ opacity: 0.2, marginBottom: 16 }} />
-        <h3 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No passes yet</h3>
-        <p style={{ color: '#6B7280', fontSize: 14, margin: 0 }}>Attend events to collect digital passes. Each event you attend mints you a unique collectible.</p>
+        <Award size={48} color="var(--brand-blue)" style={{ opacity: 0.2, marginBottom: 16 }} />
+        <h3 style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No passes yet</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>Attend events to collect digital passes. Each event you attend mints you a unique collectible.</p>
       </div>
     )
   }
@@ -248,13 +248,13 @@ export default function PassesClient({ passes, newPassIds = [] }: { passes: Pass
     <>
       <div style={{ padding: '16px' }}>
         {/* Header stats */}
-        <div style={{ background: '#13151E', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 18, padding: '14px 16px', marginBottom: 16 }}>
+        <div style={{ background: 'var(--surface-card-2)', border: '1px solid var(--guest-border)', borderRadius: 18, padding: '14px 16px', marginBottom: 16 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
             <div>
-              <p style={{ color: '#6B7280', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 2px' }}>Total Passes</p>
-              <p style={{ color: 'white', fontSize: 28, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)' }}>{passes.length}</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', margin: '0 0 2px' }}>Total Passes</p>
+              <p style={{ color: 'var(--text-primary)', fontSize: 28, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)' }}>{passes.length}</p>
             </div>
-            <Award size={32} color="#1E5EFF" style={{ opacity: 0.3 }} />
+            <Award size={32} color="var(--brand-blue)" style={{ opacity: 0.3 }} />
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {Object.entries(rarityCounts).map(([rarity, count]) => {
@@ -274,7 +274,7 @@ export default function PassesClient({ passes, newPassIds = [] }: { passes: Pass
             <button
               key={s}
               onClick={() => setSort(s)}
-              style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sort === s ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`, background: sort === s ? 'rgba(30,94,255,0.15)' : '#13151E', color: sort === s ? '#818CF8' : '#6B7280', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.15s', textTransform: 'capitalize' }}
+              style={{ padding: '6px 14px', borderRadius: 20, border: `1px solid ${sort === s ? 'var(--brand-blue)' : 'var(--guest-border)'}`, background: sort === s ? 'rgba(var(--brand-blue-rgb),0.12)' : 'var(--surface-card-2)', color: sort === s ? 'var(--brand-blue)' : 'var(--text-muted)', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)', transition: 'all 0.15s', textTransform: 'capitalize' }}
             >
               {s === 'recent' ? 'Most Recent' : 'By Rarity'}
             </button>

@@ -68,7 +68,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string; 
     info: "You're registered. Your QR ticket is in the Tickets tab.",
   },
   waitlisted: {
-    label: 'Waitlisted', color: '#9CA3AF', bg: 'rgba(156,163,175,0.1)', border: 'rgba(156,163,175,0.2)',
+    label: 'Waitlisted', color: 'var(--text-muted)', bg: 'rgba(156,163,175,0.1)', border: 'rgba(156,163,175,0.2)',
     icon: <Clock size={13} />,
     info: "You're on the waitlist. We'll notify you if a spot opens up.",
   },
@@ -128,27 +128,27 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
       <div style={{
         position: 'relative', background: 'var(--guest-surface-2)',
         borderRadius: '24px 24px 0 0', padding: '24px 20px 40px',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid var(--guest-border)',
         animation: 'sheetSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)',
         maxHeight: '90vh', overflowY: 'auto', width: '100%', maxWidth: 480,
       }}>
         {/* Handle */}
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)', margin: '0 auto 20px' }} />
+        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '0 auto 20px' }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
           <div>
-            <h3 style={{ color: 'white', fontSize: 18, fontWeight: 800, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>Submit Payment</h3>
-            <p style={{ color: '#6B7280', fontSize: 13, margin: 0 }}>{event.title}</p>
+            <h3 style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 800, margin: '0 0 4px', fontFamily: 'var(--font-display)' }}>Submit Payment</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>{event.title}</p>
           </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
+          <button onClick={onClose} style={{ background: 'var(--guest-surface-2)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
             <X size={16} />
           </button>
         </div>
 
         {event.ticket_price && event.ticket_price > 0 && (
-          <div style={{ padding: '12px 14px', background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.15)', borderRadius: 14, marginBottom: 20 }}>
+          <div style={{ padding: '12px 14px', background: 'rgba(var(--brand-blue-rgb),0.08)', border: '1px solid rgba(var(--brand-blue-rgb),0.15)', borderRadius: 14, marginBottom: 20 }}>
             <p style={{ color: '#818CF8', fontSize: 13, margin: '0 0 2px', fontWeight: 600 }}>Amount to pay</p>
-            <p style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)' }}>
+            <p style={{ color: 'var(--text-primary)', fontSize: 22, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)' }}>
               PKR {event.ticket_price.toLocaleString('en-PK')}
             </p>
           </div>
@@ -158,11 +158,11 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
         <div
           onClick={() => inputRef.current?.click()}
           style={{
-            border: `2px dashed ${preview ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.1)'}`,
+            border: `2px dashed ${preview ? 'rgba(16,185,129,0.4)' : 'var(--guest-border)'}`,
             borderRadius: 18, padding: preview ? 0 : '32px 20px',
             textAlign: 'center', cursor: 'pointer', marginBottom: 16,
             overflow: 'hidden', transition: 'border-color 0.2s',
-            background: preview ? 'transparent' : 'rgba(255,255,255,0.02)',
+            background: preview ? 'transparent' : 'var(--guest-surface-2)',
           }}
         >
           {preview ? (
@@ -177,9 +177,9 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
             </div>
           ) : (
             <>
-              <FileImage size={32} color="#6B7280" style={{ marginBottom: 10 }} />
-              <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: '0 0 4px' }}>Upload payment screenshot</p>
-              <p style={{ color: '#6B7280', fontSize: 12, margin: 0 }}>Tap to choose · JPG, PNG, HEIC · Max 8MB</p>
+              <FileImage size={32} color="var(--text-muted)" style={{ marginBottom: 10 }} />
+              <p style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, margin: '0 0 4px' }}>Upload payment screenshot</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0 }}>Tap to choose · JPG, PNG, HEIC · Max 8MB</p>
             </>
           )}
         </div>
@@ -197,8 +197,8 @@ function PaymentSheet({ registration, onClose, onSuccess }: {
           disabled={!file || busy}
           style={{
             width: '100%', padding: '14px', border: 'none', borderRadius: 14,
-            background: !file || busy ? 'rgba(255,255,255,0.06)' : '#1E5EFF',
-            color: !file || busy ? '#6B7280' : 'white',
+            background: !file || busy ? 'var(--guest-surface-2)' : 'var(--brand-blue)',
+            color: !file || busy ? 'var(--text-muted)' : '#FFFFFF',
             fontSize: 15, fontWeight: 700, cursor: !file || busy ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             fontFamily: 'var(--font-body)', transition: 'all 0.2s',
@@ -225,18 +225,18 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
 
   return (
     <div style={{
-      background: 'var(--guest-surface)', border: `1px solid ${past ? 'rgba(255,255,255,0.04)' : cfg.border}`,
+      background: 'var(--guest-surface)', border: `1px solid ${past ? 'var(--guest-border)' : cfg.border}`,
       borderRadius: 20, overflow: 'hidden', opacity: past ? 0.6 : 1,
       animation: 'revealUp 0.3s ease forwards',
     }}>
       {/* Cover strip */}
-      <div style={{ height: 90, position: 'relative', background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : 'linear-gradient(135deg,#1E3A5F,#0A0C12)' }}>
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(12,14,22,1) 0%, rgba(12,14,22,0.2) 100%)' }} />
+      <div style={{ height: 90, position: 'relative', background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : `var(--event-gradient-${event.id.charCodeAt(0) % 8})` }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--guest-surface) 0%, rgba(0,0,0,0.15) 100%)' }} />
         <div style={{ position: 'absolute', bottom: 10, left: 14, right: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-          <h3 style={{ color: 'white', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
+          <h3 style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
             {event.title}
           </h3>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: 'rgba(8,10,18,0.92)', border: `1px solid ${cfg.color}40`, color: cfg.color, fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 8 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 20, background: `${cfg.color}18`, border: `1px solid ${cfg.color}40`, color: cfg.color, fontSize: 10, fontWeight: 700, flexShrink: 0, marginLeft: 8 }}>
             {cfg.icon} {cfg.label}
           </span>
         </div>
@@ -245,12 +245,12 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
       <div style={{ padding: '12px 14px' }}>
         {/* Event info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 10 }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 12 }}>
-            <Calendar size={11} color="#1E5EFF" />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 12 }}>
+            <Calendar size={11} color="var(--brand-blue)" />
             {fmtDate(event.date_start)} · {fmtTime(event.date_start)}
           </span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 12 }}>
-            <MapPin size={11} color="#1E5EFF" />
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 12 }}>
+            <MapPin size={11} color="var(--brand-blue)" />
             {event.secret_venue && !isConfirmed
               ? <span style={{ color: '#FFC745' }}>Secret venue</span>
               : (event.venue_name ?? 'TBA')}
@@ -270,7 +270,7 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
             </button>
           )}
           {isConfirmed && !past && (
-            <Link href="/guest/tikkit" style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'rgba(30,94,255,0.15)', border: '1px solid rgba(30,94,255,0.25)', color: '#818CF8', fontSize: 13, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+            <Link href="/guest/tikkit" style={{ flex: 1, padding: '10px', borderRadius: 12, background: 'rgba(var(--brand-blue-rgb),0.15)', border: '1px solid rgba(var(--brand-blue-rgb),0.25)', color: '#818CF8', fontSize: 13, fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
               <Ticket size={13} /> View Ticket
             </Link>
           )}
@@ -325,9 +325,9 @@ export default function MyEventsClient({ registrations }: { registrations: Regis
               onClick={() => setFilter(t.key)}
               style={{
                 flexShrink: 0, padding: '7px 14px', borderRadius: 20,
-                border: `1px solid ${filter === t.key ? '#1E5EFF' : 'rgba(255,255,255,0.08)'}`,
-                background: filter === t.key ? 'rgba(30,94,255,0.15)' : 'var(--guest-surface)',
-                color: filter === t.key ? '#818CF8' : '#6B7280',
+                border: `1px solid ${filter === t.key ? 'var(--brand-blue)' : 'var(--guest-border)'}`,
+                background: filter === t.key ? 'rgba(var(--brand-blue-rgb),0.15)' : 'var(--guest-surface)',
+                color: filter === t.key ? '#818CF8' : 'var(--text-muted)',
                 fontSize: 13, fontWeight: 600, cursor: 'pointer',
                 fontFamily: 'var(--font-body)', transition: 'all 0.15s',
               }}
@@ -343,11 +343,11 @@ export default function MyEventsClient({ registrations }: { registrations: Regis
             {filtered.map(r => <RegCard key={r.id} reg={r} onPay={setPayTarget} />)}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '64px 0', color: '#6B7280' }}>
-            <Calendar size={40} color="#4B5563" style={{ opacity: 0.3, marginBottom: 14 }} />
-            <p style={{ fontSize: 15, fontWeight: 600, color: '#9CA3AF', margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No events here</p>
-            <p style={{ fontSize: 13, margin: '0 0 24px', color: '#6B7280' }}>Events you register for will appear here.</p>
-            <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
+          <div style={{ textAlign: 'center', padding: '64px 0', color: 'var(--text-muted)' }}>
+            <Calendar size={40} color="var(--text-muted)" style={{ opacity: 0.3, marginBottom: 14 }} />
+            <p style={{ fontSize: 15, fontWeight: 600, color: 'var(--text-primary)', margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No events here</p>
+            <p style={{ fontSize: 13, margin: '0 0 24px', color: 'var(--text-muted)' }}>Events you register for will appear here.</p>
+            <Link href="/guest/explore" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: 'var(--brand-blue)', color: '#FFFFFF', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
               Explore Events
             </Link>
           </div>

@@ -114,6 +114,7 @@ export default function SettingsPage() {
   const [teamOpen, setTeamOpen] = useState(false)
   const [notifOpen, setNotifOpen] = useState(false)
   const [paymentOpen, setPaymentOpen] = useState(false)
+  const [appearanceOpen, setAppearanceOpen] = useState(false)
 
   // Password (expandable under profile)
   const [passwordOpen, setPasswordOpen] = useState(false)
@@ -891,17 +892,29 @@ export default function SettingsPage() {
       </div>
 
       {/* Appearance */}
-      <div className="card space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-brand-blue/10 border border-brand-blue/20 flex items-center justify-center shrink-0">
-            <Palette className="w-4 h-4 text-brand-blue" />
+      <div className="card space-y-5">
+        <button
+          type="button"
+          onClick={() => setAppearanceOpen(!appearanceOpen)}
+          className="w-full flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center shrink-0">
+              <Palette className="w-4 h-4 text-brand-blue" />
+            </div>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Appearance</p>
+              <p className="text-xs text-gray-500 mt-0.5">Choose the visual theme for your dashboard</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>Appearance</p>
-            <p className="text-xs text-gray-500">Choose the visual theme for your dashboard</p>
+          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', appearanceOpen && 'rotate-180')} />
+        </button>
+
+        {appearanceOpen && (
+          <div className="border-t border-white/5 pt-4">
+            <ThemePicker />
           </div>
-        </div>
-        <ThemePicker />
+        )}
       </div>
 
       {/* Report a Problem */}

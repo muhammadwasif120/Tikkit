@@ -121,17 +121,17 @@ export default function AddToHomeScreen() {
           maxWidth: 448,
           zIndex: 999,
           background: 'linear-gradient(135deg, #13151E 0%, #0D0F18 100%)',
-          border: '1px solid rgba(30,94,255,0.3)',
+          border: '1px solid rgba(var(--brand-blue-rgb),0.3)',
           borderRadius: 20,
           padding: '16px',
-          boxShadow: '0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(30,94,255,0.1)',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(var(--brand-blue-rgb),0.1)',
         }}
       >
         {/* Glow accent */}
         <div style={{
           position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
           width: 160, height: 2, borderRadius: 2,
-          background: 'linear-gradient(90deg, transparent, #1E5EFF, transparent)',
+          background: 'linear-gradient(90deg, transparent, var(--brand-blue), transparent)',
         }} />
 
         {/* Close button */}
@@ -142,7 +142,7 @@ export default function AddToHomeScreen() {
             background: 'rgba(255,255,255,0.06)', border: 'none',
             borderRadius: 8, width: 28, height: 28,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: '#6B7280',
+            cursor: 'pointer', color: 'var(--text-muted)',
           }}
         >
           <X size={14} />
@@ -153,13 +153,13 @@ export default function AddToHomeScreen() {
           {/* Icon */}
           <div style={{
             width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-            background: 'rgba(30,94,255,0.15)',
-            border: '1px solid rgba(30,94,255,0.25)',
+            background: 'rgba(var(--brand-blue-rgb),0.15)',
+            border: '1px solid rgba(var(--brand-blue-rgb),0.25)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             {platform === 'ios'
-              ? <PlusSquare size={22} color="#1E5EFF" />
-              : <Download size={22} color="#1E5EFF" />
+              ? <PlusSquare size={22} color="var(--brand-blue)" />
+              : <Download size={22} color="var(--brand-blue)" />
             }
           </div>
 
@@ -167,7 +167,7 @@ export default function AddToHomeScreen() {
             <p style={{ color: 'white', fontSize: 14, fontWeight: 700, margin: '0 0 3px', lineHeight: 1.3 }}>
               Add Tikkit to your home screen
             </p>
-            <p style={{ color: '#6B7280', fontSize: 12, margin: '0 0 12px', lineHeight: 1.5 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: '0 0 12px', lineHeight: 1.5 }}>
               {platform === 'ios'
                 ? 'Get quick access — no app store needed.'
                 : 'Install for the full app experience.'}
@@ -177,16 +177,16 @@ export default function AddToHomeScreen() {
               /* iOS step-by-step instructions */
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#9CA3AF' }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--text-secondary)' }}>
                     <ShareIcon />
                   </div>
-                  <span style={{ color: '#9CA3AF', fontSize: 12 }}>Tap the <strong style={{ color: 'white' }}>Share</strong> button in Safari</span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>Tap the <strong style={{ color: 'white' }}>Share</strong> button in Safari</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#9CA3AF' }}>
+                  <div style={{ width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--text-secondary)' }}>
                     <Share size={13} />
                   </div>
-                  <span style={{ color: '#9CA3AF', fontSize: 12 }}>Select <strong style={{ color: 'white' }}>&quot;Add to Home Screen&quot;</strong></span>
+                  <span style={{ color: 'var(--text-secondary)', fontSize: 12 }}>Select <strong style={{ color: 'white' }}>&quot;Add to Home Screen&quot;</strong></span>
                 </div>
               </div>
             ) : (
@@ -196,12 +196,12 @@ export default function AddToHomeScreen() {
                 disabled={installing}
                 style={{
                   width: '100%', padding: '10px 16px',
-                  background: installing ? 'rgba(30,94,255,0.4)' : 'linear-gradient(135deg, #1E5EFF, #1448CC)',
+                  background: installing ? 'rgba(var(--brand-blue-rgb),0.4)' : 'linear-gradient(135deg, var(--brand-blue), var(--brand-blue-dark))',
                   border: 'none', borderRadius: 10,
                   color: 'white', fontSize: 13, fontWeight: 700,
                   cursor: installing ? 'not-allowed' : 'pointer',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                  boxShadow: installing ? 'none' : '0 4px 12px rgba(30,94,255,0.35)',
+                  boxShadow: installing ? 'none' : '0 4px 12px rgba(var(--brand-blue-rgb),0.35)',
                 }}
               >
                 <Download size={15} />
@@ -218,7 +218,7 @@ export default function AddToHomeScreen() {
             width: 0, height: 0,
             borderLeft: '8px solid transparent',
             borderRight: '8px solid transparent',
-            borderTop: '8px solid rgba(30,94,255,0.3)',
+            borderTop: '8px solid rgba(var(--brand-blue-rgb),0.3)',
           }} />
         )}
       </div>

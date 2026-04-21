@@ -39,12 +39,10 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
         { event: 'INSERT', schema: 'public', table: 'event_chats', filter: `event_id=eq.${eventId}` },
         (payload: any) => {
           const msg = payload.new as any
-          // Own messages
           if (msg.user_id === userId) {
             setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, { ...msg, sender_name: 'You', sender_avatar: null }])
             return
           }
-          // Organizer broadcasts (no recipient) or private replies to this user
           if (msg.role === 'organizer') {
             if (msg.recipient_user_id !== null && msg.recipient_user_id !== undefined && msg.recipient_user_id !== userId) return
             setMessages(prev => prev.some(m => m.id === msg.id) ? prev : [...prev, { ...msg, sender_name: organizerName ?? 'Organizer', sender_avatar: null }])
@@ -77,21 +75,21 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100svh', background: '#080A12', fontFamily: 'var(--font-body)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100svh', background: 'var(--guest-bg)', fontFamily: 'var(--font-body)' }}>
       {/* Header */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
         padding: 'calc(14px + env(safe-area-inset-top)) 16px 14px',
-        background: 'rgba(13,15,24,0.95)', backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        background: 'var(--surface-card)', backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--guest-border)',
         flexShrink: 0,
       }}>
-        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: '#9CA3AF', display: 'flex' }}>
+        <button onClick={() => router.back()} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--text-muted)', display: 'flex' }}>
           <ArrowLeft size={20} />
         </button>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <p style={{ color: 'white', fontSize: 15, fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{eventTitle}</p>
-          <p style={{ color: '#4B5563', fontSize: 11, margin: '1px 0 0' }}>
+          <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{eventTitle}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: '1px 0 0' }}>
             <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: '#22C55E', marginRight: 5, boxShadow: '0 0 6px rgba(34,197,94,0.6)', verticalAlign: 'middle' }} />
             {organizerName ?? 'Organizer'} · Live chat
           </p>
@@ -99,11 +97,11 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 10, scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.06) transparent' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 10, scrollbarWidth: 'thin', scrollbarColor: 'var(--guest-border) transparent' }}>
         {messages.length === 0 ? (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '40px 20px' }}>
             <div style={{ fontSize: 40 }}>💬</div>
-            <p style={{ color: '#374151', fontSize: 14, textAlign: 'center', margin: 0 }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 14, textAlign: 'center', margin: 0 }}>
               No messages yet.<br />Send a message to the organizer.
             </p>
           </div>
@@ -115,17 +113,16 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
               <div key={msg.id} style={{ display: 'flex', gap: 8, maxWidth: '85%', alignSelf: isMe ? 'flex-end' : 'flex-start', flexDirection: isMe ? 'row-reverse' : 'row' }}>
                 <div style={{
                   width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                  background: isMe ? 'rgba(30,94,255,0.2)' : 'rgba(168,85,247,0.15)',
-                  border: `1px solid ${isMe ? 'rgba(30,94,255,0.3)' : 'rgba(168,85,247,0.3)'}`,
+                  background: isMe ? 'rgba(var(--brand-blue-rgb),0.2)' : 'rgba(168,85,247,0.15)',
+                  border: `1px solid ${isMe ? 'rgba(var(--brand-blue-rgb),0.3)' : 'rgba(168,85,247,0.3)'}`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 10, fontWeight: 800,
-                  color: isMe ? '#1E5EFF' : '#A855F7',
+                  color: isMe ? 'var(--brand-blue)' : '#A855F7',
                 }}>
                   {initials}
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                  <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 600, margin: 0, textAlign: isMe ? 'right' : 'left' }}>{msg.sender_name}</p>
-                  {/* Broadcast / private reply badge on organizer messages */}
+                  <p style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 600, margin: 0, textAlign: isMe ? 'right' : 'left' }}>{msg.sender_name}</p>
                   {!isMe && msg.role === 'organizer' && (
                     <div style={{
                       display: 'inline-flex', alignItems: 'center', gap: 3,
@@ -133,7 +130,7 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
                       marginBottom: 4, width: 'fit-content',
                       ...(msg.recipient_user_id
                         ? { background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.2)', color: '#C084FC' }
-                        : { background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)', color: '#6B9FFF' }
+                        : { background: 'rgba(var(--brand-blue-rgb),0.1)', border: '1px solid rgba(var(--brand-blue-rgb),0.2)', color: '#6B9FFF' }
                       ),
                     }}>
                       {msg.recipient_user_id
@@ -145,13 +142,13 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
                   <div style={{
                     padding: '8px 12px', borderRadius: 12, fontSize: 13, lineHeight: 1.5,
                     wordBreak: 'break-word',
-                    background: isMe ? 'rgba(30,94,255,0.18)' : '#151722',
-                    border: `1px solid ${isMe ? 'rgba(30,94,255,0.25)' : 'rgba(255,255,255,0.06)'}`,
-                    color: isMe ? '#C7D6FF' : '#E5E7EB',
+                    background: isMe ? 'rgba(var(--brand-blue-rgb),0.18)' : 'var(--surface-card-2)',
+                    border: `1px solid ${isMe ? 'rgba(var(--brand-blue-rgb),0.25)' : 'var(--guest-border)'}`,
+                    color: isMe ? '#C7D6FF' : 'var(--text-primary)',
                   }}>
                     {msg.message}
                   </div>
-                  <p style={{ color: '#374151', fontSize: 9, margin: 0, textAlign: isMe ? 'right' : 'left' }}>{fmtTime(msg.created_at)}</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 9, margin: 0, textAlign: isMe ? 'right' : 'left' }}>{fmtTime(msg.created_at)}</p>
                 </div>
               </div>
             )
@@ -163,9 +160,9 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
       {/* Input */}
       <div style={{
         padding: '12px 14px calc(12px + env(safe-area-inset-bottom))',
-        borderTop: '1px solid rgba(255,255,255,0.06)',
+        borderTop: '1px solid var(--guest-border)',
         display: 'flex', gap: 8, alignItems: 'center',
-        background: 'rgba(13,15,24,0.95)', flexShrink: 0,
+        background: 'var(--surface-card)', flexShrink: 0,
       }}>
         <textarea
           value={input}
@@ -174,8 +171,8 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
           placeholder="Message the organizer..."
           rows={1}
           style={{
-            flex: 1, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: 10, padding: '9px 14px', color: 'white', fontSize: 13,
+            flex: 1, background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)',
+            borderRadius: 10, padding: '9px 14px', color: 'var(--text-primary)', fontSize: 13,
             outline: 'none', resize: 'none', minHeight: 38, maxHeight: 100,
             fontFamily: 'var(--font-body)',
           }}
@@ -185,7 +182,7 @@ export default function GuestChatPanel({ eventId, eventTitle, organizerName, ini
           disabled={!input.trim() || sending}
           style={{
             width: 36, height: 36, borderRadius: 10,
-            background: '#1E5EFF', border: 'none', cursor: 'pointer',
+            background: 'var(--brand-blue)', border: 'none', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             opacity: !input.trim() || sending ? 0.4 : 1, flexShrink: 0,
           }}

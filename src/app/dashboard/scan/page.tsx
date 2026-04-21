@@ -47,10 +47,10 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
   const ok = result.success
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
-      <div style={{ position: 'relative', width: '100%', maxWidth: 380, borderRadius: 20, border: `1px solid ${ok ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`, background: ok ? '#0a1a0a' : '#1a0a0a', overflow: 'hidden', boxShadow: '0 24px 80px rgba(0,0,0,0.6)' }}>
+      <div style={{ position: 'relative', width: '100%', maxWidth: 380, borderRadius: 20, border: `1px solid ${ok ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`, background: 'var(--surface-card)', overflow: 'hidden', boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}>
         <div style={{ height: 3, background: ok ? '#22C55E' : '#EF4444' }} />
         <div style={{ padding: '20px 20px 16px' }}>
-          <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6B7280' }}>
+          <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 8, width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
             <X size={12} />
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: result.guestName ? 16 : 0 }}>
@@ -61,19 +61,19 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
               <p style={{ color: ok ? '#22C55E' : '#EF4444', fontSize: 15, fontWeight: 700, margin: 0 }}>{result.message}</p>
               {result.scanType && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                  {result.scanType === 'entry' ? <LogIn size={11} color="#6B7280" /> : <LogOut size={11} color="#6B7280" />}
-                  <span style={{ color: '#6B7280', fontSize: 11, textTransform: 'capitalize' }}>{result.scanType}</span>
+                  {result.scanType === 'entry' ? <LogIn size={11} color="var(--text-muted)" /> : <LogOut size={11} color="var(--text-muted)" />}
+                  <span style={{ color: 'var(--text-muted)', fontSize: 11, textTransform: 'capitalize' }}>{result.scanType}</span>
                 </div>
               )}
             </div>
           </div>
           {result.guestName && (
             <>
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', marginBottom: 14 }} />
+              <div style={{ height: 1, background: 'var(--guest-border)', marginBottom: 14 }} />
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
                 <div>
-                  <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 3px' }}>Guest</p>
-                  <p style={{ color: 'white', fontSize: 20, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>{result.guestName}</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 3px' }}>Guest</p>
+                  <p style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>{result.guestName}</p>
                 </div>
                 {result.isVip && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', borderRadius: 20, background: 'rgba(255,199,69,0.12)', border: '1px solid rgba(255,199,69,0.3)', flexShrink: 0, marginTop: 4 }}>
@@ -84,30 +84,30 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {result.email && (
-                  <div style={{ gridColumn: '1 / -1', background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '8px 12px' }}>
-                    <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px' }}>Email</p>
-                    <p style={{ color: '#E5E7EB', fontSize: 12, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{result.email}</p>
+                  <div style={{ gridColumn: '1 / -1', background: 'var(--guest-surface-2)', borderRadius: 10, padding: '8px 12px' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: '0 0 2px' }}>Email</p>
+                    <p style={{ color: 'var(--text-primary)', fontSize: 12, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{result.email}</p>
                   </div>
                 )}
                 {result.ticketType && (
-                  <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '8px 12px' }}>
-                    <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px' }}>Ticket</p>
-                    <p style={{ color: '#E5E7EB', fontSize: 12, margin: 0, textTransform: 'capitalize' }}>{result.ticketType.replace(/_/g, ' ')}</p>
+                  <div style={{ background: 'var(--guest-surface-2)', borderRadius: 10, padding: '8px 12px' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: '0 0 2px' }}>Ticket</p>
+                    <p style={{ color: 'var(--text-primary)', fontSize: 12, margin: 0, textTransform: 'capitalize' }}>{result.ticketType.replace(/_/g, ' ')}</p>
                   </div>
                 )}
                 {result.checkedInAt && (
-                  <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '8px 12px' }}>
-                    <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px' }}>{result.scanType === 'exit' ? 'Checked Out' : 'Checked In'}</p>
-                    <p style={{ color: '#E5E7EB', fontSize: 12, margin: 0 }}>{new Date(result.checkedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                  <div style={{ background: 'var(--guest-surface-2)', borderRadius: 10, padding: '8px 12px' }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: '0 0 2px' }}>{result.scanType === 'exit' ? 'Checked Out' : 'Checked In'}</p>
+                    <p style={{ color: 'var(--text-primary)', fontSize: 12, margin: 0 }}>{new Date(result.checkedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 )}
               </div>
               {result.validDays && result.validDays.length > 0 && (
-                <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '8px 12px', marginTop: 8 }}>
-                  <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 6px' }}>Valid for</p>
+                <div style={{ background: 'var(--guest-surface-2)', borderRadius: 10, padding: '8px 12px', marginTop: 8 }}>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: '0 0 6px' }}>Valid for</p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {result.validDays.map(day => (
-                      <span key={day} style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 20, background: 'rgba(30,94,255,0.12)', color: '#93C5FD', border: '1px solid rgba(30,94,255,0.2)' }}>
+                      <span key={day} style={{ fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 20, background: 'rgba(var(--brand-blue-rgb),0.12)', color: 'var(--brand-blue)', border: '1px solid rgba(var(--brand-blue-rgb),0.2)' }}>
                         {new Date(day + 'T12:00:00').toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })}
                       </span>
                     ))}
@@ -116,7 +116,7 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
               )}
             </>
           )}
-          <div style={{ marginTop: 14, height: 3, borderRadius: 99, background: 'rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+          <div style={{ marginTop: 14, height: 3, borderRadius: 99, background: 'var(--guest-border)', overflow: 'hidden' }}>
             <div style={{ height: '100%', borderRadius: 99, background: ok ? '#22C55E' : '#EF4444', animation: `shrinkbar ${OVERLAY_DURATION}ms linear forwards` }} />
           </div>
         </div>
@@ -399,12 +399,12 @@ export default function ScannerPage() {
 
         {/* ── Header ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, background: 'rgba(30,94,255,0.12)', border: '1px solid rgba(30,94,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <QrCode size={20} color="#1E5EFF" />
+          <div style={{ width: 44, height: 44, borderRadius: 14, flexShrink: 0, background: 'rgba(var(--brand-blue-rgb),0.12)', border: '1px solid rgba(var(--brand-blue-rgb),0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <QrCode size={20} color="var(--brand-blue)" />
           </div>
           <div>
-            <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>QR Scanner</h1>
-            <p style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', margin: 0 }}>Scan guest QR codes at the venue entrance.</p>
+            <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>QR Scanner</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', margin: 0 }}>Scan guest QR codes at the venue entrance.</p>
           </div>
         </div>
 
@@ -420,29 +420,29 @@ export default function ScannerPage() {
           </div>
         )}
         {isOnline && syncing && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.2)', marginBottom: 14 }}>
-            <RefreshCw size={14} color="#1E5EFF" style={{ animation: 'spin 1s linear infinite' }} />
-            <p style={{ color: '#4D82FF', fontSize: 13, margin: 0 }}>Syncing offline check-ins…</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderRadius: 12, background: 'rgba(var(--brand-blue-rgb),0.08)', border: '1px solid rgba(var(--brand-blue-rgb),0.2)', marginBottom: 14 }}>
+            <RefreshCw size={14} color="var(--brand-blue)" style={{ animation: 'spin 1s linear infinite' }} />
+            <p style={{ color: 'var(--brand-blue)', fontSize: 13, margin: 0 }}>Syncing offline check-ins…</p>
           </div>
         )}
 
         {/* ── Controls bar ── */}
-        <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '14px 16px', marginBottom: 16 }}>
+        <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 16, padding: '14px 16px', marginBottom: 16 }}>
           {/* Event row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
             <div style={{ flex: 1, position: 'relative' }}>
-              <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 4px' }}>Event</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 4px' }}>Event</p>
               <div style={{ position: 'relative' }}>
                 <select
                   value={eventId}
                   onChange={e => setEventId(e.target.value)}
                   disabled={scanning}
-                  style={{ width: '100%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, color: 'white', fontSize: 13, fontWeight: 600, padding: '8px 32px 8px 12px', outline: 'none', cursor: scanning ? 'not-allowed' : 'pointer', appearance: 'none' }}
+                  style={{ width: '100%', background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 10, color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, padding: '8px 32px 8px 12px', outline: 'none', cursor: scanning ? 'not-allowed' : 'pointer', appearance: 'none' }}
                 >
-                  {events.map(e => <option key={e.id} value={e.id} style={{ background: '#0C0E16' }}>{e.title}</option>)}
+                  {events.map(e => <option key={e.id} value={e.id} style={{ background: 'var(--surface-card)' }}>{e.title}</option>)}
                   {events.length === 0 && <option disabled>No active events</option>}
                 </select>
-                <ChevronDown size={14} color="#4B5563" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                <ChevronDown size={14} color="var(--text-muted)" style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
               </div>
             </div>
           </div>
@@ -461,13 +461,13 @@ export default function ScannerPage() {
                     cursor: scanning ? 'not-allowed' : 'pointer', textTransform: 'capitalize',
                     border: scanType === type
                       ? type === 'entry' ? '1px solid rgba(34,197,94,0.4)' : '1px solid rgba(255,199,69,0.4)'
-                      : '1px solid rgba(255,255,255,0.08)',
+                      : '1px solid var(--guest-border)',
                     background: scanType === type
                       ? type === 'entry' ? 'rgba(34,197,94,0.1)' : 'rgba(255,199,69,0.1)'
-                      : 'rgba(255,255,255,0.04)',
+                      : 'var(--guest-surface-2)',
                     color: scanType === type
                       ? type === 'entry' ? '#22C55E' : '#FFC745'
-                      : '#6B7280',
+                      : 'var(--text-muted)',
                     transition: 'all 0.15s',
                   }}
                 >
@@ -481,7 +481,7 @@ export default function ScannerPage() {
               <button
                 onClick={startScanner}
                 disabled={!eventId}
-                style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px', background: '#1E5EFF', border: 'none', borderRadius: 10, color: 'white', fontSize: 13, fontWeight: 700, cursor: !eventId ? 'not-allowed' : 'pointer', flexShrink: 0, boxShadow: '0 4px 16px rgba(30,94,255,0.3)', opacity: !eventId ? 0.5 : 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '10px 18px', background: 'var(--brand-blue)', border: 'none', borderRadius: 10, color: '#FFFFFF', fontSize: 13, fontWeight: 700, cursor: !eventId ? 'not-allowed' : 'pointer', flexShrink: 0, boxShadow: '0 4px 16px rgba(var(--brand-blue-rgb),0.3)', opacity: !eventId ? 0.5 : 1 }}
               >
                 <Camera size={15} /> Start
               </button>
@@ -504,10 +504,10 @@ export default function ScannerPage() {
             { label: 'Checked Out', value: stats.checkedOut, color: '#A78BFA', icon: UserMinus },
             { label: 'Remaining', value: stats.remaining, color: '#FFC745', icon: Hourglass },
           ].map(({ label, value, color, icon: Icon }) => (
-            <div key={label} style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '14px 16px' }}>
+            <div key={label} style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                 <Icon size={12} color={color} />
-                <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>{label}</p>
+                <p style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', margin: 0 }}>{label}</p>
               </div>
               <p style={{ color, fontSize: 28, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', lineHeight: 1 }}>{value}</p>
             </div>
@@ -518,19 +518,19 @@ export default function ScannerPage() {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }} className="scanner-grid">
 
           {/* ── Camera panel ── */}
-          <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 16, overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', borderBottom: '1px solid var(--guest-border)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: scanning ? (isOnline ? '#22C55E' : '#F59E0B') : '#374151', display: 'inline-block', ...(scanning ? { animation: 'pulse 2s infinite' } : {}) }} />
-                <span style={{ color: scanning ? (isOnline ? '#22C55E' : '#F59E0B') : '#4B5563', fontSize: 12, fontWeight: 600 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: scanning ? (isOnline ? '#22C55E' : '#F59E0B') : 'var(--guest-border)', display: 'inline-block', ...(scanning ? { animation: 'pulse 2s infinite' } : {}) }} />
+                <span style={{ color: scanning ? (isOnline ? '#22C55E' : '#F59E0B') : 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>
                   {scanning ? (isOnline ? 'Live' : 'Offline') : 'Ready to scan'}
                 </span>
                 {scanning && selectedEvent && (
-                  <span style={{ color: '#374151', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 110 }}>· {selectedEvent.title}</span>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 110 }}>· {selectedEvent.title}</span>
                 )}
               </div>
               {scanning && (
-                <span style={{ color: '#4B5563', fontSize: 11, textTransform: 'capitalize', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: 11, textTransform: 'capitalize', display: 'flex', alignItems: 'center', gap: 4 }}>
                   {isOnline ? <Wifi size={11} /> : <WifiOff size={11} />}
                   {scanType}
                 </span>
@@ -553,17 +553,17 @@ export default function ScannerPage() {
               )}
               {!scanning && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 260, gap: 12, padding: 24 }}>
-                  <div style={{ width: 72, height: 72, borderRadius: 20, background: 'rgba(30,94,255,0.07)', border: '1px solid rgba(30,94,255,0.13)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <QrCode size={32} color="#1E5EFF" style={{ opacity: 0.45 }} />
+                  <div style={{ width: 72, height: 72, borderRadius: 20, background: 'rgba(var(--brand-blue-rgb),0.07)', border: '1px solid rgba(var(--brand-blue-rgb),0.13)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <QrCode size={32} color="var(--brand-blue)" style={{ opacity: 0.45 }} />
                   </div>
-                  <p style={{ color: '#374151', fontSize: 12, margin: 0, textAlign: 'center' }}>Select an event and press Start</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0, textAlign: 'center' }}>Select an event and press Start</p>
                 </div>
               )}
             </div>
 
-            <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-              <ScanLine size={12} color="#374151" />
-              <p style={{ color: '#374151', fontSize: 11, margin: 0 }}>{scanning ? 'Align QR code within the frame' : 'Camera inactive'}</p>
+            <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, borderTop: '1px solid var(--guest-border)' }}>
+              <ScanLine size={12} color="var(--text-muted)" />
+              <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{scanning ? 'Align QR code within the frame' : 'Camera inactive'}</p>
             </div>
           </div>
 
@@ -571,9 +571,9 @@ export default function ScannerPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
 
             {/* Check-in Log */}
-            <div style={{ background: '#0C0E16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, overflow: 'hidden', flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>Check-in Log</p>
+            <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 16, overflow: 'hidden', flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--guest-border)' }}>
+                <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>Check-in Log</p>
                 {log.length > 0 && (
                   <span style={{ background: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 20, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>
                     {log.filter(e => e.success && e.scanType === 'entry').length} in
@@ -583,24 +583,24 @@ export default function ScannerPage() {
               <div style={{ overflowY: 'auto', maxHeight: 240 }}>
                 {log.length === 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 20px', gap: 8 }}>
-                    <QrCode size={28} color="#374151" />
-                    <p style={{ color: '#4B5563', fontSize: 12, margin: 0, textAlign: 'center' }}>No scans yet</p>
+                    <QrCode size={28} color="var(--text-muted)" />
+                    <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0, textAlign: 'center' }}>No scans yet</p>
                   </div>
                 ) : (
                   log.map((entry, i) => (
-                    <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: i < log.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none', background: i === 0 ? 'rgba(255,255,255,0.015)' : 'transparent' }}>
+                    <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: i < log.length - 1 ? '1px solid var(--guest-border)' : 'none', background: i === 0 ? 'var(--guest-surface-2)' : 'transparent' }}>
                       <div style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: entry.success ? (entry.scanType === 'entry' ? '#22C55E' : '#A78BFA') : '#EF4444', ...(i === 0 ? { boxShadow: `0 0 6px ${entry.success ? (entry.scanType === 'entry' ? 'rgba(34,197,94,0.7)' : 'rgba(167,139,250,0.7)') : 'rgba(239,68,68,0.7)'}` } : {}) }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <p style={{ color: entry.success ? 'white' : '#6B7280', fontSize: 12, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.name}</p>
+                          <p style={{ color: entry.success ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: 12, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.name}</p>
                           {entry.isVip && <Crown size={10} color="#FFC745" />}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 1 }}>
-                          {entry.scanType === 'entry' ? <LogIn size={9} color={entry.success ? '#22C55E' : '#4B5563'} /> : <LogOut size={9} color={entry.success ? '#A78BFA' : '#4B5563'} />}
-                          <span style={{ color: '#4B5563', fontSize: 10 }}>{entry.scanType}</span>
+                          {entry.scanType === 'entry' ? <LogIn size={9} color={entry.success ? '#22C55E' : 'var(--text-muted)'} /> : <LogOut size={9} color={entry.success ? '#A78BFA' : 'var(--text-muted)'} />}
+                          <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>{entry.scanType}</span>
                         </div>
                       </div>
-                      <p style={{ color: '#4B5563', fontSize: 10, fontWeight: 500, flexShrink: 0 }}>
+                      <p style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 500, flexShrink: 0 }}>
                         {new Date(entry.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -610,16 +610,16 @@ export default function ScannerPage() {
             </div>
 
             {/* Staff Mode */}
-            <div style={{ background: 'rgba(30,94,255,0.05)', border: '1px solid rgba(30,94,255,0.16)', borderRadius: 14, padding: '14px 16px' }}>
+            <div style={{ background: 'rgba(var(--brand-blue-rgb),0.05)', border: '1px solid rgba(var(--brand-blue-rgb),0.16)', borderRadius: 14, padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
                 <Zap size={13} color="#FFC745" />
                 <p style={{ color: '#FFC745', fontSize: 13, fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>Staff Mode</p>
               </div>
-              <p style={{ color: '#9CA3AF', fontSize: 11, margin: '0 0 10px', lineHeight: 1.55 }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: '0 0 10px', lineHeight: 1.55 }}>
                 Share a scanner-only link with your team — they can scan without seeing your dashboard or guest data.
               </p>
               {eventId && (
-                <button onClick={copyStaffLink} style={{ background: staffCopied ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.05)', border: `1px solid ${staffCopied ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.1)'}`, borderRadius: 8, padding: '7px 12px', color: staffCopied ? '#22C55E' : '#9CA3AF', fontSize: 11, fontWeight: 600, cursor: 'pointer', width: '100%', transition: 'all 0.2s' }}>
+                <button onClick={copyStaffLink} style={{ background: staffCopied ? 'rgba(34,197,94,0.1)' : 'var(--guest-surface-2)', border: `1px solid ${staffCopied ? 'rgba(34,197,94,0.3)' : 'var(--guest-border)'}`, borderRadius: 8, padding: '7px 12px', color: staffCopied ? '#22C55E' : 'var(--text-muted)', fontSize: 11, fontWeight: 600, cursor: 'pointer', width: '100%', transition: 'all 0.2s' }}>
                   {staffCopied ? '✓ Link copied!' : 'Copy staff scanner link'}
                 </button>
               )}

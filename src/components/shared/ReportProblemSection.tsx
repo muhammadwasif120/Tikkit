@@ -116,7 +116,7 @@ const ALL_CATEGORIES: Category[] = [
     key: 'other',
     label: 'Other',
     icon: HelpCircle,
-    color: '#6B7280',
+    color: 'var(--text-muted)',
     hint: 'Anything else not covered above',
     priority: 'medium',
     forOrganizer: true,
@@ -208,10 +208,10 @@ export default function ReportProblemSection({ userId, userName, userType, varia
             <AlertTriangle size={18} color="#EF4444" />
           </div>
           <div style={{ flex: 1 }}>
-            <p style={{ color: 'white', fontSize: 14, fontWeight: 600, margin: 0 }}>Report a Problem</p>
-            <p style={{ color: '#6B7280', fontSize: 12, margin: '2px 0 0' }}>File a support request or dispute</p>
+            <p style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 600, margin: 0 }}>Report a Problem</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: '2px 0 0' }}>File a support request or dispute</p>
           </div>
-          <span style={{ fontSize: 11, color: '#4B5563', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, fontFamily: 'var(--font-body)' }}>
             {open ? '▲' : '▼'}
           </span>
         </button>
@@ -230,22 +230,22 @@ export default function ReportProblemSection({ userId, userName, userType, varia
               }}>
                 <CheckCircle size={24} color="#22C55E" />
               </div>
-              <p style={{ color: 'white', fontSize: 16, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
+              <p style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>
                 Report Submitted
               </p>
-              <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 4px', lineHeight: 1.5 }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 4px', lineHeight: 1.5 }}>
                 Our team will review your report and respond within 1–2 business days.
               </p>
               {submitted !== 'submitted' && (
-                <p style={{ color: '#4B5563', fontSize: 12, margin: '8px 0 0', fontFamily: 'monospace' }}>
-                  Reference: <span style={{ color: '#9CA3AF' }}>{submitted}</span>
+                <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: '8px 0 0', fontFamily: 'monospace' }}>
+                  Reference: <span style={{ color: 'var(--text-muted)' }}>{submitted}</span>
                 </p>
               )}
               <button
                 onClick={handleReset}
                 style={{
                   marginTop: 18, padding: '8px 20px', borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#9CA3AF',
+                  background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', color: 'var(--text-muted)',
                   fontFamily: 'var(--font-body)',
                 }}
               >
@@ -255,7 +255,7 @@ export default function ReportProblemSection({ userId, userName, userType, varia
           ) : (
             <>
               {/* ── Category pills ── */}
-              <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', margin: '0 0 10px', fontFamily: 'var(--font-body)' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', margin: '0 0 10px', fontFamily: 'var(--font-body)' }}>
                 WHAT BEST DESCRIBES YOUR ISSUE?
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(148px, 1fr))', gap: 8, marginBottom: 18 }}>
@@ -269,9 +269,9 @@ export default function ReportProblemSection({ userId, userName, userType, varia
                       style={{
                         display: 'flex', alignItems: 'center', gap: 8,
                         padding: '9px 12px', borderRadius: 10, cursor: 'pointer',
-                        background: active ? `${cat.color}14` : 'rgba(255,255,255,0.03)',
-                        border: `1px solid ${active ? cat.color + '45' : 'rgba(255,255,255,0.07)'}`,
-                        color: active ? cat.color : '#6B7280',
+                        background: active ? `${cat.color}14` : 'var(--guest-surface-2)',
+                        border: `1px solid ${active ? cat.color + '45' : 'var(--guest-border)'}`,
+                        color: active ? cat.color : 'var(--text-muted)',
                         fontSize: 12, fontWeight: active ? 700 : 500,
                         fontFamily: 'var(--font-body)', textAlign: 'left',
                         transition: 'all 0.15s',
@@ -299,7 +299,7 @@ export default function ReportProblemSection({ userId, userName, userType, varia
 
               {/* ── Subject ── */}
               <div style={{ marginBottom: 12 }}>
-                <label style={{ display: 'block', color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>
+                <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>
                   SUBJECT
                 </label>
                 <input
@@ -310,7 +310,7 @@ export default function ReportProblemSection({ userId, userName, userType, varia
                   maxLength={120}
                   style={{
                     width: '100%', padding: '9px 12px', borderRadius: 10,
-                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)',
+                    background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)',
                     color: 'white', fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none',
                     boxSizing: 'border-box',
                   }}
@@ -319,7 +319,7 @@ export default function ReportProblemSection({ userId, userName, userType, varia
 
               {/* ── Description ── */}
               <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>
+                <label style={{ display: 'block', color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', marginBottom: 6, fontFamily: 'var(--font-body)' }}>
                   DESCRIPTION
                 </label>
                 <textarea
@@ -329,12 +329,12 @@ export default function ReportProblemSection({ userId, userName, userType, varia
                   rows={4}
                   style={{
                     width: '100%', padding: '9px 12px', borderRadius: 10, resize: 'vertical',
-                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.09)',
+                    background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)',
                     color: 'white', fontSize: 13, fontFamily: 'var(--font-body)', outline: 'none',
                     boxSizing: 'border-box', lineHeight: 1.55,
                   }}
                 />
-                <p style={{ color: '#374151', fontSize: 11, margin: '4px 0 0', textAlign: 'right' }}>
+                <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: '4px 0 0', textAlign: 'right' }}>
                   {body.length} / 2000
                 </p>
               </div>
@@ -379,7 +379,7 @@ export default function ReportProblemSection({ userId, userName, userType, varia
 
   return (
     <div style={{
-      background: '#0C0E16', border: '1px solid rgba(255,255,255,0.07)',
+      background: 'var(--surface-card)', border: '1px solid var(--guest-border)',
       borderRadius: 16, padding: '16px 18px',
     }}>
       {content}

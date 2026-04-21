@@ -487,18 +487,18 @@ export default function PulsePage() {
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em', marginBottom: 16, lineHeight: 1.2 }}>
-              You Create Transformative Experiences.<br />
-              <span style={{ color: '#6B8F71', fontWeight: 700 }}>Your Tools Should Keep Up.</span>
+              You Create the Space.<br />
+              <span style={{ color: '#6B8F71', fontWeight: 700 }}>The Admin Shouldn&apos;t Cost You Yourself.</span>
             </h2>
             <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 480, margin: '0 auto', lineHeight: 1.8 }}>
-              The admin burden of running a retreat shouldn't outweigh the joy of hosting one.
+              You became a host to hold space for people. Not to spend your evenings chasing payment screenshots.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
             {[
-              { icon: CalendarDays, title: 'Scattered Signups',     body: "Managing registrations across Instagram DMs, WhatsApp, and Google Forms. No unified view of who's coming." },
-              { icon: Award,        title: 'No Proof of Attendance',body: 'Participants complete a 3-day retreat and leave with nothing to show for it. No verified record, no credential.' },
-              { icon: BarChart2,    title: 'Admin Overload',        body: 'You became a retreat host to change lives, not to spend evenings reconciling payment screenshots.' },
+              { icon: CalendarDays, title: 'Signups in Five Different Places',  body: "Instagram DMs, WhatsApp voice notes, Google Forms, bank transfers. You have no idea who's confirmed until the morning of." },
+              { icon: Award,        title: 'They Showed Up. There\'s No Record.', body: 'Three days in the mountains. Something shifted. They leave with nothing official — no verified record, no certificate, no credential.' },
+              { icon: BarChart2,    title: 'Sunday Night, Reconciling Screenshots', body: 'Your retreat ended six hours ago. You\'re still matching payment screenshots to names in a Notes app. This is not the life.' },
             ].map(({ icon: Icon, title, body }) => {
               const { ref, inView } = useInView()
               return (
@@ -527,9 +527,9 @@ export default function PulsePage() {
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
             <div className="pulse-label"><Sparkles size={11} /> Platform</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em', marginBottom: 16 }}>
-              Tools That Let You Focus on the Experience
+              The Platform That Gets Out of Your Way
             </h2>
-            <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 460, margin: '0 auto', lineHeight: 1.8 }}>Everything you need to run a seamless experience — nothing you don't.</p>
+            <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 460, margin: '0 auto', lineHeight: 1.8 }}>Everything that needs to run — running. So you can be present for the part that matters.</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
             {features.map((f, i) => <FeatureCard key={f.title} feature={f} index={i} />)}
@@ -543,10 +543,10 @@ export default function PulsePage() {
           <div style={{ textAlign: 'center', marginBottom: 64 }}>
             <div className="pulse-label"><Heart size={11} /> Process</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em' }}>
-              Hosting Made Human
+              Three Steps. Then You&apos;re Present.
             </h2>
             <p style={{ fontSize: 16, color: '#7A7A7A', marginTop: 14, maxWidth: 400, margin: '14px auto 0', lineHeight: 1.8 }}>
-              Simple enough for a solo facilitator. Powerful enough for a multi-day retreat.
+              Solo facilitator or multi-day retreat — the setup is the same. Fast, clear, done.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 24 }}>
@@ -575,7 +575,7 @@ export default function PulsePage() {
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em' }}>
-              For Every Kind of Experience
+              Whatever You Host. However You Host It.
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 16 }}>
@@ -604,7 +604,7 @@ export default function PulsePage() {
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <div className="pulse-label"><Star size={11} /> From Creators</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem,3.5vw,2.4rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em' }}>
-              Hosts Who've Made the Switch
+              From Hosts Who Did It the Hard Way First
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
@@ -616,9 +616,9 @@ export default function PulsePage() {
       {/* ── COMMUNITY ── */}
       <section style={{ padding: '80px 24px 96px', background: '#EDF2EE', borderTop: '1px solid #C5D9C8', textAlign: 'center' }}>
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
-          <div className="pulse-label" style={{ margin: '0 auto 24px' }}><Heart size={11} /> Built for the Experience Economy</div>
+          <div className="pulse-label" style={{ margin: '0 auto 24px' }}><Heart size={11} /> A Movement, Not a Feature</div>
           <p style={{ fontSize: 18, color: '#5A5A5A', lineHeight: 1.9 }}>
-            TIKKIT X Pulse is for the people who believe that real learning happens in person. That the best connections are made face to face. That showing up matters. We're building the infrastructure to make those experiences easier to create, easier to manage, and easier to grow.
+            Pulse exists for people who believe the best things still happen in a room. That presence is the point. That showing up — fully, physically, intentionally — is something worth making easier. We&apos;re building the infrastructure for that world.
           </p>
           <div style={{ margin: '40px auto 0', width: 48, height: 2, background: 'linear-gradient(90deg, transparent, #6B8F71, transparent)' }} />
         </div>
@@ -630,10 +630,10 @@ export default function PulsePage() {
         <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '60%', height: '200%', background: 'rgba(255,255,255,0.06)', transform: 'rotate(20deg)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 300, color: '#fff', letterSpacing: '-0.025em', marginBottom: 20 }}>
-            Your Next Experience Starts Here
+            Stop Running Your Retreat on Vibes and Voice Notes.
           </h2>
           <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.75)', marginBottom: 44, lineHeight: 1.8 }}>
-            Join retreat hosts and workshop creators who've moved beyond DMs and spreadsheets.
+            Your work deserves a platform that takes it as seriously as you do. Join hosts across Pakistan who made the switch.
           </p>
           <a href="mailto:pulse@tikkitx.com" className="pulse-btn-primary" style={{ fontSize: 16, padding: '18px 44px', background: '#C2785C', boxShadow: '0 6px 24px rgba(0,0,0,0.2)' }}>
             Start Hosting on Pulse <ChevronRight size={18} />

@@ -17,8 +17,8 @@ function TikkitXTabIcon({ active }: { active: boolean }) {
         lineHeight:       1,
         letterSpacing:    '-0.01em',
         display:          'inline-block',
-        color:            active ? '#00E5FF' : '#4B5563',
-        WebkitTextStroke: active ? '1.8px #8800CC' : 'none',
+        color:            active ? 'var(--brand-blue)' : 'var(--text-muted)',
+        WebkitTextStroke: active ? '1.8px var(--brand-blue-dark)' : 'none',
         paintOrder:       'stroke fill' as React.CSSProperties['paintOrder'],
         transition:       'color 0.2s',
       }}
@@ -39,9 +39,9 @@ const TABS: { href: string; label: string; icon: TabIcon }[] = [
 
 function NavIcon({ type, active }: { type: TabIcon; active: boolean }) {
   if (type === 'x')        return <TikkitXTabIcon active={active} />
-  if (type === 'compass')  return <Compass      size={20} color={active ? '#1E5EFF' : '#4B5563'} strokeWidth={active ? 2.2 : 1.8} />
-  if (type === 'messages') return <MessageSquare size={20} color={active ? '#1E5EFF' : '#4B5563'} strokeWidth={active ? 2.2 : 1.8} />
-  return                          <User          size={20} color={active ? '#1E5EFF' : '#4B5563'} strokeWidth={active ? 2.2 : 1.8} />
+  if (type === 'compass')  return <Compass       size={20} color={active ? 'var(--brand-blue)' : 'var(--text-muted)'} strokeWidth={active ? 2.2 : 1.8} />
+  if (type === 'messages') return <MessageSquare size={20} color={active ? 'var(--brand-blue)' : 'var(--text-muted)'} strokeWidth={active ? 2.2 : 1.8} />
+  return                          <User          size={20} color={active ? 'var(--brand-blue)' : 'var(--text-muted)'} strokeWidth={active ? 2.2 : 1.8} />
 }
 
 /* ── Shell ───────────────────────────────────────────────────────── */
@@ -75,8 +75,8 @@ export default function GuestShell({
             width: 240, flexShrink: 0,
             position: 'sticky', top: 0, height: '100vh', overflow: 'hidden',
             display: 'flex', flexDirection: 'column',
-            background: 'rgba(255,255,255,0.015)',
-            borderRight: '1px solid rgba(255,255,255,0.06)',
+            background: 'var(--guest-surface)',
+            borderRight: '1px solid var(--guest-border)',
           }}
         >
           {/* Logo */}
@@ -95,8 +95,8 @@ export default function GuestShell({
                   style={{
                     display: 'flex', alignItems: 'center', gap: 12,
                     padding: '10px 12px', borderRadius: 12, textDecoration: 'none',
-                    background: active ? 'rgba(30,94,255,0.1)' : 'transparent',
-                    border: `1px solid ${active ? 'rgba(30,94,255,0.2)' : 'transparent'}`,
+                    background: active ? 'rgba(var(--brand-blue-rgb),0.1)' : 'transparent',
+                    border: `1px solid ${active ? 'rgba(var(--brand-blue-rgb),0.2)' : 'transparent'}`,
                     transition: 'background 0.15s, border-color 0.15s',
                   }}
                 >
@@ -105,7 +105,7 @@ export default function GuestShell({
                     style={{
                       width: 34, height: 34, borderRadius: 10, flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: active ? 'rgba(30,94,255,0.15)' : 'rgba(255,255,255,0.04)',
+                      background: active ? 'rgba(var(--brand-blue-rgb),0.15)' : 'var(--guest-surface-2)',
                     }}
                   >
                     <NavIcon type={icon} active={active} />
@@ -114,7 +114,7 @@ export default function GuestShell({
                   <span
                     style={{
                       fontSize: 14, fontWeight: active ? 700 : 500,
-                      color: active ? 'white' : '#6B7280',
+                      color: active ? 'var(--brand-blue)' : 'var(--text-muted)',
                       fontFamily: 'var(--font-body)', flex: 1,
                     }}
                   >
@@ -125,8 +125,8 @@ export default function GuestShell({
                     <span
                       style={{
                         width: 6, height: 6, borderRadius: '50%',
-                        background: '#1E5EFF', flexShrink: 0,
-                        boxShadow: '0 0 8px rgba(30,94,255,0.7)',
+                        background: 'var(--brand-blue)', flexShrink: 0,
+                        boxShadow: '0 0 8px rgba(var(--brand-blue-rgb),0.7)',
                       }}
                     />
                   )}
@@ -150,10 +150,10 @@ export default function GuestShell({
                 style={{
                   width: 34, height: 34, borderRadius: 10, flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(255,255,255,0.04)', position: 'relative',
+                  background: 'var(--guest-surface-2)', position: 'relative',
                 }}
               >
-                <Bell size={17} color="#6B7280" />
+                <Bell size={17} color="var(--text-muted)" />
                 {notifCount > 0 && (
                   <span
                     style={{
@@ -168,7 +168,7 @@ export default function GuestShell({
                   </span>
                 )}
               </div>
-              <span style={{ fontSize: 14, fontWeight: 500, color: '#6B7280', fontFamily: 'var(--font-body)' }}>
+              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)', fontFamily: 'var(--font-body)' }}>
                 Notifications
               </span>
             </Link>
@@ -215,8 +215,8 @@ export default function GuestShell({
             className="relative flex items-center justify-center rounded-xl border transition-all duration-200"
             style={{
               width: 38, height: 38,
-              background: 'rgba(255,255,255,0.05)',
-              borderColor: 'rgba(255,255,255,0.08)',
+              background: 'var(--guest-surface-2)',
+              borderColor: 'var(--guest-border)',
             }}
             aria-label="Notifications"
           >
@@ -262,8 +262,8 @@ export default function GuestShell({
                   className="flex items-center justify-center rounded-xl transition-all duration-200"
                   style={{
                     width: 44, height: 32,
-                    background:  active ? 'rgba(30,94,255,0.18)' : 'transparent',
-                    boxShadow:   active ? '0 0 12px rgba(30,94,255,0.2)' : 'none',
+                    background:  active ? 'rgba(var(--brand-blue-rgb),0.18)' : 'transparent',
+                    boxShadow:   active ? '0 0 12px rgba(var(--brand-blue-rgb),0.2)' : 'none',
                   }}
                 >
                   <NavIcon type={icon} active={active} />
@@ -273,7 +273,7 @@ export default function GuestShell({
                 <span
                   style={{
                     fontSize: 10, fontWeight: active ? 700 : 500,
-                    color: active ? '#1E5EFF' : '#4B5563',
+                    color: active ? 'var(--brand-blue)' : 'var(--text-muted)',
                     letterSpacing: '0.2px', fontFamily: 'var(--font-body)',
                     transition: 'color 0.2s',
                   }}
@@ -287,8 +287,8 @@ export default function GuestShell({
                     className="rounded-full"
                     style={{
                       width: 4, height: 4,
-                      background: '#1E5EFF', marginTop: -2,
-                      boxShadow: '0 0 6px rgba(30,94,255,0.7)',
+                      background: 'var(--brand-blue)', marginTop: -2,
+                      boxShadow: '0 0 6px rgba(var(--brand-blue-rgb),0.7)',
                     }}
                   />
                 )}

@@ -906,7 +906,7 @@ export default function HomeClient() {
 
           <p className="hero-sub">
             The DHA rooftop. The brand launch in Gulberg. The invite-only night nobody talks about online.
-            That&apos;s your world. Tikkit is how you run it —{' '}
+            That&apos;s your world. TIKKIT X is how you run it —{' '}
             <strong>guest lists, QR check-in, payments,</strong> all handled.
           </p>
 
@@ -1023,7 +1023,7 @@ export default function HomeClient() {
               Explore events →
             </Link>
           </div>
-          <p className="cta-note">PLAN. PUBLISH. PARTY.</p>
+          <p className="cta-note">PLAN. PUSH. PARTY.</p>
         </div>
       </section>
 
@@ -1033,7 +1033,7 @@ export default function HomeClient() {
           <Link href="/" className="footer-brand">
             <TikkitXLogo size="sm" />
           </Link>
-          <p className="footer-copy">© {new Date().getFullYear()} Tikkit. Built in Pakistan 🇵🇰</p>
+          <p className="footer-copy">© {new Date().getFullYear()} TIKKIT X. Built in Pakistan 🇵🇰</p>
           <div className="footer-links">
             <Link href="/how-it-works" className="footer-link">How it works</Link>
             <Link href="/terms" className="footer-link">Terms</Link>

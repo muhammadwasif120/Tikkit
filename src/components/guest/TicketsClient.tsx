@@ -57,18 +57,18 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
   return (
     <>
       <div style={{
-        background: '#13151E', border: '1px solid rgba(255,255,255,0.08)',
+        background: 'var(--surface-card)', border: '1px solid var(--guest-border)',
         borderRadius: 22, overflow: 'hidden',
-        boxShadow: '0 0 40px rgba(30,94,255,0.2)',
+        boxShadow: '0 0 40px rgba(var(--brand-blue-rgb),0.2)',
       }}>
-        {/* Header */}
+        {/* Header — intentional dark gradient for ticket aesthetic */}
         <div style={{
           background: isSoldOut
             ? 'linear-gradient(135deg,#1A1A2E,#16213E)'
-            : 'linear-gradient(135deg,#0F2A5E 0%,#1E5EFF 100%)',
+            : 'linear-gradient(135deg,#0F2A5E 0%,var(--brand-blue) 100%)',
           padding: '20px 20px 16px', position: 'relative', overflow: 'hidden',
         }}>
-          <div style={{ position: 'absolute', right: -30, top: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(30,94,255,0.1)' }} />
+          <div style={{ position: 'absolute', right: -30, top: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(var(--brand-blue-rgb),0.1)' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
             <Ticket size={13} color="#818CF8" />
             <span style={{ color: '#818CF8', fontSize: 10, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>
@@ -83,7 +83,6 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
             <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
               <Calendar size={11} /> {fmtDate(ticket.eventDate)} · {fmtTime(ticket.eventDate)}
             </span>
-            {/* Venue — always visible to confirmed ticket holders */}
             <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: ticket.secretVenue ? '#10B981' : 'rgba(255,255,255,0.6)', fontSize: 12 }}>
               <MapPin size={11} /> {ticket.eventVenue ?? 'TBA'}
             </span>
@@ -92,9 +91,9 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
 
         {/* Tear divider */}
         <div style={{ display: 'flex', alignItems: 'center', padding: '0 -1px' }}>
-          <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#080A10', flexShrink: 0, marginLeft: -11 }} />
-          <div style={{ flex: 1, borderTop: '2px dashed rgba(255,255,255,0.06)' }} />
-          <div style={{ width: 22, height: 22, borderRadius: '50%', background: '#080A10', flexShrink: 0, marginRight: -11 }} />
+          <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--guest-bg)', flexShrink: 0, marginLeft: -11 }} />
+          <div style={{ flex: 1, borderTop: '2px dashed var(--guest-border)' }} />
+          <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--guest-bg)', flexShrink: 0, marginRight: -11 }} />
         </div>
 
         {/* QR section — available immediately to confirmed ticket holders */}
@@ -116,19 +115,19 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
               : <div style={{ width: 196, height: 196, background: '#E5E7EB', borderRadius: 8 }} />
             }
           </div>
-          <p style={{ color: '#4B5563', fontSize: 11, marginTop: 10 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 10 }}>
             {ticket.checkedIn ? "You're checked in ✓" : 'Tap to boost brightness · Show at entry'}
           </p>
         </div>
 
         {/* Footer */}
-        <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ borderTop: '1px solid var(--guest-border)', padding: '12px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ticket holder</p>
-            <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: 0 }}>{ticket.guestName}</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ticket holder</p>
+            <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: 0 }}>{ticket.guestName}</p>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <p style={{ color: '#4B5563', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Code</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 10, margin: '0 0 2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Code</p>
             <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 700, margin: 0, fontFamily: 'monospace' }}>
               {ticket.ticketCode.replace('TIKKIT-','').slice(0,8)}
             </p>
@@ -148,10 +147,10 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
   if (tickets.length === 0) {
     return (
       <div style={{ padding: '80px 20px', textAlign: 'center' }}>
-        <Ticket size={48} color="#1E5EFF" style={{ opacity: 0.25, marginBottom: 16 }} />
-        <h3 style={{ color: 'white', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No tickets yet</h3>
-        <p style={{ color: '#6B7280', fontSize: 14, margin: '0 0 24px' }}>Register and get confirmed for events to see your tickets here.</p>
-        <Link href="/guest/explore" style={{ display: 'inline-block', padding: '12px 24px', borderRadius: 14, background: '#1E5EFF', color: 'white', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
+        <Ticket size={48} color="var(--brand-blue)" style={{ opacity: 0.25, marginBottom: 16 }} />
+        <h3 style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 700, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>No tickets yet</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: '0 0 24px' }}>Register and get confirmed for events to see your tickets here.</p>
+        <Link href="/guest/explore" style={{ display: 'inline-block', padding: '12px 24px', borderRadius: 14, background: 'var(--brand-blue)', color: '#FFFFFF', textDecoration: 'none', fontSize: 14, fontWeight: 700 }}>
           Explore Events
         </Link>
       </div>
@@ -163,7 +162,7 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
       <div style={{ padding: '16px' }}>
         {upcoming.length > 0 && (
           <>
-            <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px' }}>Upcoming</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px' }}>Upcoming</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
               {upcoming.map(t => <QRTicketCard key={t.registrationId} ticket={t} />)}
             </div>
@@ -171,7 +170,7 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
         )}
         {checkedIn.length > 0 && (
           <>
-            <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px' }}>Checked In</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px' }}>Checked In</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
               {checkedIn.map(t => <QRTicketCard key={t.registrationId} ticket={t} />)}
             </div>
@@ -179,7 +178,7 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
         )}
         {past.length > 0 && (
           <>
-            <p style={{ color: '#6B7280', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px' }}>Past</p>
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px' }}>Past</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, opacity: 0.45 }}>
               {past.map(t => <QRTicketCard key={t.registrationId} ticket={t} />)}
             </div>

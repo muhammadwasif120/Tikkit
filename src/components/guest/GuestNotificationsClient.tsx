@@ -68,17 +68,17 @@ export default function GuestNotificationsClient({ registrations }: { registrati
 
   return (
     <div style={{ padding: '20px 18px 8px', fontFamily: 'var(--font-body)' }}>
-      <h1 style={{ color: 'white', fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px', margin: '0 0 20px' }}>
+      <h1 style={{ color: 'var(--text-primary)', fontSize: 24, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px', margin: '0 0 20px' }}>
         Notifications
       </h1>
 
       {notifs.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
-          <div style={{ width: 56, height: 56, background: 'rgba(255,255,255,0.03)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-            <Bell size={22} color="#4B5563" />
+          <div style={{ width: 56, height: 56, background: 'var(--guest-surface-2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+            <Bell size={22} color="var(--text-muted)" />
           </div>
-          <p style={{ color: '#6B7280', fontSize: 15, fontWeight: 600, margin: '0 0 4px' }}>All caught up</p>
-          <p style={{ color: '#4B5563', fontSize: 13, margin: 0 }}>Notifications about your event applications will appear here</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 15, fontWeight: 600, margin: '0 0 4px' }}>All caught up</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>Notifications about your event applications will appear here</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -86,7 +86,7 @@ export default function GuestNotificationsClient({ registrations }: { registrati
             if (!notif) return null
             const Icon = notif.icon
             return (
-              <div key={reg.id} style={{ padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+              <div key={reg.id} style={{ padding: '14px 0', borderBottom: '1px solid var(--guest-border)', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                 {/* Icon */}
                 <div style={{ width: 40, height: 40, borderRadius: 12, background: notif.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Icon size={18} color={notif.color} />
@@ -95,16 +95,16 @@ export default function GuestNotificationsClient({ registrations }: { registrati
                 {/* Content */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 3 }}>
-                    <p style={{ color: 'white', fontSize: 14, fontWeight: 700, margin: 0 }}>{notif.title}</p>
-                    <span style={{ color: '#4B5563', fontSize: 11, flexShrink: 0, marginLeft: 8 }}>{fmtRelative(reg.reviewed_at ?? reg.created_at)}</span>
+                    <p style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 700, margin: 0 }}>{notif.title}</p>
+                    <span style={{ color: 'var(--text-muted)', fontSize: 11, flexShrink: 0, marginLeft: 8 }}>{fmtRelative(reg.reviewed_at ?? reg.created_at)}</span>
                   </div>
-                  <p style={{ color: '#6B7280', fontSize: 13, margin: '0 0 8px', lineHeight: 1.5 }}>{notif.body}</p>
+                  <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 8px', lineHeight: 1.5 }}>{notif.body}</p>
 
                   {/* Cover image + event date */}
                   {reg.event?.cover_image_url && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                       <Image src={reg.event.cover_image_url} alt="" width={36} height={36} style={{ borderRadius: 8, objectFit: 'cover' }} />
-                      <span style={{ color: '#4B5563', fontSize: 12 }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>
                         {new Date(reg.event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </span>
                     </div>
