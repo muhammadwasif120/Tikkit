@@ -104,11 +104,11 @@ export default function AnalyticsClient({
   }
 
   const getHeatColor = (pct: number) => {
-    if (pct >= 80) return 'bg-[#1E5EFF]'
-    if (pct >= 60) return 'bg-[#1E5EFF] opacity-80'
-    if (pct >= 40) return 'bg-[#1E5EFF] opacity-60'
-    if (pct >= 20) return 'bg-[#1E5EFF] opacity-40'
-    return 'bg-[#1E5EFF] opacity-20'
+    if (pct >= 80) return 'bg-brand-blue'
+    if (pct >= 60) return 'bg-brand-blue opacity-80'
+    if (pct >= 40) return 'bg-brand-blue opacity-60'
+    if (pct >= 20) return 'bg-brand-blue opacity-40'
+    return 'bg-brand-blue opacity-20'
   }
 
   // --- AUDIENCE TIERS ---
@@ -137,7 +137,7 @@ export default function AnalyticsClient({
     { key: 'most_loyal', label: 'Most Loyal', description: 'VIP · Always checked in · 2+ events', icon: Crown, color: 'text-[#FFC745]', bgColor: 'bg-[#FFC74515]', borderColor: 'border-[#FFC74530]', guests: audienceGuests.filter(g => g.tier === 'most_loyal') },
     { key: 'vip', label: 'VIPs', description: 'Marked VIP on any event', icon: Star, color: 'text-purple-400', bgColor: 'bg-purple-500/10', borderColor: 'border-purple-500/20', guests: audienceGuests.filter(g => g.tier === 'vip') },
     { key: 'always_checked_in', label: 'Always Show Up', description: 'Never a no-show across all events', icon: CheckCircle, color: 'text-green-400', bgColor: 'bg-green-500/10', borderColor: 'border-green-500/20', guests: audienceGuests.filter(g => g.tier === 'always_checked_in') },
-    { key: 'returning', label: 'Returning', description: 'Attended 2+ events', icon: RefreshCw, color: 'text-[#1E5EFF]', bgColor: 'bg-[#1E5EFF15]', borderColor: 'border-[#1E5EFF30]', guests: audienceGuests.filter(g => g.tier === 'returning' && g.eventsAttended >= 2) },
+    { key: 'returning', label: 'Returning', description: 'Attended 2+ events', icon: RefreshCw, color: 'text-brand-blue', bgColor: 'bg-brand-blue/[0.08]', borderColor: 'border-brand-blue/20', guests: audienceGuests.filter(g => g.tier === 'returning' && g.eventsAttended >= 2) },
   ]
 
   const openEmailModal = (tier: AudienceTier) => {
@@ -188,7 +188,7 @@ export default function AnalyticsClient({
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 4 }}>
         <div style={{
           width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-          background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(30,94,255,0.12))',
+          background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(var(--brand-blue-rgb),0.12))',
           border: '1px solid rgba(168,85,247,0.25)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 8px 24px rgba(168,85,247,0.15)',
@@ -196,10 +196,10 @@ export default function AnalyticsClient({
           <BarChart3 size={22} color="#A855F7" />
         </div>
         <div>
-          <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+          <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
             Analytics
           </h1>
-          <p style={{ color: '#6B7280', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
+          <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
             Performance metrics and audience intelligence
           </p>
         </div>
@@ -216,15 +216,15 @@ export default function AnalyticsClient({
             className={clsx(
               'flex items-center justify-center sm:justify-between p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer',
               activeTab === tab.key
-                ? 'bg-[#1E5EFF15] border-[#1E5EFF40] text-white'
+                ? 'bg-brand-blue/[0.08] border-brand-blue/25 text-[color:var(--text-primary)]'
                 : 'bg-brand-charcoal border-white/5 text-gray-400 hover:border-white/10 hover:text-gray-200'
             )}>
             <div className="flex items-center gap-2 min-w-0">
-              <tab.icon className={clsx('w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0', activeTab === tab.key ? 'text-[#1E5EFF]' : 'text-gray-500')} />
+              <tab.icon className={clsx('w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0', activeTab === tab.key ? 'text-brand-blue' : 'text-gray-500')} />
               <span className="hidden sm:block text-sm font-medium truncate">{tab.label}</span>
             </div>
             <span className={clsx('hidden sm:inline-flex ml-2 shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full',
-              activeTab === tab.key ? 'bg-[#1E5EFF25] text-[#4D82FF]' : 'bg-white/5 text-gray-500'
+              activeTab === tab.key ? 'bg-brand-blue/[0.15] text-brand-blue' : 'bg-white/5 text-gray-500'
             )}>{tab.count}</span>
           </button>
         ))}
@@ -279,9 +279,9 @@ export default function AnalyticsClient({
             ) : (
               <>
                 {/* Peak callout */}
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-[#1E5EFF10] border border-[#1E5EFF20] mb-5">
-                  <TrendingUp className="w-4 h-4 text-[#1E5EFF] shrink-0" />
-                  <p className="text-xs text-[#1E5EFF]">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-brand-blue/[0.06] border border-brand-blue/10 mb-5">
+                  <TrendingUp className="w-4 h-4 text-brand-blue shrink-0" />
+                  <p className="text-xs text-brand-blue">
                     Peak arrival at <span className="font-bold">{formatHour(peakHour.hour)}</span> — {peakHour.count} guests checked in during this hour
                   </p>
                 </div>
@@ -309,7 +309,7 @@ export default function AnalyticsClient({
                 <div className="flex items-center gap-3 mt-4 justify-end">
                   <span className="text-[10px] text-gray-500">Low</span>
                   {[20, 40, 60, 80, 100].map(v => (
-                    <div key={v} className={clsx('w-4 h-3 rounded-sm bg-[#1E5EFF]')} style={{ opacity: v / 100 }} />
+                    <div key={v} className={clsx('w-4 h-3 rounded-sm bg-brand-blue')} style={{ opacity: v / 100 }} />
                   ))}
                   <span className="text-[10px] text-gray-500">High</span>
                 </div>
@@ -359,7 +359,7 @@ export default function AnalyticsClient({
                           <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-1">Fill rate</p>
                           <div className="flex items-center gap-1.5">
                             <div className="flex-1 bg-brand-charcoal-light rounded-full h-1">
-                              <div className="h-1 rounded-full bg-[#1E5EFF]" style={{ width: `${e.fillRate}%` }} />
+                              <div className="h-1 rounded-full bg-brand-blue" style={{ width: `${e.fillRate}%` }} />
                             </div>
                             <span className="text-xs text-gray-400 shrink-0">{e.fillRate}%</span>
                           </div>
@@ -402,7 +402,7 @@ export default function AnalyticsClient({
                           <td className="table-cell">
                             <div className="flex items-center gap-2">
                               <div className="w-16 bg-brand-charcoal-light rounded-full h-1.5">
-                                <div className="h-1.5 rounded-full bg-[#1E5EFF]" style={{ width: `${e.fillRate}%` }} />
+                                <div className="h-1.5 rounded-full bg-brand-blue" style={{ width: `${e.fillRate}%` }} />
                               </div>
                               <span className="text-xs text-gray-400">{e.fillRate}%</span>
                             </div>
@@ -421,9 +421,9 @@ export default function AnalyticsClient({
       {/* AUDIENCE TAB */}
       {activeTab === 'audience' && (
         <div className="space-y-5 animate-fade-in">
-          <div className="card bg-[#1E5EFF08] border-[#1E5EFF20]">
+          <div className="card bg-brand-blue/[0.03] border-brand-blue/10">
             <div className="flex items-start gap-3">
-              <Users className="w-5 h-5 text-[#1E5EFF] shrink-0 mt-0.5" />
+              <Users className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-white">Audience Intelligence</p>
                 <p className="text-xs text-gray-400 mt-0.5">Your guests ranked by loyalty. Send early access emails to your most valuable crowd before anyone else.</p>
@@ -540,15 +540,15 @@ export default function AnalyticsClient({
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
                 <label className="label mb-0">Recipients</label>
-                <button onClick={() => setSelectedGuests(selectedGuests.size === emailModal.guests.length ? new Set() : new Set(emailModal.guests.map(g => g.email)))} className="text-xs text-[#1E5EFF] hover:text-[#4F82FF] transition-colors">
+                <button onClick={() => setSelectedGuests(selectedGuests.size === emailModal.guests.length ? new Set() : new Set(emailModal.guests.map(g => g.email)))} className="text-xs text-brand-blue hover:text-brand-blue/80 transition-colors">
                   {selectedGuests.size === emailModal.guests.length ? 'Deselect all' : 'Select all'}
                 </button>
               </div>
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {emailModal.guests.map((guest) => (
                   <div key={guest.email} onClick={() => { const next = new Set(selectedGuests); if (next.has(guest.email)) next.delete(guest.email); else next.add(guest.email); setSelectedGuests(next) }}
-                    className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors', selectedGuests.has(guest.email) ? 'bg-[#1E5EFF15] border border-[#1E5EFF30]' : 'hover:bg-white/5 border border-transparent')}>
-                    <div className={clsx('w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors', selectedGuests.has(guest.email) ? 'bg-[#1E5EFF] border-[#1E5EFF]' : 'border-white/20')}>
+                    className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors', selectedGuests.has(guest.email) ? 'bg-brand-blue/[0.08] border border-brand-blue/20' : 'hover:bg-white/5 border border-transparent')}>
+                    <div className={clsx('w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors', selectedGuests.has(guest.email) ? 'bg-brand-blue border-brand-blue' : 'border-white/20')}>
                       {selectedGuests.has(guest.email) && <CheckCircle className="w-3 h-3 text-white" />}
                     </div>
                     <div className="flex-1 min-w-0">

@@ -104,11 +104,11 @@ export default function AnalyticsClient({
   }
 
   const getHeatColor = (pct: number) => {
-    if (pct >= 80) return 'bg-[#1E5EFF]'
-    if (pct >= 60) return 'bg-[#1E5EFF] opacity-80'
-    if (pct >= 40) return 'bg-[#1E5EFF] opacity-60'
-    if (pct >= 20) return 'bg-[#1E5EFF] opacity-40'
-    return 'bg-[#1E5EFF] opacity-20'
+    if (pct >= 80) return 'bg-brand-blue'
+    if (pct >= 60) return 'bg-brand-blue opacity-80'
+    if (pct >= 40) return 'bg-brand-blue opacity-60'
+    if (pct >= 20) return 'bg-brand-blue opacity-40'
+    return 'bg-brand-blue opacity-20'
   }
 
   // --- AUDIENCE TIERS ---
@@ -137,7 +137,7 @@ export default function AnalyticsClient({
     { key: 'most_loyal', label: 'Most Loyal', description: 'VIP · Always checked in · 2+ events', icon: Crown, color: 'text-[#FFC745]', bgColor: 'bg-[#FFC74515]', borderColor: 'border-[#FFC74530]', guests: audienceGuests.filter(g => g.tier === 'most_loyal') },
     { key: 'vip', label: 'VIPs', description: 'Marked VIP on any event', icon: Star, color: 'text-purple-400', bgColor: 'bg-purple-500/10', borderColor: 'border-purple-500/20', guests: audienceGuests.filter(g => g.tier === 'vip') },
     { key: 'always_checked_in', label: 'Always Show Up', description: 'Never a no-show across all events', icon: CheckCircle, color: 'text-green-400', bgColor: 'bg-green-500/10', borderColor: 'border-green-500/20', guests: audienceGuests.filter(g => g.tier === 'always_checked_in') },
-    { key: 'returning', label: 'Returning', description: 'Attended 2+ events', icon: RefreshCw, color: 'text-[#1E5EFF]', bgColor: 'bg-[#1E5EFF15]', borderColor: 'border-[#1E5EFF30]', guests: audienceGuests.filter(g => g.tier === 'returning' && g.eventsAttended >= 2) },
+    { key: 'returning', label: 'Returning', description: 'Attended 2+ events', icon: RefreshCw, color: 'text-brand-blue', bgColor: 'bg-brand-blue/[0.08]', borderColor: 'border-brand-blue/20', guests: audienceGuests.filter(g => g.tier === 'returning' && g.eventsAttended >= 2) },
   ]
 
   const openEmailModal = (tier: AudienceTier) => {
@@ -185,8 +185,8 @@ export default function AnalyticsClient({
   return (
     <div className="space-y-6 max-w-5xl">
       <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Analytics</h2>
-        <p className="text-gray-400 text-sm mt-1">Performance metrics and audience intelligence</p>
+        <h2 className="text-2xl font-bold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Analytics</h2>
+        <p className="text-sm mt-1" style={{ color: 'var(--text-muted)' }}>Performance metrics and audience intelligence</p>
       </div>
 
       {/* Tab switcher */}
@@ -198,7 +198,7 @@ export default function AnalyticsClient({
         ].map((tab) => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             className={clsx('flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all',
-              activeTab === tab.key ? 'bg-[#1E5EFF] text-white' : 'text-gray-400 hover:text-white')}>
+              activeTab === tab.key ? 'bg-brand-blue text-white' : 'text-gray-400 hover:text-[color:var(--text-primary)]')}>
             <tab.icon className="w-4 h-4" />
             {tab.label}
           </button>
@@ -218,7 +218,7 @@ export default function AnalyticsClient({
               { label: 'Overall Show-Up Rate', value: totalGuests > 0 ? `${Math.round((totalCheckedIn / totalGuests) * 100)}%` : '—' },
             ].map((s) => (
               <div key={s.label} className="stat-card">
-                <p className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>{s.value}</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{s.value}</p>
                 <p className="text-xs text-gray-500">{s.label}</p>
               </div>
             ))}
@@ -228,7 +228,7 @@ export default function AnalyticsClient({
           <div className="card">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
                   Arrival Heatmap
                 </h3>
                 <p className="text-xs text-gray-500 mt-0.5">When did the crowd show up?</p>
@@ -254,9 +254,9 @@ export default function AnalyticsClient({
             ) : (
               <>
                 {/* Peak callout */}
-                <div className="flex items-center gap-3 p-3 rounded-lg bg-[#1E5EFF10] border border-[#1E5EFF20] mb-5">
-                  <TrendingUp className="w-4 h-4 text-[#1E5EFF] shrink-0" />
-                  <p className="text-xs text-[#1E5EFF]">
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-brand-blue/[0.06] border border-brand-blue/10 mb-5">
+                  <TrendingUp className="w-4 h-4 text-brand-blue shrink-0" />
+                  <p className="text-xs text-brand-blue">
                     Peak arrival at <span className="font-bold">{formatHour(peakHour.hour)}</span> — {peakHour.count} guests checked in during this hour
                   </p>
                 </div>
@@ -284,7 +284,7 @@ export default function AnalyticsClient({
                 <div className="flex items-center gap-3 mt-4 justify-end">
                   <span className="text-[10px] text-gray-500">Low</span>
                   {[20, 40, 60, 80, 100].map(v => (
-                    <div key={v} className={clsx('w-4 h-3 rounded-sm bg-[#1E5EFF]')} style={{ opacity: v / 100 }} />
+                    <div key={v} className={clsx('w-4 h-3 rounded-sm bg-brand-blue')} style={{ opacity: v / 100 }} />
                   ))}
                   <span className="text-[10px] text-gray-500">High</span>
                 </div>
@@ -294,7 +294,7 @@ export default function AnalyticsClient({
 
           {/* Show-up rate per event */}
           <div className="card">
-            <h3 className="font-semibold text-white text-sm mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <h3 className="font-semibold text-sm mb-4" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>
               Event Performance
             </h3>
             {eventStats.length === 0 ? (
@@ -335,7 +335,7 @@ export default function AnalyticsClient({
                         <td className="table-cell">
                           <div className="flex items-center gap-2">
                             <div className="w-16 bg-brand-charcoal-light rounded-full h-1.5">
-                              <div className="h-1.5 rounded-full bg-[#1E5EFF]" style={{ width: `${e.fillRate}%` }} />
+                              <div className="h-1.5 rounded-full bg-brand-blue" style={{ width: `${e.fillRate}%` }} />
                             </div>
                             <span className="text-xs text-gray-400">{e.fillRate}%</span>
                           </div>
@@ -353,9 +353,9 @@ export default function AnalyticsClient({
       {/* AUDIENCE TAB */}
       {activeTab === 'audience' && (
         <div className="space-y-5 animate-fade-in">
-          <div className="card bg-[#1E5EFF08] border-[#1E5EFF20]">
+          <div className="card bg-brand-blue/[0.03] border-brand-blue/10">
             <div className="flex items-start gap-3">
-              <Users className="w-5 h-5 text-[#1E5EFF] shrink-0 mt-0.5" />
+              <Users className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium text-white">Audience Intelligence</p>
                 <p className="text-xs text-gray-400 mt-0.5">Your guests ranked by loyalty. Send early access emails to your most valuable crowd before anyone else.</p>
@@ -372,7 +372,7 @@ export default function AnalyticsClient({
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>{tier.label}</h3>
+                      <h3 className="font-semibold text-sm" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>{tier.label}</h3>
                       <span className={clsx('px-2 py-0.5 rounded-full text-[10px] font-bold', tier.bgColor, tier.color)}>{tier.guests.length}</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">{tier.description}</p>
@@ -441,7 +441,7 @@ export default function AnalyticsClient({
           <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Email — {emailModal.tier.label}</h3>
+                <h3 className="font-semibold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}>Email — {emailModal.tier.label}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{selectedGuests.size} recipients selected</p>
               </div>
               <button onClick={() => setEmailModal(null)} className="text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
@@ -472,15 +472,15 @@ export default function AnalyticsClient({
             <div className="mb-5">
               <div className="flex items-center justify-between mb-2">
                 <label className="label mb-0">Recipients</label>
-                <button onClick={() => setSelectedGuests(selectedGuests.size === emailModal.guests.length ? new Set() : new Set(emailModal.guests.map(g => g.email)))} className="text-xs text-[#1E5EFF] hover:text-[#4F82FF] transition-colors">
+                <button onClick={() => setSelectedGuests(selectedGuests.size === emailModal.guests.length ? new Set() : new Set(emailModal.guests.map(g => g.email)))} className="text-xs text-brand-blue hover:text-brand-blue/80 transition-colors">
                   {selectedGuests.size === emailModal.guests.length ? 'Deselect all' : 'Select all'}
                 </button>
               </div>
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {emailModal.guests.map((guest) => (
                   <div key={guest.email} onClick={() => { const next = new Set(selectedGuests); if (next.has(guest.email)) next.delete(guest.email); else next.add(guest.email); setSelectedGuests(next) }}
-                    className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors', selectedGuests.has(guest.email) ? 'bg-[#1E5EFF15] border border-[#1E5EFF30]' : 'hover:bg-white/5 border border-transparent')}>
-                    <div className={clsx('w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors', selectedGuests.has(guest.email) ? 'bg-[#1E5EFF] border-[#1E5EFF]' : 'border-white/20')}>
+                    className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors', selectedGuests.has(guest.email) ? 'bg-brand-blue/[0.08] border border-brand-blue/20' : 'hover:bg-white/5 border border-transparent')}>
+                    <div className={clsx('w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors', selectedGuests.has(guest.email) ? 'bg-brand-blue border-brand-blue' : 'border-white/20')}>
                       {selectedGuests.has(guest.email) && <CheckCircle className="w-3 h-3 text-white" />}
                     </div>
                     <div className="flex-1 min-w-0">

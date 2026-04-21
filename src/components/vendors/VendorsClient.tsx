@@ -246,13 +246,13 @@ export default function VendorsClient({
         <div className="flex items-center gap-4">
           <div style={{
             width: 48, height: 48, borderRadius: 14, flexShrink: 0,
-            background: 'rgba(30,94,255,0.12)', border: '1px solid rgba(30,94,255,0.2)',
+            background: 'rgba(var(--brand-blue-rgb),0.12)', border: '1px solid rgba(var(--brand-blue-rgb),0.2)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <Building2 size={22} color="#1E5EFF" />
+            <Building2 size={22} color="var(--brand-blue)" />
           </div>
           <div>
-            <h1 style={{ color: 'white', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+            <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
               Vendors
             </h1>
             <p className="text-gray-400 text-sm" style={{ margin: 0, lineHeight: 1.6 }}>
@@ -295,15 +295,15 @@ export default function VendorsClient({
             className={clsx(
               'flex items-center justify-between p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer',
               activeTab === tab.key
-                ? 'bg-[#1E5EFF15] border-[#1E5EFF40] text-white'
+                ? 'bg-brand-blue/[0.08] border-brand-blue/25 text-[color:var(--text-primary)]'
                 : 'bg-brand-charcoal border-white/5 text-gray-400 hover:border-white/10 hover:text-gray-200'
             )}>
             <div className="flex items-center gap-2">
-              <tab.icon className={clsx('w-3.5 h-3.5 shrink-0', activeTab === tab.key ? 'text-[#1E5EFF]' : 'text-gray-500')} />
+              <tab.icon className={clsx('w-3.5 h-3.5 shrink-0', activeTab === tab.key ? 'text-brand-blue' : 'text-gray-500')} />
               <span className="text-sm font-medium">{tab.label}</span>
             </div>
             <span className={clsx('ml-2 text-xs font-semibold px-2 py-0.5 rounded-full',
-              activeTab === tab.key ? 'bg-[#1E5EFF25] text-[#4D82FF]' : 'bg-white/5 text-gray-500'
+              activeTab === tab.key ? 'bg-brand-blue/[0.15] text-brand-blue' : 'bg-white/5 text-gray-500'
             )}>{tab.count}</span>
           </button>
         ))}
@@ -344,8 +344,8 @@ export default function VendorsClient({
                   <div key={vendor.id} className="card">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-[#1E5EFF15] border border-[#1E5EFF20] flex items-center justify-center shrink-0">
-                          <Building2 className="w-5 h-5 text-[#1E5EFF]" />
+                        <div className="w-10 h-10 rounded-lg bg-brand-blue/[0.08] border border-brand-blue/10 flex items-center justify-center shrink-0">
+                          <Building2 className="w-5 h-5 text-brand-blue" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
@@ -385,7 +385,7 @@ export default function VendorsClient({
                     <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
                       <p className="text-xs text-gray-600">{vendorInvoices.length} invoice{vendorInvoices.length !== 1 ? 's' : ''}</p>
                       <button onClick={() => { setActiveTab('invoices'); setSelectedVendorId(vendor.id) }}
-                        className="text-xs text-[#1E5EFF] hover:text-[#4F82FF] transition-colors">
+                        className="text-xs text-brand-blue hover:text-brand-blue/80 transition-colors">
                         View invoices →
                       </button>
                     </div>
@@ -542,9 +542,9 @@ export default function VendorsClient({
                       setVendorForm(p => ({ ...p, event_ids: ids }))
                     }}
                       className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors border',
-                        vendorForm.event_ids.includes(event.id) ? 'bg-[#1E5EFF15] border-[#1E5EFF30]' : 'border-transparent hover:bg-white/5')}>
+                        vendorForm.event_ids.includes(event.id) ? 'bg-brand-blue/[0.08] border-brand-blue/20' : 'border-transparent hover:bg-white/5')}>
                       <div className={clsx('w-4 h-4 rounded border flex items-center justify-center shrink-0',
-                        vendorForm.event_ids.includes(event.id) ? 'bg-[#1E5EFF] border-[#1E5EFF]' : 'border-white/20')}>
+                        vendorForm.event_ids.includes(event.id) ? 'bg-brand-blue border-brand-blue' : 'border-white/20')}>
                         {vendorForm.event_ids.includes(event.id) && <Check className="w-3 h-3 text-white" />}
                       </div>
                       <p className="text-sm text-white">{event.title}</p>
