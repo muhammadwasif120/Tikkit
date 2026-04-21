@@ -349,7 +349,7 @@ export default function VendorsClient({
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>{vendor.name}</h3>
+                            <h3 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{vendor.name}</h3>
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/5 text-gray-400 border border-white/10">
                               <Tag className="w-2.5 h-2.5" /> {vendor.category}
                             </span>
@@ -452,10 +452,10 @@ export default function VendorsClient({
                     const s = statusConfig[invoice.status]
                     return (
                       <tr key={invoice.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                        <td className="table-cell font-medium text-white">{vendor?.name ?? '—'}</td>
+                        <td className="table-cell font-medium" style={{ color: 'var(--text-primary)' }}>{vendor?.name ?? '—'}</td>
                         <td className="table-cell text-gray-400 max-w-[160px] truncate">{invoice.description ?? '—'}</td>
                         <td className="table-cell text-gray-400 text-xs">{event?.title ?? '—'}</td>
-                        <td className="table-cell font-medium text-white">{formatCurrency(invoice.amount)}</td>
+                        <td className="table-cell font-medium" style={{ color: 'var(--text-primary)' }}>{formatCurrency(invoice.amount)}</td>
                         <td className="table-cell text-gray-400 text-xs">
                           {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-PK') : '—'}
                         </td>
@@ -495,7 +495,7 @@ export default function VendorsClient({
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
                 {editingVendor ? 'Edit Vendor' : 'Add Vendor'}
               </h3>
               <button onClick={() => setVendorModal(false)} className="text-gray-500 hover:text-white transition-colors">
@@ -547,7 +547,7 @@ export default function VendorsClient({
                         vendorForm.event_ids.includes(event.id) ? 'bg-brand-blue border-brand-blue' : 'border-white/20')}>
                         {vendorForm.event_ids.includes(event.id) && <Check className="w-3 h-3 text-white" />}
                       </div>
-                      <p className="text-sm text-white">{event.title}</p>
+                      <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{event.title}</p>
                     </div>
                   ))}
                 </div>
@@ -576,7 +576,7 @@ export default function VendorsClient({
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="card w-full max-w-lg animate-slide-up">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>
+              <h3 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
                 {editingInvoice ? 'Edit Invoice' : 'New Invoice'}
               </h3>
               <button onClick={() => setInvoiceModal(false)} className="text-gray-500 hover:text-white transition-colors">

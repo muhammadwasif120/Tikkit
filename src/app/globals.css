@@ -118,7 +118,7 @@
 /* ─── Theme: Pulse (warm oat — inspired by retreat/wellness aesthetic) ─ */
 /*
  * Palette drawn from the reference image:
- *   page bg     #EAE4DA   warm oat cream (distinctly cream, not barely-off-white)
+ *   page bg     #FAF8F5   soft warm white
  *   card        #FFFFFF   elevated white cards with warm shadow
  *   surface-2   #F3EDE4   warm tinted surface
  *   sage        #4D6B3A   rich forest/earthy sage (much darker than before)
@@ -138,7 +138,7 @@
   --brand-blue-light:     rgb(108, 148, 90);
   --brand-charcoal:       #FFFFFF;
   --brand-charcoal-light: #F3EDE4;
-  --guest-bg:             #EAE4DA;
+  --guest-bg:             #FAF8F5;
   --guest-surface:        #FFFFFF;
   --guest-surface-2:      #F3EDE4;
   --guest-border:         #D5CEC4;
@@ -177,7 +177,7 @@
   --event-gradient-7: linear-gradient(135deg, #EDE0D0 0%, #E0C8B0 100%);
 }
 [data-theme="pulse"] body {
-  background-color: #EAE4DA;
+  background-color: #FAF8F5;
   color: #1C1A16;
 }
 
@@ -212,7 +212,7 @@
 [data-theme="pulse"] .hover\:border-white\/10:hover     { border-color: #A0B898 !important; }
 
 /* ── Scrollbar ── */
-[data-theme="pulse"] ::-webkit-scrollbar-track { background: #EAE4DA; }
+[data-theme="pulse"] ::-webkit-scrollbar-track { background: #FAF8F5; }
 [data-theme="pulse"] ::-webkit-scrollbar-thumb { background: #C8C0B4; border-radius: 3px; }
 [data-theme="pulse"] ::-webkit-scrollbar-thumb:hover { background: #4D6B3A; }
 

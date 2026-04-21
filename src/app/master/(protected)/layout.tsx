@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import ForceNoir from '@/components/master/ForceNoir'
 
 export default async function MasterLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -15,5 +16,10 @@ export default async function MasterLayout({ children }: { children: React.React
 
   if (!profile || profile.role !== 'admin') redirect('/dashboard')
 
-  return <>{children}</>
+  return (
+    <>
+      <ForceNoir />
+      {children}
+    </>
+  )
 }

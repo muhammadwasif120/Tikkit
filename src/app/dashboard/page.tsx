@@ -143,7 +143,7 @@ async function DashboardData() {
                 </div>
                 <p className="text-[10px] sm:text-xs text-gray-500 truncate">{stat.label}</p>
               </div>
-              <p className="text-base sm:text-xl font-bold text-white truncate" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+              <p className="text-base sm:text-xl font-bold truncate" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
                 {stat.value}
               </p>
               <p className="text-[10px] text-gray-600 mt-0.5 truncate">{stat.sub}</p>
@@ -170,7 +170,7 @@ async function DashboardData() {
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="card">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
+            <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
               Upcoming Events
             </h3>
             <Link href="/dashboard/events" className="text-xs text-brand-blue hover:text-brand-blue-light transition-colors">
@@ -195,7 +195,7 @@ async function DashboardData() {
                   className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white group-hover:text-brand-blue transition-colors truncate">
+                    <p className="text-sm font-medium group-hover:text-brand-blue transition-colors truncate" style={{ color: 'var(--text-primary)' }}>
                       {event.title}
                     </p>
                     <p className="text-xs text-gray-500 mt-0.5">
@@ -211,7 +211,7 @@ async function DashboardData() {
 
         {/* Quick actions */}
         <div className="card">
-          <h3 className="font-semibold text-white text-sm mb-4" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
+          <h3 className="font-semibold text-sm mb-4" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
             Quick Actions
           </h3>
           <div className="space-y-2">
@@ -229,7 +229,7 @@ async function DashboardData() {
                   <action.Icon style={{ width: 16, height: 16, color: action.color }} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-white group-hover:text-brand-blue transition-colors">
+                  <p className="text-sm font-medium group-hover:text-brand-blue transition-colors" style={{ color: 'var(--text-primary)' }}>
                     {action.label}
                   </p>
                   <p className="text-xs text-gray-500">{action.desc}</p>

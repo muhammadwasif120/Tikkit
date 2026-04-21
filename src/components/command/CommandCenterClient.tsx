@@ -25,25 +25,25 @@ const CSS = `
 
   .cc-header {
     display:flex; align-items:center; gap:12px; padding:14px 20px;
-    border-bottom:1px solid rgba(255,255,255,0.06); flex-shrink:0;
-    flex-wrap:wrap; background:#0B0D14;
+    border-bottom:1px solid var(--guest-border); flex-shrink:0;
+    flex-wrap:wrap; background:var(--brand-charcoal);
   }
   .cc-back-btn {
     display:inline-flex; align-items:center; gap:5px; padding:6px 12px;
-    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
-    border-radius:8px; color:#9CA3AF; font-size:var(--fs-sm); font-weight:600;
+    background:var(--guest-surface-2); border:1px solid var(--guest-border);
+    border-radius:8px; color:var(--text-secondary); font-size:var(--fs-sm); font-weight:600;
     cursor:pointer; transition:color 0.15s, border-color 0.15s, background 0.15s;
     flex-shrink:0; white-space:nowrap;
   }
-  .cc-back-btn:hover { color:white; border-color:rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); }
+  .cc-back-btn:hover { color:var(--text-primary); border-color:var(--guest-border-hover); background:var(--guest-surface-2); }
 
   .cc-header-info { flex:1; min-width:0; }
   .cc-event-title {
-    color:white; font-size:var(--fs-lg); font-weight:900; margin:0 0 3px;
+    color:var(--text-primary); font-size:var(--fs-lg); font-weight:900; margin:0 0 3px;
     font-family:var(--font-display); letter-spacing:-0.3px;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  .cc-event-meta { color:#4B5563; font-size:var(--fs-xs); margin:0; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .cc-event-meta { color:var(--text-muted); font-size:var(--fs-xs); margin:0; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
 
   .cc-live-badge {
     display:inline-flex; align-items:center; gap:5px; padding:3px 10px;
@@ -63,25 +63,25 @@ const CSS = `
   .cc-stats { display:flex; gap:8px; flex-wrap:wrap; flex-shrink:0; }
   .cc-stat {
     text-align:center; padding:5px 14px;
-    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+    background:var(--guest-surface-2); border:1px solid var(--guest-border);
     border-radius:10px; min-width:52px;
   }
-  .cc-stat-n { color:white; font-size:var(--fs-lg); font-weight:900; margin:0; font-family:var(--font-display); line-height:1.2; }
-  .cc-stat-l { color:#4B5563; font-size:var(--fs-2xs); margin:0; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; }
+  .cc-stat-n { color:var(--text-primary); font-size:var(--fs-lg); font-weight:900; margin:0; font-family:var(--font-display); line-height:1.2; }
+  .cc-stat-l { color:var(--text-muted); font-size:var(--fs-2xs); margin:0; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; }
   .cc-stat.warn  { background:rgba(250,204,21,0.07); border-color:rgba(250,204,21,0.18); }
   .cc-stat.warn .cc-stat-n { color:#FACC15; }
 
   .cc-tabs {
-    display:none; border-bottom:1px solid rgba(255,255,255,0.06);
+    display:none; border-bottom:1px solid var(--guest-border);
     padding:10px 20px 0; flex-shrink:0; gap:4px;
   }
   .cc-tab {
     padding:8px 16px; border-radius:10px 10px 0 0; font-size:var(--fs-sm); font-weight:700;
-    color:#4B5563; cursor:pointer; border:none; background:none;
+    color:var(--text-muted); cursor:pointer; border:none; background:none;
     border-bottom:2px solid transparent; transition:color 0.15s, border-color 0.15s;
     display:flex; align-items:center; gap:6px;
   }
-  .cc-tab.active { color:white; border-color:#1E5EFF; }
+  .cc-tab.active { color:var(--text-primary); border-color:var(--brand-blue); }
   .cc-tab-badge {
     background:rgba(250,204,21,0.15); color:#FACC15; border:1px solid rgba(250,204,21,0.25);
     padding:1px 7px; border-radius:8px; font-size:var(--fs-2xs); font-weight:800;
@@ -91,7 +91,7 @@ const CSS = `
   .cc-attendees {
     flex:1; overflow-y:auto; padding:16px 20px;
     display:flex; flex-direction:column; gap:10px;
-    scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.08) transparent;
+    scrollbar-width:thin; scrollbar-color:var(--guest-border) transparent;
   }
   .cc-chat-col { width:360px; flex-shrink:0; padding:16px 20px 16px 0; display:flex; }
 
@@ -112,11 +112,11 @@ const CSS = `
   }
   .cc-empty-icon {
     width:56px; height:56px; border-radius:18px;
-    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06);
+    background:var(--guest-surface-2); border:1px solid var(--guest-border);
     display:flex; align-items:center; justify-content:center;
   }
   .cc-section-label {
-    color:#374151; font-size:var(--fs-2xs); font-weight:700; letter-spacing:0.07em;
+    color:var(--text-muted); font-size:var(--fs-2xs); font-weight:700; letter-spacing:0.07em;
     text-transform:uppercase; padding:0 0 8px; display:block;
   }
 `
@@ -172,7 +172,7 @@ export default function CommandCenterClient({ event, attendees: initial, recentM
               {isLive ? (
                 <span className="cc-live-badge"><span className="cc-live-dot" /> LIVE NOW</span>
               ) : (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#4B5563' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)' }}>
                   <Clock size={10} /> Ended
                 </span>
               )}

@@ -191,8 +191,8 @@ export default function CorporatePage() {
         html { scroll-behavior: smooth; }
 
         body {
-          background: #0F1724;
-          color: #CBD5E1;
+          background: #0F1724 !important;
+          color: #CBD5E1 !important;
           font-family: var(--font-body);
           -webkit-font-smoothing: antialiased;
           overflow-x: hidden;

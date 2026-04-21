@@ -267,7 +267,7 @@ export default function AnalyticsClient({
                     <div key={hour} className="flex-1 flex flex-col items-center gap-1 group">
                       <div className="relative w-full flex items-end justify-center" style={{ height: '96px' }}>
                         {/* Tooltip */}
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-brand-charcoal border border-white/10 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-brand-charcoal border border-white/10 text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" style={{ color: 'var(--text-primary)' }}>
                           {count} guest{count !== 1 ? 's' : ''}
                         </div>
                         <div
@@ -318,7 +318,7 @@ export default function AnalyticsClient({
                   <tbody>
                     {eventStats.map((e) => (
                       <tr key={e.id} className="border-b border-white/5">
-                        <td className="table-cell font-medium text-white">{e.title}</td>
+                        <td className="table-cell font-medium" style={{ color: 'var(--text-primary)' }}>{e.title}</td>
                         <td className="table-cell">
                           <span className={clsx('badge', e.status === 'published' ? 'badge-green' : e.status === 'completed' ? 'badge-blue' : e.status === 'cancelled' ? 'badge-red' : 'badge-gray')}>{e.status}</span>
                         </td>
@@ -357,7 +357,7 @@ export default function AnalyticsClient({
             <div className="flex items-start gap-3">
               <Users className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-white">Audience Intelligence</p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Audience Intelligence</p>
                 <p className="text-xs text-gray-400 mt-0.5">Your guests ranked by loyalty. Send early access emails to your most valuable crowd before anyone else.</p>
               </div>
             </div>
@@ -401,7 +401,7 @@ export default function AnalyticsClient({
                           {guest.full_name.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-white">{guest.full_name}</p>
+                          <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{guest.full_name}</p>
                           <p className="text-xs text-gray-500">{guest.email}</p>
                         </div>
                       </div>
@@ -484,7 +484,7 @@ export default function AnalyticsClient({
                       {selectedGuests.has(guest.email) && <CheckCircle className="w-3 h-3 text-white" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white truncate">{guest.full_name}</p>
+                      <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{guest.full_name}</p>
                       <p className="text-xs text-gray-500 truncate">{guest.email}</p>
                     </div>
                   </div>

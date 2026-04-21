@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import ForceNoir from '@/components/master/ForceNoir'
 
 export default function MasterLoginPage() {
   const supabase = createClient()
@@ -51,6 +52,8 @@ export default function MasterLoginPage() {
   }
 
   return (
+    <>
+    <ForceNoir />
     <div style={{
       minHeight: '100vh', background: '#050608',
       display: 'flex', flexDirection: 'column',
@@ -192,5 +195,6 @@ export default function MasterLoginPage() {
         </div>
       </div>
     </div>
+    </>
   )
 }

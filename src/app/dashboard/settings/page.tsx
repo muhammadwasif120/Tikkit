@@ -348,7 +348,7 @@ export default function SettingsPage() {
               <span className="text-base font-bold text-[#1E5EFF]">{(companyName || fullName)?.charAt(0)?.toUpperCase() ?? 'U'}</span>
             </div>
             <div className="text-left">
-              <p className="text-sm font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>{companyName || fullName || 'Your Name'}</p>
+              <p className="text-sm font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{companyName || fullName || 'Your Name'}</p>
               {companyName && <p className="text-xs text-gray-500 mt-0.5">{fullName}</p>}
               <p className="text-xs text-gray-500">{profile?.email}</p>
             </div>
@@ -435,7 +435,7 @@ export default function SettingsPage() {
               <div className="w-7 h-7 rounded-md bg-[#FFC74520] flex items-center justify-center">
                 <Lock className="w-3.5 h-3.5 text-[#FFC745]" />
               </div>
-              <span className="text-sm font-medium text-white">Change Password</span>
+              <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Change Password</span>
             </div>
             <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', passwordOpen && 'rotate-180')} />
           </button>
@@ -519,7 +519,7 @@ export default function SettingsPage() {
               <ImageIcon className="w-4 h-4 text-[#1E5EFF]" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Branding</p>
+              <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Branding</p>
               <p className="text-xs text-gray-500 mt-0.5">Profile cover photo and company logo</p>
             </div>
           </div>
@@ -630,7 +630,7 @@ export default function SettingsPage() {
               <Users className="w-4 h-4 text-purple-400" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Team Access</p>
+              <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Team Access</p>
               <p className="text-xs text-gray-500 mt-0.5">
                 {activeInvites.length > 0
                   ? `${activeInvites.length} active link${activeInvites.length !== 1 ? 's' : ''}`
@@ -709,7 +709,7 @@ export default function SettingsPage() {
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
                           <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
-                          <p className="text-sm font-medium text-white truncate">{invite.label}</p>
+                          <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{invite.label}</p>
                           <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
                             {invite.role}
                           </span>
@@ -758,7 +758,7 @@ export default function SettingsPage() {
                     <div key={invite.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-brand-charcoal-light border border-white/5 opacity-60">
                       <div className="flex items-center gap-2 min-w-0">
                         <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
-                        <p className="text-sm text-white truncate">{invite.label}</p>
+                        <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{invite.label}</p>
                         <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
                           {invite.role}
                         </span>
@@ -806,7 +806,7 @@ export default function SettingsPage() {
               <Bell className="w-4 h-4 text-green-400" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Notification Preferences</p>
+              <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Notification Preferences</p>
               <p className="text-xs text-gray-500 mt-0.5">
                 {Object.values(notifications).filter(Boolean).length} of {Object.values(notifications).length} enabled
               </p>
@@ -828,7 +828,7 @@ export default function SettingsPage() {
                         <Icon className={`w-3.5 h-3.5 ${config.color}`} />
                       </div>
                       <div>
-                        <p className="text-sm text-white">{config.label}</p>
+                        <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{config.label}</p>
                         <p className="text-xs text-gray-500 mt-0.5">{config.description}</p>
                       </div>
                     </div>
@@ -857,7 +857,7 @@ export default function SettingsPage() {
               <ShieldCheck className="w-5 h-5 text-purple-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Triple Verification</p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Triple Verification</p>
               <p className="text-xs text-gray-500 mt-0.5">ID, payment & Social Score — completed once</p>
             </div>
           </div>
@@ -875,7 +875,7 @@ export default function SettingsPage() {
               <MapPin className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Guided Tour</p>
+              <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Guided Tour</p>
               <p className="text-xs text-gray-500 mt-0.5">Replay the app walkthrough to explore all features</p>
             </div>
           </div>
@@ -903,7 +903,7 @@ export default function SettingsPage() {
               <Palette className="w-4 h-4 text-brand-blue" />
             </div>
             <div className="text-left">
-              <p className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Appearance</p>
+              <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Appearance</p>
               <p className="text-xs text-gray-500 mt-0.5">Choose the visual theme for your dashboard</p>
             </div>
           </div>

@@ -20,7 +20,7 @@ export default function SkeletonEventDetail() {
             height: 100svh !important;
             overflow: hidden !important;
             padding: 24px 20px !important;
-            border-right: 1px solid rgba(255,255,255,0.05) !important;
+            border-right: 1px solid var(--guest-border) !important;
             display: flex !important;
             flex-direction: column !important;
             gap: 16px !important;
@@ -33,7 +33,7 @@ export default function SkeletonEventDetail() {
             position: sticky !important;
             bottom: 0 !important;
             padding: 12px 20px 20px !important;
-            background: linear-gradient(to top, #080A10 80%, transparent) !important;
+            background: linear-gradient(to top, var(--guest-bg) 80%, transparent) !important;
           }
           .sk-mobile-hero { display: none !important; }
         }
@@ -42,7 +42,7 @@ export default function SkeletonEventDetail() {
         }
       `}</style>
 
-      <div className="sk-root" style={{ background: '#080A10', minHeight: '100svh', paddingBottom: 120, fontFamily: 'var(--font-body)' }}>
+      <div className="sk-root" style={{ background: 'var(--guest-bg)', minHeight: '100svh', paddingBottom: 120, fontFamily: 'var(--font-body)' }}>
 
         {/* Content column (left on desktop, stacked on mobile) */}
         <div className="sk-content" style={{ padding: '20px 20px 0', display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -59,7 +59,7 @@ export default function SkeletonEventDetail() {
           {/* 2×2 info grid */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {[1, 2, 3, 4].map(i => (
-              <div key={i} style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '12px 13px' }}>
+              <div key={i} style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '12px 13px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 8 }}>
                   <div className="skeleton" style={{ width: 14, height: 14, borderRadius: '50%' }} />
                   <div className="skeleton" style={{ width: 40, height: 8, borderRadius: 4 }} />
@@ -71,13 +71,13 @@ export default function SkeletonEventDetail() {
           </div>
 
           {/* Countdown bar */}
-          <div style={{ background: '#0E1018', border: '1px solid rgba(129,140,248,0.12)', borderRadius: 14, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="skeleton" style={{ width: 100, height: 12, borderRadius: 4 }} />
             <div className="skeleton" style={{ width: 60, height: 20, borderRadius: 4 }} />
           </div>
 
           {/* Price */}
-          <div style={{ background: '#0E1018', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 14, padding: '13px 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '13px 15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="skeleton" style={{ width: 80, height: 12, borderRadius: 4 }} />
             <div className="skeleton" style={{ width: 110, height: 20, borderRadius: 4 }} />
           </div>

@@ -243,7 +243,7 @@ export default function AnalyticsClient({
               { label: 'Overall Show-Up Rate', value: totalGuests > 0 ? `${Math.round((totalCheckedIn / totalGuests) * 100)}%` : '—' },
             ].map((s) => (
               <div key={s.label} className="stat-card">
-                <p className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px' }}>{s.value}</p>
+                <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px', color: 'var(--text-primary)' }}>{s.value}</p>
                 <p className="text-xs text-gray-500">{s.label}</p>
               </div>
             ))}
@@ -253,7 +253,7 @@ export default function AnalyticsClient({
           <div className="card">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
+                <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
                   Arrival Heatmap
                 </h3>
                 <p className="text-xs text-gray-500 mt-0.5">When did the crowd show up?</p>
@@ -292,7 +292,7 @@ export default function AnalyticsClient({
                     <div key={hour} className="flex-1 flex flex-col items-center gap-1 group">
                       <div className="relative w-full flex items-end justify-center" style={{ height: '96px' }}>
                         {/* Tooltip */}
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-brand-charcoal border border-white/10 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none">
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-brand-charcoal border border-white/10 text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" style={{ color: 'var(--text-primary)' }}>
                           {count} guest{count !== 1 ? 's' : ''}
                         </div>
                         <div
@@ -319,7 +319,7 @@ export default function AnalyticsClient({
 
           {/* Show-up rate per event */}
           <div className="card">
-            <h3 className="font-semibold text-white text-sm mb-4" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
+            <h3 className="font-semibold text-sm mb-4" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
               Event Performance
             </h3>
             {eventStats.length === 0 ? (
@@ -334,17 +334,17 @@ export default function AnalyticsClient({
                   {eventStats.map((e) => (
                     <div key={e.id} className="p-3 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
                       <div className="flex items-center justify-between mb-2.5">
-                        <p className="text-sm font-semibold text-white truncate flex-1 mr-2">{e.title}</p>
+                        <p className="text-sm font-semibold truncate flex-1 mr-2" style={{ color: 'var(--text-primary)' }}>{e.title}</p>
                         <span className={clsx('badge shrink-0', e.status === 'published' ? 'badge-green' : e.status === 'completed' ? 'badge-blue' : e.status === 'cancelled' ? 'badge-red' : 'badge-gray')}>{e.status}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         <div>
                           <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-0.5">Guests</p>
-                          <p className="text-sm font-semibold text-white">{e.total}</p>
+                          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{e.total}</p>
                         </div>
                         <div>
                           <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-0.5">Check-ins</p>
-                          <p className="text-sm font-semibold text-white">{e.checkedIn}</p>
+                          <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{e.checkedIn}</p>
                         </div>
                         <div>
                           <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-1">Show-up</p>
@@ -385,7 +385,7 @@ export default function AnalyticsClient({
                     <tbody>
                       {eventStats.map((e) => (
                         <tr key={e.id} className="border-b border-white/5">
-                          <td className="table-cell font-medium text-white">{e.title}</td>
+                          <td className="table-cell font-medium" style={{ color: 'var(--text-primary)' }}>{e.title}</td>
                           <td className="table-cell">
                             <span className={clsx('badge', e.status === 'published' ? 'badge-green' : e.status === 'completed' ? 'badge-blue' : e.status === 'cancelled' ? 'badge-red' : 'badge-gray')}>{e.status}</span>
                           </td>
@@ -425,7 +425,7 @@ export default function AnalyticsClient({
             <div className="flex items-start gap-3">
               <Users className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-medium text-white">Audience Intelligence</p>
+                <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Audience Intelligence</p>
                 <p className="text-xs text-gray-400 mt-0.5">Your guests ranked by loyalty. Send early access emails to your most valuable crowd before anyone else.</p>
               </div>
             </div>
@@ -440,7 +440,7 @@ export default function AnalyticsClient({
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>{tier.label}</h3>
+                      <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>{tier.label}</h3>
                       <span className={clsx('px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0', tier.bgColor, tier.color)}>{tier.guests.length}</span>
                     </div>
                     <p className="text-xs text-gray-500 mt-0.5">{tier.description}</p>
@@ -469,7 +469,7 @@ export default function AnalyticsClient({
                           {guest.full_name.charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-white truncate">{guest.full_name}</p>
+                          <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{guest.full_name}</p>
                           <p className="text-xs text-gray-500 truncate">{guest.email}</p>
                         </div>
                       </div>
@@ -509,7 +509,7 @@ export default function AnalyticsClient({
           <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Email — {emailModal.tier.label}</h3>
+                <h3 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Email — {emailModal.tier.label}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{selectedGuests.size} recipients selected</p>
               </div>
               <button onClick={() => setEmailModal(null)} className="text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
@@ -552,7 +552,7 @@ export default function AnalyticsClient({
                       {selectedGuests.has(guest.email) && <CheckCircle className="w-3 h-3 text-white" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-white truncate">{guest.full_name}</p>
+                      <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{guest.full_name}</p>
                       <p className="text-xs text-gray-500 truncate">{guest.email}</p>
                     </div>
                   </div>

@@ -52,7 +52,7 @@ const THEMES: {
     id: 'pulse',
     name: 'Pulse',
     tagline: 'Warm · Earthy · Organic',
-    bg: '#EAE4DA',
+    bg: '#FAF8F5',
     sidebar: '#FFFFFF',
     surface: '#FFFFFF',
     surface2: '#F3EDE4',

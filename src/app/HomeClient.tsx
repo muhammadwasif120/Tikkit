@@ -193,8 +193,8 @@ export default function HomeClient() {
         html { scroll-behavior: smooth; }
 
         body {
-          background: #080A10;
-          color: #F0F2FF;
+          background: #080A10 !important;
+          color: #F0F2FF !important;
           font-family: var(--font-body);
           -webkit-font-smoothing: antialiased;
           overflow-x: hidden;

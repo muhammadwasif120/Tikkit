@@ -125,7 +125,7 @@ export default function FloatingChat() {
           position: 'fixed', bottom: 80, right: 20,
           width: 'min(360px, calc(100vw - 32px))',
           height: 'min(500px, calc(100svh - 120px))',
-          background: '#0C0E16', border: '1px solid rgba(255,255,255,0.1)',
+          background: 'var(--guest-surface)', border: '1px solid var(--guest-border)',
           borderRadius: 20, boxShadow: '0 16px 48px rgba(0,0,0,0.7)',
           display: 'flex', flexDirection: 'column', overflow: 'hidden',
           zIndex: 9999,
@@ -133,14 +133,14 @@ export default function FloatingChat() {
 
           {/* Panel header */}
           <div style={{
-            padding: '13px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)',
+            padding: '13px 16px', borderBottom: '1px solid var(--guest-border)',
             display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0,
-            background: '#0B0D14',
+            background: 'var(--brand-charcoal)',
           }}>
             {selectedEvent ? (
               <button onClick={handleBack} style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: '#9CA3AF', display: 'flex', alignItems: 'center', gap: 4,
+                color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4,
                 fontSize: 12, fontWeight: 600, padding: 0,
               }}>
                 <ChevronLeft size={14} /> Back
@@ -148,7 +148,7 @@ export default function FloatingChat() {
             ) : (
               <MessageSquare size={15} color="#A855F7" />
             )}
-            <p style={{ flex: 1, color: 'white', fontSize: 13, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <p style={{ flex: 1, color: 'var(--text-primary)', fontSize: 13, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {selectedEvent ? selectedEvent.title : 'Event Chats'}
             </p>
             {!selectedEvent && liveCount > 0 && (
@@ -160,7 +160,7 @@ export default function FloatingChat() {
                 {liveCount} LIVE
               </span>
             )}
-            <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', display: 'flex', padding: 0 }}>
+            <button onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 0 }}>
               <X size={15} />
             </button>
           </div>
@@ -171,12 +171,12 @@ export default function FloatingChat() {
             <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
               {loadingEvents ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-                  <Loader2 size={20} color="#4B5563" className="animate-spin" />
+                  <Loader2 size={20} color="var(--text-muted)" className="animate-spin" />
                 </div>
               ) : events.length === 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 8, padding: 24 }}>
-                  <MessageSquare size={28} color="#374151" />
-                  <p style={{ color: '#374151', fontSize: 13, margin: 0, textAlign: 'center' }}>No published events yet</p>
+                  <MessageSquare size={28} color="var(--text-muted)" />
+                  <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0, textAlign: 'center' }}>No published events yet</p>
                 </div>
               ) : events.map(ev => {
                 const isLive = eventIsLive(ev)
@@ -186,20 +186,20 @@ export default function FloatingChat() {
                     display: 'flex', alignItems: 'center', gap: 12,
                     padding: '10px 16px', transition: 'background 0.12s', textAlign: 'left',
                   }}
-                  onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--guest-surface-2)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                   >
                     {/* Thumbnail */}
                     <div style={{
                       width: 44, height: 44, borderRadius: 12, flexShrink: 0, overflow: 'hidden',
                       background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : getGrad(ev.id),
-                      border: isLive ? '1.5px solid rgba(34,197,94,0.4)' : '1px solid rgba(255,255,255,0.06)',
+                      border: isLive ? '1.5px solid rgba(34,197,94,0.4)' : '1px solid var(--guest-border)',
                       boxShadow: isLive ? '0 0 10px rgba(34,197,94,0.15)' : 'none',
                     }} />
                     {/* Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                        <p style={{ color: 'white', fontSize: 13, fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>
+                        <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>
                           {ev.title}
                         </p>
                         {isLive && (
@@ -210,15 +210,15 @@ export default function FloatingChat() {
                         )}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#4B5563', fontSize: 10, fontWeight: 600 }}>
-                          <Calendar size={9} color="#4B5563" /> {fmtDate(ev.date_start)}
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--text-muted)', fontSize: 10, fontWeight: 600 }}>
+                          <Calendar size={9} color="var(--text-muted)" /> {fmtDate(ev.date_start)}
                         </span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#4B5563', fontSize: 10, fontWeight: 600 }}>
-                          <Users size={9} color="#4B5563" /> {ev._count}
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--text-muted)', fontSize: 10, fontWeight: 600 }}>
+                          <Users size={9} color="var(--text-muted)" /> {ev._count}
                         </span>
                       </div>
                     </div>
-                    <ChevronLeft size={13} color="#374151" style={{ transform: 'rotate(180deg)', flexShrink: 0 }} />
+                    <ChevronLeft size={13} color="var(--text-muted)" style={{ transform: 'rotate(180deg)', flexShrink: 0 }} />
                   </button>
                 )
               })}
@@ -229,14 +229,14 @@ export default function FloatingChat() {
               <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {loadingMsgs ? (
                   <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Loader2 size={18} color="#4B5563" className="animate-spin" />
+                    <Loader2 size={18} color="var(--text-muted)" className="animate-spin" />
                   </div>
                 ) : messages.length === 0 ? (
                   <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, paddingTop: 40 }}>
                     <div style={{ width: 40, height: 40, borderRadius: 14, background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <MessageSquare size={18} color="#A855F7" />
                     </div>
-                    <p style={{ color: '#374151', fontSize: 12, textAlign: 'center', margin: 0, lineHeight: 1.6 }}>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 12, textAlign: 'center', margin: 0, lineHeight: 1.6 }}>
                       No messages yet.<br />Start the conversation.
                     </p>
                   </div>
@@ -262,7 +262,7 @@ export default function FloatingChat() {
                         }}>{initials}</div>
                         {/* Body */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                          <p style={{ fontSize: 9, fontWeight: 600, color: '#4B5563', margin: 0, textAlign: isOrg ? 'right' : 'left' }}>
+                          <p style={{ fontSize: 9, fontWeight: 600, color: 'var(--text-muted)', margin: 0, textAlign: isOrg ? 'right' : 'left' }}>
                             {msg.sender_name}
                           </p>
                           {/* Badge */}
@@ -282,13 +282,15 @@ export default function FloatingChat() {
                           <div style={{
                             padding: '6px 10px', borderRadius: isOrg ? '12px 3px 12px 12px' : '3px 12px 12px 12px',
                             fontSize: 12, lineHeight: 1.5, wordBreak: 'break-word',
-                            background: isOrg ? 'linear-gradient(135deg,rgba(168,85,247,0.2),rgba(30,94,255,0.15))' : '#151722',
-                            border: `1px solid ${isOrg ? 'rgba(168,85,247,0.22)' : 'rgba(255,255,255,0.06)'}`,
-                            color: isOrg ? '#D9C8FF' : '#E5E7EB',
+                            background: isOrg
+                              ? 'linear-gradient(135deg,rgba(168,85,247,0.2),rgba(30,94,255,0.15))'
+                              : 'var(--guest-surface-2)',
+                            border: `1px solid ${isOrg ? 'rgba(168,85,247,0.22)' : 'var(--guest-border)'}`,
+                            color: isOrg ? '#D9C8FF' : 'var(--text-primary)',
                           }}>
                             {msg.message}
                           </div>
-                          <p style={{ fontSize: 8, color: '#374151', margin: 0, textAlign: isOrg ? 'right' : 'left' }}>
+                          <p style={{ fontSize: 8, color: 'var(--text-muted)', margin: 0, textAlign: isOrg ? 'right' : 'left' }}>
                             {fmtTime(msg.created_at)}
                           </p>
                         </div>
@@ -300,7 +302,7 @@ export default function FloatingChat() {
                             opacity: 0, transition: 'opacity 0.15s',
                             background: 'none', border: 'none', cursor: 'pointer',
                             display: 'flex', alignItems: 'center', gap: 3,
-                            color: '#6B7280', fontSize: 10, fontWeight: 600,
+                            color: 'var(--text-muted)', fontSize: 10, fontWeight: 600,
                             padding: '3px 0', marginTop: 2, marginLeft: 28,
                           }}>
                           <Lock size={8} /> Reply privately
@@ -323,7 +325,7 @@ export default function FloatingChat() {
                   <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     Private → <strong>{replyTo.name}</strong>
                   </span>
-                  <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', display: 'flex', padding: 0 }}>
+                  <button onClick={() => setReplyTo(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 0 }}>
                     <X size={12} />
                   </button>
                 </div>
@@ -331,7 +333,7 @@ export default function FloatingChat() {
 
               {/* Input */}
               <div style={{
-                padding: '8px 10px', borderTop: '1px solid rgba(255,255,255,0.06)',
+                padding: '8px 10px', borderTop: '1px solid var(--guest-border)',
                 display: 'flex', gap: 7, alignItems: 'flex-end', flexShrink: 0,
               }}>
                 <textarea
@@ -342,9 +344,9 @@ export default function FloatingChat() {
                   placeholder={replyTo ? `Private → ${replyTo.name}…` : 'Broadcast to all attendees…'}
                   rows={1}
                   style={{
-                    flex: 1, background: 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${replyTo ? 'rgba(168,85,247,0.3)' : 'rgba(255,255,255,0.08)'}`,
-                    borderRadius: 10, padding: '7px 12px', color: 'white', fontSize: 12,
+                    flex: 1, background: 'var(--guest-surface-2)',
+                    border: `1px solid ${replyTo ? 'rgba(168,85,247,0.3)' : 'var(--guest-border)'}`,
+                    borderRadius: 10, padding: '7px 12px', color: 'var(--text-primary)', fontSize: 12,
                     outline: 'none', resize: 'none', minHeight: 34, maxHeight: 80,
                     fontFamily: 'var(--font-body)', lineHeight: 1.4,
                   }}
@@ -371,7 +373,7 @@ export default function FloatingChat() {
         style={{
           position: 'fixed', bottom: 20, right: 20, zIndex: 9999,
           width: 52, height: 52, borderRadius: 16,
-          background: open ? '#1a1d2e' : 'linear-gradient(135deg,#7C3AED,#A855F7)',
+          background: open ? 'var(--brand-charcoal)' : 'linear-gradient(135deg,#7C3AED,#A855F7)',
           border: open ? '1px solid rgba(168,85,247,0.3)' : 'none',
           cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: open ? 'none' : '0 8px 24px rgba(168,85,247,0.45)',
@@ -387,7 +389,7 @@ export default function FloatingChat() {
           <div style={{
             position: 'absolute', top: -4, right: -4,
             width: 18, height: 18, borderRadius: '50%',
-            background: '#22C55E', border: '2px solid #080A10',
+            background: '#22C55E', border: '2px solid var(--brand-charcoal)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 9, fontWeight: 800, color: 'white',
           }}>

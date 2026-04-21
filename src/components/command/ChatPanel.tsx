@@ -24,13 +24,13 @@ function fmtTime(iso: string) {
 const CSS = `
   .cp-wrap {
     display:flex; flex-direction:column; width:100%; height:100%;
-    background:#0C0E16; border-radius:18px;
-    border:1px solid rgba(255,255,255,0.08); overflow:hidden;
+    background:var(--guest-surface); border-radius:18px;
+    border:1px solid var(--guest-border); overflow:hidden;
   }
 
   /* Header */
   .cp-header {
-    padding:13px 16px; border-bottom:1px solid rgba(255,255,255,0.06);
+    padding:13px 16px; border-bottom:1px solid var(--guest-border);
     display:flex; align-items:center; gap:10px; flex-shrink:0;
   }
   .cp-header-dot {
@@ -38,14 +38,14 @@ const CSS = `
     box-shadow:0 0 8px rgba(34,197,94,0.6); animation:cpPulse 2s infinite; flex-shrink:0;
   }
   @keyframes cpPulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-  .cp-title { color:white; font-size:13px; font-weight:700; margin:0; font-family:var(--font-display); }
-  .cp-sub   { color:#4B5563; font-size:10px; margin:0; }
+  .cp-title { color:var(--text-primary); font-size:13px; font-weight:700; margin:0; font-family:var(--font-display); }
+  .cp-sub   { color:var(--text-muted); font-size:10px; margin:0; }
 
   /* Messages */
   .cp-messages {
     flex:1; overflow-y:auto; padding:14px;
     display:flex; flex-direction:column; gap:6px;
-    scrollbar-width:thin; scrollbar-color:rgba(255,255,255,0.08) transparent;
+    scrollbar-width:thin; scrollbar-color:var(--guest-border) transparent;
   }
 
   /* Message wrapper — for hover actions */
@@ -67,7 +67,7 @@ const CSS = `
   }
 
   .cp-body { display:flex; flex-direction:column; gap:2px; }
-  .cp-name { font-size:10px; font-weight:600; color:#4B5563; margin:0 0 3px; }
+  .cp-name { font-size:10px; font-weight:600; color:var(--text-muted); margin:0 0 3px; }
   .cp-name.mine { text-align:right; }
 
   /* Broadcast / private badge on organizer messages */
@@ -85,8 +85,8 @@ const CSS = `
   .cp-badge.mine { align-self:flex-end; }
 
   .cp-bubble {
-    padding:8px 12px; border-radius:14px; font-size:13px; line-height:1.5; color:#E5E7EB;
-    background:#151722; border:1px solid rgba(255,255,255,0.06);
+    padding:8px 12px; border-radius:14px; font-size:13px; line-height:1.5; color:var(--text-primary);
+    background:var(--guest-surface-2); border:1px solid var(--guest-border);
     word-break:break-word;
   }
   .cp-bubble.mine {
@@ -96,7 +96,7 @@ const CSS = `
   }
   .cp-msg:not(.mine) .cp-bubble { border-radius:4px 14px 14px 14px; }
 
-  .cp-time { font-size:9px; color:#374151; margin:2px 0 0; }
+  .cp-time { font-size:9px; color:var(--text-muted); margin:2px 0 0; }
   .cp-time.mine { text-align:right; }
 
   /* Per-message reply action — visible on hover */
@@ -109,7 +109,7 @@ const CSS = `
     display:inline-flex; align-items:center; gap:4px;
     padding:3px 8px; border-radius:8px; font-size:10px; font-weight:700;
     cursor:pointer; border:none; transition:background 0.15s, color 0.15s;
-    background:rgba(255,255,255,0.04); color:#6B7280;
+    background:var(--guest-surface-2); color:var(--text-muted);
   }
   .cp-action-btn:hover { background:rgba(168,85,247,0.12); color:#C084FC; }
 
@@ -122,10 +122,10 @@ const CSS = `
   }
   .cp-reply-banner span { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .cp-reply-close {
-    background:none; border:none; cursor:pointer; color:#6B7280; padding:2px;
+    background:none; border:none; cursor:pointer; color:var(--text-muted); padding:2px;
     display:flex; flex-shrink:0; transition:color 0.15s;
   }
-  .cp-reply-close:hover { color:white; }
+  .cp-reply-close:hover { color:var(--text-primary); }
 
   /* Empty state */
   .cp-empty {
@@ -137,20 +137,20 @@ const CSS = `
     background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.15);
     display:flex; align-items:center; justify-content:center;
   }
-  .cp-empty-text { color:#374151; font-size:12px; text-align:center; line-height:1.65; margin:0; }
+  .cp-empty-text { color:var(--text-muted); font-size:12px; text-align:center; line-height:1.65; margin:0; }
 
   /* Input */
   .cp-input-wrap {
-    padding:10px 12px; border-top:1px solid rgba(255,255,255,0.06);
+    padding:10px 12px; border-top:1px solid var(--guest-border);
     display:flex; gap:8px; align-items:flex-end; flex-shrink:0;
   }
   .cp-input {
-    flex:1; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
-    border-radius:12px; padding:9px 14px; color:white; font-size:13px;
+    flex:1; background:var(--guest-surface-2); border:1px solid var(--guest-border);
+    border-radius:12px; padding:9px 14px; color:var(--text-primary); font-size:13px;
     outline:none; resize:none; min-height:38px; max-height:100px;
     font-family:var(--font-body); transition:border-color 0.15s; line-height:1.4;
   }
-  .cp-input::placeholder { color:#374151; }
+  .cp-input::placeholder { color:var(--text-muted); }
   .cp-input:focus { border-color:rgba(168,85,247,0.35); }
   .cp-input.is-private { border-color:rgba(168,85,247,0.25); }
   .cp-send {
