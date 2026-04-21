@@ -7,7 +7,7 @@ import { safeDecrypt } from '@/lib/encrypt'
 // ─── Auth guard ───────────────────────────────────────────────────────────────
 // Server actions are called directly via POST — they bypass all layout-level
 // auth checks. Every sensitive action must call this before touching any data.
-async function requireAdmin(): Promise<void> {
+export async function requireAdmin(): Promise<void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')

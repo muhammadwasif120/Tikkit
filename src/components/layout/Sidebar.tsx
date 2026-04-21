@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, Users, ScanLine,
   Building2, BarChart3, Settings, LogOut, ClipboardCheck, X, UserCircle,
-  Radio,
+  Radio, MessageSquare,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import { createClient } from '@/lib/supabase/client'
@@ -24,6 +24,7 @@ const navItems = [
   { href: '/dashboard/scan',      label: 'Scanner',   icon: ScanLine,                     tour: 'nav-scan' },
   { href: '/dashboard/vendors',   label: 'Vendors',   icon: Building2,                    tour: 'nav-vendors' },
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3,                    tour: 'nav-analytics' },
+  { href: '/dashboard/messages',  label: 'Support',   icon: MessageSquare,                tour: 'nav-messages' },
 ]
 
 type Props = {

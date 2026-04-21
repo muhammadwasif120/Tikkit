@@ -20,6 +20,10 @@ import {
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
   type PlatformAnalytics, type WaitlistEntry, type SupportQuery, type CnicVerification,
 } from '@/app/actions/masterActions'
+import {
+  getAdminSupportConversations, getAdminSupportThread, sendAdminSupportReply,
+  type SupportMessage, type SupportConversationSummary,
+} from '@/app/actions/supportActions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -161,6 +165,70 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
           </button>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', borderRadius: 10, padding: '10px 16px', fontSize: 'var(--fs-base)', fontWeight: 600, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
             Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Query Detail Panel ───────────────────────────────────────────────────────
+
+function QueryDetailPanel({ query, onClose }: { query: SupportQuery; onClose: () => void }) {
+  const catLabel: Record<string, string> = {
+    ticket_registration: 'Ticket / Registration', event_cancellation: 'Cancellation / Refund',
+    organizer_dispute: 'Organizer Dispute', attendee_dispute: 'Attendee Complaint',
+    account_access: 'Account Access', payment_billing: 'Payment & Billing',
+    technical_bug: 'Technical Bug', feature_request: 'Feature Request', other: 'Other',
+  }
+  const PC2: Record<string, string> = { high: '#EF4444', medium: '#F59E0B', low: '#6B7280' }
+  const SC2: Record<string, string> = { open: '#EF4444', in_progress: '#F59E0B', resolved: '#22C55E' }
+  const SL2: Record<string, string> = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved' }
+  return (
+    <div className="ms-overlay">
+      <div className="ms-panel">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF' }}>Report Details</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', fontFamily: 'var(--font-body)', marginTop: 2 }}>{query.id}</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6B7280' }}>
+            <X size={13} />
+          </button>
+        </div>
+        <div style={{ padding: '20px 24px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 18 }}>
+          {/* Meta row */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 999, background: `${PC2[query.priority]}18`, border: `1px solid ${PC2[query.priority]}30`, color: PC2[query.priority] }}>{query.priority.toUpperCase()}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 999, background: `${SC2[query.status]}18`, border: `1px solid ${SC2[query.status]}30`, color: SC2[query.status] }}>{SL2[query.status]}</span>
+            {query.category && <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 999, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#9CA3AF' }}>{catLabel[query.category] ?? query.category}</span>}
+          </div>
+          {/* From */}
+          <div>
+            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 5, fontFamily: 'var(--font-body)' }}>FROM</div>
+            <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', fontFamily: 'var(--font-body)', fontWeight: 600 }}>{query.from_name}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 2, textTransform: 'capitalize' }}>{query.from_type} · {new Date(query.created_at).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' })}</div>
+          </div>
+          {/* Subject */}
+          <div>
+            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 5, fontFamily: 'var(--font-body)' }}>SUBJECT</div>
+            <div style={{ fontSize: 'var(--fs-md)', color: '#F0F2FF', fontFamily: 'var(--font-body)', fontWeight: 600, lineHeight: 1.4 }}>{query.subject}</div>
+          </div>
+          {/* Body */}
+          <div>
+            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 5, fontFamily: 'var(--font-body)' }}>DESCRIPTION</div>
+            {query.body ? (
+              <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', fontFamily: 'var(--font-body)', lineHeight: 1.7, whiteSpace: 'pre-wrap', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '14px 16px' }}>
+                {query.body}
+              </div>
+            ) : (
+              <div style={{ fontSize: 'var(--fs-base)', color: '#374151', fontFamily: 'var(--font-body)', fontStyle: 'italic' }}>No description provided.</div>
+            )}
+          </div>
+        </div>
+        <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#9CA3AF', borderRadius: 10, padding: '10px 20px', fontSize: 'var(--fs-base)', fontWeight: 600, fontFamily: 'var(--font-display)', cursor: 'pointer', width: '100%' }}>
+            Close
           </button>
         </div>
       </div>
@@ -843,6 +911,16 @@ export default function MasterPage() {
   const [queries, setQueries] = useState<SupportQuery[]>([])
   const [queriesLoading, setQueriesLoading] = useState(false)
   const [queryFilter, setQueryFilter] = useState<'all' | SupportQuery['status']>('all')
+  const [selectedQuery, setSelectedQuery] = useState<SupportQuery | null>(null)
+
+  // Support chat state
+  const [supportConvos, setSupportConvos] = useState<SupportConversationSummary[]>([])
+  const [supportConvosLoading, setSupportConvosLoading] = useState(false)
+  const [selectedSupportUserId, setSelectedSupportUserId] = useState<string | null>(null)
+  const [supportThread, setSupportThread] = useState<Record<string, SupportMessage[]>>({})
+  const [supportThreadLoading, setSupportThreadLoading] = useState(false)
+  const [supportReplyInput, setSupportReplyInput] = useState('')
+  const [supportReplying, setSupportReplying] = useState(false)
 
   // Waitlist state
   const [waitlist, setWaitlist] = useState<WaitlistEntry[]>([])
@@ -859,10 +937,50 @@ export default function MasterPage() {
 
   useEffect(() => {
     if (tab !== 'queries') return
-    if (queries.length > 0) return // already loaded
-    setQueriesLoading(true)
-    getSupportQueries().then(setQueries).finally(() => setQueriesLoading(false))
-  }, [tab, queries.length])
+    if (queries.length === 0) {
+      setQueriesLoading(true)
+      getSupportQueries().then(setQueries).finally(() => setQueriesLoading(false))
+    }
+    if (supportConvos.length === 0) {
+      setSupportConvosLoading(true)
+      getAdminSupportConversations().then(setSupportConvos).finally(() => setSupportConvosLoading(false))
+    }
+  }, [tab]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const loadSupportThread = async (userId: string) => {
+    setSelectedSupportUserId(userId)
+    if (supportThread[userId]) return
+    setSupportThreadLoading(true)
+    const msgs = await getAdminSupportThread(userId)
+    setSupportThread(prev => ({ ...prev, [userId]: msgs }))
+    setSupportThreadLoading(false)
+  }
+
+  const handleSupportReply = async () => {
+    if (!selectedSupportUserId || !supportReplyInput.trim() || supportReplying) return
+    const convo = supportConvos.find(c => c.userId === selectedSupportUserId)
+    if (!convo) return
+    setSupportReplying(true)
+    const msg = supportReplyInput.trim()
+    setSupportReplyInput('')
+    const { error } = await sendAdminSupportReply(selectedSupportUserId, convo.userName, convo.userType as 'organizer' | 'attendee', msg)
+    if (!error) {
+      const newMsg: SupportMessage = {
+        id: Date.now().toString(),
+        user_id: selectedSupportUserId,
+        user_name: convo.userName,
+        user_type: convo.userType as 'organizer' | 'attendee',
+        message: msg,
+        sender: 'admin',
+        created_at: new Date().toISOString(),
+      }
+      setSupportThread(prev => ({ ...prev, [selectedSupportUserId]: [...(prev[selectedSupportUserId] ?? []), newMsg] }))
+      setSupportConvos(prev => prev.map(c => c.userId === selectedSupportUserId ? { ...c, lastMessage: msg, lastAt: new Date().toISOString() } : c))
+    } else {
+      setSupportReplyInput(msg)
+    }
+    setSupportReplying(false)
+  }
 
   // CNIC verifications state
   const [cnicVerifications, setCnicVerifications] = useState<CnicVerification[]>([])
@@ -1814,6 +1932,7 @@ export default function MasterPage() {
                               <td><SBadge status={q.status} /></td>
                               <td>
                                 <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>
+                                  <button title="View full report" className="ms-ib" onClick={() => setSelectedQuery(q)} style={{ color: '#9CA3AF', border: '1px solid rgba(255,255,255,0.1)' }}><Eye size={11} /></button>
                                   {q.status === 'open' && (
                                     <button title="Mark in progress" className="ms-ib amber" onClick={() => setQueryStatus(q.id, 'in_progress')}><Clock size={11} /></button>
                                   )}
@@ -1837,6 +1956,110 @@ export default function MasterPage() {
                       </tbody>
                     </table>
                   </div>
+                </div>
+
+                {/* ── Support Chats ── */}
+                <div style={{ marginTop: 28 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <MessageSquare size={16} color="#1E5EFF" />
+                    TIKKIT X Support Chats
+                  </div>
+                  {supportConvosLoading ? (
+                    <div style={{ color: '#374151', fontSize: 'var(--fs-sm)', padding: 20, textAlign: 'center' }}>Loading conversations…</div>
+                  ) : supportConvos.length === 0 ? (
+                    <div style={{ color: '#374151', fontSize: 'var(--fs-sm)', padding: 20, textAlign: 'center', background: '#0D0F18', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12 }}>No support conversations yet.</div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: selectedSupportUserId ? '280px 1fr' : '1fr', gap: 12, minHeight: 360 }}>
+                      {/* Conversation list */}
+                      <div style={{ background: '#0D0F18', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                        {supportConvos.map(c => {
+                          const active = selectedSupportUserId === c.userId
+                          return (
+                            <button
+                              key={c.userId}
+                              onClick={() => loadSupportThread(c.userId)}
+                              style={{
+                                display: 'flex', gap: 10, padding: '12px 14px', width: '100%', textAlign: 'left',
+                                background: active ? 'rgba(30,94,255,0.1)' : 'transparent',
+                                border: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                cursor: 'pointer', alignItems: 'flex-start', transition: 'background 0.15s',
+                              }}
+                            >
+                              <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: c.userType === 'organizer' ? 'rgba(30,94,255,0.2)' : 'rgba(139,92,246,0.2)', border: `1px solid ${c.userType === 'organizer' ? 'rgba(30,94,255,0.35)' : 'rgba(139,92,246,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: c.userType === 'organizer' ? '#1E5EFF' : '#8B5CF6' }}>
+                                {c.userName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()}
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
+                                  <span style={{ fontSize: 13, fontWeight: 700, color: '#D1D5DB', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{c.userName}</span>
+                                  {c.unreadCount > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: '#EF4444', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 999, padding: '1px 6px', flexShrink: 0, marginLeft: 4 }}>{c.unreadCount}</span>}
+                                </div>
+                                <div style={{ fontSize: 11, color: '#4B5563', textTransform: 'capitalize', marginBottom: 2 }}>{c.userType}</div>
+                                <div style={{ fontSize: 12, color: '#6B7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.lastMessage}</div>
+                              </div>
+                            </button>
+                          )
+                        })}
+                      </div>
+
+                      {/* Thread view */}
+                      {selectedSupportUserId && (() => {
+                        const convo = supportConvos.find(c => c.userId === selectedSupportUserId)
+                        const msgs = supportThread[selectedSupportUserId] ?? []
+                        return (
+                          <div style={{ background: '#0D0F18', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                            {/* Thread header */}
+                            <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 700, color: '#F0F2FF', flex: 1 }}>{convo?.userName}</div>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: convo?.userType === 'organizer' ? '#1E5EFF' : '#8B5CF6', background: convo?.userType === 'organizer' ? 'rgba(30,94,255,0.12)' : 'rgba(139,92,246,0.12)', border: `1px solid ${convo?.userType === 'organizer' ? 'rgba(30,94,255,0.3)' : 'rgba(139,92,246,0.3)'}`, borderRadius: 999, padding: '2px 8px', textTransform: 'capitalize' }}>{convo?.userType}</span>
+                            </div>
+                            {/* Messages */}
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10, minHeight: 240, maxHeight: 360 }}>
+                              {supportThreadLoading ? (
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+                                  <div style={{ width: 20, height: 20, border: '2px solid rgba(30,94,255,0.2)', borderTopColor: '#1E5EFF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                </div>
+                              ) : msgs.length === 0 ? (
+                                <div style={{ color: '#374151', fontSize: 'var(--fs-sm)', textAlign: 'center', paddingTop: 40 }}>No messages yet.</div>
+                              ) : msgs.map(m => {
+                                const isAdmin = m.sender === 'admin'
+                                return (
+                                  <div key={m.id} style={{ display: 'flex', gap: 8, maxWidth: '80%', alignSelf: isAdmin ? 'flex-end' : 'flex-start', flexDirection: isAdmin ? 'row-reverse' : 'row' }}>
+                                    <div style={{ width: 24, height: 24, borderRadius: '50%', flexShrink: 0, background: isAdmin ? 'rgba(239,68,68,0.2)' : 'rgba(30,94,255,0.2)', border: `1px solid ${isAdmin ? 'rgba(239,68,68,0.35)' : 'rgba(30,94,255,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 800, color: isAdmin ? '#EF4444' : '#1E5EFF' }}>
+                                      {isAdmin ? 'TX' : m.user_name.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()}
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                                      <div style={{ fontSize: 9, fontWeight: 600, color: '#4B5563', textAlign: isAdmin ? 'right' : 'left' }}>{isAdmin ? 'TIKKIT Admin' : m.user_name} · {new Date(m.created_at).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })}</div>
+                                      <div style={{ padding: '8px 12px', borderRadius: 10, fontSize: 13, lineHeight: 1.5, wordBreak: 'break-word', background: isAdmin ? 'rgba(239,68,68,0.1)' : 'rgba(30,94,255,0.1)', border: `1px solid ${isAdmin ? 'rgba(239,68,68,0.2)' : 'rgba(30,94,255,0.2)'}`, color: isAdmin ? '#FCA5A5' : '#93C5FD' }}>
+                                        {m.message}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                            {/* Reply input */}
+                            <div style={{ padding: '10px 14px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: 8 }}>
+                              <input
+                                value={supportReplyInput}
+                                onChange={e => setSupportReplyInput(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') handleSupportReply() }}
+                                placeholder="Reply as TIKKIT Admin…"
+                                className="ms-input"
+                                style={{ flex: 1 }}
+                              />
+                              <button
+                                onClick={handleSupportReply}
+                                disabled={!supportReplyInput.trim() || supportReplying}
+                                style={{ background: 'linear-gradient(135deg,#1E5EFF,#1448CC)', border: 'none', borderRadius: 8, padding: '0 14px', color: 'white', cursor: 'pointer', opacity: !supportReplyInput.trim() || supportReplying ? 0.45 : 1, display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-display)' }}
+                              >
+                                <Send size={13} /> Send
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })()}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1946,6 +2169,9 @@ export default function MasterPage() {
 
       {/* Contact panel */}
       {contactTarget && <ContactPanel org={contactTarget} onClose={() => setContactTarget(null)} />}
+
+      {/* Query detail panel */}
+      {selectedQuery && <QueryDetailPanel query={selectedQuery} onClose={() => setSelectedQuery(null)} />}
 
       {/* CNIC Review Modal */}
       {reviewCnic && (
