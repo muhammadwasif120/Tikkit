@@ -51,16 +51,16 @@ const THEMES: {
   {
     id: 'pulse',
     name: 'Pulse',
-    tagline: 'Warm · Organic · Light',
-    bg: '#FAF8F5',
+    tagline: 'Warm · Earthy · Organic',
+    bg: '#EAE4DA',
     sidebar: '#FFFFFF',
     surface: '#FFFFFF',
-    surface2: '#F5F0EB',
-    accent: '#6B8F71',
-    accent2: '#C2785C',
-    text: '#2D2D2D',
-    textMuted: '#7A7A7A',
-    border: 'rgba(0,0,0,0.08)',
+    surface2: '#F3EDE4',
+    accent: '#4D6B3A',
+    accent2: '#B85835',
+    text: '#1C1A16',
+    textMuted: '#8A8278',
+    border: '#D5CEC4',
   },
 ]
 
@@ -178,7 +178,7 @@ export function ThemePicker() {
               padding: 12,
               border: `2px solid ${active ? t.accent : 'rgba(255,255,255,0.06)'}`,
               background: active
-                ? `rgba(${t.id === 'pulse' ? '107,143,113' : t.id === 'corporate' ? '74,144,217' : '30,94,255'},0.08)`
+                ? `rgba(${t.id === 'pulse' ? '77,107,58' : t.id === 'corporate' ? '74,144,217' : '30,94,255'},0.08)`
                 : 'rgba(255,255,255,0.02)',
               cursor: isPending ? 'default' : 'pointer',
               outline: 'none',
