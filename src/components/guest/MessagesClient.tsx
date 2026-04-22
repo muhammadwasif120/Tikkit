@@ -202,7 +202,7 @@ export default function MessagesClient({
   const supportLastMsg = supportMessages[supportMessages.length - 1]
 
   /* ── Empty state ────────────────────────────────────────────── */
-  if (threads.length === 0 && supportMessages.length === 0) {
+  if (threads.length === 0 && supportMessages.length === 0 && !selectedId) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', flexDirection: 'column', gap: 12, padding: 24 }}>
         <MessageSquare size={48} color="var(--brand-blue)" style={{ opacity: 0.15 }} />
@@ -485,7 +485,7 @@ export default function MessagesClient({
   return (
     <>
       {/* ── Mobile: list or thread ── */}
-      <div className="md:hidden flex flex-col" style={{ height: 'calc(100svh - 76px - env(safe-area-inset-bottom))', overflow: 'hidden' }}>
+      <div className="md:hidden flex flex-col" style={{ height: 'calc(100svh - 152px - env(safe-area-inset-bottom))', overflow: 'hidden' }}>
         {mobileView === 'list' ? ThreadList : ActiveThread}
       </div>
 
