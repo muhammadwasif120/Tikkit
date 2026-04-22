@@ -279,27 +279,32 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
             <Field Icon={Phone} type="tel" placeholder="Phone Number" value={phone} onChange={setPhone} accent={accent} />
             <Field Icon={CreditCard} type="text" placeholder="CNIC Number (xxxxx-xxxxxxx-x)" value={cnic} onChange={setCnic} accent={accent} />
             <div style={{ margin: '-3px 0 10px', fontSize: 11, color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.4, paddingLeft: 4 }}>
-              Complete the CNIC verification in the settings tab to get a <span style={{ color: accent, fontWeight: 600 }}>Verified Profile badge</span>.
+              This info is collected to keep the platform secure. Complete the CNIC verification in the settings tab to get a <span style={{ color: accent, fontWeight: 600 }}>Verified Profile badge</span>.
             </div>
             
             {isOrg ? (
               <Field Icon={User} type="text" placeholder="Company or Brand Name" value={company} onChange={setCompany} accent={accent} />
             ) : (
               <div style={{ display: 'flex', gap: 9 }}>
-                <Field Icon={Calendar} type="date" placeholder="Date of Birth" value={dob} onChange={setDob} accent={accent} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, paddingLeft: 4, fontWeight: 500 }}>Date of Birth</div>
+                  <Field Icon={Calendar} type="date" placeholder="Date of Birth" value={dob} onChange={setDob} accent={accent} />
+                </div>
                 <div style={{ position: 'relative', flex: 1 }}>
-                  <Users size={15} color={gender ? accent : '#4B5563'} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
-                  <select 
-                    value={gender} onChange={e => setGender(e.target.value)}
-                    style={{
-                      display: 'block', width: '100%', padding: '13px 16px 13px 40px',
-                      background: 'rgba(255,255,255,0.03)', border: `1px solid ${gender ? accent + '55' : 'rgba(255,255,255,0.07)'}`,
-                      borderRadius: 10, color: gender ? '#F0F2FF' : '#9CA3AF', fontSize: 14, outline: 'none',
-                      fontFamily: 'var(--font-body)', transition: 'all .15s', cursor: 'pointer',
-                      appearance: 'none', WebkitAppearance: 'none'
-                    }}
-                  >
-                    <option value="" disabled>Select Gender</option>
+                  <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 6, paddingLeft: 4, fontWeight: 500 }}>Gender</div>
+                  <div style={{ position: 'relative' }}>
+                    <Users size={15} color={gender ? accent : '#4B5563'} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
+                    <select 
+                      value={gender} onChange={e => setGender(e.target.value)}
+                      style={{
+                        display: 'block', width: '100%', padding: '13px 16px 13px 40px',
+                        background: 'rgba(255,255,255,0.03)', border: `1px solid ${gender ? accent + '55' : 'rgba(255,255,255,0.07)'}`,
+                        borderRadius: 10, color: gender ? '#F0F2FF' : '#9CA3AF', fontSize: 14, outline: 'none',
+                        fontFamily: 'var(--font-body)', transition: 'all .15s', cursor: 'pointer',
+                        appearance: 'none', WebkitAppearance: 'none'
+                      }}
+                    >
+                      <option value="" disabled>Select Gender</option>
                     <option value="male" style={{ background: '#0C0E16', color: '#F0F2FF' }}>Male</option>
                     <option value="female" style={{ background: '#0C0E16', color: '#F0F2FF' }}>Female</option>
                   </select>
