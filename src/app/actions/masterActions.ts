@@ -661,50 +661,50 @@ export async function getMasterAttendees(): Promise<MasterAttendee[]> {
   await requireAdmin()
   const supabase = createAdminClient()
 
-  // Fetch all guest profiles with their credit stats
-  const { data: guests } = await supabase
+  // Fetch all guest profiles
+  const { data: guests, error: guestErr } = await supabase
     .from('profiles')
-    .select(`
-      id, full_name, email, phone_number, created_at,
-      cnic_number, cnic_status, is_id_verified,
-      guest_profile:guest_profiles!guest_profiles_id_fkey(
-        credit_score, total_attended
-      )
-    `)
+    .select('id, full_name, email, phone_number, created_at, cnic_number, cnic_status, is_id_verified')
     .eq('role', 'guest')
     .order('created_at', { ascending: false })
     .limit(500)
 
+  if (guestErr) console.error("MasterAttendees profiles err:", guestErr)
   if (!guests) return []
 
-  // Count registrations per guest
-  const ids = guests.map((g: any) => g.id)
-  const { data: regCounts } = ids.length
-    ? await supabase
-        .from('public_registrations')
-        .select('email')
-        .in('email', guests.map((g: any) => g.email))
-        .not('status', 'eq', 'rejected')
-    : { data: [] }
+  const guestEmails = guests.map((g: any) => g.email).filter(Boolean)
+  const guestIds = guests.map((g: any) => g.id)
+  
+  // Decoupled nested fetches
+  const [guestProfilesRes, regsRes] = await Promise.all([
+    supabase.from('guest_profiles').select('id, credit_score, total_attended').in('id', guestIds),
+    supabase.from('public_registrations').select('email').in('email', guestEmails).not('status', 'eq', 'rejected')
+  ])
+
+  if (guestProfilesRes.error) console.error("MasterAttendees profiles err:", guestProfilesRes.error)
+  if (regsRes.error) console.error("MasterAttendees regs err:", regsRes.error)
 
   const regCountMap: Record<string, number> = {}
-  for (const r of regCounts ?? []) {
-    regCountMap[(r as any).email] = (regCountMap[(r as any).email] ?? 0) + 1
+  for (const r of regsRes.data ?? []) {
+    regCountMap[r.email] = (regCountMap[r.email] ?? 0) + 1
   }
 
-  return guests.map((g: any) => ({
-    id: g.id,
-    full_name: g.full_name,
-    email: g.email,
-    phone_number: g.phone_number ?? null,
-    cnic_number: g.cnic_number ?? null,
-    cnic_status: g.cnic_status ?? null,
-    is_id_verified: g.is_id_verified ?? false,
-    created_at: g.created_at,
-    credit_score: g.guest_profile?.credit_score ?? 0,
-    total_attended: g.guest_profile?.total_attended ?? 0,
-    total_events: regCountMap[g.email] ?? 0,
-  }))
+  return guests.map((g: any) => {
+    const prof = guestProfilesRes.data?.find((p: any) => p.id === g.id)
+    return {
+      id: g.id,
+      full_name: g.full_name,
+      email: g.email,
+      phone_number: g.phone_number ?? null,
+      cnic_number: g.cnic_number ?? null,
+      cnic_status: g.cnic_status ?? null,
+      is_id_verified: g.is_id_verified ?? false,
+      created_at: g.created_at,
+      credit_score: prof?.credit_score ?? 0,
+      total_attended: prof?.total_attended ?? 0,
+      total_events: regCountMap[g.email] ?? 0,
+    }
+  })
 }
 
 export async function rejectCnicVerification(userId: string, reason: string): Promise<{ error?: string }> {
@@ -743,35 +743,52 @@ export async function getMasterRegistrations(limit = 300): Promise<MasterRegistr
   await requireAdmin()
   const supabase = createAdminClient()
 
-  const { data } = await supabase
+  const { data: regs, error: rErr } = await supabase
     .from('public_registrations')
-    .select(`
-      id, status, payment_status, payment_screenshot_url, created_at,
-      full_name, email, phone,
-      event:events(
-        id, title, date_start, ticket_price,
-        organizer:profiles!events_organizer_id_fkey(full_name, company_name)
-      )
-    `)
+    .select('id, status, payment_status, payment_screenshot_url, created_at, full_name, email, phone, event_id')
     .not('status', 'eq', 'rejected')
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  if (!data) return []
+  if (rErr) console.error("MasterRegistrations regs err:", rErr)
+  if (!regs) return []
 
-  return data.map((r: any) => ({
-    id: r.id,
-    guest_name: r.full_name ?? '—',
-    guest_email: r.email ?? '—',
-    guest_phone: r.phone ?? null,
-    event_id: r.event?.id ?? '',
-    event_title: r.event?.title ?? 'Unknown Event',
-    event_date: r.event?.date_start ?? '',
-    organizer_name: r.event?.organizer?.company_name || r.event?.organizer?.full_name || '—',
-    status: r.status,
-    payment_status: r.payment_status ?? null,
-    payment_screenshot_url: r.payment_screenshot_url ?? null,
-    ticket_price: r.event?.ticket_price ?? null,
-    created_at: r.created_at,
-  }))
+  const eventIds = Array.from(new Set(regs.map((r: any) => r.event_id).filter(Boolean)))
+
+  const { data: events, error: eErr } = await supabase
+    .from('events')
+    .select('id, title, date_start, ticket_price, organizer_id')
+    .in('id', eventIds)
+
+  if (eErr) console.error("MasterRegistrations events err:", eErr)
+
+  const orgIds = Array.from(new Set(events?.map((e: any) => e.organizer_id).filter(Boolean) || []))
+
+  const { data: orgs, error: oErr } = await supabase
+    .from('profiles')
+    .select('id, full_name, company_name')
+    .in('id', orgIds)
+
+  if (oErr) console.error("MasterRegistrations orgs err:", oErr)
+
+  return regs.map((r: any) => {
+    const ev = events?.find((e: any) => e.id === r.event_id)
+    const org = orgs?.find((o: any) => o.id === ev?.organizer_id)
+
+    return {
+      id: r.id,
+      guest_name: r.full_name ?? '—',
+      guest_email: r.email ?? '—',
+      guest_phone: r.phone ?? null,
+      event_id: r.event_id ?? '',
+      event_title: ev?.title ?? 'Unknown Event',
+      event_date: ev?.date_start ?? '',
+      organizer_name: org?.company_name || org?.full_name || '—',
+      status: r.status ?? 'pending',
+      payment_status: r.payment_status ?? null,
+      payment_screenshot_url: r.payment_screenshot_url ?? null,
+      ticket_price: ev?.ticket_price ?? null,
+      created_at: r.created_at,
+    }
+  })
 }
