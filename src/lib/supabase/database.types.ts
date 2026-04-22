@@ -471,6 +471,8 @@ export type Database = {
           city: string | null
           created_at: string | null
           credit_score: number
+          date_of_birth: string | null
+          gender: string | null
           id: string
           instagram_handle: string | null
           is_discoverable: boolean | null
@@ -489,6 +491,8 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           credit_score?: number
+          date_of_birth?: string | null
+          gender?: string | null
           id: string
           instagram_handle?: string | null
           is_discoverable?: boolean | null
@@ -507,6 +511,8 @@ export type Database = {
           city?: string | null
           created_at?: string | null
           credit_score?: number
+          date_of_birth?: string | null
+          gender?: string | null
           id?: string
           instagram_handle?: string | null
           is_discoverable?: boolean | null

@@ -82,6 +82,12 @@ export default function MessagesClient({
   }, [messagesByEvent, supportMessages, selectedId])
 
   useEffect(() => {
+    if (selectedId === SUPPORT_ID) {
+      import('@/app/actions/supportActions').then(m => m.markSupportMessagesRead().catch(console.error))
+    }
+  }, [selectedId])
+
+  useEffect(() => {
     if (!threads.length) return
     const threadMap = Object.fromEntries(threads.map(t => [t.eventId, t]))
     const channels = threads.map(t =>

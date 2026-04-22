@@ -11,9 +11,11 @@ type Profile = Database['public']['Tables']['profiles']['Row']
 
 export default function DashboardShell({
   profile,
+  unreadSupportCount = 0,
   children,
 }: {
   profile: Profile | null
+  unreadSupportCount?: number
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -22,6 +24,7 @@ export default function DashboardShell({
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--guest-bg)' }}>
       <Sidebar
         profile={profile}
+        unreadSupportCount={unreadSupportCount}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />

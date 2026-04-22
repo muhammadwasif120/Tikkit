@@ -57,6 +57,31 @@ export async function sendSupportMessage(message: string): Promise<{ error?: str
   return { error: error?.message }
 }
 
+export async function getUnreadSupportMessageCount(): Promise<number> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return 0
+  const { count } = await (supabase as any)
+    .from('support_messages')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .eq('sender', 'admin')
+    .eq('read_by_user', false)
+  return count ?? 0
+}
+
+export async function markSupportMessagesRead(): Promise<void> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return
+  await (supabase as any)
+    .from('support_messages')
+    .update({ read_by_user: true })
+    .eq('user_id', user.id)
+    .eq('sender', 'admin')
+    .eq('read_by_user', false)
+}
+
 // ─── Admin Actions ────────────────────────────────────────────────────────────
 
 export async function getAdminSupportConversations(): Promise<SupportConversationSummary[]> {
@@ -76,10 +101,10 @@ export async function getAdminSupportConversations(): Promise<SupportConversatio
         userType: msg.user_type,
         lastMessage: msg.message,
         lastAt: msg.created_at,
-        unreadCount: msg.sender === 'user' ? 1 : 0,
+        unreadCount: msg.read_by_admin === false && msg.sender === 'user' ? 1 : 0,
         seenFirst: true,
       })
-    } else if (msg.sender === 'user') {
+    } else if (msg.read_by_admin === false && msg.sender === 'user') {
       map.get(msg.user_id)!.unreadCount++
     }
   }
@@ -112,4 +137,15 @@ export async function sendAdminSupportReply(
     .from('support_messages')
     .insert({ user_id: userId, user_name: userName, user_type: userType, message: message.trim(), sender: 'admin' })
   return { error: error?.message }
+}
+
+export async function markAdminSupportMessagesRead(userId: string): Promise<void> {
+  await requireAdmin()
+  const admin = createAdminClient()
+  await (admin as any)
+    .from('support_messages')
+    .update({ read_by_admin: true })
+    .eq('user_id', userId)
+    .eq('sender', 'user')
+    .eq('read_by_admin', false)
 }

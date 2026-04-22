@@ -59,6 +59,13 @@ export async function updateSession(request: NextRequest) {
         new URL(role === 'guest' ? '/explore' : '/dashboard', request.url)
       )
     }
+
+    // Unauthenticated user hitting /guest/explore/[slug] → send to registration form
+    if (!user && pathname.match(/^\/guest\/explore\/([^/]+)$/)) {
+      const slug = pathname.split('/guest/explore/')[1]
+      return NextResponse.redirect(new URL(`/register/${slug}`, request.url))
+    }
+
     return response
   }
 

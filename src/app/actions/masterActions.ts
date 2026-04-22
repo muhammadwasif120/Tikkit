@@ -637,8 +637,74 @@ export async function approveCnicVerification(userId: string): Promise<{ error?:
       cnic_reject_reason: null,
     })
     .eq('id', userId)
-  if (error) return { error: error.message }
-  return {}
+  if (error) return { error: error?.message }
+  return { error: error?.message }
+}
+
+// ─── Attendee Accounts ───────────────────────────────────────────────────────
+
+export type MasterAttendee = {
+  id: string
+  full_name: string
+  email: string
+  phone_number: string | null
+  cnic_number: string | null
+  cnic_status: string | null
+  is_id_verified: boolean
+  created_at: string
+  credit_score: number
+  total_attended: number
+  total_events: number
+}
+
+export async function getMasterAttendees(): Promise<MasterAttendee[]> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  // Fetch all guest profiles with their credit stats
+  const { data: guests } = await supabase
+    .from('profiles')
+    .select(`
+      id, full_name, email, phone_number, created_at,
+      cnic_number, cnic_status, is_id_verified,
+      guest_profile:guest_profiles!guest_profiles_id_fkey(
+        credit_score, total_attended
+      )
+    `)
+    .eq('role', 'guest')
+    .order('created_at', { ascending: false })
+    .limit(500)
+
+  if (!guests) return []
+
+  // Count registrations per guest
+  const ids = guests.map((g: any) => g.id)
+  const { data: regCounts } = ids.length
+    ? await supabase
+        .from('public_registrations')
+        .select('email')
+        .in('email', guests.map((g: any) => g.email))
+        .not('status', 'eq', 'rejected')
+    : { data: [] }
+
+  const regCountMap: Record<string, number> = {}
+  for (const r of regCounts ?? []) {
+    regCountMap[(r as any).email] = (regCountMap[(r as any).email] ?? 0) + 1
+  }
+
+  return guests.map((g: any) => ({
+    id: g.id,
+    full_name: g.full_name,
+    email: g.email,
+    phone_number: g.phone_number ?? null,
+    cnic_number: g.cnic_number ?? null,
+    cnic_status: g.cnic_status ?? null,
+    is_id_verified: g.is_id_verified ?? false,
+    created_at: g.created_at,
+    credit_score: g.guest_profile?.credit_score ?? 0,
+    total_attended: g.guest_profile?.total_attended ?? 0,
+    total_events: regCountMap[g.email] ?? 0,
+  }))
 }
 
 export async function rejectCnicVerification(userId: string, reason: string): Promise<{ error?: string }> {
@@ -653,4 +719,59 @@ export async function rejectCnicVerification(userId: string, reason: string): Pr
     })
     .eq('id', userId)
   return { error: error?.message }
+}
+
+// ─── Platform-wide Registrations ─────────────────────────────────────────────
+
+export type MasterRegistration = {
+  id: string
+  guest_name: string
+  guest_email: string
+  guest_phone: string | null
+  event_id: string
+  event_title: string
+  event_date: string
+  organizer_name: string
+  status: string
+  payment_status: string | null
+  payment_screenshot_url: string | null
+  ticket_price: number | null
+  created_at: string
+}
+
+export async function getMasterRegistrations(limit = 300): Promise<MasterRegistration[]> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  const { data } = await supabase
+    .from('public_registrations')
+    .select(`
+      id, status, payment_status, payment_screenshot_url, created_at,
+      full_name, email, phone,
+      event:events(
+        id, title, date_start, ticket_price,
+        organizer:profiles!events_organizer_id_fkey(full_name, company_name)
+      )
+    `)
+    .not('status', 'eq', 'rejected')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (!data) return []
+
+  return data.map((r: any) => ({
+    id: r.id,
+    guest_name: r.full_name ?? '—',
+    guest_email: r.email ?? '—',
+    guest_phone: r.phone ?? null,
+    event_id: r.event?.id ?? '',
+    event_title: r.event?.title ?? 'Unknown Event',
+    event_date: r.event?.date_start ?? '',
+    organizer_name: r.event?.organizer?.company_name || r.event?.organizer?.full_name || '—',
+    status: r.status,
+    payment_status: r.payment_status ?? null,
+    payment_screenshot_url: r.payment_screenshot_url ?? null,
+    ticket_price: r.event?.ticket_price ?? null,
+    created_at: r.created_at,
+  }))
 }

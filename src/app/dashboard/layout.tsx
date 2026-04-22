@@ -2,6 +2,8 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import DashboardShell from '@/components/layout/DashboardShell'
 
+import { getUnreadSupportMessageCount } from '@/app/actions/supportActions'
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -18,8 +20,10 @@ export default async function DashboardLayout({
     .eq('id', user.id)
     .single()
 
+  const unreadSupportCount = await getUnreadSupportMessageCount()
+
   return (
-    <DashboardShell profile={profile}>
+    <DashboardShell profile={profile} unreadSupportCount={unreadSupportCount}>
       {children}
     </DashboardShell>
   )

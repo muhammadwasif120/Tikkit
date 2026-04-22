@@ -231,9 +231,24 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
   const [preview, setPreview] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null)
   const ref = useRef<HTMLInputElement>(null)
-  const account = reg.payment_accounts?.[0]
-  const ticketPrice = reg.event?.ticket_price
+  const closeRef = useRef<HTMLButtonElement>(null)
+  const accounts = reg.payment_accounts ?? []
+  const amount = reg.event?.ticket_price ?? 0
+
+  useEffect(() => { closeRef.current?.focus() }, [])
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const copyText = (val: string, key: string) => {
+    navigator.clipboard.writeText(val).catch(() => {})
+    setCopied(key)
+    setTimeout(() => setCopied(null), 2000)
+  }
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
@@ -272,32 +287,63 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
             <h3 style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 900, margin: '0 0 3px', fontFamily: 'var(--font-display)' }}>Complete Payment</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>{reg.event?.title}</p>
           </div>
-          <button onClick={onClose} style={{ background: 'var(--guest-border)', border: '1px solid var(--guest-border)', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
+          <button ref={closeRef} onClick={onClose} style={{ background: 'var(--guest-border)', border: '1px solid var(--guest-border)', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
             <X size={16} />
           </button>
         </div>
 
         <div style={{ padding: '16px 20px 0', display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-          {/* Bank details */}
-          {account && (
-            <div style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(var(--brand-blue-rgb),0.07)', border: '1px solid rgba(var(--brand-blue-rgb),0.18)' }}>
-              <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, margin: '0 0 10px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Transfer Details</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Amount</span>
-                <span style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)' }}>PKR {(ticketPrice ?? 0).toLocaleString('en-PK')}</span>
-              </div>
-              <div style={{ height: 1, background: 'var(--guest-border)', marginBottom: 8 }} />
-              {[
-                { label: 'Bank',          value: account.bank_name || account.label },
-                { label: 'Account #',     value: account.account_number },
-                { label: 'Account Title', value: account.account_title },
-              ].filter(r => r.value).map(row => (
-                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                  <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{row.label}</span>
-                  <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 600 }}>{row.value}</span>
+          {/* Amount due */}
+          {amount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderRadius: 14, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <span style={{ color: '#F87171', fontSize: 13, fontWeight: 700 }}>Amount Due</span>
+              <span style={{ color: '#F87171', fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-display)' }}>PKR {amount.toLocaleString('en-PK')}</span>
+            </div>
+          )}
+
+          {/* All payment accounts */}
+          {accounts.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 800, margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Transfer to any of the following accounts
+              </p>
+              {accounts.map((acc: any, i: number) => (
+                <div key={acc.id ?? i} style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(var(--brand-blue-rgb),0.06)', border: '1px solid rgba(var(--brand-blue-rgb),0.18)' }}>
+                  {(acc.bank_name || acc.label) && (
+                    <p style={{ color: '#818CF8', fontSize: 12, fontWeight: 800, margin: '0 0 10px' }}>{acc.bank_name || acc.label}</p>
+                  )}
+                  {[
+                    { label: 'Account Title', value: acc.account_title },
+                    { label: 'Account Number', value: acc.account_number },
+                  ].map(row => row.value ? (
+                    <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{row.label}</span>
+                      <button
+                        onClick={() => copyText(row.value!, `${i}-${row.label}`)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, padding: 0 }}
+                      >
+                        <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 700 }}>{row.value}</span>
+                        <span style={{ fontSize: 10, color: copied === `${i}-${row.label}` ? '#10B981' : '#818CF8', fontWeight: 600 }}>
+                          {copied === `${i}-${row.label}` ? '✓ Copied' : 'Copy'}
+                        </span>
+                      </button>
+                    </div>
+                  ) : null)}
+                  {acc.instructions && (
+                    <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 8, lineHeight: 1.5 }}>
+                      {acc.instructions}
+                    </p>
+                  )}
                 </div>
               ))}
+            </div>
+          ) : (
+            <div style={{ padding: '14px 16px', borderRadius: 14, background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}>
+              <p style={{ color: '#EAB308', fontSize: 13, fontWeight: 700, margin: '0 0 4px' }}>Payment Details Pending</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0, lineHeight: 1.5 }}>
+                The organizer hasn&apos;t added payment account details yet. Please contact them directly.
+              </p>
             </div>
           )}
 
@@ -317,7 +363,7 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
                   <X size={14} />
                 </button>
                 <div style={{ position: 'absolute', bottom: 8, left: 8 }}>
-                  <span style={{ background: 'rgba(16,185,129,0.9)', color: 'var(--text-primary)', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6 }}>✓ Ready to submit</span>
+                  <span style={{ background: 'rgba(16,185,129,0.9)', color: 'white', fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6 }}>✓ Ready to submit</span>
                 </div>
               </div>
             ) : (

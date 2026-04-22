@@ -29,11 +29,12 @@ const navItems = [
 
 type Props = {
   profile: Profile | null
+  unreadSupportCount?: number
   open: boolean
   onClose: () => void
 }
 
-export default function Sidebar({ profile, open, onClose }: Props) {
+export default function Sidebar({ profile, unreadSupportCount = 0, open, onClose }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -79,9 +80,13 @@ export default function Sidebar({ profile, open, onClose }: Props) {
             onClick={handleNavClick}
             data-tour={item.tour}
             className={clsx(isActive(item.href, item.exact) ? 'sidebar-link-active' : 'sidebar-link')}
+            style={{ display: 'flex', alignItems: 'center' }}
           >
             <item.icon className="w-4 h-4 shrink-0" />
-            {item.label}
+            <span style={{ flex: 1 }}>{item.label}</span>
+            {item.label === 'Support' && unreadSupportCount > 0 && (
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF4444', flexShrink: 0, boxShadow: '0 0 6px rgba(239,68,68,0.6)' }} />
+            )}
           </Link>
         ))}
 

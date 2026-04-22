@@ -297,7 +297,7 @@ export async function getPublicEvents(limit = 20) {
 
   const { data, error } = await supabase
     .from('events')
-    .select('id, slug, title, description, venue_name, venue_address, secret_venue, date_start, date_end, capacity, cover_image_url, tags, ticket_price, registration_mode, is_private, category_id, organizer:profiles!events_organizer_id_fkey(id, full_name, company_name, username)')
+    .select('id, slug, title, description, venue_name, venue_address, secret_venue, date_start, date_end, capacity, cover_image_url, tags, ticket_price, registration_mode, is_private, category_id, organizer:profiles!events_organizer_id_fkey(id, full_name, company_name, username, is_id_verified)')
     .eq('status', 'published')
     .eq('is_private', false)
     .gte('date_start', new Date().toISOString())
@@ -308,16 +308,18 @@ export async function getPublicEvents(limit = 20) {
     // Fallback for pre-migration DBs where category_id doesn't exist yet
     const { data: fallback } = await supabase
       .from('events')
-      .select('id, title, description, venue_name, venue_address, secret_venue, date_start, date_end, capacity, cover_image_url, tags, ticket_price, registration_mode, is_private, organizer:profiles!events_organizer_id_fkey(id, full_name, company_name, username)')
+      .select('id, title, description, venue_name, venue_address, secret_venue, date_start, date_end, capacity, cover_image_url, tags, ticket_price, registration_mode, is_private, organizer:profiles!events_organizer_id_fkey(id, full_name, company_name, username, is_id_verified)')
       .eq('status', 'published')
       .eq('is_private', false)
       .gte('date_start', new Date().toISOString())
       .order('date_start', { ascending: true })
       .limit(limit)
-    return fallback ?? []
+    // Only return events from verified organizers
+    return (fallback ?? []).filter((e: any) => e.organizer?.is_id_verified === true)
   }
 
-  return data ?? []
+  // Only return events from verified organizers
+  return (data ?? []).filter((e: any) => e.organizer?.is_id_verified === true)
 }
 
 // ─── Backfill attendance passes for confirmed registrations ───────────────────

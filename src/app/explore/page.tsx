@@ -53,7 +53,7 @@ export default async function ExplorePage() {
         ticket_price, registration_mode, category_id,
         capacity, organizer_id,
         organizer:profiles!events_organizer_id_fkey(
-          full_name, company_name, username, logo_url
+          full_name, company_name, username, logo_url, is_id_verified
         )
       `)
       .eq('status', 'published')
@@ -76,8 +76,11 @@ export default async function ExplorePage() {
   }
 
   // Batch registration counts (depends on events result — unavoidable)
+  // Only show events from verified organizers on the public explore page
+  const verifiedEvents = (rawEvents ?? []).filter((e: any) => e.organizer?.is_id_verified === true)
+
   const regCounts: Record<string, number> = {}
-  const events = rawEvents ?? []
+  const events = verifiedEvents
   if (events.length > 0) {
     const { data: regRows } = await admin
       .from('public_registrations')

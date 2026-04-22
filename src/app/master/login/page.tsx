@@ -15,9 +15,11 @@ export default function MasterLoginPage() {
   const [error, setError]       = useState('')
   const [errorCode]             = useState(() => Math.floor(Math.random() * 9000 + 1000).toString())
   const [ts]                    = useState(() => new Date().toISOString())
+  const [mounted, setMounted]   = useState(false)
 
   // If already authed as admin, go straight through
   useEffect(() => {
+    setMounted(true)
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
       const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).single()
@@ -67,7 +69,7 @@ export default function MasterLoginPage() {
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#1f2937' }} />
           <span style={{ fontSize: 11, letterSpacing: '0.08em', color: '#1f2937' }}>ERR_RESOURCE_NOT_FOUND</span>
         </div>
-        <span style={{ fontSize: 10, color: '#1a1d24' }}>{ts}</span>
+        <span style={{ fontSize: 10, color: '#1a1d24' }}>{mounted ? ts : ''}</span>
       </div>
 
       {/* ── Main content ── */}
@@ -85,7 +87,7 @@ export default function MasterLoginPage() {
             This page could not be found.
           </p>
           <p style={{ fontSize: 11, color: '#1f2937', margin: 0 }}>
-            Request ID: {errorCode} · {ts.slice(0, 10)}
+            Request ID: {mounted ? errorCode : '----'} · {mounted ? ts.slice(0, 10) : '----'}
           </p>
         </div>
 

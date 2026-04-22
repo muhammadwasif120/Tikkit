@@ -48,9 +48,11 @@ function NavIcon({ type, active }: { type: TabIcon; active: boolean }) {
 export default function GuestShell({
   children,
   notifCount = 0,
+  unreadSupportCount = 0,
 }: {
   children:   React.ReactNode
   notifCount?: number
+  unreadSupportCount?: number
 }) {
   const pathname = usePathname()
 
@@ -108,7 +110,12 @@ export default function GuestShell({
                       background: active ? 'rgba(var(--brand-blue-rgb),0.15)' : 'var(--guest-surface-2)',
                     }}
                   >
-                    <NavIcon type={icon} active={active} />
+                    <div style={{ position: 'relative' }}>
+                      <NavIcon type={icon} active={active} />
+                      {icon === 'messages' && unreadSupportCount > 0 && (
+                        <span style={{ position: 'absolute', top: -2, right: -4, width: 8, height: 8, borderRadius: '50%', background: '#EF4444', border: '2px solid var(--guest-surface)', boxShadow: '0 0 6px rgba(239,68,68,0.5)' }} />
+                      )}
+                    </div>
                   </div>
 
                   <span

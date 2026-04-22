@@ -438,14 +438,21 @@ export default function NewEventPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
-            <div>
-              <p className="text-sm font-medium text-white flex items-center gap-2">
-                <Lock className="w-3.5 h-3.5" /> Private Event
-              </p>
-              <p className="text-xs text-gray-500">Only invited guests can see this event</p>
+          <div className="flex flex-col p-3 rounded-lg bg-brand-charcoal-light border border-white/5 space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-white flex items-center gap-2">
+                  <Lock className="w-3.5 h-3.5" /> Private Event
+                </p>
+                <p className="text-xs text-gray-500">Only invited guests can see this event</p>
+              </div>
+              <Toggle on={form.is_private} onToggle={() => update('is_private', !form.is_private)} />
             </div>
-            <Toggle on={form.is_private} onToggle={() => update('is_private', !form.is_private)} />
+            {form.is_private && (
+              <div className="text-[11px] text-[#FFC745] bg-[#FFC745]/10 px-2.5 py-1.5 rounded border border-[#FFC745]/20 mt-1 leading-relaxed">
+                Attendees must have a Tikkit X account to receive their private QR pass. Nothing is shared off-platform to protect your privacy.
+              </div>
+            )}
           </div>
         </div>
 

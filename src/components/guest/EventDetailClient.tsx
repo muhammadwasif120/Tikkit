@@ -166,16 +166,18 @@ function QRModal({ regId, guestName, event, onClose }: {
 }
 
 /* ─── Pay Sheet ──────────────────────────────────────────────────── */
-function PaySheet({ regId, event, onClose, onSuccess }: {
-  regId: string; event: Event; onClose: () => void; onSuccess: () => void
+function PaySheet({ regId, event, ticketPrice, onClose, onSuccess }: {
+  regId: string; event: Event; ticketPrice?: number; onClose: () => void; onSuccess: () => void
 }) {
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [copied, setCopied] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
-  const account = event.payment_accounts?.[0]
+  const accounts = event.payment_accounts ?? []
+  const amount = ticketPrice ?? event.ticket_price ?? 0
 
   useEffect(() => { closeRef.current?.focus() }, [])
   useEffect(() => {
@@ -183,6 +185,12 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, [onClose])
+
+  const copyText = (val: string, key: string) => {
+    navigator.clipboard.writeText(val).catch(() => {})
+    setCopied(key)
+    setTimeout(() => setCopied(null), 2000)
+  }
 
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
@@ -226,25 +234,57 @@ function PaySheet({ regId, event, onClose, onSuccess }: {
         </div>
 
         <div style={{ padding: '16px 20px 0', display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* Bank details */}
-          {account && (
-            <div style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(var(--brand-blue-rgb),0.07)', border: '1px solid rgba(var(--brand-blue-rgb),0.18)' }}>
-              <p style={{ color: '#818CF8', fontSize: 11, fontWeight: 800, margin: '0 0 10px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>Transfer Details</p>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Amount</span>
-                <span style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)' }}>PKR {(event.ticket_price ?? 0).toLocaleString('en-PK')}</span>
-              </div>
-              <div style={{ height: 1, background: 'rgba(255,255,255,0.05)', marginBottom: 8 }} />
-              {[
-                { label: 'Bank', value: account.bank_name },
-                { label: 'Account #', value: account.account_number },
-                { label: 'Account Title', value: account.account_title },
-              ].map(row => (
-                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-                  <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{row.label}</span>
-                  <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 600 }}>{row.value}</span>
+
+          {/* Amount due */}
+          {amount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderRadius: 14, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+              <span style={{ color: '#F87171', fontSize: 13, fontWeight: 700 }}>Amount Due</span>
+              <span style={{ color: '#F87171', fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-display)' }}>PKR {amount.toLocaleString('en-PK')}</span>
+            </div>
+          )}
+
+          {/* Bank details — show ALL linked accounts */}
+          {accounts.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 800, margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Transfer to any of the following accounts
+              </p>
+              {accounts.map((acc, i) => (
+                <div key={acc.id ?? i} style={{ padding: '14px 16px', borderRadius: 16, background: 'rgba(var(--brand-blue-rgb),0.06)', border: '1px solid rgba(var(--brand-blue-rgb),0.18)' }}>
+                  {acc.bank_name && (
+                    <p style={{ color: '#818CF8', fontSize: 12, fontWeight: 800, margin: '0 0 10px' }}>{acc.bank_name}</p>
+                  )}
+                  {[
+                    { label: 'Account Title', value: acc.account_title },
+                    { label: 'Account Number', value: acc.account_number },
+                  ].map(row => row.value ? (
+                    <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{row.label}</span>
+                      <button
+                        onClick={() => copyText(row.value!, `${i}-${row.label}`)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5, padding: 0 }}
+                      >
+                        <span style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 700 }}>{row.value}</span>
+                        <span style={{ fontSize: 10, color: copied === `${i}-${row.label}` ? '#10B981' : '#818CF8', fontWeight: 600 }}>
+                          {copied === `${i}-${row.label}` ? '✓ Copied' : 'Copy'}
+                        </span>
+                      </button>
+                    </div>
+                  ) : null)}
+                  {(acc as any).instructions && (
+                    <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 8, borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 8, lineHeight: 1.5 }}>
+                      {(acc as any).instructions}
+                    </p>
+                  )}
                 </div>
               ))}
+            </div>
+          ) : (
+            <div style={{ padding: '14px 16px', borderRadius: 14, background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)' }}>
+              <p style={{ color: '#EAB308', fontSize: 13, fontWeight: 700, margin: '0 0 4px' }}>Payment Details Pending</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0, lineHeight: 1.5 }}>
+                The organizer hasn't added payment account details yet. Please contact them directly for payment instructions.
+              </p>
             </div>
           )}
 
@@ -599,9 +639,11 @@ export default function EventDetailClient({
   const isPaid = (event.ticket_price ?? 0) > 0
   const isEOI = event.registration_mode === 'expression_of_interest'
   const isInviteOnly = event.registration_mode === 'invite_only'
+  // A guest is confirmed ONLY if payment is not required, OR payment has been confirmed by the organizer
   const isConfirmedGuest = existingReg !== null &&
-    (['confirmed', 'registered'].includes(existingReg.status) ||
-     (existingReg.status === 'approved' && (existingReg.payment_status === 'confirmed' || existingReg.payment_status === 'not_required')))
+    (['confirmed', 'registered'].includes(existingReg.status) &&
+     (!isPaid || existingReg.payment_status === 'confirmed' || existingReg.payment_status === 'not_required'))
+    || (existingReg?.status === 'approved' && (existingReg.payment_status === 'confirmed' || existingReg.payment_status === 'not_required'))
   const days = daysUntil(event.date_start)
   const gradient = getGradient(event.id)
   const organiser = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Unknown Organizer'
@@ -629,9 +671,11 @@ export default function EventDetailClient({
     // Actual DB status values
     if (regStatus === 'pending') return { label: 'Interest Submitted', color: '#EAB308', disabled: true }
     if (regStatus === 'approved') {
-      if (paymentStatus === 'pending')   return { label: 'Pay Now →', color: '#EF4444', disabled: false, action: 'pay' }
       if (paymentStatus === 'submitted') return { label: 'Payment Verifying…', color: '#818CF8', disabled: true }
-      // not_required or confirmed → ticket is ready
+      if (paymentStatus === 'confirmed' || paymentStatus === 'not_required') return { label: 'View Ticket →', color: '#10B981', disabled: false, action: 'ticket' }
+      // null or 'pending' payment_status on a paid event → must pay
+      if (isPaid) return { label: 'Pay Now →', color: '#EF4444', disabled: false, action: 'pay' }
+      // free event, approved → ticket ready
       return { label: 'View Ticket →', color: '#10B981', disabled: false, action: 'ticket' }
     }
 
@@ -639,7 +683,12 @@ export default function EventDetailClient({
     if (regStatus === 'eoi_submitted') return { label: 'Interest Submitted', color: '#EAB308', disabled: true }
     if (regStatus === 'eoi_approved') return { label: 'Pay Now →', color: '#EF4444', disabled: false, action: 'pay' }
     if (regStatus === 'payment_pending') return { label: 'Payment Verifying…', color: '#818CF8', disabled: true }
-    if (regStatus === 'confirmed' || regStatus === 'registered') return { label: 'View Ticket →', color: '#10B981', disabled: false, action: 'ticket' }
+    // 'registered' status: if event is paid, gate QR behind payment confirmation
+    if (regStatus === 'confirmed') return { label: 'View Ticket →', color: '#10B981', disabled: false, action: 'ticket' }
+    if (regStatus === 'registered') {
+      if (isPaid) return { label: 'Pay Now →', color: '#EF4444', disabled: false, action: 'pay' }
+      return { label: 'View Ticket →', color: '#10B981', disabled: false, action: 'ticket' }
+    }
     if (regStatus === 'rejected') return { label: 'Not Approved', color: 'var(--text-muted)', disabled: true }
 
     if (isFull) return { label: 'Sold Out', color: 'var(--text-muted)', disabled: true }
@@ -667,10 +716,11 @@ export default function EventDetailClient({
             margin: 0 !important;
           }
           .ed-hero {
-            position: static !important;
+            position: relative !important;
             flex: 1 !important;
             height: 100svh !important;
             min-width: 0 !important;
+            overflow: hidden !important;
           }
           .ed-content-col {
             width: 440px !important;
@@ -848,7 +898,13 @@ export default function EventDetailClient({
             onClick={() => {
               if (!isLoggedIn) { router.push('/auth/login'); return }
               if ((cta as any).action === 'pay') { setShowPaySheet(true); return }
-              if ((cta as any).action === 'ticket') { setShowQRModal(true); return }
+              if ((cta as any).action === 'ticket') {
+                // Final safety check: only show QR if payment is confirmed or not required
+                if (isPaid && existingReg?.payment_status !== 'confirmed' && existingReg?.payment_status !== 'not_required') {
+                  setShowPaySheet(true); return
+                }
+                setShowQRModal(true); return
+              }
               if (!cta.disabled) setShowSheet(true)
             }}
             disabled={cta.disabled}

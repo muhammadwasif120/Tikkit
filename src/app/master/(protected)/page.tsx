@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import {
-  LayoutDashboard, Users, Calendar, MessageSquare,
+  LayoutDashboard, Users, Calendar, MessageSquare, MessageCircle,
   Shield, Mail, Phone, CheckCircle, Search, ArrowUpRight,
   MoreHorizontal, Flag, Trash2, Send, X, Menu,
   UserCheck, TrendingUp, ExternalLink, RefreshCw,
   Eye, Ban, AlertTriangle, Clock, ChevronRight, ChevronLeft, BarChart2, Star, Download,
-  ShieldCheck, ShieldX, ZoomIn,
+  ShieldCheck, ShieldX, ZoomIn, Ticket, CreditCard,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import {
@@ -17,8 +17,10 @@ import {
   getMasterAnalytics, getWaitlistEntries,
   getSupportQueries, updateSupportQueryStatus,
   getMasterCnicVerifications, approveCnicVerification, rejectCnicVerification,
+  getMasterAttendees, getMasterRegistrations,
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
   type PlatformAnalytics, type WaitlistEntry, type SupportQuery, type CnicVerification,
+  type MasterAttendee, type MasterRegistration,
 } from '@/app/actions/masterActions'
 import {
   getAdminSupportConversations, getAdminSupportThread, sendAdminSupportReply,
@@ -27,7 +29,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'analytics' | 'waitlist' | 'verifications'
+type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'support' | 'analytics' | 'waitlist' | 'verifications' | 'attendees' | 'registrations'
 type OrgStatus = 'active' | 'review' | 'suspended'
 type EventStatus = 'live' | 'draft' | 'flagged' | 'suspended' | 'ended'
 
@@ -869,6 +871,75 @@ function NotFoundGate({ onAuth }: { onAuth: () => void }) {
   )
 }
 
+// ─── Guest List Panel ─────────────────────────────────────────────────────────
+
+function GuestListPanel({ evt, onClose }: { evt: Evt; onClose: () => void }) {
+  const [guests, setGuests] = useState<EventGuest[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    setLoading(true)
+    getMasterEventGuests(evt.id)
+      .then(setGuests)
+      .finally(() => setLoading(false))
+  }, [evt.id])
+
+  return (
+    <div className="ms-overlay">
+      <div className="ms-panel" style={{ width: 800, maxWidth: '90vw', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF' }}>{evt.title}</div>
+            <div style={{ fontSize: 'var(--fs-xs)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 2 }}>{guests.length} Guests Total</div>
+          </div>
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6B7280' }}>
+            <X size={13} />
+          </button>
+        </div>
+
+        <div style={{ padding: '0', flex: 1, overflowY: 'auto' }}>
+          <table className="ms-tbl" style={{ minWidth: 600 }}>
+            <thead>
+              <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                <th>Name</th>
+                <th>Contact</th>
+                <th>Status</th>
+                <th>Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading && <tr><td colSpan={4} style={{ textAlign: 'center', padding: '40px 20px', color: '#6B7280' }}>Loading guests...</td></tr>}
+              {!loading && guests.length === 0 && <tr><td colSpan={4} style={{ textAlign: 'center', padding: '40px 20px', color: '#6B7280' }}>No guests found</td></tr>}
+              {guests.map((g: EventGuest) => (
+                <tr key={g.id}>
+                  <td>
+                    <div style={{ fontWeight: 600, color: '#F0F2FF' }}>{g.full_name}</div>
+                    {g.gender && <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'capitalize' }}>{g.gender}</div>}
+                  </td>
+                  <td>
+                    <div style={{ fontSize: 13, color: '#D1D5DB' }}>{g.email || '-'}</div>
+                    <div style={{ fontSize: 12, color: '#6B7280' }}>{g.phone || '-'}</div>
+                  </td>
+                  <td>
+                    <SBadge status={g.status} />
+                    {g.checked_in_at && <div style={{ fontSize: 11, color: '#22C55E', marginTop: 4 }}>Checked in</div>}
+                  </td>
+                  <td>
+                    <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 99, background: g.source === 'invited' ? 'rgba(34,197,94,0.1)' : 'rgba(30,94,255,0.1)', color: g.source === 'invited' ? '#22C55E' : '#1E5EFF', textTransform: 'capitalize' }}>
+                      {g.source}
+                    </span>
+                    {g.is_vip && <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 99, background: 'rgba(245,158,11,0.1)', color: '#F59E0B', marginLeft: 6 }}>VIP</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Master Dashboard ─────────────────────────────────────────────────────────
 
 export default function MasterPage() {
@@ -906,6 +977,7 @@ export default function MasterPage() {
   const [eventSearch, setEventSearch] = useState('')
   const [openEvtMenu, setOpenEvtMenu] = useState<string | null>(null)
   const [evtMenuPos, setEvtMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 })
+  const [guestListEvent, setGuestListEvent] = useState<Evt | null>(null)
 
   // Queries state — real DB data
   const [queries, setQueries] = useState<SupportQuery[]>([])
@@ -914,6 +986,7 @@ export default function MasterPage() {
   const [selectedQuery, setSelectedQuery] = useState<SupportQuery | null>(null)
 
   // Support chat state
+  const [supportFilter, setSupportFilter] = useState<'all' | 'organizer' | 'attendee'>('all')
   const [supportConvos, setSupportConvos] = useState<SupportConversationSummary[]>([])
   const [supportConvosLoading, setSupportConvosLoading] = useState(false)
   const [selectedSupportUserId, setSelectedSupportUserId] = useState<string | null>(null)
@@ -928,6 +1001,20 @@ export default function MasterPage() {
   const [waitlistSearch, setWaitlistSearch] = useState('')
   const [waitlistRole, setWaitlistRole] = useState<'all' | 'organizer' | 'guest' | 'both'>('all')
 
+  // Attendees state
+  const [attendees, setAttendees] = useState<MasterAttendee[]>([])
+  const [attendeesLoading, setAttendeesLoading] = useState(false)
+  const [attendeeSearch, setAttendeeSearch] = useState('')
+  const [attendeeFilter, setAttendeeFilter] = useState<'all' | 'verified' | 'unverified'>('all')
+
+  // Registrations state
+  const [registrations, setRegistrations] = useState<MasterRegistration[]>([])
+  const [regsLoading, setRegsLoading] = useState(false)
+  const [regSearch, setRegSearch] = useState('')
+  const [regStatusFilter, setRegStatusFilter] = useState<'all' | 'pending' | 'approved' | 'confirmed' | 'payment_pending'>('all')
+  const [regPaymentFilter, setRegPaymentFilter] = useState<'all' | 'submitted' | 'confirmed' | 'none'>('all')
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+
   useEffect(() => {
     if (tab !== 'waitlist') return
     if (waitlist.length > 0) return // already loaded
@@ -936,12 +1023,26 @@ export default function MasterPage() {
   }, [tab, waitlist.length])
 
   useEffect(() => {
-    if (tab !== 'queries') return
-    if (queries.length === 0) {
+    if (tab !== 'attendees') return
+    if (attendees.length > 0) return // already loaded
+    setAttendeesLoading(true)
+    getMasterAttendees().then(setAttendees).finally(() => setAttendeesLoading(false))
+  }, [tab, attendees.length])
+
+  useEffect(() => {
+    if (tab !== 'registrations') return
+    if (registrations.length > 0) return
+    setRegsLoading(true)
+    getMasterRegistrations().then(setRegistrations).finally(() => setRegsLoading(false))
+  }, [tab, registrations.length])
+
+  useEffect(() => {
+    if (tab !== 'queries' && tab !== 'support') return
+    if (tab === 'queries' && queries.length === 0) {
       setQueriesLoading(true)
       getSupportQueries().then(setQueries).finally(() => setQueriesLoading(false))
     }
-    if (supportConvos.length === 0) {
+    if ((tab === 'queries' || tab === 'support') && supportConvos.length === 0) {
       setSupportConvosLoading(true)
       getAdminSupportConversations().then(setSupportConvos).finally(() => setSupportConvosLoading(false))
     }
@@ -1054,20 +1155,25 @@ export default function MasterPage() {
   const liveEvtCount = events.filter(e => getEvtStatus(e) === 'live').length
   const totalRegistered = events.reduce((a, e) => a + e.registered, 0)
   const pendingCnicCount = cnicVerifications.filter(v => v.cnic_status === 'pending').length
+  const unreadSupportCount = supportConvos.reduce((sum, c) => sum + c.unreadCount, 0)
 
   const NAV = [
     { id: 'overview'       as Tab, icon: LayoutDashboard, label: 'Overview' },
     { id: 'organizers'     as Tab, icon: Users,           label: 'Organizers',         badge: reviewOrgCount > 0 ? reviewOrgCount : undefined },
+    { id: 'attendees'      as Tab, icon: UserCheck,       label: 'Attendees'           },
+    { id: 'registrations'  as Tab, icon: Ticket,          label: 'Registrations',      badge: registrations.filter(r => r.payment_status === 'submitted').length > 0 ? registrations.filter(r => r.payment_status === 'submitted').length : undefined },
     { id: 'events'         as Tab, icon: Calendar,        label: 'Events',             badge: flaggedEvtCount > 0 ? flaggedEvtCount : undefined },
     { id: 'analytics'      as Tab, icon: BarChart2,       label: 'Analytics'           },
-    { id: 'queries'        as Tab, icon: MessageSquare,   label: 'Queries & Disputes', badge: openQCount > 0 ? openQCount : undefined },
+    { id: 'queries'        as Tab, icon: MessageCircle,   label: 'Queries & Disputes', badge: openQCount > 0 ? openQCount : undefined },
+    { id: 'support'        as Tab, icon: MessageSquare,   label: 'Support Chats',      badge: unreadSupportCount > 0 ? unreadSupportCount : undefined },
     { id: 'waitlist'       as Tab, icon: Star,            label: 'Waitlist',           badge: waitlist.length > 0 ? waitlist.length : undefined },
     { id: 'verifications'  as Tab, icon: ShieldCheck,     label: 'Verifications',      badge: pendingCnicCount > 0 ? pendingCnicCount : undefined },
   ]
 
   const PAGE_TITLES: Record<Tab, string> = {
     overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes',
-    analytics: 'Analytics', waitlist: 'Waitlist', verifications: 'Verifications',
+    support: 'Support Chats', analytics: 'Analytics', waitlist: 'Waitlist', verifications: 'Verifications',
+    attendees: 'Attendee Accounts', registrations: 'All Registrations',
   }
 
 
@@ -1421,7 +1527,20 @@ export default function MasterPage() {
                             <td style={{ color: '#9CA3AF', fontSize: 'var(--fs-sm)' }}>{o.events} <span style={{ color: '#4B5563' }}>({o.active} live)</span></td>
                             <td><SBadge status={getOrgStatus(o)} /></td>
                             <td>
-                              <button onClick={e => { e.stopPropagation(); setContactTarget(o) }} className="ms-ib blue"><Mail size={12} /></button>
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <button onClick={e => { e.stopPropagation(); setContactTarget(o) }} className="ms-ib blue" title="Email Organizer"><Mail size={12} /></button>
+                                <button onClick={e => {
+                                  e.stopPropagation()
+                                  setTab('support')
+                                  setSelectedSupportUserId(o.id)
+                                  setSupportFilter('organizer')
+                                  import('@/app/actions/supportActions').then(m => m.markAdminSupportMessagesRead(o.id))
+                                  setSupportConvos(prev => {
+                                    if (prev.find(c => c.userId === o.id)) return prev.map(p => p.userId === o.id ? { ...p, unreadCount: 0 } : p)
+                                    return [{ userId: o.id, userName: o.name, userType: 'organizer', lastMessage: 'Chat initiated from admin', lastAt: new Date().toISOString(), unreadCount: 0 }, ...prev]
+                                  })
+                                }} className="ms-ib blue" title="Chat with Organizer"><MessageSquare size={12} /></button>
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -1545,7 +1664,20 @@ export default function MasterPage() {
                               <td><SBadge status={os} /></td>
                               <td>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
-                                  <button className="ms-ib blue" title="Contact" onClick={e => { e.stopPropagation(); setContactTarget(o) }}><Mail size={12} /></button>
+                                  <div style={{ display: 'flex', gap: 6 }}>
+                                    <button className="ms-ib blue" title="Email Organizer" onClick={e => { e.stopPropagation(); setContactTarget(o) }}><Mail size={12} /></button>
+                                    <button className="ms-ib blue" title="Chat with Organizer" onClick={e => {
+                                      e.stopPropagation()
+                                      setTab('support')
+                                      setSelectedSupportUserId(o.id)
+                                      setSupportFilter('organizer')
+                                      import('@/app/actions/supportActions').then(m => m.markAdminSupportMessagesRead(o.id))
+                                      setSupportConvos(prev => {
+                                        if (prev.find(c => c.userId === o.id)) return prev.map(p => p.userId === o.id ? { ...p, unreadCount: 0 } : p)
+                                        return [{ userId: o.id, userName: o.name, userType: 'organizer', lastMessage: 'Chat initiated from admin', lastAt: new Date().toISOString(), unreadCount: 0 }, ...prev]
+                                      })
+                                    }}><MessageSquare size={12} /></button>
+                                  </div>
                                   {o.username ? (
                                     <Link href={`/organizer/${o.username}`} target="_blank" className="ms-ib" title="View public profile" style={{ color: '#6B7280', textDecoration: 'none' }}><ExternalLink size={12} /></Link>
                                   ) : (
@@ -1663,6 +1795,7 @@ export default function MasterPage() {
                                         {es !== 'suspended' && <button className="ms-drop-item dd-red" onClick={() => { setEventStatuses(s => ({...s,[e.id]:'suspended'})); setOpenEvtMenu(null) }}><Ban size={13} /> Suspend Event</button>}
                                         {es === 'suspended' && <button className="ms-drop-item dd-green" onClick={() => { setEventStatuses(s => ({...s,[e.id]:'live'})); setOpenEvtMenu(null) }}><RefreshCw size={13} /> Reinstate Event</button>}
                                         <div className="ms-drop-divider" />
+                                        <button className="ms-drop-item" onClick={() => { setGuestListEvent(e); setOpenEvtMenu(null) }}><Users size={13} /> View Guest List</button>
                                         <button
                                           className="ms-drop-item"
                                           onClick={() => {
@@ -1945,9 +2078,31 @@ export default function MasterPage() {
                                   {q.from_type === 'organizer' && (() => {
                                     const org = orgs.find((o: Org) => o.id === q.from_id || o.name === q.from_name)
                                     return org ? (
-                                      <button title="Contact" className="ms-ib blue" onClick={() => setContactTarget(org)}><Mail size={11} /></button>
+                                      <button title="Contact via Email" className="ms-ib blue" onClick={() => setContactTarget(org)}><Mail size={11} /></button>
                                     ) : null
                                   })()}
+                                  {q.from_id && (
+                                    <button title="Chat with User" className="ms-ib blue" onClick={async () => {
+                                      setTab('support')
+                                      setSelectedSupportUserId(q.from_id!)
+                                      loadSupportThread(q.from_id!)
+                                      setSupportFilter(q.from_type as 'organizer' | 'attendee' | 'all')
+                                      import('@/app/actions/supportActions').then(m => m.markAdminSupportMessagesRead(q.from_id!))
+                                      setSupportConvos(prev => {
+                                        if (prev.find(c => c.userId === q.from_id)) return prev.map(p => p.userId === q.from_id ? { ...p, unreadCount: 0 } : p)
+                                        return [{
+                                          userId: q.from_id!,
+                                          userName: q.from_name,
+                                          userType: q.from_type,
+                                          lastMessage: 'Chat initiated from report',
+                                          lastAt: new Date().toISOString(),
+                                          unreadCount: 0
+                                        }, ...prev]
+                                      })
+                                    }}>
+                                      <MessageSquare size={11} />
+                                    </button>
+                                  )}
                                 </div>
                               </td>
                             </tr>
@@ -1958,11 +2113,34 @@ export default function MasterPage() {
                   </div>
                 </div>
 
+              </div>
+            )}
+
+            {tab === 'support' && (
+              <div>
                 {/* ── Support Chats ── */}
-                <div style={{ marginTop: 28 }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <MessageSquare size={16} color="#1E5EFF" />
-                    TIKKIT X Support Chats
+                <div style={{ marginTop: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <MessageSquare size={16} color="#1E5EFF" />
+                      TIKKIT X Support Chats
+                    </div>
+                    <div className="ms-pills" style={{ display: 'flex', gap: 6 }}>
+                      {['all', 'organizer', 'attendee'].map(f => {
+                        const active = supportFilter === f
+                        const cls = active ? (f === 'organizer' ? 'pa' : f === 'attendee' ? 'pr' : 'pg') : ''
+                        return (
+                          <button 
+                            key={f} 
+                            onClick={() => setSupportFilter(f as 'all' | 'organizer' | 'attendee')} 
+                            className={`ms-pill${cls ? ' '+cls : ''}`} 
+                            style={{ textTransform: 'capitalize' }}
+                          >
+                            {f}
+                          </button>
+                        )
+                      })}
+                    </div>
                   </div>
                   {supportConvosLoading ? (
                     <div style={{ color: '#374151', fontSize: 'var(--fs-sm)', padding: 20, textAlign: 'center' }}>Loading conversations…</div>
@@ -1972,12 +2150,17 @@ export default function MasterPage() {
                     <div style={{ display: 'grid', gridTemplateColumns: selectedSupportUserId ? '280px 1fr' : '1fr', gap: 12, minHeight: 360 }}>
                       {/* Conversation list */}
                       <div style={{ background: '#0D0F18', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                        {supportConvos.map(c => {
+                        {supportConvos.filter(c => supportFilter === 'all' || c.userType === supportFilter).map(c => {
                           const active = selectedSupportUserId === c.userId
                           return (
                             <button
                               key={c.userId}
-                              onClick={() => loadSupportThread(c.userId)}
+                              onClick={() => {
+                                loadSupportThread(c.userId)
+                                setSelectedSupportUserId(c.userId)
+                                import('@/app/actions/supportActions').then(m => m.markAdminSupportMessagesRead(c.userId))
+                                setSupportConvos(prev => prev.map(p => p.userId === c.userId ? { ...p, unreadCount: 0 } : p))
+                              }}
                               style={{
                                 display: 'flex', gap: 10, padding: '12px 14px', width: '100%', textAlign: 'left',
                                 background: active ? 'rgba(30,94,255,0.1)' : 'transparent',
@@ -2170,6 +2353,9 @@ export default function MasterPage() {
       {/* Contact panel */}
       {contactTarget && <ContactPanel org={contactTarget} onClose={() => setContactTarget(null)} />}
 
+      {/* Guest list panel */}
+      {guestListEvent && <GuestListPanel evt={guestListEvent} onClose={() => setGuestListEvent(null)} />}
+
       {/* Query detail panel */}
       {selectedQuery && <QueryDetailPanel query={selectedQuery} onClose={() => setSelectedQuery(null)} />}
 
@@ -2284,6 +2470,341 @@ export default function MasterPage() {
           </div>
         </div>
       )}
+      {/* ── Attendees Tab ── */}
+      {tab === 'attendees' && (() => {
+        const cnicSC: Record<string, string> = { verified: '#22C55E', pending: '#F59E0B', rejected: '#EF4444' }
+        const cnicLabel: Record<string, string> = { verified: 'Verified', pending: 'Pending', rejected: 'Rejected' }
+        const q = attendeeSearch.toLowerCase()
+        const filtered = attendees
+          .filter(a => {
+            if (attendeeFilter === 'verified') return a.is_id_verified
+            if (attendeeFilter === 'unverified') return !a.is_id_verified
+            return true
+          })
+          .filter(a => !q || a.full_name.toLowerCase().includes(q) || a.email.toLowerCase().includes(q) || (a.phone_number ?? '').includes(q) || (a.cnic_number ?? '').includes(q))
+
+        const totalVerified = attendees.filter(a => a.is_id_verified).length
+        const totalUnverified = attendees.filter(a => !a.is_id_verified).length
+        const totalAttended = attendees.reduce((s, a) => s + a.total_attended, 0)
+
+        const exportCSV = () => {
+          const rows = [['Name','Email','Phone','CNIC','Verified','Events','Attended','Credits','Joined'],
+            ...filtered.map(a => [a.full_name, a.email, a.phone_number ?? '', a.cnic_number ?? '', a.is_id_verified ? 'Yes' : 'No', a.total_events, a.total_attended, a.credit_score, new Date(a.created_at).toLocaleDateString()])]
+          const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n')
+          const el = document.createElement('a'); el.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); el.download = 'tikkit-attendees.csv'; el.click()
+        }
+
+        return (
+          <div>
+            {/* Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
+              {[
+                { label: 'Total Attendees',   value: attendees.length, color: '#1E5EFF' },
+                { label: 'CNIC Verified',      value: totalVerified,    color: '#22C55E' },
+                { label: 'Unverified',         value: totalUnverified,  color: '#F59E0B' },
+                { label: 'Total Attendances',  value: totalAttended,    color: '#8B5CF6' },
+              ].map(s => (
+                <div key={s.label} style={{ background: '#0D0F18', border: `1px solid ${s.color}22`, borderRadius: 12, padding: '16px 18px' }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-2xl)', fontWeight: 800, color: s.color, letterSpacing: '-1px' }}>
+                    {attendeesLoading ? '—' : s.value.toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 4 }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="ms-card">
+              <div className="ms-card-hdr">
+                <span className="ms-card-title">Attendee Accounts</span>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Filter pills */}
+                  <div className="ms-pills">
+                    {(['all','verified','unverified'] as const).map(f => (
+                      <button key={f} className={`ms-pill${attendeeFilter === f ? ' pg' : ''}`} onClick={() => setAttendeeFilter(f)}>
+                        {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Search */}
+                  <div style={{ position: 'relative' }}>
+                    <Search size={12} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: '#4B5563' }} />
+                    <input
+                      value={attendeeSearch}
+                      onChange={e => setAttendeeSearch(e.target.value)}
+                      placeholder="Search name / email / CNIC…"
+                      className="ms-input"
+                      style={{ paddingLeft: 28, width: 220, fontSize: 'var(--fs-sm)' }}
+                    />
+                  </div>
+                  <button
+                    onClick={exportCSV}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.22)', color: '#4D82FF', borderRadius: 8, padding: '6px 12px', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}
+                  >
+                    <Download size={12} /> Export CSV
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                {attendeesLoading ? (
+                  <div style={{ padding: '40px', textAlign: 'center', color: '#374151' }}>Loading attendees…</div>
+                ) : (
+                  <table className="ms-tbl" style={{ minWidth: 780 }}>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Contact</th>
+                        <th className="ms-hide">CNIC</th>
+                        <th>ID Status</th>
+                        <th>Events</th>
+                        <th className="ms-hide">Attended</th>
+                        <th className="ms-hide">Credits</th>
+                        <th className="ms-hide">Joined</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.length === 0 && (
+                        <tr><td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No attendees found</td></tr>
+                      )}
+                      {filtered.map((a, i) => (
+                        <tr key={a.id}>
+                          <td style={{ color: '#4B5563', fontSize: 'var(--fs-sm)' }}>{i + 1}</td>
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{ width: 30, height: 30, borderRadius: '50%', background: avBg(a.id), display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                                {initials(a.full_name)}
+                              </div>
+                              <span style={{ color: '#F0F2FF', fontSize: 'var(--fs-base)', fontFamily: 'var(--font-body)', fontWeight: 500 }}>{a.full_name}</span>
+                            </div>
+                          </td>
+                          <td>
+                            <div style={{ fontSize: 'var(--fs-sm)', color: '#D1D5DB' }}>{a.email}</div>
+                            <div style={{ fontSize: 11, color: '#6B7280' }}>{a.phone_number ?? '—'}</div>
+                          </td>
+                          <td className="ms-hide" style={{ fontSize: 'var(--fs-sm)', color: '#9CA3AF', fontFamily: 'monospace', letterSpacing: '0.03em' }}>
+                            {a.cnic_number ?? <span style={{ color: '#374151' }}>—</span>}
+                          </td>
+                          <td>
+                            {a.cnic_status ? (
+                              <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: `${cnicSC[a.cnic_status] ?? '#6B7280'}18`, border: `1px solid ${cnicSC[a.cnic_status] ?? '#6B7280'}30`, color: cnicSC[a.cnic_status] ?? '#6B7280', whiteSpace: 'nowrap' }}>
+                                {cnicLabel[a.cnic_status] ?? a.cnic_status}
+                              </span>
+                            ) : (
+                              <span style={{ fontSize: 11, color: '#374151' }}>No CNIC</span>
+                            )}
+                          </td>
+                          <td style={{ fontSize: 'var(--fs-base)', color: '#9CA3AF', fontWeight: 600 }}>{a.total_events}</td>
+                          <td className="ms-hide" style={{ fontSize: 'var(--fs-base)', color: '#9CA3AF' }}>{a.total_attended}</td>
+                          <td className="ms-hide">
+                            <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: a.credit_score > 0 ? '#FFC745' : '#374151' }}>
+                              {a.credit_score > 0 ? `${a.credit_score} pts` : '—'}
+                            </span>
+                          </td>
+                          <td className="ms-hide" style={{ fontSize: 'var(--fs-sm)', color: '#6B7280' }}>
+                            {fmtDate(a.created_at)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* ── Registrations Tab ── */}
+      {tab === 'registrations' && (() => {
+        const REG_SC: Record<string, string> = {
+          pending: '#F59E0B', approved: '#1E5EFF', confirmed: '#22C55E',
+          payment_pending: '#818CF8', attended: '#34D399', no_show: '#EF4444', refunded: '#6B7280',
+        }
+        const REG_SL: Record<string, string> = {
+          pending: 'Pending', approved: 'Approved', confirmed: 'Confirmed',
+          payment_pending: 'Pay Pending', attended: 'Attended', no_show: 'No Show', refunded: 'Refunded',
+        }
+        const PAY_SC: Record<string, string> = { submitted: '#F59E0B', confirmed: '#22C55E', rejected: '#EF4444' }
+        const PAY_SL: Record<string, string> = { submitted: 'Awaiting Review', confirmed: 'Confirmed', rejected: 'Rejected' }
+
+        const q = regSearch.toLowerCase()
+        const filtered = registrations
+          .filter(r => {
+            if (regStatusFilter !== 'all' && r.status !== regStatusFilter) return false
+            if (regPaymentFilter === 'submitted' && r.payment_status !== 'submitted') return false
+            if (regPaymentFilter === 'confirmed' && r.payment_status !== 'confirmed') return false
+            if (regPaymentFilter === 'none' && r.payment_status != null) return false
+            if (q && !r.guest_name.toLowerCase().includes(q) && !r.guest_email.toLowerCase().includes(q) && !r.event_title.toLowerCase().includes(q) && !r.organizer_name.toLowerCase().includes(q)) return false
+            return true
+          })
+
+        const pendingPayments = registrations.filter(r => r.payment_status === 'submitted').length
+        const confirmed = registrations.filter(r => r.status === 'confirmed').length
+        const paidEvents = registrations.filter(r => (r.ticket_price ?? 0) > 0).length
+
+        const exportCSV = () => {
+          const rows = [
+            ['Guest','Email','Phone','Event','Organizer','Status','Payment','Price','Registered'],
+            ...filtered.map(r => [r.guest_name, r.guest_email, r.guest_phone ?? '', r.event_title, r.organizer_name, r.status, r.payment_status ?? '', r.ticket_price ?? 0, new Date(r.created_at).toLocaleDateString()])
+          ]
+          const csv = rows.map(row => row.map(c => `"${c}"`).join(',')).join('\n')
+          const el = document.createElement('a')
+          el.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }))
+          el.download = 'tikkit-registrations.csv'
+          el.click()
+        }
+
+        return (
+          <div>
+            {/* Lightbox */}
+            {lightboxUrl && (
+              <div onClick={() => setLightboxUrl(null)} style={{ position: 'fixed', inset: 0, zIndex: 400, background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={lightboxUrl} alt="Payment screenshot" onClick={e => e.stopPropagation()} style={{ maxWidth: '90vw', maxHeight: '85vh', borderRadius: 16, objectFit: 'contain', boxShadow: '0 24px 80px rgba(0,0,0,0.8)' }} />
+                <button onClick={() => setLightboxUrl(null)} style={{ position: 'fixed', top: 20, right: 20, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, padding: 10, color: 'white', cursor: 'pointer', display: 'flex' }}><X size={18} /></button>
+              </div>
+            )}
+
+            {/* Stats */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
+              {[
+                { label: 'Total Registrations', value: registrations.length, color: '#1E5EFF' },
+                { label: 'Payments Pending',    value: pendingPayments,       color: '#F59E0B' },
+                { label: 'Confirmed',           value: confirmed,             color: '#22C55E' },
+                { label: 'Paid Event Regs',     value: paidEvents,            color: '#8B5CF6' },
+              ].map(s => (
+                <div key={s.label} style={{ background: '#0D0F18', border: `1px solid ${s.color}22`, borderRadius: 12, padding: '16px 18px' }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-2xl)', fontWeight: 800, color: s.color, letterSpacing: '-1px' }}>
+                    {regsLoading ? '—' : s.value.toLocaleString()}
+                  </div>
+                  <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 4 }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="ms-card">
+              <div className="ms-card-hdr">
+                <span className="ms-card-title">All Registrations</span>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                  {/* Status pills */}
+                  <div className="ms-pills">
+                    {(['all','pending','approved','confirmed','payment_pending'] as const).map(f => (
+                      <button key={f} className={`ms-pill${regStatusFilter === f ? ' pa' : ''}`} onClick={() => setRegStatusFilter(f)}>
+                        {f === 'all' ? 'All' : f === 'payment_pending' ? 'Pay Pending' : f.charAt(0).toUpperCase() + f.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Payment filter pills */}
+                  <div className="ms-pills">
+                    {([
+                      { key: 'all', label: 'All Payments' },
+                      { key: 'submitted', label: '⏳ Awaiting' },
+                      { key: 'confirmed', label: '✓ Paid' },
+                      { key: 'none', label: 'No Payment' },
+                    ] as const).map(f => (
+                      <button key={f.key} className={`ms-pill${regPaymentFilter === f.key ? ' pg' : ''}`} onClick={() => setRegPaymentFilter(f.key)}>
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
+                  {/* Search */}
+                  <div style={{ position: 'relative' }}>
+                    <Search size={12} style={{ position: 'absolute', left: 9, top: '50%', transform: 'translateY(-50%)', color: '#4B5563' }} />
+                    <input
+                      value={regSearch}
+                      onChange={e => setRegSearch(e.target.value)}
+                      placeholder="Guest name / email / event…"
+                      className="ms-input"
+                      style={{ paddingLeft: 28, width: 220, fontSize: 'var(--fs-sm)' }}
+                    />
+                  </div>
+                  <button onClick={exportCSV} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.22)', color: '#4D82FF', borderRadius: 8, padding: '6px 12px', fontSize: 'var(--fs-sm)', fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font-body)' }}>
+                    <Download size={12} /> Export CSV
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ overflowX: 'auto' }}>
+                {regsLoading ? (
+                  <div style={{ padding: '40px', textAlign: 'center', color: '#374151' }}>Loading registrations…</div>
+                ) : (
+                  <table className="ms-tbl" style={{ minWidth: 860 }}>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Guest</th>
+                        <th>Event</th>
+                        <th className="ms-hide">Organizer</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th className="ms-hide">Price</th>
+                        <th className="ms-hide">Screenshot</th>
+                        <th className="ms-hide">Registered</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filtered.length === 0 && (
+                        <tr><td colSpan={9} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No registrations found</td></tr>
+                      )}
+                      {filtered.map((r, i) => (
+                        <tr key={r.id}>
+                          <td style={{ color: '#4B5563', fontSize: 'var(--fs-sm)' }}>{i + 1}</td>
+                          <td>
+                            <div style={{ fontWeight: 600, color: '#F0F2FF', fontSize: 'var(--fs-base)' }}>{r.guest_name}</div>
+                            <div style={{ fontSize: 11, color: '#6B7280' }}>{r.guest_email}</div>
+                          </td>
+                          <td>
+                            <div style={{ fontWeight: 500, color: '#D1D5DB', fontSize: 'var(--fs-sm)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.event_title}</div>
+                            {r.event_date && <div style={{ fontSize: 11, color: '#6B7280' }}>{fmtDate(r.event_date)}</div>}
+                          </td>
+                          <td className="ms-hide" style={{ fontSize: 'var(--fs-sm)', color: '#9CA3AF' }}>{r.organizer_name}</td>
+                          <td>
+                            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: `${REG_SC[r.status] ?? '#6B7280'}18`, border: `1px solid ${REG_SC[r.status] ?? '#6B7280'}30`, color: REG_SC[r.status] ?? '#6B7280', whiteSpace: 'nowrap' }}>
+                              {REG_SL[r.status] ?? r.status}
+                            </span>
+                          </td>
+                          <td>
+                            {r.payment_status ? (
+                              <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: `${PAY_SC[r.payment_status] ?? '#6B7280'}18`, border: `1px solid ${PAY_SC[r.payment_status] ?? '#6B7280'}30`, color: PAY_SC[r.payment_status] ?? '#6B7280', whiteSpace: 'nowrap' }}>
+                                {PAY_SL[r.payment_status] ?? r.payment_status}
+                              </span>
+                            ) : (r.ticket_price ?? 0) > 0 ? (
+                              <span style={{ fontSize: 11, color: '#374151' }}>Not submitted</span>
+                            ) : (
+                              <span style={{ fontSize: 11, color: '#374151' }}>Free</span>
+                            )}
+                          </td>
+                          <td className="ms-hide">
+                            {(r.ticket_price ?? 0) > 0 ? (
+                              <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 700, color: '#FFC745' }}>PKR {(r.ticket_price!).toLocaleString('en-PK')}</span>
+                            ) : (
+                              <span style={{ color: '#374151', fontSize: 'var(--fs-sm)' }}>Free</span>
+                            )}
+                          </td>
+                          <td className="ms-hide">
+                            {r.payment_screenshot_url ? (
+                              <button
+                                onClick={() => setLightboxUrl(r.payment_screenshot_url!)}
+                                style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.2)', borderRadius: 7, padding: '4px 10px', color: '#4D82FF', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}
+                              >
+                                <ZoomIn size={11} /> View
+                              </button>
+                            ) : (
+                              <span style={{ color: '#374151', fontSize: 11 }}>—</span>
+                            )}
+                          </td>
+                          <td className="ms-hide" style={{ fontSize: 'var(--fs-sm)', color: '#6B7280' }}>{fmtDate(r.created_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </>
   )
 }

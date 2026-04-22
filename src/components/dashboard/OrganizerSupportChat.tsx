@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { sendSupportMessage } from '@/app/actions/supportActions'
+import { sendSupportMessage, markSupportMessagesRead } from '@/app/actions/supportActions'
 import { Send, Loader2, ShieldCheck } from 'lucide-react'
 import type { SupportMessage } from '@/app/actions/supportActions'
 
@@ -34,6 +34,7 @@ export default function OrganizerSupportChat({
   }, [messages])
 
   useEffect(() => {
+    markSupportMessagesRead().catch(console.error)
     const channel = (supabase as any)
       .channel(`organizer-support-${userId}`)
       .on('postgres_changes', {

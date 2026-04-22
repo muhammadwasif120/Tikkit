@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import GuestShell from '@/components/guest/GuestShell'
+import { getUnreadSupportMessageCount } from '@/app/actions/supportActions'
 
 export default async function GuestLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -25,6 +26,8 @@ export default async function GuestLayout({ children }: { children: React.ReactN
     .select('*', { count: 'exact', head: true })
     .eq('email', user.email!)
     .or(`payment_status.eq.pending,and(reviewed_at.gte.${sevenDaysAgo},status.neq.pending)`)
+    
+  const unreadSupportCount = await getUnreadSupportMessageCount()
 
-  return <GuestShell notifCount={notifCount ?? 0}>{children}</GuestShell>
+  return <GuestShell notifCount={notifCount ?? 0} unreadSupportCount={unreadSupportCount}>{children}</GuestShell>
 }

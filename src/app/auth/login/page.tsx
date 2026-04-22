@@ -7,7 +7,7 @@ import {
   Mail, Lock, Eye, EyeOff, User,
   ArrowRight, AlertCircle, ChevronLeft,
   QrCode, Users, CreditCard, BarChart3, Zap,
-  Calendar, MapPin,
+  Calendar, MapPin, Phone,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import Link from 'next/link'
@@ -66,25 +66,47 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const expRole  = isOrg ? 'organizer' : 'guest'
 
   const [tab,    setTab]    = useState<SubMode>('login')
+  const [step,   setStep]   = useState<1 | 2>(1)
   const [name,   setName]   = useState('')
   const [email,  setEmail]  = useState('')
   const [pw,     setPw]     = useState('')
+  const [phone,  setPhone]  = useState('')
+  const [cnic,   setCnic]   = useState('')
+  const [company,setCompany]= useState('')
+  const [dob,    setDob]    = useState('')
+  const [gender, setGender] = useState('')
   const [show,   setShow]   = useState(false)
   const [busy,   setBusy]   = useState(false)
   const [err,    setErr]    = useState<string | null>(null)
   const [agreed, setAgreed] = useState(false)
 
-  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setAgreed(false); setTab(t) }
+  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setPhone(''); setCnic(''); setCompany(''); setDob(''); setGender(''); setAgreed(false); setStep(1); setTab(t) }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErr(null)
+    
+    if (tab === 'signup' && step === 1) {
+      if (!name.trim())  { setErr('Enter your full name'); return }
+      if (!email.trim() || !pw) { setErr('Please complete all fields'); return }
+      if (pw.length < 8) { setErr('Password must be at least 8 characters'); return }
+      setStep(2)
+      return
+    }
+
     setBusy(true)
     try {
-      if (tab === 'signup') {
-        if (!name.trim())  { setErr('Enter your name'); return }
-        if (pw.length < 8) { setErr('Password must be at least 8 characters'); return }
-        if (!agreed)       { setErr('Please agree to the Terms & Conditions to continue'); return }
+      if (tab === 'signup' && step === 2) {
+        if (!phone.trim()) { setErr('Phone Number is strictly required for security'); return }
+        if (!cnic.trim()) { setErr('CNIC is required for identity verification'); return }
+        
+        if (isOrg) {
+          if (!company.trim()) { setErr('Company or Brand Name is required'); return }
+        } else {
+          if (!dob) { setErr('Date of birth is required'); return }
+          if (!gender) { setErr('Gender is required for demographic curation'); return }
+        }
+        if (!agreed) { setErr('Please agree to the Terms & Conditions to continue'); return }
 
         const { data, error } = await supabase.auth.signUp({
           email: email.trim().toLowerCase(),
@@ -100,14 +122,26 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         }
 
         if (data.user) {
+          // Immediately secure extended data
+          await supabase.from('profiles').update({
+            phone_number: phone.trim(),
+            company_name: isOrg ? company.trim() : null,
+            cnic_number: cnic.trim(),
+          }).eq('id', data.user.id)
+
           if (!isOrg) {
             await supabase
               .from('guest_profiles')
-              .upsert({ id: data.user.id }, { onConflict: 'id', ignoreDuplicates: true })
+              .upsert({ 
+                 id: data.user.id,
+                 date_of_birth: dob,
+                 gender: gender
+              }, { onConflict: 'id', ignoreDuplicates: false })
           }
+          
           router.push(isOrg ? '/dashboard' : '/explore')
         }
-      } else {
+      } else if (tab === 'login') {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: email.trim().toLowerCase(),
           password: pw,
@@ -140,13 +174,16 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
     }
   }
 
-  const disabled = busy || !email.trim() || !pw || (tab === 'signup' && !agreed)
+  const disabled = busy 
+    || (tab === 'login' && (!email.trim() || !pw))
+    || (tab === 'signup' && step === 1 && (!name.trim() || !email.trim() || pw.length < 8))
+    || (tab === 'signup' && step === 2 && (!phone.trim() || !cnic.trim() || !agreed || (isOrg ? !company.trim() : (!dob || !gender))))
 
   return (
     <div>
       {/* Back */}
       <button
-        onClick={onBack}
+        onClick={() => { if (tab === 'signup' && step === 2) setStep(1); else onBack(); }}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
           color: '#4B5563', fontSize: 13, padding: '0 0 24px',
@@ -156,7 +193,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         onMouseEnter={e => (e.currentTarget.style.color = '#9CA3AF')}
         onMouseLeave={e => (e.currentTarget.style.color = '#4B5563')}
       >
-        <ChevronLeft size={13} /> Back
+        <ChevronLeft size={13} /> {tab === 'signup' && step === 2 ? 'Previous Step' : 'Back'}
       </button>
 
       {/* Mode pill */}
@@ -217,48 +254,84 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
 
       {/* Form */}
       <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
-        {tab === 'signup' && (
-          <Field Icon={User} type="text" placeholder="Full name" value={name} onChange={setName} accent={accent} />
-        )}
-        <Field Icon={Mail} type="email" placeholder="your@email.com" value={email} onChange={setEmail} accent={accent} />
-        <Field
-          Icon={Lock} type={show ? 'text' : 'password'} placeholder="Password" value={pw} onChange={setPw} accent={accent}
-          end={
-            <button type="button" onClick={() => setShow(!show)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4B5563', padding: 2, display: 'flex', transition: 'color .15s' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#9CA3AF')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#4B5563')}
-            >
-              {show ? <EyeOff size={15} /> : <Eye size={15} />}
-            </button>
-          }
-        />
-
-        {tab === 'signup' && (
-          <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', userSelect: 'none' }}>
-            <div
-              onClick={() => setAgreed(v => !v)}
-              style={{
-                width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 1,
-                background: agreed ? accent : 'rgba(255,255,255,0.04)',
-                border: `1.5px solid ${agreed ? accent : 'rgba(255,255,255,0.15)'}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'all .15s', cursor: 'pointer',
-              }}
-            >
-              {agreed && (
-                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                  <path d="M1 4L3.5 6.5L9 1" stroke={isOrg ? '#fff' : '#000'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
+        {tab === 'login' || (tab === 'signup' && step === 1) ? (
+          <>
+            {tab === 'signup' && (
+              <Field Icon={User} type="text" placeholder="Full name" value={name} onChange={setName} accent={accent} />
+            )}
+            <Field Icon={Mail} type="email" placeholder="your@email.com" value={email} onChange={setEmail} accent={accent} />
+            <Field
+              Icon={Lock} type={show ? 'text' : 'password'} placeholder="Password" value={pw} onChange={setPw} accent={accent}
+              end={
+                <button type="button" onClick={() => setShow(!show)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#4B5563', padding: 2, display: 'flex', transition: 'color .15s' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#9CA3AF')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#4B5563')}
+                >
+                  {show ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+              }
+            />
+          </>
+        ) : (
+          /* Step 2 Inputs */
+          <>
+            <Field Icon={Phone} type="tel" placeholder="Phone Number" value={phone} onChange={setPhone} accent={accent} />
+            <Field Icon={CreditCard} type="text" placeholder="CNIC Number (xxxxx-xxxxxxx-x)" value={cnic} onChange={setCnic} accent={accent} />
+            <div style={{ margin: '-3px 0 10px', fontSize: 11, color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.4, paddingLeft: 4 }}>
+              Complete the CNIC verification in the settings tab to get a <span style={{ color: accent, fontWeight: 600 }}>Verified Profile badge</span>.
             </div>
-            <span style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.6, fontFamily: 'var(--font-body)' }}>
-              I agree to the{' '}
-              <Link href="/terms" target="_blank" style={{ color: accent, textDecoration: 'none', fontWeight: 600 }}>Terms &amp; Conditions</Link>
-              {' '}and{' '}
-              <Link href="/privacy" target="_blank" style={{ color: accent, textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</Link>
-            </span>
-          </label>
+            
+            {isOrg ? (
+              <Field Icon={User} type="text" placeholder="Company or Brand Name" value={company} onChange={setCompany} accent={accent} />
+            ) : (
+              <div style={{ display: 'flex', gap: 9 }}>
+                <Field Icon={Calendar} type="date" placeholder="Date of Birth" value={dob} onChange={setDob} accent={accent} />
+                <div style={{ position: 'relative', flex: 1 }}>
+                  <Users size={15} color={gender ? accent : '#4B5563'} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
+                  <select 
+                    value={gender} onChange={e => setGender(e.target.value)}
+                    style={{
+                      display: 'block', width: '100%', padding: '13px 16px 13px 40px',
+                      background: 'rgba(255,255,255,0.03)', border: `1px solid ${gender ? accent + '55' : 'rgba(255,255,255,0.07)'}`,
+                      borderRadius: 10, color: gender ? '#F0F2FF' : '#9CA3AF', fontSize: 14, outline: 'none',
+                      fontFamily: 'var(--font-body)', transition: 'all .15s', cursor: 'pointer',
+                      appearance: 'none', WebkitAppearance: 'none'
+                    }}
+                  >
+                    <option value="" disabled>Select Gender</option>
+                    <option value="male" style={{ background: '#0C0E16', color: '#F0F2FF' }}>Male</option>
+                    <option value="female" style={{ background: '#0C0E16', color: '#F0F2FF' }}>Female</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', userSelect: 'none', marginTop: 10 }}>
+              <div
+                onClick={() => setAgreed(v => !v)}
+                style={{
+                  width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 1,
+                  background: agreed ? accent : 'rgba(255,255,255,0.04)',
+                  border: `1.5px solid ${agreed ? accent : 'rgba(255,255,255,0.15)'}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  transition: 'all .15s', cursor: 'pointer',
+                }}
+              >
+                {agreed && (
+                  <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                    <path d="M1 4L3.5 6.5L9 1" stroke={isOrg ? '#fff' : '#000'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+              </div>
+              <span style={{ fontSize: 12, color: '#6B7280', lineHeight: 1.6, fontFamily: 'var(--font-body)' }}>
+                I verify these details are accurate and agree to the{' '}
+                <Link href="/terms" target="_blank" style={{ color: accent, textDecoration: 'none', fontWeight: 600 }}>Terms &amp; Conditions</Link>
+                {' '}and{' '}
+                <Link href="/privacy" target="_blank" style={{ color: accent, textDecoration: 'none', fontWeight: 600 }}>Privacy Policy</Link>
+              </span>
+            </label>
+          </>
         )}
 
         {tab === 'login' && (
@@ -281,7 +354,9 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         )}
 
         <button
-          type="submit" disabled={disabled}
+          type="button" 
+          onClick={e => submit(e)}
+          disabled={disabled}
           style={{
             marginTop: 2, padding: '14px', border: 'none', borderRadius: 10,
             fontSize: 14, fontWeight: 700,
@@ -298,6 +373,8 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         >
           {busy ? 'Please wait…' : tab === 'login'
             ? <><span>Sign In</span><ArrowRight size={15} /></>
+            : tab === 'signup' && step === 1 
+            ? <><span>Continue</span><ArrowRight size={15} /></>
             : <><span>Create Account</span><ArrowRight size={15} /></>}
         </button>
 

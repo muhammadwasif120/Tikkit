@@ -1,17 +1,19 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import PublicRegistrationForm from '@/components/register/PublicRegistrationForm'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import CyberLoader from '@/components/guest/CyberLoader'
 
 export async function generateMetadata({ params }: { params: Promise<{ eventId: string }> }): Promise<Metadata> {
   const { eventId } = await params
   const supabase = await createClient()
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(eventId);
+
   const { data } = await supabase
     .from('events')
     .select('title, description, cover_image_url')
-    .eq('id', eventId)
+    .eq(isUUID ? 'id' : 'slug', eventId)
     .single()
 
   const event = data as any;
@@ -40,10 +42,12 @@ export async function generateMetadata({ params }: { params: Promise<{ eventId: 
 async function RegistrationData({ eventId }: { eventId: string }) {
   const supabase = await createClient()
 
+  const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(eventId);
+
   const { data } = await supabase
     .from('events')
     .select('id, title, description, venue_name, date_start, date_end, capacity, registration_mode, require_id_verification, require_reference_code, secret_venue, status')
-    .eq('id', eventId)
+    .eq(isUUID ? 'id' : 'slug', eventId)
     .single()
 
   const event = data as any;
@@ -51,11 +55,20 @@ async function RegistrationData({ eventId }: { eventId: string }) {
   if (!event || event.status === 'cancelled') notFound()
   if (event.registration_mode === 'invite_only') notFound()
 
-  // Check capacity
+  // If attendee is logged in, redirect them seamlessly to the native app interface
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+    if (profile?.role === 'guest') {
+      redirect(`/guest/explore/${event.id}`)
+    }
+  }
+
+  // Check capacity using the resolved event.id instead of the parameter
   const { count } = await supabase
     .from('guests')
     .select('*', { count: 'exact', head: true })
-    .eq('event_id', eventId)
+    .eq('event_id', event.id)
     .neq('status', 'cancelled')
 
   const isFull = event.capacity > 0 && (count ?? 0) >= event.capacity
@@ -64,7 +77,7 @@ async function RegistrationData({ eventId }: { eventId: string }) {
   const { data: ticketTypes } = await supabase
     .from('ticket_types')
     .select('id, name, price, original_price, discount_type, discount_value, quantity, quantity_sold, is_vip')
-    .eq('event_id', eventId)
+    .eq('event_id', event.id)
     .order('price', { ascending: true })
 
   return (
@@ -126,7 +139,7 @@ async function RegistrationData({ eventId }: { eventId: string }) {
           />
         ) : null}
 
-        <p className="text-center text-xs text-gray-600">Powered by Tikkit</p>
+        <p className="text-center text-xs text-gray-600">Powered by <span className="font-semibold text-gray-500">TIKKIT X</span></p>
       </div>
     </div>
   )
