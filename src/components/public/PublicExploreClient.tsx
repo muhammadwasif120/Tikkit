@@ -395,7 +395,7 @@ function FinalCTA({ totalEvents }: { totalEvents: number }) {
 }
 
 /* ─── Main ───────────────────────────────────────────────────────── */
-export default function PublicExploreClient({ events, categories }: { events: Event[]; categories: Category[] }) {
+export default function PublicExploreClient({ events, categories, titleOverride }: { events: Event[]; categories: Category[]; titleOverride?: string }) {
   const [activeCat, setActiveCat] = useState<string | null>(null)
 
   const catMap = Object.fromEntries(categories.map(c => [c.id, c]))
@@ -428,8 +428,9 @@ export default function PublicExploreClient({ events, categories }: { events: Ev
             </div>
 
             <h1 className="pe-hero-h1">
-              Find your<br />
-              <span className="pe-accent">next night.</span>
+              {titleOverride ? titleOverride : (
+                <>Find your<br /><span className="pe-accent">next night.</span></>
+              )}
             </h1>
 
             <p className="pe-hero-sub">

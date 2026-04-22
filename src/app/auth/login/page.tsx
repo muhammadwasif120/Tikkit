@@ -309,6 +309,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
                     <option value="female" style={{ background: '#0C0E16', color: '#F0F2FF' }}>Female</option>
                   </select>
                 </div>
+                </div>
               </div>
             )}
 
