@@ -27,7 +27,33 @@ Tikkit is not a generic ticketing platform — it is purpose-built for curated, 
 - [How it Works](https://www.tikkitx.com/how-it-works): Guide for organizers on selling tickets
 - [Corporate Events](https://www.tikkitx.com/corporate): Enterprise and B2B event solutions
 - [Wellness & Retreat Events](https://www.tikkitx.com/pulse): Wellness, yoga, and retreat events
+- [Blog](https://www.tikkitx.com/blog): Event planning guides, how-tos, and Pakistan event scene insights
 - [Sitemap](https://www.tikkitx.com/sitemap.xml): Full index of all active event URLs
+
+## Blog & Knowledge Articles
+
+Tikkit publishes practical guides for event organisers across Pakistan. Topics include platform how-tos, corporate event planning, wellness retreats, and Pakistan event scene strategy.
+
+- [The Complete Guide to Planning Events in Pakistan in 2026](https://www.tikkitx.com/blog/planning-events-pakistan-2026)
+- [How to Create Your First Event on Tikkit](https://www.tikkitx.com/blog/how-to-create-event-tikkit)
+- [How to Sell Tickets Online in Pakistan](https://www.tikkitx.com/blog/how-to-sell-tickets-online-pakistan)
+- [How to Invite Guests to Your Event](https://www.tikkitx.com/blog/how-to-invite-guests-event)
+- [How to Verify Your Organiser Profile on Tikkit](https://www.tikkitx.com/blog/how-to-verify-organiser-profile)
+- [Why Event Verification Matters in Pakistan](https://www.tikkitx.com/blog/why-event-verification-matters-pakistan)
+- [How to Share Your Event and Get Registrations](https://www.tikkitx.com/blog/how-to-share-event-get-registrations)
+- [How to Check In Attendees at Your Event](https://www.tikkitx.com/blog/how-to-check-in-attendees-event)
+- [Corporate Event Management in Pakistan](https://www.tikkitx.com/blog/corporate-event-management-pakistan)
+- [How to Plan a Corporate Dinner in Pakistan](https://www.tikkitx.com/blog/how-to-plan-corporate-dinner-pakistan)
+- [How to Run a Conference in Pakistan](https://www.tikkitx.com/blog/how-to-run-conference-pakistan)
+- [Managing Guest Lists for Corporate Events in Pakistan](https://www.tikkitx.com/blog/managing-guest-lists-corporate-events-pakistan)
+- [Best Events to Host in Lahore, Karachi & Islamabad](https://www.tikkitx.com/blog/best-events-to-host-lahore-karachi-islamabad)
+- [Wellness Events in Pakistan — Trends & Opportunities](https://www.tikkitx.com/blog/wellness-events-pakistan-trends)
+- [How to Plan a Yoga Retreat in Pakistan](https://www.tikkitx.com/blog/how-to-plan-yoga-retreat-pakistan)
+- [How to Organise a Workshop or Masterclass in Pakistan](https://www.tikkitx.com/blog/how-to-organise-workshop-masterclass-pakistan)
+- [Certificates of Attendance for Workshops in Pakistan](https://www.tikkitx.com/blog/certificates-of-attendance-workshops-pakistan)
+- [How to Host a Private Party in Pakistan](https://www.tikkitx.com/blog/how-to-host-private-party-pakistan)
+- [How to Write a Post-Event Report](https://www.tikkitx.com/blog/how-to-write-post-event-report)
+- [How to Start an Events Business in Pakistan](https://www.tikkitx.com/blog/how-to-start-events-business-pakistan)
 
 ## Event Categories Supported
 
