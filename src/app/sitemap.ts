@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getAllPosts } from '@/lib/blog'
 
 export const revalidate = 3600 // regenerate hourly
 
@@ -23,9 +24,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/how-it-works`,lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${baseUrl}/corporate`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/pulse`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${baseUrl}/blog`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${baseUrl}/coming-soon`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${baseUrl}/privacy`,     lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
     { url: `${baseUrl}/terms`,       lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
+  ]
+
+  // ─── Blog articles ────────────────────────────────────────────────────────
+  const blogPosts = getAllPosts()
+  const blogRoutes: MetadataRoute.Sitemap = [
+    // Listing page per category
+    ...['how-to', 'corporate', 'pulse', 'pakistan'].map(cat => ({
+      url: `${baseUrl}/blog?category=${cat}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.7,
+    })),
+    // Individual articles
+    ...blogPosts.map(post => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.updatedAt ?? post.publishedAt),
+      changeFrequency: 'monthly' as const,
+      priority: 0.75,
+    })),
   ]
 
   // ─── Programmatic city landing pages ─────────────────────────────────────
@@ -124,6 +145,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
+    ...blogRoutes,
     ...cityRoutes,
     ...cityCategoryRoutes,
     ...compareRoutes,

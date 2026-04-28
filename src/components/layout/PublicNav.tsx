@@ -113,6 +113,7 @@ export default function PublicNav({ activePage }: Props) {
           <Link href="/#features" className={`pub-nav-link${activePage === 'home' ? ' active' : ''}`}>Features</Link>
           <Link href="/how-it-works" className={`pub-nav-link${activePage === 'how-it-works' ? ' active' : ''}`}>How it works</Link>
           <Link href="/explore" className={`pub-nav-link${activePage === 'explore' ? ' active' : ''}`}>Explore</Link>
+          <Link href="/blog" className="pub-nav-link">Blog</Link>
         </div>
 
         <div className="pub-nav-actions">
@@ -136,6 +137,7 @@ export default function PublicNav({ activePage }: Props) {
         <Link href="/#features" className="pub-mmenu-link" onClick={() => setMenuOpen(false)}>Features</Link>
         <Link href="/how-it-works" className="pub-mmenu-link" onClick={() => setMenuOpen(false)}>How it works</Link>
         <Link href="/explore" className={`pub-mmenu-link${activePage === 'explore' ? ' active' : ''}`} onClick={() => setMenuOpen(false)}>Explore</Link>
+        <Link href="/blog" className="pub-mmenu-link" onClick={() => setMenuOpen(false)}>Blog</Link>
         <div className="pub-mmenu-actions">
           <Link href="/auth/login" className="pub-btn-full-primary">Get started free</Link>
           <Link href="/auth/login" className="pub-btn-full-ghost">Log in</Link>

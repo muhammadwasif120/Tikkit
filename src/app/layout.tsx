@@ -59,6 +59,11 @@ export const metadata: Metadata = {
       { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
     ],
   },
+  verification: {
+    other: {
+      'msvalidate.01': '2aac1ba3120f5fcd7e8ec88cc63f7355',
+    },
+  },
   robots: {
     index: true,
     follow: true,

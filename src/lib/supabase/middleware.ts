@@ -46,6 +46,7 @@ export async function updateSession(request: NextRequest) {
   '/privacy',       // Public privacy policy
   '/terms',         // Public terms & conditions
   '/compare',       // Competitor comparison pages — public SEO landing pages
+  '/blog',          // Public blog / SEO content hub
 ]
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 

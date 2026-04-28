@@ -609,6 +609,106 @@ export default function CorporatePage() {
         </div>
       </section>
 
+      {/* ── GEO SECTION ── */}
+      <section style={{ padding: '96px 24px', background: '#0F1724', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div className="corp-section-label"><Globe size={11} /> Corporate Events Across Pakistan</div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
+              Wherever the Brief Takes You.
+            </h2>
+            <p style={{ fontSize: 17, color: '#64748B', maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
+              Tikkit is built for Pakistan's corporate event circuit — from Karachi boardrooms to Islamabad summits to Lahore galas.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+            {[
+              {
+                city: 'Lahore',
+                desc: 'DHA, Gulberg, and Johar Town host Pakistan\'s most active corporate event calendar. Annual dinners at five-star ballrooms, tech summits in co-working hubs, and product launches for the country\'s largest consumer brands. Tikkit manages the full guest experience — from digital invitation to post-event report.',
+                tags: ['Annual Dinners', 'Tech Summits', 'Product Launches'],
+              },
+              {
+                city: 'Karachi',
+                desc: 'Pakistan\'s business capital runs the country\'s largest events. Expo Centre conferences, Clifton gala dinners, PECHS board retreats. Karachi\'s corporate events demand production quality and airtight guest management. Tikkit delivers both — at any scale, with verified check-in and real-time analytics.',
+                tags: ['Conferences', 'Corporate Galas', 'Financial Sector Events'],
+              },
+              {
+                city: 'Islamabad',
+                desc: 'Government agencies, multinationals, UN bodies, and embassies run Islamabad\'s event calendar. Protocol-aware, security-conscious, and formal. Verified guest lists are a professional expectation, not optional. Tikkit\'s CNIC-verified registration and offline check-in are built for exactly this environment.',
+                tags: ['Government Events', 'Diplomatic Functions', 'NGO Conferences'],
+              },
+            ].map(({ city, desc, tags }) => (
+              <div key={city} style={{
+                background: '#1A2332',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 16,
+                padding: '32px 28px',
+              }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 14 }}>{city}</h3>
+                <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.75, marginBottom: 20 }}>{desc}</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {tags.map(tag => (
+                    <span key={tag} style={{
+                      fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 100,
+                      background: 'rgba(74,144,217,0.1)', color: '#4A90D9',
+                      border: '1px solid rgba(74,144,217,0.2)',
+                    }}>{tag}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section style={{ padding: '80px 24px', background: '#1A2332', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 780, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem,3.5vw,2.4rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
+              Frequently Asked Questions
+            </h2>
+          </div>
+          {[
+            {
+              q: 'How do I manage a guest list for a large corporate event in Pakistan?',
+              a: 'Use Tikkit\'s digital registration system — every guest gets a unique QR code, your team scans at the door, and the dashboard updates in real time. No spreadsheets, no printed lists. The full attendance record exports automatically after the event.',
+            },
+            {
+              q: 'Can Tikkit handle offline check-in at venues without WiFi?',
+              a: 'Yes. Download the guest list before the event and scan QR codes completely offline. All data syncs when connectivity returns — essential for Islamabad venues, farmhouses, and large hotel ballrooms with unreliable internet.',
+            },
+            {
+              q: 'How do I generate a post-event report for leadership?',
+              a: 'Tikkit generates your report automatically. After the event, click Reports in your dashboard. Download attendance data, check-in rate, no-shows, and ticket breakdown as PDF or CSV — ready within minutes of the event ending.',
+            },
+            {
+              q: 'Does Tikkit support CNIC verification for high-security events?',
+              a: 'Yes. Verified organisers on Tikkit have completed CNIC identity confirmation. For events requiring verified guest lists — board dinners, government functions, diplomatic events — this creates an accountable, secure guest management environment.',
+            },
+            {
+              q: 'What ticket tiers can I set up for a corporate event?',
+              a: 'Unlimited tiers — General Admission, VIP, Press, Speaker, Staff, Early Bird, and any custom tier you need. Each tier has its own capacity, price (including free), and check-in flow. VIP guests can be directed to a separate entrance automatically.',
+            },
+          ].map(({ q, a }, i) => (
+            <details key={i} style={{
+              borderBottom: '1px solid rgba(255,255,255,0.07)',
+              padding: '20px 0',
+            }}>
+              <summary style={{
+                fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer',
+                listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                {q}
+                <ChevronRight size={18} color="#4A90D9" style={{ flexShrink: 0, marginLeft: 16 }} />
+              </summary>
+              <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.75, marginTop: 14 }}>{a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
       {/* ── CTA ── */}
       <section style={{ padding: '96px 24px', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at center, rgba(74,144,217,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />

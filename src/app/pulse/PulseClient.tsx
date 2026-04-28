@@ -624,6 +624,114 @@ export default function PulsePage() {
         </div>
       </section>
 
+      {/* ── GEO SECTION ── */}
+      <section style={{ padding: '96px 24px', background: '#F5F0EB', borderTop: '1px solid #E8E2DA' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div className="pulse-label"><Mountain size={11} /> Where Pakistan&apos;s Retreat Hosts Go</div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em', marginBottom: 16 }}>
+              From the Mountains to the City.<br />
+              <span style={{ fontWeight: 700, color: '#6B8F71' }}>Pulse Goes With You.</span>
+            </h2>
+            <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 480, margin: '0 auto', lineHeight: 1.8 }}>
+              Retreat venues across Pakistan — from high-altitude mountain lodges to urban studio spaces — all run on Tikkit Pulse.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
+            {[
+              {
+                place: 'Murree & Nathia Gali',
+                icon: '⛰️',
+                desc: 'Pakistan\'s most popular retreat corridor. 90 minutes from Islamabad. Misty pine forests, mountain lodges, and natural silence. Tikkit\'s offline check-in was built for venues here — where WiFi is a luxury and your guest list has to work without it.',
+                types: ['Yoga Retreats', 'Digital Detox', 'Women\'s Circles'],
+              },
+              {
+                place: 'Hunza Valley',
+                icon: '🏔️',
+                desc: 'For the retreat host who doesn\'t compromise on setting. Karakoram backdrop, glacial air, and a participant who flew in specifically to be here. Tikkit handles the logistics so you can focus on the experience.',
+                types: ['Multi-Day Retreats', 'Mindfulness Programmes', 'Adventure Wellness'],
+              },
+              {
+                place: 'Islamabad',
+                icon: '🌿',
+                desc: 'Pakistan\'s wellness capital. The Margalla Hills, urban studios, and farmhouse spaces within 45 minutes of the city. A concentrated audience of professionals who invest in experiences. Day retreats and weekend programmes thrive here.',
+                types: ['Sound Healing', 'Women\'s Wellness', 'Professional Development'],
+              },
+              {
+                place: 'Lahore & Karachi',
+                icon: '🏙️',
+                desc: 'Urban wellness is growing fast. Boutique yoga studios, wellness workshops in private venues, sound baths in DHA. Pakistan\'s two largest cities have an audience that\'s ready — and Tikkit handles registration, payment, and check-in for every format.',
+                types: ['Studio Events', 'Workshops', 'Community Circles'],
+              },
+            ].map(({ place, icon, desc, types }) => (
+              <div key={place} style={{
+                background: '#fff',
+                border: '1px solid #E8E2DA',
+                borderRadius: 20,
+                padding: '28px 24px',
+                boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+              }}>
+                <div style={{ fontSize: 28, marginBottom: 14 }}>{icon}</div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: '#2D2D2D', marginBottom: 12 }}>{place}</h3>
+                <p style={{ fontSize: 14, color: '#7A7A7A', lineHeight: 1.75, marginBottom: 18 }}>{desc}</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                  {types.map(type => (
+                    <span key={type} style={{
+                      fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100,
+                      background: '#EDF2EE', color: '#6B8F71', border: '1px solid #C5D9C8',
+                    }}>{type}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section style={{ padding: '80px 24px', background: '#FAF8F5', borderTop: '1px solid #E8E2DA' }}>
+        <div style={{ maxWidth: 760, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 48 }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem,3.5vw,2.4rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em' }}>
+              Questions From Hosts
+            </h2>
+          </div>
+          {[
+            {
+              q: 'How do I accept payments for a retreat in Pakistan?',
+              a: 'Tikkit Pulse accepts JazzCash, EasyPaisa, bank transfer, and card — the payment methods your participants already use. All payments are tracked automatically, and payouts go to your registered account on a rolling schedule.',
+            },
+            {
+              q: 'How does offline check-in work at mountain venues?',
+              a: 'Download your guest list before you leave for the venue. Tikkit works completely offline — scan participant QR codes without internet. All check-ins sync automatically when you\'re back in range. Built for Murree, Hunza, Swat, and anywhere else the signal drops.',
+            },
+            {
+              q: 'Can I issue certificates of attendance?',
+              a: 'Yes. Tikkit\'s verified attendance records confirm who actually attended your retreat or workshop. Export the attended list and generate certificates for those who checked in. Your certificates are based on real, verifiable data — not a spreadsheet guess.',
+            },
+            {
+              q: 'How do I keep my retreat intimate and limit capacity?',
+              a: 'Set a maximum capacity when creating your event. Registration closes automatically when the limit is reached. You can also enable a waitlist so interested participants are notified if a spot opens up.',
+            },
+            {
+              q: 'What\'s the best way to manage retreat deposits and final payments?',
+              a: 'Create a deposit ticket (e.g., 30% of the total price) for the initial booking, then communicate the balance payment separately via your preferred method, or set up a second ticket type for the remainder. Full payment plan configuration is available on your event settings.',
+            },
+          ].map(({ q, a }, i) => (
+            <details key={i} style={{ borderBottom: '1px solid #E8E2DA', padding: '20px 0' }}>
+              <summary style={{
+                fontSize: 16, fontWeight: 700, color: '#2D2D2D', cursor: 'pointer',
+                listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                {q}
+                <ChevronRight size={18} color="#6B8F71" style={{ flexShrink: 0, marginLeft: 16 }} />
+              </summary>
+              <p style={{ fontSize: 14, color: '#7A7A7A', lineHeight: 1.8, marginTop: 14 }}>{a}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
       {/* ── CTA ── */}
       <section style={{ padding: '96px 24px', background: 'linear-gradient(160deg, #6B8F71 0%, #5a7d60 100%)', position: 'relative', overflow: 'hidden' }}>
         {/* Shimmer */}
