@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { marked } from 'marked'
 import { getPostBySlug, getAllPosts, CATEGORY_LABELS } from '@/lib/blog'
+import { HOWTO_STEPS } from '@/lib/howto-steps'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -20,6 +21,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: post.description,
     keywords: post.keywords,
     authors: [{ name: 'Tikkit Team' }],
+    alternates: {
+      canonical: `https://www.tikkitx.com/blog/${post.slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.description,
@@ -28,6 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       modifiedTime: post.updatedAt,
       siteName: 'Tikkit',
       locale: 'en_PK',
+      url: `https://www.tikkitx.com/blog/${post.slug}`,
     },
     twitter: {
       card: 'summary_large_image',
@@ -63,18 +68,45 @@ export default async function ArticlePage({ params }: Props) {
     ? new Date(post.updatedAt).toLocaleDateString('en-PK', { year: 'numeric', month: 'long', day: 'numeric' })
     : null
 
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: post.title,
-    description: post.description,
-    datePublished: post.publishedAt,
-    dateModified: post.updatedAt ?? post.publishedAt,
-    author: { '@type': 'Organization', name: 'Tikkit', url: 'https://tikkitx.com' },
-    publisher: { '@type': 'Organization', name: 'Tikkit', url: 'https://tikkitx.com' },
-    keywords: post.keywords.join(', '),
-    inLanguage: 'en-PK',
-  }
+  const howTo = HOWTO_STEPS[post.slug]
+
+  const jsonLd = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Article',
+      headline: post.title,
+      description: post.description,
+      datePublished: post.publishedAt,
+      dateModified: post.updatedAt ?? post.publishedAt,
+      author: { '@type': 'Organization', name: 'Tikkit', url: 'https://www.tikkitx.com' },
+      publisher: { '@type': 'Organization', name: 'Tikkit', url: 'https://www.tikkitx.com' },
+      keywords: post.keywords.join(', '),
+      inLanguage: 'en-PK',
+      mainEntityOfPage: { '@type': 'WebPage', '@id': `https://www.tikkitx.com/blog/${post.slug}` },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home',   item: 'https://www.tikkitx.com' },
+        { '@type': 'ListItem', position: 2, name: 'Blog',   item: 'https://www.tikkitx.com/blog' },
+        { '@type': 'ListItem', position: 3, name: CATEGORY_LABELS[post.category], item: `https://www.tikkitx.com/blog?category=${post.category}` },
+        { '@type': 'ListItem', position: 4, name: post.title, item: `https://www.tikkitx.com/blog/${post.slug}` },
+      ],
+    },
+    ...(howTo ? [{
+      '@context': 'https://schema.org',
+      '@type': 'HowTo',
+      name: howTo.name,
+      description: howTo.description,
+      step: howTo.steps.map((s, i) => ({
+        '@type': 'HowToStep',
+        position: i + 1,
+        name: s.name,
+        text: s.text,
+      })),
+    }] : []),
+  ]
 
   return (
     <>

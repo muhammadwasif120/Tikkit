@@ -7,12 +7,19 @@ export const metadata: Metadata = {
   title: 'Blog — Event Planning Tips, Guides & Pakistan Event Scene | Tikkit',
   description: 'Practical guides for event organisers in Pakistan. How to create events, manage guest lists, plan corporate dinners, yoga retreats and more — powered by Tikkit.',
   keywords: ['event planning Pakistan', 'corporate event guide', 'how to organise events Pakistan', 'event management tips', 'workshop planning Pakistan'],
+  alternates: {
+    canonical: 'https://www.tikkitx.com/blog',
+    types: {
+      'application/rss+xml': 'https://www.tikkitx.com/feed.xml',
+    },
+  },
   openGraph: {
     title: 'Tikkit Blog — Event Planning Guides for Pakistan',
     description: 'Practical how-to guides, corporate event playbooks and Pakistan event scene insights.',
     siteName: 'Tikkit',
     locale: 'en_PK',
     type: 'website',
+    url: 'https://www.tikkitx.com/blog',
   },
 }
 

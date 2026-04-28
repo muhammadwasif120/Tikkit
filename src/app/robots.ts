@@ -6,9 +6,12 @@ export default function robots(): MetadataRoute.Robots {
   const allowPublicRules = [
     '/',
     '/explore',
+    '/explore/',
     '/how-it-works',
     '/corporate',
     '/pulse',
+    '/blog',
+    '/blog/',
     '/coming-soon',
     '/privacy',
     '/terms',
