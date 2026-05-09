@@ -64,6 +64,11 @@ export const metadata: Metadata = {
       'msvalidate.01': '2aac1ba3120f5fcd7e8ec88cc63f7355',
     },
   },
+  alternates: {
+    types: {
+      'application/rss+xml': 'https://www.tikkitx.com/feed.xml',
+    },
+  },
   robots: {
     index: true,
     follow: true,

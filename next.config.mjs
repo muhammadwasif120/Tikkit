@@ -18,6 +18,16 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'tikkitx.com' }],
+        destination: 'https://www.tikkitx.com/:path*',
+        permanent: true,
+      },
+    ]
+  },
   async headers() {
     return [
       {

@@ -395,7 +395,9 @@ function FinalCTA({ totalEvents }: { totalEvents: number }) {
 }
 
 /* ─── Main ───────────────────────────────────────────────────────── */
-export default function PublicExploreClient({ events, categories, titleOverride }: { events: Event[]; categories: Category[]; titleOverride?: string }) {
+type CategoryLink = { href: string; label: string }
+
+export default function PublicExploreClient({ events, categories, titleOverride, cityIntro, cityLinks }: { events: Event[]; categories: Category[]; titleOverride?: string; cityIntro?: string; cityLinks?: CategoryLink[] }) {
   const [activeCat, setActiveCat] = useState<string | null>(null)
 
   const catMap = Object.fromEntries(categories.map(c => [c.id, c]))
@@ -434,9 +436,29 @@ export default function PublicExploreClient({ events, categories, titleOverride 
             </h1>
 
             <p className="pe-hero-sub">
-              Private rooftops in DHA. Brand launches in Gulberg. Underground nights in Karachi.
-              The ones worth showing up to — all in one place.
+              {cityIntro ?? 'Private rooftops in DHA. Brand launches in Gulberg. Underground nights in Karachi. The ones worth showing up to — all in one place.'}
             </p>
+
+            {cityLinks && cityLinks.length > 0 && (
+              <nav aria-label="Browse by category" style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                {cityLinks.map(link => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center',
+                      padding: '0.35rem 0.9rem', borderRadius: 999,
+                      background: 'rgba(30,94,255,0.12)',
+                      border: '1px solid rgba(30,94,255,0.3)',
+                      color: '#6B9FFF', fontSize: '0.8rem', fontWeight: 600,
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
+            )}
 
             <div className="pe-hero-cta">
               <Link href="/auth/login" className="pe-btn-primary">
