@@ -14,13 +14,10 @@ export default async function DashboardLayout({
 
   if (!user) redirect('/auth/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  const unreadSupportCount = await getUnreadSupportMessageCount()
+  const [{ data: profile }, unreadSupportCount] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', user.id).single(),
+    getUnreadSupportMessageCount(),
+  ])
 
   return (
     <DashboardShell profile={profile} unreadSupportCount={unreadSupportCount}>

@@ -110,8 +110,8 @@ export async function getMasterEvents(): Promise<MasterEvt[]> {
   // Batch guest counts from both tables in parallel
   const eventIds = events.map((e: any) => e.id)
   const [{ data: guests }, { data: pubRegs }] = await Promise.all([
-    supabase.from('guests').select('event_id').in('event_id', eventIds),
-    supabase.from('public_registrations').select('event_id').in('event_id', eventIds),
+    supabase.from('guests').select('event_id').in('event_id', eventIds).limit(5000),
+    supabase.from('public_registrations').select('event_id').in('event_id', eventIds).limit(5000),
   ])
 
   const guestMap: Record<string, number> = {}
@@ -347,14 +347,14 @@ export async function getMasterAnalytics(): Promise<PlatformAnalytics> {
     { data: guests },
     { data: regs },
   ] = await Promise.all([
-    supabase.from('profiles').select('id, created_at').eq('role', 'organizer'),
+    supabase.from('profiles').select('id, created_at').eq('role', 'organizer').limit(2000),
     supabase.from('events').select(`
       id, title, status, capacity, created_at, organizer_id,
       organizer:profiles!events_organizer_id_fkey(full_name, company_name, username),
       category:event_categories!events_category_id_fkey(id, name, icon)
-    `),
-    supabase.from('guests').select('id, event_id, status, created_at'),
-    supabase.from('public_registrations').select('id, event_id, status, created_at'),
+    `).limit(1000),
+    supabase.from('guests').select('id, event_id, status, created_at').limit(10000),
+    supabase.from('public_registrations').select('id, event_id, status, created_at').limit(10000),
   ])
 
   const evts = (events ?? []) as any[]

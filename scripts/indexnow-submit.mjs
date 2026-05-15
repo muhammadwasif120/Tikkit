@@ -10,6 +10,12 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
+// Only run on production Vercel deploys — skip previews and local builds
+if (process.env.VERCEL_ENV && process.env.VERCEL_ENV !== 'production') {
+  console.log(`[IndexNow] Skipping submission on VERCEL_ENV=${process.env.VERCEL_ENV}`)
+  process.exit(0)
+}
+
 const HOST         = 'www.tikkitx.com'
 const KEY          = '2aac1ba3120f5fcd7e8ec88cc63f7355'
 const KEY_URL      = `https://${HOST}/${KEY}.txt`

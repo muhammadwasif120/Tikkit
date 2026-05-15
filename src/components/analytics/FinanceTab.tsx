@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { DollarSign, TrendingUp, TrendingDown, Ticket, Tag, ChevronDown } from 'lucide-react'
 import clsx from 'clsx'
 
@@ -45,17 +45,17 @@ export default function FinanceTab({
 }) {
   const [selectedEventId, setSelectedEventId] = useState<string>('all')
 
-  const filteredGuests = selectedEventId === 'all'
-    ? guests
-    : guests.filter(g => g.event_id === selectedEventId)
+  const filteredGuests = useMemo(() =>
+    selectedEventId === 'all' ? guests : guests.filter(g => g.event_id === selectedEventId),
+    [guests, selectedEventId])
 
-  const filteredEvents = selectedEventId === 'all'
-    ? events
-    : events.filter(e => e.id === selectedEventId)
+  const filteredEvents = useMemo(() =>
+    selectedEventId === 'all' ? events : events.filter(e => e.id === selectedEventId),
+    [events, selectedEventId])
 
-  const filteredDiscounts = selectedEventId === 'all'
-    ? discountCodes
-    : discountCodes.filter(d => d.event_id === selectedEventId)
+  const filteredDiscounts = useMemo(() =>
+    selectedEventId === 'all' ? discountCodes : discountCodes.filter(d => d.event_id === selectedEventId),
+    [discountCodes, selectedEventId])
 
   // Revenue calculations
   const totalRevenue = filteredGuests.reduce((sum, g) => sum + (g.ticket_price_paid ?? 0), 0)
@@ -73,7 +73,7 @@ export default function FinanceTab({
     new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(amount)
 
   // Per event breakdown
-  const eventBreakdown = filteredEvents.map(event => {
+  const eventBreakdown = useMemo(() => filteredEvents.map(event => {
     const eg = guests.filter(g => g.event_id === event.id && !g.waitlist)
     const revenue = eg.reduce((sum, g) => sum + (g.ticket_price_paid ?? 0), 0)
     const discounted = eg.filter(g => g.discount_applied).length
@@ -90,7 +90,7 @@ export default function FinanceTab({
       profit,
       fillRate: event.capacity > 0 ? Math.round((eg.length / event.capacity) * 100) : 0,
     }
-  })
+  }), [filteredEvents, guests])
 
   return (
     <div className="space-y-6 animate-fade-in">

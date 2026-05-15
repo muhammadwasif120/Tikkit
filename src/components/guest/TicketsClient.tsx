@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Ticket, MapPin, Calendar, CheckCircle } from 'lucide-react'
 import Link from 'next/link'
-import QRCode from 'qrcode'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 type TicketData = {
@@ -45,11 +44,13 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
 
   // Generate QR immediately — available as soon as ticket is confirmed
   useEffect(() => {
-    QRCode.toDataURL(ticket.ticketCode, {
-      width: 220, margin: 2,
-      color: { dark: '#080A10', light: '#FFFFFF' },
-      errorCorrectionLevel: 'H',
-    }).then(setQrSrc).catch(console.error)
+    import('qrcode').then(({ default: QRCode }) =>
+      QRCode.toDataURL(ticket.ticketCode, {
+        width: 220, margin: 2,
+        color: { dark: '#080A10', light: '#FFFFFF' },
+        errorCorrectionLevel: 'H',
+      }).then(setQrSrc).catch(console.error)
+    )
   }, [ticket.ticketCode])
 
   const isSoldOut = timeLeft < 0

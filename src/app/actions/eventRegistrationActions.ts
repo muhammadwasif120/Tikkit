@@ -39,22 +39,22 @@ export async function registerForEvent(formData: FormData) {
   if (!event) return { error: 'Event not found' }
   if (event.registration_mode !== 'open') return { error: 'This event requires an application' }
 
-  if (event.capacity) {
-    const { count } = await supabase
+  const [{ count: regCount }, { data: existing }] = await Promise.all([
+    supabase
       .from('public_registrations')
       .select('*', { count: 'exact', head: true })
       .eq('event_id', eventId)
+      .not('status', 'eq', 'rejected'),
+    supabase
+      .from('public_registrations')
+      .select('id')
+      .eq('event_id', eventId)
+      .eq('email', email)
       .not('status', 'eq', 'rejected')
-    if ((count ?? 0) >= event.capacity) return { error: 'This event is full' }
-  }
+      .maybeSingle(),
+  ])
 
-  const { data: existing } = await supabase
-    .from('public_registrations')
-    .select('id')
-    .eq('event_id', eventId)
-    .eq('email', email)
-    .not('status', 'eq', 'rejected')
-    .maybeSingle()
+  if (event.capacity && (regCount ?? 0) >= event.capacity) return { error: 'This event is full' }
   if (existing) return { error: 'You\'re already registered for this event' }
 
   const { error } = await supabase

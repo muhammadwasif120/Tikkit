@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from 'react'
 import { X, Download } from 'lucide-react'
-import QRCode from 'qrcode'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Guest = Database['public']['Tables']['guests']['Row']
@@ -11,16 +10,15 @@ export default function QRModal({ guest, onClose }: { guest: Guest; onClose: () 
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    if (canvasRef.current) {
-      QRCode.toCanvas(canvasRef.current, guest.qr_code, {
+    if (!canvasRef.current) return
+    const canvas = canvasRef.current
+    import('qrcode').then(({ default: QRCode }) => {
+      QRCode.toCanvas(canvas, guest.qr_code, {
         width: 240,
         margin: 2,
-        color: {
-          dark: '#1A1C23',
-          light: '#FFFFFF',
-        },
+        color: { dark: '#1A1C23', light: '#FFFFFF' },
       })
-    }
+    })
   }, [guest.qr_code])
 
   const downloadQR = () => {

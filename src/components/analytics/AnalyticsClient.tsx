@@ -57,12 +57,12 @@ export default function AnalyticsClient({
   const totalGuests = guests.length
   const totalCheckedIn = guests.filter(g => g.status === 'checked_in').length
 
-  const eventStats = events.map(event => {
+  const eventStats = useMemo(() => events.map(event => {
     const eg = guests.filter(g => g.event_id === event.id)
     const checkedIn = eg.filter(g => g.status === 'checked_in').length
     const showUpRate = eg.length > 0 ? Math.round((checkedIn / eg.length) * 100) : 0
     return { ...event, total: eg.length, checkedIn, showUpRate, fillRate: event.capacity > 0 ? Math.round((eg.length / event.capacity) * 100) : 0 }
-  })
+  }), [events, guests])
 
   // --- ARRIVAL HEATMAP for selected event ---
   const arrivalData = useMemo(() => {

@@ -55,6 +55,7 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
     .select('*')
     .eq('event_id', event.id)
     .order('created_at', { ascending: false })
+    .limit(500)
 
   const { data: ticketTypes } = await supabase
     .from('ticket_types')

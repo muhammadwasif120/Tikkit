@@ -14,20 +14,23 @@ async function AnalyticsData() {
 
   const eventIds = events?.map(e => e.id) ?? []
 
-  const { data: guests } = await supabase
-    .from('guests')
-    .select('*')
-    .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
-
-  const { data: scanLogs } = await supabase
-    .from('scan_logs')
-    .select('event_id, scan_type, scanned_at')
-    .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
-
-  const { data: discountCodes } = await supabase
-    .from('discount_codes')
-    .select('*')
-    .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
+  const [{ data: guests }, { data: scanLogs }, { data: discountCodes }] = await Promise.all([
+    supabase
+      .from('guests')
+      .select('id, event_id, status, full_name, email, is_vip, waitlist, ticket_price_paid, discount_applied, discount_amount')
+      .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
+      .limit(2000),
+    supabase
+      .from('scan_logs')
+      .select('event_id, scan_type, scanned_at')
+      .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
+      .limit(5000),
+    supabase
+      .from('discount_codes')
+      .select('id, event_id, code, discount_type, discount_value, times_used, max_uses')
+      .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
+      .limit(500),
+  ])
 
   return (
     <AnalyticsClient

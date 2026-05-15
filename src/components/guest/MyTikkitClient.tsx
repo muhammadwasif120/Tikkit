@@ -7,7 +7,6 @@ import {
   MapPin, Calendar, Upload, X, FileImage, Loader,
   Award, Zap, Star, Flame, CreditCard, Heart,
 } from 'lucide-react'
-import QRCode from 'qrcode'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
 import { toggleEventFavourite } from '@/app/actions/eventFavouriteActions'
 import { getCreditTier } from '@/lib/creditUtils'
@@ -112,11 +111,13 @@ function QRModal({ reg, guestName, onClose }: { reg: Registration; guestName: st
     if (!cached && typeof window !== 'undefined') {
       localStorage.setItem(cacheKey, ticketCode)
     }
-    QRCode.toDataURL(qrValue, {
-      width: 260, margin: 2,
-      color: { dark: '#080A10', light: '#FFFFFF' },
-      errorCorrectionLevel: 'H',
-    }).then(setQrSrc)
+    import('qrcode').then(({ default: QRCode }) =>
+      QRCode.toDataURL(qrValue, {
+        width: 260, margin: 2,
+        color: { dark: '#080A10', light: '#FFFFFF' },
+        errorCorrectionLevel: 'H',
+      }).then(setQrSrc)
+    )
   }, [ticketCode, cacheKey])
 
   return (

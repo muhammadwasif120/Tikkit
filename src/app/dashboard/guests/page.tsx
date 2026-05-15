@@ -20,6 +20,7 @@ async function GuestsData() {
     .select('*')
     .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
     .order('created_at', { ascending: false })
+    .limit(1000)
 
   return (
     <GuestsPageClient

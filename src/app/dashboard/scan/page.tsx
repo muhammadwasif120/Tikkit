@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Html5Qrcode } from 'html5-qrcode'
 import {
   CheckCircle, XCircle, ScanLine, X, LogIn, LogOut, Crown,
   Wifi, WifiOff, Camera, RefreshCw, Users, UserCheck, Hourglass,
@@ -138,7 +137,7 @@ function saveOfflineQueue(q: OfflineCheckin[]) {
 /* ─── Main Page ───────────────────────────────────────────────────── */
 export default function ScannerPage() {
   const supabase = createClient()
-  const scannerRef = useRef<Html5Qrcode | null>(null)
+  const scannerRef = useRef<any>(null)
 
   const [scanning, setScanning] = useState(false)
   const [result, setResult] = useState<ScanResult | null>(null)
@@ -289,7 +288,8 @@ export default function ScannerPage() {
       } catch { /* fall through */ }
     }
 
-    const { data: guest } = await (supabase as any).from('guests').select('*')
+    const { data: guest } = await (supabase as any).from('guests')
+      .select('id, status, full_name, is_vip, email, checked_in_at, ticket_days, ticket_type')
       .eq('event_id', currentEventId).eq(filterField, filterValue).single()
 
     if (!guest) {
@@ -360,6 +360,7 @@ export default function ScannerPage() {
     if (!pendingStart) return
     setPendingStart(false)
     const init = async () => {
+      const { Html5Qrcode } = await import('html5-qrcode')
       const scanner = new Html5Qrcode('qr-reader')
       scannerRef.current = scanner
       try {

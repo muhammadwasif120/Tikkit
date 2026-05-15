@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Html5Qrcode } from 'html5-qrcode'
 import {
   CheckCircle, XCircle, ScanLine, X, LogIn, Crown,
   Camera, Hash, Wifi, WifiOff, Users, ChevronDown, RefreshCw
@@ -147,7 +146,7 @@ function saveOfflineQueue(q: Array<{ guestId: string; eventId: string; scannedAt
 
 export default function StaffScanner({ invite, events }: { invite: Invite; events: Event[] }) {
   const supabase = createClient()
-  const scannerRef = useRef<Html5Qrcode | null>(null)
+  const scannerRef = useRef<any>(null)
   const [scanning, setScanning] = useState(false)
   const [result, setResult] = useState<ScanResult | null>(null)
   const [eventId, setEventId] = useState(events[0]?.id ?? '')
@@ -365,6 +364,7 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
     if (!pendingStart) return
     setPendingStart(false)
     const init = async () => {
+      const { Html5Qrcode } = await import('html5-qrcode')
       const scanner = new Html5Qrcode('staff-qr-reader')
       scannerRef.current = scanner
       try {

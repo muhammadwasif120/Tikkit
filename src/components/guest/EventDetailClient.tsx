@@ -8,7 +8,6 @@ import {
   FileImage, X, Loader, Share2, Heart, ExternalLink,
   Ticket, CreditCard,
 } from 'lucide-react'
-import QRCode from 'qrcode'
 import { registerForEvent, submitEOI } from '@/app/actions/eventRegistrationActions'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
 import { logBehaviour } from '@/app/actions/behaviourActions'
@@ -104,11 +103,13 @@ function QRModal({ regId, guestName, event, onClose }: {
   const ticketCode = `TIKKIT-${regId.replace(/-/g, '').slice(0, 16).toUpperCase()}`
 
   useEffect(() => {
-    QRCode.toDataURL(ticketCode, {
-      width: 260, margin: 2,
-      color: { dark: '#080A10', light: '#FFFFFF' },
-      errorCorrectionLevel: 'H',
-    }).then(setQrSrc)
+    import('qrcode').then(({ default: QRCode }) =>
+      QRCode.toDataURL(ticketCode, {
+        width: 260, margin: 2,
+        color: { dark: '#080A10', light: '#FFFFFF' },
+        errorCorrectionLevel: 'H',
+      }).then(setQrSrc)
+    )
   }, [ticketCode])
 
   useEffect(() => { closeRef.current?.focus() }, [])
