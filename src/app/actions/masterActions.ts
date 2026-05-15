@@ -674,15 +674,19 @@ export async function getMasterAttendees(): Promise<MasterAttendee[]> {
     .limit(500)
 
   if (guestErr) console.error("MasterAttendees profiles err:", guestErr)
-  if (!guests) return []
+  if (!guests || guests.length === 0) return []
 
-  const guestEmails = guests.map((g: any) => g.email).filter(Boolean)
-  const guestIds = guests.map((g: any) => g.id)
-  
+  const guestEmails = guests.map((g: any) => g.email).filter(Boolean) as string[]
+  const guestIds = guests.map((g: any) => g.id) as string[]
+
   // Decoupled nested fetches
   const [guestProfilesRes, regsRes] = await Promise.all([
-    supabase.from('guest_profiles').select('id, credit_score, total_attended').in('id', guestIds),
-    supabase.from('public_registrations').select('email').in('email', guestEmails).not('status', 'eq', 'rejected')
+    guestIds.length > 0
+      ? supabase.from('guest_profiles').select('id, credit_score, total_attended').in('id', guestIds)
+      : Promise.resolve({ data: [], error: null }),
+    guestEmails.length > 0
+      ? supabase.from('public_registrations').select('email').in('email', guestEmails).not('status', 'eq', 'rejected')
+      : Promise.resolve({ data: [], error: null }),
   ])
 
   if (guestProfilesRes.error) console.error("MasterAttendees profiles err:", guestProfilesRes.error)
@@ -755,25 +759,34 @@ export async function getMasterRegistrations(limit = 300): Promise<MasterRegistr
     .limit(limit)
 
   if (rErr) console.error("MasterRegistrations regs err:", rErr)
-  if (!regs) return []
+  if (!regs || regs.length === 0) return []
 
-  const eventIds = Array.from(new Set(regs.map((r: any) => r.event_id).filter(Boolean)))
+  const eventIds = Array.from(new Set(regs.map((r: any) => r.event_id).filter(Boolean))) as string[]
+  if (eventIds.length === 0) return regs.map((r: any) => ({
+    id: r.id, guest_name: r.full_name ?? '—', guest_email: r.email ?? '—',
+    guest_phone: r.phone ?? null, event_id: r.event_id ?? '',
+    event_title: 'Unknown Event', event_date: '', organizer_name: '—',
+    status: r.status ?? 'pending', payment_status: r.payment_status ?? null,
+    payment_screenshot_url: r.payment_screenshot_url ?? null, ticket_price: null, created_at: r.created_at,
+  }))
 
-  const { data: events, error: eErr } = await supabase
+  const { data: eventsData, error: eErr } = await supabase
     .from('events')
     .select('id, title, date_start, ticket_price, organizer_id')
     .in('id', eventIds)
 
   if (eErr) console.error("MasterRegistrations events err:", eErr)
 
-  const orgIds = Array.from(new Set(events?.map((e: any) => e.organizer_id).filter(Boolean) || []))
+  const orgIds = Array.from(new Set((eventsData ?? []).map((e: any) => e.organizer_id).filter(Boolean))) as string[]
 
-  const { data: orgs, error: oErr } = await supabase
-    .from('profiles')
-    .select('id, full_name, company_name')
-    .in('id', orgIds)
+  const { data: orgsData, error: oErr } = orgIds.length > 0
+    ? await supabase.from('profiles').select('id, full_name, company_name').in('id', orgIds)
+    : { data: [], error: null }
 
   if (oErr) console.error("MasterRegistrations orgs err:", oErr)
+
+  const events = eventsData
+  const orgs = orgsData
 
   return regs.map((r: any) => {
     const ev = events?.find((e: any) => e.id === r.event_id)

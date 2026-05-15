@@ -954,10 +954,11 @@ export default function MasterPage() {
 
   useEffect(() => {
     setLoading(true)
-    Promise.all([getMasterOrganizers(), getMasterEvents()])
-      .then(([orgsData, evtsData]) => {
+    Promise.all([getMasterOrganizers(), getMasterEvents(), getSupportQueries()])
+      .then(([orgsData, evtsData, queriesData]) => {
         setOrgs(orgsData as Org[])
         setEvents(evtsData as Evt[])
+        setQueries(queriesData)
       })
       .finally(() => setLoading(false))
   }, [])
@@ -1004,12 +1005,14 @@ export default function MasterPage() {
   // Attendees state
   const [attendees, setAttendees] = useState<MasterAttendee[]>([])
   const [attendeesLoading, setAttendeesLoading] = useState(false)
+  const [attendeesLoaded, setAttendeesLoaded] = useState(false)
   const [attendeeSearch, setAttendeeSearch] = useState('')
   const [attendeeFilter, setAttendeeFilter] = useState<'all' | 'verified' | 'unverified'>('all')
 
   // Registrations state
   const [registrations, setRegistrations] = useState<MasterRegistration[]>([])
   const [regsLoading, setRegsLoading] = useState(false)
+  const [regsLoaded, setRegsLoaded] = useState(false)
   const [regSearch, setRegSearch] = useState('')
   const [regStatusFilter, setRegStatusFilter] = useState<'all' | 'pending' | 'approved' | 'confirmed' | 'payment_pending'>('all')
   const [regPaymentFilter, setRegPaymentFilter] = useState<'all' | 'submitted' | 'confirmed' | 'none'>('all')
@@ -1024,24 +1027,25 @@ export default function MasterPage() {
 
   useEffect(() => {
     if (tab !== 'attendees') return
-    if (attendees.length > 0) return // already loaded
+    if (attendeesLoaded) return
     setAttendeesLoading(true)
-    getMasterAttendees().then(setAttendees).finally(() => setAttendeesLoading(false))
-  }, [tab, attendees.length])
+    getMasterAttendees()
+      .then(setAttendees)
+      .finally(() => { setAttendeesLoading(false); setAttendeesLoaded(true) })
+  }, [tab, attendeesLoaded])
 
   useEffect(() => {
     if (tab !== 'registrations') return
-    if (registrations.length > 0) return
+    if (regsLoaded) return
     setRegsLoading(true)
-    getMasterRegistrations().then(setRegistrations).finally(() => setRegsLoading(false))
-  }, [tab, registrations.length])
+    getMasterRegistrations()
+      .then(setRegistrations)
+      .finally(() => { setRegsLoading(false); setRegsLoaded(true) })
+  }, [tab, regsLoaded])
 
   useEffect(() => {
     if (tab !== 'queries' && tab !== 'support') return
-    if (tab === 'queries' && queries.length === 0) {
-      setQueriesLoading(true)
-      getSupportQueries().then(setQueries).finally(() => setQueriesLoading(false))
-    }
+    // queries already loaded upfront — only load support convos lazily
     if ((tab === 'queries' || tab === 'support') && supportConvos.length === 0) {
       setSupportConvosLoading(true)
       getAdminSupportConversations().then(setSupportConvos).finally(() => setSupportConvosLoading(false))
@@ -2073,10 +2077,10 @@ export default function MasterPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {queriesLoading && (
+                        {loading && (
                           <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#4B5563' }}>Loading…</td></tr>
                         )}
-                        {!queriesLoading && filteredQueries.length === 0 && (
+                        {!loading && filteredQueries.length === 0 && (
                           <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No reports found</td></tr>
                         )}
                         {filteredQueries.map(q => {
@@ -2671,10 +2675,12 @@ export default function MasterPage() {
         const REG_SC: Record<string, string> = {
           pending: '#F59E0B', approved: '#1E5EFF', confirmed: '#22C55E',
           payment_pending: '#818CF8', attended: '#34D399', no_show: '#EF4444', refunded: '#6B7280',
+          checked_in: '#22C55E', registered: '#1E5EFF', eoi_submitted: '#F59E0B', eoi_approved: '#22C55E',
         }
         const REG_SL: Record<string, string> = {
           pending: 'Pending', approved: 'Approved', confirmed: 'Confirmed',
           payment_pending: 'Pay Pending', attended: 'Attended', no_show: 'No Show', refunded: 'Refunded',
+          checked_in: 'Checked In', registered: 'Registered', eoi_submitted: 'EOI Submitted', eoi_approved: 'EOI Approved',
         }
         const PAY_SC: Record<string, string> = { submitted: '#F59E0B', confirmed: '#22C55E', rejected: '#EF4444' }
         const PAY_SL: Record<string, string> = { submitted: 'Awaiting Review', confirmed: 'Confirmed', rejected: 'Rejected' }
@@ -2685,7 +2691,7 @@ export default function MasterPage() {
             if (regStatusFilter !== 'all' && r.status !== regStatusFilter) return false
             if (regPaymentFilter === 'submitted' && r.payment_status !== 'submitted') return false
             if (regPaymentFilter === 'confirmed' && r.payment_status !== 'confirmed') return false
-            if (regPaymentFilter === 'none' && r.payment_status != null) return false
+            if (regPaymentFilter === 'none' && r.payment_status != null && r.payment_status !== 'not_required') return false
             if (q && !r.guest_name.toLowerCase().includes(q) && !r.guest_email.toLowerCase().includes(q) && !r.event_title.toLowerCase().includes(q) && !r.organizer_name.toLowerCase().includes(q)) return false
             return true
           })
