@@ -84,6 +84,7 @@ export default function NewEventPage() {
     require_reference_code: false,
     reference_code: '',
     category_id: '',
+    city: '',
   })
 
   const [categories, setCategories] = useState<EventCategory[]>([])
@@ -165,6 +166,7 @@ export default function NewEventPage() {
         require_reference_code:  form.require_reference_code,
         reference_code:          form.reference_code || null,
         category_id:             form.category_id || null,
+        city:                    form.city || null,
         status:                  'draft',
       } as any)
       .select()
@@ -400,6 +402,17 @@ export default function NewEventPage() {
             <label className="label">Venue Address</label>
             <input type="text" className="input" placeholder="123 Main St, Karachi"
               value={form.venue_address} onChange={e => update('venue_address', e.target.value)} />
+          </div>
+
+          <div>
+            <label className="label">City *</label>
+            <select className="input" value={form.city} onChange={e => update('city', e.target.value)} required
+              style={{ appearance: 'none', WebkitAppearance: 'none', color: form.city ? undefined : '#6B7280' }}>
+              <option value="" disabled>Select city</option>
+              {['Lahore','Karachi','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar','Quetta','Sialkot','Hyderabad','Gujranwala','Other'].map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
           </div>
 
           <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">

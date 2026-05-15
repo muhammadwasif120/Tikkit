@@ -29,6 +29,7 @@ export type MasterOrg = {
   username: string
   email: string
   phone: string
+  city: string
   events: number
   active: number
   status: 'active' | 'review' | 'suspended'
@@ -46,6 +47,7 @@ export type MasterEvt = {
   registered: number
   capacity: number
   cat: string
+  city: string
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -66,7 +68,7 @@ export async function getMasterOrganizers(): Promise<MasterOrg[]> {
   const [{ data: profiles }, { data: events }] = await Promise.all([
     supabase
       .from('profiles')
-      .select('id, full_name, company_name, email, phone_number, username, created_at, admin_status')
+      .select('id, full_name, company_name, email, phone_number, username, city, created_at, admin_status')
       .eq('role', 'organizer')
       .order('created_at', { ascending: false }),
     supabase
@@ -89,6 +91,7 @@ export async function getMasterOrganizers(): Promise<MasterOrg[]> {
     username: p.username || '',
     email: p.email || '',
     phone: p.phone_number || '',
+    city: p.city || '',
     events: countMap[p.id]?.total ?? 0,
     active: countMap[p.id]?.active ?? 0,
     status: (p.admin_status as MasterOrg['status']) ?? 'active',
@@ -102,7 +105,7 @@ export async function getMasterEvents(): Promise<MasterEvt[]> {
 
   const { data: events } = await supabase
     .from('events')
-    .select('id, title, status, date_start, capacity, organizer_id, organizer:profiles!events_organizer_id_fkey(full_name, company_name, username)')
+    .select('id, title, status, date_start, capacity, city, organizer_id, organizer:profiles!events_organizer_id_fkey(full_name, company_name, username)')
     .order('date_start', { ascending: false })
 
   if (!events?.length) return []
@@ -137,6 +140,7 @@ export async function getMasterEvents(): Promise<MasterEvt[]> {
       registered: guestMap[e.id] || 0,
       capacity: e.capacity,
       cat: '',
+      city: e.city || '',
     }
   })
 }

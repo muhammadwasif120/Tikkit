@@ -9,6 +9,8 @@ import {
   QrCode, Users, CreditCard, BarChart3, Zap,
   Calendar, MapPin, Phone,
 } from 'lucide-react'
+
+const PAKISTAN_CITIES = ['Lahore','Karachi','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar','Quetta','Sialkot','Hyderabad','Gujranwala','Other']
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import Link from 'next/link'
 
@@ -75,12 +77,13 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const [company,setCompany]= useState('')
   const [dob,    setDob]    = useState('')
   const [gender, setGender] = useState('')
+  const [city,   setCity]   = useState('')
   const [show,   setShow]   = useState(false)
   const [busy,   setBusy]   = useState(false)
   const [err,    setErr]    = useState<string | null>(null)
   const [agreed, setAgreed] = useState(false)
 
-  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setPhone(''); setCnic(''); setCompany(''); setDob(''); setGender(''); setAgreed(false); setStep(1); setTab(t) }
+  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setPhone(''); setCnic(''); setCompany(''); setDob(''); setGender(''); setCity(''); setAgreed(false); setStep(1); setTab(t) }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -106,6 +109,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
           if (!dob) { setErr('Date of birth is required'); return }
           if (!gender) { setErr('Gender is required for demographic curation'); return }
         }
+        if (!city) { setErr('Please select your city'); return }
         if (!agreed) { setErr('Please agree to the Terms & Conditions to continue'); return }
 
         const { data, error } = await supabase.auth.signUp({
@@ -127,6 +131,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
             phone_number: phone.trim(),
             company_name: isOrg ? company.trim() : null,
             cnic_number: cnic.trim(),
+            city: city || null,
           }).eq('id', data.user.id)
 
           if (!isOrg) {
@@ -177,7 +182,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const disabled = busy 
     || (tab === 'login' && (!email.trim() || !pw))
     || (tab === 'signup' && step === 1 && (!name.trim() || !email.trim() || pw.length < 8))
-    || (tab === 'signup' && step === 2 && (!phone.trim() || !cnic.trim() || !agreed || (isOrg ? !company.trim() : (!dob || !gender))))
+    || (tab === 'signup' && step === 2 && (!phone.trim() || !cnic.trim() || !city || !agreed || (isOrg ? !company.trim() : (!dob || !gender))))
 
   return (
     <div>
@@ -312,6 +317,26 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
                 </div>
               </div>
             )}
+
+            {/* City */}
+            <div style={{ position: 'relative' }}>
+              <MapPin size={15} color={city ? accent : '#4B5563'} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
+              <select
+                value={city} onChange={e => setCity(e.target.value)}
+                style={{
+                  display: 'block', width: '100%', padding: '13px 16px 13px 40px',
+                  background: 'rgba(255,255,255,0.03)', border: `1px solid ${city ? accent + '55' : 'rgba(255,255,255,0.07)'}`,
+                  borderRadius: 10, color: city ? '#F0F2FF' : '#9CA3AF', fontSize: 14, outline: 'none',
+                  fontFamily: 'var(--font-body)', transition: 'all .15s', cursor: 'pointer',
+                  appearance: 'none', WebkitAppearance: 'none',
+                }}
+              >
+                <option value="" disabled>Your City</option>
+                {PAKISTAN_CITIES.map(c => (
+                  <option key={c} value={c} style={{ background: '#0C0E16', color: '#F0F2FF' }}>{c}</option>
+                ))}
+              </select>
+            </div>
 
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', userSelect: 'none', marginTop: 10 }}>
               <div

@@ -1578,6 +1578,55 @@ export default function MasterPage() {
                   </div>
                 </div>
 
+                {/* City breakdown */}
+                {(() => {
+                  const orgCityMap: Record<string, number> = {}
+                  for (const o of liveOrgs) {
+                    const c = o.city || 'Unknown'
+                    orgCityMap[c] = (orgCityMap[c] || 0) + 1
+                  }
+                  const evtCityMap: Record<string, number> = {}
+                  for (const e of events) {
+                    const c = e.city || 'Unknown'
+                    evtCityMap[c] = (evtCityMap[c] || 0) + 1
+                  }
+                  const cities = Array.from(new Set([...Object.keys(orgCityMap), ...Object.keys(evtCityMap)])).sort((a, b) => (orgCityMap[b] || 0) - (orgCityMap[a] || 0))
+                  if (cities.length === 0) return null
+                  const maxOrgs = Math.max(...cities.map(c => orgCityMap[c] || 0), 1)
+                  return (
+                    <div className="ms-card" style={{ marginTop: 20 }}>
+                      <div className="ms-card-hdr">
+                        <span className="ms-card-title">Signups by City</span>
+                        <span style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>{liveOrgs.filter(o => o.city).length} of {liveOrgs.length} organizers have city set</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {cities.filter(c => c !== 'Unknown').map(c => {
+                          const orgCount = orgCityMap[c] || 0
+                          const evtCount = evtCityMap[c] || 0
+                          const pct = Math.round((orgCount / maxOrgs) * 100)
+                          return (
+                            <div key={c}>
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 5 }}>
+                                <span style={{ fontSize: 'var(--fs-sm)', fontWeight: 600, color: '#D1D5DB', fontFamily: 'var(--font-body)' }}>{c}</span>
+                                <div style={{ display: 'flex', gap: 14 }}>
+                                  <span style={{ fontSize: 'var(--fs-xs)', color: '#6B7280' }}><span style={{ color: '#1E5EFF', fontWeight: 700 }}>{orgCount}</span> organizer{orgCount !== 1 ? 's' : ''}</span>
+                                  <span style={{ fontSize: 'var(--fs-xs)', color: '#6B7280' }}><span style={{ color: '#FFC745', fontWeight: 700 }}>{evtCount}</span> event{evtCount !== 1 ? 's' : ''}</span>
+                                </div>
+                              </div>
+                              <div style={{ height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2 }}>
+                                <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,#1E5EFF,#3b82f6)', borderRadius: 2, transition: 'width 0.5s ease' }} />
+                              </div>
+                            </div>
+                          )
+                        })}
+                        {orgCityMap['Unknown'] && (
+                          <div style={{ fontSize: 'var(--fs-xs)', color: '#374151', marginTop: 4 }}>{orgCityMap['Unknown']} organizer{orgCityMap['Unknown'] !== 1 ? 's' : ''} haven&apos;t set a city yet</div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })()}
+
                 {/* Flagged events alert */}
                 {flaggedEvtCount > 0 && (
                   <div style={{ marginTop: 20, background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 12, padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -1628,6 +1677,7 @@ export default function MasterPage() {
                         <tr>
                           <th>Organizer</th>
                           <th className="ms-hide">Email</th>
+                          <th className="ms-hide">City</th>
                           <th>Events</th>
                           <th className="ms-hide">Joined</th>
                           <th>Status</th>
@@ -1636,7 +1686,7 @@ export default function MasterPage() {
                       </thead>
                       <tbody>
                         {filteredOrgs.length === 0 && (
-                          <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px 20px', color: '#374151' }}>{loading ? 'Loading…' : 'No organizers found'}</td></tr>
+                          <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px 20px', color: '#374151' }}>{loading ? 'Loading…' : 'No organizers found'}</td></tr>
                         )}
                         {filteredOrgs.map(o => {
                           const os = getOrgStatus(o)
@@ -1656,6 +1706,7 @@ export default function MasterPage() {
                                 </div>
                               </td>
                               <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)' }}>{o.email}</td>
+                              <td className="ms-hide" style={{ color: '#9CA3AF', fontSize: 'var(--fs-sm)' }}>{o.city || <span style={{ color: '#374151' }}>—</span>}</td>
                               <td>
                                 <span style={{ fontSize: 'var(--fs-base)', color: '#F0F2FF', fontWeight: 600 }}>{o.events}</span>
                                 <span style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginLeft: 4 }}>({o.active} live)</span>
@@ -1765,7 +1816,7 @@ export default function MasterPage() {
                             <tr key={e.id}>
                               <td>
                                 <div style={{ fontWeight: 600, color: '#F0F2FF', fontSize: 'var(--fs-base)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 220 }}>{e.title}</div>
-                                <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 1 }}>{e.cat}</div>
+                                <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 1 }}>{[e.city, e.cat].filter(Boolean).join(' · ') || '—'}</div>
                               </td>
                               <td>
                                 <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB' }}>{e.org}</div>
