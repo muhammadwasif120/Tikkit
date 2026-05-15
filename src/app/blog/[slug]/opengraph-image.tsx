@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og'
 import { getPostBySlug, CATEGORY_LABELS } from '@/lib/blog'
 
-export const runtime = 'edge'
+export const runtime = 'nodejs'
 export const alt = 'Tikkit Blog'
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
