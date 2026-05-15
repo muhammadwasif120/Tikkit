@@ -364,7 +364,8 @@ export default function ScannerPage() {
       scannerRef.current = scanner
       try {
         await scanner.start({ facingMode: 'environment' }, { fps: 10, qrbox: { width: 220, height: 220 } }, handleScan, () => {})
-      } catch {
+      } catch (e) {
+        console.error('[scanner] camera start failed:', e)
         setScanning(false)
         setResult({ success: false, message: 'Camera access denied or unavailable.' })
       }

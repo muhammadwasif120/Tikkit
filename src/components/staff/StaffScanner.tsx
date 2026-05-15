@@ -374,7 +374,8 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
           handleScan,
           () => {}
         )
-      } catch {
+      } catch (e) {
+        console.error('[scanner] camera start failed:', e)
         setScanning(false)
         setResult({ success: false, message: 'Camera access denied or unavailable.' })
       }
