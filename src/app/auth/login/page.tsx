@@ -73,6 +73,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const [email,  setEmail]  = useState('')
   const [pw,     setPw]     = useState('')
   const [phone,  setPhone]  = useState('')
+  const [idType, setIdType] = useState<'cnic' | 'passport'>('cnic')
   const [cnic,   setCnic]   = useState('')
   const [company,setCompany]= useState('')
   const [dob,    setDob]    = useState('')
@@ -83,7 +84,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const [err,    setErr]    = useState<string | null>(null)
   const [agreed, setAgreed] = useState(false)
 
-  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setPhone(''); setCnic(''); setCompany(''); setDob(''); setGender(''); setCity(''); setAgreed(false); setStep(1); setTab(t) }
+  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setPhone(''); setIdType('cnic'); setCnic(''); setCompany(''); setDob(''); setGender(''); setCity(''); setAgreed(false); setStep(1); setTab(t) }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -101,7 +102,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
     try {
       if (tab === 'signup' && step === 2) {
         if (!phone.trim()) { setErr('Phone Number is strictly required for security'); return }
-        if (!cnic.trim()) { setErr('CNIC is required for identity verification'); return }
+        if (!cnic.trim()) { setErr(idType === 'cnic' ? 'CNIC is required for identity verification' : 'Passport Number is required for identity verification'); return }
         
         if (isOrg) {
           if (!company.trim()) { setErr('Company or Brand Name is required'); return }
@@ -128,10 +129,12 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         if (data.user) {
           // Immediately secure extended data
           await supabase.from('profiles').update({
-            phone_number: phone.trim(),
-            company_name: isOrg ? company.trim() : null,
-            cnic_number: cnic.trim(),
-            city: city || null,
+            phone_number:    phone.trim(),
+            company_name:    isOrg ? company.trim() : null,
+            id_type:         idType,
+            cnic_number:     idType === 'cnic'     ? cnic.trim() : null,
+            passport_number: idType === 'passport' ? cnic.trim() : null,
+            city:            city || null,
           }).eq('id', data.user.id)
 
           if (!isOrg) {
@@ -282,9 +285,38 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
           /* Step 2 Inputs */
           <>
             <Field Icon={Phone} type="tel" placeholder="Phone Number" value={phone} onChange={setPhone} accent={accent} />
-            <Field Icon={CreditCard} type="text" placeholder="CNIC Number (xxxxx-xxxxxxx-x)" value={cnic} onChange={setCnic} accent={accent} />
+
+            {/* ID Type toggle */}
+            <div style={{ display: 'flex', gap: 6, padding: 3, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 10 }}>
+              {(['cnic', 'passport'] as const).map(t => (
+                <button
+                  key={t} type="button" onClick={() => { setIdType(t); setCnic('') }}
+                  style={{
+                    flex: 1, padding: '8px 0', border: 'none', cursor: 'pointer', borderRadius: 8,
+                    background: idType === t ? 'rgba(255,255,255,0.08)' : 'transparent',
+                    color: idType === t ? '#F0F2FF' : '#6B7280',
+                    fontSize: 12, fontWeight: idType === t ? 700 : 500,
+                    transition: 'all .15s', fontFamily: 'var(--font-display)',
+                  }}
+                >
+                  {t === 'cnic' ? '🇵🇰 CNIC' : '🌍 Passport'}
+                </button>
+              ))}
+            </div>
+
+            <Field
+              Icon={CreditCard}
+              type="text"
+              placeholder={idType === 'cnic' ? 'CNIC Number (xxxxx-xxxxxxx-x)' : 'Passport Number (e.g. AB1234567)'}
+              value={cnic}
+              onChange={setCnic}
+              accent={accent}
+            />
             <div style={{ margin: '-3px 0 10px', fontSize: 11, color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.4, paddingLeft: 4 }}>
-              This info is collected to keep the platform secure. Complete the CNIC verification in the settings tab to get a <span style={{ color: accent, fontWeight: 600 }}>Verified Profile badge</span>.
+              {idType === 'cnic'
+                ? <>This info is collected to keep the platform secure. Complete CNIC verification in Settings to get a <span style={{ color: accent, fontWeight: 600 }}>Verified Profile badge</span>.</>
+                : <>For foreign nationals. Your passport number is used for identity verification. You can upload your passport in Settings for a <span style={{ color: accent, fontWeight: 600 }}>Verified Profile badge</span>.</>
+              }
             </div>
             
             {isOrg ? (
