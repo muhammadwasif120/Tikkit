@@ -1,18 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import {
   Mail, Lock, Eye, EyeOff, User,
   ArrowRight, AlertCircle, ChevronLeft,
   QrCode, Users, CreditCard, BarChart3, Zap,
-  Calendar, MapPin, Phone,
+  Calendar, MapPin, Phone, Globe,
 } from 'lucide-react'
-
-const PAKISTAN_CITIES = ['Lahore','Karachi','Islamabad','Rawalpindi','Faisalabad','Multan','Peshawar','Quetta','Sialkot','Hyderabad','Gujranwala','Other']
+import { Country, City } from 'country-state-city'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import Link from 'next/link'
+
+const ALL_COUNTRIES = Country.getAllCountries().sort((a, b) => a.name.localeCompare(b.name))
 
 type Mode    = null | 'organizer' | 'attendee'
 type SubMode = 'login' | 'signup'
@@ -78,13 +79,19 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const [company,setCompany]= useState('')
   const [dob,    setDob]    = useState('')
   const [gender, setGender] = useState('')
+  const [countryIso, setCountryIso] = useState('PK')
   const [city,   setCity]   = useState('')
   const [show,   setShow]   = useState(false)
+
+  const cities = useMemo(() =>
+    (City.getCitiesOfCountry(countryIso) ?? []).map(c => c.name).sort(),
+    [countryIso]
+  )
   const [busy,   setBusy]   = useState(false)
   const [err,    setErr]    = useState<string | null>(null)
   const [agreed, setAgreed] = useState(false)
 
-  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setPhone(''); setIdType('cnic'); setCnic(''); setCompany(''); setDob(''); setGender(''); setCity(''); setAgreed(false); setStep(1); setTab(t) }
+  const reset = (t: SubMode) => { setErr(null); setName(''); setEmail(''); setPw(''); setPhone(''); setIdType('cnic'); setCnic(''); setCompany(''); setDob(''); setGender(''); setCountryIso('PK'); setCity(''); setAgreed(false); setStep(1); setTab(t) }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -134,6 +141,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
             id_type:         idType,
             cnic_number:     idType === 'cnic'     ? cnic.trim() : null,
             passport_number: idType === 'passport' ? cnic.trim() : null,
+            country:         Country.getCountryByCode(countryIso)?.name ?? 'Pakistan',
             city:            city || null,
           }).eq('id', data.user.id)
 
@@ -350,24 +358,61 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
               </div>
             )}
 
-            {/* City */}
+            {/* Country */}
             <div style={{ position: 'relative' }}>
-              <MapPin size={15} color={city ? accent : '#4B5563'} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
+              <Globe size={15} color={countryIso ? accent : '#4B5563'} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
               <select
-                value={city} onChange={e => setCity(e.target.value)}
+                value={countryIso}
+                onChange={e => { setCountryIso(e.target.value); setCity('') }}
                 style={{
                   display: 'block', width: '100%', padding: '13px 16px 13px 40px',
-                  background: 'rgba(255,255,255,0.03)', border: `1px solid ${city ? accent + '55' : 'rgba(255,255,255,0.07)'}`,
-                  borderRadius: 10, color: city ? '#F0F2FF' : '#9CA3AF', fontSize: 14, outline: 'none',
+                  background: 'rgba(255,255,255,0.03)', border: `1px solid ${accent}55`,
+                  borderRadius: 10, color: '#F0F2FF', fontSize: 14, outline: 'none',
                   fontFamily: 'var(--font-body)', transition: 'all .15s', cursor: 'pointer',
                   appearance: 'none', WebkitAppearance: 'none',
                 }}
               >
-                <option value="" disabled>Your City</option>
-                {PAKISTAN_CITIES.map(c => (
-                  <option key={c} value={c} style={{ background: '#0C0E16', color: '#F0F2FF' }}>{c}</option>
+                {ALL_COUNTRIES.map(c => (
+                  <option key={c.isoCode} value={c.isoCode} style={{ background: '#0C0E16', color: '#F0F2FF' }}>
+                    {c.flag} {c.name}
+                  </option>
                 ))}
               </select>
+            </div>
+
+            {/* City — dropdown if data available, free text otherwise */}
+            <div style={{ position: 'relative' }}>
+              <MapPin size={15} color={city ? accent : '#4B5563'} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 1 }} />
+              {cities.length > 0 ? (
+                <select
+                  value={city} onChange={e => setCity(e.target.value)}
+                  style={{
+                    display: 'block', width: '100%', padding: '13px 16px 13px 40px',
+                    background: 'rgba(255,255,255,0.03)', border: `1px solid ${city ? accent + '55' : 'rgba(255,255,255,0.07)'}`,
+                    borderRadius: 10, color: city ? '#F0F2FF' : '#9CA3AF', fontSize: 14, outline: 'none',
+                    fontFamily: 'var(--font-body)', transition: 'all .15s', cursor: 'pointer',
+                    appearance: 'none', WebkitAppearance: 'none',
+                  }}
+                >
+                  <option value="" disabled>Select City</option>
+                  {cities.map(c => (
+                    <option key={c} value={c} style={{ background: '#0C0E16', color: '#F0F2FF' }}>{c}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text" placeholder="Your City" value={city}
+                  onChange={e => setCity(e.target.value)}
+                  style={{
+                    display: 'block', width: '100%', padding: '13px 16px 13px 40px',
+                    background: city ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)',
+                    border: `1px solid ${city ? accent + '55' : 'rgba(255,255,255,0.07)'}`,
+                    borderRadius: 10, color: '#F0F2FF', fontSize: 14, outline: 'none',
+                    boxSizing: 'border-box' as const, fontFamily: 'var(--font-body)',
+                    transition: 'background .15s, border-color .15s',
+                  }}
+                />
+              )}
             </div>
 
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', userSelect: 'none', marginTop: 10 }}>
