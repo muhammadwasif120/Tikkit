@@ -605,3 +605,91 @@ export async function getVerifyStatus() {
     '/api/mobile/organizer/verify'
   )
 }
+
+// ─── My Registrations ─────────────────────────────────────────────────────────
+
+export type MyRegistration = {
+  id: string
+  status: string
+  payment_status: string | null
+  payment_screenshot_url: string | null
+  registration_notes: string | null
+  notes: string | null
+  display_status: string
+  reference_code_entered: string | null
+  created_at: string
+  reviewed_at: string | null
+  event: {
+    id: string
+    title: string
+    date_start: string
+    date_end: string | null
+    venue_name: string | null
+    city: string | null
+    cover_image_url: string | null
+    ticket_price: number | null
+    registration_mode: string
+    status: string
+    organizer_id: string
+    profiles: { full_name: string | null; username: string | null; logo_url: string | null } | null
+  } | null
+}
+
+export async function getMyRegistrations() {
+  return request<{ registrations: MyRegistration[] }>('/api/mobile/registrations')
+}
+
+// ─── Payment Screenshot ───────────────────────────────────────────────────────
+
+export async function submitPaymentScreenshot(registrationId: string, imageUri: string) {
+  const token = await getToken()
+  const formData = new FormData()
+  formData.append('registrationId', registrationId)
+
+  // React Native FormData appends files as { uri, name, type }
+  const ext = imageUri.split('.').pop()?.toLowerCase() ?? 'jpg'
+  const mimeType = ext === 'png' ? 'image/png' : 'image/jpeg'
+  formData.append('screenshot', { uri: imageUri, name: `screenshot.${ext}`, type: mimeType } as any)
+
+  const res = await fetch(`${API_BASE}/api/mobile/payment`, {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      // Do NOT set Content-Type — let fetch set multipart boundary automatically
+    },
+    body: formData,
+  })
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: res.statusText }))
+    throw new Error(err.error ?? res.statusText)
+  }
+  return res.json() as Promise<{ registration: MyRegistration }>
+}
+
+// ─── Guest Chat ───────────────────────────────────────────────────────────────
+
+export type ChatMessage = {
+  id: string
+  user_id: string
+  role: string
+  message: string
+  created_at: string
+  sender_name: string
+  is_mine: boolean
+}
+
+export async function getGuestChat(eventId: string) {
+  return request<{
+    messages: ChatMessage[]
+    event: { id: string; title: string; organizer_name: string | null }
+    user_id: string
+  }>(`/api/mobile/chat/${eventId}`)
+}
+
+export async function sendGuestChatMessage(eventId: string, message: string) {
+  return request<{ message: ChatMessage }>(`/api/mobile/chat/${eventId}`, {
+    method: 'POST',
+    body: JSON.stringify({ message }),
+  })
+}

@@ -202,9 +202,19 @@ export default function EventDetailScreen() {
 
           {/* CTA / Registration status */}
           {regStatus ? (
-            <View style={[s.statusCard, { backgroundColor: regStatus.bg, borderColor: regStatus.color + '55' }]}>
-              <Ionicons name={regStatus.icon} size={20} color={regStatus.color} />
-              <Text style={[s.statusText, { color: regStatus.color }]}>{regStatus.label}</Text>
+            <View style={{ gap: 10 }}>
+              <View style={[s.statusCard, { backgroundColor: regStatus.bg, borderColor: regStatus.color + '55' }]}>
+                <Ionicons name={regStatus.icon} size={20} color={regStatus.color} />
+                <Text style={[s.statusText, { color: regStatus.color }]}>{regStatus.label}</Text>
+              </View>
+              <TouchableOpacity
+                style={s.chatBtn}
+                onPress={() => router.push(`/(guest)/chat/${event.id}` as any)}
+                activeOpacity={0.85}
+              >
+                <Ionicons name="chatbubble-ellipses-outline" size={16} color={colors.blue} />
+                <Text style={s.chatBtnText}>Message Organizer</Text>
+              </TouchableOpacity>
             </View>
           ) : isInviteOnly ? (
             <View style={[s.statusCard, { backgroundColor: colors.surface2, borderColor: colors.border }]}>
@@ -304,4 +314,10 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', gap: 8,
   },
   registerBtnText: { color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold', fontWeight: '700' },
+  chatBtn: {
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+    backgroundColor: colors.blueSubtle, borderRadius: radius.md, padding: 13,
+    borderWidth: 1, borderColor: colors.blueBorder,
+  },
+  chatBtnText: { color: colors.blue, fontSize: 15, fontFamily: 'DMSans_500Medium', fontWeight: '600' },
 })

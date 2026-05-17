@@ -84,7 +84,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const [show,   setShow]   = useState(false)
 
   const cities = useMemo(() =>
-    (City.getCitiesOfCountry(countryIso) ?? []).map(c => c.name).sort(),
+    [...new Set((City.getCitiesOfCountry(countryIso) ?? []).map(c => c.name))].sort(),
     [countryIso]
   )
   const [busy,   setBusy]   = useState(false)
@@ -395,8 +395,8 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
                   }}
                 >
                   <option value="" disabled>Select City</option>
-                  {cities.map(c => (
-                    <option key={c} value={c} style={{ background: '#0C0E16', color: '#F0F2FF' }}>{c}</option>
+                  {cities.map((c, i) => (
+                    <option key={`${c}-${i}`} value={c} style={{ background: '#0C0E16', color: '#F0F2FF' }}>{c}</option>
                   ))}
                 </select>
               ) : (

@@ -54,16 +54,16 @@ export default function GuestLayout() {
         }}
       />
       <Tabs.Screen
-        name="passes"
+        name="registrations"
         options={{
-          title: 'Passes',
+          title: 'My Events',
           tabBarIcon: ({ color, size, focused }) => (
             <View style={{
               backgroundColor: focused ? colors.blueSubtle : 'transparent',
               borderRadius: radius.sm,
               padding: 4,
             }}>
-              <Ionicons name={focused ? 'id-card' : 'id-card-outline'} size={size} color={color} />
+              <Ionicons name={focused ? 'document-text' : 'document-text-outline'} size={size} color={color} />
             </View>
           ),
         }}
@@ -103,6 +103,8 @@ export default function GuestLayout() {
       <Tabs.Screen name="register/[id]" options={{ href: null }} />
       <Tabs.Screen name="ticket/[id]" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="passes" options={{ href: null }} />
+      <Tabs.Screen name="chat/[eventId]" options={{ href: null }} />
     </Tabs>
   )
 }
