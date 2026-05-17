@@ -16,12 +16,13 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user?.email) return mobileUnauthorized()
 
-  // Fetch guest records linked by email
+  // guests.full_name (NOT `name`) — fixed
+  // venue_city → city in events join
   const { data: guests, error } = await (supabase as any)
     .from('guests')
     .select(`
-      id, name, email, status, ticket_days, is_vip, qr_token, checked_in_at,
-      events(id, title, date_start, date_end, venue_name, venue_city, cover_image_url,
+      id, full_name, email, status, ticket_days, is_vip, qr_token, checked_in_at,
+      events(id, title, date_start, date_end, venue_name, city, cover_image_url,
              profiles!events_organizer_id_fkey(full_name, username))
     `)
     .eq('email', user.email)
@@ -31,7 +32,6 @@ export async function GET(req: NextRequest) {
 
   const QR_SECRET = getQrSecret()
 
-  // Ensure every guest record has a fresh QR token
   const tickets = await Promise.all((guests ?? []).map(async (g: any) => {
     let qrToken = g.qr_token
 
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
         const payload = {
           gid: g.id,
           eid: g.events.id,
-          name: g.name ?? g.email ?? 'Guest',
+          name: g.full_name ?? g.email ?? 'Guest',
           days: g.ticket_days ?? null,
           status: g.status,
           iat: Math.floor(Date.now() / 1000),
@@ -60,7 +60,12 @@ export async function GET(req: NextRequest) {
       } catch { /* non-critical */ }
     }
 
-    return { ...g, qr_token: qrToken }
+    return {
+      ...g,
+      // Alias for mobile client which uses `venue_city`
+      events: g.events ? { ...g.events, venue_city: g.events.city ?? null } : null,
+      qr_token: qrToken,
+    }
   }))
 
   return Response.json({ tickets })

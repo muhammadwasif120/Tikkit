@@ -12,12 +12,14 @@ export async function GET(req: NextRequest) {
   const limit = Math.min(parseInt(searchParams.get('limit') ?? '20'), 50)
   const search = searchParams.get('search')
 
+  // `city` is the column added by migration 20260516_city_fields.sql
+  // `venue_city` does not exist — removed
   let query = (supabase as any)
     .from('events')
     .select(`
       id, title, description, date_start, date_end,
-      venue_name, venue_city, capacity, ticket_price,
-      registration_mode, status, cover_image_url, city,
+      venue_name, city, capacity, ticket_price,
+      registration_mode, status, cover_image_url,
       organizer_id,
       profiles!events_organizer_id_fkey(full_name, username, logo_url),
       event_categories!events_category_id_fkey(id, name, slug, icon, color)

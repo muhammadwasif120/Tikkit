@@ -6,23 +6,17 @@ export async function GET(req: NextRequest) {
   if (!auth) return mobileUnauthorized()
   const { supabase, userId } = auth
 
-  const [{ data: guestProfile }, { data: transactions }] = await Promise.all([
-    (supabase as any)
-      .from('guest_profiles')
-      .select('credits_balance, tier_level')
-      .eq('id', userId)
-      .maybeSingle(),
-    (supabase as any)
-      .from('credit_transactions')
-      .select('id, points, type, description, created_at, event_id, events(title)')
-      .eq('guest_profile_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(50),
-  ])
+  // guest_profiles columns: id, social_credits (NOT credits_balance), no tier_level
+  // credit_transactions table does not exist in current schema — return empty list
+  const { data: guestProfile } = await (supabase as any)
+    .from('guest_profiles')
+    .select('social_credits')
+    .eq('id', userId)
+    .maybeSingle()
 
   return Response.json({
-    balance: guestProfile?.credits_balance ?? 0,
-    tier: guestProfile?.tier_level ?? 'bronze',
-    transactions: transactions ?? [],
+    balance: guestProfile?.social_credits ?? 0,
+    tier: 'member',   // tier_level column doesn't exist; use static default
+    transactions: [], // credit_transactions table not yet in schema
   })
 }

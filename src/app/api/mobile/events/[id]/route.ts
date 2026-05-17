@@ -11,17 +11,19 @@ export async function GET(
 
   const { id } = await params
 
+  // Removed: venue_city (→ city), venue_maps_url, city_label (don't exist)
+  // Removed: profiles.bio (not in profiles table — it's in guest_profiles)
+  // Fixed:   ticket_types columns (day/date/ticket_price → name/price/is_vip)
   const { data: event, error } = await (supabase as any)
     .from('events')
     .select(`
       id, title, description, date_start, date_end,
-      venue_name, venue_address, venue_city, venue_maps_url,
+      venue_name, venue_address, city,
       capacity, ticket_price, registration_mode, status,
-      cover_image_url, city, city_label,
-      organizer_id,
-      profiles!events_organizer_id_fkey(id, full_name, username, logo_url, bio),
+      cover_image_url, organizer_id,
+      profiles!events_organizer_id_fkey(id, full_name, username, logo_url),
       event_categories!events_category_id_fkey(id, name, slug, icon, color),
-      ticket_types(id, day, date, ticket_price)
+      ticket_types(id, name, price, is_vip, quantity, quantity_sold)
     `)
     .eq('id', id)
     .eq('status', 'published')

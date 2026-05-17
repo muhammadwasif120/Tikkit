@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server'
 export async function POST(req: NextRequest) {
   const auth = await createMobileClient(req.headers.get('Authorization'))
   if (!auth) return mobileUnauthorized()
-  const { supabase, userId } = auth
+  const { supabase } = auth
 
   const body = await req.json().catch(() => null)
   if (!body) return mobileBadRequest('Invalid JSON')
@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
     return mobileBadRequest('ticketDays must be an array or null')
   }
 
-  // Fetch event
   const { data: event } = await supabase
     .from('events')
     .select('id, title, capacity, registration_mode, organizer_id, status')
@@ -25,7 +24,6 @@ export async function POST(req: NextRequest) {
 
   if (!event) return mobileBadRequest('Event not found')
 
-  // Check capacity
   const { count: regCount } = await supabase
     .from('public_registrations')
     .select('*', { count: 'exact', head: true })
@@ -36,7 +34,6 @@ export async function POST(req: NextRequest) {
     return mobileBadRequest('This event is full')
   }
 
-  // Check duplicate
   const { data: existing } = await supabase
     .from('public_registrations')
     .select('id')
@@ -65,17 +62,20 @@ export async function POST(req: NextRequest) {
 
   if (error) return Response.json({ error: 'Registration failed' }, { status: 500 })
 
-  // For open events, auto-create guest record
+  // For open events, auto-create guest record for QR ticket generation.
+  // guests.full_name (NOT `name`), valid status is 'confirmed', no `source` column.
   if (isOpen) {
-    await supabase.from('guests').insert({
-      event_id: eventId,
-      name,
-      email: email.toLowerCase().trim(),
-      phone: phone ?? null,
-      status: 'registered',
-      source: 'public_registration',
-      ticket_days: ticketDays ?? null,
-    } as any)
+    const { error: guestErr } = await (supabase as any)
+      .from('guests')
+      .insert({
+        event_id: eventId,
+        full_name: name,
+        email: email.toLowerCase().trim(),
+        phone: phone ?? null,
+        status: 'confirmed',
+        ticket_days: ticketDays ?? null,
+      })
+    if (guestErr) console.error('[register] guest insert failed:', guestErr.message)
   }
 
   return Response.json({ registration: reg, status }, { status: 201 })

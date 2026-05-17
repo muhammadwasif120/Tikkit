@@ -19,7 +19,8 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const {
     title, description, date_start, date_end,
-    venue_name, venue_address, venue_city,
+    venue_name, venue_address,
+    venue_city, // kept in payload for compatibility — stored as `city`
     capacity, ticket_price, registration_mode,
     category_id, status,
   } = body
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
       date_end: date_end || null,
       venue_name: venue_name?.trim() || null,
       venue_address: venue_address?.trim() || null,
-      venue_city: venue_city?.trim() || null,
+      city: venue_city?.trim() || null,   // column is `city` not `venue_city`
       capacity: capacity ? parseInt(capacity) : null,
       ticket_price: ticket_price ? parseFloat(ticket_price) : null,
       registration_mode: registration_mode ?? 'open',
@@ -57,7 +58,6 @@ export async function GET(req: NextRequest) {
   if (!auth) return mobileUnauthorized()
   const { supabase, userId } = auth
 
-  // Verify organizer role
   const { data: profile } = await (supabase as any)
     .from('profiles')
     .select('role')
@@ -69,13 +69,13 @@ export async function GET(req: NextRequest) {
   }
 
   const { searchParams } = new URL(req.url)
-  const status = searchParams.get('status') // 'published' | 'draft' | 'ended' | null (all)
+  const status = searchParams.get('status')
 
   let query = (supabase as any)
     .from('events')
     .select(`
       id, title, date_start, date_end, status, cover_image_url,
-      venue_name, venue_city, capacity, registration_mode,
+      venue_name, city, capacity, registration_mode,
       event_categories!events_category_id_fkey(name, slug)
     `)
     .eq('organizer_id', userId)
@@ -104,6 +104,7 @@ export async function GET(req: NextRequest) {
 
   const events = (data ?? []).map((e: any) => ({
     ...e,
+    venue_city: e.city ?? null,   // alias for mobile client compatibility
     registration_count: counts[e.id] ?? 0,
   }))
 

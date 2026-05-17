@@ -13,12 +13,8 @@ export async function POST(req: NextRequest) {
   if (!auth) return mobileUnauthorized()
   const { supabase, userId } = auth
 
-  // Verify organizer/staff role
   const { data: profile } = await (supabase as any)
-    .from('profiles')
-    .select('role')
-    .eq('id', userId)
-    .single()
+    .from('profiles').select('role').eq('id', userId).single()
 
   if (!profile || !['organizer', 'staff', 'admin'].includes(profile.role)) {
     return Response.json({ error: 'Forbidden' }, { status: 403 })
@@ -30,7 +26,6 @@ export async function POST(req: NextRequest) {
   const { token, eventId } = body
   if (!token || !eventId) return mobileBadRequest('Missing token or eventId')
 
-  // Verify organizer owns/has access to this event
   const { data: event } = await supabase
     .from('events')
     .select('id, title, organizer_id')
@@ -42,7 +37,6 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  // Verify QR signature
   const QR_SECRET = getQrSecret()
   let payload: any
   try {
@@ -56,10 +50,10 @@ export async function POST(req: NextRequest) {
     return Response.json({ valid: false, error: 'QR code not valid for this event' }, { status: 422 })
   }
 
-  // Fetch guest record
+  // guests.full_name (NOT `name`) — fixed
   const { data: guest } = await (supabase as any)
     .from('guests')
-    .select('id, name, email, status, is_vip, ticket_days, checked_in_at')
+    .select('id, full_name, email, status, is_vip, ticket_days, checked_in_at')
     .eq('id', payload.gid)
     .maybeSingle()
 
@@ -67,16 +61,16 @@ export async function POST(req: NextRequest) {
     return Response.json({ valid: false, error: 'Guest record not found' }, { status: 404 })
   }
 
-  if (guest.status === 'checked_in' || guest.status === 'attended') {
+  // Valid checked-in statuses in the guests table: only 'checked_in'
+  if (guest.status === 'checked_in') {
     return Response.json({
       valid: true,
       already_checked_in: true,
-      guest,
+      guest: { ...guest, name: guest.full_name },
       checked_in_at: guest.checked_in_at,
     })
   }
 
-  // Check in
   await (supabase as any)
     .from('guests')
     .update({ status: 'checked_in', checked_in_at: new Date().toISOString() })
@@ -85,6 +79,6 @@ export async function POST(req: NextRequest) {
   return Response.json({
     valid: true,
     already_checked_in: false,
-    guest: { ...guest, status: 'checked_in' },
+    guest: { ...guest, name: guest.full_name, status: 'checked_in' },
   })
 }
