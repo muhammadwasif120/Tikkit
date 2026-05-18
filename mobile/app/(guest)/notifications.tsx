@@ -7,18 +7,83 @@ import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
-import { format } from 'date-fns'
+import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
 import { getNotifications, markNotificationsRead, AppNotification } from '@/lib/api'
 import { colors, radius } from '@/theme'
 
-const TYPE_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
-  registration_approved: 'checkmark-circle',
-  registration_rejected: 'close-circle',
-  payment_reminder: 'card',
-  event_reminder: 'calendar',
-  general: 'notifications',
+/* ─── Semantic type config ────────────────────────────────────────────────── */
+type NotifMeta = {
+  icon: keyof typeof Ionicons.glyphMap
+  color: string
+  bg: string
+  borderColor: string
 }
 
+const TYPE_META: Record<string, NotifMeta> = {
+  registration_approved: {
+    icon: 'checkmark-circle',
+    color: colors.success,
+    bg: colors.successSubtle,
+    borderColor: colors.success + '40',
+  },
+  registration_rejected: {
+    icon: 'close-circle',
+    color: colors.error,
+    bg: colors.errorSubtle,
+    borderColor: colors.error + '40',
+  },
+  payment_confirmed: {
+    icon: 'card',
+    color: colors.success,
+    bg: colors.successSubtle,
+    borderColor: colors.success + '40',
+  },
+  payment_reminder: {
+    icon: 'card-outline',
+    color: colors.warning,
+    bg: colors.warningSubtle,
+    borderColor: colors.warning + '40',
+  },
+  event_reminder: {
+    icon: 'calendar',
+    color: colors.blue,
+    bg: colors.blueSubtle,
+    borderColor: colors.blueBorder,
+  },
+  event_cancelled: {
+    icon: 'ban-outline',
+    color: colors.error,
+    bg: colors.errorSubtle,
+    borderColor: colors.error + '40',
+  },
+  waitlist_promoted: {
+    icon: 'arrow-up-circle',
+    color: '#A855F7',
+    bg: 'rgba(168,85,247,0.1)',
+    borderColor: 'rgba(168,85,247,0.3)',
+  },
+  general: {
+    icon: 'notifications',
+    color: colors.blue,
+    bg: colors.blueSubtle,
+    borderColor: colors.blueBorder,
+  },
+}
+
+function getNotifMeta(type: string): NotifMeta {
+  return TYPE_META[type] ?? TYPE_META.general
+}
+
+function formatTimestamp(dateStr: string): string {
+  const date = new Date(dateStr)
+  if (isToday(date)) {
+    return formatDistanceToNow(date, { addSuffix: true })
+  }
+  if (isYesterday(date)) return `Yesterday · ${format(date, 'h:mm a')}`
+  return format(date, 'd MMM · h:mm a')
+}
+
+/* ─── Main screen ─────────────────────────────────────────────────────────── */
 export default function NotificationsScreen() {
   const router = useRouter()
   const [notifications, setNotifications] = useState<AppNotification[]>([])
@@ -43,6 +108,8 @@ export default function NotificationsScreen() {
     setRefreshing(false)
   }
 
+  const unread = notifications.filter(n => !n.read_at).length
+
   if (loading) {
     return <View style={s.centered}><ActivityIndicator color={colors.blue} /></View>
   }
@@ -50,11 +117,17 @@ export default function NotificationsScreen() {
   return (
     <SafeAreaView style={s.root}>
       <StatusBar style="light" />
+
       <View style={s.nav}>
         <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
-        <Text style={s.navTitle}>Notifications</Text>
+        <View>
+          <Text style={s.navTitle}>Notifications</Text>
+          {unread > 0 && (
+            <Text style={s.navSub}>{unread} unread</Text>
+          )}
+        </View>
         <View style={{ width: 36 }} />
       </View>
 
@@ -68,8 +141,8 @@ export default function NotificationsScreen() {
             <View style={s.emptyIcon}>
               <Ionicons name="notifications-off-outline" size={28} color={colors.textMuted} />
             </View>
-            <Text style={s.emptyTitle}>No notifications</Text>
-            <Text style={s.emptyText}>You're all caught up</Text>
+            <Text style={s.emptyTitle}>All caught up</Text>
+            <Text style={s.emptyText}>No notifications yet — we'll alert you on approvals, reminders, and more</Text>
           </View>
         }
         renderItem={({ item }) => <NotifCard notif={item} />}
@@ -78,23 +151,29 @@ export default function NotificationsScreen() {
   )
 }
 
+/* ─── Notification card ───────────────────────────────────────────────────── */
 function NotifCard({ notif }: { notif: AppNotification }) {
   const isUnread = !notif.read_at
-  const icon = TYPE_ICON[notif.type] ?? 'notifications-outline'
+  const meta = getNotifMeta(notif.type)
 
   return (
-    <View style={[s.card, isUnread && s.cardUnread]}>
-      {isUnread && <View style={s.unreadBar} />}
-      <View style={[s.iconWrap, { backgroundColor: colors.blueSubtle }]}>
-        <Ionicons name={icon} size={18} color={colors.blue} />
+    <View style={[s.card, isUnread && { borderColor: meta.borderColor }]}>
+      {/* Left accent bar — matches type color */}
+      {isUnread && <View style={[s.accentBar, { backgroundColor: meta.color }]} />}
+
+      {/* Icon circle */}
+      <View style={[s.iconWrap, { backgroundColor: meta.bg, borderColor: meta.borderColor }]}>
+        <Ionicons name={meta.icon} size={18} color={meta.color} />
       </View>
+
+      {/* Content */}
       <View style={s.cardBody}>
         <View style={s.cardTop}>
-          <Text style={s.cardTitle}>{notif.title}</Text>
-          {isUnread && <View style={s.dot} />}
+          <Text style={s.cardTitle} numberOfLines={1}>{notif.title}</Text>
+          {isUnread && <View style={[s.dot, { backgroundColor: meta.color }]} />}
         </View>
-        <Text style={s.cardText}>{notif.body}</Text>
-        <Text style={s.cardTime}>{format(new Date(notif.created_at), 'd MMM · h:mm a')}</Text>
+        <Text style={s.cardText} numberOfLines={3}>{notif.body}</Text>
+        <Text style={s.cardTime}>{formatTimestamp(notif.created_at)}</Text>
       </View>
     </View>
   )
@@ -113,7 +192,12 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.border,
   },
-  navTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  navTitle: {
+    color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold', textAlign: 'center',
+  },
+  navSub: {
+    color: colors.blue, fontSize: 11, fontFamily: 'DMSans_500Medium', textAlign: 'center', marginTop: 1,
+  },
 
   list: { padding: 16, gap: 8, paddingBottom: 32 },
 
@@ -123,27 +207,38 @@ const s = StyleSheet.create({
     borderRadius: radius.md, borderWidth: 1, borderColor: colors.border,
     padding: 14, overflow: 'hidden',
   },
-  cardUnread: { borderColor: colors.blueBorder },
-  unreadBar: {
-    position: 'absolute', left: 0, top: 0, bottom: 0,
-    width: 3, backgroundColor: colors.blue,
+  accentBar: {
+    position: 'absolute', left: 0, top: 0, bottom: 0, width: 3,
   },
   iconWrap: {
-    width: 38, height: 38, borderRadius: 19,
+    width: 40, height: 40, borderRadius: 20,
     alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    borderWidth: 1,
   },
   cardBody: { flex: 1 },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 },
-  cardTitle: { color: colors.textPrimary, fontSize: 14, fontFamily: 'DMSans_500Medium', flex: 1 },
-  dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: colors.blue },
-  cardText: { color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular', lineHeight: 19 },
-  cardTime: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 6 },
+  cardTitle: {
+    color: colors.textPrimary, fontSize: 14, fontFamily: 'DMSans_500Medium', flex: 1,
+  },
+  dot: { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
+  cardText: {
+    color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular', lineHeight: 19,
+  },
+  cardTime: {
+    color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 6,
+  },
 
-  empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
+  empty: {
+    alignItems: 'center', paddingTop: 80, paddingHorizontal: 32, gap: 12,
+  },
   emptyIcon: {
-    width: 56, height: 56, borderRadius: 28,
-    backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
   emptyTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
-  emptyText: { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular' },
+  emptyText: {
+    color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular',
+    textAlign: 'center', lineHeight: 20,
+  },
 })

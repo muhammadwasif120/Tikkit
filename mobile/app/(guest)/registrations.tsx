@@ -13,6 +13,112 @@ import * as ImagePicker from 'expo-image-picker'
 import { getMyRegistrations, submitPaymentScreenshot, MyRegistration } from '@/lib/api'
 import { colors, radius } from '@/theme'
 
+/* ─── Status step timeline ───────────────────────────────────────────────── */
+type Step = { key: string; label: string; icon: keyof typeof Ionicons.glyphMap }
+
+const EOI_STEPS: Step[] = [
+  { key: 'applied',   label: 'Applied',   icon: 'document-text-outline' },
+  { key: 'reviewed',  label: 'Reviewed',  icon: 'eye-outline' },
+  { key: 'approved',  label: 'Approved',  icon: 'checkmark-circle-outline' },
+  { key: 'confirmed', label: 'Confirmed', icon: 'ticket-outline' },
+]
+
+const OPEN_STEPS: Step[] = [
+  { key: 'applied',   label: 'Applied',   icon: 'document-text-outline' },
+  { key: 'approved',  label: 'Approved',  icon: 'checkmark-circle-outline' },
+  { key: 'confirmed', label: 'Confirmed', icon: 'ticket-outline' },
+]
+
+function getStepIndex(displayStatus: string, isEOI: boolean): number {
+  if (isEOI) {
+    if (displayStatus === 'eoi_submitted') return 0
+    if (displayStatus === 'eoi_approved') return 1
+    if (displayStatus === 'payment_pending') return 2
+    if (displayStatus === 'confirmed') return 3
+    if (displayStatus === 'approved') return 2
+    return -1
+  }
+  if (displayStatus === 'pending') return 0
+  if (displayStatus === 'approved') return 1
+  if (displayStatus === 'confirmed') return 2
+  return -1
+}
+
+function StatusStepper({ displayStatus, isEOI }: { displayStatus: string; isEOI: boolean }) {
+  const steps = isEOI ? EOI_STEPS : OPEN_STEPS
+  const activeIdx = getStepIndex(displayStatus, isEOI)
+  const isRejected = displayStatus === 'rejected'
+
+  if (isRejected) {
+    return (
+      <View style={st.rejected}>
+        <Ionicons name="close-circle" size={14} color={colors.error} />
+        <Text style={st.rejectedText}>Application not approved</Text>
+      </View>
+    )
+  }
+
+  return (
+    <View style={st.row}>
+      {steps.map((step, i) => {
+        const done = i <= activeIdx
+        const active = i === activeIdx
+        return (
+          <View key={step.key} style={st.stepWrap}>
+            {/* Connector line before (except first) */}
+            {i > 0 && (
+              <View style={[st.line, i <= activeIdx && st.lineDone]} />
+            )}
+            {/* Circle */}
+            <View style={[
+              st.circle,
+              done && { backgroundColor: colors.blue, borderColor: colors.blue },
+              active && { borderColor: colors.blue },
+            ]}>
+              <Ionicons
+                name={done ? 'checkmark' : step.icon}
+                size={11}
+                color={done ? colors.white : colors.textMuted}
+              />
+            </View>
+            {/* Label */}
+            <Text style={[st.stepLabel, done && { color: colors.blue }]}>{step.label}</Text>
+          </View>
+        )
+      })}
+    </View>
+  )
+}
+
+const st = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 4 },
+  stepWrap: { flex: 1, alignItems: 'center', position: 'relative' },
+  line: {
+    position: 'absolute', top: 12, right: '50%',
+    left: '-50%', height: 1.5,
+    backgroundColor: colors.surface3,
+    zIndex: 0,
+  },
+  lineDone: { backgroundColor: colors.blue + '60' },
+  circle: {
+    width: 24, height: 24, borderRadius: 12,
+    backgroundColor: colors.surface2,
+    borderWidth: 1.5, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center',
+    zIndex: 1,
+  },
+  stepLabel: {
+    color: colors.textMuted, fontSize: 9, fontFamily: 'DMSans_500Medium',
+    textAlign: 'center', marginTop: 4,
+  },
+  rejected: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: colors.errorSubtle, borderRadius: radius.sm,
+    padding: 8, marginBottom: 4,
+  },
+  rejectedText: { color: colors.error, fontSize: 12, fontFamily: 'DMSans_500Medium' },
+})
+
 /* ─── Status config ──────────────────────────────────────────────────────── */
 const STATUS: Record<string, { label: string; color: string; bg: string; icon: string; info: string }> = {
   eoi_submitted: {
@@ -289,13 +395,15 @@ function RegistrationCard({ reg, onPay, onChat, onViewEvent }: {
   onChat: () => void
   onViewEvent: () => void
 }) {
-  const status = STATUS[reg.display_status ?? reg.status] ?? STATUS['pending']
+  const ds = reg.display_status ?? reg.status
+  const status = STATUS[ds] ?? STATUS['pending']
   const event = reg.event
+  const isEOI = ['eoi_submitted', 'eoi_approved', 'payment_pending'].includes(ds)
   const eventDate = event?.date_start
     ? format(new Date(event.date_start), 'EEE, d MMM yyyy · h:mm a')
     : null
-  const canPay = reg.display_status === 'eoi_approved'
-  const canChat = ['eoi_submitted', 'eoi_approved', 'payment_pending', 'confirmed', 'approved'].includes(reg.display_status ?? reg.status)
+  const canPay = ds === 'eoi_approved'
+  const canChat = ['eoi_submitted', 'eoi_approved', 'payment_pending', 'confirmed', 'approved'].includes(ds)
 
   return (
     <View style={s.card}>
@@ -310,17 +418,17 @@ function RegistrationCard({ reg, onPay, onChat, onViewEvent }: {
       }
 
       <View style={s.cardBody}>
-        {/* Title + status */}
-        <View style={s.cardTop}>
-          <Text style={s.cardTitle} numberOfLines={2}>{event?.title ?? 'Event'}</Text>
-          <View style={[s.badge, { backgroundColor: status.bg }]}>
-            <Ionicons name={status.icon as any} size={11} color={status.color} />
-            <Text style={[s.badgeText, { color: status.color }]}>{status.label}</Text>
-          </View>
-        </View>
+        {/* Title */}
+        <Text style={s.cardTitle} numberOfLines={2}>{event?.title ?? 'Event'}</Text>
 
-        {/* Status info */}
-        <Text style={s.statusInfo}>{status.info}</Text>
+        {/* Status stepper */}
+        <StatusStepper displayStatus={ds} isEOI={isEOI} />
+
+        {/* Status badge + info */}
+        <View style={[s.statusInfoRow, { backgroundColor: status.bg }]}>
+          <Ionicons name={status.icon as any} size={13} color={status.color} />
+          <Text style={[s.statusInfo, { color: status.color }]}>{status.info}</Text>
+        </View>
 
         {/* Meta */}
         {eventDate && (
@@ -393,17 +501,14 @@ const s = StyleSheet.create({
   cover: { width: '100%', height: 100 },
   coverFallback: { backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
 
-  cardBody: { padding: 14, gap: 8 },
-  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8 },
-  cardTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold', flex: 1 },
+  cardBody: { padding: 14, gap: 10 },
+  cardTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
 
-  badge: {
-    flexDirection: 'row', alignItems: 'center', gap: 4,
-    paddingHorizontal: 8, paddingVertical: 4, borderRadius: radius.full,
+  statusInfoRow: {
+    flexDirection: 'row', alignItems: 'flex-start', gap: 8,
+    borderRadius: radius.sm, padding: 9,
   },
-  badgeText: { fontSize: 10, fontFamily: 'DMSans_500Medium', fontWeight: '600' },
-
-  statusInfo: { color: colors.textSecondary, fontSize: 12, fontFamily: 'DMSans_400Regular', lineHeight: 17 },
+  statusInfo: { flex: 1, fontSize: 12, fontFamily: 'DMSans_400Regular', lineHeight: 17 },
 
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   metaText: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular', flex: 1 },

@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useAuth } from '@/contexts/AuthContext'
 import { colors, radius } from '@/theme'
 import { getProfile, updateProfile } from '@/lib/api'
@@ -269,16 +270,24 @@ export default function GuestProfileScreen() {
       <ScrollView contentContainerStyle={s.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
         {/* ── Hero ─────────────────────────────────────── */}
-        <View style={s.hero}>
-          <View style={s.avatar}>
-            <Text style={s.avatarText}>{initials}</Text>
+        <LinearGradient
+          colors={[colors.surface, tier.color + '18', colors.surface]}
+          style={s.hero}
+          start={[0, 0]} end={[1, 1]}
+        >
+          {/* Subtle glow orb behind avatar */}
+          <View style={[s.heroGlow, { backgroundColor: tier.color + '18' }]} />
+
+          <View style={[s.avatar, { borderColor: tier.color + '80' }]}>
+            <Text style={[s.avatarText, { color: tier.color }]}>{initials}</Text>
           </View>
           <Text style={s.heroName}>{p?.full_name ?? 'Guest'}</Text>
           {p?.username && <Text style={s.heroUsername}>@{p.username}</Text>}
           <View style={[s.tierBadge, { backgroundColor: tier.color + '22', borderColor: tier.color + '55' }]}>
+            <Ionicons name="ribbon-outline" size={11} color={tier.color} />
             <Text style={[s.tierText, { color: tier.color }]}>{tier.label}</Text>
           </View>
-        </View>
+        </LinearGradient>
 
         {/* ── Stats bar ────────────────────────────────── */}
         <View style={s.statsRow}>
@@ -403,12 +412,33 @@ const s = StyleSheet.create({
   centered: { flex: 1, backgroundColor: colors.pageBg, justifyContent: 'center', alignItems: 'center' },
   body: { padding: 16, paddingBottom: 48, gap: 12 },
 
-  hero: { alignItems: 'center', paddingVertical: 16, gap: 6 },
-  avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.blue, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: colors.blueBorder },
-  avatarText: { color: colors.white, fontSize: 28, fontFamily: 'Poppins_700Bold' },
-  heroName: { color: colors.textPrimary, fontSize: 22, fontFamily: 'Poppins_700Bold', marginTop: 4 },
+  hero: {
+    alignItems: 'center', paddingVertical: 28, paddingHorizontal: 20, gap: 6,
+    borderRadius: radius.xl, borderWidth: 1, borderColor: colors.border,
+    overflow: 'hidden', position: 'relative',
+  },
+  heroGlow: {
+    position: 'absolute', top: -30, width: 180, height: 180, borderRadius: 90,
+  },
+  avatar: {
+    width: 84, height: 84, borderRadius: 42,
+    backgroundColor: colors.surface2,
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2.5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  avatarText: { fontSize: 30, fontFamily: 'Poppins_700Bold' },
+  heroName: { color: colors.textPrimary, fontSize: 22, fontFamily: 'Poppins_700Bold', marginTop: 6 },
   heroUsername: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular' },
-  tierBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: radius.full, borderWidth: 1, marginTop: 4 },
+  tierBadge: {
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 12, paddingVertical: 5,
+    borderRadius: radius.full, borderWidth: 1, marginTop: 4,
+  },
   tierText: { fontSize: 11, fontFamily: 'DMSans_500Medium', fontWeight: '700', letterSpacing: 0.5 },
 
   statsRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 16 },
