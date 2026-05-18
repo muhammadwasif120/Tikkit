@@ -23,6 +23,10 @@ const SCREEN_WIDTH = Dimensions.get('window').width
 const DRAWER_WIDTH = Math.min(SCREEN_WIDTH * 0.82, 340)
 const ANIM_DURATION = 260
 
+/* ─── Module-level pending count — set by the layout after fetching stats ── */
+let _pendingApprovals = 0
+export function setPendingApprovals(count: number) { _pendingApprovals = count }
+
 /* ─── Nav item shape ─────────────────────────────────────────────────────── */
 type NavItem = {
   icon: string
@@ -175,22 +179,32 @@ function DrawerPanel({
             <View key={section.title} style={si > 0 ? ds.sectionGap : undefined}>
               <Text style={ds.sectionTitle}>{section.title}</Text>
               <View style={ds.sectionCard}>
-                {section.items.map((item, ii) => (
-                  <View key={item.route}>
-                    <TouchableOpacity
-                      style={ds.navItem}
-                      onPress={() => navigate(item.route)}
-                      activeOpacity={0.7}
-                    >
-                      <View style={[ds.navIcon, { backgroundColor: item.color + '1A' }]}>
-                        <Ionicons name={item.icon as any} size={16} color={item.color} />
-                      </View>
-                      <Text style={ds.navLabel}>{item.label}</Text>
-                      <Ionicons name="chevron-forward" size={14} color={colors.border} style={{ marginLeft: 'auto' } as any} />
-                    </TouchableOpacity>
-                    {ii < section.items.length - 1 && <View style={ds.itemDivider} />}
-                  </View>
-                ))}
+                {section.items.map((item, ii) => {
+                  const badge = item.route === '/(organizer)/approvals' && _pendingApprovals > 0
+                    ? _pendingApprovals
+                    : undefined
+                  return (
+                    <View key={item.route}>
+                      <TouchableOpacity
+                        style={ds.navItem}
+                        onPress={() => navigate(item.route)}
+                        activeOpacity={0.7}
+                      >
+                        <View style={[ds.navIcon, { backgroundColor: item.color + '1A' }]}>
+                          <Ionicons name={item.icon as any} size={16} color={item.color} />
+                          {badge ? (
+                            <View style={[ds.navBadge, { backgroundColor: item.color }]}>
+                              <Text style={ds.navBadgeText}>{badge > 99 ? '99+' : badge}</Text>
+                            </View>
+                          ) : null}
+                        </View>
+                        <Text style={ds.navLabel}>{item.label}</Text>
+                        <Ionicons name="chevron-forward" size={14} color={colors.border} style={{ marginLeft: 'auto' } as any} />
+                      </TouchableOpacity>
+                      {ii < section.items.length - 1 && <View style={ds.itemDivider} />}
+                    </View>
+                  )
+                })}
               </View>
             </View>
           ))}
@@ -275,7 +289,13 @@ const ds = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 12,
     paddingHorizontal: 14, paddingVertical: 13,
   },
-  navIcon: { width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
+  navIcon: { width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', position: 'relative' },
+  navBadge: {
+    position: 'absolute', top: -4, right: -4,
+    minWidth: 15, height: 15, borderRadius: 8,
+    alignItems: 'center', justifyContent: 'center', paddingHorizontal: 2,
+  },
+  navBadgeText: { color: colors.black, fontSize: 8, fontFamily: 'DMSans_500Medium', fontWeight: '700' },
   navLabel: { color: colors.textPrimary, fontSize: 14, fontFamily: 'DMSans_500Medium' },
   itemDivider: { height: 1, backgroundColor: colors.border, marginHorizontal: 14 },
 

@@ -7,7 +7,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import QRCode from 'react-native-qrcode-svg'
+import { Skeleton } from '@/components/Skeleton'
 import { getOrganizerGuests, updateOrgGuest, deleteOrgGuest, OrgGuest } from '@/lib/api'
 import { colors, radius } from '@/theme'
 
@@ -26,6 +28,26 @@ const STATUS_META: Record<string, { color: string; bg: string }> = {
   checked_in: { color: colors.success,  bg: colors.successSubtle },
   checked_out:{ color: colors.textSecondary, bg: 'rgba(107,114,128,0.1)' },
   cancelled:  { color: colors.error,    bg: colors.errorSubtle },
+}
+
+function GuestSkeleton() {
+  return (
+    <View style={{ padding: 16, gap: 10 }}>
+      {[0, 1, 2, 3, 4].map(i => (
+        <View key={i} style={{ flexDirection: 'row', gap: 12, backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14 }}>
+          <Skeleton height={40} width={40} style={{ borderRadius: 20 }} />
+          <View style={{ flex: 1, gap: 6 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Skeleton height={14} width={130} style={{ borderRadius: 7 }} />
+              <Skeleton height={20} width={56} style={{ borderRadius: radius.full }} />
+            </View>
+            <Skeleton height={12} width={180} style={{ borderRadius: 6 }} />
+            <Skeleton height={11} width={100} style={{ borderRadius: 5, marginTop: 2 }} />
+          </View>
+        </View>
+      ))}
+    </View>
+  )
 }
 
 export default function GuestsScreen() {
@@ -174,7 +196,7 @@ export default function GuestsScreen() {
       </View>
 
       {loading
-        ? <ActivityIndicator color={colors.blue} style={{ marginTop: 40 }} />
+        ? <GuestSkeleton />
         : (
           <FlatList
             data={filtered}
@@ -183,8 +205,14 @@ export default function GuestsScreen() {
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.blue} />}
             ListEmptyComponent={
               <View style={s.empty}>
-                <Ionicons name="people-outline" size={40} color={colors.textMuted} />
-                <Text style={s.emptyText}>No guests found</Text>
+                <LinearGradient
+                  colors={[colors.blue + '25', 'transparent']}
+                  style={s.emptyIconCircle}
+                >
+                  <Ionicons name={search ? 'search-outline' : 'people-outline'} size={28} color={colors.blue} />
+                </LinearGradient>
+                <Text style={s.emptyTitle}>{search ? 'No results found' : 'No guests yet'}</Text>
+                <Text style={s.emptyBody}>{search ? `No guests match "${search}"` : 'Guests added to your events will appear here'}</Text>
               </View>
             }
             renderItem={({ item }) => {
@@ -372,8 +400,10 @@ const s = StyleSheet.create({
   iconBtn: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   iconBtnText: { color: colors.textSecondary, fontSize: 12, fontFamily: 'DMSans_400Regular' },
 
-  empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
-  emptyText: { color: colors.textMuted, fontSize: 15, fontFamily: 'DMSans_400Regular' },
+  empty:          { alignItems: 'center', paddingTop: 64, paddingHorizontal: 32, gap: 10 },
+  emptyIconCircle:{ width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  emptyTitle:     { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold', textAlign: 'center' },
+  emptyBody:      { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
 
   // Modal shared
   modal: { flex: 1, backgroundColor: colors.pageBg },

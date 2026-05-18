@@ -10,6 +10,7 @@ import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { getOrganizerEvent, updateEvent, CreateEventPayload } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { Skeleton } from '@/components/Skeleton'
 import { format } from 'date-fns'
 
 type RegMode = 'open' | 'expression_of_interest' | 'invite_only'
@@ -109,7 +110,11 @@ export default function EditEventScreen() {
           <Text style={s.navTitle}>Edit Event</Text>
           <View style={{ width: 70 }} />
         </View>
-        <ActivityIndicator color={colors.blue} style={{ marginTop: 40 }} />
+        <View style={{ padding: 16, gap: 14 }}>
+          {[180, 60, 60, 60, 100, 60].map((h, i) => (
+            <Skeleton key={i} height={h} style={{ borderRadius: radius.md }} />
+          ))}
+        </View>
       </SafeAreaView>
     )
   }

@@ -7,7 +7,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { format } from 'date-fns'
+import { Skeleton } from '@/components/Skeleton'
 import {
   getVendors, createVendor, updateVendor, deleteVendor,
   getInvoices, createInvoice, updateInvoice, deleteInvoice,
@@ -24,6 +26,36 @@ const INVOICE_STATUS_META: Record<string, { label: string; color: string; bg: st
   overdue:   { label: 'Overdue',   color: colors.error,          bg: colors.errorSubtle },
   cancelled: { label: 'Cancelled', color: colors.textMuted,      bg: 'rgba(107,114,128,0.08)' },
   pending:   { label: 'Pending',   color: colors.warning,        bg: colors.warningSubtle },
+}
+
+function VendorSkeleton() {
+  return (
+    <View style={{ padding: 16, gap: 12 }}>
+      {/* Summary strip skeleton */}
+      <View style={{ flexDirection: 'row', gap: 8, marginBottom: 4 }}>
+        {[0, 1, 2].map(i => <Skeleton key={i} height={54} style={{ flex: 1, borderRadius: radius.md }} />)}
+      </View>
+      {/* Card skeletons */}
+      {[0, 1, 2].map(i => (
+        <View key={i} style={{ backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, overflow: 'hidden' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14 }}>
+            <Skeleton height={40} width={40} style={{ borderRadius: 20 }} />
+            <View style={{ flex: 1, gap: 6 }}>
+              <Skeleton height={14} width={130} style={{ borderRadius: 7 }} />
+              <Skeleton height={11} width={90} style={{ borderRadius: 5 }} />
+            </View>
+            <Skeleton height={22} width={60} style={{ borderRadius: 6 }} />
+          </View>
+          <View style={{ height: 1, backgroundColor: colors.border }} />
+          <View style={{ flexDirection: 'row', padding: 10, gap: 8 }}>
+            <Skeleton height={30} style={{ flex: 1, borderRadius: radius.sm }} />
+            <Skeleton height={30} style={{ flex: 1, borderRadius: radius.sm }} />
+            <Skeleton height={30} style={{ flex: 1, borderRadius: radius.sm }} />
+          </View>
+        </View>
+      ))}
+    </View>
+  )
 }
 
 export default function VendorsScreen() {
@@ -198,7 +230,13 @@ export default function VendorsScreen() {
     return (
       <SafeAreaView style={s.root}>
         <StatusBar style="light" />
-        <ActivityIndicator color={colors.blue} style={{ marginTop: 80 }} />
+        <View style={s.header}>
+          <View>
+            <Text style={s.heading}>Vendors</Text>
+            <Text style={s.subheading}>Loading…</Text>
+          </View>
+        </View>
+        <VendorSkeleton />
       </SafeAreaView>
     )
   }
@@ -221,18 +259,21 @@ export default function VendorsScreen() {
       {/* Summary strip */}
       {invoices.length > 0 && (
         <View style={s.summaryStrip}>
-          <View style={[s.summaryChip, { borderLeftColor: colors.warning }]}>
-            <Text style={s.summaryChipValue}>PKR {totalOutstanding.toLocaleString()}</Text>
-            <Text style={s.summaryChipLabel}>Outstanding</Text>
-          </View>
-          <View style={[s.summaryChip, { borderLeftColor: colors.success }]}>
-            <Text style={s.summaryChipValue}>PKR {totalPaid.toLocaleString()}</Text>
-            <Text style={s.summaryChipLabel}>Paid</Text>
-          </View>
-          <View style={[s.summaryChip, { borderLeftColor: colors.blue }]}>
-            <Text style={s.summaryChipValue}>{invoices.length}</Text>
-            <Text style={s.summaryChipLabel}>Invoices</Text>
-          </View>
+          {[
+            { value: `PKR ${totalOutstanding.toLocaleString()}`, label: 'Outstanding', color: colors.warning },
+            { value: `PKR ${totalPaid.toLocaleString()}`,        label: 'Paid',        color: colors.success },
+            { value: String(invoices.length),                    label: 'Invoices',    color: colors.blue    },
+          ].map(chip => (
+            <LinearGradient
+              key={chip.label}
+              colors={[chip.color + '22', chip.color + '0A', 'transparent']}
+              start={[0, 0]} end={[1.2, 1.2]}
+              style={[s.summaryChip, { borderColor: chip.color + '44' }]}
+            >
+              <Text style={[s.summaryChipValue, { color: chip.color }]}>{chip.value}</Text>
+              <Text style={s.summaryChipLabel}>{chip.label}</Text>
+            </LinearGradient>
+          ))}
         </View>
       )}
 
@@ -243,7 +284,9 @@ export default function VendorsScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.blue} />}
         ListEmptyComponent={
           <View style={s.empty}>
-            <Ionicons name="business-outline" size={40} color={colors.textMuted} />
+            <LinearGradient colors={[colors.gold + '25', 'transparent']} style={s.emptyIconCircle}>
+              <Ionicons name="business-outline" size={28} color={colors.gold} />
+            </LinearGradient>
             <Text style={s.emptyTitle}>No vendors yet</Text>
             <Text style={s.emptyDesc}>Add vendors to track services and manage invoices</Text>
             <TouchableOpacity style={s.emptyBtn} onPress={openAddVendor} activeOpacity={0.8}>
@@ -456,11 +499,11 @@ const s = StyleSheet.create({
     flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginBottom: 8,
   },
   summaryChip: {
-    flex: 1, backgroundColor: colors.surface, borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.border, borderLeftWidth: 3,
+    flex: 1, borderRadius: radius.md,
+    borderWidth: 1,
     padding: 10, alignItems: 'center',
   },
-  summaryChipValue: { color: colors.textPrimary, fontSize: 13, fontFamily: 'Poppins_700Bold' },
+  summaryChipValue: { fontSize: 13, fontFamily: 'Poppins_700Bold' },
   summaryChipLabel: { color: colors.textMuted, fontSize: 10, fontFamily: 'DMSans_400Regular' },
 
   list: { padding: 16, gap: 12, paddingBottom: 40 },
@@ -513,9 +556,10 @@ const s = StyleSheet.create({
   invoiceBadgeText: { fontSize: 10, fontFamily: 'DMSans_500Medium', fontWeight: '600' },
   invoiceActions: { flexDirection: 'row', gap: 10 },
 
-  empty: { alignItems: 'center', paddingTop: 80, paddingHorizontal: 32, gap: 12 },
-  emptyTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
-  emptyDesc: { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center' },
+  empty:          { alignItems: 'center', paddingTop: 64, paddingHorizontal: 32, gap: 10 },
+  emptyIconCircle:{ width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  emptyTitle:     { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  emptyDesc:      { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
   emptyBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     backgroundColor: colors.blue, borderRadius: radius.md,

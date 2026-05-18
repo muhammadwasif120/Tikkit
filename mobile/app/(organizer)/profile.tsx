@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useAuth } from '@/contexts/AuthContext'
 import { getProfile, updateProfile } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
@@ -199,7 +200,10 @@ export default function OrganizerProfileScreen() {
         <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
           {/* ── Hero ── */}
-          <View style={s.hero}>
+          <LinearGradient
+            colors={['#0D1F3C', '#080D1A', colors.pageBg]}
+            style={s.hero}
+          >
             <View style={s.avatar}>
               <Text style={s.avatarInitial}>{initial}</Text>
             </View>
@@ -210,7 +214,7 @@ export default function OrganizerProfileScreen() {
               <Ionicons name="shield-checkmark" size={12} color={colors.blue} />
               <Text style={s.roleText}>{(displayProfile?.role ?? 'organizer').toUpperCase()}</Text>
             </View>
-          </View>
+          </LinearGradient>
 
           {/* ── Profile ── */}
           <SectionLabel>Profile</SectionLabel>

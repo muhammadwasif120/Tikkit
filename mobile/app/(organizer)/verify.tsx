@@ -6,7 +6,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { getVerifyStatus } from '@/lib/api'
+import { Skeleton } from '@/components/Skeleton'
 import { colors, radius } from '@/theme'
 
 type CnicStatus = 'not_submitted' | 'pending' | 'verified' | 'rejected' | null | undefined
@@ -84,7 +86,32 @@ export default function VerifyScreen() {
     return (
       <SafeAreaView style={s.root}>
         <StatusBar style="light" />
-        <ActivityIndicator color={colors.blue} style={{ marginTop: 80 }} />
+        <View style={s.header}>
+          <Text style={s.heading}>ID Verification</Text>
+          <Text style={s.subheading}>CNIC / National ID</Text>
+        </View>
+        <View style={{ padding: 16, gap: 16 }}>
+          {/* Status card skeleton */}
+          <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 20, alignItems: 'center', gap: 12 }}>
+            <Skeleton height={60} width={60} style={{ borderRadius: 30 }} />
+            <Skeleton height={18} width={120} style={{ borderRadius: 9 }} />
+            <Skeleton height={13} width={240} style={{ borderRadius: 6 }} />
+            <Skeleton height={13} width={180} style={{ borderRadius: 6 }} />
+          </View>
+          {/* Benefits card skeleton */}
+          <Skeleton height={14} width={130} style={{ borderRadius: 7 }} />
+          <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 14 }}>
+            {[0, 1, 2, 3].map(i => (
+              <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <Skeleton height={36} width={36} style={{ borderRadius: 18 }} />
+                <View style={{ flex: 1, gap: 5 }}>
+                  <Skeleton height={13} width={100} style={{ borderRadius: 6 }} />
+                  <Skeleton height={11} width={200} style={{ borderRadius: 5 }} />
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
       </SafeAreaView>
     )
   }
@@ -109,9 +136,9 @@ export default function VerifyScreen() {
       >
         {/* Status Card */}
         <View style={[s.statusCard, { borderLeftColor: sm.color, borderLeftWidth: 4 }]}>
-          <View style={[s.statusIcon, { backgroundColor: sm.bg }]}>
+          <LinearGradient colors={[sm.color + '30', 'transparent']} style={s.statusIcon}>
             <Ionicons name={sm.icon} size={28} color={sm.color} />
-          </View>
+          </LinearGradient>
           <Text style={[s.statusLabel, { color: sm.color }]}>{sm.label}</Text>
           <Text style={s.statusDesc}>{sm.desc}</Text>
 

@@ -7,7 +7,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { format } from 'date-fns'
+import { Skeleton } from '@/components/Skeleton'
 import {
   getApprovals, submitApprovalAction,
   ApprovalRegistration, ApprovalEvent,
@@ -138,7 +140,23 @@ export default function ApprovalsScreen() {
       </View>
 
       {loading
-        ? <ActivityIndicator color={colors.blue} style={{ marginTop: 40 }} />
+        ? (
+          <ScrollView contentContainerStyle={{ padding: 16, gap: 10 }} showsVerticalScrollIndicator={false}>
+            {[1, 2, 3, 4].map(i => (
+              <View key={i} style={{ backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 10 }}>
+                <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
+                  <Skeleton height={38} width={38} style={{ borderRadius: 19 }} />
+                  <View style={{ flex: 1, gap: 6 }}>
+                    <Skeleton height={14} width="55%" style={{ borderRadius: 6 }} />
+                    <Skeleton height={12} width="70%" style={{ borderRadius: 6 }} />
+                  </View>
+                  <Skeleton height={22} width={60} style={{ borderRadius: radius.full }} />
+                </View>
+                <Skeleton height={12} width="45%" style={{ borderRadius: 6 }} />
+              </View>
+            ))}
+          </ScrollView>
+        )
         : (
           <FlatList
             data={filtered}
@@ -147,8 +165,27 @@ export default function ApprovalsScreen() {
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.blue} />}
             ListEmptyComponent={
               <View style={s.empty}>
-                <Ionicons name="checkmark-done-outline" size={40} color={colors.textMuted} />
-                <Text style={s.emptyText}>No registrations here</Text>
+                <LinearGradient
+                  colors={[
+                    filter === 'pending' ? colors.warning + '25' : colors.blue + '25',
+                    'transparent',
+                  ] as [string, string]}
+                  style={s.emptyIconCircle}
+                >
+                  <Ionicons
+                    name={filter === 'pending' ? 'time-outline' : filter === 'approved' ? 'checkmark-circle-outline' : 'checkmark-done-outline'}
+                    size={28}
+                    color={filter === 'pending' ? colors.warning : filter === 'approved' ? colors.success : colors.blue}
+                  />
+                </LinearGradient>
+                <Text style={s.emptyTitle}>
+                  {filter === 'pending' ? 'All caught up!' : `No ${filter} registrations`}
+                </Text>
+                <Text style={s.emptyText}>
+                  {filter === 'pending'
+                    ? 'No applications are waiting for your review right now'
+                    : 'Registrations with this status will appear here'}
+                </Text>
               </View>
             }
             renderItem={({ item }) => {
@@ -383,8 +420,13 @@ const s = StyleSheet.create({
   cardDate: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular' },
   paymentLabel: { fontSize: 11, fontFamily: 'DMSans_500Medium', fontWeight: '600' },
 
-  empty: { alignItems: 'center', paddingTop: 80, gap: 12 },
-  emptyText: { color: colors.textMuted, fontSize: 15, fontFamily: 'DMSans_400Regular' },
+  empty: { alignItems: 'center', paddingTop: 60, gap: 10 },
+  emptyIconCircle: {
+    width: 64, height: 64, borderRadius: 32,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 4,
+  },
+  emptyTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold' },
+  emptyText: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', maxWidth: 240, lineHeight: 20 },
 
   // Modal
   modal: { flex: 1, backgroundColor: colors.pageBg },

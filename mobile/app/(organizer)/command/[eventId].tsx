@@ -8,7 +8,9 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { format } from 'date-fns'
+import { Skeleton } from '@/components/Skeleton'
 import {
   getCommandCenter, commandUpdateStatus, commandSendMessage,
   CommandAttendee, CommandMessage, CommandEvent,
@@ -81,8 +83,36 @@ export default function CommandEventScreen() {
     return (
       <SafeAreaView style={s.root}>
         <StatusBar style="light" />
-        <View style={s.nav}><TouchableOpacity style={s.backBtn} onPress={() => router.back()}><Ionicons name="arrow-back" size={20} color={colors.textPrimary} /></TouchableOpacity></View>
-        <ActivityIndicator color={colors.blue} style={{ marginTop: 40 }} />
+        <View style={s.nav}>
+          <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <View style={{ flex: 1, gap: 4 }}>
+            <Skeleton height={16} width={180} style={{ borderRadius: 8 }} />
+            <Skeleton height={11} width={100} style={{ borderRadius: 5 }} />
+          </View>
+        </View>
+        {/* Stats skeleton */}
+        <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginBottom: 8 }}>
+          {[0, 1, 2].map(i => <Skeleton key={i} height={54} style={{ flex: 1, borderRadius: radius.md }} />)}
+        </View>
+        {/* Tab skeleton */}
+        <Skeleton height={46} style={{ marginHorizontal: 16, borderRadius: radius.md, marginBottom: 8 }} />
+        {/* Card skeletons */}
+        <View style={{ padding: 16, gap: 10 }}>
+          {[0, 1, 2, 3].map(i => (
+            <View key={i} style={{ backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 14 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Skeleton height={36} width={36} style={{ borderRadius: 18 }} />
+                <View style={{ flex: 1, gap: 5 }}>
+                  <Skeleton height={13} width={140} style={{ borderRadius: 6 }} />
+                  <Skeleton height={11} width={180} style={{ borderRadius: 5 }} />
+                </View>
+                <Skeleton height={22} width={60} style={{ borderRadius: radius.full }} />
+              </View>
+            </View>
+          ))}
+        </View>
       </SafeAreaView>
     )
   }
@@ -137,8 +167,11 @@ export default function CommandEventScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.blue} />}
           ListEmptyComponent={
             <View style={s.empty}>
-              <Ionicons name="people-outline" size={36} color={colors.textMuted} />
-              <Text style={s.emptyText}>No attendees yet</Text>
+              <LinearGradient colors={[colors.blue + '25', 'transparent']} style={s.emptyIconCircle}>
+                <Ionicons name="people-outline" size={28} color={colors.blue} />
+              </LinearGradient>
+              <Text style={s.emptyTitle}>No attendees yet</Text>
+              <Text style={s.emptyBody}>Registrations for this event will appear here</Text>
             </View>
           }
           renderItem={({ item }) => {
@@ -212,9 +245,11 @@ export default function CommandEventScreen() {
           >
             {messages.length === 0 && (
               <View style={s.empty}>
-                <Ionicons name="chatbubbles-outline" size={36} color={colors.textMuted} />
-                <Text style={s.emptyText}>No messages yet</Text>
-                <Text style={s.emptySubtext}>Send a broadcast message to all attendees</Text>
+                <LinearGradient colors={[colors.indigo + '25', 'transparent']} style={s.emptyIconCircle}>
+                  <Ionicons name="chatbubbles-outline" size={28} color={colors.indigo} />
+                </LinearGradient>
+                <Text style={s.emptyTitle}>No messages yet</Text>
+                <Text style={s.emptyBody}>Send a broadcast message to all attendees</Text>
               </View>
             )}
             {messages.map(msg => (
@@ -254,10 +289,14 @@ export default function CommandEventScreen() {
 
 function StatChip({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <View style={[s.statChip, { borderLeftColor: color }]}>
-      <Text style={s.statChipValue}>{value}</Text>
+    <LinearGradient
+      colors={[color + '22', color + '0A', 'transparent']}
+      start={[0, 0]} end={[1.2, 1.2]}
+      style={[s.statChip, { borderColor: color + '44' }]}
+    >
+      <Text style={[s.statChipValue, { color }]}>{value}</Text>
       <Text style={s.statChipLabel}>{label}</Text>
-    </View>
+    </LinearGradient>
   )
 }
 
@@ -284,11 +323,11 @@ const s = StyleSheet.create({
     flexDirection: 'row', gap: 8, paddingHorizontal: 16, marginBottom: 8,
   },
   statChip: {
-    flex: 1, backgroundColor: colors.surface, borderRadius: radius.md,
-    borderWidth: 1, borderColor: colors.border, borderLeftWidth: 3,
+    flex: 1, borderRadius: radius.md,
+    borderWidth: 1,
     padding: 10, alignItems: 'center',
   },
-  statChipValue: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_700Bold' },
+  statChipValue: { fontSize: 18, fontFamily: 'Poppins_700Bold' },
   statChipLabel: { color: colors.textMuted, fontSize: 10, fontFamily: 'DMSans_400Regular' },
 
   tabBar: {
@@ -357,7 +396,8 @@ const s = StyleSheet.create({
     backgroundColor: colors.blue, alignItems: 'center', justifyContent: 'center',
   },
 
-  empty: { alignItems: 'center', paddingTop: 60, gap: 10 },
-  emptyText: { color: colors.textPrimary, fontSize: 16, fontFamily: 'DMSans_500Medium' },
-  emptySubtext: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center' },
+  empty:          { alignItems: 'center', paddingTop: 60, paddingHorizontal: 32, gap: 10 },
+  emptyIconCircle:{ width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  emptyTitle:     { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold', textAlign: 'center' },
+  emptyBody:      { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
 })

@@ -7,7 +7,9 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
+import { LinearGradient } from 'expo-linear-gradient'
 import { format } from 'date-fns'
+import { Skeleton } from '@/components/Skeleton'
 import { getSupportMessages, sendSupportMessage, SupportMessage } from '@/lib/api'
 import { colors, radius } from '@/theme'
 
@@ -54,9 +56,22 @@ export default function MessagesScreen() {
       <SafeAreaView style={s.root}>
         <StatusBar style="light" />
         <View style={s.navBar}>
-          <Text style={s.navTitle}>Support</Text>
+          <Text style={s.navTitle}>Support Chat</Text>
+          <Text style={s.navSub}>We typically reply within a few hours</Text>
         </View>
-        <ActivityIndicator color={colors.blue} style={{ marginTop: 40 }} />
+        <View style={{ padding: 16, gap: 10 }}>
+          {/* Intro card skeleton */}
+          <View style={{ backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 20, alignItems: 'center', gap: 10, marginBottom: 8 }}>
+            <Skeleton height={48} width={48} style={{ borderRadius: 24 }} />
+            <Skeleton height={16} width={110} style={{ borderRadius: 8 }} />
+            <Skeleton height={13} width={240} style={{ borderRadius: 6 }} />
+            <Skeleton height={13} width={200} style={{ borderRadius: 6 }} />
+          </View>
+          {/* Bubble skeletons */}
+          <Skeleton height={52} width="55%" style={{ borderRadius: radius.md, alignSelf: 'flex-start' }} />
+          <Skeleton height={40} width="45%" style={{ borderRadius: radius.md, alignSelf: 'flex-end' }} />
+          <Skeleton height={64} width="65%" style={{ borderRadius: radius.md, alignSelf: 'flex-start' }} />
+        </View>
       </SafeAreaView>
     )
   }
@@ -86,9 +101,9 @@ export default function MessagesScreen() {
         >
           {/* Intro card */}
           <View style={s.introCard}>
-            <View style={s.introIcon}>
+            <LinearGradient colors={[colors.blue + '30', 'transparent']} style={s.introIcon}>
               <Ionicons name="headset-outline" size={24} color={colors.blue} />
-            </View>
+            </LinearGradient>
             <Text style={s.introTitle}>Tikkit Support</Text>
             <Text style={s.introDesc}>
               Hey! Send us a message and we'll get back to you as soon as possible. We're here to help with your events, payouts, and anything else.

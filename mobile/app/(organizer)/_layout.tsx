@@ -1,11 +1,24 @@
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { View } from 'react-native'
+import { useState, useEffect } from 'react'
 import { colors, radius } from '@/theme'
-import { useOrganizerDrawer } from '@/components/OrganizerDrawer'
+import { useOrganizerDrawer, setPendingApprovals } from '@/components/OrganizerDrawer'
+import { getOrganizerStats } from '@/lib/api'
 
 export default function OrganizerLayout() {
   const { openDrawer, DrawerOverlay } = useOrganizerDrawer()
+  const [pendingCount, setPendingCount] = useState(0)
+
+  useEffect(() => {
+    getOrganizerStats()
+      .then(r => {
+        const count = r.stats?.pendingApprovals ?? 0
+        setPendingCount(count)
+        setPendingApprovals(count)   // sync to drawer module
+      })
+      .catch(() => {})
+  }, [])
 
   return (
     <View style={{ flex: 1 }}>
@@ -53,6 +66,15 @@ export default function OrganizerLayout() {
           name="approvals"
           options={{
             title: 'Approvals',
+            tabBarBadge: pendingCount > 0 ? pendingCount : undefined,
+            tabBarBadgeStyle: {
+              backgroundColor: colors.warning,
+              color: '#000',
+              fontSize: 10,
+              minWidth: 18,
+              height: 18,
+              borderRadius: 9,
+            },
             tabBarIcon: ({ color, size, focused }) => (
               <View style={{ backgroundColor: focused ? colors.blueSubtle : 'transparent', borderRadius: radius.sm, padding: 4 }}>
                 <Ionicons name={focused ? 'checkmark-circle' : 'checkmark-circle-outline'} size={size} color={color} />
