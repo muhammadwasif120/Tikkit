@@ -3,15 +3,24 @@
 import { createClient } from '@/lib/supabase/server'
 import { deriveEventKey, exportKeyBase64, signQRPayload, QRPayload } from '@/lib/qrCrypto'
 
+// L6: getQrSecret() is now called lazily inside each function body.
+// The previous module-level `const QR_SECRET = getQrSecret()` would throw at
+// cold-start if QR_SIGNING_SECRET is missing, crashing the entire module and
+// making all server actions in this file unavailable.
 function getQrSecret(): string {
   const secret = process.env.QR_SIGNING_SECRET
   if (!secret) throw new Error('QR_SIGNING_SECRET environment variable is not set')
   return secret
 }
-const QR_SECRET = getQrSecret()
 
 export async function generateGuestQRToken(guestId: string): Promise<string | null> {
+  // H4: Explicit auth check — callers must be authenticated to generate tokens.
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  // L6: Resolve secret lazily here (not at module load time)
+  const QR_SECRET = getQrSecret()
 
   // Fetch guest + event info
   const { data: guest } = await (supabase as any)
@@ -75,6 +84,8 @@ export async function getEventScanKey(eventId: string): Promise<{ keyB64: string
 
   if (!profile || !['organizer', 'staff', 'admin'].includes((profile as any).role)) return null
 
+  // L6: Resolve secret lazily
+  const QR_SECRET = getQrSecret()
   const key = await deriveEventKey(QR_SECRET, eventId)
   const keyB64 = await exportKeyBase64(key)
   return { keyB64, eventId }
@@ -83,7 +94,18 @@ export async function getEventScanKey(eventId: string): Promise<{ keyB64: string
 export async function syncOfflineCheckins(
   queue: Array<{ guestId: string; eventId: string; scannedAt: string; deviceId?: string }>
 ): Promise<{ synced: number; errors: string[] }> {
+  // H3: Auth + role guard — this action writes check-in records and must be
+  // restricted to authenticated organizer/staff/admin users only.
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { synced: 0, errors: ['Unauthorized'] }
+
+  const { data: profile } = await (supabase as any)
+    .from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || !['organizer', 'staff', 'admin'].includes(profile.role)) {
+    return { synced: 0, errors: ['Forbidden'] }
+  }
+
   const errors: string[] = []
   let synced = 0
 

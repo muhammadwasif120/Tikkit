@@ -29,7 +29,10 @@ export async function submitPaymentScreenshot(formData: FormData) {
     .single()
 
   if (regError || !reg) return { error: 'Registration not found' }
-  if (reg.status !== 'eoi_approved') return { error: 'Payment not required for this registration' }
+  // H7: 'eoi_approved' is not a valid registration status in the DB schema.
+  // Valid statuses are: pending / approved / rejected / checked_in / attended.
+  // The duplicate function in guestPaymentActions.ts correctly checks 'approved'.
+  if (reg.status !== 'approved') return { error: 'Registration is not approved yet' }
 
   // Upload to Supabase Storage
   const ext = screenshot.name.split('.').pop() ?? 'jpg'
@@ -48,11 +51,13 @@ export async function submitPaymentScreenshot(formData: FormData) {
     .from('tikkit-uploads')
     .getPublicUrl(path)
 
-  // Update registration status
+  // H7: Update payment_status (not registration status) to 'submitted'.
+  // The previous code incorrectly set status = 'payment_pending' which is not
+  // a valid enum value — the correct field is payment_status = 'submitted'.
   const { error: updateError } = await supabase
     .from('public_registrations')
     .update({
-      status: 'payment_pending',
+      payment_status: 'submitted',
       payment_screenshot_url: publicUrl,
       payment_submitted_at: new Date().toISOString(),
     })

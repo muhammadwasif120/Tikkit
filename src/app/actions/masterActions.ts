@@ -555,6 +555,12 @@ export async function createSupportQuery(query: {
   category?: string
   priority?: 'high' | 'medium' | 'low'
 }): Promise<{ error?: string; id?: string }> {
+  // C4: Any authenticated user (organizer or attendee) may submit a support ticket.
+  // Without this guard the admin client would insert records for unauthenticated callers.
+  const supabaseAuth = await createClient()
+  const { data: { user } } = await supabaseAuth.auth.getUser()
+  if (!user) return { error: 'Unauthorized' }
+
   const supabase = createAdminClient()
   const { data, error } = await (supabase as any)
     .from('support_queries')

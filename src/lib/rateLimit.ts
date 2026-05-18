@@ -3,7 +3,10 @@ import { headers } from 'next/headers'
 type Bucket = { count: number; resetAt: number }
 
 // In-memory store — resets per serverless instance. Provides basic abuse
-// prevention; for cross-instance enforcement, replace with Upstash Redis.
+// prevention within a single warm instance.
+// TODO(H8): Replace with Upstash Redis (https://upstash.com) or Vercel KV for
+// persistent, cross-instance rate limiting on serverless deployments. The
+// current implementation is bypassed whenever a new cold-start spins up.
 const store = new Map<string, Bucket>()
 
 // Periodically prune expired entries to avoid unbounded growth

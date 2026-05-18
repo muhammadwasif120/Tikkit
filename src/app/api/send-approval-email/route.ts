@@ -179,10 +179,34 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { type, name, email, eventTitle, organizer } = body
+    const { type, name, email, eventTitle, organizer, registrationId } = body
 
     if (!type || !email) {
       return NextResponse.json({ error: 'type and email are required' }, { status: 400 })
+    }
+
+    // M1: If a registrationId is supplied (payment flows), verify the registration's
+    // event belongs to the authenticated caller. This prevents a logged-in organizer
+    // from sending approval/rejection emails for another organizer's registrations.
+    if (registrationId) {
+      const { data: reg } = await (supabase as any)
+        .from('public_registrations')
+        .select('event_id')
+        .eq('id', registrationId)
+        .single()
+
+      if (reg) {
+        const { data: evt } = await supabase
+          .from('events')
+          .select('id')
+          .eq('id', reg.event_id)
+          .eq('organizer_id', user.id)
+          .maybeSingle()
+
+        if (!evt) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        }
+      }
     }
 
     let subject = ''

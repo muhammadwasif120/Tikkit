@@ -11,9 +11,16 @@ export async function submitPaymentScreenshot(formData: FormData) {
   const registrationId = formData.get('registrationId') as string
   const screenshot     = formData.get('screenshot') as File
 
-  if (!registrationId)                    return { error: 'Missing registration ID' }
+  if (!registrationId)                      return { error: 'Missing registration ID' }
   if (!screenshot || screenshot.size === 0) return { error: 'No screenshot provided' }
-  if (screenshot.size > 8 * 1024 * 1024) return { error: 'File too large (max 8MB)' }
+  if (screenshot.size > 8 * 1024 * 1024)   return { error: 'File too large (max 8MB)' }
+
+  // H2: Validate MIME type before uploading. Without this, a user can rename
+  // any file (e.g. shell script) as .jpg and upload it to Supabase Storage.
+  const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+  if (!ALLOWED_MIME.includes((screenshot.type ?? '').toLowerCase())) {
+    return { error: 'Invalid file type. Please upload a JPEG, PNG, or WebP image.' }
+  }
 
   // Verify registration belongs to this user by email
   const { data: reg } = await supabase

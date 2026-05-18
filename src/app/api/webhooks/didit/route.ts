@@ -19,7 +19,11 @@ export async function POST(req: NextRequest) {
     .update(rawBody)
     .digest('hex')
     
-  if (signature !== expected) {
+  // C5: Use timing-safe comparison to prevent HMAC timing-oracle attacks.
+  // String !== is short-circuit and leaks signature length via response time.
+  const sigBuf = Buffer.from(signature, 'hex')
+  const expBuf = Buffer.from(expected, 'hex')
+  if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
     console.warn('didit webhook: invalid signature')
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }

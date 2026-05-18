@@ -67,14 +67,35 @@ export async function PATCH(req: NextRequest) {
 
   const newStatus = action === 'approve' ? 'approved' : 'rejected'
 
-  const { data: reg, error } = await (supabase as any)
+  // C1: Fetch registration first — then verify event ownership before updating.
+  // Without this check any organizer could approve/reject another organizer's guests.
+  const { data: reg, error: fetchError } = await (supabase as any)
+    .from('public_registrations')
+    .select('id, event_id, full_name, email')
+    .eq('id', registrationId)
+    .single()
+
+  if (fetchError || !reg) return Response.json({ error: 'Registration not found' }, { status: 404 })
+
+  // Ownership check — confirm this event belongs to the calling organizer
+  const { data: event } = await supabase
+    .from('events')
+    .select('id')
+    .eq('id', reg.event_id)
+    .eq('organizer_id', userId)
+    .maybeSingle()
+
+  if (!event) return Response.json({ error: 'Forbidden' }, { status: 403 })
+
+  // Perform the update using the server-fetched reg.id (not the client-supplied value)
+  const { data: updated, error } = await (supabase as any)
     .from('public_registrations')
     .update({ status: newStatus, reviewed_at: new Date().toISOString() })
-    .eq('id', registrationId)
+    .eq('id', reg.id)
     .select('id, status, event_id, full_name, email')
     .single()
 
   if (error) return Response.json({ error: error.message }, { status: 500 })
 
-  return Response.json({ registration: reg })
+  return Response.json({ registration: updated })
 }

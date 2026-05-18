@@ -31,7 +31,12 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
+
+# Google services key (contains Firebase credentials — must never be committed)
+google-services-key.json
+google-services.json
 
 # typescript
 *.tsbuildinfo

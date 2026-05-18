@@ -77,9 +77,21 @@ const storage = Platform.OS === 'web'
     }
   : nativeStorage
 
+// C2: Credentials must come from environment variables — never hardcoded.
+// Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in mobile/.env
+// (see mobile/.env.example). Expo inlines EXPO_PUBLIC_* vars at build time.
+const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  throw new Error(
+    'Missing Supabase config. Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY in mobile/.env'
+  )
+}
+
 export const supabase = createClient(
-  'https://eyelcvclqzxhaaxyvgfu.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5ZWxjdmNscXp4aGFheHl2Z2Z1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE2NTU5ODEsImV4cCI6MjA4NzIzMTk4MX0.d7D2xE3UvOhqmBesKOmEd8JGka9CermfvqZvFUbWA3I',
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
   {
     auth: {
       storage,

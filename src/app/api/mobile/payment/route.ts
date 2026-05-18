@@ -21,6 +21,12 @@ export async function POST(req: NextRequest) {
   if (!screenshot || screenshot.size === 0) return Response.json({ error: 'screenshot required' }, { status: 400 })
   if (screenshot.size > 8 * 1024 * 1024) return Response.json({ error: 'File too large (max 8MB)' }, { status: 400 })
 
+  // H2: Validate MIME type to prevent arbitrary file uploads masquerading as images.
+  const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+  if (!ALLOWED_MIME.includes((screenshot.type ?? '').toLowerCase())) {
+    return Response.json({ error: 'Invalid file type. Please upload a JPEG, PNG, or WebP image.' }, { status: 400 })
+  }
+
   // Get user email
   const { data: profile } = await (supabase as any)
     .from('profiles').select('email').eq('id', userId).single()

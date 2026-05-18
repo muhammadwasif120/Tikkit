@@ -142,17 +142,21 @@ export async function approvePaymentSubmission(submissionId: string, registratio
   } as any)
 
   // 5. Send payment confirmed email
+  // M9: Use absolute URL — relative fetch('/api/...') fails in server actions
+  // because Node.js has no base URL context. NEXT_PUBLIC_APP_URL is set in .env.local.
   const event = (reg as any).event as any
-  await fetch('/api/send-approval-email', {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tikkit.app'
+  await fetch(`${appUrl}/api/send-approval-email`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      type:          'payment_confirmed',
-      name:          (reg as any).full_name,
-      email:         (reg as any).email,
-      eventTitle:    event?.title,
-      organizer:     event?.organizer?.company_name ?? event?.organizer?.full_name,
-      referenceCode: event?.require_reference_code ? event?.reference_code : null,
+      type:           'payment_confirmed',
+      name:           (reg as any).full_name,
+      email:          (reg as any).email,
+      eventTitle:     event?.title,
+      organizer:      event?.organizer?.company_name ?? event?.organizer?.full_name,
+      referenceCode:  event?.require_reference_code ? event?.reference_code : null,
+      registrationId: (reg as any).id,
     }),
   })
 }
@@ -190,15 +194,18 @@ export async function rejectPaymentSubmission(submissionId: string, registration
   if (regError) throw regError
 
   // 4. Send rejection email
-  await fetch('/api/send-approval-email', {
+  // M9: Absolute URL required in server actions (same reason as above)
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://tikkit.app'
+  await fetch(`${appUrl}/api/send-approval-email`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      type:       'payment_rejected',
-      name:       (reg as any).full_name,
-      email:      (reg as any).email,
-      eventTitle: ((reg as any).event as any)?.title,
-      notes:      notes ?? null,
+      type:           'payment_rejected',
+      name:           (reg as any).full_name,
+      email:          (reg as any).email,
+      eventTitle:     ((reg as any).event as any)?.title,
+      notes:          notes ?? null,
+      registrationId: registrationId,
     }),
   })
 }

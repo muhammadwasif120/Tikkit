@@ -37,7 +37,6 @@ export async function updateSession(request: NextRequest) {
   '/guest/explore',
   '/register',
   '/organizer',     // Public organizer profiles
-  '/master',        // Internal admin — security by obscurity, no public links
   '/coming-soon',   // Public marketing waitlist page
   '/demo',          // Interactive organizer demo — no auth required
   '/staff',         // Staff/organizer invite links — token-gated, no auth required
@@ -79,6 +78,12 @@ export async function updateSession(request: NextRequest) {
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
   const role = profile?.role ?? 'guest'
+
+  // M7: /master requires admin role — removed from publicPaths above so this
+  // check now runs. Non-admins (including organizers) are redirected to login.
+  if (pathname.startsWith('/master') && role !== 'admin') {
+    return NextResponse.redirect(new URL('/auth/login', request.url))
+  }
 
   // Guest trying to hit organizer routes
   if (role === 'guest' && pathname.startsWith('/dashboard')) {
