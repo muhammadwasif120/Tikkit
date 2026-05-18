@@ -10,13 +10,14 @@ import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as SecureStore from 'expo-secure-store'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase } from '@/lib/supabase'
 import { colors, radius } from '@/theme'
 
 const { width: SCREEN_W } = Dimensions.get('window')
 
 /* ─── Types ───────────────────────────────────────────────────────────────── */
 type Role   = 'organizer' | 'attendee'
-type Screen = 'welcome' | 'signin' | 'signup1' | 'signup2' | 'signup3' | 'verify'
+type Screen = 'welcome' | 'signin' | 'signup1' | 'signup2' | 'signup3' | 'verify' | 'forgot'
 
 /* ─── Category interests ─────────────────────────────────────────────────── */
 const SCENE_CATS = [
@@ -270,8 +271,26 @@ export default function AuthScreen() {
   }
 
   /* ── Forgot password ───────────────────────────────────────────────────── */
-  // placeholder — wire to supabase.auth.resetPasswordForEmail if needed
-  const handleForgotPw = () => setError('Check your inbox — password reset coming soon')
+  const [forgotEmail,    setForgotEmail]    = useState('')
+  const [forgotSent,     setForgotSent]     = useState(false)
+
+  const handleForgotPw = () => { clearError(); setScreen('forgot') }
+
+  const sendResetLink = async () => {
+    clearError()
+    if (!forgotEmail.trim()) return setError('Please enter your email address')
+    setLoading(true)
+    try {
+      const { error: err } = await supabase.auth.resetPasswordForEmail(
+        forgotEmail.trim(),
+        { redirectTo: 'tikkit://reset-password' }
+      )
+      if (err) setError(err.message)
+      else setForgotSent(true)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   /* ══════════════════════════════════════════════════════════════════════════
      SCREENS
@@ -323,6 +342,74 @@ export default function AuthScreen() {
   /* ── Verify email ────────────────────────────────────────────────────────── */
   if (screen === 'verify') {
     return <VerifyEmailScreen email={email} onBack={() => { setScreen('signin'); clearError() }} insets={insets} />
+  }
+
+  /* ── Forgot password ─────────────────────────────────────────────────────── */
+  if (screen === 'forgot') {
+    return (
+      <SafeAreaView style={a.root}>
+        <StatusBar style="light" />
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+          <ScrollView
+            contentContainerStyle={[a.scroll, { paddingBottom: insets.bottom + 32 }]}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <TouchableOpacity style={a.backBtn} onPress={() => { clearError(); setForgotSent(false); setScreen('signin') }}>
+              <Ionicons name="chevron-back" size={18} color={colors.textSecondary} />
+              <Text style={a.backText}>Back to sign in</Text>
+            </TouchableOpacity>
+
+            {forgotSent ? (
+              <View style={fg.sentWrap}>
+                <View style={fg.sentIcon}>
+                  <Ionicons name="mail-open-outline" size={32} color={colors.blue} />
+                </View>
+                <Text style={fg.sentTitle}>Check your inbox</Text>
+                <Text style={fg.sentBody}>
+                  {'We sent a password reset link to\n'}
+                  <Text style={{ color: colors.blue }}>{forgotEmail}</Text>
+                </Text>
+                <Text style={fg.sentHint}>
+                  Click the link in the email, then come back and sign in with your new password.
+                </Text>
+                <CTAButton
+                  label="Back to Sign In"
+                  accent={colors.blue}
+                  onPress={() => { setForgotSent(false); setForgotEmail(''); setScreen('signin') }}
+                />
+              </View>
+            ) : (
+              <>
+                <Text style={[a.headline, { marginTop: 8 }]}>Reset password</Text>
+                <Text style={a.subtext}>
+                  Enter your email and we'll send you a link to create a new password
+                </Text>
+                <View style={a.form}>
+                  <AuthField
+                    icon="mail-outline"
+                    placeholder="Your email address"
+                    value={forgotEmail}
+                    onChangeText={setForgotEmail}
+                    keyboardType="email-address"
+                    accent={colors.blue}
+                    autoCapitalize="none"
+                  />
+                  {error && <ErrorBanner message={error} />}
+                  <CTAButton
+                    label="Send Reset Link"
+                    accent={colors.blue}
+                    loading={loading}
+                    onPress={sendResetLink}
+                    disabled={!forgotEmail.trim()}
+                  />
+                </View>
+              </>
+            )}
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    )
   }
 
   /* ── Sign in ─────────────────────────────────────────────────────────────── */
@@ -886,4 +973,23 @@ const ve = StyleSheet.create({
     elevation: 6,
   },
   btnText: { color: colors.white, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+})
+
+// Forgot password
+const fg = StyleSheet.create({
+  sentWrap: { alignItems: 'center', paddingTop: 40, gap: 14 },
+  sentIcon: {
+    width: 72, height: 72, borderRadius: 36,
+    backgroundColor: colors.blueSubtle, borderWidth: 1, borderColor: colors.blueBorder,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 4,
+  },
+  sentTitle: { color: colors.textPrimary, fontSize: 24, fontFamily: 'Poppins_700Bold', textAlign: 'center' },
+  sentBody: {
+    color: colors.textSecondary, fontSize: 14, fontFamily: 'DMSans_400Regular',
+    textAlign: 'center', lineHeight: 21,
+  },
+  sentHint: {
+    color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular',
+    textAlign: 'center', lineHeight: 19, paddingHorizontal: 12,
+  },
 })

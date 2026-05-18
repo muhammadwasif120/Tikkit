@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { format } from 'date-fns'
 import QRCode from 'react-native-qrcode-svg'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as SecureStore from 'expo-secure-store'
 import { getTickets, Ticket } from '@/lib/api'
 import { colors, radius, getEventGradient } from '@/theme'
 
@@ -17,25 +18,56 @@ const { width: SCREEN_W } = Dimensions.get('window')
 const CARD_W = Math.min(SCREEN_W - 32, 380)
 const QR_SIZE = Math.min(CARD_W - 80, 220)
 
+const QR_CACHE_KEY = (id: string) => `qr_ticket_${id}`
+
 export default function QRTicketScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const insets = useSafeAreaInsets()
 
-  const [ticket, setTicket] = useState<Ticket | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [darkQR, setDarkQR] = useState(false)
+  const [ticket, setTicket]     = useState<Ticket | null>(null)
+  const [loading, setLoading]   = useState(true)
+  const [darkQR, setDarkQR]     = useState(false)
+  const [fromCache, setFromCache] = useState(false)
 
   // Pulsing glow animation
   const glowAnim = useRef(new Animated.Value(0.35)).current
   const glowLoop = useRef<Animated.CompositeAnimation | null>(null)
 
   useEffect(() => {
-    getTickets().then(({ tickets }) => {
-      const found = tickets.find(t => t.id === id) ?? null
-      setTicket(found)
-      if (!found) Alert.alert('Not found', 'Ticket not found')
-    }).finally(() => setLoading(false))
+    if (!id) return
+
+    const load = async () => {
+      // 1. Show cached ticket immediately so QR is visible offline
+      try {
+        const cached = await SecureStore.getItemAsync(QR_CACHE_KEY(id))
+        if (cached) {
+          setTicket(JSON.parse(cached))
+          setFromCache(true)
+          setLoading(false)  // unblock UI straight away
+        }
+      } catch { /* ignore */ }
+
+      // 2. Fetch fresh data from API and update cache
+      try {
+        const { tickets } = await getTickets()
+        const found = tickets.find(t => t.id === id) ?? null
+        if (found) {
+          setTicket(found)
+          setFromCache(false)
+          await SecureStore.setItemAsync(QR_CACHE_KEY(id), JSON.stringify(found))
+        } else if (!ticket) {
+          // Not in API and nothing cached
+          Alert.alert('Not found', 'Ticket not found')
+        }
+      } catch {
+        // Network failed — already showing cached version, nothing to do
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    load()
   }, [id])
 
   useEffect(() => {
@@ -50,7 +82,7 @@ export default function QRTicketScreen() {
     return () => loop.stop()
   }, [])
 
-  if (loading) {
+  if (loading && !ticket) {
     return (
       <View style={s.centered}>
         <ActivityIndicator color={colors.blue} size="large" />
@@ -85,6 +117,12 @@ export default function QRTicketScreen() {
         <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
           <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
+        {fromCache && (
+          <View style={s.offlinePill}>
+            <Ionicons name="cloud-offline-outline" size={11} color={colors.warning} />
+            <Text style={s.offlinePillText}>Offline</Text>
+          </View>
+        )}
         <Text style={s.navTitle}>Your Ticket</Text>
         <View style={{ width: 36 }} />
       </View>
@@ -444,4 +482,13 @@ const s = StyleSheet.create({
     marginTop: 20, opacity: 0.55,
   },
   offlineText: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular' },
+
+  // Offline nav pill
+  offlinePill: {
+    flexDirection: 'row', alignItems: 'center', gap: 4,
+    backgroundColor: colors.warningSubtle,
+    borderRadius: radius.full, paddingHorizontal: 8, paddingVertical: 4,
+    borderWidth: 1, borderColor: colors.warning + '40',
+  },
+  offlinePillText: { color: colors.warning, fontSize: 10, fontFamily: 'DMSans_500Medium' },
 })

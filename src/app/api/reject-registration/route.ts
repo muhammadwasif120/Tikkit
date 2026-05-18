@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createNotification, Notifications } from '@/lib/supabase/notifications'
+import { pushToUser } from '@/lib/pushNotifications'
 import { verifyCsrfOrigin } from '@/lib/csrf'
 
 export async function POST(req: NextRequest) {
@@ -16,10 +17,10 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // Fetch registration + event info for the notification
+    // Fetch registration + event info (include email for attendee push)
     const { data: reg, error: regError } = await supabase
       .from('public_registrations')
-      .select('full_name, event_id, event:events(title, organizer_id)')
+      .select('full_name, email, event_id, event:events(title, organizer_id)')
       .eq('id', registrationId)
       .single()
 
@@ -35,11 +36,35 @@ export async function POST(req: NextRequest) {
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    // Notify the organizer that a guest cancelled / was rejected
+    // Notify the organizer that a guest was rejected
     if (reg && event?.organizer_id) {
       await createNotification(
         Notifications.guestCancellation(event.organizer_id, (reg as any).event_id, (reg as any).full_name, event.title)
       )
+    }
+
+    // Push notification to the attendee (if they have a Tikkit account)
+    if ((reg as any).email) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('email', (reg as any).email.toLowerCase())
+        .maybeSingle()
+
+      if (profile?.id) {
+        const title = 'Registration update'
+        const body  = `Your application for ${event?.title} was not approved this time.`
+
+        await supabase.from('notifications').insert({
+          user_id: profile.id,
+          type:    'registration_rejected',
+          title,
+          body,
+          data:    { event_id: (reg as any).event_id, registration_id: registrationId },
+        } as any)
+
+        pushToUser(profile.id, title, body, { type: 'registration_rejected', eventId: (reg as any).event_id }).catch(() => {})
+      }
     }
 
     return NextResponse.json({ success: true })

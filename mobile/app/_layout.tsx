@@ -2,11 +2,56 @@ import { useEffect } from 'react'
 import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
+import * as Linking from 'expo-linking'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { useFonts } from '@/hooks/useFonts'
+import { usePushNotifications } from '@/hooks/usePushNotifications'
+import { supabase } from '@/lib/supabase'
 import { colors } from '@/theme'
 
 SplashScreen.preventAutoHideAsync()
+
+/**
+ * Parse a deep link URL from Supabase and exchange it for a session.
+ * Returns the auth `type` string ('signup', 'recovery', etc.) so callers
+ * can navigate accordingly.
+ *
+ * Handles both:
+ *   • Implicit flow  — tikkit://#access_token=...&refresh_token=...&type=signup|recovery
+ *   • PKCE flow      — tikkit://?code=...
+ */
+async function handleDeepLink(url: string): Promise<string | null> {
+  try {
+    if (__DEV__) console.log('[DeepLink]', url)
+
+    // Fragment-style (implicit): #access_token=...
+    const hashIdx = url.indexOf('#')
+    if (hashIdx !== -1) {
+      const params = new URLSearchParams(url.slice(hashIdx + 1))
+      const accessToken  = params.get('access_token')
+      const refreshToken = params.get('refresh_token')
+      const type         = params.get('type')
+      if (accessToken && refreshToken) {
+        await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+        return type
+      }
+    }
+
+    // Query-style (PKCE): ?code=...
+    const queryIdx = url.indexOf('?')
+    if (queryIdx !== -1) {
+      const params = new URLSearchParams(url.slice(queryIdx + 1))
+      const code = params.get('code')
+      if (code) {
+        await supabase.auth.exchangeCodeForSession(code)
+        return null
+      }
+    }
+  } catch (e) {
+    if (__DEV__) console.warn('[DeepLink] failed to handle:', e)
+  }
+  return null
+}
 
 function RootNavigator() {
   const { user, profile, loading } = useAuth()
@@ -14,12 +59,33 @@ function RootNavigator() {
   const segments = useSegments()
   const [fontsLoaded, fontError] = useFonts()
 
+  // Register device for push notifications once user is logged in
+  usePushNotifications(user?.id)
+
   const fontsReady = fontsLoaded || !!fontError
   const appReady = fontsReady && !loading
 
   useEffect(() => {
     if (fontsReady) SplashScreen.hideAsync()
   }, [fontsReady])
+
+  // Handle deep links (email verification + password reset)
+  useEffect(() => {
+    const process = async (url: string) => {
+      const type = await handleDeepLink(url)
+      // Password reset link: route user to the reset screen
+      if (type === 'recovery') {
+        router.replace('/(auth)/reset-password')
+      }
+    }
+
+    // Cold start: app opened via deep link
+    Linking.getInitialURL().then(url => { if (url) process(url) })
+
+    // Warm: app already open, link tapped
+    const sub = Linking.addEventListener('url', ({ url }) => process(url))
+    return () => sub.remove()
+  }, [])
 
   useEffect(() => {
     if (!appReady) return
