@@ -114,14 +114,50 @@ export async function getTickets() {
 
 // ─── Profile ──────────────────────────────────────────────────────────────────
 
+export type GuestExtras = {
+  bio: string | null
+  social_credits: number
+  instagram_handle: string | null
+  is_discoverable: boolean
+  notification_prefs: { registration_updates: boolean; payment_reminders: boolean; event_reminders: boolean }
+  attended_count: number
+  active_count: number
+}
+
+export type FullProfile = {
+  id: string
+  full_name: string | null
+  email: string
+  role: string
+  avatar_url: string | null
+  username: string | null
+  phone_number: string | null
+  company_name: string | null
+  city: string | null
+  notification_preferences: Record<string, boolean> | null
+}
+
 export type ProfileUpdate = {
   full_name?: string | null
-  phone?: string | null
+  phone_number?: string | null
   city?: string | null
+  username?: string | null
+  company_name?: string | null
+  notification_preferences?: Record<string, boolean>
+  // guest_profiles fields
+  bio?: string | null
+  instagram_handle?: string | null
+  is_discoverable?: boolean
+  notification_prefs?: Record<string, boolean>
+  avatar_url?: string | null
+}
+
+export async function getProfile() {
+  return request<{ profile: FullProfile; guest_extras: GuestExtras }>('/api/mobile/profile')
 }
 
 export async function updateProfile(body: ProfileUpdate) {
-  return request<{ profile: Record<string, unknown> }>('/api/mobile/profile', {
+  return request<{ profile: FullProfile; ok: boolean }>('/api/mobile/profile', {
     method: 'PATCH',
     body: JSON.stringify(body),
   })
