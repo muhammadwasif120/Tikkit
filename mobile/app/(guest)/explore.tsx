@@ -12,6 +12,10 @@ import { format, isToday, isThisWeek } from 'date-fns'
 import { getEvents, getTickets, EventSummary, addFavourite, removeFavourite } from '@/lib/api'
 import { colors, radius, getEventGradient } from '@/theme'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as SecureStore from 'expo-secure-store'
+import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
+import { Skeleton } from '@/components/Skeleton'
 
 const { width: SCREEN_W } = Dimensions.get('window')
 const CARD_W = SCREEN_W - 32   // 16px margin each side
@@ -58,6 +62,7 @@ function groupEvents(events: EventSummary[]) {
 /* ─── Main screen ─────────────────────────────────────────────────────────── */
 export default function ExploreScreen() {
   const router = useRouter()
+  const { user } = useAuth()
   const [events, setEvents] = useState<EventSummary[]>([])
   const [myTickets, setMyTickets] = useState<MyTicket[]>([])
   const [loading, setLoading] = useState(true)
@@ -69,6 +74,43 @@ export default function ExploreScreen() {
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
   const [favourites, setFavourites] = useState<Set<string>>(new Set())
+
+  // ── Seed pending interests from signup into the behaviour engine ──────────
+  useEffect(() => {
+    if (!user?.id) return
+    ;(async () => {
+      try {
+        const raw = await SecureStore.getItemAsync('pending_interests')
+        if (!raw) return
+        const slugs: string[] = JSON.parse(raw)
+        if (!slugs.length) return
+
+        // Look up category IDs from slugs
+        const { data: cats } = await (supabase as any)
+          .from('event_categories')
+          .select('id, slug')
+          .in('slug', slugs)
+
+        if (!cats?.length) return
+
+        // Seed a score for each selected category
+        await Promise.all(
+          (cats as { id: string; slug: string }[]).map(cat =>
+            (supabase as any).rpc('upsert_category_score', {
+              p_user_id: user.id,
+              p_category_id: cat.id,
+              p_delta: 3,        // 3pts per selected interest (same as organiser_visit weight)
+            })
+          )
+        )
+
+        // Done — clear so it never runs again
+        await SecureStore.deleteItemAsync('pending_interests')
+      } catch {
+        /* silent — non-critical */
+      }
+    })()
+  }, [user?.id])
 
   const fetchEvents = useCallback(async (p = 0, cat = category, q = search) => {
     try {
@@ -220,8 +262,17 @@ export default function ExploreScreen() {
       </ScrollView>
 
       {loading ? (
-        <View style={s.loadingWrap}>
-          <ActivityIndicator color={colors.blue} size="large" />
+        <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+          {/* Carousel skeleton */}
+          <Skeleton height={200} borderRadius={16} style={{ marginBottom: 20 }} />
+          {/* Event card skeletons */}
+          {[0, 1, 2].map(i => (
+            <View key={i} style={{ marginBottom: 14 }}>
+              <Skeleton height={180} borderRadius={12} style={{ marginBottom: 8 }} />
+              <Skeleton width="70%" height={16} style={{ marginBottom: 6 }} />
+              <Skeleton width="45%" height={13} />
+            </View>
+          ))}
         </View>
       ) : (
         <FlatList

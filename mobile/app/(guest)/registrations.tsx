@@ -3,6 +3,7 @@ import {
   Image, ActivityIndicator, RefreshControl, Alert, Modal,
   Pressable,
 } from 'react-native'
+import { Skeleton } from '@/components/Skeleton'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -337,9 +338,22 @@ export default function RegistrationsScreen() {
 
   if (loading) {
     return (
-      <View style={s.centered}>
-        <ActivityIndicator color={colors.blue} size="large" />
-      </View>
+      <SafeAreaView style={s.root}>
+        <StatusBar style="light" />
+        <View style={s.header}>
+          <Skeleton width={160} height={28} style={{ marginBottom: 6 }} />
+          <Skeleton width={100} height={14} />
+        </View>
+        <View style={{ paddingHorizontal: 16, gap: 12 }}>
+          {[0, 1, 2].map(i => (
+            <View key={i} style={s.skeletonCard}>
+              <Skeleton height={72} borderRadius={8} style={{ marginBottom: 10 }} />
+              <Skeleton width="60%" height={14} style={{ marginBottom: 6 }} />
+              <Skeleton width="80%" height={36} borderRadius={8} />
+            </View>
+          ))}
+        </View>
+      </SafeAreaView>
     )
   }
 
@@ -487,6 +501,11 @@ function RegistrationCard({ reg, onPay, onChat, onViewEvent }: {
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.pageBg },
   centered: { flex: 1, backgroundColor: colors.pageBg, justifyContent: 'center', alignItems: 'center' },
+
+  skeletonCard: {
+    backgroundColor: colors.surface, borderRadius: 12,
+    borderWidth: 1, borderColor: colors.border, padding: 14,
+  },
 
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
   heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },

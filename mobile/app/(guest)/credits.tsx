@@ -10,6 +10,7 @@ import { format } from 'date-fns'
 import { getCredits, CreditTransaction } from '@/lib/api'
 import { colors, radius, creditTiers } from '@/theme'
 import { LinearGradient } from 'expo-linear-gradient'
+import { Skeleton } from '@/components/Skeleton'
 
 /* ─── Tier config ─────────────────────────────────────────────────────────── */
 const TIER_META: Record<string, {
@@ -153,9 +154,29 @@ export default function CreditsScreen() {
 
   if (loading) {
     return (
-      <View style={s.centered}>
-        <ActivityIndicator color={colors.blue} size="large" />
-      </View>
+      <SafeAreaView style={s.root}>
+        <StatusBar style="light" />
+        <View style={{ padding: 16, gap: 12 }}>
+          {/* Prestige card skeleton */}
+          <Skeleton height={220} borderRadius={20} style={{ marginBottom: 8 }} />
+          {/* Section header */}
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+            <Skeleton width={160} height={18} />
+            <Skeleton width={60} height={14} />
+          </View>
+          {/* Transaction rows */}
+          {[0, 1, 2, 4].map(i => (
+            <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <Skeleton width={42} height={42} borderRadius={21} />
+              <View style={{ flex: 1, gap: 6 }}>
+                <Skeleton width="65%" height={14} />
+                <Skeleton width="40%" height={12} />
+              </View>
+              <Skeleton width={40} height={18} />
+            </View>
+          ))}
+        </View>
+      </SafeAreaView>
     )
   }
 

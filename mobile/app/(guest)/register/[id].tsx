@@ -141,13 +141,13 @@ export default function RegisterScreen() {
         phone: phone.trim() || undefined,
         ticketDays: event?.ticket_types?.length ? selectedDays : null,
       })
-      Alert.alert(
-        result.status === 'approved' ? '🎉 Registered!' : '📋 Application Submitted',
-        result.status === 'approved'
-          ? 'You\'re registered. Check your Tickets tab for your QR code.'
-          : 'Your application is under review. We\'ll notify you once it\'s approved.',
-        [{ text: 'View My Events', onPress: () => router.replace('/(guest)/registrations') }]
-      )
+      router.replace({
+        pathname: '/(guest)/register/success',
+        params: {
+          status: result.status,
+          title: event?.title ?? '',
+        },
+      })
     } catch (err: any) {
       Alert.alert('Registration failed', err.message ?? 'Something went wrong. Please try again.')
     } finally {
