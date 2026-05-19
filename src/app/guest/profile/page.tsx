@@ -45,6 +45,7 @@ async function ProfileData() {
     avatar_url:        p?.avatar_url        ?? null,
     username:          gp?.username         ?? null,
     bio:               gp?.bio              ?? null,
+    city:              (p as any)?.city     ?? null,
     instagram_handle:  gp?.instagram_handle ?? null,
     is_discoverable:   gp?.is_discoverable  ?? true,
     credit_score:      gp?.credit_score     ?? 0,

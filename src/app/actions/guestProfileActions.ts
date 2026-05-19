@@ -105,6 +105,7 @@ export async function updateGuestProfile(formData: FormData) {
   const instagram_handle = (formData.get('instagram_handle') as string)?.trim().replace(/^@/, '')
   const bio = (formData.get('bio') as string)?.trim()
   const is_discoverable = formData.get('is_discoverable') === 'true'
+  const city = (formData.get('city') as string)?.trim() || null
 
   // Check username uniqueness (if changed)
   if (username) {
@@ -134,12 +135,11 @@ export async function updateGuestProfile(formData: FormData) {
   }
 
   // Sync editable identity fields to base profiles table
-  const profileUpdate: Record<string, string> = {}
+  const profileUpdate: Record<string, string | null> = {}
   if (full_name) profileUpdate.full_name = full_name
   if (phone)     profileUpdate.phone_number = phone
-  if (Object.keys(profileUpdate).length > 0) {
-    await supabase.from('profiles').update(profileUpdate).eq('id', user.id)
-  }
+  profileUpdate.city = city  // always write (can be null to clear)
+  await supabase.from('profiles').update(profileUpdate).eq('id', user.id)
 
   revalidatePath('/guest/profile')
   return { success: true }

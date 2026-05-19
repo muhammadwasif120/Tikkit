@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Check, ChevronDown, Star, Eye, EyeOff, Lock } from 'lucide-react'
 import Link from 'next/link'
+import { PAKISTAN_CITIES } from '@/lib/pakistanCities'
 
 type TicketType = {
   id: string
@@ -47,6 +48,7 @@ export default function PublicRegistrationForm({
     dob: '',
     cnic: '',
     referenceCode: '',
+    city: '',
   })
   const [showPw, setShowPw] = useState(false)
   const [selectedTicketTypeId, setSelectedTicketTypeId] = useState<string>(
@@ -112,6 +114,7 @@ export default function PublicRegistrationForm({
     await supabase.from('profiles').update({
       phone_number: form.phone.trim(),
       cnic_number: form.cnic.trim(),
+      city: form.city || null,
     }).eq('id', user.id)
 
     await supabase.from('guest_profiles').upsert({
@@ -304,6 +307,20 @@ export default function PublicRegistrationForm({
           <input type="tel" required placeholder="+92 300 0000000"
             className={inputCls} value={form.phone}
             onChange={e => f('phone', e.target.value)} />
+        </div>
+
+        {/* City */}
+        <div style={{ position: 'relative' }}>
+          <select
+            value={form.city}
+            onChange={e => f('city', e.target.value)}
+            className={inputCls}
+            style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' }}
+          >
+            <option value="">City (optional)</option>
+            {PAKISTAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
         </div>
 
         <div>

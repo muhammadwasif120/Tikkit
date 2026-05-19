@@ -1,7 +1,7 @@
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator,
-  Image, Dimensions, Animated,
+  Image, Dimensions, Animated, Modal,
 } from 'react-native'
 import { useState, useRef, useEffect } from 'react'
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -14,6 +14,14 @@ import { supabase } from '@/lib/supabase'
 import { colors, radius } from '@/theme'
 
 const { width: SCREEN_W } = Dimensions.get('window')
+
+const PAKISTAN_CITIES = [
+  'Karachi','Lahore','Islamabad','Rawalpindi','Faisalabad','Multan',
+  'Peshawar','Quetta','Sialkot','Gujranwala','Hyderabad','Abbottabad',
+  'Bahawalpur','Sargodha','Sukkur','Larkana','Sheikhupura','Jhang',
+  'Rahim Yar Khan','Gujrat','Mardan','Kasur','Dera Ghazi Khan',
+  'Nawabshah','Mingora','Other',
+]
 
 /* ─── Types ───────────────────────────────────────────────────────────────── */
 type Role   = 'organizer' | 'attendee'
@@ -194,6 +202,7 @@ export default function AuthScreen() {
   // Details
   const [phone,    setPhone]    = useState('')
   const [city,     setCity]     = useState('')
+  const [showCityPicker, setShowCityPicker] = useState(false)
   const [gender,   setGender]   = useState('')
 
   const [loading,  setLoading]  = useState(false)
@@ -628,10 +637,44 @@ export default function AuthScreen() {
             onChangeText={setPhone} keyboardType="phone-pad" accent={accent}
             autoCapitalize="none"
           />
-          <AuthField
-            icon="location-outline" placeholder="Your city (optional)" value={city}
-            onChangeText={setCity} accent={accent} autoCapitalize="words"
-          />
+          {/* City picker */}
+          <TouchableOpacity
+            onPress={() => setShowCityPicker(true)}
+            style={[a.cityPickerBtn, city ? { borderColor: accent + '40' } : {}]}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="location-outline" size={18} color={city ? accent : colors.textMuted} />
+            <Text style={[a.cityPickerText, city ? { color: colors.textPrimary } : {}]}>
+              {city || 'Your city (optional)'}
+            </Text>
+            <Ionicons name="chevron-down-outline" size={16} color={colors.textMuted} />
+          </TouchableOpacity>
+
+          <Modal
+            visible={showCityPicker}
+            transparent
+            animationType="slide"
+            onRequestClose={() => setShowCityPicker(false)}
+          >
+            <TouchableOpacity style={a.modalOverlay} activeOpacity={1} onPress={() => setShowCityPicker(false)} />
+            <View style={a.cityModal}>
+              <View style={a.cityModalHandle} />
+              <Text style={a.cityModalTitle}>Select City</Text>
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {PAKISTAN_CITIES.map(c => (
+                  <TouchableOpacity
+                    key={c}
+                    style={[a.cityOption, city === c && { backgroundColor: accent + '15' }]}
+                    onPress={() => { setCity(c); setShowCityPicker(false) }}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={[a.cityOptionText, city === c && { color: accent, fontFamily: 'DMSans_500Medium' }]}>{c}</Text>
+                    {city === c && <Ionicons name="checkmark" size={16} color={accent} />}
+                  </TouchableOpacity>
+                ))}
+              </ScrollView>
+            </View>
+          </Modal>
 
           {isAttendee && (
             <View style={a.genderWrap}>
@@ -879,6 +922,65 @@ const a = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   genderBtnText: { color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular' },
+
+  cityPickerBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+  },
+  cityPickerText: {
+    flex: 1,
+    color: colors.textMuted,
+    fontSize: 15,
+    fontFamily: 'DMSans_400Regular',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  cityModal: {
+    backgroundColor: colors.surface,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    paddingBottom: 40,
+    maxHeight: '70%',
+  },
+  cityModalHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.border,
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  cityModalTitle: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+    fontFamily: 'DMSans_700Bold',
+    marginBottom: 12,
+  },
+  cityOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    paddingHorizontal: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  cityOptionText: {
+    color: colors.textSecondary,
+    fontSize: 15,
+    fontFamily: 'DMSans_400Regular',
+  },
 })
 
 // Role cards

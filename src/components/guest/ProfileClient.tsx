@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { Edit3, Star, Award, LogOut, Bell, Instagram, ChevronRight, X, Check, AlertCircle, Flame, Lock, Sparkles, KeyRound, CalendarDays, MapPin, ChevronDown, ShieldCheck, Ticket, Trash2, Camera, Palette } from 'lucide-react'
 import { updateGuestProfile, signOut, sendPasswordReset, uploadProfilePhoto, deleteAccount, updateNotificationPrefs } from '@/app/actions/guestProfileActions'
 import { getCreditTier } from '@/lib/creditUtils'
+import { PAKISTAN_CITIES } from '@/lib/pakistanCities'
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
 import VerifyForm from '@/components/verification/VerifyForm'
@@ -15,7 +16,7 @@ import { ThemePicker } from '@/components/theme/ThemePicker'
 type Profile = {
   id: string; full_name: string | null; username: string | null
   phone: string | null; avatar_url: string | null; instagram_handle: string | null
-  bio: string | null; is_discoverable: boolean
+  bio: string | null; city: string | null; is_discoverable: boolean
   attendance_streak: number; total_attended: number; total_no_shows: number
   credit_score: number
   is_id_verified: boolean; is_payment_verified: boolean; social_score: number
@@ -385,6 +386,7 @@ function EditSheet({ profile, email, onClose, onSave }: {
   const [username, setUsername]          = useState(profile.username ?? '')
   const [instagram_handle, setInstagram] = useState(profile.instagram_handle ?? '')
   const [bio, setBio]                    = useState(profile.bio ?? '')
+  const [city, setCity]                  = useState(profile.city ?? '')
   const [is_discoverable, setDiscoverable] = useState(profile.is_discoverable)
   const [busy, setBusy]                  = useState(false)
   const [err, setErr]                    = useState<string | null>(null)
@@ -426,10 +428,11 @@ function EditSheet({ profile, email, onClose, onSave }: {
       fd.append('username', username)
       fd.append('instagram_handle', instagram_handle)
       fd.append('bio', bio)
+      fd.append('city', city)
       fd.append('is_discoverable', String(is_discoverable))
       const res = await updateGuestProfile(fd)
       if (res?.error) { setErr(res.error); return }
-      onSave({ full_name, phone, username, instagram_handle, bio, is_discoverable })
+      onSave({ full_name, phone, username, instagram_handle, bio, is_discoverable, city })
       onClose()
     } catch { setErr('Failed to save. Try again.') }
     finally { setBusy(false) }
@@ -534,6 +537,22 @@ function EditSheet({ profile, email, onClose, onSave }: {
           <label style={{ color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>Bio</label>
           <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Tell organizers about yourself..." rows={3}
             style={{ ...inputStyle, resize: 'none' }} />
+        </div>
+
+        {/* City */}
+        <div style={{ marginBottom: 14 }}>
+          <label style={{ color: 'var(--text-muted)', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: 6 }}>City</label>
+          <div style={{ position: 'relative' }}>
+            <select
+              value={city}
+              onChange={e => setCity(e.target.value)}
+              style={{ ...inputStyle, appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer', paddingRight: 36 }}
+            >
+              <option value="">Select your city</option>
+              {PAKISTAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <ChevronDown size={15} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+          </div>
         </div>
 
         {/* Discoverable toggle */}
