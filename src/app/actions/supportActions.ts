@@ -39,9 +39,17 @@ export async function getSupportConversation(): Promise<SupportMessage[]> {
 
 export async function sendSupportMessage(message: string): Promise<{ error?: string }> {
   if (!message.trim()) return { error: 'Message cannot be empty' }
+  if (message.length > 2000) return { error: 'Message must be 2,000 characters or fewer.' }
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
+
+  // Rate limit: 20 messages per user per minute
+  const { checkRateLimit } = await import('@/lib/rateLimit')
+  if (!checkRateLimit(`support:${user.id}`, 20, 60_000)) {
+    return { error: 'Too many messages. Please wait before sending more.' }
+  }
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -91,6 +99,7 @@ export async function getAdminSupportConversations(): Promise<SupportConversatio
     .from('support_messages')
     .select('*')
     .order('created_at', { ascending: false })
+    .limit(1000)
 
   const map = new Map<string, SupportConversationSummary & { seenFirst: boolean }>()
   for (const msg of (data ?? [])) {

@@ -177,12 +177,18 @@ export async function POST(req: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+    // Rate limit: max 5 approval/rejection emails per organizer per recipient per hour
     const body = await req.json()
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { type, name, email, eventTitle, organizer, registrationId } = body
 
     if (!type || !email) {
       return NextResponse.json({ error: 'type and email are required' }, { status: 400 })
+    }
+
+    const { checkRateLimit } = await import('@/lib/rateLimit')
+    if (!checkRateLimit(`approval-email:${user.id}:${email}`, 5, 3_600_000)) {
+      return NextResponse.json({ error: 'Too many emails sent to this address. Please wait before retrying.' }, { status: 429 })
     }
 
     // M1: If a registrationId is supplied (payment flows), verify the registration's
@@ -251,7 +257,7 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('Resend error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      { console.error(error); return NextResponse.json({ error: "Internal server error" }, { status: 500 }) }
     }
 
     return NextResponse.json({ success: true, id: data?.id })

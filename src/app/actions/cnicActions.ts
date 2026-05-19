@@ -65,7 +65,14 @@ export async function submitCnicVerification(params: {
   const base64 = imageDataUrl.split(',')[1]
   if (!base64) return { error: 'Invalid image data' }
 
+  // Guard against payload bombs: base64 overhead is ~1.37x, so 10MB base64 ≈ 7.3MB decoded.
+  // Reject before allocating any buffer memory.
+  if (base64.length > 10_000_000) return { error: 'Image too large. Maximum size is 7MB.' }
+
   const buffer = Buffer.from(base64, 'base64')
+
+  // Secondary check on decoded size
+  if (buffer.byteLength > 7 * 1024 * 1024) return { error: 'Image too large. Maximum size is 7MB.' }
   const fileName = `${user.id}/cnic_${Date.now()}.jpg`
 
   // Upload watermarked image to private bucket

@@ -38,8 +38,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No recipients provided' }, { status: 400 })
     }
 
+    // Abuse guard: cap batch size to prevent quota exhaustion
+    if (recipients.length > 500) {
+      return NextResponse.json({ error: 'Maximum 500 recipients per send' }, { status: 400 })
+    }
+
     if (!subject || !body) {
       return NextResponse.json({ error: 'Subject and body are required' }, { status: 400 })
+    }
+
+    // Length caps to prevent oversized payloads
+    if (subject.length > 200) {
+      return NextResponse.json({ error: 'Subject must be 200 characters or fewer' }, { status: 400 })
+    }
+    if (body.length > 10_000) {
+      return NextResponse.json({ error: 'Body must be 10,000 characters or fewer' }, { status: 400 })
     }
 
     // Send emails individually so we can personalise with {name}

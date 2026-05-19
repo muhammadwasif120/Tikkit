@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     .eq('id', userId)
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   let guestExtras: Record<string, any> = {}
 
@@ -99,7 +99,7 @@ export async function PATCH(req: NextRequest) {
       .eq('id', userId)
       .select('id, full_name, email, role, avatar_url, username, phone_number, company_name, city, notification_preferences')
       .single()
-    if (error) return Response.json({ error: error.message }, { status: 500 })
+    if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
     updatedProfile = data
   }
 

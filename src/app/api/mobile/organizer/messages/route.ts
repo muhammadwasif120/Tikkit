@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     .eq('user_id', userId)
     .order('created_at', { ascending: true })
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ messages: messages ?? [] })
 }
 
@@ -46,6 +46,6 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ message: msg }, { status: 201 })
 }

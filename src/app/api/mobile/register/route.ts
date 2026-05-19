@@ -1,16 +1,28 @@
 import { createMobileClient, mobileUnauthorized, mobileBadRequest } from '@/lib/supabase/mobile'
+import { checkRateLimit } from '@/lib/rateLimit'
 import { NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest) {
   const auth = await createMobileClient(req.headers.get('Authorization'))
   if (!auth) return mobileUnauthorized()
-  const { supabase } = auth
+  const { supabase, userId } = auth
+
+  // Rate limit: 10 registration attempts per user per 10 minutes
+  if (!checkRateLimit(`mobile:register:${userId}`, 10, 600_000)) {
+    return Response.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+  }
 
   const body = await req.json().catch(() => null)
   if (!body) return mobileBadRequest('Invalid JSON')
 
   const { eventId, name, email, phone, ticketDays } = body
   if (!eventId || !name || !email) return mobileBadRequest('Missing required fields')
+
+  // Input length caps
+  if (typeof name === 'string' && name.length > 100) return mobileBadRequest('Name too long')
+  if (typeof email === 'string' && email.length > 255) return mobileBadRequest('Email too long')
+  if (phone && typeof phone === 'string' && phone.length > 30) return mobileBadRequest('Phone too long')
+
   if (ticketDays !== undefined && ticketDays !== null && !Array.isArray(ticketDays)) {
     return mobileBadRequest('ticketDays must be an array or null')
   }

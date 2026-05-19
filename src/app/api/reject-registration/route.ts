@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
       .eq('id', registrationId)
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) { console.error(error); return NextResponse.json({ error: "Internal server error" }, { status: 500 }) }
 
     // Notify the organizer that a guest was rejected
     if (reg && event?.organizer_id) {

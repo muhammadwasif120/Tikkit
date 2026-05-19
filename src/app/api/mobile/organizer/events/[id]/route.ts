@@ -83,6 +83,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     .select('id, title, status')
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ event })
 }

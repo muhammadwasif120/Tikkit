@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
     .eq('organizer_id', userId)
     .order('name')
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ vendors: vendors ?? [] })
 }
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ vendor }, { status: 201 })
 }
 
@@ -64,7 +64,7 @@ export async function PATCH(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ vendor })
 }
 
@@ -82,6 +82,6 @@ export async function DELETE(req: NextRequest) {
   if (!existing) return Response.json({ error: 'Vendor not found' }, { status: 404 })
 
   const { error } = await (supabase as any).from('vendors').delete().eq('id', id)
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ ok: true })
 }

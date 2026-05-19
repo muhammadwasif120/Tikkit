@@ -29,7 +29,7 @@ export async function GET(
     .eq('status', 'published')
     .maybeSingle()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   if (!event) return Response.json({ error: 'Event not found' }, { status: 404 })
 
   // Check if user is already registered

@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
       .select('organizer_id, profiles!organizer_favourites_organizer_id_fkey(id, full_name, username, logo_url)')
       .eq('user_id', userId)
 
-    if (error) return Response.json({ error: error.message }, { status: 500 })
+    if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
     return Response.json({ favourites: data ?? [] })
   }
 
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
              profiles!events_organizer_id_fkey(full_name, username))`)
     .eq('user_id', userId)
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ favourites: data ?? [] })
 }
 

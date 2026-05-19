@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
       { onConflict: 'user_id,token' }
     )
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   return Response.json({ ok: true })
 }

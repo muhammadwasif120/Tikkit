@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
   else if (filter === 'rejected') query = query.eq('status', 'rejected')
 
   const { data: registrations, error } = await query
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   // Alias registration_notes → notes for mobile client compatibility
   const mapped = (registrations ?? []).map((r: any) => ({
@@ -99,6 +99,6 @@ export async function POST(req: NextRequest) {
   const { data: updated, error } = await (supabase as any)
     .from('public_registrations').update(update).eq('id', registrationId).select().single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ registration: { ...updated, notes: updated.registration_notes ?? null } })
 }

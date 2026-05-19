@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
   else if (tier === 'regular') query = query.eq('is_vip', false).eq('waitlist', false)
 
   const { data: guests, error } = await query
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   return Response.json({ guests: guests ?? [], events: events ?? [] })
 }
@@ -72,7 +72,7 @@ export async function PATCH(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ guest: updated })
 }
 
@@ -95,6 +95,6 @@ export async function DELETE(req: NextRequest) {
   if (!event) return Response.json({ error: 'Forbidden' }, { status: 403 })
 
   const { error } = await (supabase as any).from('guests').delete().eq('id', guestId)
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ ok: true })
 }

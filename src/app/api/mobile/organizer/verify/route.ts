@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     .eq('id', userId)
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({
     status: profile?.cnic_status ?? 'unverified',
     cnic_number: profile?.cnic_number ?? null,

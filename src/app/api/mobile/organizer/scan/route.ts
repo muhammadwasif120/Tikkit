@@ -1,4 +1,5 @@
 import { createMobileClient, mobileUnauthorized, mobileBadRequest } from '@/lib/supabase/mobile'
+import { checkRateLimit } from '@/lib/rateLimit'
 import { NextRequest } from 'next/server'
 import { deriveEventKey, verifyQRToken } from '@/lib/qrCrypto'
 
@@ -12,6 +13,11 @@ export async function POST(req: NextRequest) {
   const auth = await createMobileClient(req.headers.get('Authorization'))
   if (!auth) return mobileUnauthorized()
   const { supabase, userId } = auth
+
+  // Rate limit: 120 scans per minute (generous for real scanning, blocks automated probing)
+  if (!checkRateLimit(`scan:${userId}`, 120, 60_000)) {
+    return Response.json({ error: 'Scan rate limit exceeded. Please slow down.' }, { status: 429 })
+  }
 
   const { data: profile } = await (supabase as any)
     .from('profiles').select('role').eq('id', userId).single()

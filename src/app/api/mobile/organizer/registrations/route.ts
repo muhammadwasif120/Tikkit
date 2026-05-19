@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
   if (status) query = query.eq('status', status)
 
   const { data, error } = await query
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   return Response.json({ registrations: data ?? [] })
 }
@@ -95,7 +95,7 @@ export async function PATCH(req: NextRequest) {
     .select('id, status, event_id, full_name, email')
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   return Response.json({ registration: updated })
 }

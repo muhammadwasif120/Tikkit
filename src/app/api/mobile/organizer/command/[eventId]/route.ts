@@ -108,7 +108,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ eve
 
     const { data, error } = await (supabase as any)
       .from('public_registrations').update(update).eq('id', reg.id).select().single()
-    if (error) return Response.json({ error: error.message }, { status: 500 })
+    if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
     return Response.json({ registration: data })
   }
 
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ eve
       .select('id, user_id, role, message, created_at')
       .single()
 
-    if (error) return Response.json({ error: error.message }, { status: 500 })
+    if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
     return Response.json({
       message: { ...msg, sender_name: senderProfile?.full_name ?? 'Organizer', sender_avatar: null }
     }, { status: 201 })

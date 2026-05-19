@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
   if (search) query = query.ilike('title', `%${search}%`)
 
   const { data, error } = await query
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   return Response.json({ events: data ?? [], page, limit })
 }

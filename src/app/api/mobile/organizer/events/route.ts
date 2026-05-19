@@ -29,6 +29,16 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Title and start date are required' }, { status: 400 })
   }
 
+  // Numeric bounds validation — prevent negative prices and absurd capacities
+  const parsedCapacity = capacity ? parseInt(capacity) : null
+  const parsedPrice = ticket_price ? parseFloat(ticket_price) : null
+  if (parsedCapacity !== null && (isNaN(parsedCapacity) || parsedCapacity < 1 || parsedCapacity > 100_000)) {
+    return Response.json({ error: 'Capacity must be between 1 and 100,000' }, { status: 400 })
+  }
+  if (parsedPrice !== null && (isNaN(parsedPrice) || parsedPrice < 0 || parsedPrice > 10_000_000)) {
+    return Response.json({ error: 'Ticket price must be between 0 and 10,000,000' }, { status: 400 })
+  }
+
   const { data: event, error } = await (supabase as any)
     .from('events')
     .insert({
@@ -39,8 +49,8 @@ export async function POST(req: NextRequest) {
       venue_name: venue_name?.trim() || null,
       venue_address: venue_address?.trim() || null,
       city: venue_city?.trim() || null,   // column is `city` not `venue_city`
-      capacity: capacity ? parseInt(capacity) : null,
-      ticket_price: ticket_price ? parseFloat(ticket_price) : null,
+      capacity: parsedCapacity,
+      ticket_price: parsedPrice,
       registration_mode: registration_mode ?? 'open',
       category_id: category_id || null,
       status: status ?? 'draft',
@@ -49,7 +59,7 @@ export async function POST(req: NextRequest) {
     .select('id, title, status')
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ event }, { status: 201 })
 }
 
@@ -84,7 +94,7 @@ export async function GET(req: NextRequest) {
   if (status) query = query.eq('status', status)
 
   const { data, error } = await query
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   // Attach registration counts
   const eventIds = (data ?? []).map((e: any) => e.id)

@@ -100,7 +100,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ eve
     .select('id, user_id, role, message, created_at')
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   return Response.json({
     message: {

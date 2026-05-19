@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     .eq('email', user.email)
     .order('created_at', { ascending: false })
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   const QR_SECRET = getQrSecret()
 

@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
     .in('vendor_id', vendorIds)
     .order('due_date', { ascending: true })
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ invoices: invoices ?? [] })
 }
 
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
 
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ invoice }, { status: 201 })
 }
 
@@ -81,7 +81,7 @@ export async function PATCH(req: NextRequest) {
 
   const { data: invoice, error } = await (supabase as any)
     .from('vendor_invoices').update(update).eq('id', id).select().single()
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ invoice })
 }
 
@@ -100,6 +100,6 @@ export async function DELETE(req: NextRequest) {
     return Response.json({ error: 'Not found' }, { status: 404 })
 
   const { error } = await (supabase as any).from('vendor_invoices').delete().eq('id', id)
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ ok: true })
 }

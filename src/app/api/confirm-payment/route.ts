@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       .update({ payment_status: 'confirmed', reviewed_at: new Date().toISOString() })
       .eq('id', registrationId)
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) { console.error(error); return NextResponse.json({ error: "Internal server error" }, { status: 500 }) }
 
     if (reg?.email) {
       const { data: profile } = await supabase

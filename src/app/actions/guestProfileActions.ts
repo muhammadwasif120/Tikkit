@@ -156,6 +156,13 @@ export async function sendPasswordReset() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user?.email) return { error: 'No email found' }
+
+  // Rate limit: 3 reset emails per hour per user
+  const { checkRateLimit } = await import('@/lib/rateLimit')
+  if (!checkRateLimit(`pwreset:${user.id}`, 3, 3_600_000)) {
+    return { error: 'Too many reset attempts. Please wait before trying again.' }
+  }
+
   const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
     redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/reset-password`,
   })
