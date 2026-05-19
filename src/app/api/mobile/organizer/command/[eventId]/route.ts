@@ -96,8 +96,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ eve
     else if (action === 'confirm_payment') update.payment_status = 'confirmed'
     else return Response.json({ error: 'Invalid action' }, { status: 400 })
 
+    // Ownership check: verify the registration belongs to this event before updating.
+    // Prevents IDOR where an organizer supplies a registrationId from another event.
+    const { data: reg, error: fetchError } = await (supabase as any)
+      .from('public_registrations')
+      .select('id, event_id')
+      .eq('id', registrationId)
+      .single()
+    if (fetchError || !reg) return Response.json({ error: 'Registration not found' }, { status: 404 })
+    if (reg.event_id !== eventId) return Response.json({ error: 'Forbidden' }, { status: 403 })
+
     const { data, error } = await (supabase as any)
-      .from('public_registrations').update(update).eq('id', registrationId).select().single()
+      .from('public_registrations').update(update).eq('id', reg.id).select().single()
     if (error) return Response.json({ error: error.message }, { status: 500 })
     return Response.json({ registration: data })
   }

@@ -8,8 +8,26 @@ import type { PayProWebhookPayload } from '@/types/verification'
  *
  * BillReference format: "TKT-VRF-{userId[:20]}-{timestamp}"
  * We parse userId from BillReference to route the verification update.
+ *
+ * Security: set PAYPRO_WEBHOOK_SECRET in Vercel env vars and configure the
+ * same value as a custom header (x-paypro-secret) in the PayPro merchant
+ * dashboard IPN settings. If the env var is set, any request missing or
+ * mismatching the header is rejected before touching the DB.
  */
 export async function POST(req: NextRequest) {
+  // Pre-shared secret guard — prevents forged IPN calls from marking
+  // payments as verified without a real PayPro transaction.
+  const webhookSecret = process.env.PAYPRO_WEBHOOK_SECRET
+  if (webhookSecret) {
+    const provided = req.headers.get('x-paypro-secret')
+    if (provided !== webhookSecret) {
+      console.warn('paypro webhook: invalid or missing x-paypro-secret header')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+  } else {
+    console.warn('paypro webhook: PAYPRO_WEBHOOK_SECRET is not set — webhook is unauthenticated')
+  }
+
   let payload: PayProWebhookPayload
 
   // PayPro sends application/x-www-form-urlencoded or JSON — handle both

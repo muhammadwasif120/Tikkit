@@ -20,7 +20,12 @@ export async function submitPaymentScreenshot(formData: FormData) {
   if (!screenshot || screenshot.size === 0) return { error: 'No screenshot provided' }
   if (screenshot.size > 5 * 1024 * 1024) return { error: 'File too large (max 5MB)' }
 
-  // Verify this registration belongs to the current user and is in eoi_approved state
+  const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif']
+  if (!ALLOWED_MIME.includes((screenshot.type ?? '').toLowerCase())) {
+    return { error: 'Invalid file type. Please upload a JPEG, PNG, or WebP image.' }
+  }
+
+  // Verify this registration belongs to the current user and is approved
   const { data: reg, error: regError } = await (supabase as any)
     .from('public_registrations')
     .select('id, status, email, event_id')
@@ -39,7 +44,7 @@ export async function submitPaymentScreenshot(formData: FormData) {
   const path = `payment-screenshots/${user.id}/${registrationId}.${ext}`
 
   const { error: uploadError } = await supabase.storage
-    .from('tikkit-uploads')
+    .from('payment-screenshots')
     .upload(path, screenshot, { upsert: true, contentType: screenshot.type })
 
   if (uploadError) {
@@ -47,8 +52,9 @@ export async function submitPaymentScreenshot(formData: FormData) {
     return { error: 'Upload failed. Please try again.' }
   }
 
+  // payment-screenshots bucket is private; store the path and serve via signed URL as needed
   const { data: { publicUrl } } = supabase.storage
-    .from('tikkit-uploads')
+    .from('payment-screenshots')
     .getPublicUrl(path)
 
   // H7: Update payment_status (not registration status) to 'submitted'.

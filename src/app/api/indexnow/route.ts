@@ -23,13 +23,17 @@ const STATIC_URLS = [
  *   -H "x-indexnow-secret: <your-deploy-secret>"
  */
 export async function POST(req: NextRequest) {
-  // Simple auth gate — set INDEXNOW_SECRET env var in Vercel
+  // Required auth gate — INDEXNOW_SECRET must be set in Vercel env vars.
+  // Refusing the request if the env var is absent prevents an open admin endpoint
+  // from being exploitable when the variable is accidentally unset.
   const secret = process.env.INDEXNOW_SECRET
-  if (secret) {
-    const provided = req.headers.get('x-indexnow-secret')
-    if (provided !== secret) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+  if (!secret) {
+    console.error('INDEXNOW_SECRET env var is not set')
+    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+  }
+  const provided = req.headers.get('x-indexnow-secret')
+  if (provided !== secret) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   // Build URL list: static pages + all blog articles
