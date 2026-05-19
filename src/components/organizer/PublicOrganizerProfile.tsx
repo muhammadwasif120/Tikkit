@@ -6,8 +6,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
 import {
-  CalendarDays, MapPin, Mail, Phone, Users, ChevronDown, ArrowLeft, Star,
+  CalendarDays, MapPin, Mail, Phone, Users, ChevronDown, ArrowLeft, Star, Heart,
 } from 'lucide-react'
+import { toggleFavouriteOrganizer } from '@/app/actions/organizerActions'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
 export type PublicProfile = {
@@ -118,13 +119,31 @@ function EventRow({ event, dim }: { event: PublicEvent; dim?: boolean }) {
 
 /* ─── Main ───────────────────────────────────────────────────────── */
 export default function PublicOrganizerProfile({
-  profile, events,
+  profile, events, isFavourite: initialFav = false, isAuthenticated = false,
 }: {
   profile: PublicProfile
   events: PublicEvent[]
+  isFavourite?: boolean
+  isAuthenticated?: boolean
 }) {
   const router = useRouter()
   const [showPast, setShowPast] = useState(false)
+  const [fav, setFav] = useState(initialFav)
+  const [favLoading, setFavLoading] = useState(false)
+
+  const handleFollow = async () => {
+    if (!isAuthenticated) { router.push('/auth/login'); return }
+    setFavLoading(true)
+    setFav(f => !f) // optimistic
+    try {
+      const res = await toggleFavouriteOrganizer(profile.id)
+      setFav(res.is_favourite)
+    } catch {
+      setFav(f => !f) // revert on error
+    } finally {
+      setFavLoading(false)
+    }
+  }
   const now = new Date()
 
   const upcomingEvents = events.filter(e => e.status === 'published' && new Date(e.date_start) >= now)
@@ -195,6 +214,32 @@ export default function PublicOrganizerProfile({
           >
             <ArrowLeft size={14} />
             Back
+          </button>
+
+          {/* Follow button — top-right of hero */}
+          <button
+            onClick={handleFollow}
+            disabled={favLoading}
+            title={fav ? 'Unfollow organizer' : 'Follow organizer'}
+            style={{
+              position: 'absolute', top: 'calc(env(safe-area-inset-top) + 14px)', right: 16, zIndex: 10,
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: fav ? 'rgba(239,68,68,0.25)' : 'rgba(0,0,0,0.45)',
+              backdropFilter: 'blur(10px)',
+              border: `1px solid ${fav ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.12)'}`,
+              borderRadius: 12, padding: '7px 12px', cursor: favLoading ? 'wait' : 'pointer',
+              transition: 'all 0.2s', opacity: favLoading ? 0.7 : 1,
+            }}
+          >
+            <Heart
+              size={14}
+              color={fav ? '#EF4444' : 'rgba(255,255,255,0.7)'}
+              fill={fav ? '#EF4444' : 'none'}
+              style={{ transition: 'all 0.2s' }}
+            />
+            <span style={{ color: fav ? '#FCA5A5' : 'rgba(255,255,255,0.85)', fontSize: 12, fontWeight: 600 }}>
+              {fav ? 'Following' : 'Follow'}
+            </span>
           </button>
 
           {/* Bottom: logo + name */}
@@ -281,6 +326,31 @@ export default function PublicOrganizerProfile({
                 </div>
               ))}
             </div>
+
+            {/* Follow button — desktop content panel */}
+            <button
+              onClick={handleFollow}
+              disabled={favLoading}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                width: '100%', padding: '12px 16px', marginBottom: 16,
+                background: fav ? 'rgba(239,68,68,0.1)' : 'rgba(30,94,255,0.12)',
+                border: `1px solid ${fav ? 'rgba(239,68,68,0.3)' : 'rgba(30,94,255,0.3)'}`,
+                borderRadius: 14, cursor: favLoading ? 'wait' : 'pointer',
+                transition: 'all 0.2s', opacity: favLoading ? 0.7 : 1,
+                fontFamily: 'var(--font-body)',
+              }}
+            >
+              <Heart
+                size={16}
+                color={fav ? '#EF4444' : '#818CF8'}
+                fill={fav ? '#EF4444' : 'none'}
+                style={{ transition: 'all 0.2s' }}
+              />
+              <span style={{ color: fav ? '#FCA5A5' : '#818CF8', fontSize: 14, fontWeight: 700 }}>
+                {fav ? 'Following' : 'Follow Organizer'}
+              </span>
+            </button>
 
             {/* Contact */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

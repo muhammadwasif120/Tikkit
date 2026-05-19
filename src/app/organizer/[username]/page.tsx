@@ -60,7 +60,20 @@ async function OrganizerData({ username }: { username: string }) {
   const profile = (rows as any[])?.[0] ?? null
   if (!profile) notFound()
 
-  // 2. Fetch published + completed events
+  // 2. Check if the current user already follows this organizer
+  const { data: { user } } = await supabase.auth.getUser()
+  let isFavourite = false
+  if (user) {
+    const { data: fav } = await (supabase as any)
+      .from('organizer_favourites')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('organizer_id', profile.id)
+      .maybeSingle()
+    isFavourite = !!fav
+  }
+
+  // 3. Fetch published + completed events
   const { data: eventsData } = await supabase
     .from('events')
     .select('id, slug, title, date_start, cover_image_url, venue_name, capacity, status')
@@ -136,7 +149,7 @@ async function OrganizerData({ username }: { username: string }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(profileSchema) }}
       />
-      <PublicOrganizerProfile profile={publicProfile} events={enrichedEvents} />
+      <PublicOrganizerProfile profile={publicProfile} events={enrichedEvents} isFavourite={isFavourite} isAuthenticated={!!user} />
     </>
   )
 }
