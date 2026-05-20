@@ -51,7 +51,9 @@ export async function updateSession(request: NextRequest) {
 
   if (isPublic) {
     // Already logged in + hitting login → redirect to their home
-    if (user && pathname === '/auth/login') {
+    // Only intercept GET requests — POST requests are Next.js server actions
+    // (ensureProfileRole etc.) and must NOT be redirected or they never run
+    if (user && pathname === '/auth/login' && request.method === 'GET') {
       const { data: profile } = await supabase
         .from('profiles').select('role').eq('id', user.id).single()
       const metaRole = user.user_metadata?.role as string | undefined

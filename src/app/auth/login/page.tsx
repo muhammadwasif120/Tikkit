@@ -136,9 +136,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
 
         if (data.user) {
           // Step 1: guarantee the profile row exists with the correct role.
-          // Pass the form role as a hint for accounts created before metadata
-          // was added. ensureProfileRole prefers auth.users metadata when set.
-          await ensureProfileRole(isOrg ? 'organizer' : 'guest')
+          try { await ensureProfileRole(isOrg ? 'organizer' : 'guest') } catch { /* non-fatal */ }
 
           // Step 2: write the extended signup fields (never touches role column)
           await supabase.from('profiles').update({
@@ -173,8 +171,8 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
 
         if (data.user) {
           // Fix any profile with wrong role or create missing one.
-          // Pass form role as a hint for accounts without metadata.
-          await ensureProfileRole(expRole)
+          // try/catch so a failure never blocks login from completing.
+          try { await ensureProfileRole(expRole) } catch { /* non-fatal */ }
 
           // Re-fetch the profile now that it's been corrected
           const { data: p } = await supabase
