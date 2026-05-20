@@ -32,10 +32,6 @@ export default function MasterLoginPage() {
     setError('')
     setLoading(true)
 
-    // Sign out any existing session first — avoids stale organizer session
-    // interfering with the admin sign-in below.
-    await supabase.auth.signOut()
-
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
     if (authError || !data.user) {
       setError(`Auth failed: ${authError?.message ?? 'no user'}`)

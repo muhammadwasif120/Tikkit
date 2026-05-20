@@ -14,7 +14,8 @@ export default async function MasterLayout({ children }: { children: React.React
     .eq('id', user.id)
     .single()
 
-  if (!profile || profile.role !== 'admin') redirect('/dashboard')
+  console.log('[master layout] user:', user?.id, '| profile.role:', profile?.role, '| meta.role:', user?.user_metadata?.role)
+  if (!profile || profile.role !== 'admin') redirect('/master/login')
 
   return (
     <>
