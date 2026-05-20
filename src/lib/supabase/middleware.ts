@@ -54,7 +54,10 @@ export async function updateSession(request: NextRequest) {
     if (user && pathname === '/auth/login') {
       const { data: profile } = await supabase
         .from('profiles').select('role').eq('id', user.id).single()
-      const role = profile?.role ?? 'guest'
+      // Fall back to auth metadata role, then to 'guest' as last resort
+      // Prevents organizers without a profile row from being sent to /explore
+      const metaRole = user.user_metadata?.role as string | undefined
+      const role = profile?.role ?? metaRole ?? 'guest'
       return NextResponse.redirect(
         new URL(role === 'guest' ? '/explore' : '/dashboard', request.url)
       )
@@ -77,7 +80,10 @@ export async function updateSession(request: NextRequest) {
   // Fetch role for route protection
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
-  const role = profile?.role ?? 'guest'
+  // Fall back to auth metadata role so organizers without a profile row
+  // don't get silently downgraded to 'guest' and blocked from /dashboard
+  const metaRole = user.user_metadata?.role as string | undefined
+  const role = profile?.role ?? metaRole ?? 'guest'
 
   // M7: /master requires admin role — removed from publicPaths above so this
   // check now runs. Non-admins (including organizers) are redirected to login.

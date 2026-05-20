@@ -134,7 +134,17 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         }
 
         if (data.user) {
-          // Immediately secure extended data
+          // Step 1: guarantee the profile row exists with the correct role.
+          // Uses ignoreDuplicates so the role isn't overwritten if the row
+          // already exists (protect_profile_role trigger blocks role changes).
+          await supabase.from('profiles').upsert({
+            id:        data.user.id,
+            email:     email.trim().toLowerCase(),
+            full_name: name.trim(),
+            role:      isOrg ? 'organizer' : 'guest',
+          }, { onConflict: 'id', ignoreDuplicates: true })
+
+          // Step 2: write the extended signup fields (never touches role column)
           await supabase.from('profiles').update({
             phone_number:    phone.trim(),
             company_name:    isOrg ? company.trim() : null,
