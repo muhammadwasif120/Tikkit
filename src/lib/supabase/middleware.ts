@@ -29,6 +29,7 @@ export async function updateSession(request: NextRequest) {
   '/auth/login',
   '/auth/callback',
   '/auth/reset-password',
+  '/master/login',  // Admin login — public, separate from main auth flow
   '/api',
   '/events',
   '/',
@@ -86,10 +87,9 @@ export async function updateSession(request: NextRequest) {
   const metaRole = user.user_metadata?.role as string | undefined
   const role = profile?.role ?? metaRole ?? 'guest'
 
-  // M7: /master requires admin role — removed from publicPaths above so this
-  // check now runs. Non-admins (including organizers) are redirected to login.
+  // /master requires admin role. Send non-admins to the dedicated admin login.
   if (pathname.startsWith('/master') && role !== 'admin') {
-    return NextResponse.redirect(new URL('/auth/login', request.url))
+    return NextResponse.redirect(new URL('/master/login', request.url))
   }
 
   // Guest trying to hit organizer routes

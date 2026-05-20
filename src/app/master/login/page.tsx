@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { ensureProfileRole } from '@/app/actions/authActions'
 import { useRouter } from 'next/navigation'
 import ForceNoir from '@/components/master/ForceNoir'
 
@@ -40,6 +41,10 @@ export default function MasterLoginPage() {
       return
     }
 
+    // Fix profile role if needed (uses admin client via service-role key)
+    try { await ensureProfileRole() } catch { /* non-fatal */ }
+
+    // Re-read profile after potential fix
     const { data: profile } = await supabase
       .from('profiles').select('role').eq('id', data.user.id).single()
 
