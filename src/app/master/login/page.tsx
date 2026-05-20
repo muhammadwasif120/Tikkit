@@ -21,11 +21,9 @@ export default function MasterLoginPage() {
   // If already authed as admin, go straight through
   useEffect(() => {
     setMounted(true)
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return
-      const { data: p } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-      if (p?.role === 'admin') router.replace('/master')
-    })
+    ensureProfileRole().then(result => {
+      if (result?.role === 'admin') router.replace('/master')
+    }).catch(() => {/* not logged in, stay on page */})
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -45,17 +43,14 @@ export default function MasterLoginPage() {
       return
     }
 
-    // Fix / confirm profile role using service-role
+    // Verify role via service-role server action — reads directly from auth.users
+    // and profiles via admin client, so no RLS/cache issues on the client side.
     let roleResult: { role?: string; error?: string } = {}
     try { roleResult = await ensureProfileRole() ?? {} } catch (e: unknown) { roleResult = { error: String(e) } }
 
-    // Re-read profile after potential fix
-    const { data: profile } = await supabase
-      .from('profiles').select('role').eq('id', data.user.id).single()
-
-    if (profile?.role !== 'admin') {
+    if (roleResult.role !== 'admin') {
       await supabase.auth.signOut()
-      setError(`Role check failed: profile="${profile?.role ?? 'null'}" ensure="${roleResult.error ?? roleResult.role ?? '?'}"`)
+      setError(`Role check failed: ensure="${roleResult.error ?? roleResult.role ?? 'no role returned'}"`)
       setLoading(false)
       return
     }
