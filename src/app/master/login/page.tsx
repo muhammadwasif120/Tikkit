@@ -34,6 +34,10 @@ export default function MasterLoginPage() {
     setError('')
     setLoading(true)
 
+    // Sign out any existing session first — avoids stale organizer session
+    // interfering with the admin sign-in below.
+    await supabase.auth.signOut()
+
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
     if (authError || !data.user) {
       setError('Invalid credentials.')
@@ -41,7 +45,8 @@ export default function MasterLoginPage() {
       return
     }
 
-    // Fix profile role if needed (uses admin client via service-role key)
+    // Fix / confirm profile role using service-role (reads auth metadata + existing
+    // profile as fallback, so this works even before SQL back-fill is run)
     try { await ensureProfileRole() } catch { /* non-fatal */ }
 
     // Re-read profile after potential fix

@@ -16,8 +16,13 @@ type HintRole = typeof HINT_ROLES[number]
  *
  * Priority order:
  *   1. raw_user_meta_data from auth.users (via admin client — bypasses JWT cache)
- *   2. hintRole — form selection, only used when metadata has NO role at all
- *      and only for 'organizer' / 'guest' (admin/staff can't be self-claimed)
+ *   2. Existing profiles.role (via admin client) — handles accounts whose role
+ *      was set directly in the DB (e.g. admin bootstrapped via SQL) but whose
+ *      auth metadata was never back-filled.  We trust it and back-fill metadata
+ *      so future logins always hit path 1 instead.
+ *   3. hintRole — form selection, only used when both metadata and existing
+ *      profile have NO valid role, and only for 'organizer' / 'guest'
+ *      (admin/staff can NEVER be self-claimed from a form).
  *
  * Writes via service-role, bypassing protect_profile_role trigger.
  * Back-fills metadata so future logins need no hint.
@@ -39,11 +44,26 @@ export async function ensureProfileRole(hintRole?: HintRole) {
   let targetRole: AnyRole | undefined
 
   if (metaRole && (ALL_ROLES as readonly string[]).includes(metaRole)) {
-    // Metadata has a valid role — always trust it (covers admin/staff too)
+    // Path 1: metadata has a valid role — always trust it (covers admin/staff too)
     targetRole = metaRole as AnyRole
-  } else if (hintRole && (HINT_ROLES as readonly string[]).includes(hintRole)) {
-    // Metadata absent — use form hint (organizer/guest only, never admin/staff)
-    targetRole = hintRole
+  } else {
+    // Path 2: metadata absent — read the existing profile row via service-role.
+    // This handles accounts bootstrapped by SQL (e.g. manual admin setup) whose
+    // auth metadata was never populated.  We read it, trust it, and back-fill
+    // metadata below so next login always goes through path 1.
+    const { data: existingProfile } = await admin
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    const existingRole = existingProfile?.role as string | undefined
+
+    if (existingRole && (ALL_ROLES as readonly string[]).includes(existingRole)) {
+      targetRole = existingRole as AnyRole
+    } else if (hintRole && (HINT_ROLES as readonly string[]).includes(hintRole)) {
+      // Path 3: form hint — organizer/guest only, never admin/staff
+      targetRole = hintRole
+    }
   }
 
   if (!targetRole) return { error: 'Cannot determine correct role' }
@@ -68,8 +88,9 @@ export async function ensureProfileRole(hintRole?: HintRole) {
 
   if (updateError) return { error: updateError.message }
 
-  // Back-fill metadata so future logins need no hint
-  if (!metaRole || !(ALL_ROLES as readonly string[]).includes(metaRole)) {
+  // Back-fill metadata whenever it was absent or wrong, so future logins
+  // always hit the fast path (metadata check) without needing DB/hint fallbacks.
+  if (metaRole !== targetRole) {
     await admin.auth.admin.updateUserById(user.id, {
       user_metadata: { ...rawMeta, role: targetRole },
     })
