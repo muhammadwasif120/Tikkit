@@ -48,15 +48,25 @@ export async function ensureProfileRole(hintRole?: HintRole) {
 
   if (!targetRole) return { error: 'Cannot determine correct role' }
 
-  // Upsert the profile (creates if missing, corrects role if wrong)
-  const { error: upsertError } = await admin.from('profiles').upsert({
+  // Step 1: create the profile row if it doesn't exist yet.
+  // ignoreDuplicates=true means we NEVER overwrite existing profile data
+  // (name, phone, company, etc.) — only a fresh INSERT happens here.
+  await admin.from('profiles').upsert({
     id:        user.id,
     email:     authUser?.email ?? user.email ?? '',
     full_name: rawMeta.full_name ?? authUser?.email?.split('@')[0] ?? '',
     role:      targetRole,
-  }, { onConflict: 'id' })
+  }, { onConflict: 'id', ignoreDuplicates: true })
 
-  if (upsertError) return { error: upsertError.message }
+  // Step 2: fix ONLY the role column on the existing row.
+  // This is the only field we're allowed to change here — all other profile
+  // data (name, avatar, company, etc.) stays exactly as the user set it.
+  const { error: updateError } = await admin
+    .from('profiles')
+    .update({ role: targetRole })
+    .eq('id', user.id)
+
+  if (updateError) return { error: updateError.message }
 
   // Back-fill metadata so future logins need no hint
   if (!metaRole || !(ALL_ROLES as readonly string[]).includes(metaRole)) {
