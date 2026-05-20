@@ -51,18 +51,34 @@ export async function updateSession(request: NextRequest) {
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (isPublic) {
-    // Already logged in + hitting login → redirect to their home
     // Only intercept GET requests — POST requests are Next.js server actions
     // (ensureProfileRole etc.) and must NOT be redirected or they never run
-    if (user && pathname === '/auth/login' && request.method === 'GET') {
-      const { data: profile } = await supabase
-        .from('profiles').select('role').eq('id', user.id).single()
-      const metaRole = user.user_metadata?.role as string | undefined
-      const role = profile?.role ?? metaRole ?? 'guest'
-      const dest = role === 'guest'  ? '/explore'
-                 : role === 'admin'  ? '/master'
-                 : '/dashboard'
-      return NextResponse.redirect(new URL(dest, request.url))
+    if (user && request.method === 'GET') {
+      // Already-authed user hitting the main login → send to their home
+      if (pathname === '/auth/login') {
+        const { data: profile } = await supabase
+          .from('profiles').select('role').eq('id', user.id).single()
+        const metaRole = user.user_metadata?.role as string | undefined
+        const role = profile?.role ?? metaRole ?? 'guest'
+        const dest = role === 'guest'  ? '/explore'
+                   : role === 'admin'  ? '/master'
+                   : '/dashboard'
+        return NextResponse.redirect(new URL(dest, request.url))
+      }
+
+      // Already-authed admin hitting the admin login → skip straight to /master
+      // This prevents the useEffect redirect loop: /master/login → /master → /master/login
+      if (pathname === '/master/login') {
+        const { data: profile } = await supabase
+          .from('profiles').select('role').eq('id', user.id).single()
+        const metaRole = user.user_metadata?.role as string | undefined
+        const role = profile?.role ?? metaRole ?? 'guest'
+        if (role === 'admin') {
+          return NextResponse.redirect(new URL('/master', request.url))
+        }
+        // Not admin — show the login form so they can sign in with admin creds
+        return response
+      }
     }
 
     // Unauthenticated user hitting /guest/explore/[slug] → send to registration form

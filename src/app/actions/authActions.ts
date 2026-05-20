@@ -66,11 +66,7 @@ export async function ensureProfileRole(hintRole?: HintRole) {
     }
   }
 
-  console.log('[ensureProfileRole] userId:', user.id, '| metaRole:', metaRole, '| targetRole:', targetRole)
-  if (!targetRole) {
-    console.log('[ensureProfileRole] ERROR: cannot determine role — metaRole:', metaRole, 'hintRole:', hintRole)
-    return { error: 'Cannot determine correct role' }
-  }
+  if (!targetRole) return { error: 'Cannot determine correct role' }
 
   // Step 1: create the profile row if it doesn't exist yet.
   // ignoreDuplicates=true means we NEVER overwrite existing profile data
@@ -90,11 +86,7 @@ export async function ensureProfileRole(hintRole?: HintRole) {
     .update({ role: targetRole })
     .eq('id', user.id)
 
-  if (updateError) {
-    console.log('[ensureProfileRole] profile update ERROR:', updateError.message)
-    return { error: updateError.message }
-  }
-  console.log('[ensureProfileRole] profile updated to role:', targetRole)
+  if (updateError) return { error: updateError.message }
 
   // Back-fill metadata whenever it was absent or wrong, so future logins
   // always hit the fast path (metadata check) without needing DB/hint fallbacks.

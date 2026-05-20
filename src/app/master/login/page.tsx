@@ -18,14 +18,7 @@ export default function MasterLoginPage() {
   const [ts]                    = useState(() => new Date().toISOString())
   const [mounted, setMounted]   = useState(false)
 
-  // If already authed as admin, go straight through
-  useEffect(() => {
-    setMounted(true)
-    ensureProfileRole().then(result => {
-      if (result?.role === 'admin') router.replace('/master')
-    }).catch(() => {/* not logged in, stay on page */})
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  useEffect(() => { setMounted(true) }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
