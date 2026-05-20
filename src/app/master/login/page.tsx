@@ -40,14 +40,14 @@ export default function MasterLoginPage() {
 
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
     if (authError || !data.user) {
-      setError('Invalid credentials.')
+      setError(`Auth failed: ${authError?.message ?? 'no user'}`)
       setLoading(false)
       return
     }
 
-    // Fix / confirm profile role using service-role (reads auth metadata + existing
-    // profile as fallback, so this works even before SQL back-fill is run)
-    try { await ensureProfileRole() } catch { /* non-fatal */ }
+    // Fix / confirm profile role using service-role
+    let roleResult: { role?: string; error?: string } = {}
+    try { roleResult = await ensureProfileRole() ?? {} } catch (e: unknown) { roleResult = { error: String(e) } }
 
     // Re-read profile after potential fix
     const { data: profile } = await supabase
@@ -55,7 +55,7 @@ export default function MasterLoginPage() {
 
     if (profile?.role !== 'admin') {
       await supabase.auth.signOut()
-      setError('Invalid credentials.')
+      setError(`Role check failed: profile="${profile?.role ?? 'null'}" ensure="${roleResult.error ?? roleResult.role ?? '?'}"`)
       setLoading(false)
       return
     }
