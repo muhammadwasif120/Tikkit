@@ -2,55 +2,53 @@
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 
+// Roles the auth metadata can legitimately carry
+const ALL_ROLES    = ['organizer', 'guest', 'admin', 'staff'] as const
+// Roles the login form is allowed to suggest as a hint
+// (admin / staff can ONLY come from auth metadata, never from a form selection)
+const HINT_ROLES   = ['organizer', 'guest'] as const
+
+type AnyRole  = typeof ALL_ROLES[number]
+type HintRole = typeof HINT_ROLES[number]
+
 /**
- * Guarantees the profiles row has the correct role, using three layers:
+ * Guarantees the profiles row has the correct role.
  *
- * 1. Read the user's actual raw_user_meta_data from auth.users via the
- *    admin client — this is the most reliable source, unaffected by JWT
- *    expiry or missing metadata in the session token.
- * 2. If metadata has no role (accounts created before we added it), fall
- *    back to `hintRole` — the role the user selected in the form.
- * 3. Write via the service-role admin client, which bypasses the
- *    protect_profile_role trigger (that trigger only fires for
- *    'authenticated'/'anon', not 'service_role').
+ * Priority order:
+ *   1. raw_user_meta_data from auth.users (via admin client — bypasses JWT cache)
+ *   2. hintRole — form selection, only used when metadata has NO role at all
+ *      and only for 'organizer' / 'guest' (admin/staff can't be self-claimed)
  *
- * Also back-fills the auth metadata role so future logins resolve
- * correctly without needing the hint.
- *
- * Security: hintRole is only used when metadata is truly absent.
- * If metadata explicitly says 'guest', hintRole='organizer' is ignored —
- * so a guest cannot use this to self-elevate.
+ * Writes via service-role, bypassing protect_profile_role trigger.
+ * Back-fills metadata so future logins need no hint.
  */
-export async function ensureProfileRole(hintRole?: 'organizer' | 'guest') {
+export async function ensureProfileRole(hintRole?: HintRole) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
   const admin = createAdminClient()
 
-  // Read the full auth.users row — more reliable than the session JWT
+  // Read raw auth.users row — more reliable than the session JWT
   const { data: authData } = await admin.auth.admin.getUserById(user.id)
   const authUser = authData?.user
-
-  const rawMeta = authUser?.user_metadata ?? {}
+  const rawMeta  = authUser?.user_metadata ?? {}
   const metaRole = rawMeta.role as string | undefined
 
-  // Determine the target role:
-  // - Trust metadata when it has a valid role
-  // - Fall back to hint ONLY when metadata has no role at all
-  const VALID_ROLES = ['organizer', 'guest'] as const
-  type ValidRole = typeof VALID_ROLES[number]
+  // Determine target role
+  let targetRole: AnyRole | undefined
 
-  const targetRole: ValidRole | undefined =
-    metaRole && (VALID_ROLES as readonly string[]).includes(metaRole)
-      ? metaRole as ValidRole
-      : hintRole && (VALID_ROLES as readonly string[]).includes(hintRole)
-        ? hintRole
-        : undefined
+  if (metaRole && (ALL_ROLES as readonly string[]).includes(metaRole)) {
+    // Metadata has a valid role — always trust it (covers admin/staff too)
+    targetRole = metaRole as AnyRole
+  } else if (hintRole && (HINT_ROLES as readonly string[]).includes(hintRole)) {
+    // Metadata absent — use form hint (organizer/guest only, never admin/staff)
+    targetRole = hintRole
+  }
 
   if (!targetRole) return { error: 'Cannot determine correct role' }
 
-  // Upsert the profile (creates if missing, fixes role if wrong)
+  // Upsert the profile (creates if missing, corrects role if wrong)
   const { error: upsertError } = await admin.from('profiles').upsert({
     id:        user.id,
     email:     authUser?.email ?? user.email ?? '',
@@ -60,8 +58,8 @@ export async function ensureProfileRole(hintRole?: 'organizer' | 'guest') {
 
   if (upsertError) return { error: upsertError.message }
 
-  // Back-fill metadata role so future logins work without a hint
-  if (!metaRole || !(VALID_ROLES as readonly string[]).includes(metaRole)) {
+  // Back-fill metadata so future logins need no hint
+  if (!metaRole || !(ALL_ROLES as readonly string[]).includes(metaRole)) {
     await admin.auth.admin.updateUserById(user.id, {
       user_metadata: { ...rawMeta, role: targetRole },
     })

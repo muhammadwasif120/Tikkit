@@ -172,7 +172,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
         if (error) { setErr('Wrong email or password'); return }
 
         if (data.user) {
-          // Fix any profile that exists with the wrong role (or create missing one).
+          // Fix any profile with wrong role or create missing one.
           // Pass form role as a hint for accounts without metadata.
           await ensureProfileRole(expRole)
 
@@ -185,7 +185,15 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
 
           const role = p?.role ?? expRole
 
-          if (role !== expRole) {
+          // Mismatch logic:
+          // - A guest must not use the organizer form
+          // - An organizer/admin/staff must not use the guest form
+          // Admin and staff are always allowed through the organizer form
+          const isWrongForm =
+            (expRole === 'organizer' && role === 'guest') ||
+            (expRole === 'guest'     && role !== 'guest')
+
+          if (isWrongForm) {
             await supabase.auth.signOut()
             setErr(isOrg
               ? "That's a guest account — use \"Join The Scene\"."
@@ -193,7 +201,11 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
             return
           }
 
-          router.push(role === 'guest' ? '/explore' : '/dashboard')
+          // Admin → /master, organizer/staff → /dashboard, guest → /explore
+          const dest = role === 'guest' ? '/explore'
+                     : role === 'admin' ? '/master'
+                     : '/dashboard'
+          router.push(dest)
         }
       }
     } finally {

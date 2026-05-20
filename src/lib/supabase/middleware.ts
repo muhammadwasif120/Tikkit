@@ -54,13 +54,12 @@ export async function updateSession(request: NextRequest) {
     if (user && pathname === '/auth/login') {
       const { data: profile } = await supabase
         .from('profiles').select('role').eq('id', user.id).single()
-      // Fall back to auth metadata role, then to 'guest' as last resort
-      // Prevents organizers without a profile row from being sent to /explore
       const metaRole = user.user_metadata?.role as string | undefined
       const role = profile?.role ?? metaRole ?? 'guest'
-      return NextResponse.redirect(
-        new URL(role === 'guest' ? '/explore' : '/dashboard', request.url)
-      )
+      const dest = role === 'guest'  ? '/explore'
+                 : role === 'admin'  ? '/master'
+                 : '/dashboard'
+      return NextResponse.redirect(new URL(dest, request.url))
     }
 
     // Unauthenticated user hitting /guest/explore/[slug] → send to registration form
@@ -96,9 +95,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(new URL('/explore', request.url))
   }
 
-  // Organizer trying to hit guest/explore routes
+  // Non-guest trying to hit guest/explore routes — send to their home
   if (role !== 'guest' && (pathname.startsWith('/guest') || pathname.startsWith('/explore'))) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const home = role === 'admin' ? '/master' : '/dashboard'
+    return NextResponse.redirect(new URL(home, request.url))
   }
 
   return response
