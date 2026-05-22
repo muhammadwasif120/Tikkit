@@ -23,7 +23,6 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  console.log('[MW]', request.method, pathname, '| user:', user?.id?.slice(0,8) ?? 'none', '| meta.role:', user?.user_metadata?.role ?? 'none')
 
   // Public routes — always allow through
   const publicPaths = [
@@ -71,7 +70,6 @@ export async function updateSession(request: NextRequest) {
       // Use JWT metadata only — no DB read needed here
       if (pathname === '/master/login') {
         const metaRole = user.user_metadata?.role as string | undefined
-        console.log('[MW] /master/login auto-redirect check | metaRole:', metaRole)
         if (metaRole === 'admin') {
           return NextResponse.redirect(new URL('/master', request.url))
         }
@@ -100,7 +98,6 @@ export async function updateSession(request: NextRequest) {
   // /master: trust JWT metadata only (DB read in edge middleware is flaky).
   // The layout does an authoritative DB check as a second layer.
   if (pathname.startsWith('/master')) {
-    console.log('[MW] /master check | metaRole:', metaRole)
     if (metaRole !== 'admin') {
       return NextResponse.redirect(new URL('/master/login', request.url))
     }
@@ -111,7 +108,6 @@ export async function updateSession(request: NextRequest) {
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
   const role = profile?.role ?? metaRole ?? 'guest'
-  console.log('[MW] protected | profile.role:', profile?.role, '| role:', role)
 
   // Guest trying to hit organizer routes
   if (role === 'guest' && pathname.startsWith('/dashboard')) {

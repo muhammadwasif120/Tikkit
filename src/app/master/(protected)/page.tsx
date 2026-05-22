@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import {
   LayoutDashboard, Users, Calendar, MessageSquare, MessageCircle,
@@ -18,6 +18,7 @@ import {
   getSupportQueries, updateSupportQueryStatus,
   getMasterCnicVerifications, approveCnicVerification, rejectCnicVerification,
   getMasterAttendees, getMasterRegistrations,
+  setEventAdminStatus, removeOrganizer, sendAdminEmailToOrganizer,
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
   type PlatformAnalytics, type WaitlistEntry, type SupportQuery, type CnicVerification,
   type MasterAttendee, type MasterRegistration,
@@ -90,9 +91,16 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState('')
 
-  const send = () => {
-    if (!subject || !message) return
+  const send = async () => {
+    if (!subject || !message || sending) return
+    setSending(true)
+    setSendError('')
+    const { error } = await sendAdminEmailToOrganizer(org.id, subject, message)
+    setSending(false)
+    if (error) { setSendError(error); return }
     setSent(true)
     setTimeout(() => { setSent(false); onClose() }, 2000)
   }
@@ -149,21 +157,26 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
           </div>
         </div>
 
+        {sendError && (
+          <div style={{ padding: '0 24px 12px', fontSize: 'var(--fs-xs)', color: '#EF4444', fontFamily: 'var(--font-body)' }}>
+            ✕ {sendError}
+          </div>
+        )}
         <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 10 }}>
           <button
             onClick={send}
-            disabled={!subject || !message || sent}
+            disabled={!subject || !message || sent || sending}
             style={{
               flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               background: sent ? 'rgba(34,197,94,0.15)' : 'linear-gradient(135deg,#1E5EFF,#1448CC)',
               border: sent ? '1px solid rgba(34,197,94,0.35)' : 'none',
               color: sent ? '#22C55E' : 'white', borderRadius: 10, padding: '10px',
               fontSize: 'var(--fs-base)', fontWeight: 700, fontFamily: 'var(--font-display)',
-              cursor: !subject || !message || sent ? 'default' : 'pointer',
-              opacity: !subject || !message ? 0.45 : 1, transition: 'all 0.3s',
+              cursor: !subject || !message || sent || sending ? 'default' : 'pointer',
+              opacity: !subject || !message || sending ? 0.55 : 1, transition: 'all 0.3s',
             }}
           >
-            {sent ? <><CheckCircle size={13} /> Sent!</> : <><Send size={13} /> Send Message</>}
+            {sent ? <><CheckCircle size={13} /> Sent!</> : sending ? '▸ Sending…' : <><Send size={13} /> Send Message</>}
           </button>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', borderRadius: 10, padding: '10px 16px', fontSize: 'var(--fs-base)', fontWeight: 600, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
             Cancel
@@ -277,6 +290,7 @@ function OrgDetailView({
     setLoading(true)
     Promise.all([getMasterOrgProfile(orgId), getMasterOrgEvents(orgId)])
       .then(([prof, evts]) => { setProfile(prof); setOrgEvents(evts) })
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [orgId])
 
@@ -536,7 +550,9 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
   const [topEvtTab, setTopEvtTab] = useState<'fill' | 'regs'>('fill')
 
   useEffect(() => {
-    getMasterAnalytics().then(d => { setData(d); setLoading(false) })
+    getMasterAnalytics()
+      .then(d => { setData(d); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [])
 
   if (loading || !data) return (
@@ -781,95 +797,6 @@ function AnalyticsView({ onOrgClick }: { onOrgClick: (id: string) => void }) {
   )
 }
 
-// ─── Auth Gate ────────────────────────────────────────────────────────────────
-
-const MASTER_KEY = 'tkmaster2026' // ⚠️  change before going to production
-
-function NotFoundGate({ onAuth }: { onAuth: () => void }) {
-  const [showModal, setShowModal] = useState(false)
-  const [pwd, setPwd] = useState('')
-  const [shake, setShake] = useState(false)
-  const clickCount = useRef(0)
-  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const handleSecretClick = () => {
-    clickCount.current += 1
-    if (clickTimer.current) clearTimeout(clickTimer.current)
-    clickTimer.current = setTimeout(() => { clickCount.current = 0 }, 2500)
-    if (clickCount.current >= 5) {
-      clickCount.current = 0
-      setShowModal(true)
-    }
-  }
-
-  const handleSubmit = () => {
-    if (pwd === MASTER_KEY) {
-      sessionStorage.setItem('_ms', '1')
-      onAuth()
-    } else {
-      setShake(true)
-      setPwd('')
-      setTimeout(() => setShake(false), 600)
-    }
-  }
-
-  return (
-    <>
-      <style>{`
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        .nf-page { min-height:100vh; background:#0A0C14; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:40px 24px; font-family:var(--font-body,'Inter',sans-serif); position:relative; }
-        .nf-code { font-family:var(--font-display,'Space Grotesk',sans-serif); font-size:clamp(80px,18vw,180px); font-weight:900; color:rgba(255,255,255,0.04); letter-spacing:-6px; line-height:1; transition:color 0.15s; }
-        .nf-code:active { color:rgba(255,255,255,0.06); }
-        .nf-heading { font-family:var(--font-display,'Space Grotesk',sans-serif); font-size:clamp(20px,4vw,28px); font-weight:700; color:#F0F2FF; letter-spacing:-0.5px; }
-        .nf-sub { font-size:14px; color:#4B5563; text-align:center; max-width:360px; line-height:1.6; }
-        .nf-btn { margin-top:8px; display:inline-block; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); color:#9CA3AF; font-size:13px; font-family:var(--font-body,'Inter',sans-serif); text-decoration:none; border-radius:10px; padding:9px 20px; transition:all 0.2s; }
-        .nf-btn:hover { background:rgba(255,255,255,0.08); color:#F0F2FF; }
-        .nf-footer { position:absolute; bottom:24px; font-size:11px; color:#1F2937; }
-        .nf-modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.72); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; z-index:999; }
-        .nf-modal { background:#0F1120; border:1px solid rgba(255,255,255,0.08); border-radius:18px; padding:34px 28px; display:flex; flex-direction:column; align-items:center; gap:18px; width:min(340px,90vw); }
-        .nf-modal-input { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 16px; color:#F0F2FF; font-size:18px; letter-spacing:5px; width:100%; text-align:center; outline:none; font-family:var(--font-body,'Inter',sans-serif); transition:border-color 0.2s; }
-        .nf-modal-input::placeholder { letter-spacing:2px; font-size:14px; color:#374151; }
-        .nf-modal-input:focus { border-color:rgba(30,94,255,0.45); }
-        .nf-modal-btn { background:#1E5EFF; border:none; border-radius:10px; padding:12px 24px; color:#fff; font-size:14px; font-weight:700; font-family:var(--font-body,'Inter',sans-serif); cursor:pointer; width:100%; transition:opacity 0.2s; letter-spacing:0.02em; }
-        .nf-modal-btn:hover { opacity:0.88; }
-        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
-        .nf-modal-input.shake { animation:shake 0.5s ease; border-color:rgba(239,68,68,0.5) !important; }
-      `}</style>
-
-      <div className="nf-page">
-        <div
-          className="nf-code"
-          onClick={handleSecretClick}
-          style={{ cursor: 'default', userSelect: 'none' }}
-        >
-          404
-        </div>
-        <div className="nf-heading">Page not found</div>
-        <div className="nf-sub">The page you&apos;re looking for doesn&apos;t exist or has been moved.</div>
-        <Link href="/" className="nf-btn">← Back to Tikkit</Link>
-        <div className="nf-footer">© {new Date().getFullYear()} Tikkit</div>
-      </div>
-
-      {showModal && (
-        <div className="nf-modal-overlay" onClick={() => { setShowModal(false); setPwd('') }}>
-          <div className="nf-modal" onClick={e => e.stopPropagation()}>
-            <TikkitXLogo size="sm" />
-            <input
-              className={`nf-modal-input${shake ? ' shake' : ''}`}
-              type="password"
-              value={pwd}
-              onChange={e => setPwd(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSubmit()}
-              autoFocus
-              placeholder="············"
-            />
-            <button className="nf-modal-btn" onClick={handleSubmit}>Continue →</button>
-          </div>
-        </div>
-      )}
-    </>
-  )
-}
 
 // ─── Guest List Panel ─────────────────────────────────────────────────────────
 
@@ -881,6 +808,7 @@ function GuestListPanel({ evt, onClose }: { evt: Evt; onClose: () => void }) {
     setLoading(true)
     getMasterEventGuests(evt.id)
       .then(setGuests)
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [evt.id])
 
@@ -960,6 +888,7 @@ export default function MasterPage() {
         setEvents(evtsData as Evt[])
         setQueries(queriesData)
       })
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
 
@@ -1136,6 +1065,11 @@ export default function MasterPage() {
     setOrgAdminStatus(id, s) // persist to DB — fire and forget
   }
   const getEvtStatus = (e: Evt): EventStatus => eventStatuses[e.id] ?? e.status
+  const setEvtStatus = (id: string, s: 'live' | 'flagged' | 'suspended') => {
+    setEventStatuses(prev => ({ ...prev, [id]: s }))
+    setOpenEvtMenu(null)
+    setEventAdminStatus(id, s) // persist to DB — fire and forget
+  }
 
   const setQueryStatus = (id: string, s: SupportQuery['status']) => {
     setQueries(prev => prev.map(q => q.id === id ? { ...q, status: s } : q))
@@ -1758,7 +1692,11 @@ export default function MasterPage() {
                                           <span className="ms-drop-item" style={{ opacity: 0.35, cursor: 'not-allowed' }}><Eye size={13} /> No username set</span>
                                         )}
                                         <div className="ms-drop-divider" />
-                                        <button className="ms-drop-item dd-red" onClick={() => { setRemovedOrgs(s => new Set([...s, o.id])); setOpenOrgMenu(null) }}><Trash2 size={13} /> Remove Organizer</button>
+                                        <button className="ms-drop-item dd-red" onClick={() => {
+                                          setRemovedOrgs(s => new Set([...s, o.id]))
+                                          setOpenOrgMenu(null)
+                                          removeOrganizer(o.id) // ban auth + suspend profile — fire and forget
+                                        }}><Trash2 size={13} /> Remove Organizer</button>
                                       </div>
                                     )}
                                   </div>
@@ -1845,10 +1783,10 @@ export default function MasterPage() {
                                     }}><MoreHorizontal size={13} /></button>
                                     {openEvtMenu === e.id && (
                                       <div className="ms-dropdown" style={{ position: 'fixed', top: evtMenuPos.top, right: evtMenuPos.right, left: 'auto' }}>
-                                        {es === 'flagged'   && <button className="ms-drop-item dd-green" onClick={() => { setEventStatuses(s => ({...s,[e.id]:'live'})); setOpenEvtMenu(null) }}><CheckCircle size={13} /> Clear Flag</button>}
-                                        {es !== 'flagged'   && es !== 'suspended' && <button className="ms-drop-item dd-amber" onClick={() => { setEventStatuses(s => ({...s,[e.id]:'flagged'})); setOpenEvtMenu(null) }}><Flag size={13} /> Flag Event</button>}
-                                        {es !== 'suspended' && <button className="ms-drop-item dd-red" onClick={() => { setEventStatuses(s => ({...s,[e.id]:'suspended'})); setOpenEvtMenu(null) }}><Ban size={13} /> Suspend Event</button>}
-                                        {es === 'suspended' && <button className="ms-drop-item dd-green" onClick={() => { setEventStatuses(s => ({...s,[e.id]:'live'})); setOpenEvtMenu(null) }}><RefreshCw size={13} /> Reinstate Event</button>}
+                                        {es === 'flagged'   && <button className="ms-drop-item dd-green" onClick={() => setEvtStatus(e.id, 'live')}><CheckCircle size={13} /> Clear Flag</button>}
+                                        {es !== 'flagged'   && es !== 'suspended' && <button className="ms-drop-item dd-amber" onClick={() => setEvtStatus(e.id, 'flagged')}><Flag size={13} /> Flag Event</button>}
+                                        {es !== 'suspended' && <button className="ms-drop-item dd-red" onClick={() => setEvtStatus(e.id, 'suspended')}><Ban size={13} /> Suspend Event</button>}
+                                        {es === 'suspended' && <button className="ms-drop-item dd-green" onClick={() => setEvtStatus(e.id, 'live')}><RefreshCw size={13} /> Reinstate Event</button>}
                                         <div className="ms-drop-divider" />
                                         <button className="ms-drop-item" onClick={() => { setGuestListEvent(e); setOpenEvtMenu(null) }}><Users size={13} /> View Guest List</button>
                                         <button

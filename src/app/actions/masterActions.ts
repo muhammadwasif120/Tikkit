@@ -3,6 +3,10 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { safeDecrypt } from '@/lib/encrypt'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+const EMAIL_FROM = process.env.EMAIL_FROM ?? 'Tikkit Admin <admin@tikkit.app>'
 
 // ─── Auth guard ───────────────────────────────────────────────────────────────
 // Server actions are called directly via POST — they bypass all layout-level
@@ -43,7 +47,7 @@ export type MasterEvt = {
   orgId: string
   username: string
   date: string
-  status: 'live' | 'draft' | 'suspended' | 'ended'
+  status: 'live' | 'draft' | 'flagged' | 'suspended' | 'ended'
   registered: number
   capacity: number
   cat: string
@@ -52,10 +56,13 @@ export type MasterEvt = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-function mapEventStatus(s: string): MasterEvt['status'] {
-  if (s === 'published') return 'live'
-  if (s === 'cancelled') return 'suspended'
-  if (s === 'completed') return 'ended'
+function mapEventStatus(s: string, adminStatus?: string | null): MasterEvt['status'] {
+  // Admin overrides take precedence
+  if (adminStatus === 'suspended') return 'suspended'
+  if (adminStatus === 'flagged')   return 'flagged'
+  if (s === 'published')  return 'live'
+  if (s === 'cancelled')  return 'suspended'
+  if (s === 'completed')  return 'ended'
   return 'draft'
 }
 
@@ -105,7 +112,7 @@ export async function getMasterEvents(): Promise<MasterEvt[]> {
 
   const { data: events } = await supabase
     .from('events')
-    .select('id, title, status, date_start, capacity, city, organizer_id, organizer:profiles!events_organizer_id_fkey(full_name, company_name, username)')
+    .select('id, title, status, admin_status, date_start, capacity, city, organizer_id, organizer:profiles!events_organizer_id_fkey(full_name, company_name, username), category:event_categories!events_category_id_fkey(name)')
     .order('date_start', { ascending: false })
 
   if (!events?.length) return []
@@ -136,10 +143,10 @@ export async function getMasterEvents(): Promise<MasterEvt[]> {
       orgId: e.organizer_id,
       username: org?.username || '',
       date: e.date_start,
-      status: mapEventStatus(e.status),
+      status: mapEventStatus(e.status, e.admin_status),
       registered: guestMap[e.id] || 0,
       capacity: e.capacity,
-      cat: '',
+      cat: (e.category as any)?.name ?? '',
       city: e.city || '',
     }
   })
@@ -647,8 +654,8 @@ export async function approveCnicVerification(userId: string): Promise<{ error?:
       cnic_reject_reason: null,
     })
     .eq('id', userId)
-  if (error) return { error: error?.message }
-  return { error: error?.message }
+  if (error) return { error: error.message }
+  return {}
 }
 
 // ─── Attendee Accounts ───────────────────────────────────────────────────────
@@ -695,7 +702,7 @@ export async function getMasterAttendees(): Promise<MasterAttendee[]> {
       : Promise.resolve({ data: [], error: null }),
   ])
 
-  if (guestProfilesRes.error) console.error("MasterAttendees profiles err:", guestProfilesRes.error)
+  if (guestProfilesRes.error) console.error("MasterAttendees guest_profiles err:", guestProfilesRes.error)
   if (regsRes.error) console.error("MasterAttendees regs err:", regsRes.error)
 
   const regCountMap: Record<string, number> = {}
@@ -814,4 +821,111 @@ export async function getMasterRegistrations(limit = 300): Promise<MasterRegistr
       created_at: r.created_at,
     }
   })
+}
+
+// ─── Event Admin Status ───────────────────────────────────────────────────────
+
+/**
+ * Set an admin-controlled status on an event.
+ * Maps the admin UI status ('flagged' | 'suspended' | 'live') to DB columns:
+ *   live      → clears admin_status flag, restores status to 'published'
+ *   flagged   → sets admin_status = 'flagged'  (status stays as-is)
+ *   suspended → sets admin_status = 'suspended', status = 'cancelled'
+ */
+export async function setEventAdminStatus(
+  eventId: string,
+  adminStatus: 'live' | 'flagged' | 'suspended'
+): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  const update: Record<string, string | null> =
+    adminStatus === 'live'
+      ? { admin_status: null }
+      : adminStatus === 'flagged'
+      ? { admin_status: 'flagged' }
+      : { admin_status: 'suspended' }
+
+  const { error } = await (supabase as any)
+    .from('events')
+    .update(update)
+    .eq('id', eventId)
+
+  return { error: error?.message }
+}
+
+// ─── Remove / Deactivate Organizer ───────────────────────────────────────────
+
+/**
+ * Soft-remove an organizer: suspends their admin_status and marks their
+ * Supabase Auth account as banned so they cannot log in.
+ */
+export async function removeOrganizer(orgId: string): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  // Suspend the profile row
+  const { error: profileErr } = await supabase
+    .from('profiles')
+    .update({ admin_status: 'suspended' } as any)
+    .eq('id', orgId)
+
+  if (profileErr) return { error: profileErr.message }
+
+  // Ban the auth user so they cannot sign in
+  const { error: authErr } = await supabase.auth.admin.updateUserById(orgId, {
+    ban_duration: '876600h', // ~100 years (Supabase requires a duration string, not a boolean)
+  })
+
+  return { error: authErr?.message }
+}
+
+// ─── Admin Email to Organizer ─────────────────────────────────────────────────
+
+/**
+ * Send a plain-text/HTML admin notice email to a specific organizer.
+ * The FROM address is always the verified Tikkit admin address — no
+ * risk of spoofing because this action requires requireAdmin() to pass first.
+ */
+export async function sendAdminEmailToOrganizer(
+  orgId: string,
+  subject: string,
+  message: string
+): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('email, full_name, company_name')
+    .eq('id', orgId)
+    .single()
+
+  if (!profile) return { error: 'Organizer not found' }
+
+  const toName = (profile as any).company_name || (profile as any).full_name || 'Organizer'
+  const toEmail = (profile as any).email
+  if (!toEmail) return { error: 'Organizer has no email address' }
+
+  const htmlBody = `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;padding:32px 20px;background:#0A0C12;color:#D1D5DB;">
+      <div style="margin-bottom:24px;">
+        <span style="font-size:20px;font-weight:800;color:#fff;letter-spacing:-0.5px;">Tikkit</span>
+        <span style="margin-left:8px;font-size:11px;font-weight:700;letter-spacing:0.06em;color:#EF4444;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:4px;padding:2px 6px;">ADMIN</span>
+      </div>
+      <h2 style="color:#F0F2FF;font-size:18px;font-weight:700;margin:0 0 16px;">${subject}</h2>
+      <p style="color:#9CA3AF;font-size:14px;margin:0 0 8px;">Hi ${toName},</p>
+      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:16px 20px;margin:16px 0;white-space:pre-wrap;font-size:14px;line-height:1.6;color:#D1D5DB;">${message.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+      <p style="color:#4B5563;font-size:12px;margin:24px 0 0;">This message was sent by the Tikkit admin team. Reply to this email if you have questions.</p>
+    </div>
+  `
+
+  const { error } = await resend.emails.send({
+    from: EMAIL_FROM,
+    to: toEmail,
+    subject: `[Tikkit Admin] ${subject}`,
+    html: htmlBody,
+  })
+
+  return { error: error?.message }
 }
