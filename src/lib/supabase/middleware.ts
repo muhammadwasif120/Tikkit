@@ -23,6 +23,7 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+  console.log('[MW]', request.method, pathname, '| user:', user?.id?.slice(0,8) ?? 'none', '| meta.role:', user?.user_metadata?.role ?? 'none')
 
   // Public routes — always allow through
   const publicPaths = [
@@ -67,13 +68,11 @@ export async function updateSession(request: NextRequest) {
       }
 
       // Already-authed admin hitting the admin login → skip straight to /master
-      // This prevents the useEffect redirect loop: /master/login → /master → /master/login
+      // Use JWT metadata only — no DB read needed here
       if (pathname === '/master/login') {
-        const { data: profile } = await supabase
-          .from('profiles').select('role').eq('id', user.id).single()
         const metaRole = user.user_metadata?.role as string | undefined
-        const role = profile?.role ?? metaRole ?? 'guest'
-        if (role === 'admin') {
+        console.log('[MW] /master/login auto-redirect check | metaRole:', metaRole)
+        if (metaRole === 'admin') {
           return NextResponse.redirect(new URL('/master', request.url))
         }
         // Not admin — show the login form so they can sign in with admin creds
@@ -95,18 +94,24 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(new URL('/auth/login', request.url))
   }
 
-  // Fetch role for route protection
+  // JWT metadata role — signed, no DB round-trip, reliable in edge middleware
+  const metaRole = user.user_metadata?.role as string | undefined
+
+  // /master: trust JWT metadata only (DB read in edge middleware is flaky).
+  // The layout does an authoritative DB check as a second layer.
+  if (pathname.startsWith('/master')) {
+    console.log('[MW] /master check | metaRole:', metaRole)
+    if (metaRole !== 'admin') {
+      return NextResponse.redirect(new URL('/master/login', request.url))
+    }
+    return response
+  }
+
+  // For all other protected routes, read profile from DB
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
-  // Fall back to auth metadata role so organizers without a profile row
-  // don't get silently downgraded to 'guest' and blocked from /dashboard
-  const metaRole = user.user_metadata?.role as string | undefined
   const role = profile?.role ?? metaRole ?? 'guest'
-
-  // /master requires admin role. Send non-admins to the dedicated admin login.
-  if (pathname.startsWith('/master') && role !== 'admin') {
-    return NextResponse.redirect(new URL('/master/login', request.url))
-  }
+  console.log('[MW] protected | profile.role:', profile?.role, '| role:', role)
 
   // Guest trying to hit organizer routes
   if (role === 'guest' && pathname.startsWith('/dashboard')) {
