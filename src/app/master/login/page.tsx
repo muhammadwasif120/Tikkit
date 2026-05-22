@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { ensureProfileRole } from '@/app/actions/authActions'
 import { useRouter } from 'next/navigation'
 import ForceNoir from '@/components/master/ForceNoir'
 
@@ -27,23 +26,14 @@ export default function MasterLoginPage() {
 
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password })
     if (authError || !data.user) {
-      setError(`Auth failed: ${authError?.message ?? 'no user'}`)
+      setError('Invalid credentials.')
       setLoading(false)
       return
     }
 
-    // Verify role via service-role server action — reads directly from auth.users
-    // and profiles via admin client, so no RLS/cache issues on the client side.
-    let roleResult: { role?: string; error?: string } = {}
-    try { roleResult = await ensureProfileRole() ?? {} } catch (e: unknown) { roleResult = { error: String(e) } }
-
-    if (roleResult.role !== 'admin') {
-      await supabase.auth.signOut()
-      setError(`Role check failed: ensure="${roleResult.error ?? roleResult.role ?? 'no role returned'}"`)
-      setLoading(false)
-      return
-    }
-
+    // Middleware gates /master on JWT metadata.role === 'admin'.
+    // The layout does the authoritative DB check.
+    // If the user isn't admin, the middleware will bounce them back here.
     router.replace('/master')
   }
 
