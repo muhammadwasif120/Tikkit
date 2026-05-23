@@ -6,7 +6,7 @@
     "version": "1.0.0",
     "extra": {
       "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_UUID"
+        "projectId": "e442f468-70ca-4773-bc76-5e7ecf0adedd"
       }
     },
     "orientation": "portrait",
