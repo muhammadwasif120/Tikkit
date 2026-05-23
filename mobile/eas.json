@@ -16,13 +16,11 @@
   "submit": {
     "production": {
       "ios": {
-        "appleId": "muhammadwasif12@gmail.com",
-        "ascAppId": "",
-        "appleTeamId": ""
+        "appleId": "muhammadwasif12@gmail.com"
       },
       "android": {
         "serviceAccountKeyPath": "./google-services-key.json",
-        "track": "internal"
+        "track": "production"
       }
     }
   }
