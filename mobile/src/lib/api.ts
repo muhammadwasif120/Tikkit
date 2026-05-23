@@ -391,10 +391,10 @@ export async function getOrganizerAnalytics() {
   return request<{ analytics: OrganizerAnalytics }>('/api/mobile/organizer/analytics')
 }
 
-export async function scanQR(token: string, eventId: string) {
+export async function scanQR(token: string, eventId: string, scanType: 'entry' | 'exit' = 'entry') {
   return request<ScanResult>('/api/mobile/organizer/scan', {
     method: 'POST',
-    body: JSON.stringify({ token, eventId }),
+    body: JSON.stringify({ token, eventId, scanType }),
   })
 }
 

@@ -11,6 +11,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { format } from 'date-fns'
 import { Skeleton } from '@/components/Skeleton'
 import { getSupportMessages, sendSupportMessage, SupportMessage } from '@/lib/api'
+import { supabase } from '@/lib/supabase'
 import { colors, radius } from '@/theme'
 
 export default function MessagesScreen() {
@@ -29,6 +30,28 @@ export default function MessagesScreen() {
   }, [])
 
   useEffect(() => { load().finally(() => setLoading(false)) }, [])
+
+  // Real-time: listen for new messages on this user's thread
+  useEffect(() => {
+    const channel = (supabase as any)
+      .channel('support_messages_rt')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'support_messages' },
+        (payload: any) => {
+          const msg = payload.new as SupportMessage
+          setMessages(prev => {
+            // Deduplicate (the optimistic send already added the user's own message)
+            if (prev.some(m => m.id === msg.id)) return prev
+            return [...prev, msg]
+          })
+          setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100)
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   const onRefresh = async () => {
     setRefreshing(true)

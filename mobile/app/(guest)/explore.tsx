@@ -276,9 +276,9 @@ export default function ExploreScreen() {
         </View>
       ) : (
         <FlatList
-          data={[]}
-          keyExtractor={() => 'list'}
-          renderItem={null}
+          data={events}
+          keyExtractor={item => item.id}
+          renderItem={() => null}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.blue} />
           }

@@ -4,6 +4,11 @@
     "slug": "tikkit",
     "scheme": "tikkit",
     "version": "1.0.0",
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_UUID"
+      }
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",

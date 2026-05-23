@@ -55,7 +55,7 @@ export default function ScanScreen() {
     setScanState('scanning')
 
     try {
-      const result = await scanQR(data, selectedEvent.id)
+      const result = await scanQR(data, selectedEvent.id, scanType)
       setLastResult(result)
 
       const outcome: ScanLogEntry['outcome'] = !result.valid ? 'error' : result.already_checked_in ? 'duplicate' : 'success'

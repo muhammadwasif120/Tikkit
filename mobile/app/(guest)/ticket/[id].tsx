@@ -39,9 +39,12 @@ export default function QRTicketScreen() {
 
     const load = async () => {
       // 1. Show cached ticket immediately so QR is visible offline
+      // Hoist `hasCached` outside the try so the network step can reference it
+      let hasCached = false
       try {
         const cached = await SecureStore.getItemAsync(QR_CACHE_KEY(id))
         if (cached) {
+          hasCached = true
           setTicket(JSON.parse(cached))
           setFromCache(true)
           setLoading(false)  // unblock UI straight away
@@ -56,8 +59,8 @@ export default function QRTicketScreen() {
           setTicket(found)
           setFromCache(false)
           await SecureStore.setItemAsync(QR_CACHE_KEY(id), JSON.stringify(found))
-        } else if (!ticket) {
-          // Not in API and nothing cached
+        } else if (!hasCached) {
+          // Not in API and nothing in cache — genuinely missing
           Alert.alert('Not found', 'Ticket not found')
         }
       } catch {

@@ -12,6 +12,7 @@ import { useEffect, useRef } from 'react'
 import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
 import { useRouter } from 'expo-router'
+import Constants from 'expo-constants'
 import { registerPushToken } from '@/lib/api'
 
 // Show notifications as banners even when the app is in the foreground
@@ -59,9 +60,13 @@ export function usePushNotifications(userId: string | null | undefined) {
         }
 
         // 3. Get the Expo push token
-        const { data: token } = await Notifications.getExpoPushTokenAsync({
-          projectId: 'tikkit',  // matches app.json slug
-        })
+        // projectId must be the EAS UUID from app.json extra.eas.projectId, NOT the slug
+        const projectId = Constants.expoConfig?.extra?.eas?.projectId as string | undefined
+        if (!projectId) {
+          if (__DEV__) console.warn('[Push] Missing extra.eas.projectId in app.json — push tokens disabled')
+          return
+        }
+        const { data: token } = await Notifications.getExpoPushTokenAsync({ projectId })
         tokenString = token
 
         // 4. Register with our backend

@@ -76,7 +76,7 @@ export default function VerifyScreen() {
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Open Web App',
-          onPress: () => Linking.openURL('https://tikkit.vercel.app/dashboard/settings'),
+          onPress: () => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL ?? 'https://www.tikkitx.com'}/dashboard/settings`),
         },
       ]
     )

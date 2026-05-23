@@ -386,8 +386,8 @@ export default function RegistrationsScreen() {
           <RegistrationCard
             reg={item}
             onPay={() => setPaymentTarget(item)}
-            onChat={() => router.push(`/(guest)/chat/${item.event?.id}`)}
-            onViewEvent={() => router.push(`/(guest)/event/${item.event?.id}`)}
+            onChat={() => { if (item.event?.id) router.push(`/(guest)/chat/${item.event.id}`) }}
+            onViewEvent={() => { if (item.event?.id) router.push(`/(guest)/event/${item.event.id}`) }}
           />
         )}
       />

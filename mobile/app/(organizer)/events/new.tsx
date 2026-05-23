@@ -47,8 +47,8 @@ export default function NewEventScreen() {
       const payload: CreateEventPayload = {
         title: title.trim(),
         description: description.trim() || undefined,
-        date_start: new Date(dateStart).toISOString(),
-        date_end: dateEnd ? new Date(dateEnd).toISOString() : undefined,
+        date_start: new Date(dateStart.replace(' ', 'T')).toISOString(),
+        date_end: dateEnd ? new Date(dateEnd.replace(' ', 'T')).toISOString() : undefined,
         venue_name: venueName.trim() || undefined,
         venue_address: venueAddress.trim() || undefined,
         venue_city: venueCity.trim() || undefined,
