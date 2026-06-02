@@ -34,6 +34,13 @@ export default function MasterLoginPage() {
     // Middleware gates /master on JWT metadata.role === 'admin'.
     // The layout does the authoritative DB check.
     // If the user isn't admin, the middleware will bounce them back here.
+    const metaRole = data.user.user_metadata?.role
+    if (metaRole !== 'admin') {
+      setError('Access denied. This account does not have admin privileges.')
+      setLoading(false)
+      return
+    }
+
     router.replace('/master')
   }
 

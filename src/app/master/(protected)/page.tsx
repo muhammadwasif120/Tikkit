@@ -943,7 +943,7 @@ export default function MasterPage() {
   const [regsLoading, setRegsLoading] = useState(false)
   const [regsLoaded, setRegsLoaded] = useState(false)
   const [regSearch, setRegSearch] = useState('')
-  const [regStatusFilter, setRegStatusFilter] = useState<'all' | 'pending' | 'approved' | 'confirmed' | 'payment_pending'>('all')
+  const [regStatusFilter, setRegStatusFilter] = useState<'all' | 'pending' | 'approved' | 'payment_pending' | 'checked_in'>('all')
   const [regPaymentFilter, setRegPaymentFilter] = useState<'all' | 'submitted' | 'confirmed' | 'none'>('all')
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
 
@@ -2339,10 +2339,6 @@ export default function MasterPage() {
               </div>
             )}
 
-          </div>
-        </main>
-      </div>
-
       {/* Contact panel */}
       {contactTarget && <ContactPanel org={contactTarget} onClose={() => setContactTarget(null)} />}
 
@@ -2620,8 +2616,8 @@ export default function MasterPage() {
           payment_pending: 'Pay Pending', attended: 'Attended', no_show: 'No Show', refunded: 'Refunded',
           checked_in: 'Checked In', registered: 'Registered', eoi_submitted: 'EOI Submitted', eoi_approved: 'EOI Approved',
         }
-        const PAY_SC: Record<string, string> = { submitted: '#F59E0B', confirmed: '#22C55E', rejected: '#EF4444' }
-        const PAY_SL: Record<string, string> = { submitted: 'Awaiting Review', confirmed: 'Confirmed', rejected: 'Rejected' }
+        const PAY_SC: Record<string, string> = { submitted: '#F59E0B', confirmed: '#22C55E', rejected: '#EF4444', not_required: '#4B5563', pending: '#6B7280' }
+        const PAY_SL: Record<string, string> = { submitted: 'Awaiting Review', confirmed: 'Confirmed', rejected: 'Rejected', not_required: 'Free', pending: 'Pending' }
 
         const q = regSearch.toLowerCase()
         const filtered = registrations
@@ -2635,7 +2631,7 @@ export default function MasterPage() {
           })
 
         const pendingPayments = registrations.filter(r => r.payment_status === 'submitted').length
-        const confirmed = registrations.filter(r => r.status === 'confirmed').length
+        const confirmed = registrations.filter(r => r.status === 'checked_in' || r.status === 'attended').length
         const paidEvents = registrations.filter(r => (r.ticket_price ?? 0) > 0).length
 
         const exportCSV = () => {
@@ -2666,7 +2662,7 @@ export default function MasterPage() {
               {[
                 { label: 'Total Registrations', value: registrations.length, color: '#1E5EFF' },
                 { label: 'Payments Pending',    value: pendingPayments,       color: '#F59E0B' },
-                { label: 'Confirmed',           value: confirmed,             color: '#22C55E' },
+                { label: 'Checked In',           value: confirmed,             color: '#22C55E' },
                 { label: 'Paid Event Regs',     value: paidEvents,            color: '#8B5CF6' },
               ].map(s => (
                 <div key={s.label} style={{ background: '#0D0F18', border: `1px solid ${s.color}22`, borderRadius: 12, padding: '16px 18px' }}>
@@ -2684,9 +2680,9 @@ export default function MasterPage() {
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                   {/* Status pills */}
                   <div className="ms-pills">
-                    {(['all','pending','approved','confirmed','payment_pending'] as const).map(f => (
+                    {(['all','pending','approved','payment_pending','checked_in'] as const).map(f => (
                       <button key={f} className={`ms-pill${regStatusFilter === f ? ' pa' : ''}`} onClick={() => setRegStatusFilter(f)}>
-                        {f === 'all' ? 'All' : f === 'payment_pending' ? 'Pay Pending' : f.charAt(0).toUpperCase() + f.slice(1)}
+                        {f === 'all' ? 'All' : f === 'payment_pending' ? 'Pay Pending' : f === 'checked_in' ? 'Checked In' : f.charAt(0).toUpperCase() + f.slice(1)}
                       </button>
                     ))}
                   </div>
@@ -2800,6 +2796,10 @@ export default function MasterPage() {
           </div>
         )
       })()}
+
+          </div>
+        </main>
+      </div>
     </>
   )
 }
