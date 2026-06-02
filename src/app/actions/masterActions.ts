@@ -11,18 +11,19 @@ const EMAIL_FROM = process.env.EMAIL_FROM ?? 'Tikkit Admin <admin@tikkit.app>'
 // ─── Auth guard ───────────────────────────────────────────────────────────────
 // Server actions are called directly via POST — they bypass all layout-level
 // auth checks. Every sensitive action must call this before touching any data.
+//
+// We verify against JWT metadata (user_metadata.role) rather than a DB lookup.
+// getUser() validates the session token against Supabase auth servers so the
+// metadata is cryptographically verified — same source of truth the middleware
+// uses. This avoids the metadata↔DB mismatch that caused Forbidden on every
+// action when profiles.role was out of sync with the JWT.
 export async function requireAdmin(): Promise<void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'admin') throw new Error('Forbidden')
+  const metaRole = user.user_metadata?.role
+  if (metaRole !== 'admin') throw new Error('Forbidden')
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
