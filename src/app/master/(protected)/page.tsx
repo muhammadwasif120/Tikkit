@@ -17,7 +17,7 @@ import {
   getMasterAnalytics, getWaitlistEntries,
   getSupportQueries, updateSupportQueryStatus,
   getMasterCnicVerifications, approveCnicVerification, rejectCnicVerification,
-  getMasterAttendees, getMasterRegistrations,
+  getMasterAttendees, getMasterRegistrations, getMasterBadgeCounts,
   setEventAdminStatus, removeOrganizer, sendAdminEmailToOrganizer,
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
   type PlatformAnalytics, type WaitlistEntry, type SupportQuery, type CnicVerification,
@@ -880,13 +880,21 @@ export default function MasterPage() {
   const [events, setEvents] = useState<Evt[]>([])
   const [loading, setLoading] = useState(false)
 
+  // Eager badge counts — loaded upfront so sidebar badges are accurate immediately
+  const [eagerPendingVerif, setEagerPendingVerif] = useState(0)
+  const [eagerPendingPayments, setEagerPendingPayments] = useState(0)
+  const [eagerUnreadSupport, setEagerUnreadSupport] = useState(0)
+
   useEffect(() => {
     setLoading(true)
-    Promise.all([getMasterOrganizers(), getMasterEvents(), getSupportQueries()])
-      .then(([orgsData, evtsData, queriesData]) => {
+    Promise.all([getMasterOrganizers(), getMasterEvents(), getSupportQueries(), getMasterBadgeCounts()])
+      .then(([orgsData, evtsData, queriesData, counts]) => {
         setOrgs(orgsData as Org[])
         setEvents(evtsData as Evt[])
         setQueries(queriesData)
+        setEagerPendingVerif(counts.pendingVerifications)
+        setEagerPendingPayments(counts.pendingPayments)
+        setEagerUnreadSupport(counts.unreadSupport)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -1038,6 +1046,7 @@ export default function MasterPage() {
     if (!error) {
       setCnicVerifications(prev => prev.map(v => v.id === userId ? { ...v, cnic_status: 'verified' } : v))
       setReviewCnic(prev => prev?.id === userId ? { ...prev, cnic_status: 'verified' } : prev)
+      setEagerPendingVerif(n => Math.max(0, n - 1))
     }
     setCnicAction('idle')
     setShowRejectInput(false)
@@ -1050,6 +1059,7 @@ export default function MasterPage() {
     if (!error) {
       setCnicVerifications(prev => prev.map(v => v.id === userId ? { ...v, cnic_status: 'rejected', cnic_reject_reason: rejectReason } : v))
       setReviewCnic(prev => prev?.id === userId ? { ...prev, cnic_status: 'rejected', cnic_reject_reason: rejectReason } : prev)
+      setEagerPendingVerif(n => Math.max(0, n - 1))
     }
     setCnicAction('idle')
     setShowRejectInput(false)
@@ -1092,14 +1102,16 @@ export default function MasterPage() {
   const flaggedEvtCount = events.filter(e => getEvtStatus(e) === 'flagged').length
   const liveEvtCount = events.filter(e => getEvtStatus(e) === 'live').length
   const totalRegistered = events.reduce((a, e) => a + e.registered, 0)
-  const pendingCnicCount = cnicVerifications.filter(v => v.cnic_status === 'pending').length
-  const unreadSupportCount = supportConvos.reduce((sum, c) => sum + c.unreadCount, 0)
+  // Use eager counts until lazy tabs are loaded, then switch to live data
+  const pendingCnicCount    = cnicVerifications.length > 0 ? cnicVerifications.filter(v => v.cnic_status === 'pending').length : eagerPendingVerif
+  const unreadSupportCount  = supportConvos.length > 0 ? supportConvos.reduce((sum, c) => sum + c.unreadCount, 0) : eagerUnreadSupport
+  const pendingPaymentCount = registrations.length > 0 ? registrations.filter(r => r.payment_status === 'submitted').length : eagerPendingPayments
 
   const NAV = [
     { id: 'overview'       as Tab, icon: LayoutDashboard, label: 'Overview' },
     { id: 'organizers'     as Tab, icon: Users,           label: 'Organizers',         badge: reviewOrgCount > 0 ? reviewOrgCount : undefined },
     { id: 'attendees'      as Tab, icon: UserCheck,       label: 'Attendees'           },
-    { id: 'registrations'  as Tab, icon: Ticket,          label: 'Registrations',      badge: registrations.filter(r => r.payment_status === 'submitted').length > 0 ? registrations.filter(r => r.payment_status === 'submitted').length : undefined },
+    { id: 'registrations'  as Tab, icon: Ticket,          label: 'Registrations',      badge: pendingPaymentCount > 0 ? pendingPaymentCount : undefined },
     { id: 'events'         as Tab, icon: Calendar,        label: 'Events',             badge: flaggedEvtCount > 0 ? flaggedEvtCount : undefined },
     { id: 'analytics'      as Tab, icon: BarChart2,       label: 'Analytics'           },
     { id: 'queries'        as Tab, icon: MessageCircle,   label: 'Queries & Disputes', badge: openQCount > 0 ? openQCount : undefined },

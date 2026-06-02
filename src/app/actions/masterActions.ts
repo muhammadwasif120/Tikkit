@@ -765,14 +765,29 @@ export async function getMasterRegistrations(limit = 300): Promise<MasterRegistr
   await requireAdmin()
   const supabase = createAdminClient()
 
-  const { data: regs, error: rErr } = await supabase
+  // Try with payment_screenshot_url first; fall back without it if the column
+  // hasn't been added to this environment yet (migration may be pending).
+  let regs: any[] | null = null
+  const { data: regsWithScreenshot, error: rErr1 } = await (supabase as any)
     .from('public_registrations')
     .select('id, status, payment_status, payment_screenshot_url, created_at, full_name, email, phone, event_id')
     .not('status', 'eq', 'rejected')
     .order('created_at', { ascending: false })
     .limit(limit)
 
-  if (rErr) console.error("MasterRegistrations regs err:", rErr)
+  if (!rErr1) {
+    regs = regsWithScreenshot
+  } else {
+    const { data: regsNoScreenshot, error: rErr2 } = await supabase
+      .from('public_registrations')
+      .select('id, status, payment_status, created_at, full_name, email, phone, event_id')
+      .not('status', 'eq', 'rejected')
+      .order('created_at', { ascending: false })
+      .limit(limit)
+    if (rErr2) console.error("MasterRegistrations regs err:", rErr2)
+    regs = regsNoScreenshot
+  }
+
   if (!regs || regs.length === 0) return []
 
   const eventIds = Array.from(new Set(regs.map((r: any) => r.event_id).filter(Boolean))) as string[]
@@ -929,4 +944,41 @@ export async function sendAdminEmailToOrganizer(
   })
 
   return { error: error?.message }
+}
+
+// ─── Badge Counts ─────────────────────────────────────────────────────────────
+// Fetched on initial dashboard load so sidebar badges are accurate from the
+// moment the page opens — without loading full tab datasets upfront.
+
+export type MasterBadgeCounts = {
+  pendingVerifications: number   // CNIC reviews awaiting action
+  pendingPayments: number        // registrations with payment submitted, awaiting review
+  unreadSupport: number          // support messages unread by admin
+}
+
+export async function getMasterBadgeCounts(): Promise<MasterBadgeCounts> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+
+  const [verif, payments, support] = await Promise.all([
+    (supabase as any)
+      .from('profiles')
+      .select('id', { count: 'exact', head: true })
+      .eq('cnic_status', 'pending'),
+    (supabase as any)
+      .from('public_registrations')
+      .select('id', { count: 'exact', head: true })
+      .eq('payment_status', 'submitted'),
+    (supabase as any)
+      .from('support_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('sender', 'user')
+      .eq('read_by_admin', false),
+  ])
+
+  return {
+    pendingVerifications: verif.count ?? 0,
+    pendingPayments:      payments.count ?? 0,
+    unreadSupport:        support.count ?? 0,
+  }
 }
