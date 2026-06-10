@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
-  title: 'Explore Events in Pakistan — Concerts, Parties & More | Tikkit',
+  title: 'Explore Events in Pakistan — Concerts, Parties & More',
   description: 'Browse upcoming concerts, private parties, corporate networking events, and exclusive experiences in Lahore, Karachi, Islamabad, and across Pakistan. Buy tickets online.',
   keywords: ['events in Pakistan', 'buy tickets Pakistan', 'concerts Pakistan', 'events Lahore', 'events Karachi', 'events Islamabad', 'upcoming events Pakistan', 'things to do Pakistan'],
   alternates: { canonical: 'https://www.tikkitx.com/explore' },

@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import PulsePage from './PulseClient'
 
 export const metadata: Metadata = {
-  title: 'Pulse — Host Yoga Retreats, Wellness Events & Workshops in Pakistan | Tikkit',
+  title: 'Pulse — Host Yoga Retreats, Wellness Events & Workshops in Pakistan',
   description: 'Host yoga retreats, wellness workshops and mindful experiences in Pakistan with Tikkit Pulse. Manage registrations, offline check-in and attendance certificates — built for creators in Murree, Islamabad, Lahore and beyond.',
   keywords: [
     'yoga retreat Pakistan',

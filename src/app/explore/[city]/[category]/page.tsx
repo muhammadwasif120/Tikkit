@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import PublicExploreClient from '@/components/public/PublicExploreClient'
 
-export const revalidate = 120 
+export const revalidate = 120
 
 type Props = {
   params: Promise<{ city: string; category: string }>
@@ -14,14 +14,36 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params
   const cityStr = resolvedParams.city
   const catStr = resolvedParams.category
-  
+  const city = cityStr.replace(/-/g, ' ')
+
   const formattedCity = cityStr.charAt(0).toUpperCase() + cityStr.slice(1).replace(/-/g, ' ')
   const formattedCat = catStr.charAt(0).toUpperCase() + catStr.slice(1).replace(/-/g, ' ')
-  
+
+  // Noindex pages with no live events — prevents thin content from suppressing ranked pages
+  const admin = createAdminClient()
+  const { data: cats } = await admin
+    .from('event_categories')
+    .select('id')
+    .ilike('name', catStr)
+    .limit(1)
+  const catId = cats?.[0]?.id
+  const { count } = catId
+    ? await admin
+        .from('events')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'published')
+        .eq('is_private', false)
+        .eq('category_id', catId)
+        .gte('date_start', new Date().toISOString())
+        .or(`venue_name.ilike.%${city}%,title.ilike.%${city}%`)
+    : { count: 0 }
+  const hasEvents = (count ?? 0) > 0
+
   return {
-    title: `${formattedCat} in ${formattedCity} | Tickets & Events | Tikkit`,
-    description: `Buy tickets for upcoming ${formattedCat.toLowerCase()} in ${formattedCity}. Browse the best exclusive events and reserve your spot on Tikkit.`,
+    title: `${formattedCat} Events & Tickets in ${formattedCity}`,
+    description: `Buy tickets for upcoming ${formattedCat.toLowerCase()} events in ${formattedCity}. Browse exclusive events and reserve your spot on Tikkit.`,
     alternates: { canonical: `https://www.tikkitx.com/explore/${cityStr}/${catStr}` },
+    robots: hasEvents ? undefined : { index: false, follow: true },
     openGraph: {
       title: `${formattedCat} Events in ${formattedCity} | Tikkit`,
       description: `Secure tickets for ${formattedCat.toLowerCase()} events in ${formattedCity}.`,

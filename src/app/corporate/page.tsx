@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import CorporatePage from './CorporateClient'
 
 export const metadata: Metadata = {
-  title: 'Corporate Event Management in Pakistan — Tikkit for Business',
+  title: 'Corporate Event Management in Pakistan',
   description: 'Plan, manage and report on corporate events in Pakistan with Tikkit. Verified check-in, digital invitations, real-time analytics and post-event reports — built for teams in Lahore, Karachi and Islamabad.',
   keywords: [
     'corporate event management Pakistan',

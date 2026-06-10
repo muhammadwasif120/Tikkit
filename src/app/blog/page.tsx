@@ -4,7 +4,7 @@ import { getAllPosts, CATEGORY_LABELS, type BlogPostMeta } from '@/lib/blog'
 import BlogCard from '@/components/blog/BlogCard'
 
 export const metadata: Metadata = {
-  title: 'Blog — Event Planning Tips, Guides & Pakistan Event Scene | Tikkit',
+  title: 'Blog — Event Planning Tips, Guides & Pakistan Event Scene',
   description: 'Practical guides for event organisers in Pakistan. How to create events, manage guest lists, plan corporate dinners, yoga retreats and more — powered by Tikkit.',
   keywords: ['event planning Pakistan', 'corporate event guide', 'how to organise events Pakistan', 'event management tips', 'workshop planning Pakistan'],
   alternates: {

@@ -66,7 +66,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const formattedCity = cityStr.charAt(0).toUpperCase() + cityStr.slice(1).replace(/-/g, ' ')
 
   return {
-    title: `Events, Concerts & Experiences in ${formattedCity} | Tikkit`,
+    title: `Events, Concerts & Experiences in ${formattedCity}`,
     description: `Discover the best upcoming events, concerts, private parties, and corporate networking events happening in ${formattedCity}. Secure your tickets online with Tikkit.`,
     alternates: { canonical: `https://www.tikkitx.com/explore/${cityStr}` },
     openGraph: {

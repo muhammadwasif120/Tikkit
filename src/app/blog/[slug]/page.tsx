@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!post) return {}
 
   return {
-    title: `${post.title} | Tikkit Blog`,
+    title: post.title,
     description: post.description,
     keywords: post.keywords,
     authors: [{ name: 'Tikkit Team' }],

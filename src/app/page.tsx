@@ -3,22 +3,22 @@ import Link from 'next/link'
 import HomeClient from './HomeClient'
 
 export const metadata: Metadata = {
-  title: 'Tikkit — Buy & Sell Event Tickets in Pakistan | Lahore · Karachi · Islamabad',
-  description: "Pakistan's #1 event ticketing platform. Discover concerts, parties, tech conferences & corporate events. Sell tickets with dynamic QR, guest approval, and instant payouts. Free to start.",
-  keywords: ['buy event tickets Pakistan', 'sell tickets online Pakistan', 'concerts Lahore', 'events Karachi', 'events Islamabad', 'event ticketing app Pakistan', 'event management Pakistan'],
+  title: 'Event Management & Ticketing Platform for Pakistan',
+  description: 'Run your events end to end — guest lists, QR check-in, JazzCash & EasyPaisa payments, vendors and finances. Built for Pakistani organizers. Free to start.',
+  keywords: ['event management Pakistan', 'sell tickets online Pakistan', 'event ticketing platform Pakistan', 'concerts Lahore', 'events Karachi', 'events Islamabad', 'event organizer tools Pakistan', 'JazzCash event tickets'],
   alternates: { canonical: 'https://www.tikkitx.com' },
   openGraph: {
-    title: 'Tikkit — Buy & Sell Event Tickets in Pakistan',
-    description: "Pakistan's #1 event ticketing platform. Concerts, parties, tech events in Lahore, Karachi & Islamabad. Dynamic QR, instant payouts.",
+    title: 'Event Management & Ticketing Platform for Pakistan | Tikkit',
+    description: 'Run your events end to end — guest lists, QR check-in, JazzCash & EasyPaisa payments, vendors and finances. Built for Pakistani organizers.',
     url: 'https://www.tikkitx.com',
     type: 'website',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit — Event Ticketing Platform Pakistan' }],
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit — Event Management Platform Pakistan' }],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@tikkitx',
-    title: 'Tikkit — Buy & Sell Event Tickets in Pakistan',
-    description: "Pakistan's #1 event ticketing platform. Concerts, parties, tech events in Lahore, Karachi & Islamabad.",
+    title: 'Event Management & Ticketing Platform for Pakistan | Tikkit',
+    description: 'Guest lists, QR check-in, JazzCash & EasyPaisa payments — event management built for Pakistan. Free to start.',
     images: ['/og-image.jpg'],
   },
 }

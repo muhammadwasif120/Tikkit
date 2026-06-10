@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ensureProfileRole } from '@/app/actions/authActions'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Mail, Lock, Eye, EyeOff, User,
   ArrowRight, AlertCircle, ChevronLeft,
@@ -59,7 +59,7 @@ function Field({ Icon, type, placeholder, value, onChange, end, accent }: {
 
 // ─── AuthForm ──────────────────────────────────────────────────────────────
 
-function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
+function AuthForm({ mode, onBack, initialTab = 'login' }: { mode: Mode; onBack: () => void; initialTab?: SubMode }) {
   const supabase = createClient()
   const router   = useRouter()
   const isOrg    = mode === 'organizer'
@@ -69,7 +69,7 @@ function AuthForm({ mode, onBack }: { mode: Mode; onBack: () => void }) {
   const btnGlow  = isOrg ? 'rgba(30,94,255,0.4)' : 'rgba(255,199,69,0.35)'
   const expRole  = isOrg ? 'organizer' : 'guest'
 
-  const [tab,    setTab]    = useState<SubMode>('login')
+  const [tab,    setTab]    = useState<SubMode>(initialTab)
   const [step,   setStep]   = useState<1 | 2>(1)
   const [name,   setName]   = useState('')
   const [email,  setEmail]  = useState('')
@@ -767,8 +767,11 @@ function BrandPanel() {
 
 // ─── Page ──────────────────────────────────────────────────────────────────
 
-export default function AuthPage() {
-  const [mode, setMode] = useState<Mode>(null)
+function AuthPageInner() {
+  const params   = useSearchParams()
+  const isSignup = params.get('flow') === 'organizer-signup'
+  const [mode, setMode] = useState<Mode>(isSignup ? 'organizer' : null)
+  const initialTab: SubMode = isSignup ? 'signup' : 'login'
 
   return (
     <>
@@ -914,12 +917,20 @@ export default function AuthPage() {
 
           <div className={`auth-inner${!mode ? ' picker' : ''}`}>
             {mode
-              ? <AuthForm mode={mode} onBack={() => setMode(null)} />
+              ? <AuthForm mode={mode} onBack={() => setMode(null)} initialTab={initialTab} />
               : <RolePicker onSelect={setMode} />
             }
           </div>
         </div>
       </div>
     </>
+  )
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense>
+      <AuthPageInner />
+    </Suspense>
   )
 }

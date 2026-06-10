@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
     '/compare/',
     '/organizer/',
     '/guest/explore/',
+    '/contact',
   ]
 
   const disallowPrivateRules = [

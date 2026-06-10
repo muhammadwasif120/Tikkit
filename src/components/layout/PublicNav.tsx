@@ -114,11 +114,12 @@ export default function PublicNav({ activePage }: Props) {
           <Link href="/how-it-works" className={`pub-nav-link${activePage === 'how-it-works' ? ' active' : ''}`}>How it works</Link>
           <Link href="/explore" className={`pub-nav-link${activePage === 'explore' ? ' active' : ''}`}>Explore</Link>
           <Link href="/blog" className="pub-nav-link">Blog</Link>
+          <Link href="/contact" className="pub-nav-link">Contact</Link>
         </div>
 
         <div className="pub-nav-actions">
           <Link href="/auth/login" className="pub-btn-ghost">Log in</Link>
-          <Link href="/auth/login" className="pub-btn-nav">Get started <ArrowRight size={14} /></Link>
+          <Link href="/auth/login?flow=organizer-signup" className="pub-btn-nav">Get started <ArrowRight size={14} /></Link>
         </div>
 
         <button className="pub-hamburger" onClick={() => setMenuOpen(true)} aria-label="Open menu">
@@ -138,8 +139,9 @@ export default function PublicNav({ activePage }: Props) {
         <Link href="/how-it-works" className="pub-mmenu-link" onClick={() => setMenuOpen(false)}>How it works</Link>
         <Link href="/explore" className={`pub-mmenu-link${activePage === 'explore' ? ' active' : ''}`} onClick={() => setMenuOpen(false)}>Explore</Link>
         <Link href="/blog" className="pub-mmenu-link" onClick={() => setMenuOpen(false)}>Blog</Link>
+        <Link href="/contact" className="pub-mmenu-link" onClick={() => setMenuOpen(false)}>Contact</Link>
         <div className="pub-mmenu-actions">
-          <Link href="/auth/login" className="pub-btn-full-primary">Get started free</Link>
+          <Link href="/auth/login?flow=organizer-signup" className="pub-btn-full-primary">Get started free</Link>
           <Link href="/auth/login" className="pub-btn-full-ghost">Log in</Link>
         </div>
       </div>

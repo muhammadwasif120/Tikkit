@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'How Tikkit Works — Sell Event Tickets Online in Pakistan',
-  description: 'Learn how to create, manage, and sell tickets for your events in Pakistan. Dynamic QR check-in, guest list approval, instant payouts. Free to start — no subscription needed.',
+  description: 'Go live in 10 minutes. Create your event page, sell tickets, and manage your guest list — JazzCash & EasyPaisa native, QR check-in at the door. Free to start.',
   keywords: ['sell tickets online Pakistan', 'how to sell event tickets Pakistan', 'event ticketing platform Pakistan', 'create event page Pakistan', 'QR ticket scanning Pakistan'],
   alternates: { canonical: 'https://www.tikkitx.com/how-it-works' },
   openGraph: {
@@ -45,7 +45,7 @@ const faqSchema = {
       name: 'How does Tikkit prevent ticket fraud?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: "Tikkit uses Dynamic QR technology — each ticket's QR code refreshes every 15 seconds. This makes screenshot-sharing and duplicate tickets completely useless. Your staff scan the live QR at the door using the Tikkit Scanner.",
+        text: 'Every ticket carries a cryptographically signed QR code, verified at the door even with zero internet — no screenshots, no duplicates, no fake tickets. Your staff scan the live QR at the door using the Tikkit Scanner.',
       },
     },
     {

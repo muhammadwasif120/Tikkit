@@ -709,7 +709,7 @@ export default function HowItWorksPage() {
                 },
                 {
                   '@type': 'HowToStep',
-                  text: 'Once approved, your cinematic QR ticket is issued instantly.',
+                  text: 'Once approved, your cryptographically signed QR ticket is issued instantly.',
                   name: 'Entry',
                 },
               ],
@@ -1124,9 +1124,9 @@ export default function HowItWorksPage() {
             Safe Payments in Pakistan
           </h2>
           <p style={{ fontSize: 'var(--fs-lg)', color: '#9CA3AF', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 680, margin: '0 auto 32px' }}>
-            Unlike automated payment gateways that are vulnerable to regional scams and chargebacks, TIKKIT X secures your transaction using 100% Manual P2P Verification. By uploading your direct transfer screenshot (EasyPaisa, JazzCash, or Bank), the event Organizer personally verifies the funds. 
+            On Tikkit X, money never sits with a middleman. Guests pay you directly — JazzCash, EasyPaisa, or bank transfer — and confirm with their transfer receipt. You verify with one tap from your dashboard, and the platform records every transaction ID, timestamp, and approval.
             <br/><br/>
-            No bots. No delayed processing. Absolute cryptographic trust between you and the host.
+            You hold the money. Not us, not a gateway. Funds arrive before the event, in your account — no settlement delays, no chargebacks, no frozen payouts.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 24, flexWrap: 'wrap' }}>
             {[
@@ -1156,11 +1156,11 @@ export default function HowItWorksPage() {
             },
             {
               q: 'What if the organizer denies or ignores my payment?',
-              a: 'TIKKIT acts as the underlying arbiter. Every P2P transaction happens via explicit tracking IDs. If you have valid proof of transfer (EasyPaisa/JazzCash tracking number) but face a dispute, our dispute resolution team enforces accountability.'
+              a: 'Tikkit retains the full payment trail — tracking IDs, timestamps, and approvals. If a dispute arises and you have a valid transfer reference (EasyPaisa/JazzCash tracking number), Tikkit will provide the complete records to both parties so the evidence speaks for itself.'
             },
             {
               q: 'Do I need a physical ticket?',
-              a: 'No. The moment your payment is verified, a cinematic QR code is generated inside your TIKKIT dashboard. It is impossible to duplicate. Just show it at the door to be scanned in.'
+              a: 'No. The moment your payment is verified, your cryptographically signed QR ticket is issued inside your Tikkit dashboard. It\'s verified at the door even with zero internet — screenshots and duplicates fail at the scan. Just show it at the door.'
             },
             {
               q: 'How does the Guest Score work?',
@@ -1248,12 +1248,11 @@ export default function HowItWorksPage() {
             color: '#F0F2FF', lineHeight: 1.15, marginBottom: 16,
           }}>
             Add to your phone.<br />
-            <span className="gradient-text">No App Store. No storage. Just tap.</span>
+            <span className="gradient-text">No download required. Just tap.</span>
           </h2>
 
           <p style={{ fontSize: 'var(--fs-lg)', color: '#6B7280', fontFamily: 'var(--font-body)', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 12px' }}>
-            TIKKIT X installs as a web app — no Play Store, no App Store, no 200MB download.
-            Perfect for phones that are already full.
+            Add Tikkit X to your home screen in 10 seconds — no download required, zero storage used. Or grab the app from the App Store or Play Store. Your choice.
           </p>
           <p style={{ fontSize: 'var(--fs-md)', color: '#4B5563', fontFamily: 'var(--font-body)' }}>
             Works on every iPhone, Android, and tablet.
