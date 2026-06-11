@@ -4,7 +4,7 @@ import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'Tikkit X is built by Two Bit Digital Ltd — a Lahore-based team on a mission to give Pakistani event organisers the tools global platforms take for granted. Free. Local. Reliable.',
+  description: 'Tikkit X is built by Two Bit Digital Ltd — a Karachi-based team on a mission to give Pakistani event organisers the tools global platforms take for granted. Free. Local. Reliable.',
   alternates: { canonical: 'https://www.tikkitx.com/about' },
   robots: { index: true, follow: true },
 }
@@ -19,7 +19,7 @@ const orgSchema = {
   foundingDate: '2024',
   foundingLocation: {
     '@type': 'Place',
-    name: 'Lahore, Pakistan',
+    name: 'Karachi, Pakistan',
   },
   areaServed: {
     '@type': 'Country',
@@ -52,7 +52,7 @@ const timeline = [
   {
     year: '2024',
     title: 'First version ships',
-    body: 'Tikkit X launches with guest lists, QR check-in, and payment receipt verification. The first events go live in Lahore within weeks.',
+    body: 'Tikkit X launches with guest lists, QR check-in, and payment receipt verification. The first events go live in Karachi within weeks.',
   },
   {
     year: '2025',
@@ -67,7 +67,7 @@ const timeline = [
   {
     year: '2026',
     title: 'Growing across Pakistan',
-    body: 'Events running in Lahore, Karachi, and Islamabad. Music nights, corporate dinners, tech meetups, wellness retreats. Tikkit X is the platform Pakistani events run on.',
+    body: 'Events running in Karachi, Lahore, and Islamabad. Music nights, corporate dinners, tech meetups, wellness retreats. Tikkit X is the platform Pakistani events run on.',
   },
 ]
 
@@ -151,7 +151,7 @@ export default function AboutPage() {
             background: 'rgba(30,94,255,0.1)', border: '1px solid rgba(30,94,255,0.2)',
             borderRadius: 20, padding: '5px 14px',
           }}>
-            Two Bit Digital Ltd · Lahore, Pakistan
+            Two Bit Digital Ltd · Karachi, Pakistan
           </div>
           <h1 style={{
             fontFamily: 'var(--font-display)',
@@ -283,7 +283,7 @@ export default function AboutPage() {
           {[
             { label: 'Company',  value: 'Two Bit Digital Ltd' },
             { label: 'Founded',  value: '2024' },
-            { label: 'Based in', value: 'Lahore, Pakistan' },
+            { label: 'Based in', value: 'Karachi, Pakistan' },
             { label: 'Contact',  value: 'hello@tikkitx.com' },
           ].map(({ label, value }) => (
             <div key={label}>
