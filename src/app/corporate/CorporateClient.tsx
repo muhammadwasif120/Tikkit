@@ -347,7 +347,7 @@ export default function CorporatePage() {
             ))}
           </nav>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary corp-hide-mobile">Book a Demo <ChevronRight size={16} /></a>
+            <a href="/corporate/demo" className="corp-btn-primary corp-hide-mobile">Book a Demo <ChevronRight size={16} /></a>
             <button
               onClick={() => setMenuOpen(v => !v)}
               style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: 8, display: 'none' }}
@@ -362,7 +362,7 @@ export default function CorporatePage() {
             {['Features', 'How It Works', 'Security', 'Use Cases'].map(l => (
               <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="corp-nav-link" onClick={() => setMenuOpen(false)}>{l}</a>
             ))}
-            <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary" style={{ justifyContent: 'center' }}>Book a Demo</a>
+            <a href="/corporate/demo" className="corp-btn-primary" style={{ justifyContent: 'center' }}>Book a Demo</a>
           </div>
         )}
       </header>
@@ -396,7 +396,7 @@ export default function CorporatePage() {
               Town halls. Leadership galas. Annual conferences. When the room matters, the details can&apos;t slip. One platform that makes sure they don&apos;t.
             </p>
             <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-              <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary" style={{ fontSize: 15, padding: '15px 32px' }}>
+              <a href="/corporate/demo" className="corp-btn-primary" style={{ fontSize: 15, padding: '15px 32px' }}>
                 Book a Demo <ArrowRight size={17} />
               </a>
               <a href="#features" className="corp-btn-ghost" style={{ fontSize: 15, padding: '15px 32px' }}>
@@ -722,7 +722,7 @@ export default function CorporatePage() {
           <p style={{ fontSize: 18, color: '#64748B', marginBottom: 40, lineHeight: 1.7 }}>
             Corporate teams across Pakistan are running events on Tikkit. Time to see what a proper platform feels like.
           </p>
-          <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary" style={{ fontSize: 16, padding: '17px 40px', animation: 'corpGlow 3s ease infinite' }}>
+          <a href="/corporate/demo" className="corp-btn-primary" style={{ fontSize: 16, padding: '17px 40px', animation: 'corpGlow 3s ease infinite' }}>
             Book a Demo <ArrowRight size={18} />
           </a>
           <p style={{ marginTop: 20, fontSize: 14, color: '#475569' }}>
