@@ -15,6 +15,8 @@ export type BlogPost = {
   readingTime: number
   pillar?: string
   excerpt: string
+  author: string
+  authorTitle: string
   content: string
 }
 
@@ -46,6 +48,8 @@ export function getAllPosts(): BlogPostMeta[] {
       readingTime: estimateReadingTime(content),
       pillar: data.pillar,
       excerpt: data.excerpt ?? data.description ?? '',
+      author: data.author ?? 'Muhammad Wasif',
+      authorTitle: data.authorTitle ?? 'Founder, Two Bit Digital Ltd',
     } as BlogPostMeta
   })
 
@@ -72,6 +76,8 @@ export function getPostBySlug(slug: string): BlogPost | null {
     readingTime: estimateReadingTime(content),
     pillar: data.pillar,
     excerpt: data.excerpt ?? data.description ?? '',
+    author: data.author ?? 'Muhammad Wasif',
+    authorTitle: data.authorTitle ?? 'Founder, Two Bit Digital Ltd',
     content,
   }
 }

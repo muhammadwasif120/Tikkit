@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: post.title,
     description: post.description,
     keywords: post.keywords,
-    authors: [{ name: 'Tikkit Team' }],
+    authors: [{ name: post.author, url: 'https://www.tikkitx.com/about' }],
     alternates: {
       canonical: `https://www.tikkitx.com/blog/${post.slug}`,
     },
@@ -78,8 +78,14 @@ export default async function ArticlePage({ params }: Props) {
       description: post.description,
       datePublished: post.publishedAt,
       dateModified: post.updatedAt ?? post.publishedAt,
-      author: { '@type': 'Organization', name: 'Tikkit', url: 'https://www.tikkitx.com' },
-      publisher: { '@type': 'Organization', name: 'Tikkit', url: 'https://www.tikkitx.com' },
+      author: {
+        '@type': 'Person',
+        name: post.author,
+        jobTitle: post.authorTitle,
+        url: 'https://www.tikkitx.com/about',
+        worksFor: { '@type': 'Organization', name: 'Two Bit Digital Ltd', url: 'https://www.tikkitx.com' },
+      },
+      publisher: { '@type': 'Organization', name: 'Tikkit X', url: 'https://www.tikkitx.com' },
       keywords: post.keywords.join(', '),
       inLanguage: 'en-PK',
       mainEntityOfPage: { '@type': 'WebPage', '@id': `https://www.tikkitx.com/blog/${post.slug}` },
@@ -311,7 +317,7 @@ export default async function ArticlePage({ params }: Props) {
             borderBottom: '1px solid rgba(255,255,255,0.07)',
             marginBottom: '48px',
           }}>
-            <span>By Tikkit Team</span>
+            <span>By {post.author}</span>
             <span>·</span>
             <span>{publishDate}</span>
             {updatedDate && <><span>·</span><span>Updated {updatedDate}</span></>}
@@ -326,6 +332,38 @@ export default async function ArticlePage({ params }: Props) {
           style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px' }}
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
+
+        {/* Author bio */}
+        <div style={{ maxWidth: '760px', margin: '56px auto 0', padding: '0 24px' }}>
+          <div style={{
+            display: 'flex', gap: 20, alignItems: 'flex-start',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: 16, padding: '24px 24px',
+          }}>
+            <div style={{
+              width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+              background: 'linear-gradient(135deg, #1E5EFF, #A855F7)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: '#fff',
+            }}>
+              {post.author.split(' ').map(n => n[0]).join('').slice(0, 2)}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
+                <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--foreground)' }}>{post.author}</span>
+                <span style={{ fontSize: 12, color: 'var(--foreground)', opacity: 0.4 }}>{post.authorTitle}</span>
+              </div>
+              <p style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--foreground)', opacity: 0.55, margin: 0 }}>
+                Muhammad built Tikkit X after watching Pakistani organisers run events on WhatsApp threads and Google Sheets.
+                He writes about event management, ticketing, and building products for Pakistan.
+              </p>
+              <Link href="/about" style={{ display: 'inline-block', marginTop: 10, fontSize: 12, color: '#1E5EFF', textDecoration: 'none', fontWeight: 600 }}>
+                About the author →
+              </Link>
+            </div>
+          </div>
+        </div>
 
         {/* Footer CTA */}
         <div style={{ maxWidth: '760px', margin: '64px auto 0', padding: '0 24px' }}>
@@ -350,7 +388,7 @@ export default async function ArticlePage({ params }: Props) {
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link
-                href="/auth/login"
+                href="/auth/login?flow=organizer-signup"
                 style={{
                   padding: '12px 28px',
                   background: '#1E5EFF',
