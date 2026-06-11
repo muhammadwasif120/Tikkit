@@ -7,20 +7,21 @@ import { SceneCheckin } from './scenes/Scene4Checkin'
 import { SceneNumbers } from './scenes/Scene5Numbers'
 import { SceneCTA } from './scenes/Scene6CTA'
 
-// Shared font stack — DM Sans / system sans fallback
-const FONT = '"DM Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif'
-
-export { FONT }
-
 export const TikkitDemo: React.FC = () => (
-  <AbsoluteFill style={{ background: '#000', fontFamily: FONT }}>
+  <AbsoluteFill style={{ background: '#000', fontFamily: '"DM Sans", "Inter", -apple-system, sans-serif' }}>
     <Series>
-      <Series.Sequence durationInFrames={150}><SceneProblem /></Series.Sequence>
-      <Series.Sequence durationInFrames={90}><SceneReveal /></Series.Sequence>
-      <Series.Sequence durationInFrames={210}><SceneCreate /></Series.Sequence>
-      <Series.Sequence durationInFrames={180}><SceneCheckin /></Series.Sequence>
-      <Series.Sequence durationInFrames={150}><SceneNumbers /></Series.Sequence>
-      <Series.Sequence durationInFrames={300}><SceneCTA /></Series.Sequence>
+      {/* 3 hard-cut problem beats — 24f each = 2.4s */}
+      <Series.Sequence durationInFrames={72}><SceneProblem /></Series.Sequence>
+      {/* Logo snap — 1.8s */}
+      <Series.Sequence durationInFrames={54}><SceneReveal /></Series.Sequence>
+      {/* Create event split — 5.5s */}
+      <Series.Sequence durationInFrames={165}><SceneCreate /></Series.Sequence>
+      {/* QR check-in split — 4s */}
+      <Series.Sequence durationInFrames={120}><SceneCheckin /></Series.Sequence>
+      {/* 3 stats full-bleed — 3s */}
+      <Series.Sequence durationInFrames={90}><SceneNumbers /></Series.Sequence>
+      {/* CTA — 7.3s */}
+      <Series.Sequence durationInFrames={219}><SceneCTA /></Series.Sequence>
     </Series>
   </AbsoluteFill>
 )

@@ -1,125 +1,132 @@
 import React from 'react'
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
 
+// Full-bleed CTA — left-anchored widescreen type
 export const SceneCTA: React.FC = () => {
   const frame = useCurrentFrame()
   const { fps } = useVideoConfig()
 
-  // "Your night." — snaps in at f10
-  const line1S = spring({ frame: Math.max(0, frame - 10), fps, config: { damping: 11, stiffness: 260 }, durationInFrames: 22 })
-  const line1Op = interpolate(frame, [10, 17], [0, 1], { extrapolateRight: 'clamp' })
+  const endOp = interpolate(frame, [196, 219], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
 
-  // "Your rules." — snaps in at f50
-  const line2S = spring({ frame: Math.max(0, frame - 50), fps, config: { damping: 11, stiffness: 260 }, durationInFrames: 22 })
-  const line2Op = interpolate(frame, [50, 57], [0, 1], { extrapolateRight: 'clamp' })
+  // "Your night." — immediate, left
+  const l1S = spring({ frame, fps, config: { damping: 9, stiffness: 320 }, durationInFrames: 20 })
+  const l1Op = interpolate(frame, [0, 4], [0, 1], { extrapolateRight: 'clamp' })
 
-  // Divider
-  const divOp = interpolate(frame, [82, 92], [0, 1], { extrapolateRight: 'clamp' })
-  const divW = interpolate(frame, [82, 110], [0, 56], { extrapolateRight: 'clamp' })
+  // "Your rules." — snaps in at frame 36
+  const l2S = spring({ frame: Math.max(0, frame - 36), fps, config: { damping: 9, stiffness: 320 }, durationInFrames: 20 })
+  const l2Op = interpolate(frame, [36, 40], [0, 1], { extrapolateRight: 'clamp' })
 
-  // URL
-  const urlF = Math.max(0, frame - 100)
-  const urlS = spring({ frame: urlF, fps, config: { damping: 12, stiffness: 220 }, durationInFrames: 25 })
-  const urlOp = interpolate(frame, [100, 108], [0, 1], { extrapolateRight: 'clamp' })
+  // Horizontal rule
+  const hrOp = interpolate(frame, [64, 72], [0, 1], { extrapolateRight: 'clamp' })
+  const hrW = interpolate(frame, [64, 100], [0, 800], { extrapolateRight: 'clamp' })
 
-  // "Free to start."
-  const freeOp = interpolate(frame, [148, 158], [0, 1], { extrapolateRight: 'clamp' })
-  const freeY = interpolate(frame, [148, 162], [10, 0], { extrapolateRight: 'clamp' })
+  // URL — large, left-aligned
+  const urlF = Math.max(0, frame - 80)
+  const urlS = spring({ frame: urlF, fps, config: { damping: 11, stiffness: 260 }, durationInFrames: 22 })
+  const urlOp = interpolate(frame, [80, 86], [0, 1], { extrapolateRight: 'clamp' })
 
-  // Pills
-  const pillsOp = interpolate(frame, [175, 188], [0, 1], { extrapolateRight: 'clamp' })
+  // Sub-line
+  const subOp = interpolate(frame, [112, 122], [0, 1], { extrapolateRight: 'clamp' })
 
-  // Logo watermark
-  const logoOp = interpolate(frame, [230, 248], [0, 1], { extrapolateRight: 'clamp' })
+  // Feature pills
+  const pillsOp = interpolate(frame, [132, 144], [0, 1], { extrapolateRight: 'clamp' })
 
-  // Fade to black at end
-  const endOp = interpolate(frame, [270, 300], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
+  // Logo — bottom right
+  const logoOp = interpolate(frame, [150, 164], [0, 1], { extrapolateRight: 'clamp' })
 
-  // Glow
-  const glowOp = interpolate(frame, [40, 120, 300], [0, 0.8, 0.5])
+  // Subtle full-bleed glow — right side
+  const glowOp = interpolate(frame, [24, 90], [0, 1], { extrapolateRight: 'clamp' })
 
   return (
-    <AbsoluteFill style={{ opacity: endOp, background: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-
-      {/* Blue glow */}
+    <AbsoluteFill style={{ opacity: endOp, background: '#000' }}>
+      {/* Full-bleed right glow */}
       <div style={{
-        position: 'absolute', width: 900, height: 900, borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(30,94,255,0.14) 0%, transparent 65%)',
+        position: 'absolute', right: -100, top: '50%',
+        width: 900, height: 900, borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(30,94,255,0.12) 0%, transparent 65%)',
+        transform: 'translateY(-50%)',
         opacity: glowOp, pointerEvents: 'none',
       }} />
 
-      {/* "Your night." */}
+      {/* All content — left-anchored */}
       <div style={{
-        opacity: line1Op,
-        transform: `translateY(${interpolate(line1S, [0, 1], [28, 0])}px)`,
-        fontSize: 130, fontWeight: 900, color: '#fff',
-        lineHeight: 1, letterSpacing: '-4px',
+        position: 'absolute', inset: 0,
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        paddingLeft: 140,
       }}>
-        Your night.
+        {/* "Your night." */}
+        <div style={{
+          opacity: l1Op,
+          transform: `translateY(${interpolate(l1S, [0, 1], [32, 0])}px)`,
+          fontSize: 170, fontWeight: 900, color: '#fff',
+          lineHeight: 0.88, letterSpacing: '-6px',
+        }}>
+          Your night.
+        </div>
+
+        {/* "Your rules." */}
+        <div style={{
+          opacity: l2Op,
+          transform: `translateY(${interpolate(l2S, [0, 1], [32, 0])}px)`,
+          fontSize: 170, fontWeight: 900, lineHeight: 0.88, letterSpacing: '-6px',
+          background: 'linear-gradient(135deg, #1E5EFF 0%, #7C3AED 60%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          marginBottom: 52,
+        }}>
+          Your rules.
+        </div>
+
+        {/* Horizontal rule */}
+        <div style={{
+          opacity: hrOp, width: hrW, height: 1,
+          background: 'rgba(255,255,255,0.12)', borderRadius: 1,
+          marginBottom: 44,
+        }} />
+
+        {/* URL */}
+        <div style={{
+          opacity: urlOp,
+          transform: `scale(${0.9 + urlS * 0.1}) translateX(${interpolate(urlS, [0, 1], [-16, 0])}px)`,
+          transformOrigin: 'left center',
+          fontSize: 64, fontWeight: 800, color: '#fff',
+          letterSpacing: '-2px', marginBottom: 22,
+        }}>
+          tikkitx.com
+        </div>
+
+        {/* "Free to start." */}
+        <p style={{
+          opacity: subOp,
+          fontSize: 24, color: 'rgba(255,255,255,0.3)',
+          fontWeight: 500, letterSpacing: '-0.3px',
+          marginBottom: 36,
+        }}>
+          Free to start · No card required · Built for Pakistan
+        </p>
+
+        {/* Pills */}
+        <div style={{ opacity: pillsOp, display: 'flex', gap: 12 }}>
+          {['Guest lists', 'QR check-in', 'JazzCash & EasyPaisa', 'Live analytics', 'Vendor management'].map(t => (
+            <div key={t} style={{
+              fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.28)',
+              padding: '8px 18px', borderRadius: 100,
+              border: '1px solid rgba(255,255,255,0.09)',
+            }}>
+              {t}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* "Your rules." */}
-      <div style={{
-        opacity: line2Op,
-        transform: `translateY(${interpolate(line2S, [0, 1], [28, 0])}px)`,
-        fontSize: 130, fontWeight: 900, lineHeight: 1, letterSpacing: '-4px',
-        background: 'linear-gradient(135deg, #1E5EFF 0%, #7C3AED 100%)',
-        WebkitBackgroundClip: 'text',
-        WebkitTextFillColor: 'transparent',
-        marginBottom: 40,
-      }}>
-        Your rules.
-      </div>
-
-      {/* Divider */}
-      <div style={{
-        opacity: divOp, width: divW, height: 1,
-        background: 'rgba(255,255,255,0.15)', borderRadius: 1,
-        marginBottom: 36,
-      }} />
-
-      {/* URL */}
-      <div style={{
-        opacity: urlOp,
-        transform: `scale(${0.88 + urlS * 0.12})`,
-        fontSize: 52, fontWeight: 800, color: '#fff',
-        letterSpacing: '-1px', marginBottom: 24,
-      }}>
-        tikkitx.com
-      </div>
-
-      {/* "Free to start." */}
-      <p style={{
-        opacity: freeOp,
-        transform: `translateY(${freeY}px)`,
-        fontSize: 22, color: 'rgba(255,255,255,0.35)',
-        fontWeight: 500, letterSpacing: '-0.3px',
-        marginBottom: 32,
-      }}>
-        Free to start. No card required.
-      </p>
-
-      {/* Pills */}
-      <div style={{ opacity: pillsOp, display: 'flex', gap: 12 }}>
-        {['Guest lists', 'QR check-in', 'JazzCash & EasyPaisa', 'Live analytics'].map(t => (
-          <div key={t} style={{
-            fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.3)',
-            padding: '7px 16px', borderRadius: 100,
-            border: '1px solid rgba(255,255,255,0.1)',
-          }}>
-            {t}
-          </div>
-        ))}
-      </div>
-
-      {/* Logo watermark */}
+      {/* Logo — bottom right */}
       <div style={{
         opacity: logoOp,
-        position: 'absolute', bottom: 52,
+        position: 'absolute', bottom: 52, right: 80,
         display: 'flex', alignItems: 'center', gap: 10,
       }}>
-        <span style={{ fontSize: 20, fontWeight: 900, color: 'rgba(255,255,255,0.18)', letterSpacing: '-0.5px' }}>TIKKIT</span>
-        <span style={{ fontSize: 20, fontWeight: 900, color: 'rgba(30,94,255,0.35)' }}>✕</span>
+        <span style={{ fontSize: 22, fontWeight: 900, color: 'rgba(255,255,255,0.15)', letterSpacing: '-0.5px' }}>TIKKIT</span>
+        <span style={{ fontSize: 22, fontWeight: 900, color: 'rgba(30,94,255,0.3)' }}>✕</span>
       </div>
     </AbsoluteFill>
   )

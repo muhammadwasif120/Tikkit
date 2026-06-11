@@ -1,64 +1,77 @@
 import React from 'react'
 import { AbsoluteFill, interpolate, useCurrentFrame } from 'remotion'
 
-// Apple style: hard cuts, big type, 1.3s per beat
-const beats = [
-  { text: 'WhatsApp threads.', sub: 'Your guest list.' },
-  { text: 'Cash at the door.', sub: 'Your revenue.' },
-  { text: 'No idea who showed up.', sub: 'Your event.' },
+// 3 hard cuts × 24 frames = 72 frames total (2.4s)
+// Full-bleed widescreen — massive left-aligned type
+
+const BEATS = [
+  { eyebrow: 'Before Tikkit X',    line: 'WhatsApp\nthreads.',     accent: false },
+  { eyebrow: 'Before Tikkit X',    line: 'Cash at\nthe door.',     accent: false },
+  { eyebrow: 'Before Tikkit X',    line: 'No data.\nNo record.',   accent: true  },
 ]
-
-const BEAT = 44 // frames per beat
-const FADE = 5  // frames to fade in/out
-
-function snap(f: number) {
-  return interpolate(f, [0, FADE], [0, 1], { extrapolateRight: 'clamp' })
-}
+const BF = 24 // frames per beat
 
 export const SceneProblem: React.FC = () => {
   const frame = useCurrentFrame()
+  const beat = Math.min(2, Math.floor(frame / BF))
+  const localF = frame % BF
 
-  // Overall fade out
-  const exitOpacity = interpolate(frame, [135, 150], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
+  const data = BEATS[beat]
+
+  // Super fast snap-in — 4 frames
+  const textOpacity = interpolate(localF, [0, 4], [0, 1], { extrapolateRight: 'clamp' })
+  const textY = interpolate(localF, [0, 5], [20, 0], { extrapolateRight: 'clamp' })
+
+  // Subtle red slash accent — left edge bar
+  const barH = interpolate(localF, [0, 6], [0, 100], { extrapolateRight: 'clamp' })
 
   return (
-    <AbsoluteFill style={{ opacity: exitOpacity, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      {beats.map((beat, i) => {
-        const start = i * BEAT
-        const end = start + BEAT
-        const localF = frame - start
-        const visible = frame >= start && frame < end
-        const opacity = visible
-          ? snap(localF) * interpolate(localF, [BEAT - FADE, BEAT], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
-          : 0
-        const y = interpolate(localF, [0, FADE * 1.5], [18, 0], { extrapolateRight: 'clamp' })
+    <AbsoluteFill style={{ background: '#000', display: 'flex', alignItems: 'center' }}>
+      {/* Left edge bar */}
+      <div style={{
+        position: 'absolute', left: 0, top: 0,
+        width: 5, height: `${barH}%`,
+        background: 'linear-gradient(180deg, #FF3B30, transparent)',
+        transition: 'none',
+      }} />
 
-        return (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              textAlign: 'center' as const,
-              opacity,
-              transform: `translateY(${y}px)`,
-            }}
-          >
-            <p style={{
-              fontSize: 16, fontWeight: 700, letterSpacing: '0.18em',
-              textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.3)',
-              marginBottom: 20,
-            }}>
-              {beat.sub}
-            </p>
-            <h1 style={{
-              fontSize: 96, fontWeight: 900, color: '#fff',
-              letterSpacing: '-2px', lineHeight: 1,
-            }}>
-              {beat.text}
-            </h1>
-          </div>
-        )
-      })}
+      {/* Content — left-aligned, pushed to left third */}
+      <div style={{ paddingLeft: 140, paddingRight: 60, maxWidth: 1100 }}>
+        <p style={{
+          fontSize: 15, fontWeight: 700, letterSpacing: '0.2em',
+          textTransform: 'uppercase' as const, color: '#FF3B30',
+          marginBottom: 28,
+          opacity: textOpacity,
+        }}>
+          {data.eyebrow}
+        </p>
+        <h1 style={{
+          fontSize: 180,
+          fontWeight: 900,
+          color: data.accent ? 'rgba(255,255,255,0.25)' : '#fff',
+          lineHeight: 0.92,
+          letterSpacing: '-6px',
+          whiteSpace: 'pre-line' as const,
+          opacity: textOpacity,
+          transform: `translateY(${textY}px)`,
+        }}>
+          {data.line}
+        </h1>
+      </div>
+
+      {/* Beat counter — bottom right */}
+      <div style={{
+        position: 'absolute', bottom: 52, right: 80,
+        display: 'flex', gap: 8,
+      }}>
+        {BEATS.map((_, i) => (
+          <div key={i} style={{
+            width: i === beat ? 28 : 8, height: 4, borderRadius: 2,
+            background: i === beat ? '#FF3B30' : 'rgba(255,255,255,0.15)',
+            transition: 'none',
+          }} />
+        ))}
+      </div>
     </AbsoluteFill>
   )
 }
