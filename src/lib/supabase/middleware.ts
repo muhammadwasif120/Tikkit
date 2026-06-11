@@ -50,6 +50,7 @@ export async function updateSession(request: NextRequest) {
   '/contact',       // Public contact page
   '/pricing',       // Public pricing page
   '/about',         // Public about page
+  '/security',      // Public security/trust page
 ]
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 

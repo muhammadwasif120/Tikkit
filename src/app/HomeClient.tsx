@@ -1064,6 +1064,7 @@ export default function HomeClient() {
           <div className="footer-links">
             <Link href="/how-it-works" className="footer-link">How it works</Link>
             <Link href="/about" className="footer-link">About</Link>
+            <Link href="/security" className="footer-link">Security</Link>
             <Link href="/pricing" className="footer-link">Pricing</Link>
             <Link href="/contact" className="footer-link">Contact</Link>
             <Link href="/terms" className="footer-link">Terms</Link>
