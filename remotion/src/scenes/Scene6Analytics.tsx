@@ -1,24 +1,14 @@
+// Full-bleed stats scene — real numbers from demo page analytics
+// 4 panels spanning 1920px on pure black — same grammar as SceneProblem
 import React from 'react'
 import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from 'remotion'
-import { BG, SURF, BLUE, BLUE_DIM, GREEN, YELLOW, PURPLE, BORDER, TEXT_MUT, TEXT_SEC, Card, DashShell } from '../components/DashboardShell'
+import { BLUE, GREEN, YELLOW, PURPLE } from '../components/DashboardShell'
 
-// Actual bar data from MOCK_ANALYTICS.checkInTimeline in demo page
-const BAR_DATA = [
-  { time: '8pm',  val: 12 },
-  { time: '9pm',  val: 28 },
-  { time: '10pm', val: 45 },
-  { time: '11pm', val: 38 },
-  { time: '12am', val: 31 },
-  { time: '1am',  val: 24 },
-  { time: '2am',  val: 13 },
-]
-const MAX_BAR = 45
-
-const STATS = [
-  { label: 'Total Revenue',    value: '₨280,000', icon: '₨', color: YELLOW,  glow: 'rgba(255,199,69,0.15)' },
-  { label: 'Attendance Rate',  value: '94%',       icon: '⬡', color: GREEN,   glow: 'rgba(34,197,94,0.15)'  },
-  { label: 'Avg. Ticket',      value: '₨3,500',    icon: '◈', color: BLUE,    glow: 'rgba(30,94,255,0.15)'  },
-  { label: 'Waitlisted',       value: '23',        icon: '◉', color: PURPLE,  glow: 'rgba(167,139,250,0.15)' },
+const PANELS = [
+  { num: '₨280K',  label: 'Total\nrevenue',      color: YELLOW,  delay: 0  },
+  { num: '94%',    label: 'Attendance\nrate',     color: GREEN,   delay: 16 },
+  { num: '191',    label: 'Guests\nchecked in',   color: BLUE,    delay: 32 },
+  { num: '₨3.5K', label: 'Avg.\nticket price',   color: PURPLE,  delay: 48 },
 ]
 
 export const SceneAnalytics: React.FC = () => {
@@ -26,115 +16,70 @@ export const SceneAnalytics: React.FC = () => {
   const { fps } = useVideoConfig()
 
   const exitOp = interpolate(frame, [76, 90], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
-  const dashOp = interpolate(frame, [0, 6], [0, 1], { extrapolateRight: 'clamp' })
 
-  // Bars grow up from 0
-  const barProgress = interpolate(frame, [8, 48], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
-
-  // Stat cards stagger
-  const cardDelay = [14, 24, 34, 44]
-
-  // Right callout
-  const callOp = interpolate(frame, [50, 58], [0, 1], { extrapolateRight: 'clamp' })
-  const callY  = interpolate(frame, [50, 60], [18, 0], { extrapolateRight: 'clamp' })
+  // Sub-label at bottom
+  const subOp = interpolate(frame, [60, 70], [0, 1], { extrapolateRight: 'clamp' })
 
   return (
-    <AbsoluteFill style={{ opacity: exitOp, background: BG }}>
-      <div style={{ position: 'absolute', inset: 0, opacity: dashOp }}>
-        <DashShell active="anal">
-          <div style={{ display: 'flex', gap: 32, height: '100%' }}>
+    <AbsoluteFill style={{ opacity: exitOp, background: '#000', display: 'flex', alignItems: 'stretch' }}>
+      {PANELS.map((p, i) => {
+        const f  = Math.max(0, frame - p.delay)
+        const sp = spring({ frame: f, fps, config: { damping: 12, stiffness: 260 }, durationInFrames: 30 })
+        const op = interpolate(f, [0, 5], [0, 1], { extrapolateRight: 'clamp' })
+        const y  = interpolate(sp, [0, 1], [28, 0])
 
-            {/* LEFT — bar chart + mini stats */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
-              {/* Bar chart */}
-              <Card style={{ flex: 1, padding: '28px 32px', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', marginBottom: 6 }}>Check-in Timeline</div>
-                <div style={{ fontSize: 12, color: TEXT_MUT, marginBottom: 24 }}>Rooftop Night — Karachi · Sat 22 Mar 2026</div>
+        return (
+          <div key={i} style={{
+            flex: 1,
+            display: 'flex', flexDirection: 'column', justifyContent: 'center',
+            paddingLeft:  i === 0 ? 140 : 72,
+            paddingRight: i === PANELS.length - 1 ? 120 : 0,
+            borderRight:  i < PANELS.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+            opacity: op,
+          }}>
+            {/* Coloured accent bar */}
+            <div style={{
+              width: 40, height: 4, borderRadius: 2,
+              background: p.color, marginBottom: 24,
+              opacity: op,
+              boxShadow: `0 0 12px ${p.color}80`,
+            }} />
 
-                {/* Bars */}
-                <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: 14 }}>
-                  {BAR_DATA.map((bar, i) => {
-                    const h = (bar.val / MAX_BAR) * 100 * barProgress
-                    return (
-                      <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, height: '100%', justifyContent: 'flex-end' }}>
-                        <div style={{
-                          width: '100%', background: `${BLUE}22`,
-                          borderRadius: 6, overflow: 'hidden',
-                          height: '100%', display: 'flex', alignItems: 'flex-end',
-                        }}>
-                          <div style={{
-                            width: '100%', borderRadius: 6,
-                            height: `${h}%`,
-                            background: bar.val === MAX_BAR
-                              ? `linear-gradient(to top, ${BLUE}, #7C3AED)`
-                              : `linear-gradient(to top, ${BLUE}99, ${BLUE}44)`,
-                            transition: 'height 0.05s',
-                          }} />
-                        </div>
-                        <span style={{ fontSize: 11, color: TEXT_MUT, fontWeight: 600, flexShrink: 0 }}>{bar.time}</span>
-                      </div>
-                    )
-                  })}
-                </div>
-              </Card>
-
-              {/* 4 mini stat cards in 2×2 */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, flexShrink: 0 }}>
-                {STATS.map((stat, i) => {
-                  const f  = Math.max(0, frame - cardDelay[i])
-                  const s  = spring({ frame: f, fps, config: { damping: 14, stiffness: 240 }, durationInFrames: 22 })
-                  const op = interpolate(f, [0, 5], [0, 1], { extrapolateRight: 'clamp' })
-                  const y  = interpolate(s, [0, 1], [14, 0])
-                  return (
-                    <div key={i} style={{ opacity: op, transform: `translateY(${y}px)` }}>
-                      <Card style={{ padding: '20px 22px', display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div style={{
-                          width: 40, height: 40, borderRadius: 11,
-                          background: stat.glow,
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: 16, color: stat.color, flexShrink: 0,
-                        }}>{stat.icon}</div>
-                        <div>
-                          <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' }}>{stat.value}</div>
-                          <div style={{ fontSize: 12, color: TEXT_MUT, fontWeight: 500 }}>{stat.label}</div>
-                        </div>
-                      </Card>
-                    </div>
-                  )
-                })}
-              </div>
+            {/* Number */}
+            <div style={{
+              fontSize: 136, fontWeight: 900, color: '#fff',
+              lineHeight: 0.85, letterSpacing: '-5px',
+              fontVariantNumeric: 'tabular-nums' as const,
+              transform: `translateY(${y}px)`,
+            }}>
+              {p.num}
             </div>
 
-            {/* RIGHT — callout text */}
+            {/* Label */}
             <div style={{
-              width: 460, flexShrink: 0,
-              display: 'flex', flexDirection: 'column', justifyContent: 'center',
-              opacity: callOp, transform: `translateY(${callY}px)`,
-              paddingLeft: 40,
+              fontSize: 17, fontWeight: 600,
+              color: 'rgba(255,255,255,0.3)',
+              letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+              marginTop: 22, whiteSpace: 'pre-line' as const, lineHeight: 1.45,
             }}>
-              <p style={{
-                fontSize: 12, fontWeight: 700, letterSpacing: '0.22em',
-                textTransform: 'uppercase' as const, color: BLUE, marginBottom: 20,
-              }}>Analytics</p>
-              <h2 style={{
-                fontSize: 80, fontWeight: 900, color: '#fff',
-                lineHeight: 0.88, letterSpacing: '-3.5px', marginBottom: 28,
-              }}>
-                See it all<br />
-                <span style={{ color: 'rgba(255,255,255,0.2)' }}>after.</span>
-              </h2>
-              <p style={{
-                fontSize: 17, color: 'rgba(255,255,255,0.28)',
-                fontWeight: 500, lineHeight: 1.65, letterSpacing: '-0.3px',
-              }}>
-                Revenue, attendance,<br />
-                check-in timeline —<br />
-                auto-generated.<br />
-                Export as PDF.
-              </p>
+              {p.label}
             </div>
           </div>
-        </DashShell>
+        )
+      })}
+
+      {/* Bottom label */}
+      <div style={{
+        position: 'absolute', bottom: 52, left: 140,
+        opacity: subOp,
+      }}>
+        <p style={{
+          fontSize: 14, color: 'rgba(255,255,255,0.18)',
+          letterSpacing: '0.16em', textTransform: 'uppercase' as const,
+          fontWeight: 600,
+        }}>
+          After every event · Auto-generated · Export as PDF
+        </p>
       </div>
     </AbsoluteFill>
   )
