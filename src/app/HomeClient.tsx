@@ -1063,6 +1063,7 @@ export default function HomeClient() {
           <p className="footer-copy">© {new Date().getFullYear()} TIKKIT X. Built in Pakistan 🇵🇰</p>
           <div className="footer-links">
             <Link href="/how-it-works" className="footer-link">How it works</Link>
+            <Link href="/pricing" className="footer-link">Pricing</Link>
             <Link href="/contact" className="footer-link">Contact</Link>
             <Link href="/terms" className="footer-link">Terms</Link>
             <Link href="/privacy" className="footer-link">Privacy</Link>

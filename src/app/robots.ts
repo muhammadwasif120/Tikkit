@@ -20,6 +20,7 @@ export default function robots(): MetadataRoute.Robots {
     '/organizer/',
     '/guest/explore/',
     '/contact',
+    '/pricing',
   ]
 
   const disallowPrivateRules = [

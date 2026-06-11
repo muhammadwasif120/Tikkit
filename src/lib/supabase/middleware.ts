@@ -48,6 +48,7 @@ export async function updateSession(request: NextRequest) {
   '/compare',       // Competitor comparison pages — public SEO landing pages
   '/blog',          // Public blog / SEO content hub
   '/contact',       // Public contact page
+  '/pricing',       // Public pricing page
 ]
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
