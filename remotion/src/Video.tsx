@@ -1,33 +1,26 @@
 import React from 'react'
 import { AbsoluteFill, Series } from 'remotion'
-import { Scene1Logo } from './scenes/Scene1Logo'
-import { Scene2Problem } from './scenes/Scene2Problem'
-import { Scene3CreateEvent } from './scenes/Scene3CreateEvent'
-import { Scene4QRCheckin } from './scenes/Scene4QRCheckin'
-import { Scene5Analytics } from './scenes/Scene5Analytics'
-import { Scene6CTA } from './scenes/Scene6CTA'
+import { SceneProblem } from './scenes/Scene1Problem'
+import { SceneReveal } from './scenes/Scene2Reveal'
+import { SceneCreate } from './scenes/Scene3Create'
+import { SceneCheckin } from './scenes/Scene4Checkin'
+import { SceneNumbers } from './scenes/Scene5Numbers'
+import { SceneCTA } from './scenes/Scene6CTA'
+
+// Shared font stack — DM Sans / system sans fallback
+const FONT = '"DM Sans", "Inter", -apple-system, BlinkMacSystemFont, sans-serif'
+
+export { FONT }
 
 export const TikkitDemo: React.FC = () => (
-  <AbsoluteFill style={{ background: '#050505', fontFamily: 'DM Sans, Inter, sans-serif' }}>
+  <AbsoluteFill style={{ background: '#000', fontFamily: FONT }}>
     <Series>
-      <Series.Sequence durationInFrames={90}>
-        <Scene1Logo />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={240}>
-        <Scene2Problem />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={390}>
-        <Scene3CreateEvent />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={420}>
-        <Scene4QRCheckin />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={360}>
-        <Scene5Analytics />
-      </Series.Sequence>
-      <Series.Sequence durationInFrames={300}>
-        <Scene6CTA />
-      </Series.Sequence>
+      <Series.Sequence durationInFrames={150}><SceneProblem /></Series.Sequence>
+      <Series.Sequence durationInFrames={90}><SceneReveal /></Series.Sequence>
+      <Series.Sequence durationInFrames={210}><SceneCreate /></Series.Sequence>
+      <Series.Sequence durationInFrames={180}><SceneCheckin /></Series.Sequence>
+      <Series.Sequence durationInFrames={150}><SceneNumbers /></Series.Sequence>
+      <Series.Sequence durationInFrames={300}><SceneCTA /></Series.Sequence>
     </Series>
   </AbsoluteFill>
 )
