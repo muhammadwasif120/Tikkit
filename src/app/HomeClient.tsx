@@ -67,6 +67,15 @@ const steps = [
   { n: '04', title: 'Review the night', desc: 'Revenue, attendance, timing. Everything you need to make the next one better.' },
 ]
 
+const testimonials = [
+  { quote: "We've been running private events for years. The door is everything — who gets in, who doesn't. Tikkit was the first tool that actually understood that.",         handle: 'Organiser · Berlin' },
+  { quote: 'Three invite-only sessions in one weekend. Sixty guests, zero chaos, zero screenshots at the door. It just worked.',                                               handle: 'Event curator · Toronto' },
+  { quote: "The guest list curation is what got me. Not everyone gets in. That's the whole point. Finally something built around that logic.",                                 handle: 'Private events · Tokyo' },
+  { quote: "We don't publicise our events and we don't want to. Tikkit lets us run tight, keep it quiet, and still have everything organised from one place.",                 handle: 'Underground collective · London' },
+  { quote: 'First time using it in Karachi. Fifty people, rooftop, no issues at the door. Every scan went through cleanly. No one got in who wasn\'t supposed to.',           handle: 'Organiser · Karachi' },
+  { quote: 'We were in a basement with no signal. The offline QR check-in still worked. That was the moment I knew this was built by people who actually run events.',         handle: 'Event host · Amsterdam' },
+]
+
 const heroCards = [
   { name: 'Rooftop Night Karachi', date: 'Sat 22 Mar', location: 'DHA Phase 5', count: 84,  color: '#1E5EFF', status: 'Live'   },
   { name: 'Brand Launch — Lahore',  date: 'Fri 28 Mar', location: 'Gulberg III',  count: 127, color: '#22C55E', status: 'Open'   },
@@ -684,6 +693,38 @@ export default function HomeClient() {
         .why-item { display: flex; align-items: center; gap: 12px; }
         .why-text { color: #D1D5DB; font-size: 15px; }
 
+        /* ── Testimonials ── */
+        .testimonials-section {
+          padding: 80px 24px 100px; max-width: 1200px; margin: 0 auto;
+        }
+        .testimonials-grid {
+          display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px;
+        }
+        .t-card {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 16px; padding: 28px 24px;
+          display: flex; flex-direction: column; gap: 20px;
+        }
+        .t-quote {
+          font-size: 14px; line-height: 1.8; color: #9CA3AF; flex: 1;
+          font-style: italic;
+        }
+        .t-quote::before { content: '"'; color: #1E5EFF; font-size: 20px; font-style: normal; line-height: 1; display: block; margin-bottom: 8px; }
+        .t-handle {
+          font-size: 12px; font-weight: 700; color: #4B5563;
+          letter-spacing: 0.06em; text-transform: uppercase;
+        }
+        .t-anon-note {
+          text-align: center; font-size: 12px; color: #374151; margin-top: 32px;
+        }
+        @media (max-width: 900px) {
+          .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 560px) {
+          .testimonials-grid { grid-template-columns: 1fr; }
+        }
+
         /* ── CTA ── */
         .cta-section {
           padding: 130px 24px; text-align: center; position: relative; overflow: hidden;
@@ -998,6 +1039,25 @@ export default function HomeClient() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="testimonials-section">
+        <div className="sec-label">From the scene</div>
+        <h2 className="sec-h2">Off the record. On the night.</h2>
+        <p className="sec-sub" style={{ maxWidth: 520 }}>
+          Tikkit X was built in underground rooms before it ever touched a mainstream venue.
+          The people who tested it prefer to stay anonymous — that&apos;s the nature of the scene.
+        </p>
+        <div className="testimonials-grid">
+          {testimonials.map((t, i) => (
+            <div key={i} className="t-card">
+              <p className="t-quote">{t.quote}</p>
+              <span className="t-handle">{t.handle}</span>
+            </div>
+          ))}
+        </div>
+        <p className="t-anon-note">Names withheld by request. Quotes shared with permission.</p>
       </section>
 
       {/* ── CTA ── */}
