@@ -159,7 +159,7 @@ export default function PricingPage() {
           <h1 style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(40px, 6vw, 64px)',
-            fontWeight: 800, letterSpacing: '-2px',
+            fontWeight: 800, letterSpacing: '0',
             color: '#F0F2FF', marginBottom: 20, lineHeight: 1.05,
           }}>
             Free. Seriously.
@@ -179,7 +179,7 @@ export default function PricingPage() {
               <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#1E5EFF', marginBottom: 12 }}>
                 Free forever
               </div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 800, letterSpacing: '-2px', lineHeight: 1, marginBottom: 8 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 800, letterSpacing: '0', lineHeight: 1, marginBottom: 8 }}>
                 PKR 0
               </div>
               <div style={{ fontSize: 14, color: '#6B7280' }}>per event · per ticket · per year</div>
@@ -220,7 +220,7 @@ export default function PricingPage() {
               <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9CA3AF', marginBottom: 12 }}>
                 Corporate
               </div>
-              <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 800, letterSpacing: '-2px', lineHeight: 1, marginBottom: 8 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 800, letterSpacing: '0', lineHeight: 1, marginBottom: 8 }}>
                 Custom
               </div>
               <div style={{ fontSize: 14, color: '#6B7280' }}>tailored to your organisation</div>
@@ -264,7 +264,7 @@ export default function PricingPage() {
         <div style={{ marginBottom: 80 }}>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800,
-            letterSpacing: '-0.5px', marginBottom: 32, textAlign: 'center',
+            letterSpacing: '0', marginBottom: 32, textAlign: 'center',
           }}>
             Full comparison
           </h2>
@@ -314,7 +314,7 @@ export default function PricingPage() {
         <div>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800,
-            letterSpacing: '-0.5px', marginBottom: 32, textAlign: 'center',
+            letterSpacing: '0', marginBottom: 32, textAlign: 'center',
           }}>
             Questions
           </h2>
@@ -354,7 +354,7 @@ export default function PricingPage() {
         }}>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontSize: 36, fontWeight: 800,
-            letterSpacing: '-1px', marginBottom: 16,
+            letterSpacing: '0', marginBottom: 16,
           }}>
             Start running events today.
           </h2>

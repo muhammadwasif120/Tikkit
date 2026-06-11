@@ -73,7 +73,7 @@ export default function ContactPage() {
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(32px, 5vw, 48px)',
             fontWeight: 800,
-            letterSpacing: '-1.5px',
+            letterSpacing: '0',
             color: '#F0F2FF',
             marginBottom: 16,
             lineHeight: 1.1,

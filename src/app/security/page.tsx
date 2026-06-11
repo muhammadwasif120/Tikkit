@@ -196,7 +196,7 @@ export default function SecurityPage() {
           <h1 style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(36px, 5vw, 56px)',
-            fontWeight: 800, letterSpacing: '-2px',
+            fontWeight: 800, letterSpacing: '0',
             color: '#F0F2FF', marginBottom: 20, lineHeight: 1.08,
           }}>
             No fake tickets.<br />No duplicate entries.<br />No surprises at the door.
@@ -243,7 +243,7 @@ export default function SecurityPage() {
         <div style={{ marginBottom: 80 }}>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800,
-            letterSpacing: '-0.5px', marginBottom: 8, textAlign: 'center',
+            letterSpacing: '0', marginBottom: 8, textAlign: 'center',
           }}>
             What happens at the door
           </h2>
@@ -289,7 +289,7 @@ export default function SecurityPage() {
         <div style={{ marginBottom: 80 }}>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800,
-            letterSpacing: '-0.5px', marginBottom: 32, textAlign: 'center',
+            letterSpacing: '0', marginBottom: 32, textAlign: 'center',
           }}>
             Common questions
           </h2>
@@ -327,7 +327,7 @@ export default function SecurityPage() {
         }}>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800,
-            letterSpacing: '-1px', marginBottom: 14,
+            letterSpacing: '0', marginBottom: 14,
           }}>
             Run a tight door. Every time.
           </h2>

@@ -156,7 +156,7 @@ export default function AboutPage() {
           <h1 style={{
             fontFamily: 'var(--font-display)',
             fontSize: 'clamp(36px, 5vw, 56px)',
-            fontWeight: 800, letterSpacing: '-2px',
+            fontWeight: 800, letterSpacing: '0',
             color: '#F0F2FF', marginBottom: 24, lineHeight: 1.08,
           }}>
             We got tired of watching Pakistani organisers run events on WhatsApp.
@@ -205,7 +205,7 @@ export default function AboutPage() {
         <div style={{ marginBottom: 80 }}>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800,
-            letterSpacing: '-0.5px', marginBottom: 40,
+            letterSpacing: '0', marginBottom: 40,
           }}>
             How we got here
           </h2>
@@ -247,7 +247,7 @@ export default function AboutPage() {
         <div style={{ marginBottom: 80 }}>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800,
-            letterSpacing: '-0.5px', marginBottom: 32,
+            letterSpacing: '0', marginBottom: 32,
           }}>
             What we believe
           </h2>
@@ -308,7 +308,7 @@ export default function AboutPage() {
         }}>
           <h2 style={{
             fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 800,
-            letterSpacing: '-1px', marginBottom: 14,
+            letterSpacing: '0', marginBottom: 14,
           }}>
             Ready to run your next event?
           </h2>
