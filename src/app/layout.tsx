@@ -102,19 +102,37 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   "@type": "Organization",
                   "@id": "https://www.tikkitx.com/#organization",
                   "name": "Tikkit X",
-                  "alternateName": "Tikkit",
+                  "alternateName": ["Tikkit", "TikkitX"],
+                  "legalName": "Two Bit Digital Ltd",
                   "url": "https://www.tikkitx.com",
                   "logo": {
                     "@type": "ImageObject",
+                    "@id": "https://www.tikkitx.com/#logo",
                     "url": "https://www.tikkitx.com/tikkit-logo.svg",
                     "width": 600,
-                    "height": 120
+                    "height": 120,
+                    "caption": "Tikkit X"
                   },
-                  "description": "Pakistan's #1 event ticketing and management platform. Buy and sell tickets for concerts, corporate events, parties, and experiences in Lahore, Karachi, and Islamabad.",
-                  "foundingLocation": { "@type": "Place", "name": "Lahore, Pakistan" },
+                  "image": { "@id": "https://www.tikkitx.com/#logo" },
+                  "description": "Pakistan's event ticketing and management platform — guest lists, QR check-in, JazzCash & EasyPaisa payments. Headquartered in Karachi. Built for Pakistani organizers. Free to start.",
+                  "foundingDate": "2024",
+                  "foundingLocation": { "@type": "Place", "name": "Karachi, Pakistan" },
+                  "address": {
+                    "@type": "PostalAddress",
+                    "addressLocality": "Karachi",
+                    "addressCountry": "PK"
+                  },
+                  "founder": {
+                    "@type": "Person",
+                    "@id": "https://www.tikkitx.com/#founder",
+                    "name": "Muhammad Wasif",
+                    "jobTitle": "Founder & CEO",
+                    "url": "https://www.tikkitx.com/about",
+                    "worksFor": { "@id": "https://www.tikkitx.com/#organization" }
+                  },
                   "areaServed": [
-                    { "@type": "City", "name": "Lahore" },
                     { "@type": "City", "name": "Karachi" },
+                    { "@type": "City", "name": "Lahore" },
                     { "@type": "City", "name": "Islamabad" },
                     { "@type": "Country", "name": "Pakistan" }
                   ],
@@ -126,6 +144,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   "contactPoint": {
                     "@type": "ContactPoint",
                     "contactType": "customer support",
+                    "email": "hello@tikkitx.com",
                     "availableLanguage": ["English", "Urdu"]
                   }
                 },

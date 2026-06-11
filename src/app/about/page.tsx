@@ -9,39 +9,68 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const orgSchema = {
-  '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'Tikkit X',
-  legalName: 'Two Bit Digital Ltd',
-  url: 'https://www.tikkitx.com',
-  logo: 'https://www.tikkitx.com/og-image.png',
-  foundingDate: '2024',
-  foundingLocation: {
-    '@type': 'Place',
-    name: 'Karachi, Pakistan',
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    '@id': 'https://www.tikkitx.com/#organization',
+    name: 'Tikkit X',
+    alternateName: ['Tikkit', 'TikkitX'],
+    legalName: 'Two Bit Digital Ltd',
+    url: 'https://www.tikkitx.com',
+    logo: {
+      '@type': 'ImageObject',
+      '@id': 'https://www.tikkitx.com/#logo',
+      url: 'https://www.tikkitx.com/tikkit-logo.svg',
+      width: 600,
+      height: 120,
+      caption: 'Tikkit X',
+    },
+    image: { '@id': 'https://www.tikkitx.com/#logo' },
+    foundingDate: '2024',
+    foundingLocation: { '@type': 'Place', name: 'Karachi, Pakistan' },
+    address: { '@type': 'PostalAddress', addressLocality: 'Karachi', addressCountry: 'PK' },
+    description: 'Tikkit X is a Pakistani event management and ticketing platform built by Two Bit Digital Ltd. Guest lists, QR check-in, JazzCash & EasyPaisa payments — all free.',
+    founder: {
+      '@type': 'Person',
+      '@id': 'https://www.tikkitx.com/#founder',
+      name: 'Muhammad Wasif',
+      jobTitle: 'Founder & CEO',
+      url: 'https://www.tikkitx.com/about',
+      worksFor: { '@id': 'https://www.tikkitx.com/#organization' },
+    },
+    sameAs: [
+      'https://www.instagram.com/tikkitx',
+      'https://www.twitter.com/tikkitx',
+      'https://www.linkedin.com/company/tikkit-x/',
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer support',
+      email: 'hello@tikkitx.com',
+      availableLanguage: ['English', 'Urdu'],
+    },
   },
-  areaServed: {
-    '@type': 'Country',
-    name: 'Pakistan',
-  },
-  description: 'Tikkit X is a Pakistani event management and ticketing platform built by Two Bit Digital Ltd. It gives organisers guest lists, QR check-in, JazzCash and EasyPaisa payment collection, and vendor finance tools — all free.',
-  founder: {
+  {
+    '@context': 'https://schema.org',
     '@type': 'Person',
+    '@id': 'https://www.tikkitx.com/#founder',
     name: 'Muhammad Wasif',
     jobTitle: 'Founder & CEO',
-    worksFor: { '@type': 'Organization', name: 'Two Bit Digital Ltd' },
+    url: 'https://www.tikkitx.com/about',
+    worksFor: {
+      '@type': 'Organization',
+      '@id': 'https://www.tikkitx.com/#organization',
+      name: 'Two Bit Digital Ltd',
+    },
+    knowsAbout: [
+      'Event Management',
+      'Event Ticketing',
+      'Software Product Development',
+      'Pakistan Tech Startups',
+    ],
   },
-  contactPoint: {
-    '@type': 'ContactPoint',
-    contactType: 'customer support',
-    availableLanguage: ['English', 'Urdu'],
-    contactOption: 'TollFree',
-  },
-  sameAs: [
-    'https://www.tikkitx.com',
-  ],
-}
+]
 
 const timeline = [
   {
@@ -104,7 +133,7 @@ export default function AboutPage() {
     }}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
       <style>{`
