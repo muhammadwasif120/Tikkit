@@ -21,6 +21,7 @@ export default function robots(): MetadataRoute.Robots {
     '/guest/explore/',
     '/contact',
     '/pricing',
+    '/about',
   ]
 
   const disallowPrivateRules = [
