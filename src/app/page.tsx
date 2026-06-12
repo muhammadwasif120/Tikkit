@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import HomeClient from './HomeClient'
+import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'Event Management & Ticketing Platform for Pakistan',
@@ -209,6 +210,8 @@ export default function Page() {
           </div>
         </div>
       </section>
+
+      <SiteFooter />
     </>
   )
 }

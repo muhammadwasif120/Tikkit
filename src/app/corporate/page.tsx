@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import CorporatePage from './CorporateClient'
+import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'Corporate Event Management in Pakistan',
@@ -90,6 +91,7 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <CorporatePage />
+      <SiteFooter />
     </>
   )
 }

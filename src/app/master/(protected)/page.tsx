@@ -335,7 +335,7 @@ function OrgDetailView({
           {profile.cover_image_url
             ? <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={profile.cover_image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={profile.cover_image_url} alt={`${displayName} cover`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </>
             : <div style={{ width: '100%', height: '100%', background: `linear-gradient(135deg, ${avatarBg}40 0%, #080A14 100%)` }} />
           }
@@ -366,7 +366,7 @@ function OrgDetailView({
             {profile.logo_url
               ? <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={profile.logo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={profile.logo_url} alt={`${displayName} logo`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </>
               : <div className="od-avatar-initials" style={{ background: avatarBg }}>{initials(displayName)}</div>
             }

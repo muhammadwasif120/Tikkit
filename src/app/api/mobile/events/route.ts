@@ -35,5 +35,13 @@ export async function GET(req: NextRequest) {
   const { data, error } = await query
   if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
-  return Response.json({ events: data ?? [], page, limit })
+  return Response.json(
+    { events: data ?? [], page, limit },
+    {
+      headers: {
+        // Cache at CDN/shared caches for 60 s; serve stale for up to 5 min while revalidating
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      },
+    },
+  )
 }

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
+import SiteFooter from '@/components/SiteFooter'
 
 import type { Metadata } from 'next'
 
@@ -245,6 +246,7 @@ export default function PrivacyPolicyPage() {
         main ul li { font-size: 15px; line-height: 1.75; color: #9AAAB8; margin-bottom: 8px; }
         main strong { color: #C8D0DC; font-weight: 600; }
       `}</style>
+      <SiteFooter />
     </div>
   )
 }

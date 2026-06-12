@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'How Tikkit Works — Sell Event Tickets Online in Pakistan',
@@ -99,6 +100,7 @@ export default function HowItWorksLayout({ children }: { children: React.ReactNo
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
       {children}
+      <SiteFooter />
     </>
   )
 }
