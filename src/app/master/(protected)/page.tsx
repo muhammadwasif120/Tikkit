@@ -8,7 +8,7 @@ import {
   MoreHorizontal, Flag, Trash2, Send, X, Menu,
   UserCheck, TrendingUp, ExternalLink, RefreshCw,
   Eye, Ban, AlertTriangle, Clock, ChevronRight, ChevronLeft, BarChart2, Star, Download,
-  ShieldCheck, ShieldX, ZoomIn, Ticket, CreditCard,
+  ShieldCheck, ShieldX, ZoomIn, Ticket, CreditCard, Tag, Plus, Pencil, Check,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import {
@@ -19,9 +19,10 @@ import {
   getMasterCnicVerifications, approveCnicVerification, rejectCnicVerification,
   getMasterAttendees, getMasterRegistrations, getMasterBadgeCounts,
   setEventAdminStatus, removeOrganizer, sendAdminEmailToOrganizer,
+  getAdminCategories, createAdminCategory, updateAdminCategory, deleteAdminCategory,
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
   type PlatformAnalytics, type WaitlistEntry, type SupportQuery, type CnicVerification,
-  type MasterAttendee, type MasterRegistration,
+  type MasterAttendee, type MasterRegistration, type AdminCategory,
 } from '@/app/actions/masterActions'
 import {
   getAdminSupportConversations, getAdminSupportThread, sendAdminSupportReply,
@@ -30,7 +31,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'support' | 'analytics' | 'waitlist' | 'verifications' | 'attendees' | 'registrations'
+type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'support' | 'analytics' | 'waitlist' | 'verifications' | 'attendees' | 'registrations' | 'categories'
 type OrgStatus = 'active' | 'review' | 'suspended'
 type EventStatus = 'live' | 'draft' | 'flagged' | 'suspended' | 'ended'
 
@@ -868,6 +869,194 @@ function GuestListPanel({ evt, onClose }: { evt: Evt; onClose: () => void }) {
   )
 }
 
+// ─── Category Admin ───────────────────────────────────────────────────────────
+
+const PRESET_COLORS = ['#8B5CF6','#06B6D4','#F59E0B','#10B981','#EF4444','#EC4899','#1E5EFF','#F97316','#14B8A6','#84CC16','#6366F1','#E879F9']
+
+function CategoryAdmin() {
+  const [cats, setCats]         = useState<AdminCategory[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [editId, setEditId]     = useState<string | null>(null)
+  const [showNew, setShowNew]   = useState(false)
+  const [saving, setSaving]     = useState(false)
+  const [err, setErr]           = useState('')
+
+  const BLANK = { name: '', slug: '', icon: '🎉', color: '#8B5CF6', description: '', sort_order: 0 }
+  const [form, setForm] = useState(BLANK)
+
+  const load = () => {
+    setLoading(true)
+    getAdminCategories().then(setCats).finally(() => setLoading(false))
+  }
+  useEffect(load, [])
+
+  const upd = (k: keyof typeof BLANK, v: string | number) => setForm(f => ({ ...f, [k]: v }))
+
+  const autoSlug = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+  const startEdit = (cat: AdminCategory) => {
+    setForm({ name: cat.name, slug: cat.slug, icon: cat.icon, color: cat.color, description: cat.description ?? '', sort_order: cat.sort_order })
+    setEditId(cat.id)
+    setShowNew(false)
+    setErr('')
+  }
+
+  const startNew = () => {
+    setForm(BLANK)
+    setShowNew(true)
+    setEditId(null)
+    setErr('')
+  }
+
+  const cancel = () => { setEditId(null); setShowNew(false); setErr('') }
+
+  const save = async () => {
+    if (!form.name.trim() || !form.slug.trim() || !form.icon.trim()) { setErr('Name, slug, and icon are required.'); return }
+    setSaving(true); setErr('')
+    try {
+      if (editId) {
+        const res = await updateAdminCategory(editId, { name: form.name, slug: form.slug, icon: form.icon, color: form.color, description: form.description || undefined, sort_order: Number(form.sort_order) })
+        if (res.error) { setErr(res.error); return }
+      } else {
+        const res = await createAdminCategory({ name: form.name, slug: form.slug, icon: form.icon, color: form.color, description: form.description || undefined, sort_order: Number(form.sort_order) })
+        if (res.error) { setErr(res.error); return }
+      }
+      cancel()
+      load()
+    } finally { setSaving(false) }
+  }
+
+  const del = async (id: string, name: string) => {
+    if (!confirm(`Delete "${name}"? Events using this category will have it cleared.`)) return
+    await deleteAdminCategory(id)
+    load()
+  }
+
+  const F = ({ label, children }: { label: string; children: React.ReactNode }) => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+      <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.1em', textTransform: 'uppercase' as const }}>{label}</div>
+      {children}
+    </div>
+  )
+
+  const isEditing = editId !== null || showNew
+  const editingCat = editId ? cats.find(c => c.id === editId) : null
+
+  return (
+    <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+      {/* ── Category list ── */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF' }}>
+            {cats.length} Categories
+          </div>
+          <button onClick={startNew} disabled={isEditing} style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'linear-gradient(135deg,#1E5EFF,#1448CC)', border: 'none', borderRadius: 10, padding: '9px 16px', color: '#fff', fontSize: 'var(--fs-base)', fontWeight: 700, fontFamily: 'var(--font-display)', cursor: isEditing ? 'default' : 'pointer', opacity: isEditing ? 0.5 : 1 }}>
+            <Plus size={13} /> New Category
+          </button>
+        </div>
+
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: 48, color: '#374151', fontFamily: 'var(--font-body)' }}>Loading categories…</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {cats.map(cat => (
+              <div key={cat.id} className="ms-card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 14, background: editId === cat.id ? 'rgba(30,94,255,0.06)' : undefined, border: editId === cat.id ? '1px solid rgba(30,94,255,0.25)' : undefined }}>
+                {/* Colour swatch + icon */}
+                <div style={{ width: 42, height: 42, borderRadius: 12, background: `${cat.color}22`, border: `1.5px solid ${cat.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                  {cat.icon}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontWeight: 700, color: '#F0F2FF', fontFamily: 'var(--font-body)', fontSize: 'var(--fs-md)' }}>{cat.name}</span>
+                    <span style={{ fontSize: 'var(--fs-2xs)', color: '#4B5563', fontFamily: 'monospace' }}>/{cat.slug}</span>
+                    <span style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, padding: '2px 7px', borderRadius: 5, background: `${cat.color}18`, color: cat.color }}>{cat.color}</span>
+                  </div>
+                  {cat.description && (
+                    <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', marginTop: 3, fontFamily: 'var(--font-body)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{cat.description}</div>
+                  )}
+                  <div style={{ fontSize: 'var(--fs-xs)', color: '#374151', marginTop: 2 }}>Sort order: {cat.sort_order}</div>
+                </div>
+                <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <button onClick={() => startEdit(cat)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#9CA3AF' }} title="Edit">
+                    <Pencil size={13} />
+                  </button>
+                  <button onClick={() => del(cat.id, cat.name)} style={{ background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 8, width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#EF4444' }} title="Delete">
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Form panel ── */}
+      {isEditing && (
+        <div className="ms-card" style={{ width: 360, flexShrink: 0, padding: '22px 24px', position: 'sticky', top: 24 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', marginBottom: 18 }}>
+            {editingCat ? `Edit "${editingCat.name}"` : 'New Category'}
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <F label="Icon (emoji)">
+              <input value={form.icon} onChange={e => upd('icon', e.target.value)} className="ms-input" placeholder="🎉" style={{ fontSize: 20 }} />
+            </F>
+
+            <F label="Name">
+              <input value={form.name} onChange={e => { upd('name', e.target.value); if (!editId) upd('slug', autoSlug(e.target.value)) }} className="ms-input" placeholder="e.g. Wellness" />
+            </F>
+
+            <F label="Slug">
+              <input value={form.slug} onChange={e => upd('slug', autoSlug(e.target.value))} className="ms-input" placeholder="e.g. wellness" style={{ fontFamily: 'monospace' }} />
+            </F>
+
+            <F label="Colour">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {PRESET_COLORS.map(c => (
+                    <button key={c} onClick={() => upd('color', c)} style={{ width: 24, height: 24, borderRadius: 6, background: c, border: form.color === c ? '2.5px solid #fff' : '2px solid transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {form.color === c && <Check size={11} color="#fff" />}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input type="color" value={form.color} onChange={e => upd('color', e.target.value)} style={{ width: 36, height: 30, borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)', background: 'transparent', cursor: 'pointer', padding: 2 }} />
+                  <input value={form.color} onChange={e => upd('color', e.target.value)} className="ms-input" style={{ flex: 1, fontFamily: 'monospace' }} placeholder="#8B5CF6" />
+                </div>
+              </div>
+            </F>
+
+            <F label="Description (optional)">
+              <input value={form.description} onChange={e => upd('description', e.target.value)} className="ms-input" placeholder="Short description…" />
+            </F>
+
+            <F label="Sort Order">
+              <input type="number" value={form.sort_order} onChange={e => upd('sort_order', Number(e.target.value))} className="ms-input" min="0" />
+            </F>
+
+            {/* Preview */}
+            <div style={{ padding: '10px 14px', borderRadius: 10, background: `${form.color}14`, border: `1px solid ${form.color}30`, display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 22 }}>{form.icon}</span>
+              <span style={{ fontWeight: 700, color: form.color, fontSize: 'var(--fs-base)' }}>{form.name || 'Preview'}</span>
+            </div>
+
+            {err && <div style={{ fontSize: 'var(--fs-xs)', color: '#EF4444', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 8, padding: '8px 12px' }}>{err}</div>}
+
+            <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+              <button onClick={save} disabled={saving} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: 'linear-gradient(135deg,#1E5EFF,#1448CC)', border: 'none', borderRadius: 10, padding: '10px', color: '#fff', fontSize: 'var(--fs-base)', fontWeight: 700, fontFamily: 'var(--font-display)', cursor: saving ? 'default' : 'pointer', opacity: saving ? 0.6 : 1 }}>
+                {saving ? 'Saving…' : <><Check size={13} /> {editId ? 'Update' : 'Create'}</>}
+              </button>
+              <button onClick={cancel} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', borderRadius: 10, padding: '10px 14px', fontSize: 'var(--fs-base)', fontWeight: 600, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Master Dashboard ─────────────────────────────────────────────────────────
 
 export default function MasterPage() {
@@ -1118,12 +1307,13 @@ export default function MasterPage() {
     { id: 'support'        as Tab, icon: MessageSquare,   label: 'Support Chats',      badge: unreadSupportCount > 0 ? unreadSupportCount : undefined },
     { id: 'waitlist'       as Tab, icon: Star,            label: 'Waitlist',           badge: waitlist.length > 0 ? waitlist.length : undefined },
     { id: 'verifications'  as Tab, icon: ShieldCheck,     label: 'Verifications',      badge: pendingCnicCount > 0 ? pendingCnicCount : undefined },
+    { id: 'categories'     as Tab, icon: Tag,             label: 'Categories'          },
   ]
 
   const PAGE_TITLES: Record<Tab, string> = {
     overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes',
     support: 'Support Chats', analytics: 'Analytics', waitlist: 'Waitlist', verifications: 'Verifications',
-    attendees: 'Attendee Accounts', registrations: 'All Registrations',
+    attendees: 'Attendee Accounts', registrations: 'All Registrations', categories: 'Event Categories',
   }
 
 
@@ -2808,6 +2998,9 @@ export default function MasterPage() {
           </div>
         )
       })()}
+
+            {/* ════════════════════════════════════════════════════ CATEGORIES */}
+            {tab === 'categories' && <CategoryAdmin />}
 
           </div>
         </main>

@@ -982,3 +982,80 @@ export async function getMasterBadgeCounts(): Promise<MasterBadgeCounts> {
     unreadSupport:        support.count ?? 0,
   }
 }
+
+// ─── Category admin ────────────────────────────────────────────────────────────
+
+export type AdminCategory = {
+  id: string
+  name: string
+  slug: string
+  icon: string
+  color: string
+  description: string | null
+  sort_order: number
+  created_at: string
+}
+
+export async function getAdminCategories(): Promise<AdminCategory[]> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { data, error } = await supabase
+    .from('event_categories')
+    .select('*')
+    .order('sort_order', { ascending: true })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as AdminCategory[]
+}
+
+export async function createAdminCategory(payload: {
+  name: string
+  slug: string
+  icon: string
+  color: string
+  description?: string
+  sort_order?: number
+}): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { error } = await supabase
+    .from('event_categories')
+    .insert({
+      name:        payload.name,
+      slug:        payload.slug,
+      icon:        payload.icon,
+      color:       payload.color,
+      description: payload.description ?? null,
+      sort_order:  payload.sort_order ?? 0,
+    })
+  return error ? { error: error.message } : {}
+}
+
+export async function updateAdminCategory(
+  id: string,
+  payload: Partial<{
+    name: string
+    slug: string
+    icon: string
+    color: string
+    description: string
+    sort_order: number
+  }>,
+): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { error } = await supabase
+    .from('event_categories')
+    .update(payload)
+    .eq('id', id)
+  return error ? { error: error.message } : {}
+}
+
+export async function deleteAdminCategory(id: string): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { error } = await supabase
+    .from('event_categories')
+    .delete()
+    .eq('id', id)
+  return error ? { error: error.message } : {}
+}

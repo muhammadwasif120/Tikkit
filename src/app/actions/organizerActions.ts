@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { logBehaviour } from './behaviourActions'
 
 export type TopOrganizer = {
   id: string
@@ -57,6 +58,8 @@ export async function toggleFavouriteOrganizer(
   await (supabase as any)
     .from('organizer_favourites')
     .insert({ user_id: user.id, organizer_id: organizerId })
+  // Log behaviour signal (fire-and-forget)
+  logBehaviour({ action: 'favourite_organizer', organizerId }).catch(() => {})
   revalidatePath('/guest/explore')
   return { is_favourite: true }
 }
