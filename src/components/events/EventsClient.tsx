@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Plus, CalendarDays, MapPin, Users, Edit2, Trash2, X, Check, ChevronDown, Lock, Eye, ChevronRight } from 'lucide-react'
+import { pingIndexNowForEvent } from '@/app/actions/seoActions'
 import { getEffectiveStatus } from '@/lib/eventStatus'
 import { format } from 'date-fns'
 import Link from 'next/link'
@@ -112,6 +113,13 @@ export default function EventsClient({
       return
     }
     setEvents(prev => prev.map(e => e.id === data.id ? data : e))
+
+    // When an event goes live, ping IndexNow so Bing/Yandex index it immediately
+    if (editForm.status === 'published' && editEvent.status !== 'published') {
+      const slugOrId = (data as any).slug || data.id
+      pingIndexNowForEvent(data.id, slugOrId).catch(() => {})
+    }
+
     setEditEvent(null)
   }
 

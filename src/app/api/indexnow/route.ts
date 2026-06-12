@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllPosts } from '@/lib/blog'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 const INDEX_NOW_KEY = '2aac1ba3120f5fcd7e8ec88cc63f7355'
 const BASE_URL = 'https://www.tikkitx.com'
@@ -12,20 +13,64 @@ const STATIC_URLS = [
   `${BASE_URL}/corporate`,
   `${BASE_URL}/pulse`,
   `${BASE_URL}/blog`,
+  `${BASE_URL}/privacy`,
+  `${BASE_URL}/terms`,
 ]
+
+/** Pull published event + organizer URLs from DB */
+async function getDynamicUrls(): Promise<string[]> {
+  try {
+    const admin = createAdminClient()
+    const now = new Date().toISOString()
+
+    // Upcoming + recent past events (6 months back)
+    const sixMonthsAgo = new Date()
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+
+    const [eventsRes, organizersRes] = await Promise.all([
+      admin
+        .from('events')
+        .select('id, slug')
+        .eq('status', 'published')
+        .eq('is_private', false)
+        .gte('date_start', sixMonthsAgo.toISOString())
+        .order('date_start', { ascending: false })
+        .limit(500),
+      admin
+        .from('profiles')
+        .select('username')
+        .eq('role', 'organizer')
+        .not('username', 'is', null)
+        .neq('username', '')
+        .limit(500),
+    ])
+
+    const eventUrls = (eventsRes.data ?? []).map((ev: any) =>
+      `${BASE_URL}/guest/explore/${ev.slug || ev.id}`
+    )
+    const organizerUrls = (organizersRes.data ?? []).map((org: any) =>
+      `${BASE_URL}/organizer/${org.username}`
+    )
+
+    return [...eventUrls, ...organizerUrls]
+  } catch {
+    return []
+  }
+}
 
 /**
  * POST /api/indexnow
- * Submits all blog URLs (+ key static pages) to Bing IndexNow for instant crawl.
- * Protect with a secret header in production: x-indexnow-secret
+ * Submits all blog, event, and organizer URLs to Bing IndexNow for instant crawl.
+ * Protect with a secret header: x-indexnow-secret
  *
  * Example: curl -X POST https://www.tikkitx.com/api/indexnow \
- *   -H "x-indexnow-secret: <your-deploy-secret>"
+ *   -H "x-indexnow-secret: <INDEXNOW_SECRET>"
+ *
+ * IndexNow propagates to Bing, Yandex, and Seznam simultaneously.
+ * Limit: 10,000 URLs per request.
  */
 export async function POST(req: NextRequest) {
-  // Required auth gate — INDEXNOW_SECRET must be set in Vercel env vars.
-  // Refusing the request if the env var is absent prevents an open admin endpoint
-  // from being exploitable when the variable is accidentally unset.
+  // Auth gate — INDEXNOW_SECRET must be set in Vercel env vars
   const secret = process.env.INDEXNOW_SECRET
   if (!secret) {
     console.error('INDEXNOW_SECRET env var is not set')
@@ -36,10 +81,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Build URL list: static pages + all blog articles
   const blogPosts = getAllPosts()
   const blogUrls = blogPosts.map(p => `${BASE_URL}/blog/${p.slug}`)
-  const urlList = [...STATIC_URLS, ...blogUrls]
+  const dynamicUrls = await getDynamicUrls()
+
+  const urlList = [...STATIC_URLS, ...blogUrls, ...dynamicUrls]
 
   const body = {
     host: 'www.tikkitx.com',
@@ -59,7 +105,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       submitted: urlList.length,
-      urls: urlList,
+      breakdown: {
+        static: STATIC_URLS.length,
+        blog: blogUrls.length,
+        dynamic: dynamicUrls.length,
+      },
       bingStatus: res.status,
       bingResponse: statusText,
     })
@@ -70,12 +120,21 @@ export async function POST(req: NextRequest) {
 
 /**
  * GET /api/indexnow
- * Returns the list of URLs that would be submitted — useful for verification.
+ * Returns the list of URLs that would be submitted — dry run, no Bing call.
  */
 export async function GET() {
   const blogPosts = getAllPosts()
   const blogUrls = blogPosts.map(p => `${BASE_URL}/blog/${p.slug}`)
-  const urlList = [...STATIC_URLS, ...blogUrls]
+  const dynamicUrls = await getDynamicUrls()
+  const urlList = [...STATIC_URLS, ...blogUrls, ...dynamicUrls]
 
-  return NextResponse.json({ count: urlList.length, urls: urlList })
+  return NextResponse.json({
+    count: urlList.length,
+    breakdown: {
+      static: STATIC_URLS.length,
+      blog: blogUrls.length,
+      dynamic: dynamicUrls.length,
+    },
+    urls: urlList,
+  })
 }
