@@ -7,6 +7,18 @@ async function getToken(): Promise<string | null> {
   return session?.access_token ?? null
 }
 
+async function parseJSON<T>(res: Response): Promise<T> {
+  const ct = res.headers.get('content-type') ?? ''
+  if (!ct.includes('application/json')) {
+    throw new Error(`Server returned ${res.status} with non-JSON response`)
+  }
+  try {
+    return await res.json() as T
+  } catch {
+    throw new Error(`Invalid JSON from server (${res.status})`)
+  }
+}
+
 async function request<T>(
   path: string,
   options: RequestInit = {}
@@ -22,9 +34,9 @@ async function request<T>(
   })
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }))
-    throw new Error(err.error ?? res.statusText)
+    throw new Error(err.error ?? err.message ?? res.statusText)
   }
-  return res.json()
+  return parseJSON<T>(res)
 }
 
 // ─── Events ──────────────────────────────────────────────────────────────────
