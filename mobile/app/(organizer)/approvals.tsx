@@ -16,6 +16,7 @@ import {
 } from '@/lib/api'
 import { colors, radius } from '@/theme'
 import { useToast } from '@/components/Toast'
+import { haptic } from '@/lib/haptics'
 
 type Filter = 'pending' | 'payment' | 'approved' | 'rejected' | 'all'
 
@@ -87,11 +88,13 @@ export default function ApprovalsScreen() {
     setActing(true)
     try {
       await submitApprovalAction(selected.id, action, notes)
+      haptic.success()
       setSelected(null)
       setShowRejectInput(false)
       setRejectNotes('')
       await load(filter)
     } catch (err: any) {
+      haptic.error()
       Alert.alert('Error', err.message ?? 'Action failed')
     } finally {
       setActing(false)

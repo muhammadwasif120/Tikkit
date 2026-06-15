@@ -16,10 +16,12 @@ export const colors = {
 
   gold: '#FFC745',
   goldHover: '#E5A800',
-  goldSubtle: 'rgba(255,199,69,0.1)',
+  goldSubtle: 'rgba(255,199,69,0.15)',
+  goldBorder: 'rgba(255,199,69,0.3)',
 
   indigo: '#818CF8',
-  indigoSubtle: 'rgba(129,140,248,0.1)',
+  indigoSubtle: 'rgba(129,140,248,0.15)',
+  indigoBorder: 'rgba(129,140,248,0.3)',
 
   // Text
   textPrimary: '#F3F4F6',
@@ -34,11 +36,14 @@ export const colors = {
 
   // Status
   success: '#10B981',
-  successSubtle: 'rgba(16,185,129,0.1)',
+  successSubtle: 'rgba(16,185,129,0.15)',
+  successBorder: 'rgba(16,185,129,0.3)',
   warning: '#EAB308',
-  warningSubtle: 'rgba(234,179,8,0.1)',
+  warningSubtle: 'rgba(234,179,8,0.15)',
+  warningBorder: 'rgba(234,179,8,0.3)',
   error: '#EF4444',
-  errorSubtle: 'rgba(239,68,68,0.1)',
+  errorSubtle: 'rgba(239,68,68,0.15)',
+  errorBorder: 'rgba(239,68,68,0.3)',
 
   // White/black
   white: '#FFFFFF',
@@ -105,11 +110,13 @@ export function getEventGradient(eventId: string) {
 
 // Registration status
 export const registrationStatus = {
-  pending: { color: colors.warning, bg: colors.warningSubtle, label: 'Pending' },
-  approved: { color: colors.success, bg: colors.successSubtle, label: 'Approved' },
-  rejected: { color: colors.error, bg: colors.errorSubtle, label: 'Rejected' },
-  cancelled: { color: colors.textMuted, bg: 'rgba(107,114,128,0.1)', label: 'Cancelled' },
-  payment_pending: { color: colors.indigo, bg: colors.indigoSubtle, label: 'Payment Pending' },
+  pending:         { color: colors.warning, bg: colors.warningSubtle, border: colors.warningBorder, label: 'Pending' },
+  approved:        { color: colors.success, bg: colors.successSubtle, border: colors.successBorder, label: 'Approved' },
+  rejected:        { color: colors.error,   bg: colors.errorSubtle,   border: colors.errorBorder,   label: 'Rejected' },
+  cancelled:       { color: colors.textMuted, bg: 'rgba(107,114,128,0.15)', border: 'rgba(107,114,128,0.3)', label: 'Cancelled' },
+  payment_pending: { color: colors.indigo, bg: colors.indigoSubtle, border: colors.indigoBorder, label: 'Payment Pending' },
+  checked_in:      { color: colors.success, bg: colors.successSubtle, border: colors.successBorder, label: 'Checked In' },
+  registered:      { color: colors.blue,    bg: colors.blueSubtle,   border: colors.blueBorder,    label: 'Registered' },
 }
 
 // Credits tier system

@@ -12,6 +12,7 @@ import { format, isToday, isThisWeek } from 'date-fns'
 import { getEvents, getTickets, EventSummary, addFavourite, removeFavourite } from '@/lib/api'
 import { colors, radius, getEventGradient } from '@/theme'
 import { useToast } from '@/components/Toast'
+import { haptic } from '@/lib/haptics'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as SecureStore from 'expo-secure-store'
 import { supabase } from '@/lib/supabase'
@@ -156,6 +157,7 @@ export default function ExploreScreen() {
 
   const toggleFav = async (eventId: string) => {
     const isFav = favourites.has(eventId)
+    haptic.light()
     setFavourites(prev => {
       const next = new Set(prev)
       isFav ? next.delete(eventId) : next.add(eventId)

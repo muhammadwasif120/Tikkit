@@ -11,6 +11,7 @@ import { format } from 'date-fns'
 import { getOrganizerEvents, scanQR, ScanResult, OrganizerEvent } from '@/lib/api'
 import { colors, radius } from '@/theme'
 import { useToast } from '@/components/Toast'
+import { haptic } from '@/lib/haptics'
 
 type ScanState = 'idle' | 'scanning' | 'success' | 'error' | 'duplicate'
 type ScanType = 'entry' | 'exit'
@@ -64,6 +65,9 @@ export default function ScanScreen() {
 
       const outcome: ScanLogEntry['outcome'] = !result.valid ? 'error' : result.already_checked_in ? 'duplicate' : 'success'
       setScanState(outcome)
+      if (outcome === 'success') haptic.success()
+      else if (outcome === 'duplicate') haptic.warning()
+      else haptic.error()
 
       setSessionStats(prev => ({ ...prev, [outcome]: prev[outcome] + 1 }))
 
@@ -81,6 +85,7 @@ export default function ScanScreen() {
       setScanLog(prev => [entry, ...prev].slice(0, 20))
     } catch {
       setScanState('error')
+      haptic.error()
       setLastResult({ valid: false, error: 'Network error' })
       setSessionStats(prev => ({ ...prev, error: prev.error + 1 }))
     }

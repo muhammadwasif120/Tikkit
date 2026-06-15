@@ -1,10 +1,10 @@
 import React from 'react'
 import {
   View, Text, TouchableOpacity, ActivityIndicator,
-  StyleSheet, ViewStyle, TextStyle,
+  StyleSheet, ViewStyle,
 } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { colors, radius, spacing, typography } from '@/theme'
+import { colors, radius, spacing, typography, registrationStatus } from '@/theme'
 
 // ─── Button ──────────────────────────────────────────────────────────────────
 
@@ -44,10 +44,10 @@ const btnBorder: Record<ButtonVariant, string> = {
   danger: colors.error + '33',
   gold: 'transparent',
 }
-const btnPad: Record<ButtonSize, { paddingVertical: number; paddingHorizontal: number }> = {
-  sm: { paddingVertical: 8, paddingHorizontal: 14 },
-  md: { paddingVertical: 12, paddingHorizontal: 20 },
-  lg: { paddingVertical: 15, paddingHorizontal: 24 },
+const btnPad: Record<ButtonSize, { paddingVertical: number; paddingHorizontal: number; minHeight: number }> = {
+  sm: { paddingVertical: 10, paddingHorizontal: 14, minHeight: 44 },
+  md: { paddingVertical: 13, paddingHorizontal: 20, minHeight: 44 },
+  lg: { paddingVertical: 15, paddingHorizontal: 24, minHeight: 52 },
 }
 const btnFontSize: Record<ButtonSize, number> = { sm: 13, md: 15, lg: 16 }
 
@@ -108,17 +108,47 @@ export function Badge({ label, color = colors.textSecondary, bg = colors.surface
       backgroundColor: bg,
       borderRadius: radius.full,
       paddingHorizontal: size === 'sm' ? 8 : 10,
-      paddingVertical: size === 'sm' ? 2 : 4,
+      paddingVertical: size === 'sm' ? 3 : 5,
       alignSelf: 'flex-start',
     }}>
       <Text style={{
         ...typography.labelSM,
         fontSize: size === 'sm' ? 9 : 11,
         color,
-        fontWeight: '600',
+        fontWeight: '700',
         textTransform: 'uppercase',
-        letterSpacing: 0.5,
+        letterSpacing: 0.6,
       }}>{label}</Text>
+    </View>
+  )
+}
+
+// Semantic status badge that pulls from the registrationStatus token map
+export function StatusBadge({ status, size = 'md' }: { status: string; size?: 'sm' | 'md' }) {
+  const s = registrationStatus[status as keyof typeof registrationStatus] ?? {
+    color: colors.textMuted,
+    bg: 'rgba(107,114,128,0.15)',
+    border: 'rgba(107,114,128,0.3)',
+    label: status,
+  }
+  return (
+    <View style={{
+      backgroundColor: s.bg,
+      borderRadius: radius.full,
+      borderWidth: 1,
+      borderColor: s.border,
+      paddingHorizontal: size === 'sm' ? 8 : 10,
+      paddingVertical: size === 'sm' ? 3 : 5,
+      alignSelf: 'flex-start',
+    }}>
+      <Text style={{
+        ...typography.labelSM,
+        fontSize: size === 'sm' ? 9 : 11,
+        color: s.color,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+        letterSpacing: 0.6,
+      }}>{s.label}</Text>
     </View>
   )
 }
@@ -158,7 +188,11 @@ export function SectionHeader({ title, action, onAction }: SectionHeaderProps) {
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
       <Text style={{ ...typography.displaySM, color: colors.textPrimary }}>{title}</Text>
       {action && onAction && (
-        <TouchableOpacity onPress={onAction}>
+        <TouchableOpacity
+          onPress={onAction}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Text style={{ ...typography.labelMD, color: colors.blue }}>{action}</Text>
         </TouchableOpacity>
       )}
@@ -178,20 +212,45 @@ interface EmptyStateProps {
   icon: keyof typeof Ionicons.glyphMap
   title: string
   subtitle?: string
+  cta?: string
+  onCta?: () => void
 }
 
-export function EmptyState({ icon, title, subtitle }: EmptyStateProps) {
+export function EmptyState({ icon, title, subtitle, cta, onCta }: EmptyStateProps) {
   return (
-    <View style={{ alignItems: 'center', paddingVertical: 48, gap: 12 }}>
+    <View style={{ alignItems: 'center', paddingVertical: 48, paddingHorizontal: 32, gap: 12 }}>
       <View style={{
-        width: 56, height: 56, borderRadius: 28,
+        width: 68, height: 68, borderRadius: 34,
         backgroundColor: colors.surface2,
+        borderWidth: 1, borderColor: colors.border,
         alignItems: 'center', justifyContent: 'center',
       }}>
-        <Ionicons name={icon} size={24} color={colors.textMuted} />
+        <Ionicons name={icon} size={28} color={colors.textMuted} />
       </View>
-      <Text style={{ ...typography.displaySM, color: colors.textPrimary }}>{title}</Text>
-      {subtitle && <Text style={{ ...typography.bodyMD, color: colors.textMuted, textAlign: 'center' }}>{subtitle}</Text>}
+      <Text style={{ ...typography.displaySM, color: colors.textPrimary, textAlign: 'center' }}>{title}</Text>
+      {subtitle && (
+        <Text style={{ ...typography.bodyMD, color: colors.textMuted, textAlign: 'center', lineHeight: 21 }}>
+          {subtitle}
+        </Text>
+      )}
+      {cta && onCta && (
+        <TouchableOpacity
+          onPress={onCta}
+          activeOpacity={0.75}
+          style={{
+            marginTop: 4,
+            backgroundColor: colors.blue,
+            borderRadius: radius.md,
+            paddingVertical: 12,
+            paddingHorizontal: 20,
+            minHeight: 44,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Text style={{ ...typography.labelLG, color: colors.white, fontWeight: '600' }}>{cta}</Text>
+        </TouchableOpacity>
+      )}
     </View>
   )
 }

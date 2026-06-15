@@ -113,8 +113,8 @@ function StepDots({ total, current, accent }: { total: number; current: number; 
           key={i}
           style={[
             sd.dot,
-            i === current - 1 && { width: 20, backgroundColor: accent },
-            i < current - 1 && { backgroundColor: accent + '55' },
+            i === current - 1 && { width: 28, height: 4, backgroundColor: accent },
+            i < current - 1 && { backgroundColor: accent + '66' },
           ]}
         />
       ))}
@@ -123,7 +123,7 @@ function StepDots({ total, current, accent }: { total: number; current: number; 
 }
 const sd = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.surface3 },
+  dot: { width: 8, height: 4, borderRadius: 2, backgroundColor: colors.surface3 },
 })
 
 /* ─── Error banner ───────────────────────────────────────────────────────── */
@@ -203,6 +203,7 @@ export default function AuthScreen() {
   const [phone,    setPhone]    = useState('')
   const [city,     setCity]     = useState('')
   const [showCityPicker, setShowCityPicker] = useState(false)
+  const [citySearch, setCitySearch] = useState('')
   const [gender,   setGender]   = useState('')
 
   const [loading,  setLoading]  = useState(false)
@@ -654,24 +655,51 @@ export default function AuthScreen() {
             visible={showCityPicker}
             transparent
             animationType="slide"
-            onRequestClose={() => setShowCityPicker(false)}
+            onRequestClose={() => { setShowCityPicker(false); setCitySearch('') }}
           >
-            <TouchableOpacity style={a.modalOverlay} activeOpacity={1} onPress={() => setShowCityPicker(false)} />
+            <TouchableOpacity style={a.modalOverlay} activeOpacity={1} onPress={() => { setShowCityPicker(false); setCitySearch('') }} />
             <View style={a.cityModal}>
               <View style={a.cityModalHandle} />
               <Text style={a.cityModalTitle}>Select City</Text>
-              <ScrollView showsVerticalScrollIndicator={false}>
-                {PAKISTAN_CITIES.map(c => (
+              {/* Search */}
+              <View style={a.citySearch}>
+                <Ionicons name="search-outline" size={15} color={colors.textMuted} />
+                <TextInput
+                  style={a.citySearchInput}
+                  placeholder="Search cities…"
+                  placeholderTextColor={colors.textMuted}
+                  value={citySearch}
+                  onChangeText={setCitySearch}
+                  autoCapitalize="words"
+                  returnKeyType="search"
+                />
+                {citySearch.length > 0 && (
+                  <TouchableOpacity onPress={() => setCitySearch('')} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                    <Ionicons name="close-circle" size={16} color={colors.textMuted} />
+                  </TouchableOpacity>
+                )}
+              </View>
+              <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                {PAKISTAN_CITIES.filter(c =>
+                  c.toLowerCase().includes(citySearch.toLowerCase())
+                ).map(c => (
                   <TouchableOpacity
                     key={c}
                     style={[a.cityOption, city === c && { backgroundColor: accent + '15' }]}
-                    onPress={() => { setCity(c); setShowCityPicker(false) }}
+                    onPress={() => { setCity(c); setShowCityPicker(false); setCitySearch('') }}
                     activeOpacity={0.7}
                   >
                     <Text style={[a.cityOptionText, city === c && { color: accent, fontFamily: 'DMSans_500Medium' }]}>{c}</Text>
                     {city === c && <Ionicons name="checkmark" size={16} color={accent} />}
                   </TouchableOpacity>
                 ))}
+                {PAKISTAN_CITIES.filter(c => c.toLowerCase().includes(citySearch.toLowerCase())).length === 0 && (
+                  <View style={{ alignItems: 'center', paddingVertical: 24 }}>
+                    <Text style={{ color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular' }}>
+                      No cities match "{citySearch}"
+                    </Text>
+                  </View>
+                )}
               </ScrollView>
             </View>
           </Modal>
@@ -966,6 +994,24 @@ const a = StyleSheet.create({
     fontWeight: '700',
     fontFamily: 'DMSans_700Bold',
     marginBottom: 12,
+  },
+  citySearch: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: colors.surface2,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginBottom: 8,
+  },
+  citySearchInput: {
+    flex: 1,
+    color: colors.textPrimary,
+    fontSize: 14,
+    fontFamily: 'DMSans_400Regular',
   },
   cityOption: {
     flexDirection: 'row',

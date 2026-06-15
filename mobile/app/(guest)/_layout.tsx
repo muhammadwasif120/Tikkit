@@ -1,8 +1,9 @@
 import { Tabs } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, radius } from '@/theme'
-import { View, Text, StyleSheet, AppState } from 'react-native'
+import { View, Text, StyleSheet, AppState, Platform } from 'react-native'
 import { useState, useEffect, useRef } from 'react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { getNotifications } from '@/lib/api'
 
 /* Fetch unread notification count and refresh when app comes to foreground */
@@ -69,6 +70,8 @@ function BadgedTabIcon({ name, focusedName, color, size, focused, badge }: {
 
 export default function GuestLayout() {
   const unreadCount = useUnreadCount()
+  const insets = useSafeAreaInsets()
+  const tabBarHeight = Platform.OS === 'ios' ? 56 + insets.bottom : 64
 
   return (
     <Tabs
@@ -76,16 +79,18 @@ export default function GuestLayout() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: colors.surface,
-          borderTopColor: colors.border,
+          borderTopColor: colors.borderHover,
           borderTopWidth: 1,
-          height: 60,
-          paddingBottom: 8,
+          height: tabBarHeight,
+          paddingBottom: Platform.OS === 'ios' ? insets.bottom : 8,
+          paddingTop: 6,
         },
-        tabBarActiveTintColor: colors.blue,
+        tabBarActiveTintColor: colors.gold,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarLabelStyle: {
           fontFamily: 'DMSans_500Medium',
           fontSize: 11,
+          marginTop: 2,
         },
       }}
     >
@@ -160,7 +165,7 @@ const s = StyleSheet.create({
     padding: 4,
   },
   iconWrapActive: {
-    backgroundColor: colors.blueSubtle,
+    backgroundColor: colors.goldSubtle,
   },
   badge: {
     position: 'absolute',
