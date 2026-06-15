@@ -3,7 +3,7 @@ import {
   StyleSheet, Image, ActivityIndicator, ScrollView,
   RefreshControl, Dimensions,
 } from 'react-native'
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo, memo } from 'react'
 import { useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { format, isToday, isThisWeek } from 'date-fns'
 import { getEvents, getTickets, EventSummary, addFavourite, removeFavourite } from '@/lib/api'
 import { colors, radius, getEventGradient } from '@/theme'
+import { useToast } from '@/components/Toast'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as SecureStore from 'expo-secure-store'
 import { supabase } from '@/lib/supabase'
@@ -63,6 +64,7 @@ function groupEvents(events: EventSummary[]) {
 export default function ExploreScreen() {
   const router = useRouter()
   const { user } = useAuth()
+  const toast = useToast()
   const [events, setEvents] = useState<EventSummary[]>([])
   const [myTickets, setMyTickets] = useState<MyTicket[]>([])
   const [loading, setLoading] = useState(true)
@@ -119,14 +121,18 @@ export default function ExploreScreen() {
       else setEvents(prev => [...prev, ...res.events])
       setHasMore(res.events.length === res.limit)
       setPage(p)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      if (p === 0) toast.show({ type: 'error', message: e?.message || 'Couldn\'t load events. Pull down to retry.' })
+    }
   }, [category, search])
 
   const fetchMyTickets = useCallback(async () => {
     try {
       const { tickets } = await getTickets()
       setMyTickets(tickets.map(t => ({ eventId: t.events?.id ?? '', status: t.status })))
-    } catch { /* silent */ }
+    } catch {
+      // Non-critical — tickets strip is supplementary
+    }
   }, [])
 
   useEffect(() => {
@@ -167,17 +173,20 @@ export default function ExploreScreen() {
     }
   }
 
-  // My events: upcoming only (exclude cancelled/rejected)
-  const myUpcoming = myTickets
-    .filter(t => t.status !== 'cancelled' && t.status !== 'rejected')
-    .map(t => events.find(e => e.id === t.eventId))
-    .filter(Boolean) as EventSummary[]
+  const myUpcoming = useMemo(() =>
+    myTickets
+      .filter(t => t.status !== 'cancelled' && t.status !== 'rejected')
+      .map(t => events.find(e => e.id === t.eventId))
+      .filter(Boolean) as EventSummary[],
+    [myTickets, events],
+  )
 
-  // Featured = first 5 events from the list (preferably with cover images)
-  const withImage = events.filter(e => e.cover_image_url)
-  const featured = (withImage.length >= 3 ? withImage : events).slice(0, 5)
+  const featured = useMemo(() => {
+    const withImage = events.filter(e => e.cover_image_url)
+    return (withImage.length >= 3 ? withImage : events).slice(0, 5)
+  }, [events])
 
-  const { today, thisWeek, comingUp } = groupEvents(events)
+  const { today, thisWeek, comingUp } = useMemo(() => groupEvents(events), [events])
 
   const renderSection = (
     title: string,
@@ -382,7 +391,7 @@ export default function ExploreScreen() {
 }
 
 /* ─── Featured Carousel ───────────────────────────────────────────────────── */
-function FeaturedCarousel({
+const FeaturedCarousel = memo(function FeaturedCarousel({
   events,
   favourites,
   onPress,
@@ -394,6 +403,7 @@ function FeaturedCarousel({
   onFav: (id: string) => void
 }) {
   const [dotPage, setDotPage] = useState(0)
+
   const listRef = useRef<FlatList>(null)
   const pageRef = useRef(0)
 
@@ -510,10 +520,10 @@ function FeaturedCarousel({
       )}
     </View>
   )
-}
+})
 
 /* ─── Event Card ──────────────────────────────────────────────────────────── */
-function EventCard({
+const EventCard = memo(function EventCard({
   event, isFav, onPress, onFav,
 }: {
   event: EventSummary
@@ -618,7 +628,7 @@ function EventCard({
       </View>
     </TouchableOpacity>
   )
-}
+})
 
 /* ─── Styles ─────────────────────────────────────────────────────────────── */
 const s = StyleSheet.create({

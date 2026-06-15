@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { getOrganizerEvents, OrganizerEvent } from '@/lib/api'
 import { colors, radius, getEventGradient } from '@/theme'
 import { Skeleton } from '@/components/Skeleton'
+import { useToast } from '@/components/Toast'
 
 /* ─── Skeleton ───────────────────────────────────────────────────────────── */
 function CommandSkeleton() {
@@ -40,6 +41,7 @@ function CommandSkeleton() {
 /* ─── Screen ─────────────────────────────────────────────────────────────── */
 export default function CommandHubScreen() {
   const router = useRouter()
+  const toast = useToast()
   const [events, setEvents] = useState<OrganizerEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -48,7 +50,9 @@ export default function CommandHubScreen() {
     try {
       const { events: e } = await getOrganizerEvents()
       setEvents(e)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load events. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => { load().finally(() => setLoading(false)) }, [])

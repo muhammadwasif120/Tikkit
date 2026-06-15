@@ -13,6 +13,7 @@ import { format } from 'date-fns'
 import * as ImagePicker from 'expo-image-picker'
 import { getMyRegistrations, submitPaymentScreenshot, MyRegistration } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 /* ─── Status step timeline ───────────────────────────────────────────────── */
 type Step = { key: string; label: string; icon: keyof typeof Ionicons.glyphMap }
@@ -308,6 +309,7 @@ function PaymentModal({ registration, onClose, onSuccess }: {
 /* ─── Main screen ─────────────────────────────────────────────────────────── */
 export default function RegistrationsScreen() {
   const router = useRouter()
+  const toast = useToast()
   const [registrations, setRegistrations] = useState<MyRegistration[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -317,7 +319,9 @@ export default function RegistrationsScreen() {
     try {
       const { registrations: r } = await getMyRegistrations()
       setRegistrations(r)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load registrations. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

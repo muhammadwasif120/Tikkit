@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns'
 import { getNotifications, markNotificationsRead, AppNotification } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 /* ─── Semantic type config ────────────────────────────────────────────────── */
 type NotifMeta = {
@@ -86,6 +87,7 @@ function formatTimestamp(dateStr: string): string {
 /* ─── Main screen ─────────────────────────────────────────────────────────── */
 export default function NotificationsScreen() {
   const router = useRouter()
+  const toast = useToast()
   const [notifications, setNotifications] = useState<AppNotification[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -95,7 +97,9 @@ export default function NotificationsScreen() {
       const { notifications: n } = await getNotifications()
       setNotifications(n)
       await markNotificationsRead()
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load notifications. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

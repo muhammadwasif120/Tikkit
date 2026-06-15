@@ -12,6 +12,7 @@ import { getGuestChat, sendGuestChatMessage, ChatMessage } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 function fmtTime(iso: string) {
   const d = new Date(iso)
@@ -53,6 +54,7 @@ function MessageBubble({ msg, isMe }: { msg: ChatMessage; isMe: boolean }) {
 export default function GuestChatScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>()
   const router = useRouter()
+  const toast = useToast()
   const { user } = useAuth()
   const userId = user?.id ?? null
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -70,7 +72,9 @@ export default function GuestChatScreen() {
       setMessages(msgs)
       setEventTitle(event.title)
       setOrganizerName(event.organizer_name ?? 'Organizer')
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load chat. Pull down to retry.' })
+    }
   }, [eventId])
 
   useEffect(() => {

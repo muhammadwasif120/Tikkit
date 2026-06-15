@@ -16,6 +16,7 @@ import {
   CommandAttendee, CommandMessage, CommandEvent,
 } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 type Tab = 'attendees' | 'chat'
 
@@ -28,6 +29,7 @@ const STATUS_META: Record<string, { label: string; color: string; bg: string }> 
 export default function CommandEventScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>()
   const router = useRouter()
+  const toast = useToast()
 
   const [tab, setTab] = useState<Tab>('attendees')
   const [event, setEvent] = useState<CommandEvent | null>(null)
@@ -47,7 +49,9 @@ export default function CommandEventScreen() {
       setAttendees(data.attendees)
       setMessages(data.messages)
       setStats(data.stats)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load command center. Pull down to retry.' })
+    }
   }, [eventId])
 
   useEffect(() => { load().finally(() => setLoading(false)) }, [])

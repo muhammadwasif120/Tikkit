@@ -10,6 +10,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { getVerifyStatus } from '@/lib/api'
 import { Skeleton } from '@/components/Skeleton'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 type CnicStatus = 'not_submitted' | 'pending' | 'verified' | 'rejected' | null | undefined
 
@@ -45,6 +46,7 @@ const STATUS_META: Record<string, { label: string; desc: string; color: string; 
 }
 
 export default function VerifyScreen() {
+  const toast = useToast()
   const [status, setStatus] = useState<CnicStatus>(null)
   const [cnicNumber, setCnicNumber] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -57,7 +59,9 @@ export default function VerifyScreen() {
       const mapped = data.status === 'unverified' ? 'not_submitted' : data.status
       setStatus(mapped as CnicStatus)
       setCnicNumber(data.cnic_number ?? null)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load verification status. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => { load().finally(() => setLoading(false)) }, [])

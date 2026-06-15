@@ -12,6 +12,7 @@ import { format } from 'date-fns'
 import { getOrganizerAnalytics, OrganizerAnalytics, AnalyticsEvent } from '@/lib/api'
 import { colors, radius } from '@/theme'
 import { Skeleton } from '@/components/Skeleton'
+import { useToast } from '@/components/Toast'
 
 function fmt(n: number) {
   if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`
@@ -45,6 +46,7 @@ function AnalyticsSkeleton() {
 
 export default function AnalyticsScreen() {
   const router = useRouter()
+  const toast = useToast()
   const [data, setData] = useState<OrganizerAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -53,7 +55,9 @@ export default function AnalyticsScreen() {
     try {
       const { analytics } = await getOrganizerAnalytics()
       setData(analytics)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load analytics. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

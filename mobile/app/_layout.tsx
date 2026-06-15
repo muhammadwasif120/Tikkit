@@ -4,6 +4,7 @@ import { Stack, useRouter, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import * as Linking from 'expo-linking'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
+import { ToastProvider } from '@/components/Toast'
 import { useFonts } from '@/hooks/useFonts'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { supabase } from '@/lib/supabase'
@@ -54,7 +55,7 @@ async function handleDeepLink(url: string): Promise<string | null> {
 }
 
 function RootNavigator() {
-  const { user, profile, loading } = useAuth()
+  const { user, profile, loading, profileLoading } = useAuth()
   const router = useRouter()
   const segments = useSegments()
   const [fontsLoaded, fontError] = useFonts()
@@ -99,10 +100,16 @@ function RootNavigator() {
       return
     }
 
-    // Profile fetch still in-flight (sign-in via onAuthStateChange path) — wait.
-    // With the new AuthContext, INITIAL_SESSION always awaits the fetch before
-    // setting loading=false, so this guard only ever fires during a fresh sign-in.
-    if (!profile) return
+    // Profile fetch still in-flight — keep splash up until it resolves.
+    if (profileLoading) return
+
+    // Profile fetch finished but returned nothing (no DB row / RLS blocked).
+    // Sign the user out so they land on login rather than hanging forever.
+    if (!profile) {
+      if (__DEV__) console.warn('[Nav] profile is null after fetch — signing out')
+      supabase.auth.signOut()
+      return
+    }
 
     if (__DEV__) console.log('[Nav] routing | role:', profile.role, '| segments:', segments[0])
 
@@ -114,12 +121,11 @@ function RootNavigator() {
     } else if (!isOrganizer && !inGuestGroup) {
       router.replace('/(guest)/explore')
     }
-  }, [user, profile, appReady, segments])
+  }, [user, profile, profileLoading, appReady, segments])
 
   // Show splash until fully ready.
-  // Also show it while user is known but profile is still loading (sign-in transition)
-  // so we never briefly render the wrong route group.
-  const showSplash = !appReady || (!!user && !profile)
+  // Also show it while profile fetch is in-flight after sign-in.
+  const showSplash = !appReady || (!!user && profileLoading)
 
   if (showSplash) {
     return (
@@ -144,7 +150,9 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <RootNavigator />
+      <ToastProvider>
+        <RootNavigator />
+      </ToastProvider>
     </AuthProvider>
   )
 }

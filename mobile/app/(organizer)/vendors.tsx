@@ -16,6 +16,7 @@ import {
   Vendor, VendorInvoice,
 } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
 
@@ -59,6 +60,7 @@ function VendorSkeleton() {
 }
 
 export default function VendorsScreen() {
+  const toast = useToast()
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [invoices, setInvoices] = useState<VendorInvoice[]>([])
   const [loading, setLoading] = useState(true)
@@ -94,7 +96,9 @@ export default function VendorsScreen() {
       ])
       setVendors(v)
       setInvoices(inv)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load vendors. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => { load().finally(() => setLoading(false)) }, [])

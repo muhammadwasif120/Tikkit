@@ -12,6 +12,7 @@ import { getTickets, Ticket } from '@/lib/api'
 import { colors, radius, getEventGradient } from '@/theme'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Skeleton } from '@/components/Skeleton'
+import { useToast } from '@/components/Toast'
 
 const { width: SCREEN_W } = Dimensions.get('window')
 
@@ -56,6 +57,7 @@ function TicketSkeleton() {
 /* ─── Main screen ─────────────────────────────────────────────────────────── */
 export default function TicketsScreen() {
   const router = useRouter()
+  const toast = useToast()
   const [tickets,    setTickets]    = useState<Ticket[]>([])
   const [loading,    setLoading]    = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -64,7 +66,9 @@ export default function TicketsScreen() {
     try {
       const { tickets: t } = await getTickets()
       setTickets(t)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load tickets. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

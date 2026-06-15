@@ -11,6 +11,7 @@ import { getCredits, CreditTransaction } from '@/lib/api'
 import { colors, radius, creditTiers } from '@/theme'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Skeleton } from '@/components/Skeleton'
+import { useToast } from '@/components/Toast'
 
 /* ─── Tier config ─────────────────────────────────────────────────────────── */
 const TIER_META: Record<string, {
@@ -121,6 +122,7 @@ const m = StyleSheet.create({
 /* ─── Main screen ─────────────────────────────────────────────────────────── */
 export default function CreditsScreen() {
   const router = useRouter()
+  const toast = useToast()
   const [balance, setBalance] = useState(0)
   const [transactions, setTransactions] = useState<CreditTransaction[]>([])
   const [loading, setLoading] = useState(true)
@@ -131,7 +133,9 @@ export default function CreditsScreen() {
       const data = await getCredits()
       setBalance(data.balance)
       setTransactions(data.transactions)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load credits. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

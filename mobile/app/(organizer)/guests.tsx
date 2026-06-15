@@ -12,6 +12,7 @@ import QRCode from 'react-native-qrcode-svg'
 import { Skeleton } from '@/components/Skeleton'
 import { getOrganizerGuests, updateOrgGuest, deleteOrgGuest, OrgGuest } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 type Tier = 'all' | 'vip' | 'regular' | 'waitlist'
 const TIERS: { key: Tier; label: string }[] = [
@@ -51,6 +52,7 @@ function GuestSkeleton() {
 }
 
 export default function GuestsScreen() {
+  const toast = useToast()
   const [tier, setTier] = useState<Tier>('all')
   const [guests, setGuests] = useState<OrgGuest[]>([])
   const [events, setEvents] = useState<Array<{ id: string; title: string; status: string }>>([])
@@ -74,7 +76,9 @@ export default function GuestsScreen() {
       const { guests: g, events: e } = await getOrganizerGuests(evId, t === 'all' ? undefined : t)
       setGuests(g)
       setEvents(e)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load guests. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

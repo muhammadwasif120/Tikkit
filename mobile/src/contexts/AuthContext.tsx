@@ -24,6 +24,7 @@ type AuthContextValue = {
   session: Session | null
   profile: Profile | null
   loading: boolean
+  profileLoading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
   signUp: (email: string, password: string, fullName: string, extras?: SignUpExtras) => Promise<{ error: string | null }>
   signOut: () => Promise<void>
@@ -37,21 +38,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [profileLoading, setProfileLoading] = useState(false)
   // Ref (not state) so we never re-render just because it flips
   const initializedRef = useRef(false)
 
   const fetchProfile = async (userId: string): Promise<void> => {
+    setProfileLoading(true)
     try {
       const { data, error } = await (supabase as any)
         .from('profiles')
         .select('id, full_name, email, role, avatar_url, username')
         .eq('id', userId)
-        .single()
+        .single() as { data: Profile | null; error: { message: string } | null }
       if (__DEV__) console.log('[Auth] fetchProfile →', { role: data?.role, error: error?.message })
-      setProfile(data ? (data as Profile) : null)
+      setProfile(data ?? null)
     } catch (e) {
       if (__DEV__) console.error('[Auth] fetchProfile threw:', e)
       setProfile(null)
+    } finally {
+      setProfileLoading(false)
     }
   }
 
@@ -78,10 +83,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (s?.user) {
         const uid = s.user.id
-        // Defer outside the auth lock — _layout keeps splash up while profile loads
+        // Mark profile as loading immediately (synchronously) so _layout
+        // keeps the splash up while we wait for the deferred fetch.
+        setProfileLoading(true)
+        // Defer outside the auth lock — awaiting a DB call here deadlocks
+        // because Supabase holds an internal lock during this callback.
         setTimeout(() => { fetchProfile(uid) }, 0)
       } else {
         setProfile(null)
+        setProfileLoading(false)
       }
 
       // Only flip loading→false once (on the very first event, INITIAL_SESSION).
@@ -130,7 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, session, profile, loading,
+      user, session, profile, loading, profileLoading,
       signIn, signUp, signOut,
       refreshProfile: () => user ? fetchProfile(user.id) : Promise.resolve(),
     }}>

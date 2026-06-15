@@ -10,8 +10,10 @@ import { format } from 'date-fns'
 import QRCode from 'react-native-qrcode-svg'
 import { getPasses, EventPass } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 export default function PassesScreen() {
+  const toast = useToast()
   const [passes, setPasses] = useState<EventPass[]>([])
   const [newPassIds, setNewPassIds] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,7 +25,9 @@ export default function PassesScreen() {
       const { passes: p, newPassIds: n } = await getPasses()
       setPasses(p)
       setNewPassIds(n)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load passes. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

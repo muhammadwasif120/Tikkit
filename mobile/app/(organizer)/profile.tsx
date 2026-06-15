@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { getProfile, updateProfile } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 /* ─── Notification config ────────────────────────────────────────────────── */
 type NotifKey = 'guest_signup' | 'guest_cancellation' | 'entry_scan' | 'exit_scan' | 'vendor_payment_due' | 'event_going_live' | 'event_ended'
@@ -86,6 +87,7 @@ function EditField({ label, value, onChangeText, placeholder, keyboardType, secu
 /* ─── Main screen ────────────────────────────────────────────────────────── */
 export default function OrganizerProfileScreen() {
   const { profile: authProfile, refreshProfile, signOut } = useAuth()
+  const toast = useToast()
   const router = useRouter()
 
   const [loading, setLoading] = useState(true)
@@ -127,7 +129,9 @@ export default function OrganizerProfileScreen() {
       if (p.notification_preferences && typeof p.notification_preferences === 'object') {
         setNotifPrefs(prev => ({ ...prev, ...(p.notification_preferences as any) }))
       }
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load profile. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => { load().finally(() => setLoading(false)) }, [])
@@ -189,7 +193,9 @@ export default function OrganizerProfileScreen() {
     try {
       await updateProfile({ notification_preferences: notifPrefs })
       setNotifSaved(true)
-    } catch { /* silent */ }
+    } catch {
+      toast.show({ type: 'error', message: 'Couldn\'t save notification preferences.' })
+    }
     setNotifSaving(false)
   }
 

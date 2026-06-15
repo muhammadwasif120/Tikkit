@@ -12,6 +12,7 @@ import { format } from 'date-fns'
 import { getOrganizerEvents, OrganizerEvent } from '@/lib/api'
 import { colors, radius, getEventGradient } from '@/theme'
 import { Skeleton } from '@/components/Skeleton'
+import { useToast } from '@/components/Toast'
 
 const STATUS_TABS = ['all', 'published', 'draft', 'ended', 'archived', 'cancelled'] as const
 type StatusTab = typeof STATUS_TABS[number]
@@ -51,6 +52,7 @@ function EventCardSkeleton() {
 
 export default function OrganizerEventsScreen() {
   const router = useRouter()
+  const toast = useToast()
   const [events, setEvents] = useState<OrganizerEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -60,7 +62,9 @@ export default function OrganizerEventsScreen() {
     try {
       const { events: e } = await getOrganizerEvents(status === 'all' ? undefined : status)
       setEvents(e)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load events. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

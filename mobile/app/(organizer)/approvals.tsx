@@ -15,6 +15,7 @@ import {
   ApprovalRegistration, ApprovalEvent,
 } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 type Filter = 'pending' | 'payment' | 'approved' | 'rejected' | 'all'
 
@@ -40,6 +41,7 @@ const PAYMENT_META: Record<string, { label: string; color: string }> = {
 }
 
 export default function ApprovalsScreen() {
+  const toast = useToast()
   const [filter, setFilter] = useState<Filter>('pending')
   const [registrations, setRegistrations] = useState<ApprovalRegistration[]>([])
   const [events, setEvents] = useState<ApprovalEvent[]>([])
@@ -56,7 +58,9 @@ export default function ApprovalsScreen() {
       const { registrations: r, events: e } = await getApprovals(f)
       setRegistrations(r)
       setEvents(e)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load approvals. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

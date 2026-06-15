@@ -10,6 +10,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera'
 import { format } from 'date-fns'
 import { getOrganizerEvents, scanQR, ScanResult, OrganizerEvent } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 type ScanState = 'idle' | 'scanning' | 'success' | 'error' | 'duplicate'
 type ScanType = 'entry' | 'exit'
@@ -31,6 +32,7 @@ const STATE_COLOR: Record<ScanState, string> = {
 }
 
 export default function ScanScreen() {
+  const toast = useToast()
   const [permission, requestPermission] = useCameraPermissions()
   const [events, setEvents] = useState<OrganizerEvent[]>([])
   const [selectedEvent, setSelectedEvent] = useState<OrganizerEvent | null>(null)
@@ -46,7 +48,9 @@ export default function ScanScreen() {
     getOrganizerEvents('published').then(({ events: e }) => {
       setEvents(e)
       if (e.length > 0) setSelectedEvent(e[0])
-    }).catch(() => {})
+    }).catch((e: any) => {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load events for scanning.' })
+    })
   }, [])
 
   const handleBarCode = async ({ data }: { data: string }) => {

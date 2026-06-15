@@ -544,7 +544,7 @@ export async function getCommandCenter(eventId: string) {
 }
 
 export async function commandUpdateStatus(eventId: string, registrationId: string, action: 'approve' | 'reject' | 'confirm_payment') {
-  return request<{ registration: any }>(`/api/mobile/organizer/command/${eventId}`, {
+  return request<{ registration: CommandAttendee }>(`/api/mobile/organizer/command/${eventId}`, {
     method: 'POST',
     body: JSON.stringify({ type: 'update_status', registrationId, action }),
   })
@@ -685,7 +685,8 @@ export async function submitPaymentScreenshot(registrationId: string, imageUri: 
   // React Native FormData appends files as { uri, name, type }
   const ext = imageUri.split('.').pop()?.toLowerCase() ?? 'jpg'
   const mimeType = ext === 'png' ? 'image/png' : 'image/jpeg'
-  formData.append('screenshot', { uri: imageUri, name: `screenshot.${ext}`, type: mimeType } as any)
+  // React Native FormData accepts { uri, name, type } for file parts but the TS types don't know that
+  formData.append('screenshot', { uri: imageUri, name: `screenshot.${ext}`, type: mimeType } as unknown as Blob)
 
   const res = await fetch(`${API_BASE}/api/mobile/payment`, {
     method: 'POST',

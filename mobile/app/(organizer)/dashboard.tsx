@@ -13,10 +13,12 @@ import { getOrganizerStats, getOrganizerEvents, OrganizerEvent, OrganizerStats }
 import { useAuth } from '@/contexts/AuthContext'
 import { colors, radius, getEventGradient } from '@/theme'
 import { Skeleton } from '@/components/Skeleton'
+import { useToast } from '@/components/Toast'
 
 export default function OrganizerDashboard() {
   const { profile } = useAuth()
   const router = useRouter()
+  const toast = useToast()
   const [stats, setStats] = useState<OrganizerStats | null>(null)
   const [events, setEvents] = useState<OrganizerEvent[]>([])
   const [loading, setLoading] = useState(true)
@@ -30,7 +32,9 @@ export default function OrganizerDashboard() {
       ])
       setStats(statsRes.stats)
       setEvents(eventsRes.events)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load dashboard. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => {

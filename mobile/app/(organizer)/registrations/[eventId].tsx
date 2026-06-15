@@ -12,6 +12,7 @@ import { format } from 'date-fns'
 import { getOrganizerRegistrations, updateRegistration, Registration } from '@/lib/api'
 import { colors, radius } from '@/theme'
 import { Skeleton } from '@/components/Skeleton'
+import { useToast } from '@/components/Toast'
 
 const STATUS_TABS = ['pending', 'approved', 'all', 'rejected'] as const
 type StatusTab = typeof STATUS_TABS[number]
@@ -62,6 +63,7 @@ function RegSkeleton() {
 export default function RegistrationsScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>()
   const router = useRouter()
+  const toast = useToast()
   const [registrations, setRegistrations] = useState<Registration[]>([])
   const [loading, setLoading]       = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -77,7 +79,9 @@ export default function RegistrationsScreen() {
         status === 'all' ? undefined : status,
       )
       setRegistrations(r)
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load registrations. Pull down to retry.' })
+    }
   }, [eventId])
 
   useEffect(() => {

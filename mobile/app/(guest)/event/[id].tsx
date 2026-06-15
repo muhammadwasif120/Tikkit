@@ -11,11 +11,13 @@ import { format } from 'date-fns'
 import { LinearGradient } from 'expo-linear-gradient'
 import { getEvent, EventDetail, addFavourite, removeFavourite } from '@/lib/api'
 import { colors, radius, getEventGradient } from '@/theme'
+import { useToast } from '@/components/Toast'
 
 export default function EventDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const toast = useToast()
 
   const [event, setEvent] = useState<EventDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -37,7 +39,9 @@ export default function EventDetailScreen() {
     try {
       if (favourited) { await removeFavourite('event', event.id); setFavourited(false) }
       else { await addFavourite('event', event.id); setFavourited(true) }
-    } catch { /* silent */ }
+    } catch {
+      toast.show({ type: 'error', message: 'Couldn\'t update favourite. Try again.' })
+    }
   }
 
   const handleShare = async () => {

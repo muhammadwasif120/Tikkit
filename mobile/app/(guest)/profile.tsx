@@ -11,6 +11,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { colors, radius } from '@/theme'
 import { getProfile, updateProfile } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
+import { useToast } from '@/components/Toast'
 
 /* ─── Credit tier helper ─────────────────────────────────────────────────── */
 function creditTier(score: number) {
@@ -145,6 +146,7 @@ const DEFAULT_NOTIFS: NotifPrefs = { registration_updates: true, payment_reminde
 
 export default function GuestProfileScreen() {
   const { profile: authProfile, signOut } = useAuth()
+  const toast = useToast()
 
   const [loading, setLoading] = useState(true)
   const [serverData, setServerData] = useState<any>(null)
@@ -188,7 +190,9 @@ export default function GuestProfileScreen() {
       setInstagram(g.instagram_handle ?? '')
       setDiscoverable(g.is_discoverable ?? true)
       if (g.notification_prefs) setNotifs({ ...DEFAULT_NOTIFS, ...g.notification_prefs })
-    } catch { /* silent */ }
+    } catch (e: any) {
+      toast.show({ type: 'error', message: e?.message || 'Couldn\'t load profile. Pull down to retry.' })
+    }
   }, [])
 
   useEffect(() => { load().finally(() => setLoading(false)) }, [])
@@ -219,7 +223,12 @@ export default function GuestProfileScreen() {
     const updated = { ...notifs, [key]: !notifs[key] }
     setNotifs(updated)
     setNotifSaving(true)
-    try { await updateProfile({ notification_prefs: updated }) } catch { /* silent */ }
+    try {
+      await updateProfile({ notification_prefs: updated })
+    } catch {
+      toast.show({ type: 'error', message: 'Couldn\'t save notification preferences.' })
+      setNotifs(notifs) // revert
+    }
     setNotifSaving(false)
   }
 
