@@ -128,7 +128,7 @@ export default function VenueHomePage() {
             ✦ Now Onboarding Venues
           </div>
 
-          <h1 className="fade-up" style={{ fontFamily: 'var(--font-display, inherit)', fontSize: 'clamp(38px, 6vw, 66px)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-2px', marginBottom: 24 }}>
+          <h1 className="fade-up" style={{ fontFamily: 'var(--font-display, inherit)', fontSize: 'clamp(38px, 6vw, 66px)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-0.5px', marginBottom: 24 }}>
             Your space.<br />
             <span style={{ background: `linear-gradient(135deg, ${C.gold}, ${C.teal})`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Your programmes.
