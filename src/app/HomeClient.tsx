@@ -403,7 +403,6 @@ const CSS = `
   .h1-city {
     font-size:.38em; font-weight:900; letter-spacing:0; color:#00E5FF;
     display:inline-block;
-    transition:opacity .12s ease, transform .12s ease;
     text-shadow:0 0 40px rgba(0,229,255,.5);
   }
 
@@ -754,6 +753,7 @@ export default function HomeClient() {
   const [scrolled, setScrolled] = useState(false)
   const [cityIdx, setCityIdx] = useState(0)
   const [cityVisible, setCityVisible] = useState(true)
+  const [fadeDuration, setFadeDuration] = useState(55)
   const [flowActive, setFlowActive] = useState(0)
   const [productsOpen, setProductsOpen] = useState(false)
 
@@ -764,11 +764,36 @@ export default function HomeClient() {
   }, [])
 
   useEffect(() => {
-    const t = setInterval(() => {
+    const total = CITIES.length
+    let idx = 0
+    let mounted = true
+    let tid: ReturnType<typeof setTimeout>
+
+    // Per-city timing: fast spin → decelerate over last 7 cities → hold on finale
+    const getTiming = (i: number): { fade: number; hold: number } => {
+      const fromEnd = total - 1 - i
+      if (fromEnd > 6) return { fade: 55,  hold: 65  }  // rapid spin
+      const fades = [65,  85,  105, 125, 150, 190, 260]
+      const holds = [110, 190, 290, 400, 560, 950, 1700]
+      return { fade: fades[6 - fromEnd], hold: holds[6 - fromEnd] }
+    }
+
+    const spin = () => {
+      if (!mounted) return
+      const { fade, hold } = getTiming(idx)
+      setFadeDuration(fade)
       setCityVisible(false)
-      setTimeout(() => { setCityIdx(i => (i + 1) % CITIES.length); setCityVisible(true) }, 120)
-    }, 500)
-    return () => clearInterval(t)
+      tid = setTimeout(() => {
+        if (!mounted) return
+        setCityIdx(idx)
+        setCityVisible(true)
+        idx = (idx + 1) % total
+        tid = setTimeout(spin, hold)
+      }, fade)
+    }
+
+    tid = setTimeout(spin, 500)
+    return () => { mounted = false; clearTimeout(tid) }
   }, [])
 
   useEffect(() => {
@@ -856,7 +881,7 @@ export default function HomeClient() {
           <h1 className="hero-h1">
             <span className="h1-os">Event OS</span>
             <span className="h1-running">Running in </span>
-            <span className="h1-city" style={{ opacity: cityVisible ? 1 : 0, transform: cityVisible ? 'none' : 'translateY(8px)' }}>
+            <span className="h1-city" style={{ opacity: cityVisible ? 1 : 0, transform: cityVisible ? 'none' : 'translateY(6px)', transition: `opacity ${fadeDuration}ms ease, transform ${fadeDuration}ms ease` }}>
               {CITIES[cityIdx]}
             </span>
           </h1>
