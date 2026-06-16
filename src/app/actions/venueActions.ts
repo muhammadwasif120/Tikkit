@@ -688,3 +688,44 @@ export async function getExperiencesForExplore(limit = 12) {
     next_dates: (instanceMap[p.id] ?? []).slice(0, 3),
   }))
 }
+
+export async function getVenuesForExplore(limit = 10) {
+  const supabase = await createClient()
+
+  const { data: venues } = await (supabase as any)
+    .from('venues')
+    .select('id, name, slug, city, categories, photos, capacity')
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (!venues || venues.length === 0) return []
+
+  // Count programmes and resources per venue
+  const venueIds = (venues as any[]).map((v: any) => v.id) as string[]
+
+  const [{ data: progCounts }, { data: resCounts }] = await Promise.all([
+    (supabase as any)
+      .from('programmes')
+      .select('venue_id')
+      .in('venue_id', venueIds)
+      .eq('active', true),
+    (supabase as any)
+      .from('resources')
+      .select('venue_id')
+      .in('venue_id', venueIds)
+      .eq('active', true),
+  ])
+
+  const progMap: Record<string, number> = {}
+  for (const p of (progCounts ?? [])) progMap[p.venue_id] = (progMap[p.venue_id] ?? 0) + 1
+
+  const resMap: Record<string, number> = {}
+  for (const r of (resCounts ?? [])) resMap[r.venue_id] = (resMap[r.venue_id] ?? 0) + 1
+
+  return (venues as any[]).map((v: any) => ({
+    ...v,
+    programme_count: progMap[v.id] ?? 0,
+    resource_count: resMap[v.id] ?? 0,
+  }))
+}

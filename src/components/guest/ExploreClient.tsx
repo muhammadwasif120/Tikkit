@@ -11,9 +11,14 @@ import { toggleFavouriteOrganizer } from '@/app/actions/organizerActions'
 import { toggleEventFavourite } from '@/app/actions/eventFavouriteActions'
 import type { TopOrganizer } from '@/app/actions/organizerActions'
 import ExperiencesStrip from './ExperiencesStrip'
+import VenuesStrip from './VenuesStrip'
 
 function ExperiencesStripLazy({ experiences }: { experiences: any[] }) {
   return <ExperiencesStrip experiences={experiences} />
+}
+
+function VenuesStripLazy({ venues }: { venues: any[] }) {
+  return <VenuesStrip venues={venues} />
 }
 
 
@@ -806,6 +811,7 @@ export default function ExploreClient({
   userId = null,
   favouritedEventIds = [],
   experiences = [],
+  venues = [],
 }: {
   events: Event[]
   myEvents: MyEvent[]
@@ -814,6 +820,7 @@ export default function ExploreClient({
   userId?: string | null
   favouritedEventIds?: string[]
   experiences?: any[]
+  venues?: any[]
 }) {
   const [query, setQuery] = useState('')
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
@@ -1106,6 +1113,11 @@ export default function ExploreClient({
           {/* Top Organizers strip */}
           {!isFiltering && topOrganizers.length > 0 && (
             <TopOrganizersStrip organizers={topOrganizers} userId={userId} />
+          )}
+
+          {/* Venues strip */}
+          {!isFiltering && venues.length > 0 && (
+            <VenuesStripLazy venues={venues} />
           )}
 
           {/* Experiences strip */}
