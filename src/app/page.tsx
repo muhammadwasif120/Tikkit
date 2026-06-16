@@ -4,22 +4,22 @@ import HomeClient from './HomeClient'
 import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'Event Management & Ticketing Platform for Pakistan',
-  description: 'Run your events end to end — guest lists, QR check-in, JazzCash & EasyPaisa payments, vendors and finances. Built for Pakistani organizers. Free to start.',
-  keywords: ['event management Pakistan', 'sell tickets online Pakistan', 'event ticketing platform Pakistan', 'concerts Lahore', 'events Karachi', 'events Islamabad', 'event organizer tools Pakistan', 'JazzCash event tickets'],
+  title: 'TIKKIT X — The Complete Event OS for Pakistan',
+  description: 'Six modules. One platform. Events, Vendor X, Venues, Artist Management, Guest App & Analytics — the complete operating system for live events in Pakistan. Free to start.',
+  keywords: ['event management Pakistan', 'event operating system', 'venue booking Pakistan', 'artist management Pakistan', 'sell tickets online Pakistan', 'event ticketing platform Pakistan', 'concerts Lahore', 'events Karachi', 'events Islamabad', 'event organizer tools Pakistan', 'JazzCash event tickets', 'vendor management events'],
   alternates: { canonical: 'https://www.tikkitx.com' },
   openGraph: {
-    title: 'Event Management & Ticketing Platform for Pakistan | Tikkit',
-    description: 'Run your events end to end — guest lists, QR check-in, JazzCash & EasyPaisa payments, vendors and finances. Built for Pakistani organizers.',
+    title: 'TIKKIT X — The Complete Event OS for Pakistan',
+    description: 'Six modules. One platform. Events, Vendor X, Venues, Artist Management, Guest App & Analytics — the complete operating system for live events.',
     url: 'https://www.tikkitx.com',
     type: 'website',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit — Event Management Platform Pakistan' }],
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'TIKKIT X — The Complete Event OS' }],
   },
   twitter: {
     card: 'summary_large_image',
     site: '@tikkitx',
-    title: 'Event Management & Ticketing Platform for Pakistan | Tikkit',
-    description: 'Guest lists, QR check-in, JazzCash & EasyPaisa payments — event management built for Pakistan. Free to start.',
+    title: 'TIKKIT X — The Complete Event OS for Pakistan',
+    description: 'Six modules. One platform. Every organiser, vendor, venue, artist, and guest — connected. Free to start.',
     images: ['/og-image.jpg'],
   },
 }
@@ -41,8 +41,8 @@ const organizationSchema = {
     caption: 'Tikkit X',
   },
   image: { '@id': 'https://www.tikkitx.com/#logo' },
-  description: "Pakistan's event ticketing and management platform — guest lists, QR check-in, JazzCash & EasyPaisa payments. Headquartered in Karachi. Built for Pakistani organizers. Free to start.",
-  slogan: 'Your night. Your rules.',
+  description: "The complete event operating system for Pakistan — events, vendor management, venue booking, artist management, guest app, and analytics. Six modules. One platform. Built in Karachi.",
+  slogan: 'The Complete Event OS.',
   foundingDate: '2024',
   foundingLocation: { '@type': 'Place', name: 'Karachi, Pakistan' },
   address: {

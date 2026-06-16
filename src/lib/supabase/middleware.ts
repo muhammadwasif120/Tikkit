@@ -87,6 +87,7 @@ export async function updateSession(request: NextRequest) {
     '/vendor/home',     // Vendor X landing page
     '/venue/home',      // Venues & Experiences landing page
     '/artist-mgmt/home', // Artist Management landing page
+    '/lp',               // Preserved landing pages (/lp/underground etc.)
   ]
 
   // On a product subdomain, only its own routes + auth are accessible
