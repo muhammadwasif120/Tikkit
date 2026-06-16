@@ -4,13 +4,14 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   LayoutDashboard, CalendarDays, Clock3, Settings,
-  ChevronRight, MapPin, LogOut, Grid3X3
+  ChevronRight, MapPin, LogOut, Grid3X3, MessageSquare,
 } from 'lucide-react'
 import { signOut } from '@/app/actions/guestProfileActions'
 
 const NAV = [
   { label: 'Overview',   href: '/venue/os',              icon: LayoutDashboard, extra: [] },
   { label: 'Programmes', href: '/venue/os/programmes',   icon: CalendarDays,    extra: [] },
+  { label: 'Enquiries',  href: '/venue/os/enquiries',    icon: MessageSquare,   extra: [] },
   { label: 'Slots',      href: '/venue/os/slots',        icon: Clock3,          extra: [] },
   { label: 'Spot Map',   href: '/venue/os/spot-map',     icon: Grid3X3,         extra: [] },
   { label: 'Settings',   href: '/venue/os/settings',     icon: Settings,        extra: [] },

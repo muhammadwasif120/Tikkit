@@ -389,3 +389,302 @@ export async function cancelSpotBooking(spotMapId: string, instanceId: string) {
 
   return { error: error?.message ?? null }
 }
+
+// ── Guest: Enquiries ─────────────────────────────────────────────────────────
+
+export async function createVenueEnquiry(fd: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  const { error, data } = await (supabase as any)
+    .from('venue_enquiries')
+    .insert({
+      venue_id:     fd.get('venue_id') as string,
+      programme_id: (fd.get('programme_id') as string) || null,
+      resource_id:  (fd.get('resource_id') as string) || null,
+      guest_id:     user?.id ?? null,
+      guest_name:   (fd.get('guest_name') as string).trim(),
+      guest_phone:  (fd.get('guest_phone') as string)?.trim() || null,
+      message:      (fd.get('message') as string).trim(),
+    })
+    .select('id')
+    .single()
+
+  return { error: error?.message ?? null, id: data?.id ?? null }
+}
+
+// ── Guest: Programme Registrations ───────────────────────────────────────────
+
+export async function createProgrammeRegistrations(
+  programmeId: string,
+  venueId: string,
+  instanceIds: string[],
+  guestName: string,
+  guestPhone: string,
+  guestCount: number,
+  pricePerSession: number,
+  notes: string,
+) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Please sign in to register.' }
+
+  const rows = instanceIds.map(instanceId => ({
+    programme_id: programmeId,
+    instance_id:  instanceId || null,
+    venue_id:     venueId,
+    user_id:      user.id,
+    guest_name:   guestName.trim(),
+    guest_phone:  guestPhone?.trim() || null,
+    guest_count:  guestCount,
+    total_price:  pricePerSession * guestCount,
+    notes:        notes?.trim() || null,
+  }))
+
+  const { error, data } = await (supabase as any)
+    .from('programme_registrations')
+    .insert(rows)
+    .select('id, qr_token')
+
+  if (error) return { error: error.message }
+  revalidatePath('/guest/my-tikkit')
+  return { error: null, registrations: data as { id: string; qr_token: string }[] }
+}
+
+export async function createProgrammeRegistration(fd: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Please sign in to register.' }
+
+  const programmeId = fd.get('programme_id') as string
+  const guestCount  = parseInt(fd.get('guest_count') as string) || 1
+  const price       = parseFloat(fd.get('total_price') as string) || 0
+
+  const { error, data } = await (supabase as any)
+    .from('programme_registrations')
+    .insert({
+      programme_id: programmeId,
+      instance_id:  (fd.get('instance_id') as string) || null,
+      venue_id:     fd.get('venue_id') as string,
+      user_id:      user.id,
+      guest_name:   (fd.get('guest_name') as string).trim(),
+      guest_phone:  (fd.get('guest_phone') as string)?.trim() || null,
+      guest_count:  guestCount,
+      total_price:  price,
+      notes:        (fd.get('notes') as string)?.trim() || null,
+    })
+    .select('id, qr_token')
+    .single()
+
+  if (error) return { error: error.message }
+  revalidatePath('/guest/my-tikkit')
+  return { error: null, id: data.id, qr_token: data.qr_token }
+}
+
+// ── Guest: Slot Bookings (resource) ──────────────────────────────────────────
+
+export async function createSlotBookingGuest(fd: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Please sign in to book.' }
+
+  const resourceId  = fd.get('resource_id') as string
+  const date        = fd.get('date') as string
+  const startTime   = fd.get('start_time') as string
+  const endTime     = fd.get('end_time') as string
+  const durationMins = parseInt(fd.get('duration_mins') as string)
+  const totalPrice  = parseFloat(fd.get('total_price') as string) || 0
+
+  // Check for conflicts
+  const { data: conflict } = await (supabase as any)
+    .from('slot_bookings')
+    .select('id')
+    .eq('resource_id', resourceId)
+    .eq('date', date)
+    .eq('start_time', startTime)
+    .in('status', ['pending', 'confirmed'])
+    .maybeSingle()
+
+  if (conflict) return { error: 'This slot was just booked. Please choose another time.' }
+
+  const { error, data } = await (supabase as any)
+    .from('slot_bookings')
+    .insert({
+      resource_id:   resourceId,
+      user_id:       user.id,
+      date,
+      start_time:    startTime,
+      end_time:      endTime,
+      duration_mins: durationMins,
+      guest_count:   parseInt(fd.get('guest_count') as string) || 1,
+      total_price:   totalPrice,
+      notes:         (fd.get('notes') as string)?.trim() || null,
+    })
+    .select('id, qr_token')
+    .single()
+
+  if (error) return { error: error.message }
+  revalidatePath('/guest/my-tikkit')
+  return { error: null, id: data.id, qr_token: data.qr_token }
+}
+
+export async function cancelSlotBookingGuest(bookingId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await (supabase as any)
+    .from('slot_bookings')
+    .update({ status: 'cancelled' })
+    .eq('id', bookingId)
+    .eq('user_id', user.id)
+    .eq('status', 'pending')
+
+  revalidatePath('/guest/my-tikkit')
+  return { error: error?.message ?? null }
+}
+
+export async function cancelProgrammeRegistration(registrationId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const { error } = await (supabase as any)
+    .from('programme_registrations')
+    .update({ status: 'cancelled' })
+    .eq('id', registrationId)
+    .eq('user_id', user.id)
+    .eq('status', 'pending')
+
+  revalidatePath('/guest/my-tikkit')
+  return { error: error?.message ?? null }
+}
+
+// ── Venue OS: Enquiry Management ─────────────────────────────────────────────
+
+export async function markEnquiryRead(enquiryId: string) {
+  const { supabase, user } = await getAuthUser()
+  const venue = await getVenueForUser(supabase, user.id)
+  if (!venue) return { error: 'Venue not found' }
+
+  await (supabase as any)
+    .from('venue_enquiries')
+    .update({ status: 'read' })
+    .eq('id', enquiryId)
+    .eq('venue_id', venue.id)
+    .eq('status', 'new')
+
+  revalidatePath('/venue/os/enquiries')
+  return { error: null }
+}
+
+export async function replyToEnquiry(enquiryId: string, reply: string) {
+  const { supabase, user } = await getAuthUser()
+  const venue = await getVenueForUser(supabase, user.id)
+  if (!venue) return { error: 'Venue not found' }
+
+  const { error } = await (supabase as any)
+    .from('venue_enquiries')
+    .update({ reply: reply.trim(), status: 'replied', replied_at: new Date().toISOString() })
+    .eq('id', enquiryId)
+    .eq('venue_id', venue.id)
+
+  revalidatePath('/venue/os/enquiries')
+  return { error: error?.message ?? null }
+}
+
+export async function archiveEnquiry(enquiryId: string) {
+  const { supabase, user } = await getAuthUser()
+  const venue = await getVenueForUser(supabase, user.id)
+  if (!venue) return { error: 'Venue not found' }
+
+  await (supabase as any)
+    .from('venue_enquiries')
+    .update({ status: 'archived' })
+    .eq('id', enquiryId)
+    .eq('venue_id', venue.id)
+
+  revalidatePath('/venue/os/enquiries')
+  return { error: null }
+}
+
+export async function confirmSlotBookingVenue(bookingId: string) {
+  const { supabase, user } = await getAuthUser()
+  const venue = await getVenueForUser(supabase, user.id)
+  if (!venue) return { error: 'Venue not found' }
+
+  const { error } = await (supabase as any)
+    .from('slot_bookings')
+    .update({ status: 'confirmed' })
+    .eq('id', bookingId)
+
+  revalidatePath('/venue/os/enquiries')
+  return { error: error?.message ?? null }
+}
+
+export async function confirmProgrammeRegistration(regId: string) {
+  const { supabase, user } = await getAuthUser()
+  const venue = await getVenueForUser(supabase, user.id)
+  if (!venue) return { error: 'Venue not found' }
+
+  const { error } = await (supabase as any)
+    .from('programme_registrations')
+    .update({ status: 'confirmed' })
+    .eq('id', regId)
+
+  revalidatePath('/venue/os/enquiries')
+  return { error: error?.message ?? null }
+}
+
+// ── Public: Experiences for Guest Explore ────────────────────────────────────
+
+export async function getExperiencesForExplore(limit = 12) {
+  const supabase = await createClient()
+  const today = new Date().toISOString().slice(0, 10)
+  const in14days = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+
+  // Get active programmes that have upcoming instances
+  const { data: instances } = await (supabase as any)
+    .from('programme_instances')
+    .select('programme_id, date')
+    .gte('date', today)
+    .lte('date', in14days)
+    .eq('status', 'scheduled')
+    .order('date', { ascending: true })
+    .limit(50)
+
+  if (!instances || instances.length === 0) return []
+
+  const progIds = [...new Set((instances as any[]).map((i: any) => i.programme_id))] as string[]
+
+  const { data: programmes } = await (supabase as any)
+    .from('programmes')
+    .select('id, title, description, category, start_time, duration_mins, price, cover_image, tags, venue_id')
+    .in('id', progIds)
+    .eq('active', true)
+    .limit(limit)
+
+  if (!programmes || programmes.length === 0) return []
+
+  const venueIds = [...new Set((programmes as any[]).map((p: any) => p.venue_id))] as string[]
+
+  const { data: venues } = await (supabase as any)
+    .from('venues')
+    .select('id, name, slug, city, categories')
+    .in('id', venueIds)
+    .eq('active', true)
+
+  const venueMap: Record<string, any> = {}
+  for (const v of (venues ?? [])) venueMap[v.id] = v
+
+  const instanceMap: Record<string, string[]> = {}
+  for (const inst of instances) {
+    ;(instanceMap[inst.programme_id] ??= []).push(inst.date)
+  }
+
+  return (programmes as any[]).map((p: any) => ({
+    ...p,
+    venue: venueMap[p.venue_id] ?? null,
+    next_dates: (instanceMap[p.id] ?? []).slice(0, 3),
+  }))
+}

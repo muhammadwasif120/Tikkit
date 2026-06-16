@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
 import { toggleEventFavourite } from '@/app/actions/eventFavouriteActions'
+import { cancelProgrammeRegistration, cancelSlotBookingGuest } from '@/app/actions/venueActions'
 import { getCreditTier } from '@/lib/creditUtils'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
@@ -638,15 +639,19 @@ function FavCard({ event, onRemove }: { event: FavEvent; onRemove: (id: string) 
 }
 
 /* ─── Main ───────────────────────────────────────────────────────── */
-export default function MyTikkitClient({ registrations, guestName, creditScore, favourites: initialFavourites = [] }: {
+export default function MyTikkitClient({ registrations, guestName, creditScore, favourites: initialFavourites = [], programmeRegistrations = [], slotBookings = [] }: {
   registrations: Registration[]; guestName: string; creditScore: number
   favourites?: FavEvent[]
+  programmeRegistrations?: any[]
+  slotBookings?: any[]
 }) {
   const [payTarget, setPayTarget] = useState<Registration | null>(null)
   const [ticketTarget, setTicketTarget] = useState<Registration | null>(null)
   const [successMsg, setSuccessMsg] = useState(false)
-  const [tab, setTab] = useState<'upcoming' | 'past' | 'saved'>('upcoming')
+  const [tab, setTab] = useState<'upcoming' | 'past' | 'saved' | 'experiences'>('upcoming')
   const [favEvents, setFavEvents] = useState<FavEvent[]>(initialFavourites)
+  const [progRegs, setProgRegs] = useState<any[]>(programmeRegistrations)
+  const [slotBks, setSlotBks] = useState<any[]>(slotBookings)
 
   const upcoming = registrations.filter(r => r.event && new Date(r.event.date_start) >= new Date() && r.status !== 'rejected')
   const past = registrations.filter(r => r.event && new Date(r.event.date_start) < new Date())
@@ -696,9 +701,10 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 0, padding: '14px 16px 0' }}>
         {([
-          { key: 'upcoming', label: `Upcoming${upcoming.length > 0 ? ` (${upcoming.length})` : ''}` },
-          { key: 'past',     label: `Past${past.length > 0 ? ` (${past.length})` : ''}` },
-          { key: 'saved',    label: favEvents.length > 0 ? `❤️ Saved (${favEvents.length})` : '❤️ Saved' },
+          { key: 'upcoming',    label: `Upcoming${upcoming.length > 0 ? ` (${upcoming.length})` : ''}` },
+          { key: 'past',        label: `Past${past.length > 0 ? ` (${past.length})` : ''}` },
+          { key: 'experiences', label: `Exp${(progRegs.length + slotBks.length) > 0 ? ` (${progRegs.length + slotBks.length})` : ''}` },
+          { key: 'saved',       label: favEvents.length > 0 ? `❤️ (${favEvents.length})` : '❤️' },
         ] as const).map(({ key, label }) => (
           <button key={key} onClick={() => setTab(key)} className="mt-tab" style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: `2px solid ${tab === key ? 'var(--brand-blue)' : 'var(--guest-border)'}`, color: tab === key ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: 12, fontWeight: tab === key ? 700 : 500, transition: 'all 0.15s' }}>
             {label}
@@ -706,7 +712,79 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
         ))}
       </div>
 
+      {/* Experiences tab */}
+      {tab === 'experiences' && (
+        <div style={{ padding: '14px 16px 80px' }}>
+          {progRegs.length === 0 && slotBks.length === 0 ? (
+            <div style={{ padding: '64px 0', textAlign: 'center', animation: 'revealUp 0.3s ease' }}>
+              <Zap size={36} color="var(--text-muted)" style={{ marginBottom: 14, opacity: 0.4 }} />
+              <p style={{ color: 'var(--text-secondary)', fontSize: 14, fontWeight: 700, margin: '0 0 6px', fontFamily: 'var(--font-display)' }}>No experiences yet</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 20px' }}>Register for programmes or book spaces to see them here.</p>
+              <Link href="/venues" style={{ display: 'inline-block', padding: '10px 20px', borderRadius: 12, background: '#00D4AA', color: '#06080C', textDecoration: 'none', fontSize: 13, fontWeight: 700 }}>
+                Browse Venues
+              </Link>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {progRegs.map((r: any) => {
+                const prog  = r.programme
+                const inst  = r.instance
+                const venue = r.venue
+                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(r.qr_token)}&size=120x120&bgcolor=101620&color=00D4AA&margin=8`
+                const statusColor = r.status === 'confirmed' ? '#00D4AA' : r.status === 'pending' ? '#F6C90E' : '#FC8181'
+                return (
+                  <div key={r.id} style={{ background: 'var(--surface-card)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '16px 18px', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                    <img src={qrUrl} alt="QR" width={60} height={60} style={{ borderRadius: 8, flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{prog?.title ?? 'Programme'}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: statusColor, background: `${statusColor}18`, border: `1px solid ${statusColor}30`, borderRadius: 20, padding: '1px 7px' }}>{r.status}</span>
+                      </div>
+                      {inst?.date && <p style={{ margin: '0 0 2px', fontSize: 12, color: 'var(--text-muted)' }}>{new Date(inst.date + 'T00:00:00').toLocaleDateString('en-PK', { weekday: 'short', month: 'short', day: 'numeric' })} · {prog?.start_time?.slice(0,5)}</p>}
+                      {venue && <p style={{ margin: '0 0 2px', fontSize: 12, color: 'var(--text-muted)' }}>📍 {venue.name}</p>}
+                      {r.guest_count > 1 && <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)' }}>{r.guest_count} people</p>}
+                    </div>
+                    {r.status === 'pending' && (
+                      <button onClick={async () => { await cancelProgrammeRegistration(r.id); setProgRegs(p => p.filter(x => x.id !== r.id)) }}
+                        style={{ fontSize: 11, color: '#FC8181', background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+              {slotBks.map((b: any) => {
+                const resource = b.resource
+                const venue    = resource?.venue
+                const qrUrl    = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(b.qr_token)}&size=120x120&bgcolor=101620&color=7C3AED&margin=8`
+                const statusColor = b.status === 'confirmed' ? '#00D4AA' : b.status === 'pending' ? '#F6C90E' : '#FC8181'
+                return (
+                  <div key={b.id} style={{ background: 'var(--surface-card)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 18, padding: '16px 18px', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                    <img src={qrUrl} alt="QR" width={60} height={60} style={{ borderRadius: 8, flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--text-primary)' }}>{resource?.name ?? 'Space'}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: statusColor, background: `${statusColor}18`, border: `1px solid ${statusColor}30`, borderRadius: 20, padding: '1px 7px' }}>{b.status}</span>
+                      </div>
+                      <p style={{ margin: '0 0 2px', fontSize: 12, color: 'var(--text-muted)' }}>{new Date(b.date + 'T00:00:00').toLocaleDateString('en-PK', { weekday: 'short', month: 'short', day: 'numeric' })} · {b.start_time?.slice(0,5)} – {b.end_time?.slice(0,5)}</p>
+                      {venue && <p style={{ margin: 0, fontSize: 12, color: 'var(--text-muted)' }}>📍 {venue.name}</p>}
+                    </div>
+                    {b.status === 'pending' && (
+                      <button onClick={async () => { await cancelSlotBookingGuest(b.id); setSlotBks(p => p.filter((x: any) => x.id !== b.id)) }}
+                        style={{ fontSize: 11, color: '#FC8181', background: 'none', border: 'none', cursor: 'pointer', padding: 0, flexShrink: 0 }}>
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Cards */}
+      {tab !== 'experiences' && (
       <div style={{ padding: '14px 16px 0', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 12 }}>
         {tab === 'saved' ? (
           favEvents.length > 0
@@ -753,6 +831,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
           )
         }
       </div>
+      )}
       <div style={{ height: 20 }} />
 
       {/* QR Ticket popup */}

@@ -6,6 +6,17 @@ export default async function VenuePublicPage({ params }: { params: Promise<{ sl
   const { slug } = await params
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  let userProfile: { name?: string; phone?: string } | null = null
+  if (user) {
+    const { data: profile } = await (supabase as any)
+      .from('profiles')
+      .select('full_name, phone')
+      .eq('id', user.id)
+      .single()
+    if (profile) userProfile = { name: profile.full_name, phone: profile.phone }
+  }
+
   const { data: venue } = await (supabase as any)
     .from('venues')
     .select(`
@@ -62,6 +73,7 @@ export default async function VenuePublicPage({ params }: { params: Promise<{ sl
       programmes={programmes ?? []}
       resources={resources ?? []}
       upcomingInstances={upcomingInstances ?? []}
+      userProfile={userProfile}
     />
   )
 }

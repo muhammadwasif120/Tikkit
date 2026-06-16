@@ -93,64 +93,67 @@ export default function VenueBrowseClient({ venues }: { venues: Venue[] }) {
             <p style={{ color: C.muted, fontSize: 14 }}>No venues match your search.</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16, alignItems: 'stretch' }}>
             {filtered.map(v => {
               const activeProgs = (v.programmes ?? []).filter(p => p.active)
               const activeRes   = (v.resources  ?? []).filter(r => r.active)
               return (
-                <Link key={v.id} href={`/venue/${v.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                  <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, overflow: 'hidden', transition: 'border-color 0.15s, transform 0.15s' }}
+                <Link key={v.id} href={`/venue/${v.slug}`} style={{ textDecoration: 'none', color: 'inherit', display: 'flex' }}>
+                  <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: C.surface, border: `1px solid ${C.border}`, borderRadius: 18, overflow: 'hidden', transition: 'border-color 0.15s, transform 0.15s' }}
                     onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(0,212,170,0.3)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)' }}
                     onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.borderColor = C.border; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)' }}
                   >
-                    {/* Image placeholder */}
-                    <div style={{ height: 160, background: `linear-gradient(135deg, rgba(0,212,170,0.12), rgba(124,58,237,0.12))`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {/* Thumbnail — fixed height, always rendered */}
+                    <div style={{ height: 168, flexShrink: 0, background: `linear-gradient(135deg, rgba(0,212,170,0.12), rgba(124,58,237,0.12))`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                       {v.photos.length > 0
                         ? <img src={v.photos[0]} alt={v.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         : <MapPin size={32} color="rgba(0,212,170,0.3)" />
                       }
                     </div>
 
-                    <div style={{ padding: '18px 20px 20px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                        <h3 style={{ fontSize: 16, fontWeight: 800, margin: 0, color: '#fff', letterSpacing: '-0.2px' }}>{v.name}</h3>
-                      </div>
+                    {/* Body — grows to fill remaining height */}
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: '18px 20px 20px' }}>
+                      <h3 style={{ fontSize: 16, fontWeight: 800, margin: '0 0 6px', color: '#fff', letterSpacing: '-0.2px' }}>{v.name}</h3>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
                         <MapPin size={11} color={C.muted} />
                         <span style={{ fontSize: 12, color: C.muted }}>{v.city}</span>
                       </div>
 
-                      {v.categories.length > 0 && (
-                        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12 }}>
-                          {v.categories.slice(0, 3).map(cat => (
-                            <span key={cat} style={{ fontSize: 10, fontWeight: 600, color: C.emerald, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.15)', borderRadius: 20, padding: '1px 7px' }}>
-                              {CATEGORY_LABELS[cat] ?? cat}
-                            </span>
-                          ))}
+                      {/* Category pills — fixed row, always same height */}
+                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', marginBottom: 12, minHeight: 22 }}>
+                        {v.categories.slice(0, 3).map(cat => (
+                          <span key={cat} style={{ fontSize: 10, fontWeight: 600, color: C.emerald, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.15)', borderRadius: 20, padding: '2px 8px' }}>
+                            {CATEGORY_LABELS[cat] ?? cat}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Description — always 2-line reserved block */}
+                      <p style={{ fontSize: 12, color: C.muted, margin: '0 0 0', lineHeight: 1.55, flex: 1,
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+                        minHeight: '2.4em',
+                      }}>
+                        {v.description ?? ''}
+                      </p>
+
+                      {/* Stats — always pinned to bottom */}
+                      {(activeProgs.length > 0 || activeRes.length > 0) && (
+                        <div style={{ display: 'flex', gap: 12, marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                          {activeProgs.length > 0 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <Calendar size={12} color={C.violet} />
+                              <span style={{ fontSize: 11, color: C.muted }}>{activeProgs.length} programme{activeProgs.length !== 1 ? 's' : ''}</span>
+                            </div>
+                          )}
+                          {activeRes.length > 0 && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                              <Clock3 size={12} color={C.emerald} />
+                              <span style={{ fontSize: 11, color: C.muted }}>{activeRes.length} space{activeRes.length !== 1 ? 's' : ''}</span>
+                            </div>
+                          )}
                         </div>
                       )}
-
-                      {v.description && (
-                        <p style={{ fontSize: 12, color: C.muted, margin: '0 0 12px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                          {v.description}
-                        </p>
-                      )}
-
-                      <div style={{ display: 'flex', gap: 12 }}>
-                        {activeProgs.length > 0 && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Calendar size={12} color={C.violet} />
-                            <span style={{ fontSize: 11, color: C.muted }}>{activeProgs.length} programme{activeProgs.length !== 1 ? 's' : ''}</span>
-                          </div>
-                        )}
-                        {activeRes.length > 0 && (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <Clock3 size={12} color={C.emerald} />
-                            <span style={{ fontSize: 11, color: C.muted }}>{activeRes.length} bookable space{activeRes.length !== 1 ? 's' : ''}</span>
-                          </div>
-                        )}
-                      </div>
                     </div>
                   </div>
                 </Link>

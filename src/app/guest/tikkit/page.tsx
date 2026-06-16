@@ -10,7 +10,7 @@ async function TikkitData() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
 
-  const [profileRes, guestProfileRes, registrationsRes, favouriteIds] = await Promise.all([
+  const [profileRes, guestProfileRes, registrationsRes, favouriteIds, progRegsRes, slotBookingsRes] = await Promise.all([
     supabase.from('profiles').select('full_name').eq('id', user.id).single(),
     supabase.from('guest_profiles').select('credit_score').eq('id', user.id).maybeSingle(),
     supabase
@@ -23,6 +23,20 @@ async function TikkitData() {
       .not('status', 'eq', 'rejected')
       .order('created_at', { ascending: false }),
     getUserFavouriteEventIds(),
+    (supabase as any)
+      .from('programme_registrations')
+      .select('id, status, guest_count, total_price, qr_token, created_at, programme:programmes(title, start_time, duration_mins, price), instance:programme_instances(date), venue:venues(name, slug)')
+      .eq('user_id', user.id)
+      .not('status', 'eq', 'cancelled')
+      .order('created_at', { ascending: false })
+      .limit(20),
+    (supabase as any)
+      .from('slot_bookings')
+      .select('id, date, start_time, end_time, status, total_price, qr_token, created_at, resource:resources(name, resource_type, venue:venues(name, slug))')
+      .eq('user_id', user.id)
+      .not('status', 'in', '("cancelled","no_show")')
+      .order('created_at', { ascending: false })
+      .limit(20),
   ])
 
   // Fetch full event details for favourited events
@@ -82,6 +96,8 @@ async function TikkitData() {
       guestName={profileRes.data?.full_name ?? user.email ?? 'Guest'}
       creditScore={guestProfileRes.data?.credit_score ?? 0}
       favourites={favouriteEvents as any}
+      programmeRegistrations={progRegsRes.data ?? []}
+      slotBookings={slotBookingsRes.data ?? []}
     />
   )
 }
