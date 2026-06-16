@@ -192,7 +192,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 12,
   },
   backBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.border,
   },

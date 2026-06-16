@@ -315,7 +315,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border, padding: 14, gap: 8,
   },
   benefit: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 6 },
-  benefitIcon: { width: 36, height: 36, borderRadius: 18, alignItems: 'center', justifyContent: 'center' },
+  benefitIcon: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
   benefitTitle: { color: colors.textPrimary, fontSize: 13, fontFamily: 'DMSans_500Medium', marginBottom: 2 },
   benefitDesc: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular', lineHeight: 17 },
 

@@ -188,7 +188,7 @@ export default function GuestChatScreen() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={0}
       >
         {loading ? (
@@ -263,7 +263,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface,
   },
   backBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.border,
   },

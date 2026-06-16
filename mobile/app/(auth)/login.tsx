@@ -359,7 +359,7 @@ export default function AuthScreen() {
     return (
       <SafeAreaView style={a.root}>
         <StatusBar style="light" />
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <ScrollView
             contentContainerStyle={[a.scroll, { paddingBottom: insets.bottom + 32 }]}
             keyboardShouldPersistTaps="handled"
@@ -751,7 +751,7 @@ function AuthShell({
   return (
     <SafeAreaView style={a.root}>
       <StatusBar style="light" />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView
           contentContainerStyle={[a.scroll, { paddingBottom: insets.bottom + 32 }]}
           keyboardShouldPersistTaps="handled"

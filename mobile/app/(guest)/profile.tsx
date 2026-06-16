@@ -106,7 +106,7 @@ const mr = StyleSheet.create({
 /* ─── Delete confirm modal ─────────────────────────────────────────────── */
 function DeleteModal({ onClose, onConfirm, busy }: { onClose: () => void; onConfirm: () => void; busy: boolean }) {
   return (
-    <Modal visible animationType="fade" transparent onRequestClose={onClose}>
+    <Modal visible animationType="slide" transparent onRequestClose={onClose}>
       <Pressable style={dm.backdrop} onPress={busy ? undefined : onClose} />
       <View style={dm.box}>
         <Ionicons name="warning-outline" size={36} color={colors.error} />

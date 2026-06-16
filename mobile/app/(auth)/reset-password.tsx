@@ -42,7 +42,7 @@ export default function ResetPasswordScreen() {
   return (
     <SafeAreaView style={s.root}>
       <StatusBar style="light" />
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
 
         <View style={[s.content, { paddingBottom: insets.bottom + 32 }]}>
 

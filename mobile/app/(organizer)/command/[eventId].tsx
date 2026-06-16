@@ -241,7 +241,7 @@ export default function CommandEventScreen() {
       )}
 
       {tab === 'chat' && (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
           <ScrollView
             contentContainerStyle={s.chatList}
             showsVerticalScrollIndicator={false}
@@ -309,7 +309,7 @@ const s = StyleSheet.create({
 
   nav: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, gap: 12 },
   backBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -352,7 +352,7 @@ const s = StyleSheet.create({
   },
   attendeeTop: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 0 },
   attendeeAvatar: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: colors.blueSubtle, alignItems: 'center', justifyContent: 'center',
   },
   attendeeAvatarText: { color: colors.blue, fontSize: 14, fontFamily: 'Poppins_700Bold' },

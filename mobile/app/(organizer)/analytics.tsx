@@ -92,6 +92,10 @@ export default function AnalyticsScreen() {
             </LinearGradient>
             <Text style={s.emptyTitle}>No data yet</Text>
             <Text style={s.emptyBody}>Publish your first event to start seeing analytics</Text>
+            <TouchableOpacity style={s.emptyBtn} onPress={() => router.push('/(organizer)/events/new')} accessibilityLabel="Create your first event">
+              <Ionicons name="add" size={16} color={colors.white} />
+              <Text style={s.emptyBtnText}>Create Event</Text>
+            </TouchableOpacity>
           </View>
         ) : (
           <>
@@ -273,4 +277,10 @@ const s = StyleSheet.create({
     color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular',
     textAlign: 'center', maxWidth: 240, lineHeight: 20,
   },
+  emptyBtn: {
+    flexDirection: 'row', alignItems: 'center', gap: 6,
+    backgroundColor: colors.blue, borderRadius: radius.md,
+    paddingHorizontal: 20, paddingVertical: 10, marginTop: 6,
+  },
+  emptyBtnText: { color: colors.white, fontFamily: 'DMSans_500Medium', fontSize: 14, fontWeight: '700' },
 })

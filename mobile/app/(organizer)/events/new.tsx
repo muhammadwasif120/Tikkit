@@ -19,6 +19,14 @@ const REG_MODES: { value: RegMode; label: string; desc: string; icon: keyof type
   { value: 'invite_only',            label: 'Invite Only',  desc: 'You manually add guests',               icon: 'lock-closed-outline' },
 ]
 
+function validateDate(val: string): string | null {
+  if (!val) return null
+  if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(val)) return 'Use format YYYY-MM-DD HH:MM'
+  const d = new Date(val.replace(' ', 'T'))
+  if (isNaN(d.getTime())) return 'Invalid date or time'
+  return null
+}
+
 export default function NewEventScreen() {
   const router = useRouter()
 
@@ -36,11 +44,25 @@ export default function NewEventScreen() {
 
   const [loading,          setLoading]          = useState(false)
   const [error,            setError]            = useState<string | null>(null)
+  const [fieldErrors,      setFieldErrors]      = useState<Record<string, string>>({})
+
+  function setFieldError(field: string, msg: string | null) {
+    setFieldErrors(prev => {
+      const next = { ...prev }
+      if (msg) next[field] = msg; else delete next[field]
+      return next
+    })
+  }
 
   const handleSave = async () => {
     setError(null)
-    if (!title.trim()) return setError('Event title is required')
-    if (!dateStart) return setError('Start date and time is required')
+
+    const errs: Record<string, string> = {}
+    if (!title.trim()) errs.title = 'Event title is required'
+    if (!dateStart) errs.dateStart = 'Start date and time is required'
+    else { const e = validateDate(dateStart); if (e) errs.dateStart = e }
+    if (dateEnd) { const e = validateDate(dateEnd); if (e) errs.dateEnd = e }
+    if (Object.keys(errs).length) { setFieldErrors(errs); return }
 
     setLoading(true)
     try {
@@ -76,7 +98,7 @@ export default function NewEventScreen() {
 
       {/* Nav */}
       <View style={s.nav}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={s.backBtn} onPress={() => router.back()} accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={s.navTitle}>New Event</Text>
@@ -84,6 +106,7 @@ export default function NewEventScreen() {
           style={[s.saveBtn, loading && { opacity: 0.6 }]}
           onPress={handleSave}
           disabled={loading}
+          accessibilityLabel="Save event"
         >
           {loading
             ? <ActivityIndicator size="small" color={colors.white} />
@@ -92,7 +115,7 @@ export default function NewEventScreen() {
         </TouchableOpacity>
       </View>
 
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={s.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
           {error && (
@@ -105,8 +128,16 @@ export default function NewEventScreen() {
           {/* ── Basics ── */}
           <SectionLabel>Event Details</SectionLabel>
 
-          <Field label="Event Title *">
-            <TextInput style={s.input} value={title} onChangeText={setTitle} placeholder="e.g. Rooftop Night Karachi" placeholderTextColor={colors.textMuted} />
+          <Field label="Event Title *" error={fieldErrors.title}>
+            <TextInput
+              style={[s.input, fieldErrors.title && s.inputError]}
+              value={title}
+              onChangeText={t => { setTitle(t); if (fieldErrors.title) setFieldError('title', null) }}
+              onBlur={() => { if (!title.trim()) setFieldError('title', 'Event title is required') }}
+              placeholder="e.g. Rooftop Night Karachi"
+              placeholderTextColor={colors.textMuted}
+              accessibilityLabel="Event title"
+            />
           </Field>
 
           <Field label="Description">
@@ -119,33 +150,54 @@ export default function NewEventScreen() {
               multiline
               numberOfLines={4}
               textAlignVertical="top"
+              accessibilityLabel="Event description"
             />
           </Field>
 
           {/* ── Date & Time ── */}
           <SectionLabel>Date & Time</SectionLabel>
 
-          <Field label="Start Date & Time *" hint="Format: YYYY-MM-DD HH:MM">
-            <TextInput style={s.input} value={dateStart} onChangeText={setDateStart} placeholder="2025-12-31 20:00" placeholderTextColor={colors.textMuted} />
+          <Field label="Start Date & Time *" hint="YYYY-MM-DD HH:MM  e.g. 2025-12-31 20:00" error={fieldErrors.dateStart}>
+            <TextInput
+              style={[s.input, fieldErrors.dateStart && s.inputError]}
+              value={dateStart}
+              onChangeText={t => { setDateStart(t); if (fieldErrors.dateStart) setFieldError('dateStart', null) }}
+              onBlur={() => { if (dateStart) setFieldError('dateStart', validateDate(dateStart)) }}
+              placeholder="2025-12-31 20:00"
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              keyboardType="numbers-and-punctuation"
+              accessibilityLabel="Start date and time"
+            />
           </Field>
 
-          <Field label="End Date & Time (optional)" hint="Format: YYYY-MM-DD HH:MM">
-            <TextInput style={s.input} value={dateEnd} onChangeText={setDateEnd} placeholder="2026-01-01 02:00" placeholderTextColor={colors.textMuted} />
+          <Field label="End Date & Time (optional)" hint="YYYY-MM-DD HH:MM" error={fieldErrors.dateEnd}>
+            <TextInput
+              style={[s.input, fieldErrors.dateEnd && s.inputError]}
+              value={dateEnd}
+              onChangeText={t => { setDateEnd(t); if (fieldErrors.dateEnd) setFieldError('dateEnd', null) }}
+              onBlur={() => { if (dateEnd) setFieldError('dateEnd', validateDate(dateEnd)) }}
+              placeholder="2026-01-01 02:00"
+              placeholderTextColor={colors.textMuted}
+              autoCapitalize="none"
+              keyboardType="numbers-and-punctuation"
+              accessibilityLabel="End date and time"
+            />
           </Field>
 
           {/* ── Venue ── */}
           <SectionLabel>Venue</SectionLabel>
 
           <Field label="Venue Name">
-            <TextInput style={s.input} value={venueName} onChangeText={setVenueName} placeholder="e.g. DHA Rooftop" placeholderTextColor={colors.textMuted} />
+            <TextInput style={s.input} value={venueName} onChangeText={setVenueName} placeholder="e.g. DHA Rooftop" placeholderTextColor={colors.textMuted} accessibilityLabel="Venue name" />
           </Field>
 
           <Field label="Venue Address">
-            <TextInput style={s.input} value={venueAddress} onChangeText={setVenueAddress} placeholder="Full address" placeholderTextColor={colors.textMuted} />
+            <TextInput style={s.input} value={venueAddress} onChangeText={setVenueAddress} placeholder="Full address" placeholderTextColor={colors.textMuted} accessibilityLabel="Venue address" />
           </Field>
 
           <Field label="City">
-            <TextInput style={s.input} value={venueCity} onChangeText={setVenueCity} placeholder="e.g. Lahore" placeholderTextColor={colors.textMuted} />
+            <TextInput style={s.input} value={venueCity} onChangeText={setVenueCity} placeholder="e.g. Lahore" placeholderTextColor={colors.textMuted} accessibilityLabel="City" />
           </Field>
 
           {/* ── Capacity & Pricing ── */}
@@ -154,12 +206,12 @@ export default function NewEventScreen() {
           <View style={s.row}>
             <View style={{ flex: 1 }}>
               <Field label="Capacity">
-                <TextInput style={s.input} value={capacity} onChangeText={setCapacity} placeholder="100" placeholderTextColor={colors.textMuted} keyboardType="number-pad" />
+                <TextInput style={s.input} value={capacity} onChangeText={setCapacity} placeholder="100" placeholderTextColor={colors.textMuted} keyboardType="number-pad" accessibilityLabel="Capacity" />
               </Field>
             </View>
             <View style={{ flex: 1 }}>
               <Field label="Ticket Price (PKR)">
-                <TextInput style={s.input} value={ticketPrice} onChangeText={setTicketPrice} placeholder="0 = Free" placeholderTextColor={colors.textMuted} keyboardType="decimal-pad" />
+                <TextInput style={s.input} value={ticketPrice} onChangeText={setTicketPrice} placeholder="0 = Free" placeholderTextColor={colors.textMuted} keyboardType="decimal-pad" accessibilityLabel="Ticket price in PKR" />
               </Field>
             </View>
           </View>
@@ -173,6 +225,7 @@ export default function NewEventScreen() {
               style={[s.modeCard, regMode === m.value && s.modeCardActive]}
               onPress={() => setRegMode(m.value)}
               activeOpacity={0.75}
+              accessibilityLabel={`Registration mode: ${m.label}`}
             >
               <View style={[s.modeIcon, regMode === m.value && { backgroundColor: colors.blueSubtle }]}>
                 <Ionicons name={m.icon} size={18} color={regMode === m.value ? colors.blue : colors.textMuted} />
@@ -198,6 +251,7 @@ export default function NewEventScreen() {
               onValueChange={setPublishNow}
               trackColor={{ false: colors.surface2, true: colors.blueSubtle }}
               thumbColor={publishNow ? colors.blue : colors.textMuted}
+              accessibilityLabel="Publish immediately"
             />
           </View>
 
@@ -206,6 +260,7 @@ export default function NewEventScreen() {
             onPress={handleSave}
             disabled={loading}
             activeOpacity={0.85}
+            accessibilityLabel={publishNow ? 'Publish event' : 'Save as draft'}
           >
             {loading
               ? <ActivityIndicator color={colors.white} size="small" />
@@ -228,12 +283,13 @@ function SectionLabel({ children }: { children: string }) {
   return <Text style={s.sectionLabel}>{children}</Text>
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Field({ label, hint, error, children }: { label: string; hint?: string; error?: string; children: React.ReactNode }) {
   return (
     <View style={s.field}>
-      <Text style={s.fieldLabel}>{label}</Text>
+      <Text style={[s.fieldLabel, error ? { color: colors.error } : null]}>{label}</Text>
       {hint && <Text style={s.fieldHint}>{hint}</Text>}
       {children}
+      {error ? <Text style={s.fieldError}>{error}</Text> : null}
     </View>
   )
 }
@@ -246,7 +302,7 @@ const s = StyleSheet.create({
     paddingHorizontal: 16, paddingVertical: 12, gap: 12,
   },
   backBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
@@ -275,11 +331,13 @@ const s = StyleSheet.create({
   field: { marginBottom: 12 },
   fieldLabel: { color: colors.textSecondary, fontSize: 12, fontFamily: 'DMSans_500Medium', marginBottom: 4 },
   fieldHint: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular', marginBottom: 4 },
+  fieldError: { color: colors.error, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 4 },
   input: {
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 12,
     color: colors.textPrimary, fontSize: 14, fontFamily: 'DMSans_400Regular',
   },
+  inputError: { borderColor: colors.error, backgroundColor: colors.errorSubtle },
   multiline: { height: 100, paddingTop: 12 },
 
   row: { flexDirection: 'row', gap: 12 },

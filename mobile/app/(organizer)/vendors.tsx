@@ -404,7 +404,7 @@ export default function VendorsScreen() {
               {savingVendor ? <ActivityIndicator size="small" color={colors.white} /> : <Text style={s.saveBtnText}>Save</Text>}
             </TouchableOpacity>
           </View>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
             <ScrollView contentContainerStyle={s.modalContent} keyboardShouldPersistTaps="handled">
               <MField label="Vendor Name *" value={vName} onChange={setVName} placeholder="e.g. Sound Works" />
               <MField label="Category" value={vCategory} onChange={setVCategory} placeholder="e.g. Audio / Lighting / Catering" />
@@ -433,7 +433,7 @@ export default function VendorsScreen() {
               {savingInvoice ? <ActivityIndicator size="small" color={colors.white} /> : <Text style={s.saveBtnText}>Save</Text>}
             </TouchableOpacity>
           </View>
-          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
             <ScrollView contentContainerStyle={s.modalContent} keyboardShouldPersistTaps="handled">
               <MField label="Description" value={iDescription} onChange={setIDescription} placeholder="e.g. Sound system rental" />
               <MField label="Amount (PKR) *" value={iAmount} onChange={setIAmount} placeholder="0" keyboard="numeric" />
@@ -579,7 +579,7 @@ const s = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: colors.border,
   },
   closeBtn: {
-    width: 36, height: 36, borderRadius: 18,
+    width: 44, height: 44, borderRadius: 22,
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
