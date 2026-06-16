@@ -92,7 +92,7 @@ export default function VenuePublicClient({
         /* ── Hero ── */
         .vp-hero {
           position: relative;
-          height: 440px;
+          height: ${hasPhotos ? '440px' : '320px'};
           overflow: hidden;
         }
         .vp-hero-img {
@@ -120,8 +120,19 @@ export default function VenuePublicClient({
         /* Coloured glow if no photo */
         .vp-hero-glow {
           position: absolute; inset: 0;
-          background: radial-gradient(ellipse 80% 60% at 30% 50%, rgba(0,212,170,0.18) 0%, transparent 70%),
-                      radial-gradient(ellipse 60% 80% at 80% 30%, rgba(124,58,237,0.18) 0%, transparent 70%);
+          background:
+            radial-gradient(ellipse 70% 80% at 20% 60%, rgba(0,212,170,0.32) 0%, transparent 60%),
+            radial-gradient(ellipse 55% 70% at 85% 25%, rgba(124,58,237,0.3) 0%, transparent 55%),
+            radial-gradient(ellipse 40% 50% at 55% 80%, rgba(0,212,170,0.12) 0%, transparent 50%),
+            linear-gradient(135deg, #080E14 0%, #0A0C16 50%, #080E14 100%);
+        }
+        .vp-hero-grid {
+          position: absolute; inset: 0;
+          background-image:
+            linear-gradient(rgba(0,212,170,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,212,170,0.04) 1px, transparent 1px);
+          background-size: 40px 40px;
+          mask-image: radial-gradient(ellipse 90% 80% at 50% 50%, black 30%, transparent 80%);
         }
 
         .vp-hero-content {
@@ -484,7 +495,10 @@ export default function VenuePublicClient({
               className="vp-hero-img"
             />
           ) : (
-            <div className="vp-hero-glow" />
+            <>
+              <div className="vp-hero-glow" />
+              <div className="vp-hero-grid" />
+            </>
           )}
           <div className="vp-hero-noise" />
           <div className="vp-hero-gradient" />
