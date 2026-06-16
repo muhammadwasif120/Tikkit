@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react'
 import {
-  CalendarDays, QrCode, WifiOff, CreditCard, Store, BarChart2,
-  Leaf, CheckCircle, Signal, Heart, ChevronRight, Mountain,
-  BookOpen, Compass, Award, ArrowRight, Menu, X, Star, Sparkles,
+  CalendarDays, QrCode, WifiOff, CreditCard,
+  BarChart2, CheckCircle, Heart, ChevronRight,
+  Mountain, BookOpen, Compass, Award, ArrowRight,
+  Menu, X, Star, Sparkles, Leaf, MapPin, Users,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
@@ -42,41 +43,88 @@ function useCountUp(target: number, inView: boolean, duration = 1600) {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const features = [
-  { icon: CalendarDays, color: '#6B8F71', bg: 'rgba(107,143,113,0.12)', title: 'One Link. Done.',                  desc: 'Open, curated, or approval-based. Guests register, pay, and get their QR pass — all through a single link you share anywhere.' },
-  { icon: CheckCircle,  color: '#6B8F71', bg: 'rgba(107,143,113,0.12)', title: 'Attendance That Counts',           desc: 'Every scan creates a verified attendance record — the foundation for certificates, credentials, and community tracking.' },
-  { icon: WifiOff,      color: '#C2785C', bg: 'rgba(194,120,92,0.12)',  title: 'The Mountains Don\'t Have WiFi. That\'s Fine.', desc: 'Your check-in works without signal and syncs when you\'re back online. Built for retreats that go off the grid.' },
-  { icon: CreditCard,   color: '#C2785C', bg: 'rgba(194,120,92,0.12)',  title: 'No More Screenshot Chaos',         desc: 'JazzCash, EasyPaisa, bank transfer — all accepted, all tracked. Your dashboard is the only place you need to look.' },
-  { icon: Store,        color: '#6B8F71', bg: 'rgba(107,143,113,0.12)', title: 'Verified Partners, Not Blind Luck', desc: 'Find photographers, caterers, and venue partners with verified event histories. Tikkit vets them so you don\'t have to.' },
-  { icon: BarChart2,    color: '#C2785C', bg: 'rgba(194,120,92,0.12)',  title: 'Know Your Community',              desc: 'Who comes back. What they love. How the numbers move. Understanding your participants is how you grow them.' },
+  {
+    icon: CalendarDays,
+    color: '#6B8F71', bg: 'rgba(107,143,113,0.12)',
+    title: 'One Link. Every Location.',
+    desc: 'Open, curated, or approval-based registration. Share a single link — participants register, pay, and receive their TIKKIT X QR pass without a single DM from you.',
+  },
+  {
+    icon: MapPin,
+    color: '#C2785C', bg: 'rgba(194,120,92,0.12)',
+    title: 'Your Practice Travels With You',
+    desc: "Host in a borrowed studio, a mountain lodge, a client's garden, a rooftop in DHA. Pulse is tied to you — not to a fixed address. No permanent venue required.",
+  },
+  {
+    icon: WifiOff,
+    color: '#6B8F71', bg: 'rgba(107,143,113,0.12)',
+    title: 'The Mountains Don\'t Have WiFi. That\'s Fine.',
+    desc: 'QR check-in works completely offline. Download your list before you leave, scan on arrival, sync when you\'re back in range. Built for Murree, Hunza, Swat, and anywhere the signal drops.',
+  },
+  {
+    icon: CreditCard,
+    color: '#C2785C', bg: 'rgba(194,120,92,0.12)',
+    title: 'No More Screenshot Chaos',
+    desc: 'JazzCash, EasyPaisa, bank transfer — all accepted, all tracked automatically. Your dashboard knows who\'s paid. You don\'t have to.',
+  },
+  {
+    icon: CheckCircle,
+    color: '#6B8F71', bg: 'rgba(107,143,113,0.12)',
+    title: 'Attendance That Actually Means Something',
+    desc: 'Every scan creates a verified record — the foundation for certificates, CPD credentials, and community trust. Not a spreadsheet. Proof.',
+  },
+  {
+    icon: BarChart2,
+    color: '#C2785C', bg: 'rgba(194,120,92,0.12)',
+    title: 'Know Your Community',
+    desc: 'Who keeps coming back. What formats fill fastest. Where your people are. Understanding your participants is how you grow the practice you actually want.',
+  },
 ]
 
-const useCases = [
-  { icon: Mountain,  title: 'Yoga & Wellness Retreats',     desc: 'Multi-day retreats, dietary preferences, offline check-in for mountain venues. Everything a wellness host needs.' },
-  { icon: BookOpen,  title: 'Workshops & Masterclasses',    desc: 'Skills sessions, attendance records, the foundation for CPD certificates. Your knowledge deserves a proper home.' },
-  { icon: Compass,   title: 'Travel & Adventure Trips',     desc: 'Group trips, activity slots, participant tracking that works in the middle of nowhere. Your adventure, managed.' },
-  { icon: Award,     title: 'Professional Development',     desc: 'Training sessions, CPD tracking, verified records. The administrative backbone for serious learning.' },
+const practitioners = [
+  {
+    icon: Mountain,
+    title: 'The Retreat Facilitator',
+    desc: 'You curate multi-day experiences in rented venues — mountain lodges, farmhouses, borrowed studios. Pulse handles logistics so you can hold space instead of chasing confirmations.',
+  },
+  {
+    icon: Compass,
+    title: 'The Travelling Practitioner',
+    desc: "Islamabad this week, Murree next weekend, Karachi in a month. Your schedule moves. Your booking system should too — without rebuilding it from scratch every time.",
+  },
+  {
+    icon: BookOpen,
+    title: 'The Independent Teacher',
+    desc: 'You teach wherever the group gathers — a park, a studio you rent by the hour, a client\'s home. Pulse makes you look as established as any institution.',
+  },
+  {
+    icon: Award,
+    title: 'The Knowledge Creator',
+    desc: 'Workshops, masterclasses, CPD programmes. Your expertise is the product. Verified attendance records make your certificates worth something — and your participants know it.',
+  },
 ]
 
 const steps = [
-  { n: '1', title: 'Build the Space',    desc: 'Create your retreat in minutes. Set capacity, pricing, requirements. As open or as curated as you want.', color: '#6B8F71' },
-  { n: '2', title: 'Open the Door',      desc: 'Drop your link on Instagram or WhatsApp. Participants register, pay, and get their QR pass — no friction.', color: '#C2785C' },
-  { n: '3', title: 'Arrive. Breathe. Begin.', desc: 'Scan at the door. Your dashboard handles everything else. Review insights and grow your community after.', color: '#D4A574' },
+  { n: '1', title: 'Set Up Your Practice',  desc: 'Create your session in minutes. Set capacity, pricing, location, and requirements — as intimate or as open as you want.', color: '#6B8F71' },
+  { n: '2', title: 'Share One Link',         desc: 'Post it on Instagram or drop it in WhatsApp. Participants register, pay, and get their TIKKIT X pass — no follow-up needed.', color: '#C2785C' },
+  { n: '3', title: 'Arrive. Be Present.',    desc: 'Scan at the door. Your dashboard handles the rest. Review who came, grow the next session, build the community.', color: '#D4A574' },
 ]
 
-const experienceTypes = [
-  'Yoga Retreat', 'Sound Bath', 'Art Workshop', 'Nature Hike', 'Meditation', 'Pottery Class',
-  'Breathwork', 'Journaling', 'Cacao Ceremony', 'Masterclass', 'Book Club', 'Dance Workshop',
+const practitionerTypes = [
+  'Yoga Teacher', 'Sound Healer', 'Breathwork Facilitator', 'Retreat Host',
+  'Meditation Guide', 'Movement Coach', 'Art Therapist', 'Nature Guide',
+  'Cacao Ceremonialist', 'Workshop Facilitator', 'Life Coach', 'Nutritionist',
 ]
 
 const heroCards = [
-  { label: 'OPEN',     title: 'Mountain Yoga Retreat',   sub: 'Muree · 12 spots left', spots: 12, total: 24, color: '#6B8F71' },
-  { label: 'UPCOMING', title: 'Sound Bath & Cacao Circle', sub: 'DHA Karachi · Sat 5 Apr', spots: 18, total: 20, color: '#C2785C' },
+  { label: 'OPEN',     title: 'Mountain Yoga Retreat',    sub: 'Murree · 12 spots left',    spots: 12, total: 24, color: '#6B8F71' },
+  { label: 'UPCOMING', title: 'Sound Bath & Cacao Circle', sub: 'DHA Karachi · Sat 5 Apr',   spots: 18, total: 20, color: '#C2785C' },
 ]
 
 const testimonials = [
-  { name: 'Sana M.',    role: 'Retreat Host',        text: 'Registration used to take me hours. Now it literally handles itself.' },
-  { name: 'Zara K.',    role: 'Yoga Instructor',     text: 'My participants love getting the QR pass. It feels professional and legit.' },
-  { name: 'Bilal A.',   role: 'Workshop Facilitator', text: 'Finally someone built something for us. Not for conferences. For this.' },
+  { name: 'Sana M.',  role: 'Retreat Facilitator',    text: 'Registration used to take me hours. Now it literally handles itself. I actually showed up rested.' },
+  { name: 'Zara K.',  role: 'Yoga Teacher',            text: 'My participants love getting the pass on the TIKKIT X app. It feels real and professional — which it should, because what I do is.' },
+  { name: 'Bilal A.', role: 'Breathwork Facilitator',  text: 'Finally someone built for the practitioner, not just the venue. This is the difference.' },
 ]
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -104,11 +152,9 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        background: hovered ? 'rgba(107,143,113,0.04)' : '#fff',
+        background: hovered ? 'rgba(107,143,113,0.03)' : '#fff',
         border: `1px solid ${hovered ? feature.color + '50' : '#E8E2DA'}`,
-        borderRadius: 20,
-        padding: '28px 26px',
-        cursor: 'default',
+        borderRadius: 20, padding: '28px 26px', cursor: 'default',
         transition: 'all 0.35s ease',
         boxShadow: hovered ? `0 8px 32px rgba(107,143,113,0.12)` : '0 1px 4px rgba(0,0,0,0.04)',
         opacity: inView ? 1 : 0,
@@ -135,14 +181,10 @@ function HeroCard({ card, delay }: { card: typeof heroCards[0]; delay: number })
   const pct = Math.round(((card.total - card.spots) / card.total) * 100)
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.92)',
-      backdropFilter: 'blur(20px)',
-      border: '1px solid rgba(0,0,0,0.08)',
-      borderRadius: 20,
-      padding: '20px 22px',
+      background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(20px)',
+      border: '1px solid rgba(0,0,0,0.08)', borderRadius: 20, padding: '20px 22px',
       animation: `pulseFloat ${3.5 + delay}s ease-in-out ${delay}s infinite alternate`,
-      minWidth: 250,
-      boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
+      minWidth: 250, boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <div style={{ width: 7, height: 7, borderRadius: '50%', background: card.color, animation: 'pulseDot 2s ease infinite', flexShrink: 0 }} />
@@ -162,7 +204,7 @@ function HeroCard({ card, delay }: { card: typeof heroCards[0]; delay: number })
       <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
           <QrCode size={11} color="#9CA3AF" />
-          <span style={{ fontSize: 11, color: '#9CA3AF' }}>QR included</span>
+          <span style={{ fontSize: 11, color: '#9CA3AF' }}>TIKKIT X pass</span>
         </div>
         <span style={{ fontSize: 11, color: card.color, fontWeight: 600 }}>{card.spots} spots left</span>
       </div>
@@ -175,8 +217,7 @@ function TestimonialCard({ t, index }: { t: typeof testimonials[0]; index: numbe
   return (
     <div ref={ref} style={{
       background: '#fff', borderRadius: 20, padding: '28px 24px',
-      border: '1px solid #E8E2DA',
-      boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
+      border: '1px solid #E8E2DA', boxShadow: '0 2px 12px rgba(0,0,0,0.05)',
       opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(20px)',
       transition: `opacity 0.55s ease ${index * 0.12}s, transform 0.55s ease ${index * 0.12}s`,
     }}>
@@ -210,7 +251,7 @@ export default function PulsePage() {
     return () => window.removeEventListener('scroll', fn)
   }, [])
 
-  const marqueeItems = [...experienceTypes, ...experienceTypes]
+  const marqueeItems = [...practitionerTypes, ...practitionerTypes]
 
   return (
     <>
@@ -242,31 +283,22 @@ export default function PulsePage() {
           from { transform: translateY(0px); }
           to   { transform: translateY(-14px); }
         }
-
         @keyframes pulseMarquee {
           from { transform: translateX(0); }
           to   { transform: translateX(-50%); }
         }
-
         @keyframes pulseFadeUp {
           from { opacity: 0; transform: translateY(24px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes pulseDot {
           0%, 100% { transform: scale(1); opacity: 1; }
           50%       { transform: scale(1.4); opacity: 0.6; }
         }
-
         @keyframes pulseOrb {
           0%, 100% { transform: scale(1) translate(0, 0); }
           33%       { transform: scale(1.1) translate(3%, -2%); }
           66%       { transform: scale(0.95) translate(-2%, 3%); }
-        }
-
-        @keyframes pulseWave {
-          0%   { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
         }
 
         .pulse-nav-link {
@@ -311,7 +343,7 @@ export default function PulsePage() {
         }
         .pulse-marquee-track {
           display: flex; gap: 0;
-          animation: pulseMarquee 32s linear infinite;
+          animation: pulseMarquee 36s linear infinite;
           width: max-content;
         }
 
@@ -326,13 +358,13 @@ export default function PulsePage() {
           transform: translateY(-4px);
         }
 
-        .pulse-use-card {
+        .pulse-practitioner-card {
           background: #fff; border-radius: 20px; padding: 30px 26px;
           border: 1px solid #E8E2DA;
           transition: all 0.3s; cursor: default;
           box-shadow: 0 1px 4px rgba(0,0,0,0.03);
         }
-        .pulse-use-card:hover {
+        .pulse-practitioner-card:hover {
           border-color: #C5D9C8;
           box-shadow: 0 8px 28px rgba(107,143,113,0.1);
           transform: translateY(-3px);
@@ -358,23 +390,20 @@ export default function PulsePage() {
             <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 12px', borderRadius: 100, background: '#EDF2EE', color: '#6B8F71', letterSpacing: '0.08em', textTransform: 'uppercase' as const, border: '1px solid #C5D9C8' }}>Pulse</span>
           </div>
           <nav className="pulse-hide-mobile" style={{ display: 'flex', alignItems: 'center', gap: 36 }}>
-            {['Features', 'How It Works', 'Use Cases'].map(l => (
+            {['Features', 'How It Works', 'For Practitioners'].map(l => (
               <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="pulse-nav-link">{l}</a>
             ))}
           </nav>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <a href="mailto:pulse@tikkitx.com" className="pulse-btn-primary pulse-hide-mobile" style={{ padding: '11px 24px', fontSize: 13 }}>Start Hosting</a>
-            <button
-              onClick={() => setMenuOpen(v => !v)}
-              style={{ background: 'none', border: 'none', color: '#7A7A7A', cursor: 'pointer', padding: 8 }}
-            >
+            <button onClick={() => setMenuOpen(v => !v)} style={{ background: 'none', border: 'none', color: '#7A7A7A', cursor: 'pointer', padding: 8 }}>
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
         {menuOpen && (
           <div style={{ background: '#FAF8F5', borderTop: '1px solid #E8E2DA', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {['Features', 'How It Works', 'Use Cases'].map(l => (
+            {['Features', 'How It Works', 'For Practitioners'].map(l => (
               <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="pulse-nav-link" onClick={() => setMenuOpen(false)}>{l}</a>
             ))}
             <a href="mailto:pulse@tikkitx.com" className="pulse-btn-primary" style={{ justifyContent: 'center' }}>Start Hosting</a>
@@ -388,28 +417,26 @@ export default function PulsePage() {
         position: 'relative', overflow: 'hidden', paddingTop: 68,
         background: 'linear-gradient(160deg, #EDF2EE 0%, #FAF8F5 45%, #F5F0EB 100%)',
       }}>
-        {/* Animated orbs */}
         <div style={{ position: 'absolute', top: '8%', right: '12%', width: 500, height: 500, borderRadius: '50%', background: 'radial-gradient(circle, rgba(107,143,113,0.18) 0%, transparent 65%)', animation: 'pulseOrb 9s ease-in-out infinite', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: '15%', left: '5%', width: 350, height: 350, borderRadius: '50%', background: 'radial-gradient(circle, rgba(194,120,92,0.13) 0%, transparent 65%)', animation: 'pulseOrb 12s ease-in-out 3s infinite', pointerEvents: 'none' }} />
-        {/* Dot texture */}
         <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle, #6B8F71 1px, transparent 1px)', backgroundSize: '28px 28px', pointerEvents: 'none' }} />
 
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '80px 24px', display: 'flex', alignItems: 'center', gap: 64, width: '100%' }}>
           {/* Left */}
           <div style={{ flex: 1, animation: 'pulseFadeUp 0.7s ease both' }}>
             <div className="pulse-label">
-              <Leaf size={11} /> For Hosts Who Lead with Intention
+              <Leaf size={11} /> For the Practitioner. Not the Platform.
             </div>
             <h1 style={{
-              fontFamily: 'var(--font-display)', fontWeight: 300, lineHeight: 1.05,
+              fontFamily: 'var(--font-display)', fontWeight: 300, lineHeight: 1.08,
               fontSize: 'clamp(2.8rem, 7vw, 5.5rem)', color: '#2D2D2D',
-              letterSpacing: '-0.03em', marginBottom: 28,
+              letterSpacing: '-0.02em', marginBottom: 28,
             }}>
-              Experiences<br />
-              <span style={{ color: '#6B8F71', fontWeight: 700 }}>Worth Showing<br />Up For</span>
+              Your practice.<br />
+              <span style={{ color: '#6B8F71', fontWeight: 700 }}>Any room.<br />Every time.</span>
             </h1>
-            <p style={{ fontSize: 18, color: '#7A7A7A', lineHeight: 1.8, marginBottom: 40, maxWidth: 460 }}>
-              Your retreat shouldn&apos;t run on Instagram DMs and spreadsheet tabs. You built something worth showing up for — the admin should match.
+            <p style={{ fontSize: 18, color: '#7A7A7A', lineHeight: 1.8, marginBottom: 40, maxWidth: 480 }}>
+              You're not running a venue. You're running a practice — and it should travel as easily as you do. Pulse handles registration, payment, QR passes, and attendance so you can be fully present for the people who show up.
             </p>
             <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
               <a href="mailto:pulse@tikkitx.com" className="pulse-btn-primary" style={{ fontSize: 15, padding: '16px 36px' }}>
@@ -419,9 +446,8 @@ export default function PulsePage() {
                 See What's Possible
               </a>
             </div>
-            {/* Trust chips */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 36 }}>
-              {['Registration That Disappears', 'Works in the Mountains', 'Attendance That\'s Real', 'Built for Creators'].map(t => (
+              {['No permanent venue needed', 'Works without WiFi', 'Attendees get the TIKKIT X app', 'Built for practitioners'].map(t => (
                 <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#7A7A7A', padding: '5px 12px', borderRadius: 100, background: '#fff', border: '1px solid #E8E2DA', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                   <CheckCircle size={11} color="#6B8F71" /> {t}
                 </div>
@@ -432,7 +458,6 @@ export default function PulsePage() {
           {/* Right — floating cards */}
           <div className="pulse-hero-cards" style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: 16, animation: 'pulseFadeUp 0.7s ease 0.25s both' }}>
             {heroCards.map((card, i) => <HeroCard key={card.title} card={card} delay={i * 1.0} />)}
-            {/* Mini receipt card */}
             <div style={{
               background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(20px)',
               border: '1px solid rgba(0,0,0,0.07)', borderRadius: 20, padding: '18px 20px',
@@ -444,21 +469,21 @@ export default function PulsePage() {
                 <span style={{ fontSize: 12, fontWeight: 700, color: '#6B8F71' }}>Registration Confirmed</span>
               </div>
               <p style={{ fontSize: 13, fontWeight: 700, color: '#2D2D2D', marginBottom: 2 }}>Zara K. — Sound Bath</p>
-              <p style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 14 }}>Sat 5 Apr · 7:00 PM</p>
+              <p style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 14 }}>Sat 5 Apr · 7:00 PM · DHA Karachi</p>
               <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0', background: '#FAF8F5', borderRadius: 10, border: '1px solid #E8E2DA' }}>
                 <QrCode size={40} color="#6B8F71" opacity={0.7} />
               </div>
-              <p style={{ fontSize: 10, color: '#C5D9C8', textAlign: 'center', marginTop: 8 }}>Verified · Scan at entry</p>
+              <p style={{ fontSize: 10, color: '#C5D9C8', textAlign: 'center', marginTop: 8 }}>Verified · Scan at entry via TIKKIT X</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── EXPERIENCE MARQUEE ── */}
+      {/* ── PRACTITIONER MARQUEE ── */}
       <div style={{ background: '#EDF2EE', borderTop: '1px solid #C5D9C8', borderBottom: '1px solid #C5D9C8', padding: '16px 0' }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ padding: '0 32px', fontSize: 11, fontWeight: 700, color: '#6B8F71', letterSpacing: '0.1em', textTransform: 'uppercase' as const, flexShrink: 0, whiteSpace: 'nowrap' as const }}>
-            Experiences
+            Practitioners
           </div>
           <div className="pulse-marquee-wrap" style={{ flex: 1 }}>
             <div className="pulse-marquee-track">
@@ -476,7 +501,7 @@ export default function PulsePage() {
       {/* ── STATS ── */}
       <section ref={statsSection.ref} style={{ padding: '80px 24px', background: '#FAF8F5', borderBottom: '1px solid #E8E2DA' }}>
         <div style={{ maxWidth: 800, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 40 }}>
-          <StatItem target={300}  suffix="+"   label="Experiences hosted" />
+          <StatItem target={300}  suffix="+"   label="Sessions hosted" />
           <StatItem target={8000} suffix="+"   label="Participants registered" />
           <StatItem target={4}    suffix=".9★" label="Average host rating" />
         </div>
@@ -487,18 +512,18 @@ export default function PulsePage() {
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em', marginBottom: 16, lineHeight: 1.2 }}>
-              You Create the Space.<br />
-              <span style={{ color: '#6B8F71', fontWeight: 700 }}>The Admin Shouldn&apos;t Cost You Yourself.</span>
+              You Don't Need a Studio.<br />
+              <span style={{ color: '#6B8F71', fontWeight: 700 }}>You Need a System.</span>
             </h2>
-            <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 480, margin: '0 auto', lineHeight: 1.8 }}>
-              You became a host to hold space for people. Not to spend your evenings chasing payment screenshots.
+            <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 520, margin: '0 auto', lineHeight: 1.8 }}>
+              Practitioners who travel, teach across multiple spaces, and host in rented venues shouldn't have to rebuild their admin from scratch every time.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
             {[
-              { icon: CalendarDays, title: 'Signups in Five Different Places',  body: "Instagram DMs, WhatsApp voice notes, Google Forms, bank transfers. You have no idea who's confirmed until the morning of." },
-              { icon: Award,        title: 'They Showed Up. There\'s No Record.', body: 'Three days in the mountains. Something shifted. They leave with nothing official — no verified record, no certificate, no credential.' },
-              { icon: BarChart2,    title: 'Sunday Night, Reconciling Screenshots', body: 'Your retreat ended six hours ago. You\'re still matching payment screenshots to names in a Notes app. This is not the life.' },
+              { icon: CalendarDays, title: 'Signups in Five Different Places',      body: "Instagram DMs, WhatsApp voice notes, Google Forms, bank transfers. You have no idea who's confirmed until the morning of — and the morning of is when you need to be grounded, not chasing." },
+              { icon: Award,        title: 'They Showed Up. There\'s No Record.',   body: 'Three days in the mountains. Something real happened. They leave with nothing official — no verified record, no certificate, no proof it was real. Just a memory and a group chat.' },
+              { icon: BarChart2,    title: 'Sunday Night. Reconciling Screenshots.', body: "Your retreat ended six hours ago. You're matching payment screenshots to names in your Notes app. You became a practitioner for the work. This is not the work." },
             ].map(({ icon: Icon, title, body }) => {
               const { ref, inView } = useInView()
               return (
@@ -527,9 +552,11 @@ export default function PulsePage() {
           <div style={{ textAlign: 'center', marginBottom: 60 }}>
             <div className="pulse-label"><Sparkles size={11} /> Platform</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em', marginBottom: 16 }}>
-              The Platform That Gets Out of Your Way
+              The Infrastructure That Gets Out of Your Way
             </h2>
-            <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 460, margin: '0 auto', lineHeight: 1.8 }}>Everything that needs to run — running. So you can be present for the part that matters.</p>
+            <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 480, margin: '0 auto', lineHeight: 1.8 }}>
+              Everything that needs to run — running. So you can be present for the part that matters.
+            </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
             {features.map((f, i) => <FeatureCard key={f.title} feature={f} index={i} />)}
@@ -570,19 +597,24 @@ export default function PulsePage() {
         </div>
       </section>
 
-      {/* ── USE CASES ── */}
-      <section id="use-cases" style={{ padding: '96px 24px', background: '#F5F0EB', borderTop: '1px solid #E8E2DA' }}>
+      {/* ── FOR PRACTITIONERS ── */}
+      <section id="for-practitioners" style={{ padding: '96px 24px', background: '#F5F0EB', borderTop: '1px solid #E8E2DA' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div className="pulse-label"><Users size={11} /> Who It's For</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em' }}>
-              Whatever You Host. However You Host It.
+              The Practice Is You.<br />
+              <span style={{ fontWeight: 700, color: '#6B8F71' }}>Not the Room.</span>
             </h2>
+            <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 480, margin: '16px auto 0', lineHeight: 1.8 }}>
+              Pulse is for practitioners whose work doesn't live in one place — it lives in them.
+            </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: 16 }}>
-            {useCases.map(({ icon: Icon, title, desc }) => {
+            {practitioners.map(({ icon: Icon, title, desc }) => {
               const { ref, inView } = useInView()
               return (
-                <div key={title} ref={ref} className="pulse-use-card" style={{
+                <div key={title} ref={ref} className="pulse-practitioner-card" style={{
                   opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(20px)',
                   transition: 'opacity 0.5s ease, transform 0.5s ease',
                 }}>
@@ -604,7 +636,7 @@ export default function PulsePage() {
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
             <div className="pulse-label"><Star size={11} /> From Creators</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem,3.5vw,2.4rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em' }}>
-              From Hosts Who Did It the Hard Way First
+              From Practitioners Who Did It the Hard Way First
             </h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
@@ -613,12 +645,12 @@ export default function PulsePage() {
         </div>
       </section>
 
-      {/* ── COMMUNITY ── */}
+      {/* ── MANIFESTO ── */}
       <section style={{ padding: '80px 24px 96px', background: '#EDF2EE', borderTop: '1px solid #C5D9C8', textAlign: 'center' }}>
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
           <div className="pulse-label" style={{ margin: '0 auto 24px' }}><Heart size={11} /> A Movement, Not a Feature</div>
           <p style={{ fontSize: 18, color: '#5A5A5A', lineHeight: 1.9 }}>
-            Pulse exists for people who believe the best things still happen in a room. That presence is the point. That showing up — fully, physically, intentionally — is something worth making easier. We&apos;re building the infrastructure for that world.
+            Pulse exists for people who believe the best things still happen in a room — and that the practitioner standing in it deserves infrastructure as serious as their work. Presence is the point. Everything else should be invisible.
           </p>
           <div style={{ margin: '40px auto 0', width: 48, height: 2, background: 'linear-gradient(90deg, transparent, #6B8F71, transparent)' }} />
         </div>
@@ -628,58 +660,45 @@ export default function PulsePage() {
       <section style={{ padding: '96px 24px', background: '#F5F0EB', borderTop: '1px solid #E8E2DA' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 56 }}>
-            <div className="pulse-label"><Mountain size={11} /> Where Pakistan&apos;s Retreat Hosts Go</div>
+            <div className="pulse-label"><Mountain size={11} /> Where Pakistan&apos;s Practitioners Go</div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.6rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em', marginBottom: 16 }}>
               From the Mountains to the City.<br />
               <span style={{ fontWeight: 700, color: '#6B8F71' }}>Pulse Goes With You.</span>
             </h2>
             <p style={{ fontSize: 17, color: '#7A7A7A', maxWidth: 480, margin: '0 auto', lineHeight: 1.8 }}>
-              Retreat venues across Pakistan — from high-altitude mountain lodges to urban studio spaces — all run on Tikkit Pulse.
+              Practitioners across Pakistan — from mountain retreat hosts to urban studio teachers — host on Pulse because the admin works wherever they do.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 16 }}>
             {[
               {
-                place: 'Murree & Nathia Gali',
-                icon: '⛰️',
-                desc: 'Pakistan\'s most popular retreat corridor. 90 minutes from Islamabad. Misty pine forests, mountain lodges, and natural silence. Tikkit\'s offline check-in was built for venues here — where WiFi is a luxury and your guest list has to work without it.',
+                place: 'Murree & Nathia Gali', icon: '⛰️',
+                desc: "Pakistan's most popular retreat corridor. 90 minutes from Islamabad, misty pine forests, mountain lodges. Pulse's offline check-in was built for hosts here — where WiFi is a luxury and your guest list can't wait for signal.",
                 types: ['Yoga Retreats', 'Digital Detox', 'Women\'s Circles'],
               },
               {
-                place: 'Hunza Valley',
-                icon: '🏔️',
-                desc: 'For the retreat host who doesn\'t compromise on setting. Karakoram backdrop, glacial air, and a participant who flew in specifically to be here. Tikkit handles the logistics so you can focus on the experience.',
+                place: 'Hunza Valley', icon: '🏔️',
+                desc: "For the practitioner who doesn't compromise on setting. Karakoram backdrop, glacial air, and participants who flew in specifically to be here. Pulse handles the logistics so you can focus on what they came for.",
                 types: ['Multi-Day Retreats', 'Mindfulness Programmes', 'Adventure Wellness'],
               },
               {
-                place: 'Islamabad',
-                icon: '🌿',
-                desc: 'Pakistan\'s wellness capital. The Margalla Hills, urban studios, and farmhouse spaces within 45 minutes of the city. A concentrated audience of professionals who invest in experiences. Day retreats and weekend programmes thrive here.',
-                types: ['Sound Healing', 'Women\'s Wellness', 'Professional Development'],
+                place: 'Islamabad', icon: '🌿',
+                desc: "Pakistan's wellness capital. The Margalla Hills, rented studios, and farmhouse spaces within 45 minutes of the city. A concentrated audience of professionals who invest in experiences. Day sessions and weekend programmes thrive here.",
+                types: ['Sound Healing', 'Women\'s Wellness', 'Breathwork Circles'],
               },
               {
-                place: 'Lahore & Karachi',
-                icon: '🏙️',
-                desc: 'Urban wellness is growing fast. Boutique yoga studios, wellness workshops in private venues, sound baths in DHA. Pakistan\'s two largest cities have an audience that\'s ready — and Tikkit handles registration, payment, and check-in for every format.',
-                types: ['Studio Events', 'Workshops', 'Community Circles'],
+                place: 'Lahore & Karachi', icon: '🏙️',
+                desc: "Urban wellness is growing fast. Boutique sessions in private venues, sound baths in DHA, workshops in borrowed lofts. Pakistan's two largest cities have an audience that's ready — and Pulse handles everything so you just show up.",
+                types: ['Studio Sessions', 'Workshops', 'Community Circles'],
               },
             ].map(({ place, icon, desc, types }) => (
-              <div key={place} style={{
-                background: '#fff',
-                border: '1px solid #E8E2DA',
-                borderRadius: 20,
-                padding: '28px 24px',
-                boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-              }}>
+              <div key={place} style={{ background: '#fff', border: '1px solid #E8E2DA', borderRadius: 20, padding: '28px 24px', boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
                 <div style={{ fontSize: 28, marginBottom: 14 }}>{icon}</div>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: '#2D2D2D', marginBottom: 12 }}>{place}</h3>
                 <p style={{ fontSize: 14, color: '#7A7A7A', lineHeight: 1.75, marginBottom: 18 }}>{desc}</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
                   {types.map(type => (
-                    <span key={type} style={{
-                      fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100,
-                      background: '#EDF2EE', color: '#6B8F71', border: '1px solid #C5D9C8',
-                    }}>{type}</span>
+                    <span key={type} style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 100, background: '#EDF2EE', color: '#6B8F71', border: '1px solid #C5D9C8' }}>{type}</span>
                   ))}
                 </div>
               </div>
@@ -693,36 +712,33 @@ export default function PulsePage() {
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: 48 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.6rem,3.5vw,2.4rem)', fontWeight: 300, color: '#2D2D2D', letterSpacing: '-0.02em' }}>
-              Questions From Hosts
+              Questions From Practitioners
             </h2>
           </div>
           {[
             {
-              q: 'How do I accept payments for a retreat in Pakistan?',
-              a: 'Tikkit Pulse accepts JazzCash, EasyPaisa, bank transfer, and card — the payment methods your participants already use. All payments are tracked automatically, and payouts go to your registered account on a rolling schedule.',
+              q: 'Do my participants need to download anything?',
+              a: 'Yes — and that\'s a feature, not a limitation. Participants receive their QR pass inside the TIKKIT X app. It means they have their pass on their phone, you can scan them in instantly, and they stay connected to your future sessions in the app.',
             },
             {
               q: 'How does offline check-in work at mountain venues?',
-              a: 'Download your guest list before you leave for the venue. Tikkit works completely offline — scan participant QR codes without internet. All check-ins sync automatically when you\'re back in range. Built for Murree, Hunza, Swat, and anywhere else the signal drops.',
+              a: 'Download your participant list before you leave. Pulse works completely offline — scan QR codes without internet, all check-ins sync when you\'re back in range. Built for Murree, Hunza, Swat, and anywhere the signal goes.',
+            },
+            {
+              q: 'I don\'t have a fixed studio. Can I still use Pulse?',
+              a: "Absolutely — Pulse is designed for exactly this. You set the location per session, not per account. Host in a borrowed studio one week, a mountain lodge the next, a client's garden after that. The admin travels with you.",
             },
             {
               q: 'Can I issue certificates of attendance?',
-              a: 'Yes. Tikkit\'s verified attendance records confirm who actually attended your retreat or workshop. Export the attended list and generate certificates for those who checked in. Your certificates are based on real, verifiable data — not a spreadsheet guess.',
+              a: "Yes. Every scan creates a verified attendance record. Export the confirmed list and generate certificates for those who checked in — your certificates are based on real data, not a spreadsheet guess.",
             },
             {
-              q: 'How do I keep my retreat intimate and limit capacity?',
-              a: 'Set a maximum capacity when creating your event. Registration closes automatically when the limit is reached. You can also enable a waitlist so interested participants are notified if a spot opens up.',
-            },
-            {
-              q: 'What\'s the best way to manage retreat deposits and final payments?',
-              a: 'Create a deposit ticket (e.g., 30% of the total price) for the initial booking, then communicate the balance payment separately via your preferred method, or set up a second ticket type for the remainder. Full payment plan configuration is available on your event settings.',
+              q: 'How do I accept payments in Pakistan?',
+              a: 'JazzCash, EasyPaisa, bank transfer, and card — all accepted, all tracked automatically. Your dashboard knows who\'s paid. You don\'t have to.',
             },
           ].map(({ q, a }, i) => (
             <details key={i} style={{ borderBottom: '1px solid #E8E2DA', padding: '20px 0' }}>
-              <summary style={{
-                fontSize: 16, fontWeight: 700, color: '#2D2D2D', cursor: 'pointer',
-                listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
+              <summary style={{ fontSize: 16, fontWeight: 700, color: '#2D2D2D', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 {q}
                 <ChevronRight size={18} color="#6B8F71" style={{ flexShrink: 0, marginLeft: 16 }} />
               </summary>
@@ -734,14 +750,13 @@ export default function PulsePage() {
 
       {/* ── CTA ── */}
       <section style={{ padding: '96px 24px', background: 'linear-gradient(160deg, #6B8F71 0%, #5a7d60 100%)', position: 'relative', overflow: 'hidden' }}>
-        {/* Shimmer */}
         <div style={{ position: 'absolute', top: '-50%', left: '-20%', width: '60%', height: '200%', background: 'rgba(255,255,255,0.06)', transform: 'rotate(20deg)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 640, margin: '0 auto', textAlign: 'center', position: 'relative' }}>
           <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,3rem)', fontWeight: 300, color: '#fff', letterSpacing: '-0.025em', marginBottom: 20 }}>
-            Stop Running Your Retreat on Vibes and Voice Notes.
+            Stop Running Your Practice on Vibes and Voice Notes.
           </h2>
           <p style={{ fontSize: 18, color: 'rgba(255,255,255,0.75)', marginBottom: 44, lineHeight: 1.8 }}>
-            Your work deserves a platform that takes it as seriously as you do. Join hosts across Pakistan who made the switch.
+            Your work deserves infrastructure that takes it as seriously as you do. Join practitioners across Pakistan who made the switch.
           </p>
           <a href="mailto:pulse@tikkitx.com" className="pulse-btn-primary" style={{ fontSize: 16, padding: '18px 44px', background: '#C2785C', boxShadow: '0 6px 24px rgba(0,0,0,0.2)' }}>
             Start Hosting on Pulse <ChevronRight size={18} />
