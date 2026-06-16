@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import {
   LayoutDashboard, KanbanSquare, FileText, Settings,
-  ChevronRight, Zap, LogOut
+  ChevronRight, Zap, LogOut, Receipt, BarChart2, Package
 } from 'lucide-react'
 import { signOut } from '@/app/actions/guestProfileActions'
 
@@ -12,6 +12,9 @@ const NAV = [
   { label: 'Overview',  href: '/vendor/os',          icon: LayoutDashboard },
   { label: 'Deals',     href: '/vendor/os/deals',     icon: KanbanSquare    },
   { label: 'Invoices',  href: '/vendor/os/invoices',  icon: FileText        },
+  { label: 'Bills',     href: '/vendor/os/bills',     icon: Receipt         },
+  { label: 'Analytics', href: '/vendor/os/analytics', icon: BarChart2       },
+  { label: 'Inventory', href: '/vendor/os/inventory', icon: Package         },
   { label: 'Settings',  href: '/vendor/os/settings',  icon: Settings        },
 ]
 

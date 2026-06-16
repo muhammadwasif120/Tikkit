@@ -304,6 +304,123 @@ export async function confirmAdvancePayment(invoiceId: string) {
   revalidatePath(`/vendor/os/invoices/${invoiceId}`)
 }
 
+/* ─── Bills ──────────────────────────────────────────────────────────────── */
+export async function createBill(fd: FormData) {
+  const supabase = await createClient()
+  const vendorId = await getVendorId(supabase)
+  if (!vendorId) return { error: 'Vendor account not found' }
+
+  const lineItemsRaw = fd.get('line_items') as string
+  let line_items = []
+  try { line_items = JSON.parse(lineItemsRaw || '[]') } catch {}
+
+  const subtotal = line_items.reduce((s: number, i: any) => s + (Number(i.qty) * Number(i.unit_price)), 0)
+  const tax = Number(fd.get('tax') ?? 0)
+
+  const { data, error } = await (supabase as any).from('vendor_bills').insert({
+    vendor_id:      vendorId,
+    supplier_name:  (fd.get('supplier_name') as string).trim(),
+    supplier_email: (fd.get('supplier_email') as string)?.trim() || null,
+    supplier_phone: (fd.get('supplier_phone') as string)?.trim() || null,
+    bill_number:    (fd.get('bill_number') as string)?.trim() || null,
+    issue_date:     fd.get('issue_date') as string,
+    due_date:       (fd.get('due_date') as string) || null,
+    line_items,
+    subtotal,
+    tax,
+    total:          subtotal + tax,
+    notes:          (fd.get('notes') as string)?.trim() || null,
+  }).select('id').single()
+
+  if (error) return { error: error.message }
+  revalidatePath('/vendor/os/bills')
+  return { id: data.id }
+}
+
+export async function updateBillStatus(billId: string, status: string) {
+  const supabase = await createClient()
+  const vendorId = await getVendorId(supabase)
+  if (!vendorId) return { error: 'Vendor account not found' }
+
+  const patch: any = { status }
+  if (status === 'paid') patch.paid_at = new Date().toISOString()
+
+  const { error } = await (supabase as any).from('vendor_bills')
+    .update(patch).eq('id', billId).eq('vendor_id', vendorId)
+  if (error) return { error: error.message }
+  revalidatePath('/vendor/os/bills')
+  return { success: true }
+}
+
+export async function deleteBill(billId: string) {
+  const supabase = await createClient()
+  const vendorId = await getVendorId(supabase)
+  if (!vendorId) return { error: 'Vendor account not found' }
+
+  const { error } = await (supabase as any).from('vendor_bills')
+    .delete().eq('id', billId).eq('vendor_id', vendorId)
+  if (error) return { error: error.message }
+  revalidatePath('/vendor/os/bills')
+  return { success: true }
+}
+
+/* ─── Inventory ──────────────────────────────────────────────────────────── */
+export async function createInventoryItem(fd: FormData) {
+  const supabase = await createClient()
+  const vendorId = await getVendorId(supabase)
+  if (!vendorId) return { error: 'Vendor account not found' }
+
+  const { error } = await (supabase as any).from('vendor_inventory').insert({
+    vendor_id:          vendorId,
+    name:               (fd.get('name') as string).trim(),
+    category:           fd.get('category') as string,
+    quantity:           Number(fd.get('quantity') ?? 1),
+    available_quantity: Number(fd.get('available_quantity') ?? 1),
+    condition:          fd.get('condition') as string,
+    description:        (fd.get('description') as string)?.trim() || null,
+    purchase_value:     fd.get('purchase_value') ? Number(fd.get('purchase_value')) : null,
+    daily_hire_rate:    fd.get('daily_hire_rate') ? Number(fd.get('daily_hire_rate')) : null,
+    notes:              (fd.get('notes') as string)?.trim() || null,
+  })
+  if (error) return { error: error.message }
+  revalidatePath('/vendor/os/inventory')
+  return { success: true }
+}
+
+export async function updateInventoryItem(itemId: string, fd: FormData) {
+  const supabase = await createClient()
+  const vendorId = await getVendorId(supabase)
+  if (!vendorId) return { error: 'Vendor account not found' }
+
+  const { error } = await (supabase as any).from('vendor_inventory').update({
+    name:               (fd.get('name') as string).trim(),
+    category:           fd.get('category') as string,
+    quantity:           Number(fd.get('quantity') ?? 1),
+    available_quantity: Number(fd.get('available_quantity') ?? 1),
+    condition:          fd.get('condition') as string,
+    description:        (fd.get('description') as string)?.trim() || null,
+    purchase_value:     fd.get('purchase_value') ? Number(fd.get('purchase_value')) : null,
+    daily_hire_rate:    fd.get('daily_hire_rate') ? Number(fd.get('daily_hire_rate')) : null,
+    notes:              (fd.get('notes') as string)?.trim() || null,
+  }).eq('id', itemId).eq('vendor_id', vendorId)
+
+  if (error) return { error: error.message }
+  revalidatePath('/vendor/os/inventory')
+  return { success: true }
+}
+
+export async function deleteInventoryItem(itemId: string) {
+  const supabase = await createClient()
+  const vendorId = await getVendorId(supabase)
+  if (!vendorId) return { error: 'Vendor account not found' }
+
+  const { error } = await (supabase as any).from('vendor_inventory')
+    .delete().eq('id', itemId).eq('vendor_id', vendorId)
+  if (error) return { error: error.message }
+  revalidatePath('/vendor/os/inventory')
+  return { success: true }
+}
+
 /* ─── Vendor profile settings ────────────────────────────────────────────── */
 export async function updateVendorProfile(fd: FormData) {
   const supabase = await createClient()
