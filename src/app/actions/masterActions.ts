@@ -1059,3 +1059,164 @@ export async function deleteAdminCategory(id: string): Promise<{ error?: string 
     .eq('id', id)
   return error ? { error: error.message } : {}
 }
+
+// ─── Artist Management Admin ───────────────────────────────────────────────────
+
+export type MasterMgmtAccount = {
+  id: string
+  company_name: string
+  contact_email: string
+  contact_phone: string | null
+  website: string | null
+  account_status: string
+  user_id: string
+  artist_count: number
+  created_at: string
+}
+
+export type MasterArtist = {
+  id: string
+  name: string
+  slug: string
+  category: string
+  sub_tags: string[]
+  based_in_city: string | null
+  bio: string | null
+  profile_photo_url: string | null
+  availability_status: string
+  profile_status: string
+  verified: boolean
+  management_id: string
+  company_name: string
+  enquiry_count: number
+  created_at: string
+}
+
+export type MasterArtistEnquiry = {
+  id: string
+  artist_id: string
+  artist_name: string
+  management_id: string
+  company_name: string
+  organiser_id: string
+  event_name: string
+  event_type: string
+  event_date: string
+  event_city: string
+  estimated_attendance: string
+  performance_duration: string
+  status: string
+  expires_at: string
+  created_at: string
+}
+
+export async function getMasterManagementAccounts(): Promise<MasterMgmtAccount[]> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { data: accounts } = await (supabase as any)
+    .from('management_accounts')
+    .select('id, company_name, contact_email, contact_phone, website, account_status, user_id, created_at')
+    .order('created_at', { ascending: false })
+  if (!accounts) return []
+  const { data: artists } = await (supabase as any)
+    .from('artists')
+    .select('id, management_id')
+  const countMap: Record<string, number> = {}
+  for (const a of (artists ?? [])) {
+    countMap[a.management_id] = (countMap[a.management_id] ?? 0) + 1
+  }
+  return (accounts as any[]).map(a => ({ ...a, artist_count: countMap[a.id] ?? 0 }))
+}
+
+export async function getMasterArtists(): Promise<MasterArtist[]> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { data: artists } = await (supabase as any)
+    .from('artists')
+    .select('id, name, slug, category, sub_tags, based_in_city, bio, profile_photo_url, availability_status, profile_status, verified, management_id, created_at, management_accounts(company_name)')
+    .order('created_at', { ascending: false })
+  if (!artists) return []
+  const { data: enquiries } = await (supabase as any)
+    .from('artist_enquiries')
+    .select('id, artist_id, status')
+  const countMap: Record<string, number> = {}
+  for (const e of (enquiries ?? [])) {
+    if (['submitted', 'viewed'].includes(e.status)) {
+      countMap[e.artist_id] = (countMap[e.artist_id] ?? 0) + 1
+    }
+  }
+  return (artists as any[]).map(a => ({
+    ...a,
+    company_name: a.management_accounts?.company_name ?? '—',
+    enquiry_count: countMap[a.id] ?? 0,
+  }))
+}
+
+export async function getMasterArtistEnquiries(): Promise<MasterArtistEnquiry[]> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { data } = await (supabase as any)
+    .from('artist_enquiries')
+    .select('id, artist_id, management_id, organiser_id, event_name, event_type, event_date, event_city, estimated_attendance, performance_duration, status, expires_at, created_at, artists(name), management_accounts(company_name)')
+    .order('created_at', { ascending: false })
+  if (!data) return []
+  return (data as any[]).map(e => ({
+    ...e,
+    artist_name:  e.artists?.name ?? '—',
+    company_name: e.management_accounts?.company_name ?? '—',
+  }))
+}
+
+export async function setManagementAccountStatus(
+  mgmtId: string,
+  status: 'active' | 'suspended' | 'inactive',
+): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('management_accounts')
+    .update({ account_status: status })
+    .eq('id', mgmtId)
+  return error ? { error: error.message } : {}
+}
+
+export async function publishArtist(artistId: string): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('artists')
+    .update({ profile_status: 'published', verified: true })
+    .eq('id', artistId)
+  return error ? { error: error.message } : {}
+}
+
+export async function pauseArtist(artistId: string): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('artists')
+    .update({ profile_status: 'paused' })
+    .eq('id', artistId)
+  return error ? { error: error.message } : {}
+}
+
+export async function updateArtistAdminFields(
+  artistId: string,
+  fields: {
+    name?: string
+    slug?: string
+    category?: string
+    verified?: boolean
+    profile_status?: string
+    profile_photo_url?: string
+    availability_status?: string
+  },
+): Promise<{ error?: string }> {
+  await requireAdmin()
+  const supabase = createAdminClient()
+  const { error } = await (supabase as any)
+    .from('artists')
+    .update(fields)
+    .eq('id', artistId)
+  return error ? { error: error.message } : {}
+}

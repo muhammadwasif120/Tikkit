@@ -9,6 +9,7 @@ import {
   UserCheck, TrendingUp, ExternalLink, RefreshCw,
   Eye, Ban, AlertTriangle, Clock, ChevronRight, ChevronLeft, BarChart2, Star, Download,
   ShieldCheck, ShieldX, ZoomIn, Ticket, CreditCard, Tag, Plus, Pencil, Check,
+  Mic2, Globe, Music, Laugh, MapPin, Inbox as InboxIcon,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import {
@@ -20,9 +21,12 @@ import {
   getMasterAttendees, getMasterRegistrations, getMasterBadgeCounts,
   setEventAdminStatus, removeOrganizer, sendAdminEmailToOrganizer,
   getAdminCategories, createAdminCategory, updateAdminCategory, deleteAdminCategory,
+  getMasterManagementAccounts, getMasterArtists, getMasterArtistEnquiries,
+  setManagementAccountStatus, publishArtist, pauseArtist, updateArtistAdminFields,
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
   type PlatformAnalytics, type WaitlistEntry, type SupportQuery, type CnicVerification,
   type MasterAttendee, type MasterRegistration, type AdminCategory,
+  type MasterMgmtAccount, type MasterArtist, type MasterArtistEnquiry,
 } from '@/app/actions/masterActions'
 import {
   getAdminSupportConversations, getAdminSupportThread, sendAdminSupportReply,
@@ -31,7 +35,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'support' | 'analytics' | 'waitlist' | 'verifications' | 'attendees' | 'registrations' | 'categories'
+type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'support' | 'analytics' | 'waitlist' | 'verifications' | 'attendees' | 'registrations' | 'categories' | 'artists'
 type OrgStatus = 'active' | 'review' | 'suspended'
 type EventStatus = 'live' | 'draft' | 'flagged' | 'suspended' | 'ended'
 
@@ -1057,6 +1061,454 @@ function CategoryAdmin() {
   )
 }
 
+// ─── Artists View ────────────────────────────────────────────────────────────
+
+const CAT_LABEL: Record<string, string> = { dj: 'DJ', musician: 'Musician / Band', comedian: 'Comedian' }
+const CAT_ICON:  Record<string, React.ElementType> = { dj: Music, musician: Music, comedian: Laugh }
+const AVAIL_C:   Record<string, string> = { accepting: '#22C55E', limited: '#F59E0B', not_accepting: '#EF4444' }
+const AVAIL_L:   Record<string, string> = { accepting: 'Accepting', limited: 'Limited', not_accepting: 'Closed' }
+const PS_C:      Record<string, string> = { draft: '#6B7280', published: '#22C55E', paused: '#F59E0B' }
+const ENQ_C:     Record<string, string> = { submitted: '#EF4444', viewed: '#F59E0B', responded: '#1E5EFF', negotiating: '#8B5CF6', booked: '#22C55E', declined: '#4B5563', expired: '#4B5563' }
+
+const CYAN    = '#00E5FF'
+const MAGENTA = '#CC00FF'
+
+function ArtistsView({
+  mgmtAccounts, artists, enquiries,
+  onMgmtStatusChange, onPublish, onPause, onArtistUpdate,
+}: {
+  mgmtAccounts: MasterMgmtAccount[]
+  artists:      MasterArtist[]
+  enquiries:    MasterArtistEnquiry[]
+  onMgmtStatusChange: (id: string, s: 'active' | 'suspended' | 'inactive') => void
+  onPublish:    (id: string) => void
+  onPause:      (id: string) => void
+  onArtistUpdate: (id: string, fields: Record<string, any>) => void
+}) {
+  const [subTab, setSubTab] = useState<'artists' | 'management' | 'enquiries'>('artists')
+  const [artistFilter, setArtistFilter] = useState<'all' | 'draft' | 'published' | 'paused'>('all')
+  const [artistSearch, setArtistSearch] = useState('')
+  const [enqFilter, setEnqFilter]       = useState<'all' | 'submitted' | 'viewed' | 'responded' | 'booked' | 'declined'>('all')
+  const [editArtist, setEditArtist]     = useState<MasterArtist | null>(null)
+  const [editForm, setEditForm]         = useState<Record<string, any>>({})
+  const [saving, setSaving]             = useState(false)
+  const [saveOk, setSaveOk]             = useState(false)
+
+  const draftCount     = artists.filter(a => a.profile_status === 'draft').length
+  const publishedCount = artists.filter(a => a.profile_status === 'published').length
+  const openEnqCount   = enquiries.filter(e => ['submitted', 'viewed'].includes(e.status)).length
+
+  const filteredArtists = artists
+    .filter(a => artistFilter === 'all' || a.profile_status === artistFilter)
+    .filter(a => !artistSearch || a.name.toLowerCase().includes(artistSearch.toLowerCase()) || a.company_name.toLowerCase().includes(artistSearch.toLowerCase()) || (a.based_in_city ?? '').toLowerCase().includes(artistSearch.toLowerCase()))
+
+  const filteredEnqs = enquiries.filter(e => enqFilter === 'all' || e.status === enqFilter)
+
+  const openEdit = (a: MasterArtist) => {
+    setEditArtist(a)
+    setEditForm({ name: a.name, slug: a.slug, category: a.category, verified: a.verified, profile_status: a.profile_status, availability_status: a.availability_status, profile_photo_url: a.profile_photo_url ?? '' })
+    setSaveOk(false)
+  }
+
+  const handleSave = async () => {
+    if (!editArtist || saving) return
+    setSaving(true)
+    const { error } = await updateArtistAdminFields(editArtist.id, editForm)
+    setSaving(false)
+    if (!error) {
+      onArtistUpdate(editArtist.id, editForm)
+      setSaveOk(true)
+      setTimeout(() => setEditArtist(null), 1200)
+    }
+  }
+
+  const autoSlug = (n: string) => n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+
+  return (
+    <div>
+      {/* ── Stats row ── */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 24 }}>
+        {[
+          { label: 'Management Companies', value: mgmtAccounts.length,    color: CYAN,    icon: Globe    },
+          { label: 'Total Artists',         value: artists.length,         color: MAGENTA, icon: Mic2     },
+          { label: 'Pending Review',        value: draftCount,             color: '#F59E0B', icon: Clock  },
+          { label: 'Published',             value: publishedCount,         color: '#22C55E', icon: CheckCircle },
+        ].map(({ label, value, color, icon: Icon }) => (
+          <div key={label} className="ms-stat">
+            <div style={{ width: 32, height: 32, borderRadius: 9, background: `${color}14`, border: `1px solid ${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 14 }}>
+              <Icon size={14} color={color} />
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 800, color: '#F0F2FF', letterSpacing: '-1.5px', lineHeight: 1 }}>{value}</div>
+            <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 6 }}>{label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Sub-tab nav ── */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
+        {([
+          { key: 'artists',    label: `Artists (${artists.length})`              },
+          { key: 'management', label: `Management (${mgmtAccounts.length})`      },
+          { key: 'enquiries',  label: `Enquiries${openEnqCount > 0 ? ` · ${openEnqCount} open` : ''}` },
+        ] as const).map(t => (
+          <button key={t.key} onClick={() => setSubTab(t.key)}
+            style={{ padding: '7px 16px', borderRadius: 999, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-body)', border: subTab === t.key ? `1px solid ${CYAN}40` : '1px solid rgba(255,255,255,0.08)', background: subTab === t.key ? `${CYAN}12` : 'transparent', color: subTab === t.key ? CYAN : '#6B7280', transition: 'all 0.15s' }}>
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* ══ Artists sub-tab ══ */}
+      {subTab === 'artists' && (
+        <div className="ms-card">
+          <div className="ms-card-hdr">
+            <span className="ms-card-title">All Artists</span>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="ms-pills">
+                {(['all','draft','published','paused'] as const).map(f => (
+                  <button key={f} className={`ms-pill${artistFilter === f ? ' pa' : ''}`} onClick={() => setArtistFilter(f)}>
+                    {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                  </button>
+                ))}
+              </div>
+              <div className="ms-search" style={{ width: 200 }}>
+                <Search size={11} color="#4B5563" />
+                <input value={artistSearch} onChange={e => setArtistSearch(e.target.value)} placeholder="Name, company, city…" />
+              </div>
+            </div>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="ms-tbl" style={{ minWidth: 780 }}>
+              <thead>
+                <tr>
+                  <th>Artist</th>
+                  <th>Category</th>
+                  <th className="ms-hide">Management</th>
+                  <th className="ms-hide">City</th>
+                  <th>Status</th>
+                  <th>Availability</th>
+                  <th>Enquiries</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredArtists.length === 0 && (
+                  <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No artists found</td></tr>
+                )}
+                {filteredArtists.map(a => {
+                  const psColor = PS_C[a.profile_status] ?? '#6B7280'
+                  const avColor = AVAIL_C[a.availability_status] ?? '#6B7280'
+                  const CatIcon = CAT_ICON[a.category] ?? Mic2
+                  return (
+                    <tr key={a.id}>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          {a.profile_photo_url
+                            ? <img src={a.profile_photo_url} alt={a.name} style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
+                            : <div style={{ width: 32, height: 32, borderRadius: 8, background: `${CYAN}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}><Mic2 size={14} color={CYAN} /></div>
+                          }
+                          <div>
+                            <div style={{ fontWeight: 600, color: '#F0F2FF', fontSize: 'var(--fs-base)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                              {a.name}
+                              {a.verified && <ShieldCheck size={12} color={CYAN} />}
+                            </div>
+                            <div style={{ fontSize: 11, color: '#4B5563', fontFamily: 'monospace' }}>/{a.slug}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <CatIcon size={12} color={CYAN} />
+                          <span style={{ fontSize: 12, color: '#9CA3AF' }}>{CAT_LABEL[a.category] ?? a.category}</span>
+                        </div>
+                      </td>
+                      <td className="ms-hide" style={{ fontSize: 12, color: '#9CA3AF' }}>{a.company_name}</td>
+                      <td className="ms-hide">
+                        {a.based_in_city && (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: '#6B7280' }}>
+                            <MapPin size={10} /> {a.based_in_city}
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: `${psColor}18`, border: `1px solid ${psColor}30`, color: psColor }}>
+                          {a.profile_status.charAt(0).toUpperCase() + a.profile_status.slice(1)}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                          <div style={{ width: 6, height: 6, borderRadius: 3, background: avColor }} />
+                          <span style={{ fontSize: 11, color: avColor }}>{AVAIL_L[a.availability_status] ?? a.availability_status}</span>
+                        </div>
+                      </td>
+                      <td>
+                        {a.enquiry_count > 0
+                          ? <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: `${MAGENTA}18`, border: `1px solid ${MAGENTA}30`, color: MAGENTA }}>{a.enquiry_count} open</span>
+                          : <span style={{ color: '#374151', fontSize: 11 }}>—</span>
+                        }
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          {a.profile_status === 'draft' && (
+                            <button onClick={() => onPublish(a.id)} style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 7, background: `${CYAN}14`, border: `1px solid ${CYAN}30`, color: CYAN, cursor: 'pointer' }}>
+                              Publish
+                            </button>
+                          )}
+                          {a.profile_status === 'published' && (
+                            <button onClick={() => onPause(a.id)} style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 7, background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.28)', color: '#F59E0B', cursor: 'pointer' }}>
+                              Pause
+                            </button>
+                          )}
+                          {a.profile_status === 'paused' && (
+                            <button onClick={() => onPublish(a.id)} style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 7, background: `${CYAN}14`, border: `1px solid ${CYAN}30`, color: CYAN, cursor: 'pointer' }}>
+                              Re-publish
+                            </button>
+                          )}
+                          <button onClick={() => openEdit(a)} style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 7, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#9CA3AF', cursor: 'pointer' }}>
+                            Edit
+                          </button>
+                          <Link href={`/artists/${a.slug}`} target="_blank" style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 7, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', color: '#4B5563', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <ExternalLink size={10} />
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ══ Management sub-tab ══ */}
+      {subTab === 'management' && (
+        <div className="ms-card">
+          <div className="ms-card-hdr">
+            <span className="ms-card-title">Management Companies</span>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="ms-tbl" style={{ minWidth: 640 }}>
+              <thead>
+                <tr>
+                  <th>Company</th>
+                  <th>Contact</th>
+                  <th className="ms-hide">Website</th>
+                  <th>Artists</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {mgmtAccounts.length === 0 && (
+                  <tr><td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No management accounts yet</td></tr>
+                )}
+                {mgmtAccounts.map(m => {
+                  const stC = m.account_status === 'active' ? '#22C55E' : m.account_status === 'suspended' ? '#EF4444' : '#6B7280'
+                  return (
+                    <tr key={m.id}>
+                      <td>
+                        <div style={{ fontWeight: 600, color: '#F0F2FF', fontSize: 'var(--fs-base)' }}>{m.company_name}</div>
+                        <div style={{ fontSize: 11, color: '#4B5563', fontFamily: 'monospace' }}>{m.id.slice(0, 8)}…</div>
+                      </td>
+                      <td>
+                        <div style={{ fontSize: 12, color: '#D1D5DB' }}>{m.contact_email}</div>
+                        {m.contact_phone && <div style={{ fontSize: 11, color: '#6B7280' }}>{m.contact_phone}</div>}
+                      </td>
+                      <td className="ms-hide">
+                        {m.website
+                          ? <a href={m.website} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: CYAN, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}><Globe size={11} /> {m.website.replace(/^https?:\/\//, '')}</a>
+                          : <span style={{ color: '#374151', fontSize: 12 }}>—</span>
+                        }
+                      </td>
+                      <td style={{ fontSize: 12, color: '#9CA3AF' }}>
+                        {m.artist_count} artist{m.artist_count !== 1 ? 's' : ''}
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: `${stC}18`, border: `1px solid ${stC}30`, color: stC }}>
+                          {m.account_status.charAt(0).toUpperCase() + m.account_status.slice(1)}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          {m.account_status !== 'active' && (
+                            <button onClick={() => onMgmtStatusChange(m.id, 'active')} style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 7, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', color: '#22C55E', cursor: 'pointer' }}>Activate</button>
+                          )}
+                          {m.account_status !== 'suspended' && (
+                            <button onClick={() => onMgmtStatusChange(m.id, 'suspended')} style={{ fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 7, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', cursor: 'pointer' }}>Suspend</button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ══ Enquiries sub-tab ══ */}
+      {subTab === 'enquiries' && (
+        <div className="ms-card">
+          <div className="ms-card-hdr">
+            <span className="ms-card-title">All Artist Enquiries</span>
+            <div className="ms-pills">
+              {(['all','submitted','viewed','responded','booked','declined'] as const).map(f => (
+                <button key={f} className={`ms-pill${enqFilter === f ? ' pa' : ''}`} onClick={() => setEnqFilter(f)}>
+                  {f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="ms-tbl" style={{ minWidth: 760 }}>
+              <thead>
+                <tr>
+                  <th>Artist</th>
+                  <th>Event</th>
+                  <th className="ms-hide">Management</th>
+                  <th className="ms-hide">Date</th>
+                  <th>City</th>
+                  <th>Status</th>
+                  <th className="ms-hide">Submitted</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredEnqs.length === 0 && (
+                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No enquiries found</td></tr>
+                )}
+                {filteredEnqs.map(e => {
+                  const eC = ENQ_C[e.status] ?? '#6B7280'
+                  return (
+                    <tr key={e.id}>
+                      <td style={{ fontWeight: 600, color: '#F0F2FF', fontSize: 'var(--fs-base)' }}>{e.artist_name}</td>
+                      <td>
+                        <div style={{ fontWeight: 500, color: '#D1D5DB', fontSize: 'var(--fs-sm)' }}>{e.event_name}</div>
+                        <div style={{ fontSize: 11, color: '#6B7280' }}>{e.event_type}</div>
+                      </td>
+                      <td className="ms-hide" style={{ fontSize: 12, color: '#9CA3AF' }}>{e.company_name}</td>
+                      <td className="ms-hide" style={{ fontSize: 12, color: '#9CA3AF' }}>{e.event_date ? fmtDate(e.event_date) : '—'}</td>
+                      <td style={{ fontSize: 12, color: '#9CA3AF' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <MapPin size={10} /> {e.event_city}
+                        </div>
+                      </td>
+                      <td>
+                        <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 999, background: `${eC}18`, border: `1px solid ${eC}30`, color: eC }}>
+                          {e.status.charAt(0).toUpperCase() + e.status.slice(1)}
+                        </span>
+                      </td>
+                      <td className="ms-hide" style={{ fontSize: 11, color: '#6B7280' }}>{fmtDate(e.created_at)}</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ── Artist edit panel ── */}
+      {editArtist && (
+        <div className="ms-overlay">
+          <div className="ms-panel" style={{ width: 460 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF' }}>Curate Artist Profile</div>
+                <div style={{ fontSize: 11, color: '#4B5563', marginTop: 2 }}>Admin-only fields — management cannot change these</div>
+              </div>
+              <button onClick={() => setEditArtist(null)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6B7280' }}>
+                <X size={13} />
+              </button>
+            </div>
+            <div style={{ padding: '20px 24px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {[
+                { label: 'NAME', key: 'name', type: 'text', onChangeExtra: (v: string) => setEditForm(f => ({ ...f, slug: autoSlug(v) })) },
+                { label: 'SLUG', key: 'slug', type: 'text', mono: true },
+                { label: 'PROFILE PHOTO URL', key: 'profile_photo_url', type: 'text' },
+              ].map(({ label, key, type, mono, onChangeExtra }) => (
+                <div key={key}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#4B5563', letterSpacing: '0.1em', marginBottom: 5, fontFamily: 'var(--font-body)' }}>{label}</div>
+                  <input
+                    type={type}
+                    value={editForm[key] ?? ''}
+                    onChange={e => { setEditForm(f => ({ ...f, [key]: e.target.value })); onChangeExtra?.(e.target.value) }}
+                    className="ms-input"
+                    style={mono ? { fontFamily: 'monospace' } : undefined}
+                  />
+                </div>
+              ))}
+
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#4B5563', letterSpacing: '0.1em', marginBottom: 8, fontFamily: 'var(--font-body)' }}>CATEGORY</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {(['dj','musician','comedian'] as const).map(c => (
+                    <button key={c} onClick={() => setEditForm(f => ({ ...f, category: c }))}
+                      style={{ flex: 1, padding: '8px 0', borderRadius: 9, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: editForm.category === c ? `1px solid ${CYAN}50` : '1px solid rgba(255,255,255,0.08)', background: editForm.category === c ? `${CYAN}12` : 'rgba(255,255,255,0.03)', color: editForm.category === c ? CYAN : '#6B7280' }}>
+                      {CAT_LABEL[c]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#4B5563', letterSpacing: '0.1em', marginBottom: 8, fontFamily: 'var(--font-body)' }}>PROFILE STATUS</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {(['draft','published','paused'] as const).map(s => {
+                    const c = PS_C[s]
+                    return (
+                      <button key={s} onClick={() => setEditForm(f => ({ ...f, profile_status: s }))}
+                        style={{ flex: 1, padding: '8px 0', borderRadius: 9, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: editForm.profile_status === s ? `1px solid ${c}50` : '1px solid rgba(255,255,255,0.08)', background: editForm.profile_status === s ? `${c}12` : 'rgba(255,255,255,0.03)', color: editForm.profile_status === s ? c : '#6B7280' }}>
+                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#4B5563', letterSpacing: '0.1em', marginBottom: 8, fontFamily: 'var(--font-body)' }}>AVAILABILITY</div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {(['accepting','limited','not_accepting'] as const).map(s => {
+                    const c = AVAIL_C[s]
+                    return (
+                      <button key={s} onClick={() => setEditForm(f => ({ ...f, availability_status: s }))}
+                        style={{ flex: 1, padding: '8px 0', borderRadius: 9, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: editForm.availability_status === s ? `1px solid ${c}50` : '1px solid rgba(255,255,255,0.08)', background: editForm.availability_status === s ? `${c}12` : 'rgba(255,255,255,0.03)', color: editForm.availability_status === s ? c : '#6B7280' }}>
+                        {AVAIL_L[s]}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderRadius: 10, background: editForm.verified ? `${CYAN}08` : 'rgba(255,255,255,0.03)', border: `1px solid ${editForm.verified ? CYAN + '25' : 'rgba(255,255,255,0.08)'}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <ShieldCheck size={14} color={editForm.verified ? CYAN : '#4B5563'} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: editForm.verified ? CYAN : '#6B7280', fontFamily: 'var(--font-body)' }}>Verified Badge</span>
+                </div>
+                <button onClick={() => setEditForm(f => ({ ...f, verified: !f.verified }))}
+                  style={{ width: 40, height: 22, borderRadius: 11, background: editForm.verified ? CYAN : 'rgba(255,255,255,0.08)', border: 'none', cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', top: 3, left: editForm.verified ? 21 : 3, width: 16, height: 16, borderRadius: 8, background: 'white', transition: 'left 0.2s' }} />
+                </button>
+              </div>
+            </div>
+            <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 10 }}>
+              <button onClick={handleSave} disabled={saving || saveOk}
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: saveOk ? 'rgba(34,197,94,0.15)' : `linear-gradient(135deg, ${CYAN}cc, ${MAGENTA}cc)`, border: saveOk ? '1px solid rgba(34,197,94,0.35)' : 'none', color: saveOk ? '#22C55E' : '#050508', borderRadius: 10, padding: '10px', fontSize: 'var(--fs-base)', fontWeight: 800, fontFamily: 'var(--font-display)', cursor: saving || saveOk ? 'default' : 'pointer', opacity: saving ? 0.6 : 1, transition: 'all 0.3s' }}>
+                {saveOk ? <><CheckCircle size={13} /> Saved!</> : saving ? 'Saving…' : <><Check size={13} /> Save Changes</>}
+              </button>
+              <button onClick={() => setEditArtist(null)} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', borderRadius: 10, padding: '10px 16px', fontSize: 'var(--fs-base)', fontWeight: 600, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Master Dashboard ─────────────────────────────────────────────────────────
 
 export default function MasterPage() {
@@ -1135,6 +1587,12 @@ export default function MasterPage() {
   const [attendeeSearch, setAttendeeSearch] = useState('')
   const [attendeeFilter, setAttendeeFilter] = useState<'all' | 'verified' | 'unverified'>('all')
 
+  // Artists state
+  const [mgmtAccounts, setMgmtAccounts]   = useState<MasterMgmtAccount[]>([])
+  const [masterArtists, setMasterArtists] = useState<MasterArtist[]>([])
+  const [artistEnqs, setArtistEnqs]       = useState<MasterArtistEnquiry[]>([])
+  const [artistsLoaded, setArtistsLoaded] = useState(false)
+
   // Registrations state
   const [registrations, setRegistrations] = useState<MasterRegistration[]>([])
   const [regsLoading, setRegsLoading] = useState(false)
@@ -1143,6 +1601,14 @@ export default function MasterPage() {
   const [regStatusFilter, setRegStatusFilter] = useState<'all' | 'pending' | 'approved' | 'payment_pending' | 'checked_in'>('all')
   const [regPaymentFilter, setRegPaymentFilter] = useState<'all' | 'submitted' | 'confirmed' | 'none'>('all')
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (tab !== 'artists') return
+    if (artistsLoaded) return
+    Promise.all([getMasterManagementAccounts(), getMasterArtists(), getMasterArtistEnquiries()])
+      .then(([accts, arts, enqs]) => { setMgmtAccounts(accts); setMasterArtists(arts); setArtistEnqs(enqs) })
+      .finally(() => setArtistsLoaded(true))
+  }, [tab, artistsLoaded])
 
   useEffect(() => {
     if (tab !== 'waitlist') return
@@ -1308,12 +1774,14 @@ export default function MasterPage() {
     { id: 'waitlist'       as Tab, icon: Star,            label: 'Waitlist',           badge: waitlist.length > 0 ? waitlist.length : undefined },
     { id: 'verifications'  as Tab, icon: ShieldCheck,     label: 'Verifications',      badge: pendingCnicCount > 0 ? pendingCnicCount : undefined },
     { id: 'categories'     as Tab, icon: Tag,             label: 'Categories'          },
+    { id: 'artists'        as Tab, icon: Mic2,            label: 'Artists',            badge: masterArtists.filter(a => a.profile_status === 'draft').length > 0 ? masterArtists.filter(a => a.profile_status === 'draft').length : undefined },
   ]
 
   const PAGE_TITLES: Record<Tab, string> = {
     overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes',
     support: 'Support Chats', analytics: 'Analytics', waitlist: 'Waitlist', verifications: 'Verifications',
     attendees: 'Attendee Accounts', registrations: 'All Registrations', categories: 'Event Categories',
+    artists: 'Artist Management',
   }
 
 
@@ -3001,6 +3469,35 @@ export default function MasterPage() {
 
             {/* ════════════════════════════════════════════════════ CATEGORIES */}
             {tab === 'categories' && <CategoryAdmin />}
+
+            {/* ════════════════════════════════════════════════════ ARTISTS */}
+            {tab === 'artists' && (
+              artistsLoaded
+                ? <ArtistsView
+                    mgmtAccounts={mgmtAccounts}
+                    artists={masterArtists}
+                    enquiries={artistEnqs}
+                    onMgmtStatusChange={(id, s) => {
+                      setMgmtAccounts(prev => prev.map(m => m.id === id ? { ...m, account_status: s } : m))
+                      setManagementAccountStatus(id, s)
+                    }}
+                    onPublish={id => {
+                      setMasterArtists(prev => prev.map(a => a.id === id ? { ...a, profile_status: 'published', verified: true } : a))
+                      publishArtist(id)
+                    }}
+                    onPause={id => {
+                      setMasterArtists(prev => prev.map(a => a.id === id ? { ...a, profile_status: 'paused' } : a))
+                      pauseArtist(id)
+                    }}
+                    onArtistUpdate={(id, fields) => {
+                      setMasterArtists(prev => prev.map(a => a.id === id ? { ...a, ...fields } : a))
+                    }}
+                  />
+                : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200, flexDirection: 'column', gap: 12 }}>
+                    <div style={{ width: 28, height: 28, border: '2px solid rgba(0,229,255,0.2)', borderTopColor: '#00E5FF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                    <div style={{ fontSize: 'var(--fs-sm)', color: '#374151', fontFamily: 'var(--font-body)' }}>Loading artist data…</div>
+                  </div>
+            )}
 
           </div>
         </main>
