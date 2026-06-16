@@ -3,8 +3,9 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 // Subdomains map to their root redirect and protected path prefix
 const SUBDOMAIN_MAP: Record<string, { root: string; prefix: string }> = {
-  'vendor': { root: '/vendor/os',  prefix: '/vendor' },
-  'venue':  { root: '/venue/os',   prefix: '/venue'  },
+  'vendor': { root: '/vendor/os',      prefix: '/vendor'      },
+  'venue':  { root: '/venue/os',       prefix: '/venue'       },
+  'artist': { root: '/artist-mgmt/os', prefix: '/artist-mgmt' },
 }
 
 function getSubdomain(host: string): string | null {
@@ -81,6 +82,7 @@ export async function updateSession(request: NextRequest) {
     '/venues',   // Public venue browse
     '/venue',    // Public venue profile pages
     '/v',        // Public vendor profiles
+    '/artists',  // Public artist directory + profiles
   ]
 
   // On a product subdomain, only its own routes + auth are accessible
