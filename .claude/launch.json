@@ -6,6 +6,24 @@
       "runtimeExecutable": "/usr/local/bin/node",
       "runtimeArgs": ["node_modules/.bin/next", "dev"],
       "autoPort": true
+    },
+    {
+      "name": "vendor-x-dev",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "cd /Users/mws/tikkit/.claude/worktrees/vendor-x && /usr/local/bin/node node_modules/.bin/next dev"],
+      "autoPort": true
+    }
+    ,{
+      "name": "venues-dev",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "cd /Users/mws/tikkit/.claude/worktrees/venues-experiences && /usr/local/bin/node node_modules/.bin/next dev"],
+      "autoPort": true
+    }
+    ,{
+      "name": "artist-mgmt-dev",
+      "runtimeExecutable": "/bin/bash",
+      "runtimeArgs": ["-c", "cd /Users/mws/tikkit/.claude/worktrees/artist-management && /usr/local/bin/node node_modules/.bin/next dev"],
+      "autoPort": true
     }
   ]
 }

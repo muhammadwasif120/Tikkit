@@ -60,9 +60,11 @@ function Field({ Icon, type, placeholder, value, onChange, end, accent }: {
 // ─── AuthForm ──────────────────────────────────────────────────────────────
 
 function AuthForm({ mode, onBack, initialTab = 'login' }: { mode: Mode; onBack: () => void; initialTab?: SubMode }) {
-  const supabase = createClient()
-  const router   = useRouter()
-  const isOrg    = mode === 'organizer'
+  const supabase     = createClient()
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+  const nextPath     = searchParams.get('next')
+  const isOrg        = mode === 'organizer'
   const accent   = isOrg ? '#1E5EFF' : '#FFC745'
   const btnBg    = isOrg ? 'linear-gradient(135deg,#1E5EFF,#3b82f6)' : 'linear-gradient(135deg,#FFC745,#f59e0b)'
   const btnClr   = isOrg ? '#fff' : '#000'
@@ -159,7 +161,7 @@ function AuthForm({ mode, onBack, initialTab = 'login' }: { mode: Mode; onBack: 
               }, { onConflict: 'id', ignoreDuplicates: false })
           }
           
-          router.push(isOrg ? '/dashboard' : '/explore')
+          router.push(nextPath || (isOrg ? '/dashboard' : '/explore'))
         }
       } else if (tab === 'login') {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -200,10 +202,11 @@ function AuthForm({ mode, onBack, initialTab = 'login' }: { mode: Mode; onBack: 
           }
 
           // Admin → /master, organizer/staff → /dashboard, guest → /explore
+          // If a ?next= param was set by middleware, honour it (vendor/venue flows)
           const dest = role === 'guest' ? '/explore'
                      : role === 'admin' ? '/master'
                      : '/dashboard'
-          router.push(dest)
+          router.push(nextPath || dest)
         }
       }
     } finally {

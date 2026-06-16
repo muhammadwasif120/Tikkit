@@ -275,12 +275,12 @@ function PaymentSheet({ reg, onClose, onSuccess }: { reg: Registration; onClose:
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+    <div className="mt-pay-overlay" style={{ background: 'transparent' }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
-      <div style={{ position: 'relative', background: 'var(--surface-card)', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
+      <div className="mt-pay-panel" style={{ position: 'relative', background: 'var(--surface-card)', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
 
         {/* Handle */}
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 0' }} />
+        <div className="mt-pay-handle" style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.12)', margin: '14px auto 0' }} />
 
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
@@ -661,6 +661,21 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
 
   return (
     <>
+      <style>{`
+        @keyframes revealUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes sheetSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        @keyframes confettiFall { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+        .mt-tab { flex: 1; padding: 9px 0; }
+        .mt-header-title { font-size: 20px; }
+        .mt-pay-overlay { position: fixed; inset: 0; z-index: 300; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+        @media (min-width: 768px) {
+          .mt-tab { padding: 10px 20px !important; }
+          .mt-header-title { font-size: 26px !important; }
+          .mt-pay-overlay { justify-content: center !important; padding: 20px; }
+          .mt-pay-panel { border-radius: 24px !important; }
+          .mt-pay-handle { display: none !important; }
+        }
+      `}</style>
       <Confetti active={successMsg} />
 
       {successMsg && (
@@ -671,7 +686,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
 
       {/* Credit chip */}
       <div style={{ padding: '14px 16px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>My Tikkit</h2>
+        <h2 className="mt-header-title" style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 900, margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>My Tikkit</h2>
         <Link href="/guest/profile" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 20, background: tier.bg, border: `1px solid ${tier.border}`, textDecoration: 'none' }}>
           <Zap size={11} color={tier.color} />
           <span style={{ color: tier.color, fontSize: 11, fontWeight: 800 }}>{creditScore} · {tier.label}</span>
@@ -685,7 +700,7 @@ export default function MyTikkitClient({ registrations, guestName, creditScore, 
           { key: 'past',     label: `Past${past.length > 0 ? ` (${past.length})` : ''}` },
           { key: 'saved',    label: favEvents.length > 0 ? `❤️ Saved (${favEvents.length})` : '❤️ Saved' },
         ] as const).map(({ key, label }) => (
-          <button key={key} onClick={() => setTab(key)} style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: `2px solid ${tab === key ? 'var(--brand-blue)' : 'var(--guest-border)'}`, color: tab === key ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: 12, fontWeight: tab === key ? 700 : 500, transition: 'all 0.15s' }}>
+          <button key={key} onClick={() => setTab(key)} className="mt-tab" style={{ flex: 1, padding: '9px 0', border: 'none', background: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: `2px solid ${tab === key ? 'var(--brand-blue)' : 'var(--guest-border)'}`, color: tab === key ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: 12, fontWeight: tab === key ? 700 : 500, transition: 'all 0.15s' }}>
             {label}
           </button>
         ))}

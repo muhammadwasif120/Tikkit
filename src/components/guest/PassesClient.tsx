@@ -72,6 +72,14 @@ function Confetti({ active, rarity }: { active: boolean; rarity: string }) {
   )
 }
 
+const PM_STYLES = `
+  @keyframes sheetSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @media (min-width: 768px) {
+    .pm-overlay { align-items: center !important; padding: 20px !important; }
+    .pm-panel { border-radius: 28px !important; }
+  }
+`
+
 /* ─── Pass Modal ─────────────────────────────────────────────────── */
 function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
   const cfg = PASS_CONFIG[pass.pass_type] ?? { label: pass.pass_type, rarity: 'Common', desc: '' }
@@ -84,10 +92,11 @@ function PassModal({ pass, onClose }: { pass: Pass; onClose: () => void }) {
   }, [])
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+    <div className="pm-overlay" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+      <style>{PM_STYLES}</style>
       <Confetti active={confetti} rarity={cfg.rarity} />
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }} />
-      <div style={{
+      <div className="pm-panel" style={{
         position: 'relative', width: '100%', maxWidth: 480,
         background: 'var(--surface-card-2)', borderRadius: '28px 28px 0 0',
         border: `1px solid ${rarity.border}`,
@@ -282,7 +291,7 @@ export default function PassesClient({ passes, newPassIds = [] }: { passes: Pass
         </div>
 
         {/* Responsive grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 10 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
           {sorted.map((pass, i) => (
             <PassCard
               key={pass.id} pass={pass} index={i}

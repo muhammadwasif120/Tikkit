@@ -61,6 +61,8 @@ export default function GuestShell({
 
   // Event detail pages need full-bleed layout (no padding wrapper, no paddingBottom on mobile main)
   const isEventDetail = /^\/guest\/explore\/.+/.test(pathname)
+  // Messages needs overflow:hidden for the 2-pane chat layout to work correctly
+  const isMessages = /^\/guest\/messages/.test(pathname)
 
   return (
     <>
@@ -74,7 +76,7 @@ export default function GuestShell({
         {/* ── Sidebar ── */}
         <aside
           style={{
-            width: 240, flexShrink: 0,
+            width: 220, flexShrink: 0,
             position: 'sticky', top: 0, height: '100vh', overflow: 'hidden',
             display: 'flex', flexDirection: 'column',
             background: 'var(--guest-surface)',
@@ -82,12 +84,12 @@ export default function GuestShell({
           }}
         >
           {/* Logo */}
-          <div style={{ padding: '28px 24px 32px' }}>
+          <div style={{ padding: '28px 20px 32px' }}>
             <TikkitXLogo size="md" variant="text-only" />
           </div>
 
           {/* Nav items */}
-          <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <nav style={{ flex: 1, padding: '0 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
             {TABS.map(({ href, label, icon }) => {
               const active = isActive(href)
               return (
@@ -95,11 +97,12 @@ export default function GuestShell({
                   key={href}
                   href={href}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: 12,
+                    display: 'flex', alignItems: 'center', gap: 11,
                     padding: '10px 12px', borderRadius: 12, textDecoration: 'none',
-                    background: active ? 'rgba(var(--brand-blue-rgb),0.1)' : 'transparent',
-                    border: `1px solid ${active ? 'rgba(var(--brand-blue-rgb),0.2)' : 'transparent'}`,
-                    transition: 'background 0.15s, border-color 0.15s',
+                    background: active ? 'rgba(var(--brand-blue-rgb),0.12)' : 'transparent',
+                    border: `1px solid ${active ? 'rgba(var(--brand-blue-rgb),0.25)' : 'transparent'}`,
+                    boxShadow: active ? 'inset 3px 0 0 var(--brand-blue)' : 'none',
+                    transition: 'background 0.15s, border-color 0.15s, box-shadow 0.15s',
                   }}
                 >
                   {/* Icon box */}
@@ -107,7 +110,9 @@ export default function GuestShell({
                     style={{
                       width: 34, height: 34, borderRadius: 10, flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      background: active ? 'rgba(var(--brand-blue-rgb),0.15)' : 'var(--guest-surface-2)',
+                      background: active ? 'rgba(var(--brand-blue-rgb),0.18)' : 'var(--guest-surface-2)',
+                      boxShadow: active ? '0 0 12px rgba(var(--brand-blue-rgb),0.25)' : 'none',
+                      transition: 'background 0.15s, box-shadow 0.15s',
                     }}
                   >
                     <div style={{ position: 'relative' }}>
@@ -121,36 +126,26 @@ export default function GuestShell({
                   <span
                     style={{
                       fontSize: 14, fontWeight: active ? 700 : 500,
-                      color: active ? 'var(--brand-blue)' : 'var(--text-muted)',
+                      color: active ? 'var(--brand-blue)' : 'var(--text-secondary)',
                       fontFamily: 'var(--font-body)', flex: 1,
+                      transition: 'color 0.15s',
                     }}
                   >
                     {label}
                   </span>
-
-                  {active && (
-                    <span
-                      style={{
-                        width: 6, height: 6, borderRadius: '50%',
-                        background: 'var(--brand-blue)', flexShrink: 0,
-                        boxShadow: '0 0 8px rgba(var(--brand-blue-rgb),0.7)',
-                      }}
-                    />
-                  )}
                 </Link>
               )
             })}
           </nav>
 
           {/* Notification link */}
-          <div style={{ padding: '12px 12px 28px' }}>
+          <div style={{ padding: '12px 10px 28px' }}>
             <Link
               href="/guest/notifications"
               style={{
-                display: 'flex', alignItems: 'center', gap: 12,
+                display: 'flex', alignItems: 'center', gap: 11,
                 padding: '10px 12px', borderRadius: 12, textDecoration: 'none',
                 background: 'transparent', transition: 'background 0.15s',
-                position: 'relative',
               }}
             >
               <div
@@ -175,7 +170,7 @@ export default function GuestShell({
                   </span>
                 )}
               </div>
-              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)', fontFamily: 'var(--font-body)' }}>
+              <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-secondary)', fontFamily: 'var(--font-body)' }}>
                 Notifications
               </span>
             </Link>
@@ -183,9 +178,9 @@ export default function GuestShell({
         </aside>
 
         {/* ── Main content ── */}
-        <main style={{ flex: 1, overflowY: 'auto', minWidth: 0 }}>
-          {isEventDetail ? children : (
-            <div style={{ width: '100%', maxWidth: 1280, margin: '0 auto', padding: '24px 32px 40px' }}>
+        <main style={{ flex: 1, overflowY: isMessages ? 'hidden' : 'auto', overflow: isMessages ? 'hidden' : undefined, minWidth: 0, display: isMessages ? 'flex' : undefined, flexDirection: isMessages ? 'column' : undefined }}>
+          {isEventDetail || isMessages ? children : (
+            <div style={{ width: '100%', maxWidth: 1100, margin: '0 auto', padding: '32px 40px 48px' }}>
               {children}
             </div>
           )}

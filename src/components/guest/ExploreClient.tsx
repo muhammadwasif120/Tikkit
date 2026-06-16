@@ -335,6 +335,7 @@ function TopOrganizersStrip({
 function DesktopHeroCarousel({ slides }: { slides: Event[] }) {
   const [idx, setIdx] = useState(0)
   const [paused, setPaused] = useState(false)
+  const [arrowsVisible, setArrowsVisible] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const count = slides.length
 
@@ -344,6 +345,10 @@ function DesktopHeroCarousel({ slides }: { slides: Event[] }) {
     return () => { if (timerRef.current) clearInterval(timerRef.current) }
   }, [paused, count])
 
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft')  setIdx(i => (i - 1 + count) % count)
+    if (e.key === 'ArrowRight') setIdx(i => (i + 1) % count)
+  }
   const prev = (e: React.MouseEvent) => { e.preventDefault(); setIdx(i => (i - 1 + count) % count) }
   const next = (e: React.MouseEvent) => { e.preventDefault(); setIdx(i => (i + 1) % count) }
 
@@ -352,9 +357,11 @@ function DesktopHeroCarousel({ slides }: { slides: Event[] }) {
   return (
     <div
       className="exp-desktop-hero"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      style={{ position: 'relative', borderRadius: 22, overflow: 'hidden', height: 420, marginBottom: 28, boxShadow: '0 24px 80px rgba(0,0,0,0.7)' }}
+      tabIndex={0}
+      onKeyDown={handleKey}
+      onMouseEnter={() => { setPaused(true); setArrowsVisible(true) }}
+      onMouseLeave={() => { setPaused(false); setArrowsVisible(false) }}
+      style={{ position: 'relative', borderRadius: 20, overflow: 'hidden', height: 520, marginBottom: 32, boxShadow: '0 32px 80px rgba(0,0,0,0.7)', outline: 'none' }}
     >
       {/* Slides */}
       {slides.map((ev, i) => {
@@ -367,36 +374,35 @@ function DesktopHeroCarousel({ slides }: { slides: Event[] }) {
               position: 'absolute', inset: 0,
               background: ev.cover_image_url ? `url(${ev.cover_image_url}) center/cover` : getGradient(ev.id),
               opacity: i === idx ? 1 : 0,
-              transition: 'opacity 0.8s ease',
+              transition: 'opacity 0.7s ease',
               pointerEvents: i === idx ? 'auto' : 'none',
             }}
           >
-            {/* Noise */}
-            <div style={{ position: 'absolute', inset: 0, opacity: 0.025, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
-            {/* Gradient overlay — dark left + bottom */}
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.65) 40%, rgba(0,0,0,0.15) 75%, transparent 100%)' }} />
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%)' }} />
+            {/* Bottom gradient — stronger for text legibility */}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 40%, rgba(0,0,0,0.1) 75%, transparent 100%)' }} />
+            {/* Left gradient */}
+            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to right, rgba(0,0,0,0.6) 0%, transparent 60%)' }} />
 
             {/* Content */}
             <Link
               href={`/guest/explore/${ev.slug || ev.id}`}
-              style={{ position: 'absolute', inset: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '40px 48px' }}
+              style={{ position: 'absolute', inset: 0, textDecoration: 'none', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: '48px 52px' }}
             >
               {/* Top badges */}
-              <div style={{ position: 'absolute', top: 28, left: 48, display: 'flex', gap: 8, alignItems: 'center' }}>
+              <div style={{ position: 'absolute', top: 28, left: 52, display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span style={{ padding: '5px 12px', borderRadius: 8, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)', color: 'rgba(255,255,255,0.9)', fontSize: 10, fontWeight: 800, letterSpacing: '1.5px' }}>
                   FEATURED
                 </span>
-                <span style={{ padding: '5px 12px', borderRadius: 8, background: days <= 1 ? 'rgba(239,68,68,0.9)' : 'rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)', color: 'white', fontSize: 10, fontWeight: 800, letterSpacing: '0.8px' }}>
+                <span style={{ padding: '5px 12px', borderRadius: 8, background: days <= 1 ? 'rgba(239,68,68,0.9)' : 'rgba(0,0,0,0.55)', backdropFilter: 'blur(12px)', color: 'white', fontSize: 10, fontWeight: 800, letterSpacing: '0.8px' }}>
                   {days <= 0 ? 'TODAY' : days === 1 ? 'TOMORROW' : `IN ${days} DAYS`}
                 </span>
               </div>
 
               {/* Tags */}
               {(ev.tags ?? []).length > 0 && (
-                <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                <div style={{ display: 'flex', gap: 6, marginBottom: 14 }}>
                   {(ev.tags ?? []).slice(0, 3).map(tag => (
-                    <span key={tag} style={{ padding: '3px 10px', borderRadius: 7, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.7)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <span key={tag} style={{ padding: '4px 11px', borderRadius: 7, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.75)', fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                       {tag}
                     </span>
                   ))}
@@ -404,34 +410,34 @@ function DesktopHeroCarousel({ slides }: { slides: Event[] }) {
               )}
 
               {/* Title */}
-              <h2 style={{ color: 'white', fontSize: 40, fontWeight: 900, margin: '0 0 14px', fontFamily: 'var(--font-display)', letterSpacing: '-1px', lineHeight: 1.05, maxWidth: 560 }}>
+              <h2 style={{ color: 'white', fontSize: 44, fontWeight: 900, margin: '0 0 16px', fontFamily: 'var(--font-display)', letterSpacing: '-1px', lineHeight: 1.05, maxWidth: 600 }}>
                 {ev.title}
               </h2>
 
               {/* Meta */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 22, flexWrap: 'wrap' }}>
-                <span style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <CalendarDays size={13} style={{ opacity: 0.7 }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24, flexWrap: 'wrap' }}>
+                <span style={{ color: 'rgba(255,255,255,0.7)', fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <CalendarDays size={14} style={{ opacity: 0.8 }} />
                   {fmtDay(ev.date_start)} · {fmtTime(ev.date_start)}
                 </span>
                 {ev.venue_name && !ev.secret_venue && (
                   <>
-                    <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
-                    <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, display: 'flex', alignItems: 'center', gap: 5 }}>
-                      <MapPin size={12} style={{ opacity: 0.7 }} />{ev.venue_name}
+                    <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.3)', flexShrink: 0 }} />
+                    <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 14, display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <MapPin size={13} style={{ opacity: 0.7 }} />{ev.venue_name}
                     </span>
                   </>
                 )}
                 <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
-                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 13 }}>by {organiser}</span>
+                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: 14 }}>by {organiser}</span>
               </div>
 
               {/* CTA row */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 24px', borderRadius: 12, background: 'var(--brand-blue)', color: '#FFFFFF', fontSize: 14, fontWeight: 800, boxShadow: '0 4px 20px rgba(var(--brand-blue-rgb),0.5)' }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 28px', borderRadius: 14, background: 'var(--brand-blue)', color: '#FFFFFF', fontSize: 15, fontWeight: 800, boxShadow: '0 4px 24px rgba(var(--brand-blue-rgb),0.55)', letterSpacing: '-0.2px' }}>
                   View Event →
                 </span>
-                <span style={{ padding: '9px 16px', borderRadius: 12, background: (ev.ticket_price ?? 0) === 0 ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', border: `1px solid ${(ev.ticket_price ?? 0) === 0 ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.12)'}`, color: (ev.ticket_price ?? 0) === 0 ? '#10B981' : 'white', fontSize: 14, fontWeight: 800 }}>
+                <span style={{ padding: '11px 18px', borderRadius: 14, background: (ev.ticket_price ?? 0) === 0 ? 'rgba(16,185,129,0.2)' : 'rgba(255,255,255,0.08)', backdropFilter: 'blur(8px)', border: `1px solid ${(ev.ticket_price ?? 0) === 0 ? 'rgba(16,185,129,0.4)' : 'rgba(255,255,255,0.14)'}`, color: (ev.ticket_price ?? 0) === 0 ? '#10B981' : 'white', fontSize: 15, fontWeight: 800 }}>
                   {(ev.ticket_price ?? 0) === 0 ? 'FREE' : `PKR ${ev.ticket_price!.toLocaleString('en-PK')}`}
                 </span>
               </div>
@@ -440,48 +446,180 @@ function DesktopHeroCarousel({ slides }: { slides: Event[] }) {
         )
       })}
 
-      {/* Prev / Next arrows */}
+      {/* Prev / Next arrows — visible on hover only */}
       {count > 1 && (
         <>
           <button
             onClick={prev}
-            style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
+            aria-label="Previous slide"
+            style={{ position: 'absolute', left: 20, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 44, height: 44, borderRadius: 12, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'opacity 0.2s, background 0.15s', opacity: arrowsVisible ? 1 : 0 }}
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={20} />
           </button>
           <button
             onClick={next}
-            style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'background 0.15s' }}
+            aria-label="Next slide"
+            style={{ position: 'absolute', right: 20, top: '50%', transform: 'translateY(-50%)', zIndex: 10, width: 44, height: 44, borderRadius: 12, background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'opacity 0.2s, background 0.15s', opacity: arrowsVisible ? 1 : 0 }}
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={20} />
           </button>
         </>
       )}
 
       {/* Dot indicators */}
       {count > 1 && (
-        <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 10 }}>
+        <div style={{ position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 6, zIndex: 10 }}>
           {slides.map((_, i) => (
             <button
               key={i}
               onClick={() => setIdx(i)}
-              style={{ height: 6, width: i === idx ? 28 : 6, borderRadius: 3, background: i === idx ? 'white' : 'rgba(255,255,255,0.3)', border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.35s ease' }}
+              aria-label={`Slide ${i + 1}`}
+              style={{ height: 4, width: i === idx ? 32 : 8, borderRadius: 2, background: i === idx ? 'white' : 'rgba(255,255,255,0.35)', border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.35s ease' }}
             />
           ))}
         </div>
       )}
 
-      {/* Slide counter */}
-      <div style={{ position: 'absolute', top: 28, right: 28, zIndex: 10, padding: '4px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', color: 'rgba(255,255,255,0.6)', fontSize: 11, fontWeight: 700, letterSpacing: '0.5px' }}>
-        {idx + 1} / {count}
-      </div>
-
       {/* Progress bar */}
       {count > 1 && !paused && (
-        <div key={idx} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, zIndex: 10 }}>
-          <div style={{ height: '100%', background: 'rgba(var(--brand-blue-rgb),0.8)', animation: 'heroProgress 5.5s linear forwards' }} />
+        <div key={idx} style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 4, zIndex: 10 }}>
+          <div style={{ height: '100%', background: 'rgba(var(--brand-blue-rgb),0.9)', animation: 'heroProgress 5.5s linear forwards' }} />
         </div>
       )}
+    </div>
+  )
+}
+
+/* ─── Desktop Event Card ─────────────────────────────────────── */
+function EventCard({ event, index, isFavourited, onToggleFav }: {
+  event: Event; index: number
+  isFavourited: boolean
+  onToggleFav: (id: string) => void
+}) {
+  const router = useRouter()
+  const [hovered, setHovered] = useState(false)
+  const orgName = event.organizer?.company_name ?? event.organizer?.full_name ?? 'Unknown Organizer'
+  const orgUsername = event.organizer?.username
+  const spotsLeft = (event.capacity && event.registered_count !== undefined) ? event.capacity - event.registered_count : null
+  const isFull = spotsLeft !== null && spotsLeft <= 0
+  const modeCfg: Record<string, { label: string; color: string; bg: string }> = {
+    expression_of_interest: { label: 'APPLY',       color: '#A855F7',           bg: 'rgba(168,85,247,0.10)' },
+    open:                   { label: 'REGISTER',    color: 'var(--brand-blue)', bg: 'rgba(var(--brand-blue-rgb),0.10)' },
+    invite_only:            { label: 'INVITE ONLY', color: 'var(--text-muted)', bg: 'rgba(107,114,128,0.09)' },
+  }
+  const mode = modeCfg[event.registration_mode] ?? modeCfg.open
+
+  return (
+    <div
+      onClick={() => router.push(`/guest/explore/${event.slug || event.id}`)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        cursor: 'pointer',
+        borderRadius: 16,
+        overflow: 'hidden',
+        background: 'var(--surface-card)',
+        border: '1px solid var(--guest-border)',
+        transition: 'all 0.2s ease',
+        opacity: 0,
+        animation: 'revealUp 0.35s ease forwards',
+        animationDelay: `${index * 45}ms`,
+        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
+        boxShadow: hovered ? '0 12px 40px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.15)',
+      }}
+    >
+      {/* Image */}
+      <div style={{ position: 'relative', height: 180, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : getGradient(event.id) }}>
+        {!event.cover_image_url && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.15 }}>
+            <CalendarDays size={40} color="white" />
+          </div>
+        )}
+        {/* Overlay gradient */}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)' }} />
+
+        {/* Price badge — top left */}
+        <div style={{ position: 'absolute', top: 10, left: 10 }}>
+          {(event.ticket_price ?? 0) === 0
+            ? <span style={{ padding: '4px 10px', borderRadius: 8, background: 'rgba(16,185,129,0.9)', color: 'white', fontSize: 11, fontWeight: 800 }}>FREE</span>
+            : <span style={{ padding: '4px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', color: 'white', fontSize: 11, fontWeight: 800 }}>PKR {event.ticket_price!.toLocaleString('en-PK')}</span>
+          }
+        </div>
+
+        {/* FULL badge */}
+        {isFull && (
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ color: 'white', fontSize: 13, fontWeight: 900, letterSpacing: '1px', padding: '6px 14px', borderRadius: 8, background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.15)' }}>FULL</span>
+          </div>
+        )}
+
+        {/* Heart button — top right */}
+        <button
+          onClick={e => { e.stopPropagation(); onToggleFav(event.id) }}
+          style={{ position: 'absolute', top: 10, right: 10, width: 32, height: 32, borderRadius: 8, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+        >
+          <Heart size={14} style={{ color: isFavourited ? '#EF4444' : 'white', fill: isFavourited ? '#EF4444' : 'none', transition: 'all 0.15s' }} />
+        </button>
+
+        {/* Mode badge — bottom left */}
+        <div style={{ position: 'absolute', bottom: 10, left: 10 }}>
+          <span style={{ padding: '3px 8px', borderRadius: 6, background: mode.bg, backdropFilter: 'blur(6px)', color: mode.color, fontSize: 10, fontWeight: 800, letterSpacing: '0.4px' }}>
+            {mode.label}
+          </span>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '14px 16px 16px' }}>
+        {/* Category tag */}
+        {(event.tags ?? []).length > 0 && (
+          <span style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 5, background: 'rgba(129,140,248,0.1)', color: '#818CF8', fontSize: 10, fontWeight: 800, letterSpacing: '0.4px', marginBottom: 8 }}>
+            {(event.tags ?? [])[0].toUpperCase()}
+          </span>
+        )}
+
+        {/* Title */}
+        <h3 style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+          {event.title}
+        </h3>
+
+        {/* Meta */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-secondary)', fontSize: 12 }}>
+            <CalendarDays size={11} style={{ flexShrink: 0, opacity: 0.7 }} />
+            {fmtDay(event.date_start)} · {fmtTime(event.date_start)}
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-secondary)', fontSize: 12 }}>
+            <MapPin size={11} style={{ flexShrink: 0, opacity: 0.7 }} />
+            {event.secret_venue
+              ? <span style={{ color: '#FFC745', display: 'flex', alignItems: 'center', gap: 3 }}><Lock size={10} />Secret venue</span>
+              : (event.venue_name ?? 'TBA')
+            }
+          </span>
+        </div>
+
+        {/* Organizer + spots */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--guest-border)' }}>
+          {orgUsername ? (
+            <span
+              role="link"
+              tabIndex={0}
+              onClick={e => { e.stopPropagation(); router.push(`/organizer/${orgUsername}`) }}
+              onKeyDown={e => e.key === 'Enter' && router.push(`/organizer/${orgUsername}`)}
+              style={{ color: '#818CF8', fontSize: 11, fontStyle: 'italic', cursor: 'pointer' }}
+            >
+              {orgName} →
+            </span>
+          ) : (
+            <span style={{ color: 'var(--text-muted)', fontSize: 11, fontStyle: 'italic' }}>{orgName}</span>
+          )}
+          {spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 15 && (
+            <span style={{ padding: '2px 7px', borderRadius: 5, background: 'rgba(239,68,68,0.1)', color: '#EF4444', fontSize: 10, fontWeight: 800 }}>
+              {spotsLeft} LEFT
+            </span>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -717,94 +855,93 @@ export default function ExploreClient({
 
   return (
     <>
-      {/* ── Desktop responsive overrides ─────────────────────────── */}
+      {/* ── Responsive overrides ─────────────────────────────────── */}
       <style>{`
-        /* Search + filters */
-        .exp-search-wrap { padding: 12px 16px 0; }
-        .exp-pills-wrap  { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px 0; scrollbar-width: none; }
-        .exp-tags-wrap   { display: flex; gap: 5px; overflow-x: auto; padding: 8px 16px 0; scrollbar-width: none; }
+        /* ── Mobile defaults ── */
+        .exp-search-wrap  { padding: 12px 16px 0; }
+        .exp-pills-wrap   { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px 0; scrollbar-width: none; }
+        .exp-tags-wrap    { display: flex; gap: 5px; overflow-x: auto; padding: 8px 16px 0; scrollbar-width: none; }
 
-        /* 2-column grid: sidebar first in DOM (mobile shows it on top), events second */
-        .exp-grid        { display: flex; flex-direction: column; }
-        .exp-sidebar     { order: 1; }   /* top on mobile */
-        .exp-main        { order: 2; }   /* below on mobile */
+        .exp-grid         { display: flex; flex-direction: column; }
+        .exp-sidebar      { order: 1; }
+        .exp-main         { order: 2; }
 
-        /* Event row pieces */
-        .exp-row-thumb   { width: 68px !important; height: 68px !important; }
-        .exp-row-title   { font-size: 13px !important; }
-        .exp-row-meta    { font-size: 10px !important; }
-        .exp-row-badge   { font-size: 8px !important; }
-        .exp-date-day    { font-size: 20px !important; }
-        .exp-date-col    { width: 42px !important; }
+        .exp-row-thumb    { width: 68px !important; height: 68px !important; }
+        .exp-row-title    { font-size: 13px !important; }
+        .exp-row-meta     { font-size: 10px !important; }
+        .exp-row-badge    { font-size: 8px !important; }
+        .exp-date-day     { font-size: 20px !important; }
+        .exp-date-col     { width: 42px !important; }
+        .exp-section-lbl  { font-size: 12px !important; }
+        .exp-group-lbl    { font-size: 10px !important; }
 
-        /* Section labels */
-        .exp-section-lbl { font-size: 12px !important; }
-        .exp-group-lbl   { font-size: 10px !important; }
+        .exp-org-scroll   { display: flex; gap: 10px; overflow-x: auto; padding: 0 16px 4px; scrollbar-width: none; }
+        .exp-org-card     { flex-shrink: 0; width: 104px; }
+        .exp-myev-scroll  { display: flex; gap: 9px; overflow-x: auto; padding: 0 16px 2px; scrollbar-width: none; }
+        .exp-myev-card    { flex-shrink: 0; width: 120px; }
 
-        /* Organizer cards */
-        .exp-org-scroll  { display: flex; gap: 10px; overflow-x: auto; padding: 0 16px 4px; scrollbar-width: none; }
-        .exp-org-card    { flex-shrink: 0; width: 104px; }
+        .exp-hero-wrap    { margin: 14px 16px 0; }
+        .exp-hero-inner   { border-radius: 20px; overflow: hidden; position: relative; height: 215px; }
 
-        /* My events */
-        .exp-myev-scroll { display: flex; gap: 9px; overflow-x: auto; padding: 0 16px 2px; scrollbar-width: none; }
-        .exp-myev-card   { flex-shrink: 0; width: 120px; }
-
-        /* Hero */
-        .exp-hero-wrap   { margin: 14px 16px 0; }
-        .exp-hero-inner  { border-radius: 20px; overflow: hidden; position: relative; height: 215px; }
-
-        /* Desktop carousel — hidden on mobile */
+        /* Desktop carousel hidden on mobile */
         .exp-desktop-hero { display: none; }
+
+        /* Event card grid — hidden on mobile */
+        .exp-card-grid    { display: none; }
+        /* Event row list — shown on mobile */
+        .exp-row-list     { display: block; }
 
         @keyframes heroProgress {
           from { width: 0%; }
           to   { width: 100%; }
         }
 
+        /* ── Desktop overrides (≥768px) ── */
         @media (min-width: 768px) {
-          /* Full-width carousel above grid, strips right, events left */
+          /* Hero carousel replaces mobile hero */
           .exp-desktop-hero { display: block; }
           .exp-hero-wrap    { display: none !important; }
 
-          /* Layout */
-          .exp-grid      { display: grid; grid-template-columns: 3fr 2fr; gap: 28px; align-items: start; padding: 0; }
-          .exp-sidebar   { order: 2; position: sticky; top: 0; }
-          .exp-main      { order: 1; }
+          /* Single-column linear flow — no sidebar layout */
+          .exp-grid         { display: block; }
+          .exp-sidebar      { margin-bottom: 0; }
 
-          /* Search + filters lose side padding (container already has it) */
-          .exp-search-wrap { padding: 0 0 8px; }
-          .exp-pills-wrap  { padding: 0 0 0; flex-wrap: wrap; overflow: visible; }
-          .exp-tags-wrap   { padding: 4px 0 0; flex-wrap: wrap; overflow: visible; }
+          /* Search + pills: no side padding (content container already has it) */
+          .exp-search-wrap  { padding: 0 0 12px; }
+          .exp-pills-wrap   { padding: 0 0 0; flex-wrap: wrap; overflow: visible; gap: 8px; }
+          .exp-tags-wrap    { padding: 6px 0 0; flex-wrap: wrap; overflow: visible; gap: 6px; }
 
-          /* Organizer cards → 2-col grid */
-          .exp-org-scroll  { display: grid; grid-template-columns: repeat(2, 1fr); overflow: visible; padding: 0; gap: 10px; }
-          .exp-org-card    { width: auto !important; }
+          /* Pill sizing on desktop */
+          .exp-pills-wrap button,
+          .exp-tags-wrap  button { padding: 7px 16px !important; font-size: 11px !important; }
 
-          /* My events → 3-col grid */
-          .exp-myev-scroll { display: grid; grid-template-columns: repeat(3, 1fr); overflow: visible; padding: 0; gap: 8px; }
-          .exp-myev-card   { width: auto !important; }
+          /* Organizer grid: auto-fill columns */
+          .exp-org-scroll   { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); overflow: visible; padding: 0; gap: 12px; }
+          .exp-org-card     { width: auto !important; }
 
-          /* Section strips lose side padding */
+          /* My events strip stays horizontal but wider cards */
+          .exp-myev-scroll  { padding: 0; gap: 12px; }
+          .exp-myev-card    { width: 140px !important; }
+
+          /* Strip headers lose side padding */
           .exp-strip-header { padding-left: 0 !important; padding-right: 0 !important; }
 
-          /* Event row — scaled up */
-          .exp-row-thumb  { width: 88px !important; height: 88px !important; border-radius: 14px !important; }
-          .exp-row-title  { font-size: 15px !important; }
-          .exp-row-meta   { font-size: 12px !important; gap: 10px !important; }
-          .exp-row-meta span { font-size: 12px !important; }
-          .exp-row-badge  { font-size: 10px !important; padding: 3px 8px !important; }
-          .exp-date-day   { font-size: 26px !important; }
-          .exp-date-col   { width: 52px !important; }
-          .exp-row-pad    { padding: 14px 0 !important; gap: 14px !important; }
+          /* Section headers */
+          .exp-section-lbl  { font-size: 14px !important; }
+          .exp-group-lbl    { font-size: 12px !important; letter-spacing: 1.2px !important; }
+          .exp-all-divider  { padding: 16px 0 0 !important; }
+          .exp-group-header { padding: 20px 0 8px !important; }
+          .exp-group-rows   { padding: 0 !important; }
+          .exp-filter-pad   { padding: 14px 0 0 !important; }
+          .exp-filter-lbl   { font-size: 13px !important; }
 
-          /* Section labels scaled */
-          .exp-section-lbl { font-size: 14px !important; }
-          .exp-group-lbl   { font-size: 12px !important; letter-spacing: 1.2px !important; }
-          .exp-all-divider { padding: 16px 0 0 !important; }
-          .exp-group-header { padding: 14px 0 0 !important; }
-          .exp-group-rows  { padding: 0 !important; }
-          .exp-filter-pad  { padding: 14px 0 0 !important; }
-          .exp-filter-lbl  { font-size: 12px !important; }
+          /* Event card grid shown on desktop; row list hidden */
+          .exp-card-grid    { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+          .exp-row-list     { display: none; }
+        }
+
+        @media (min-width: 1024px) {
+          .exp-card-grid    { grid-template-columns: repeat(3, 1fr); }
         }
       `}</style>
 
@@ -896,51 +1033,34 @@ export default function ExploreClient({
         <DesktopHeroCarousel slides={events.slice(0, 5)} />
       )}
 
-      {/* ── 2-column grid (sidebar first = top on mobile, right on desktop) ── */}
-      <div className="exp-grid">
-
-        {/* RIGHT / TOP: Hero + My Events + Organizers */}
-        <div className="exp-sidebar">
-          {!isFiltering && heroEvent && (
-            <div className="exp-hero-wrap">
-              <Link href={`/guest/explore/${heroEvent.slug || heroEvent.id}`} style={{ textDecoration: 'none', display: 'block' }}>
-                <div className="exp-hero-inner" style={{
-                  background: heroEvent.cover_image_url
-                    ? `url(${heroEvent.cover_image_url}) center/cover`
-                    : getGradient(heroEvent.id),
-                  boxShadow: '0 16px 56px rgba(0,0,0,0.65)',
-                }}>
-                  <div style={{ position: 'absolute', inset: 0, opacity: 0.035, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.25) 55%, transparent 100%)' }} />
-                  <div style={{ position: 'absolute', top: 13, left: 13, right: 13, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ padding: '4px 9px', borderRadius: 7, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', color: 'rgba(255,255,255,0.8)', fontSize: 9, fontWeight: 800, letterSpacing: '1.2px' }}>FEATURED</span>
-                    <span style={{ padding: '4px 9px', borderRadius: 7, background: daysUntil(heroEvent.date_start) <= 1 ? 'rgba(239,68,68,0.9)' : 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', color: 'white', fontSize: 9, fontWeight: 800, letterSpacing: '0.8px' }}>
-                      {daysUntil(heroEvent.date_start) <= 0 ? 'TODAY' : daysUntil(heroEvent.date_start) === 1 ? 'TOMORROW' : `IN ${daysUntil(heroEvent.date_start)} DAYS`}
-                    </span>
-                  </div>
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 16px 16px' }}>
-                    {(heroEvent.tags ?? []).length > 0 && (
-                      <div style={{ display: 'flex', gap: 5, marginBottom: 7 }}>
-                        {(heroEvent.tags ?? []).slice(0, 2).map(tag => (
-                          <span key={tag} style={{ padding: '2px 7px', borderRadius: 6, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(6px)', color: 'rgba(255,255,255,0.75)', fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{tag}</span>
-                        ))}
-                      </div>
-                    )}
-                    <h2 style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: '0 0 7px', fontFamily: 'var(--font-display)', letterSpacing: '-0.6px', lineHeight: 1.1 }}>{heroEvent.title}</h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11 }}>{fmtDay(heroEvent.date_start)} · {fmtTime(heroEvent.date_start)}</span>
-                      <span style={{ width: 2, height: 2, borderRadius: '50%', background: 'rgba(255,255,255,0.25)', flexShrink: 0 }} />
-                      <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11 }}>by {heroEvent.organizer?.company_name ?? heroEvent.organizer?.full_name ?? 'Unknown'}</span>
-                      <span style={{ marginLeft: 'auto', padding: '4px 9px', borderRadius: 7, background: (heroEvent.ticket_price ?? 0) === 0 ? 'rgba(16,185,129,0.85)' : 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: 10, fontWeight: 800 }}>
-                        {(heroEvent.ticket_price ?? 0) === 0 ? 'FREE' : `PKR ${heroEvent.ticket_price!.toLocaleString('en-PK')}`}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </Link>
+      {/* ── Mobile hero banner (hidden on desktop via CSS) ── */}
+      {!isFiltering && heroEvent && (
+        <div className="exp-hero-wrap">
+          <Link href={`/guest/explore/${heroEvent.slug || heroEvent.id}`} style={{ textDecoration: 'none', display: 'block' }}>
+            <div className="exp-hero-inner" style={{
+              background: heroEvent.cover_image_url
+                ? `url(${heroEvent.cover_image_url}) center/cover`
+                : getGradient(heroEvent.id),
+              boxShadow: '0 16px 56px rgba(0,0,0,0.65)',
+            }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.25) 55%, transparent 100%)' }} />
+              <div style={{ position: 'absolute', top: 13, left: 13, right: 13, display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ padding: '4px 9px', borderRadius: 7, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', color: 'rgba(255,255,255,0.8)', fontSize: 9, fontWeight: 800, letterSpacing: '1.2px' }}>FEATURED</span>
+              </div>
+              <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '0 16px 16px' }}>
+                <h2 style={{ color: 'white', fontSize: 22, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', lineHeight: 1.1 }}>{heroEvent.title}</h2>
+                <span style={{ color: 'rgba(255,255,255,0.55)', fontSize: 11 }}>{fmtDay(heroEvent.date_start)} · {fmtTime(heroEvent.date_start)}</span>
+              </div>
             </div>
-          )}
+          </Link>
+        </div>
+      )}
 
+      {/* ── Content grid (single col on desktop, stacked on mobile) ── */}
+      <div className="exp-grid">
+        <div className="exp-sidebar">
+
+          {/* My Events strip */}
           {!isFiltering && myEvents.length > 0 && (
             <div style={{ marginTop: 20 }}>
               <div className="exp-strip-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', marginBottom: 11 }}>
@@ -976,14 +1096,13 @@ export default function ExploreClient({
             </div>
           )}
 
+          {/* Top Organizers strip */}
           {!isFiltering && topOrganizers.length > 0 && (
-            <div className="exp-org-section">
-              <TopOrganizersStrip organizers={topOrganizers} userId={userId} />
-            </div>
+            <TopOrganizersStrip organizers={topOrganizers} userId={userId} />
           )}
         </div>
 
-        {/* LEFT / BOTTOM: Filters + Events list */}
+        {/* Events section */}
         <div className="exp-main">
           {!isFiltering && (
             <div className="exp-all-divider" style={{ padding: '18px 16px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -995,20 +1114,28 @@ export default function ExploreClient({
 
           {isFiltering ? (
             <div className="exp-filter-pad" style={{ padding: '14px 16px 0' }}>
-              <p className="exp-filter-lbl" style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 800, letterSpacing: '0.8px', margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>
+              <p className="exp-filter-lbl" style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 800, letterSpacing: '0.8px', margin: '0 0 12px', fontFamily: 'var(--font-display)' }}>
                 {filtered.length} RESULT{filtered.length !== 1 ? 'S' : ''}
               </p>
-              {filtered.length > 0
-                ? filtered.map((e, i) => <EventRow key={e.id} event={e} index={i} isFavourited={favIds.has(e.id)} onToggleFav={handleToggleFav} />)
-                : (
-                  <div style={{ padding: '60px 0', textAlign: 'center' }}>
-                    <Search size={32} style={{ opacity: 0.15, color: 'var(--text-muted)', display: 'block', margin: '0 auto 12px' }} />
-                    <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>
-                      No events match &ldquo;{query || selectedTag || categories.find(c => c.id === selectedCategoryId)?.name}&rdquo;
-                    </p>
+              {filtered.length > 0 ? (
+                <>
+                  {/* Desktop: card grid */}
+                  <div className="exp-card-grid">
+                    {filtered.map((e, i) => <EventCard key={e.id} event={e} index={i} isFavourited={favIds.has(e.id)} onToggleFav={handleToggleFav} />)}
                   </div>
-                )
-              }
+                  {/* Mobile: row list */}
+                  <div className="exp-row-list">
+                    {filtered.map((e, i) => <EventRow key={e.id} event={e} index={i} isFavourited={favIds.has(e.id)} onToggleFav={handleToggleFav} />)}
+                  </div>
+                </>
+              ) : (
+                <div style={{ padding: '60px 0', textAlign: 'center' }}>
+                  <Search size={32} style={{ opacity: 0.15, color: 'var(--text-muted)', display: 'block', margin: '0 auto 12px' }} />
+                  <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0 }}>
+                    No events match &ldquo;{query || selectedTag || categories.find(c => c.id === selectedCategoryId)?.name}&rdquo;
+                  </p>
+                </div>
+              )}
             </div>
           ) : (
             <div>
@@ -1021,7 +1148,12 @@ export default function ExploreClient({
                     </span>
                     <span style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700 }}>· {group.events.length}</span>
                   </div>
-                  <div className="exp-group-rows" style={{ padding: '0 16px' }}>
+                  {/* Desktop: card grid */}
+                  <div className="exp-card-grid" style={{ paddingTop: 8 }}>
+                    {group.events.map((e, i) => <EventCard key={e.id} event={e} index={i} isFavourited={favIds.has(e.id)} onToggleFav={handleToggleFav} />)}
+                  </div>
+                  {/* Mobile: row list */}
+                  <div className="exp-group-rows exp-row-list" style={{ padding: '0 16px' }}>
                     {group.events.map((e, i) => <EventRow key={e.id} event={e} index={i} isFavourited={favIds.has(e.id)} onToggleFav={handleToggleFav} />)}
                   </div>
                 </div>
@@ -1034,7 +1166,7 @@ export default function ExploreClient({
               )}
             </div>
           )}
-          <div style={{ height: 20 }} />
+          <div style={{ height: 24 }} />
         </div>
       </div>
     </>

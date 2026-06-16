@@ -1,10 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
+// Subdomains map to their root redirect and protected path prefix
+const SUBDOMAIN_MAP: Record<string, { root: string; prefix: string }> = {
+  'vendor': { root: '/vendor/os',  prefix: '/vendor' },
+  'venue':  { root: '/venue/os',   prefix: '/venue'  },
+}
+
+function getSubdomain(host: string): string | null {
+  // "vendor.tikkitx.com" → "vendor", "localhost:3000" → null
+  const parts = host.split('.')
+  if (parts.length >= 3) return parts[0]
+  return null
+}
+
+// Share the auth session across all *.tikkitx.com subdomains in production
+const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.tikkitx.com' : undefined
+
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const host        = request.headers.get('host') ?? ''
+  const subdomain   = getSubdomain(host)
+  const subConfig   = subdomain ? SUBDOMAIN_MAP[subdomain] : null
 
-  const response = NextResponse.next({ request })
+  // ── Subdomain root redirect ────────────────────────────────────────────────
+  // vendor.tikkitx.com/ → /vendor/os
+  // venue.tikkitx.com/  → /venue/os
+  if (subConfig && pathname === '/') {
+    return NextResponse.redirect(new URL(subConfig.root, request.url))
+  }
+
+  let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,7 +41,8 @@ export async function updateSession(request: NextRequest) {
         setAll: (cookiesToSet: { name: string; value: string; options: CookieOptions }[]) => {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value)
-            response.cookies.set(name, value, options)
+            // Set domain to apex so session is shared across all *.tikkitx.com subdomains
+            response.cookies.set(name, value, { ...options, ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}) })
           })
         },
       },
@@ -26,63 +53,76 @@ export async function updateSession(request: NextRequest) {
 
   // Public routes — always allow through
   const publicPaths = [
-  '/auth/login',
-  '/auth/callback',
-  '/auth/reset-password',
-  '/master/login',  // Admin login — public, separate from main auth flow
-  '/api',
-  '/events',
-  '/',
-  '/how-it-works',
-  '/explore',       // Public event showcase (unauthenticated-friendly)
-  '/guest/explore',
-  '/register',
-  '/organizer',     // Public organizer profiles
-  '/coming-soon',   // Public marketing waitlist page
-  '/demo',          // Interactive organizer demo — no auth required
-  '/staff',         // Staff/organizer invite links — token-gated, no auth required
-  '/corporate',     // Public marketing landing page
-  '/pulse',         // Public marketing landing page
-  '/privacy',       // Public privacy policy
-  '/terms',         // Public terms & conditions
-  '/compare',       // Competitor comparison pages — public SEO landing pages
-  '/blog',          // Public blog / SEO content hub
-  '/contact',       // Public contact page
-  '/pricing',       // Public pricing page
-  '/about',         // Public about page
-  '/security',      // Public security/trust page
-]
+    '/auth/login',
+    '/auth/callback',
+    '/auth/reset-password',
+    '/master/login',
+    '/api',
+    '/events',
+    '/',
+    '/how-it-works',
+    '/explore',
+    '/guest/explore',
+    '/register',
+    '/organizer',
+    '/coming-soon',
+    '/demo',
+    '/staff',
+    '/corporate',
+    '/pulse',
+    '/privacy',
+    '/terms',
+    '/compare',
+    '/blog',
+    '/contact',
+    '/pricing',
+    '/about',
+    '/security',
+    '/venues',   // Public venue browse
+    '/venue',    // Public venue profile pages
+    '/v',        // Public vendor profiles
+  ]
+
+  // On a product subdomain, only its own routes + auth are accessible
+  // Everything else redirects to that subdomain's dashboard
+  if (subConfig) {
+    const isAuth    = pathname.startsWith('/auth')
+    const isProduct = pathname.startsWith(subConfig.prefix)
+    if (!isAuth && !isProduct) {
+      return NextResponse.redirect(new URL(subConfig.root, request.url))
+    }
+  }
+
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (isPublic) {
-    // Only intercept GET requests — POST requests are Next.js server actions
-    // (ensureProfileRole etc.) and must NOT be redirected or they never run
     if (user && request.method === 'GET') {
-      // Already-authed user hitting the main login → send to their home
       if (pathname === '/auth/login') {
         const { data: profile } = await supabase
           .from('profiles').select('role').eq('id', user.id).single()
         const metaRole = user.user_metadata?.role as string | undefined
         const role = profile?.role ?? metaRole ?? 'guest'
+
+        // On a product subdomain, authenticated login always goes to that product's root
+        if (subConfig) {
+          return NextResponse.redirect(new URL(subConfig.root, request.url))
+        }
+
         const dest = role === 'guest'  ? '/explore'
                    : role === 'admin'  ? '/master'
                    : '/dashboard'
         return NextResponse.redirect(new URL(dest, request.url))
       }
 
-      // Already-authed admin hitting the admin login → skip straight to /master
-      // Use JWT metadata only — no DB read needed here
       if (pathname === '/master/login') {
         const metaRole = user.user_metadata?.role as string | undefined
         if (metaRole === 'admin') {
           return NextResponse.redirect(new URL('/master', request.url))
         }
-        // Not admin — show the login form so they can sign in with admin creds
         return response
       }
     }
 
-    // Unauthenticated user hitting /guest/explore/[slug] → send to registration form
     if (!user && pathname.match(/^\/guest\/explore\/([^/]+)$/)) {
       const slug = pathname.split('/guest/explore/')[1]
       return NextResponse.redirect(new URL(`/register/${slug}`, request.url))
@@ -91,16 +131,15 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
-  // Not logged in → send to login
+  // Not logged in → send to login, preserving destination for post-auth redirect
   if (!user) {
-    return NextResponse.redirect(new URL('/auth/login', request.url))
+    const loginUrl = new URL('/auth/login', request.url)
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
   }
 
-  // JWT metadata role — signed, no DB round-trip, reliable in edge middleware
   const metaRole = user.user_metadata?.role as string | undefined
 
-  // /master: trust JWT metadata only (DB read in edge middleware is flaky).
-  // The layout does an authoritative DB check as a second layer.
   if (pathname.startsWith('/master')) {
     if (metaRole !== 'admin') {
       return NextResponse.redirect(new URL('/master/login', request.url))
@@ -108,17 +147,14 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
-  // For all other protected routes, read profile from DB
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
   const role = profile?.role ?? metaRole ?? 'guest'
 
-  // Guest trying to hit organizer routes
   if (role === 'guest' && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/explore', request.url))
   }
 
-  // Non-guest trying to hit guest/explore routes — send to their home
   if (role !== 'guest' && (pathname.startsWith('/guest') || pathname.startsWith('/explore'))) {
     const home = role === 'admin' ? '/master' : '/dashboard'
     return NextResponse.redirect(new URL(home, request.url))

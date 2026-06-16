@@ -61,7 +61,7 @@ function daysUntil(iso: string) {
 }
 
 /* ─── Registration status banner ────────────────────────────────── */
-function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus: string | null }) {
+function StatusBanner({ status, paymentStatus, style: extraStyle }: { status: string; paymentStatus: string | null; style?: React.CSSProperties }) {
   // Map actual DB status values → display key
   let key = status
   if (status === 'pending')   key = 'eoi_submitted'
@@ -83,7 +83,7 @@ function StatusBanner({ status, paymentStatus }: { status: string; paymentStatus
   if (!s) return null
   const Icon = s.icon
   return (
-    <div style={{ margin: '16px 20px 0', padding: '13px 15px', borderRadius: 16, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+    <div style={{ margin: '16px 20px 0', padding: '13px 15px', borderRadius: 16, background: s.bg, border: `1px solid ${s.border}`, display: 'flex', gap: 12, alignItems: 'flex-start', ...extraStyle }}>
       <Icon size={18} color={s.color} style={{ flexShrink: 0, marginTop: 1 }} />
       <div>
         <p style={{ color: s.color, fontSize: 13, fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>{s.label}</p>
@@ -217,11 +217,11 @@ function PaySheet({ regId, event, ticketPrice, onClose, onSuccess }: {
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="pay-sheet-title" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="pay-sheet-title" className="ed-sheet-overlay" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
-      <div style={{ position: 'relative', background: 'var(--surface-card)', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
+      <div className="ed-sheet-panel" style={{ position: 'relative', background: 'var(--surface-card)', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
         {/* Handle */}
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '14px auto 0' }} />
+        <div className="ed-sheet-handle" style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '14px auto 0' }} />
 
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
@@ -424,11 +424,11 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
   }
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="register-sheet-title" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+    <div role="dialog" aria-modal="true" aria-labelledby="register-sheet-title" className="ed-sheet-overlay" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
       <div onClick={onClose} aria-hidden="true" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(5px)' }} />
-      <div style={{ position: 'relative', background: 'var(--surface-card)', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
+      <div className="ed-sheet-panel" style={{ position: 'relative', background: 'var(--surface-card)', borderRadius: '24px 24px 0 0', padding: '0 0 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.35s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '92vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
         {/* Handle */}
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '14px auto 0' }} />
+        <div className="ed-sheet-handle" style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '14px auto 0' }} />
 
         {/* Header */}
         <div style={{ padding: '16px 20px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 }}>
@@ -699,63 +699,51 @@ export default function EventDetailClient({
   }
   const cta = ctaLabel()
 
+  const handleCtaClick = () => {
+    if (!isLoggedIn) { router.push('/auth/login'); return }
+    if ((cta as any).action === 'pay') { setShowPaySheet(true); return }
+    if ((cta as any).action === 'ticket') {
+      if (isPaid && existingReg?.payment_status !== 'confirmed' && existingReg?.payment_status !== 'not_required') {
+        setShowPaySheet(true); return
+      }
+      setShowQRModal(true); return
+    }
+    if (!cta.disabled) setShowSheet(true)
+  }
+
   return (
     <>
       <style>{`
         @keyframes revealUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes popIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
         @keyframes sheetSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .ed-reg-col { display: none; }
         @media (min-width: 768px) {
-          .ed-root {
-            display: flex !important;
-            flex-direction: row !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            height: 100svh !important;
-            overflow: hidden !important;
-            padding-bottom: 0 !important;
-            margin: 0 !important;
+          .ed-root { padding-bottom: 0 !important; }
+          .ed-hero { height: 500px !important; }
+          .ed-below {
+            display: grid !important;
+            grid-template-columns: 1fr 400px !important;
+            gap: 32px !important;
+            max-width: 1100px !important;
+            margin: 0 auto !important;
+            padding: 32px 40px 48px !important;
+            align-items: start !important;
           }
-          .ed-hero {
-            position: relative !important;
-            flex: 1 !important;
-            height: 100svh !important;
-            min-width: 0 !important;
-            overflow: hidden !important;
-          }
-          .ed-content-col {
-            width: 440px !important;
-            flex-shrink: 0 !important;
-            overflow-y: auto !important;
-            height: 100svh !important;
-            display: flex !important;
-            flex-direction: column !important;
-            padding-bottom: 0 !important;
-            border-right: 1px solid rgba(255,255,255,0.05) !important;
-            order: -1 !important;
-          }
-          .ed-content-inner { flex: 1; }
-          .ed-cta-fixed {
-            position: sticky !important;
-            bottom: 0 !important;
-            transform: none !important;
-            width: auto !important;
-            left: auto !important;
-            padding: 12px 20px 20px !important;
-            background: linear-gradient(to top, var(--guest-bg) 80%, transparent) !important;
-            z-index: 10 !important;
-          }
-          .ed-cta-btn { border-radius: 14px !important; }
-        }
-        @media (min-width: 1280px) {
-          .ed-content-col { width: 480px !important; order: -1 !important; }
+          .ed-main-col { padding: 0 !important; }
+          .ed-reg-col { display: block !important; position: sticky !important; top: 24px !important; }
+          .ed-status-mob { display: none !important; }
+          .ed-price-main { display: none !important; }
+          .ed-cta-fixed { display: none !important; }
+          .ed-sheet-overlay { align-items: center !important; padding: 20px !important; }
+          .ed-sheet-panel { border-radius: 24px !important; padding-bottom: 24px !important; }
+          .ed-sheet-handle { display: none !important; }
         }
       `}</style>
       <div className="ed-root" style={{ background: 'var(--guest-bg)', minHeight: '100svh', fontFamily: 'var(--font-body)', paddingBottom: 120 }}>
 
-        {/* Hero */}
+        {/* Hero — full-bleed on both mobile (280px) and desktop (500px via CSS) */}
         <div className="ed-hero" style={{ position: 'relative', height: 280, background: event.cover_image_url ? `url(${event.cover_image_url}) center/cover` : gradient, overflow: 'hidden' }}>
-          {/* Noise texture */}
           <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")` }} />
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 40%, rgba(8,10,16,0.95) 100%)' }} />
 
@@ -795,128 +783,179 @@ export default function EventDetailClient({
             </div>
           </div>
         </div>
-        {/* ↑ closes ed-hero */}
 
-        {/* Right column: content + CTA — must be inside ed-root for the grid to work */}
-        <div className="ed-content-col" style={{ display: 'flex', flexDirection: 'column' }}>
+        {/* Below hero: single col on mobile, 2-col grid on desktop */}
+        <div className="ed-below">
 
-        {/* Status banner for existing registrations */}
-        {regStatus && <StatusBanner status={regStatus} paymentStatus={paymentStatus} />}
+          {/* Main content column */}
+          <div className="ed-main-col" style={{ padding: '20px 20px 0', animation: 'revealUp 0.4s ease' }}>
 
-        {/* Main content */}
-        <div className="ed-content-inner" style={{ padding: '20px 20px 0', flex: 1, animation: 'revealUp 0.4s ease' }}>
+            {/* Status banner — mobile only (desktop shows in reg col) */}
+            {regStatus && (
+              <div className="ed-status-mob">
+                <StatusBanner status={regStatus} paymentStatus={paymentStatus} />
+                <div style={{ height: 16 }} />
+              </div>
+            )}
 
-          {/* Title + organiser */}
-          <div style={{ marginBottom: 16 }}>
-            <h1 style={{ color: 'var(--text-primary)', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.8px', lineHeight: 1.15 }}>
-              {event.title}
-            </h1>
-            {event.organizer?.username ? (
-              <a
-                href={`/organizer/${event.organizer.username}`}
-                style={{ color: '#818CF8', fontSize: 13, margin: 0, fontStyle: 'italic', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3 }}
-              >
-                by {organiser}
-                <ExternalLink size={11} color="#818CF8" style={{ opacity: 0.7 }} />
+            {/* Title + organiser */}
+            <div style={{ marginBottom: 16 }}>
+              <h1 style={{ color: 'var(--text-primary)', fontSize: 26, fontWeight: 900, margin: '0 0 6px', fontFamily: 'var(--font-display)', letterSpacing: '-0.8px', lineHeight: 1.15 }}>
+                {event.title}
+              </h1>
+              {event.organizer?.username ? (
+                <a href={`/organizer/${event.organizer.username}`} style={{ color: '#818CF8', fontSize: 13, margin: 0, fontStyle: 'italic', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                  by {organiser}
+                  <ExternalLink size={11} color="#818CF8" style={{ opacity: 0.7 }} />
+                </a>
+              ) : (
+                <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>
+              )}
+            </div>
+
+            {/* Key info grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+              {[
+                { icon: <Calendar size={14} color="#818CF8" />, label: 'Date',     value: `${days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d away`}`, sub: new Date(event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) },
+                { icon: <Clock    size={14} color="#818CF8" />, label: 'Time',     value: fmtTime(event.date_start), sub: event.date_end ? `until ${fmtTime(event.date_end)}` : '' },
+                { icon: <MapPin   size={14} color="#818CF8" />, label: 'Venue',    value: event.secret_venue && !isConfirmedGuest ? 'Secret' : (event.venue_name ?? 'TBA'), sub: event.secret_venue && !isConfirmedGuest ? 'Revealed upon confirmation' : (event.venue_address ?? '') },
+                { icon: <Users    size={14} color="#818CF8" />, label: 'Capacity', value: event.capacity ? `${event.registered_count} / ${event.capacity}` : 'Unlimited', sub: spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 20 ? `${spotsLeft} spots left` : '' },
+              ].map((item, i) => (
+                <div key={i} style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '12px 13px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
+                    {item.icon}
+                    <span style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
+                  </div>
+                  <p style={{ color: item.label === 'Venue' && event.secret_venue && !isConfirmedGuest ? '#FFC745' : 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: 'var(--font-display)' }}>
+                    {item.label === 'Venue' && event.secret_venue && !isConfirmedGuest
+                      ? <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Lock size={11} />{item.value}</span>
+                      : item.value
+                    }
+                  </p>
+                  {item.sub && <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{item.sub}</p>}
+                </div>
+              ))}
+            </div>
+
+            {/* Countdown */}
+            {countdown > 0 && (
+              <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '14px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>Event starts in</span>
+                <span style={{ color: '#818CF8', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+                  {fmtCountdown(countdown)}
+                </span>
+              </div>
+            )}
+
+            {/* Price — mobile only; desktop shows in reg col */}
+            {isPaid && (
+              <div className="ed-price-main" style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '13px 15px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>Ticket Price</span>
+                <span style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 900, fontFamily: 'var(--font-display)' }}>
+                  PKR {event.ticket_price!.toLocaleString('en-PK')}
+                </span>
+              </div>
+            )}
+
+            {/* Description */}
+            {event.description && (
+              <div style={{ marginBottom: 20 }}>
+                <h3 style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>About</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, margin: 0 }}>{event.description}</p>
+              </div>
+            )}
+
+            {/* Venue map link */}
+            {(!event.secret_venue || isConfirmedGuest) && event.venue_address && (
+              <a href={`https://maps.google.com/?q=${encodeURIComponent(event.venue_address)}`} target="_blank" rel="noopener noreferrer"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 15px', background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, marginBottom: 16, textDecoration: 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <MapPin size={16} color="#818CF8" />
+                  <div>
+                    <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, margin: '0 0 1px' }}>{event.venue_name}</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{event.venue_address}</p>
+                  </div>
+                </div>
+                <ExternalLink size={14} color="var(--text-muted)" />
               </a>
-            ) : (
-              <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: 0, fontStyle: 'italic' }}>by {organiser}</p>
             )}
           </div>
 
-          {/* Key info grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
-            {[
-              { icon: <Calendar size={14} color="#818CF8" />, label: 'Date',     value: `${days <= 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d away`}`, sub: new Date(event.date_start).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' }) },
-              { icon: <Clock    size={14} color="#818CF8" />, label: 'Time',     value: fmtTime(event.date_start), sub: event.date_end ? `until ${fmtTime(event.date_end)}` : '' },
-              { icon: <MapPin   size={14} color="#818CF8" />, label: 'Venue',    value: event.secret_venue && !isConfirmedGuest ? 'Secret' : (event.venue_name ?? 'TBA'), sub: event.secret_venue && !isConfirmedGuest ? 'Revealed upon confirmation' : (event.venue_address ?? '') },
-              { icon: <Users    size={14} color="#818CF8" />, label: 'Capacity', value: event.capacity ? `${event.registered_count} / ${event.capacity}` : 'Unlimited', sub: spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 20 ? `${spotsLeft} spots left` : '' },
-            ].map((item, i) => (
-              <div key={i} style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '12px 13px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
-                  {item.icon}
-                  <span style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
+          {/* Registration card — desktop only (CSS .ed-reg-col shows it) */}
+          <div className="ed-reg-col">
+
+            {/* Status banner */}
+            {regStatus && (
+              <StatusBanner status={regStatus} paymentStatus={paymentStatus} style={{ margin: '0 0 16px' }} />
+            )}
+
+            {/* Card */}
+            <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 20, padding: 24, display: 'flex', flexDirection: 'column', gap: 14 }}>
+
+              {/* Price */}
+              {isPaid ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', background: 'rgba(var(--brand-blue-rgb),0.06)', border: '1px solid rgba(var(--brand-blue-rgb),0.15)', borderRadius: 14 }}>
+                  <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>Ticket Price</span>
+                  <span style={{ color: 'var(--text-primary)', fontSize: 22, fontWeight: 900, fontFamily: 'var(--font-display)' }}>
+                    PKR {event.ticket_price!.toLocaleString('en-PK')}
+                  </span>
                 </div>
-                <p style={{ color: item.label === 'Venue' && event.secret_venue && !isConfirmedGuest ? '#FFC745' : 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: 'var(--font-display)' }}>
-                  {item.label === 'Venue' && event.secret_venue && !isConfirmedGuest
-                    ? <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Lock size={11} />{item.value}</span>
-                    : item.value
-                  }
+              ) : (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: 14 }}>
+                  <span style={{ color: '#10B981', fontSize: 13, fontWeight: 700 }}>Free Event</span>
+                  <span style={{ color: '#10B981', fontSize: 13, fontWeight: 700 }}>No cost to attend</span>
+                </div>
+              )}
+
+              {/* Capacity pill */}
+              {isFull ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12 }}>
+                  <Users size={14} color="#F87171" />
+                  <span style={{ color: '#F87171', fontSize: 13, fontWeight: 700 }}>Sold out</span>
+                </div>
+              ) : spotsLeft !== null && spotsLeft > 0 && spotsLeft <= 20 ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(234,179,8,0.08)', border: '1px solid rgba(234,179,8,0.2)', borderRadius: 12 }}>
+                  <Users size={14} color="#EAB308" />
+                  <span style={{ color: '#EAB308', fontSize: 13, fontWeight: 700 }}>{spotsLeft} spots remaining</span>
+                </div>
+              ) : null}
+
+              {/* CTA */}
+              <button
+                onClick={handleCtaClick}
+                disabled={cta.disabled}
+                style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 14, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? 'var(--text-muted)' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}
+              >
+                {cta.label}
+              </button>
+
+              {isEOI && !regStatus && (
+                <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
+                  Organizer reviews applications — you'll be notified in-app.
                 </p>
-                {item.sub && <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{item.sub}</p>}
-              </div>
-            ))}
+              )}
+              {isInviteOnly && (
+                <p style={{ color: 'var(--text-muted)', fontSize: 12, margin: 0, textAlign: 'center' }}>
+                  This is an invite-only event.
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Countdown */}
-          {countdown > 0 && (
-            <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '14px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>Event starts in</span>
-              <span style={{ color: '#818CF8', fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
-                {fmtCountdown(countdown)}
-              </span>
-            </div>
-          )}
-
-          {/* Price */}
-          {isPaid && (
-            <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '13px 15px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ color: 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>Ticket Price</span>
-              <span style={{ color: 'var(--text-primary)', fontSize: 20, fontWeight: 900, fontFamily: 'var(--font-display)' }}>
-                PKR {event.ticket_price!.toLocaleString('en-PK')}
-              </span>
-            </div>
-          )}
-
-          {/* Description */}
-          {event.description && (
-            <div style={{ marginBottom: 20 }}>
-              <h3 style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 800, margin: '0 0 8px', fontFamily: 'var(--font-display)' }}>About</h3>
-              <p style={{ color: 'var(--text-secondary)', fontSize: 14, lineHeight: 1.7, margin: 0 }}>{event.description}</p>
-            </div>
-          )}
-
-          {/* Venue map link */}
-          {(!event.secret_venue || isConfirmedGuest) && event.venue_address && (
-            <a href={`https://maps.google.com/?q=${encodeURIComponent(event.venue_address)}`} target="_blank" rel="noopener noreferrer"
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 15px', background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, marginBottom: 16, textDecoration: 'none' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <MapPin size={16} color="#818CF8" />
-                <div>
-                  <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 600, margin: '0 0 1px' }}>{event.venue_name}</p>
-                  <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{event.venue_address}</p>
-                </div>
-              </div>
-              <ExternalLink size={14} color="var(--text-muted)" />
-            </a>
-          )}
         </div>
 
-        {/* CTA — fixed on mobile, inline on desktop */}
+        {/* Fixed CTA — mobile only, hidden on desktop via CSS */}
         <div className="ed-cta-fixed" style={{ position: 'fixed', bottom: 76, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, padding: '12px 16px 12px', background: 'linear-gradient(to top, var(--guest-bg) 60%, transparent)', zIndex: 50 }}>
           <button
-            className="ed-cta-btn"
-            onClick={() => {
-              if (!isLoggedIn) { router.push('/auth/login'); return }
-              if ((cta as any).action === 'pay') { setShowPaySheet(true); return }
-              if ((cta as any).action === 'ticket') {
-                // Final safety check: only show QR if payment is confirmed or not required
-                if (isPaid && existingReg?.payment_status !== 'confirmed' && existingReg?.payment_status !== 'not_required') {
-                  setShowPaySheet(true); return
-                }
-                setShowQRModal(true); return
-              }
-              if (!cta.disabled) setShowSheet(true)
-            }}
+            onClick={handleCtaClick}
             disabled={cta.disabled}
-            style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? 'var(--text-muted)' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}>
+            style={{ width: '100%', padding: '15px', border: 'none', borderRadius: 16, background: cta.disabled ? 'rgba(255,255,255,0.06)' : cta.color, color: cta.disabled ? 'var(--text-muted)' : 'white', fontSize: 16, fontWeight: 800, cursor: cta.disabled ? 'not-allowed' : 'pointer', fontFamily: 'var(--font-display)', letterSpacing: '-0.2px', transition: 'all 0.2s', boxShadow: cta.disabled ? 'none' : `0 8px 24px ${cta.color}40` }}
+          >
             {cta.label}
           </button>
         </div>
+
       </div>
-      {/* ↑ closes ed-content-col */}
-      </div>
-      {/* ↑ closes ed-root grid */}
 
       {/* Sheets & modals */}
       <div className="ed-sheets-container">

@@ -139,6 +139,13 @@ function QRTicketCard({ ticket }: { ticket: TicketData }) {
   )
 }
 
+const TC_STYLES = `
+  .tc-grid { display: flex; flex-direction: column; gap: 16px; }
+  @media (min-width: 768px) {
+    .tc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+  }
+`
+
 /* ─── Main ───────────────────────────────────────────────────────── */
 export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
   const upcoming = tickets.filter(t => !t.checkedIn && new Date(t.eventDate) >= new Date())
@@ -160,11 +167,12 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
 
   return (
     <>
+      <style>{TC_STYLES}</style>
       <div style={{ padding: '16px' }}>
         {upcoming.length > 0 && (
           <>
             <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px' }}>Upcoming</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
+            <div className="tc-grid" style={{ marginBottom: 24 }}>
               {upcoming.map(t => <QRTicketCard key={t.registrationId} ticket={t} />)}
             </div>
           </>
@@ -172,7 +180,7 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
         {checkedIn.length > 0 && (
           <>
             <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px' }}>Checked In</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}>
+            <div className="tc-grid" style={{ marginBottom: 24 }}>
               {checkedIn.map(t => <QRTicketCard key={t.registrationId} ticket={t} />)}
             </div>
           </>
@@ -180,7 +188,7 @@ export default function TicketsClient({ tickets }: { tickets: TicketData[] }) {
         {past.length > 0 && (
           <>
             <p style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', margin: '0 0 12px' }}>Past</p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, opacity: 0.45 }}>
+            <div className="tc-grid" style={{ opacity: 0.45 }}>
               {past.map(t => <QRTicketCard key={t.registrationId} ticket={t} />)}
             </div>
           </>

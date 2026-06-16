@@ -490,7 +490,7 @@ export default function MessagesClient({
       </div>
 
       {/* ── Desktop: two-panel ── */}
-      <div className="hidden md:flex" style={{ height: 'calc(100vh - 24px)', overflow: 'hidden' }}>
+      <div className="hidden md:flex" style={{ height: '100vh', overflow: 'hidden' }}>
         <div style={{ width: 320, flexShrink: 0, borderRight: '1px solid var(--guest-border)', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
           {ThreadList}
         </div>

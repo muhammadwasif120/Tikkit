@@ -243,10 +243,10 @@ function AvatarPicker({ current, onSelect, onClose, onPhotoUpload }: {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+    <div className="prof-sheet-overlay" style={{ zIndex: 300 }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }} />
-      <div style={{ position: 'relative', background: 'var(--surface-card-2)', borderRadius: '28px 28px 0 0', padding: '20px 20px 44px', border: '1px solid var(--guest-border)', borderBottom: 'none', width: '100%', maxWidth: 480 }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '0 auto 20px' }} />
+      <div className="prof-sheet-panel" style={{ position: 'relative', background: 'var(--surface-card-2)', borderRadius: '28px 28px 0 0', padding: '20px 20px 44px', border: '1px solid var(--guest-border)', borderBottom: 'none', width: '100%', maxWidth: 480 }}>
+        <div className="prof-sheet-handle" style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '0 auto 20px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           <div>
             <h3 style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Choose Avatar</h3>
@@ -443,10 +443,10 @@ function EditSheet({ profile, email, onClose, onSave }: {
   const saveDisabled = busy || usernameState === 'taken' || usernameState === 'checking'
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center' }}>
+    <div className="prof-sheet-overlay" style={{ zIndex: 200 }}>
       <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }} />
-      <div style={{ position: 'relative', background: 'var(--surface-card-2)', borderRadius: '24px 24px 0 0', padding: '24px 20px 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '90vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
-        <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '0 auto 20px' }} />
+      <div className="prof-sheet-panel" style={{ position: 'relative', background: 'var(--surface-card-2)', borderRadius: '24px 24px 0 0', padding: '24px 20px 40px', border: '1px solid var(--guest-border)', animation: 'sheetSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1)', maxHeight: '90vh', overflowY: 'auto', width: '100%', maxWidth: 480 }}>
+        <div className="prof-sheet-handle" style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--guest-border)', margin: '0 auto 20px' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h3 style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Edit Profile</h3>
           <button onClick={onClose} style={{ background: 'var(--guest-surface-2)', border: 'none', borderRadius: 10, padding: 8, cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
@@ -771,6 +771,13 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
   const tier = getCreditTier(profile.credit_score)
   const supabase = createClient()
 
+  useEffect(() => {
+    if (window.innerWidth >= 768) {
+      setShowNotifPrefs(true)
+      setShowTheme(true)
+    }
+  }, [])
+
   const initials = (profile.full_name ?? profile.username ?? 'G').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   const txTypeLabel: Record<string, string> = {
@@ -806,11 +813,28 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
   return (
     <>
       <style>{`
+        @keyframes sheetSlideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         .prof-wrap  { padding: 16px; max-width: 640px; margin: 0 auto; }
         .prof-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+        .prof-id-card { display: flex; align-items: center; gap: 16px; }
+        .prof-id-name-col { flex: 1; min-width: 0; }
+        .prof-id-heading { font-size: 18px; color: var(--text-primary); font-weight: 800; margin: 0 0 2px; font-family: var(--font-display); letter-spacing: -0.4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .prof-stat-val { font-size: 24px; color: inherit; font-weight: 900; margin: 0 0 2px; font-family: var(--font-body); font-variant-numeric: tabular-nums; display: flex; align-items: center; justify-content: center; gap: 3px; }
+        .prof-stat-card { padding: 14px 10px; text-align: center; }
+        .prof-edit-btn { background: var(--guest-surface-2); border: 1px solid var(--guest-border); border-radius: 12px; padding: 8px 12px; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; font-family: var(--font-body); flex-shrink: 0; }
+        .prof-sheet-overlay { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
         @media (min-width: 768px) {
-          .prof-wrap  { max-width: 1000px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+          .prof-wrap  { max-width: 1060px; display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
           .prof-stats { grid-template-columns: repeat(4, 1fr); }
+          .prof-id-card { flex-direction: column; align-items: center; text-align: center; gap: 14px; }
+          .prof-id-name-col { flex: initial; min-width: 0; width: 100%; }
+          .prof-id-heading { font-size: 22px !important; white-space: normal !important; text-overflow: clip !important; }
+          .prof-stat-val { font-size: 30px !important; }
+          .prof-stat-card { padding: 18px 10px !important; }
+          .prof-edit-btn { width: 100% !important; justify-content: center !important; }
+          .prof-sheet-overlay { justify-content: center !important; padding: 20px; }
+          .prof-sheet-panel { border-radius: 24px !important; }
+          .prof-sheet-handle { display: none !important; }
         }
       `}</style>
       <div className="prof-wrap">
@@ -818,13 +842,13 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
         <div className="prof-left">
         {/* Avatar + name card */}
         <div style={{ background: 'var(--surface-card-2)', border: '1px solid var(--guest-border)', borderRadius: 22, padding: '20px', marginBottom: 14 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: profile.bio ? 14 : 0 }}>
+          <div className="prof-id-card" style={{ marginBottom: profile.bio ? 14 : 0 }}>
             {/* Tappable avatar */}
             <button
               onClick={() => setShowAvatarPicker(true)}
               style={{ position: 'relative', background: 'none', border: 'none', padding: 0, cursor: 'pointer', flexShrink: 0 }}
             >
-              <AvatarDisplay url={profile.avatar_url} initials={initials} tier={tier} size={64} />
+              <AvatarDisplay url={profile.avatar_url} initials={initials} tier={tier} size={80} />
               <div style={{
                 position: 'absolute', bottom: -2, right: -2,
                 width: 20, height: 20, borderRadius: '50%',
@@ -840,8 +864,8 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
               )}
             </button>
 
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h2 style={{ color: 'var(--text-primary)', fontSize: 18, fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div className="prof-id-name-col">
+              <h2 className="prof-id-heading">
                 {profile.full_name ?? 'Tikkit User'}
               </h2>
               {profile.username && <p style={{ color: 'var(--text-muted)', fontSize: 13, margin: '0 0 6px' }}>@{profile.username}</p>}
@@ -849,7 +873,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
             </div>
             <button
               onClick={() => setShowEdit(true)}
-              style={{ background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 12, padding: '8px 12px', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 600, fontFamily: 'var(--font-body)', flexShrink: 0 }}
+              className="prof-edit-btn"
             >
               <Edit3 size={13} /> Edit
             </button>
@@ -866,8 +890,8 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
         {/* Stats */}
         <div className="prof-stats">
           {stats.map(stat => (
-            <div key={stat.label} style={{ background: 'var(--surface-card-2)', border: '1px solid var(--guest-border)', borderRadius: 16, padding: '14px 10px', textAlign: 'center' }}>
-              <p style={{ color: stat.color, fontSize: 24, fontWeight: 900, margin: '0 0 2px', fontFamily: 'var(--font-body)', fontVariantNumeric: 'tabular-nums', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
+            <div key={stat.label} className="prof-stat-card" style={{ background: 'var(--surface-card-2)', border: '1px solid var(--guest-border)', borderRadius: 16 }}>
+              <p className="prof-stat-val" style={{ color: stat.color }}>
                 {stat.value}{stat.icon}
               </p>
               <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: 0 }}>{stat.label}</p>
@@ -1098,14 +1122,16 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
 
       {showReport && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          className="prof-sheet-overlay"
+          style={{ zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)' }}
           onClick={() => setShowReport(false)}
         >
           <div
-            style={{ background: 'var(--surface-card-2)', borderRadius: '24px 24px 0 0', border: '1px solid var(--guest-border)', width: '100%', maxWidth: 560, padding: '20px 20px 40px', maxHeight: '90vh', overflowY: 'auto' }}
+            className="prof-sheet-panel"
+            style={{ position: 'relative', background: 'var(--surface-card-2)', borderRadius: '24px 24px 0 0', border: '1px solid var(--guest-border)', width: '100%', maxWidth: 560, padding: '20px 20px 40px', maxHeight: '90vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ width: 36, height: 4, background: 'var(--guest-border)', borderRadius: 2, margin: '0 auto 16px' }} />
+            <div className="prof-sheet-handle" style={{ width: 36, height: 4, background: 'var(--guest-border)', borderRadius: 2, margin: '0 auto 16px' }} />
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
               <p style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 800, margin: 0, fontFamily: 'var(--font-display)' }}>Report a Problem</p>
               <button onClick={() => setShowReport(false)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: 4 }}>
@@ -1124,14 +1150,16 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
 
       {showVerify && (
         <div
-          style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
+          className="prof-sheet-overlay"
+          style={{ zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(10px)' }}
           onClick={() => setShowVerify(false)}
         >
           <div
-            style={{ background: 'var(--surface-card-2)', borderRadius: '24px 24px 0 0', border: '1px solid var(--guest-border)', width: '100%', maxWidth: 560, padding: '20px 20px 40px', maxHeight: '90vh', overflowY: 'auto' }}
+            className="prof-sheet-panel"
+            style={{ position: 'relative', background: 'var(--surface-card-2)', borderRadius: '24px 24px 0 0', border: '1px solid var(--guest-border)', width: '100%', maxWidth: 560, padding: '20px 20px 40px', maxHeight: '90vh', overflowY: 'auto' }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ width: 36, height: 4, background: 'var(--guest-border)', borderRadius: 2, margin: '0 auto 16px' }} />
+            <div className="prof-sheet-handle" style={{ width: 36, height: 4, background: 'var(--guest-border)', borderRadius: 2, margin: '0 auto 16px' }} />
             <p style={{ color: 'var(--text-primary)', fontSize: 16, fontWeight: 800, margin: '0 0 20px', fontFamily: 'var(--font-display)' }}>Identity &amp; Payment Verification</p>
             <VerifyForm profile={{
               id:                 profile.id,

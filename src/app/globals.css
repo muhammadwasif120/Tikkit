@@ -3,15 +3,16 @@
 @tailwind utilities;
 
 /* ─── Responsive Font Sizes ──────────────────────────────────────── */
+/* Desktop: bumped +2px from original mobile-first scale             */
 :root {
-  --fs-2xs:  10px;   /* tiny badges, micro icons */
-  --fs-xs:   11px;   /* uppercase meta labels, counts */
-  --fs-sm:   12px;   /* secondary text, dates, events */
-  --fs-base: 13px;   /* primary body / list-row text  */
-  --fs-md:   14px;   /* emphasised body, event titles  */
-  --fs-lg:   16px;   /* sub-headings                   */
-  --fs-xl:   18px;   /* card values                    */
-  --fs-2xl:  24px;   /* page titles                    */
+  --fs-2xs:  11px;   /* tiny badges, micro icons */
+  --fs-xs:   12px;   /* uppercase meta labels, counts */
+  --fs-sm:   13px;   /* secondary text, dates, events */
+  --fs-base: 15px;   /* primary body / list-row text  */
+  --fs-md:   16px;   /* emphasised body, event titles  */
+  --fs-lg:   18px;   /* sub-headings                   */
+  --fs-xl:   21px;   /* card values                    */
+  --fs-2xl:  28px;   /* page titles                    */
 }
 @media (max-width: 767px) {
   :root {
@@ -579,6 +580,14 @@ body {
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border-color: var(--glass-border);
+  }
+
+  /* Content width cap — prevents lines stretching to 1400px on wide monitors */
+  .guest-content {
+    width: 100%;
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }
 
