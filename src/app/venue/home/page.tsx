@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Venues & Experiences — List Your Space on Tikkit X',
+  title: 'Venues & Experiences — List Your Space on TIKKIT X',
   description: 'Get discovered by thousands of event organisers. List your venue, manage availability, and fill every date.',
 }
 
@@ -73,7 +73,7 @@ export default function VenueHomePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: 8, background: `linear-gradient(135deg, ${C.gold}, #B8960C)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: '#0A0C0F' }}>V</div>
             <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.3px' }}>Venues <span style={{ color: C.gold }}>&</span> Experiences</span>
-            <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>by Tikkit X</span>
+            <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>by TIKKIT X</span>
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Link href="/auth/login" className="btn-ghost" style={{ padding: '9px 20px', fontSize: 14 }}>Sign In</Link>
@@ -93,7 +93,7 @@ export default function VenueHomePage() {
             </span>
           </h1>
           <p className="fade-up-2" style={{ fontSize: 18, color: C.muted, lineHeight: 1.7, marginBottom: 44 }}>
-            Venues & Experiences connects your space directly with event organisers on the Tikkit platform. List once, fill your calendar all year.
+            Venues & Experiences connects your space directly with event organisers on the TIKKIT X platform. List once, fill your calendar all year.
           </p>
           <div className="fade-up-3" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="mailto:hello@tikkitx.com?subject=List My Venue" className="btn-primary">List Your Venue →</Link>
@@ -152,7 +152,7 @@ export default function VenueHomePage() {
 
         {/* ── Footer ── */}
         <footer style={{ borderTop: `1px solid ${C.border}`, padding: '28px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          <span style={{ fontSize: 13, color: C.muted }}>© 2026 Tikkit X · Venues & Experiences</span>
+          <span style={{ fontSize: 13, color: C.muted }}>© 2026 TIKKIT X · Venues & Experiences</span>
           <div style={{ display: 'flex', gap: 24 }}>
             <Link href="https://tikkitx.com" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>tikkitx.com</Link>
             <Link href="/auth/login" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>Sign In</Link>

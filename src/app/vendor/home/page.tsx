@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Vendor X — Run Your Event Services Business',
-  description: 'CRM, invoicing, cross-hires and analytics built for event vendors. Join Vendor X by Tikkit.',
+  description: 'CRM, invoicing, cross-hires and analytics built for event vendors. Join Vendor X by TIKKIT X.',
 }
 
 const C = {
@@ -73,7 +73,7 @@ export default function VendorHomePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: 8, background: `linear-gradient(135deg, ${C.blue}, ${C.purple})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 900, color: '#fff' }}>V</div>
             <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.3px' }}>Vendor <span style={{ color: C.blue }}>X</span></span>
-            <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>by Tikkit</span>
+            <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>by TIKKIT X</span>
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Link href="/auth/login" className="btn-ghost" style={{ padding: '9px 20px', fontSize: 14 }}>Sign In</Link>
@@ -180,7 +180,7 @@ export default function VendorHomePage() {
 
         {/* ── Footer ── */}
         <footer style={{ borderTop: `1px solid ${C.border}`, padding: '28px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          <span style={{ fontSize: 13, color: C.muted }}>© 2026 Tikkit X · Vendor X</span>
+          <span style={{ fontSize: 13, color: C.muted }}>© 2026 TIKKIT X · Vendor X</span>
           <div style={{ display: 'flex', gap: 24 }}>
             <Link href="https://tikkitx.com" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>tikkitx.com</Link>
             <Link href="/auth/login" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>Sign In</Link>

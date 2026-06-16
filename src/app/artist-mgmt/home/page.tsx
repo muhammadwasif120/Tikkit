@@ -2,8 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Artist Management — Grow Your Roster on Tikkit X',
-  description: 'Manage your artist roster, receive booking enquiries from verified organisers, and grow your bookings with Tikkit X.',
+  title: 'Artist Management — Grow Your Roster on TIKKIT X',
+  description: 'Manage your artist roster, receive booking enquiries from verified organisers, and grow your bookings with TIKKIT X.',
 }
 
 const C = {
@@ -19,10 +19,10 @@ const C = {
 const FEATURES = [
   { icon: '🎤', title: 'Artist Profiles',     body: 'Create rich profiles with bio, photo gallery, media embeds, and press kit. Your artists, showcased professionally.' },
   { icon: '📥', title: 'Enquiry Inbox',        body: 'Receive booking requests from verified event organisers in a structured inbox. No cold calls, no spam.' },
-  { icon: '🔒', title: 'Verified Organisers Only', body: 'Every enquiry comes from an ID-verified organiser on the Tikkit platform. No time-wasters.' },
+  { icon: '🔒', title: 'Verified Organisers Only', body: 'Every enquiry comes from an ID-verified organiser on the TIKKIT X platform. No time-wasters.' },
   { icon: '🎯', title: 'Category Discovery',   body: 'Artists are listed under DJs, Musicians, and Comedians — surfaced to organisers looking for exactly what you offer.' },
   { icon: '📋', title: 'Booking Pipeline',     body: 'Track each enquiry from submitted to booked. Respond, negotiate, and confirm — all in one place.' },
-  { icon: '✅', title: 'Tikkit X Verified Badge', body: 'Our team reviews and publishes every profile. The verified badge on your artists signals quality to every organiser.' },
+  { icon: '✅', title: 'TIKKIT X Verified Badge', body: 'Our team reviews and publishes every profile. The verified badge on your artists signals quality to every organiser.' },
 ]
 
 const ARTIST_TYPES = ['DJs', 'Live Bands', 'Solo Musicians', 'Stand-up Comedians', 'Classical Ensembles', 'Electronic Artists', 'Jazz Quartets', 'Spoken Word']
@@ -74,7 +74,7 @@ export default function ArtistMgmtHomePage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 28, height: 28, borderRadius: 8, background: `linear-gradient(135deg, ${C.cyan}, ${C.magenta})`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>🎤</div>
             <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.3px' }}>Artist <span style={{ color: C.cyan }}>Management</span></span>
-            <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>by Tikkit X</span>
+            <span style={{ fontSize: 11, color: C.muted, marginLeft: 4 }}>by TIKKIT X</span>
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Link href="/auth/login" className="btn-ghost" style={{ padding: '9px 20px', fontSize: 14 }}>Sign In</Link>
@@ -94,7 +94,7 @@ export default function ArtistMgmtHomePage() {
             </span>
           </h1>
           <p className="fade-up-2" style={{ fontSize: 18, color: C.muted, lineHeight: 1.7, marginBottom: 44 }}>
-            Tikkit X Artist Management is built for management companies and agencies. Create verified profiles for your artists, receive structured booking enquiries from organisers, and manage your entire pipeline in one place.
+            TIKKIT X Artist Management is built for management companies and agencies. Create verified profiles for your artists, receive structured booking enquiries from organisers, and manage your entire pipeline in one place.
           </p>
           <div className="fade-up-3" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="mailto:hello@tikkitx.com?subject=Artist Management Access" className="btn-primary">Request Access →</Link>
@@ -161,7 +161,7 @@ export default function ArtistMgmtHomePage() {
             {[
               { n: '01', title: 'Contact us for access',    body: 'Artist Management is for verified management companies and agencies. Email us and we\'ll onboard you within 48 hours.' },
               { n: '02', title: 'Add your artists',          body: 'Create profiles for each artist on your roster. Our team reviews and publishes each one with a verified badge.' },
-              { n: '03', title: 'Receive enquiries',         body: 'Verified organisers on Tikkit send structured booking requests. You respond, negotiate, and confirm — all in your inbox.' },
+              { n: '03', title: 'Receive enquiries',         body: 'Verified organisers on TIKKIT X send structured booking requests. You respond, negotiate, and confirm — all in your inbox.' },
             ].map(s => (
               <div key={s.n} style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
                 <div style={{ width: 48, height: 48, borderRadius: 14, background: `${C.cyan}10`, border: `1px solid ${C.cyan}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-display, inherit)', fontSize: 13, fontWeight: 900, color: C.cyan, flexShrink: 0 }}>{s.n}</div>
@@ -180,14 +180,14 @@ export default function ArtistMgmtHomePage() {
             <div style={{ position: 'absolute', top: -80, right: -80, width: 240, height: 240, borderRadius: '50%', background: `${C.cyan}06`, filter: 'blur(40px)' }} />
             <div style={{ position: 'absolute', bottom: -80, left: -80, width: 240, height: 240, borderRadius: '50%', background: `${C.magenta}06`, filter: 'blur(40px)' }} />
             <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 900, letterSpacing: '-1px', marginBottom: 16, position: 'relative' }}>Ready to bring your roster online?</h2>
-            <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.65, marginBottom: 36, position: 'relative' }}>Get your management company set up on Tikkit X. Direct enquiries from verified organisers, zero commission.</p>
+            <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.65, marginBottom: 36, position: 'relative' }}>Get your management company set up on TIKKIT X. Direct enquiries from verified organisers, zero commission.</p>
             <Link href="mailto:hello@tikkitx.com?subject=Artist Management Access" className="btn-primary" style={{ fontSize: 16, padding: '16px 40px', position: 'relative' }}>Request Access →</Link>
           </div>
         </section>
 
         {/* ── Footer ── */}
         <footer style={{ borderTop: `1px solid ${C.border}`, padding: '28px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-          <span style={{ fontSize: 13, color: C.muted }}>© 2026 Tikkit X · Artist Management</span>
+          <span style={{ fontSize: 13, color: C.muted }}>© 2026 TIKKIT X · Artist Management</span>
           <div style={{ display: 'flex', gap: 24 }}>
             <Link href="https://tikkitx.com" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>tikkitx.com</Link>
             <Link href="/auth/login" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>Sign In</Link>
