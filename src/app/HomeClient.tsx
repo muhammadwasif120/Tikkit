@@ -787,8 +787,9 @@ export default function HomeClient() {
         if (!mounted) return
         setCityIdx(idx)
         setCityVisible(true)
-        idx = (idx + 1) % total
-        tid = setTimeout(spin, hold)
+        const isLast = idx === total - 1
+        idx = idx + 1
+        if (!isLast) tid = setTimeout(spin, hold)
       }, fade)
     }
 
