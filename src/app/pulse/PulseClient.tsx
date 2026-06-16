@@ -761,10 +761,6 @@ export default function PulsePage() {
           <a href="mailto:pulse@tikkitx.com" className="pulse-btn-primary" style={{ fontSize: 16, padding: '18px 44px', background: '#C2785C', boxShadow: '0 6px 24px rgba(0,0,0,0.2)' }}>
             Start Hosting on Pulse <ChevronRight size={18} />
           </a>
-          <p style={{ marginTop: 24, fontSize: 14, color: 'rgba(255,255,255,0.5)' }}>
-            Questions?{' '}
-            <a href="mailto:pulse@tikkitx.com" style={{ color: 'rgba(255,255,255,0.8)', textDecoration: 'underline' }}>pulse@tikkitx.com</a>
-          </p>
         </div>
       </section>
 
