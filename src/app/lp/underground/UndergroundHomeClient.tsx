@@ -1120,7 +1120,7 @@ export default function UndergroundHomeClient() {
           <Link href="/" className="footer-brand">
             <TikkitXLogo size="sm" />
           </Link>
-          <p className="footer-copy">© {new Date().getFullYear()} TIKKIT X. Built in Pakistan 🇵🇰</p>
+          <p className="footer-copy">© {new Date().getFullYear()} TIKKIT X. From the underground. For the world.</p>
           <div className="footer-links">
             <Link href="/how-it-works" className="footer-link">How it works</Link>
             <Link href="/about" className="footer-link">About</Link>

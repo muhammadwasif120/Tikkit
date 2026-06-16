@@ -4,13 +4,13 @@ import HomeClient from './HomeClient'
 import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'TIKKIT X — The Complete Event OS for Pakistan',
-  description: 'Six modules. One platform. Events, Vendor X, Venues, Artist Management, Guest App & Analytics — the complete operating system for live events in Pakistan. Free to start.',
-  keywords: ['event management Pakistan', 'event operating system', 'venue booking Pakistan', 'artist management Pakistan', 'sell tickets online Pakistan', 'event ticketing platform Pakistan', 'concerts Lahore', 'events Karachi', 'events Islamabad', 'event organizer tools Pakistan', 'JazzCash event tickets', 'vendor management events'],
+  title: 'TIKKIT X — The Complete Event OS',
+  description: 'Six modules. One platform. Events, Vendor X, Venues, Artist Management, Guest App & Analytics — the complete operating system for live events. From the underground. For the world.',
+  keywords: ['event management', 'event operating system', 'venue booking platform', 'artist management platform', 'event ticketing platform', 'sell tickets online', 'event organizer tools', 'vendor management events', 'concerts Lahore', 'events Karachi', 'events Islamabad', 'JazzCash event tickets'],
   alternates: { canonical: 'https://www.tikkitx.com' },
   openGraph: {
-    title: 'TIKKIT X — The Complete Event OS for Pakistan',
-    description: 'Six modules. One platform. Events, Vendor X, Venues, Artist Management, Guest App & Analytics — the complete operating system for live events.',
+    title: 'TIKKIT X — The Complete Event OS',
+    description: 'Six modules. One platform. Events, Vendor X, Venues, Artist Management, Guest App & Analytics — the complete operating system for live events. From the underground. For the world.',
     url: 'https://www.tikkitx.com',
     type: 'website',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'TIKKIT X — The Complete Event OS' }],
@@ -18,8 +18,8 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     site: '@tikkitx',
-    title: 'TIKKIT X — The Complete Event OS for Pakistan',
-    description: 'Six modules. One platform. Every organiser, vendor, venue, artist, and guest — connected. Free to start.',
+    title: 'TIKKIT X — The Complete Event OS',
+    description: 'Six modules. One platform. Every organiser, vendor, venue, artist, and guest — connected. From the underground. For the world.',
     images: ['/og-image.jpg'],
   },
 }
@@ -41,8 +41,8 @@ const organizationSchema = {
     caption: 'Tikkit X',
   },
   image: { '@id': 'https://www.tikkitx.com/#logo' },
-  description: "The complete event operating system for Pakistan — events, vendor management, venue booking, artist management, guest app, and analytics. Six modules. One platform. Built in Karachi.",
-  slogan: 'The Complete Event OS.',
+  description: "The complete event operating system for live events — events, vendor management, venue booking, artist management, guest app, and analytics. Six modules. One platform. From the underground. For the world.",
+  slogan: 'From the underground. For the world.',
   foundingDate: '2024',
   foundingLocation: { '@type': 'Place', name: 'Karachi, Pakistan' },
   address: {

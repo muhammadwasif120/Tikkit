@@ -1061,7 +1061,7 @@ export default function HomeClient() {
       <footer className="footer">
         <div className="footer-inner">
           <Link href="/" className="footer-brand"><TikkitXLogo size="sm" /></Link>
-          <p className="footer-copy">© {new Date().getFullYear()} TIKKIT X — The Complete Event OS · Built in Pakistan 🇵🇰</p>
+          <p className="footer-copy">© {new Date().getFullYear()} TIKKIT X — The Complete Event OS · From the underground. For the world.</p>
           <div className="footer-links">
             <Link href="/how-it-works" className="footer-link">How it works</Link>
             <Link href="/explore"      className="footer-link">Explore</Link>
