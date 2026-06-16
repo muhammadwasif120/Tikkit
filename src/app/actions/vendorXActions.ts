@@ -303,3 +303,32 @@ export async function confirmAdvancePayment(invoiceId: string) {
   if (error) return { error: error.message }
   revalidatePath(`/vendor/os/invoices/${invoiceId}`)
 }
+
+/* ─── Vendor profile settings ────────────────────────────────────────────── */
+export async function updateVendorProfile(fd: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated' }
+
+  const citiesRaw = (fd.get('cities_covered') as string ?? '').trim()
+  const portfolioRaw = (fd.get('portfolio_urls') as string ?? '').trim()
+
+  const patch = {
+    trading_name:   (fd.get('trading_name') as string).trim(),
+    company_name:   (fd.get('company_name') as string).trim() || null,
+    category:       fd.get('category') as string,
+    bio:            (fd.get('bio') as string).trim().slice(0, 280) || null,
+    cities_covered: citiesRaw ? citiesRaw.split(',').map(s => s.trim()).filter(Boolean) : [],
+    portfolio_urls: portfolioRaw ? portfolioRaw.split('\n').map(s => s.trim()).filter(Boolean) : [],
+  }
+
+  const { error } = await (supabase as any)
+    .from('vendors')
+    .update(patch)
+    .eq('user_id', user.id)
+
+  if (error) return { error: error.message }
+  revalidatePath('/vendor/os/settings')
+  revalidatePath('/vendor/os')
+  return { success: true }
+}
