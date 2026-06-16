@@ -33,7 +33,7 @@ export default function SiteFooter() {
               fontFamily: 'var(--font-display, inherit)',
             }}
           >
-            Tikkit
+            TIKKIT X
           </span>
           <span
             style={{
@@ -42,7 +42,7 @@ export default function SiteFooter() {
               fontFamily: 'var(--font-body, inherit)',
             }}
           >
-            Pakistan's event ticketing platform
+            The Complete Event OS
           </span>
         </div>
 
