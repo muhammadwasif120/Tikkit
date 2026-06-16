@@ -5,6 +5,7 @@ import {
   ShieldCheck, BarChart2, QrCode, Users, Briefcase, FileText,
   CheckCircle, Building2, CalendarDays, Globe, Lock, Database,
   ChevronRight, ArrowRight, Menu, X, Zap, TrendingUp, Clock,
+  MapPin, Package, Smartphone,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 
@@ -42,12 +43,42 @@ function useCountUp(target: number, inView: boolean, duration = 1600) {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const features = [
-  { icon: Users,        color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',  title: 'Invitations That Mean It',      desc: 'Invite-only, open, or approval-based. From board dinners to 500-person town halls — every guest list managed with precision.' },
-  { icon: QrCode,       color: '#64B5F6', glow: 'rgba(100,181,246,0.3)', title: 'Check-In Without the Clipboard', desc: 'Cryptographic QR codes that work offline. Know exactly who arrived and when. No paper, no guessing, no gatecrashers.' },
-  { icon: BarChart2,    color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',  title: 'The Room, Live',                desc: 'Attendance velocity, capacity, demographic breakdowns — updating in real time as your event runs. Your team always knows the score.' },
-  { icon: Briefcase,    color: '#64B5F6', glow: 'rgba(100,181,246,0.3)', title: 'Every Vendor. One Dashboard.',  desc: 'Photographers, AV, catering, security. Invoices, payments, performance — tracked centrally. No missed calls, no lost receipts.' },
-  { icon: ShieldCheck,  color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',  title: 'Only the Right People Get In',  desc: 'CNIC-verified guest lists for high-stakes functions. Gatecrashers are not a possibility when identity is verified at registration.' },
-  { icon: FileText,     color: '#64B5F6', glow: 'rgba(100,181,246,0.3)', title: 'The Report That Writes Itself', desc: 'Attendance, dwell time, vendor scores, financials — one click, PDF ready for leadership the same night.' },
+  {
+    icon: Users,
+    color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',
+    title: 'Invitations That Mean It',
+    desc: 'Invite-only, open, or approval-based. From board dinners to 500-person town halls — every guest list managed with precision, not spreadsheets.',
+  },
+  {
+    icon: Smartphone,
+    color: '#64B5F6', glow: 'rgba(100,181,246,0.3)',
+    title: 'QR Passes in the TIKKIT X App',
+    desc: 'Every attendee receives their verified QR pass inside the TIKKIT X app. Scan at the door — cryptographic verification, offline-capable, no paper, no gatecrashers.',
+  },
+  {
+    icon: BarChart2,
+    color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',
+    title: 'The Room, Live',
+    desc: 'Attendance velocity, capacity, demographic breakdowns — updating in real time as your event runs. Your team always knows the score.',
+  },
+  {
+    icon: Package,
+    color: '#64B5F6', glow: 'rgba(100,181,246,0.3)',
+    title: 'Vendor X — Built Right In',
+    desc: 'Photographers, AV, catering, security — source from TIKKIT X\'s verified vendor network. Manage quotes, invoices, and performance centrally. No missed calls, no lost receipts.',
+  },
+  {
+    icon: MapPin,
+    color: '#4A90D9', glow: 'rgba(74,144,217,0.3)',
+    title: 'Venue Discovery & Booking',
+    desc: 'Access vetted spaces — hotel ballrooms, conference centres, rooftop venues, private dining rooms — directly through the TIKKIT X Venues platform. Enquire, confirm, and coordinate without leaving the dashboard.',
+  },
+  {
+    icon: FileText,
+    color: '#64B5F6', glow: 'rgba(100,181,246,0.3)',
+    title: 'The Report That Writes Itself',
+    desc: 'Attendance, dwell time, vendor scores, financials — one click, PDF or CSV ready for leadership the same night the event ends.',
+  },
 ]
 
 const securityPoints = [
@@ -60,16 +91,40 @@ const securityPoints = [
 ]
 
 const useCases = [
-  { icon: CalendarDays, title: 'Annual Dinners & Galas',       desc: 'Tiered seating, VIP access tiers, full vendor coordination. The night that defines the year — done properly.' },
-  { icon: Building2,    title: 'Team Retreats & Offsites',     desc: 'Multi-day scheduling, activity sign-ups, headcount tracking. Everyone accounted for, every step of the way.' },
+  { icon: CalendarDays, title: 'Annual Dinners & Galas',       desc: 'Tiered seating, VIP access, full vendor coordination. The night that defines the year — done properly.' },
+  { icon: Building2,    title: 'Team Retreats & Offsites',     desc: 'Multi-day scheduling, activity sign-ups, headcount tracking. Book a partner venue through TIKKIT X. Everyone accounted for, every step of the way.' },
   { icon: Users,        title: 'Conferences & Seminars',       desc: 'Session registration, speaker management, verified CPD records. Serious events run on serious infrastructure.' },
   { icon: Briefcase,    title: 'Product Launches & Roadshows', desc: 'Approval-only access, branded invitations, post-launch analytics. Make the launch match the product.' },
 ]
 
+const ecosystemPillars = [
+  {
+    icon: Smartphone,
+    color: '#4A90D9',
+    title: 'TIKKIT X App',
+    subtitle: 'For your attendees',
+    body: 'Every guest carries their QR pass in the TIKKIT X mobile app. Verified entry, event schedule, and communications — all in one place on their phone.',
+  },
+  {
+    icon: Package,
+    color: '#7C3AED',
+    title: 'Vendor X',
+    subtitle: 'For your suppliers',
+    body: 'Source photographers, AV, catering, and security from a verified vendor network. Manage quotes, contracts, and payments from a single dashboard.',
+  },
+  {
+    icon: MapPin,
+    color: '#0D9488',
+    title: 'Venues & Experiences',
+    subtitle: 'For your spaces',
+    body: 'Browse and enquire on vetted event spaces across Pakistan — hotel ballrooms, conference centres, private dining rooms — directly through the platform.',
+  },
+]
+
 const steps = [
-  { n: '01', title: 'Build the event',         desc: 'Registration type, capacity, tiers, vendors. Two minutes from blank screen to live event.' },
-  { n: '02', title: 'Send the invitations',    desc: 'One link. Guests register and receive their verified QR ticket. Works for 20 or 2,000.' },
-  { n: '03', title: 'Run it. Then review it.', desc: 'One scan per guest. Monitor live. Export the analytics report for leadership the same night.' },
+  { n: '01', title: 'Build the event',         desc: 'Registration type, capacity, tiers, vendors, venue. Two minutes from blank screen to live event page.' },
+  { n: '02', title: 'Send the invitations',    desc: 'One link. Guests register and receive their verified QR pass in the TIKKIT X app. Works for 20 or 2,000.' },
+  { n: '03', title: 'Run it. Then report it.', desc: 'One scan per guest. Monitor live. Export the full analytics report for leadership the same night.' },
 ]
 
 const companyTypes = [
@@ -78,8 +133,8 @@ const companyTypes = [
 ]
 
 const heroCards = [
-  { label: 'LIVE', title: 'Board Summit 2026', sub: 'Avari Towers, Karachi', checkins: 98,  total: 120, color: '#4A90D9' },
-  { label: 'OPEN', title: 'Annual Leadership Gala', sub: 'PC Hotel, Lahore',   checkins: 214, total: 350, color: '#64B5F6' },
+  { label: 'LIVE', title: 'Board Summit 2026',      sub: 'Avari Towers, Karachi',  checkins: 98,  total: 120, color: '#4A90D9' },
+  { label: 'OPEN', title: 'Annual Leadership Gala', sub: 'PC Hotel, Lahore',        checkins: 214, total: 350, color: '#64B5F6' },
 ]
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
@@ -109,9 +164,7 @@ function FeatureCard({ feature, index }: { feature: typeof features[0]; index: n
       style={{
         background: hovered ? 'rgba(74,144,217,0.06)' : '#1A2332',
         border: `1px solid ${hovered ? 'rgba(74,144,217,0.35)' : 'rgba(255,255,255,0.07)'}`,
-        borderRadius: 16,
-        padding: '28px 24px',
-        cursor: 'default',
+        borderRadius: 16, padding: '28px 24px', cursor: 'default',
         transition: 'all 0.3s ease',
         boxShadow: hovered ? `0 0 32px ${feature.glow}` : 'none',
         opacity: inView ? 1 : 0,
@@ -138,11 +191,8 @@ function HeroCard({ card, delay }: { card: typeof heroCards[0]; delay: number })
   const pct = Math.round((card.checkins / card.total) * 100)
   return (
     <div style={{
-      background: 'rgba(26,35,50,0.9)',
-      backdropFilter: 'blur(20px)',
-      border: '1px solid rgba(255,255,255,0.08)',
-      borderRadius: 16,
-      padding: '20px 22px',
+      background: 'rgba(26,35,50,0.9)', backdropFilter: 'blur(20px)',
+      border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '20px 22px',
       animation: `corpFloat ${3 + delay}s ease-in-out ${delay}s infinite alternate`,
       minWidth: 260,
     }}>
@@ -162,7 +212,10 @@ function HeroCard({ card, delay }: { card: typeof heroCards[0]; delay: number })
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <span style={{ fontSize: 11, color: '#475569' }}>QR verified</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+          <Smartphone size={10} color="#64748B" />
+          <span style={{ fontSize: 11, color: '#475569' }}>TIKKIT X app</span>
+        </div>
         <span style={{ fontSize: 11, color: '#22C55E', fontWeight: 600 }}>{pct}% capacity</span>
       </div>
     </div>
@@ -213,30 +266,17 @@ export default function CorporatePage() {
           from { transform: translateY(0px); }
           to   { transform: translateY(-12px); }
         }
-
         @keyframes corpMarquee {
           from { transform: translateX(0); }
           to   { transform: translateX(-50%); }
         }
-
         @keyframes corpFadeUp {
           from { opacity: 0; transform: translateY(20px); }
           to   { opacity: 1; transform: translateY(0); }
         }
-
         @keyframes corpGlow {
           0%, 100% { box-shadow: 0 0 20px rgba(74,144,217,0.2); }
           50%       { box-shadow: 0 0 40px rgba(74,144,217,0.45); }
-        }
-
-        @keyframes corpPulse {
-          0%, 100% { opacity: 1; }
-          50%       { opacity: 0.5; }
-        }
-
-        @keyframes corpGridShift {
-          0%   { background-position: 0 0; }
-          100% { background-position: 40px 40px; }
         }
 
         .corp-nav-link {
@@ -347,11 +387,10 @@ export default function CorporatePage() {
             ))}
           </nav>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <a href="/corporate/demo" className="corp-btn-primary corp-hide-mobile">Book a Demo <ChevronRight size={16} /></a>
+            <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary corp-hide-mobile">Get in Touch <ChevronRight size={16} /></a>
             <button
               onClick={() => setMenuOpen(v => !v)}
-              style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: 8, display: 'none' }}
-              className="corp-show-mobile"
+              style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', padding: 8 }}
             >
               {menuOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
@@ -362,7 +401,7 @@ export default function CorporatePage() {
             {['Features', 'How It Works', 'Security', 'Use Cases'].map(l => (
               <a key={l} href={`#${l.toLowerCase().replace(/ /g, '-')}`} className="corp-nav-link" onClick={() => setMenuOpen(false)}>{l}</a>
             ))}
-            <a href="/corporate/demo" className="corp-btn-primary" style={{ justifyContent: 'center' }}>Book a Demo</a>
+            <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary" style={{ justifyContent: 'center' }}>Get in Touch</a>
           </div>
         )}
       </header>
@@ -372,7 +411,6 @@ export default function CorporatePage() {
         minHeight: '100vh', display: 'flex', alignItems: 'center',
         position: 'relative', overflow: 'hidden', paddingTop: 68,
       }}>
-        {/* Gradient orbs */}
         <div style={{ position: 'absolute', top: '15%', left: '55%', width: 600, height: 600, borderRadius: '50%', background: 'radial-gradient(circle, rgba(74,144,217,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: '10%', left: '10%', width: 400, height: 400, borderRadius: '50%', background: 'radial-gradient(circle, rgba(100,181,246,0.07) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
@@ -380,8 +418,7 @@ export default function CorporatePage() {
           {/* Left */}
           <div style={{ flex: 1, animation: 'corpFadeUp 0.7s ease both' }}>
             <div className="corp-section-label">
-              <Zap size={11} />
-              Enterprise Event Management
+              <Zap size={11} /> Enterprise Event Management · Pakistan
             </div>
             <h1 style={{
               fontFamily: 'var(--font-display)', fontWeight: 800, lineHeight: 1.08,
@@ -389,23 +426,22 @@ export default function CorporatePage() {
               letterSpacing: '-0.025em', marginBottom: 24,
             }}>
               Corporate Events.<br />
-              <span style={{ color: '#4A90D9' }}>Executed</span><br />
-              Flawlessly.
+              <span style={{ color: '#4A90D9' }}>The Full Stack.</span><br />
+              Nothing Missing.
             </h1>
-            <p style={{ fontSize: 18, color: '#94A3B8', lineHeight: 1.75, marginBottom: 40, maxWidth: 480 }}>
-              Town halls. Leadership galas. Annual conferences. When the room matters, the details can&apos;t slip. One platform that makes sure they don&apos;t.
+            <p style={{ fontSize: 18, color: '#94A3B8', lineHeight: 1.75, marginBottom: 40, maxWidth: 500 }}>
+              From the first guest invitation to the post-event leadership report — TIKKIT X handles invitations, QR check-in via the mobile app, vendor coordination through Vendor X, venue booking, and real-time analytics. One platform. One brief. Done.
             </p>
             <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
-              <a href="/corporate/demo" className="corp-btn-primary" style={{ fontSize: 15, padding: '15px 32px' }}>
-                Book a Demo <ArrowRight size={17} />
+              <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary" style={{ fontSize: 15, padding: '15px 32px' }}>
+                Get in Touch <ArrowRight size={17} />
               </a>
               <a href="#features" className="corp-btn-ghost" style={{ fontSize: 15, padding: '15px 32px' }}>
                 See Features
               </a>
             </div>
-            {/* Trust chips */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 36 }}>
-              {['Verified Check-In', 'Offline QR', 'Real-Time Analytics', 'SOC 2 Infrastructure'].map(t => (
+              {['TIKKIT X app check-in', 'Vendor X included', 'Venue network access', 'SOC 2 infrastructure'].map(t => (
                 <div key={t} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#64748B', padding: '5px 12px', borderRadius: 100, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
                   <CheckCircle size={11} color="#22C55E" /> {t}
                 </div>
@@ -422,14 +458,14 @@ export default function CorporatePage() {
               border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '18px 22px',
               animation: 'corpFloat 4.2s ease-in-out 1.6s infinite alternate',
             }}>
-              <p style={{ fontSize: 11, color: '#64748B', marginBottom: 10 }}>Attendance Rate</p>
+              <p style={{ fontSize: 11, color: '#64748B', marginBottom: 10 }}>Attendance Rate — Last 7 Events</p>
               <div style={{ display: 'flex', gap: 3, alignItems: 'flex-end', height: 40 }}>
                 {[55, 72, 64, 88, 95, 82, 98].map((h, i) => (
                   <div key={i} style={{ flex: 1, borderRadius: '3px 3px 0 0', background: `rgba(74,144,217,${0.3 + (h / 100) * 0.7})`, height: `${h}%`, transition: 'height 1s ease' }} />
                 ))}
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10 }}>
-                <span style={{ fontSize: 11, color: '#64748B' }}>Last 7 events</span>
+                <span style={{ fontSize: 11, color: '#64748B' }}>avg attendance</span>
                 <span style={{ fontSize: 13, fontWeight: 800, color: '#22C55E' }}>↑ 98%</span>
               </div>
             </div>
@@ -439,11 +475,11 @@ export default function CorporatePage() {
 
       {/* ── COMPANY MARQUEE ── */}
       <div style={{ background: '#1A2332', borderTop: '1px solid rgba(255,255,255,0.07)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '18px 0', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ padding: '0 32px', fontSize: 11, fontWeight: 700, color: '#4A90D9', letterSpacing: '0.1em', textTransform: 'uppercase' as const, flexShrink: 0, whiteSpace: 'nowrap' as const }}>
             Trusted by
           </div>
-          <div className="corp-marquee-wrap" style={{ flex: 1, overflow: 'hidden' }}>
+          <div className="corp-marquee-wrap" style={{ flex: 1 }}>
             <div className="corp-marquee-track">
               {marqueeItems.map((t, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', padding: '0 32px', flexShrink: 0 }}>
@@ -459,9 +495,9 @@ export default function CorporatePage() {
       {/* ── STATS ── */}
       <section ref={statsSection.ref} style={{ padding: '80px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 48 }}>
-          <StatItem target={500}  suffix="+"    label="Corporate events managed" />
-          <StatItem target={99}   suffix=".2%"  label="Check-in accuracy rate" />
-          <StatItem target={40}   suffix="+"    label="Enterprise clients" />
+          <StatItem target={500}  suffix="+"   label="Corporate events managed" />
+          <StatItem target={99}   suffix=".2%" label="Check-in accuracy rate" />
+          <StatItem target={40}   suffix="+"   label="Enterprise clients" />
         </div>
       </section>
 
@@ -478,9 +514,9 @@ export default function CorporatePage() {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
             {[
-              { icon: FileText,  title: 'Guest Lists Built in Threads',       body: 'RSVPs scattered across email and WhatsApp. No master list. No way to know who\'s confirmed, who\'s a maybe, or who just walked in.' },
-              { icon: BarChart2, title: 'The Event Ends. The Data Doesn\'t Exist.', body: 'You ran a 400-person gala. Leadership asks for the report. You have a signup sheet and a vague feeling.' },
-              { icon: Users,     title: 'Vendors on WhatsApp. Bills in the Inbox.', body: 'Photographers, catering, AV — all coordinated through scattered messages. No paper trail. No accountability.' },
+              { icon: FileText,  title: 'Guest Lists Built in Threads',            body: "RSVPs scattered across email and WhatsApp. No master list. No way to know who's confirmed, who's a maybe, or who just walked in uninvited." },
+              { icon: BarChart2, title: 'The Event Ends. The Data Doesn\'t Exist.', body: 'You ran a 400-person gala. Leadership asks for the report. You have a signup sheet, three WhatsApp groups, and a vague feeling.' },
+              { icon: Users,     title: 'Vendors on WhatsApp. Bills in the Inbox.', body: 'Photographers, catering, AV — all coordinated through scattered messages. No paper trail. No accountability. One no-show and the night falls apart.' },
             ].map(({ icon: Icon, title, body }) => {
               const { ref, inView } = useInView()
               return (
@@ -510,12 +546,52 @@ export default function CorporatePage() {
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
               One Platform. From Invite to Export.
             </h2>
-            <p style={{ fontSize: 17, color: '#64748B', maxWidth: 480, margin: '0 auto', lineHeight: 1.7 }}>
-              From the first guest invite to the post-event leadership report — everything runs in one place.
+            <p style={{ fontSize: 17, color: '#64748B', maxWidth: 500, margin: '0 auto', lineHeight: 1.7 }}>
+              Invitations, QR check-in, vendor sourcing, venue booking, live analytics, post-event reports — all connected, all in one place.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
             {features.map((f, i) => <FeatureCard key={f.title} feature={f} index={i} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ── ECOSYSTEM ── */}
+      <section style={{ padding: '96px 24px', background: '#0B1220', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div className="corp-section-label"><Zap size={11} /> The TIKKIT X Ecosystem</div>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
+              Every Piece of Your Event. Connected.
+            </h2>
+            <p style={{ fontSize: 17, color: '#64748B', maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
+              TIKKIT X is not just event ticketing. It&apos;s the full operating system for your event — from sourcing the space to scanning the last guest in.
+            </p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
+            {ecosystemPillars.map(({ icon: Icon, color, title, subtitle, body }) => {
+              const { ref, inView } = useInView()
+              return (
+                <div key={title} ref={ref} style={{
+                  padding: '32px 28px', borderRadius: 18,
+                  background: '#1A2332',
+                  border: `1px solid ${color}22`,
+                  opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(20px)',
+                  transition: 'opacity 0.5s ease, transform 0.5s ease',
+                }}>
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 14,
+                    background: `${color}18`, border: `1px solid ${color}30`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20,
+                  }}>
+                    <Icon size={22} color={color} />
+                  </div>
+                  <div style={{ fontSize: 10, fontWeight: 800, color, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 6 }}>{subtitle}</div>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 10 }}>{title}</h3>
+                  <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.75 }}>{body}</p>
+                </div>
+              )
+            })}
           </div>
         </div>
       </section>
@@ -537,10 +613,8 @@ export default function CorporatePage() {
                   opacity: inView ? 1 : 0, transform: inView ? 'translateY(0)' : 'translateY(24px)',
                   transition: `opacity 0.55s ease ${i * 0.12}s, transform 0.55s ease ${i * 0.12}s`,
                 }}>
-                  {/* Step number */}
                   <div style={{ fontFamily: 'var(--font-display)', fontSize: 48, fontWeight: 900, color: 'rgba(74,144,217,0.15)', lineHeight: 1, marginBottom: 16, letterSpacing: '-0.04em' }}>{step.n}</div>
-                  {/* Glow line */}
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, #4A90D9, transparent)`, borderRadius: '16px 16px 0 0', opacity: 0.6 }} />
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #4A90D9, transparent)', borderRadius: '16px 16px 0 0', opacity: 0.6 }} />
                   <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, color: '#fff', marginBottom: 10 }}>{step.title}</h3>
                   <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.7 }}>{step.desc}</p>
                 </div>
@@ -558,7 +632,7 @@ export default function CorporatePage() {
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(1.8rem,4vw,2.8rem)', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 16 }}>
               Your IT Team Already Has Questions.<br />Here Are the Answers.
             </h2>
-            <p style={{ fontSize: 17, color: '#64748B', lineHeight: 1.7 }}>
+            <p style={{ fontSize: 17, color: '#64748B', lineHeight: 1.7, maxWidth: 520, margin: '0 auto' }}>
               We built this knowing your security team would push back. Every answer is already in the platform.
             </p>
           </div>
@@ -618,42 +692,33 @@ export default function CorporatePage() {
               Wherever the Brief Takes You.
             </h2>
             <p style={{ fontSize: 17, color: '#64748B', maxWidth: 520, margin: '0 auto', lineHeight: 1.7 }}>
-              Tikkit is built for Pakistan's corporate event circuit — from Karachi boardrooms to Islamabad summits to Lahore galas.
+              TIKKIT X is built for Pakistan&apos;s corporate event circuit — from Karachi boardrooms to Islamabad summits to Lahore galas.
             </p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
             {[
               {
                 city: 'Lahore',
-                desc: 'DHA, Gulberg, and Johar Town host Pakistan\'s most active corporate event calendar. Annual dinners at five-star ballrooms, tech summits in co-working hubs, and product launches for the country\'s largest consumer brands. Tikkit manages the full guest experience — from digital invitation to post-event report.',
+                desc: "DHA, Gulberg, and Johar Town host Pakistan's most active corporate event calendar. Annual dinners at five-star ballrooms, tech summits in co-working hubs, product launches for the country's largest consumer brands. TIKKIT X handles the full guest experience — from digital invitation to post-event report — while Vendor X keeps your suppliers accountable.",
                 tags: ['Annual Dinners', 'Tech Summits', 'Product Launches'],
               },
               {
                 city: 'Karachi',
-                desc: 'Pakistan\'s business capital runs the country\'s largest events. Expo Centre conferences, Clifton gala dinners, PECHS board retreats. Karachi\'s corporate events demand production quality and airtight guest management. Tikkit delivers both — at any scale, with verified check-in and real-time analytics.',
+                desc: "Pakistan's business capital runs the country's largest events. Expo Centre conferences, Clifton gala dinners, PECHS board retreats. Karachi's corporate events demand production quality and airtight guest management. TIKKIT X delivers both — at any scale, with real-time analytics and verified QR check-in via the TIKKIT X app.",
                 tags: ['Conferences', 'Corporate Galas', 'Financial Sector Events'],
               },
               {
                 city: 'Islamabad',
-                desc: 'Government agencies, multinationals, UN bodies, and embassies run Islamabad\'s event calendar. Protocol-aware, security-conscious, and formal. Verified guest lists are a professional expectation, not optional. Tikkit\'s CNIC-verified registration and offline check-in are built for exactly this environment.',
+                desc: "Government agencies, multinationals, UN bodies, and embassies run Islamabad's event calendar. Protocol-aware, security-conscious, and formal. Verified guest lists are a professional expectation. TIKKIT X's CNIC-verified registration and offline QR check-in were built for exactly this environment — and for the venue WiFi that always seems to fail.",
                 tags: ['Government Events', 'Diplomatic Functions', 'NGO Conferences'],
               },
             ].map(({ city, desc, tags }) => (
-              <div key={city} style={{
-                background: '#1A2332',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: 16,
-                padding: '32px 28px',
-              }}>
+              <div key={city} style={{ background: '#1A2332', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: '32px 28px' }}>
                 <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 22, fontWeight: 800, color: '#fff', marginBottom: 14 }}>{city}</h3>
                 <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.75, marginBottom: 20 }}>{desc}</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                   {tags.map(tag => (
-                    <span key={tag} style={{
-                      fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 100,
-                      background: 'rgba(74,144,217,0.1)', color: '#4A90D9',
-                      border: '1px solid rgba(74,144,217,0.2)',
-                    }}>{tag}</span>
+                    <span key={tag} style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 100, background: 'rgba(74,144,217,0.1)', color: '#4A90D9', border: '1px solid rgba(74,144,217,0.2)' }}>{tag}</span>
                   ))}
                 </div>
               </div>
@@ -673,33 +738,31 @@ export default function CorporatePage() {
           {[
             {
               q: 'How do I manage a guest list for a large corporate event in Pakistan?',
-              a: 'Use Tikkit\'s digital registration system — every guest gets a unique QR code, your team scans at the door, and the dashboard updates in real time. No spreadsheets, no printed lists. The full attendance record exports automatically after the event.',
+              a: 'Every guest registers and receives a unique QR pass inside the TIKKIT X mobile app. Your check-in team scans codes at the door — no spreadsheet, no clipboard, no paper. The dashboard updates in real time and exports a full attendance report automatically.',
             },
             {
-              q: 'Can Tikkit handle offline check-in at venues without WiFi?',
-              a: 'Yes. Download the guest list before the event and scan QR codes completely offline. All data syncs when connectivity returns — essential for Islamabad venues, farmhouses, and large hotel ballrooms with unreliable internet.',
+              q: 'Can I book a venue for my corporate event through TIKKIT X?',
+              a: 'Yes. TIKKIT X Venues gives you access to vetted event spaces across Pakistan — hotel ballrooms, conference centres, rooftop venues, private dining rooms. Browse availability, send an enquiry, and coordinate the booking directly through the platform.',
+            },
+            {
+              q: 'How do I manage vendors for a corporate event?',
+              a: 'TIKKIT X includes Vendor X — a built-in vendor coordination system. Source photographers, AV teams, caterers, and security with verified event histories. Manage quotes, invoices, and payments from a single dashboard. No missed WhatsApp messages, no lost receipts.',
+            },
+            {
+              q: 'Can TIKKIT X handle offline check-in at venues without WiFi?',
+              a: 'Yes. Download the guest list before the event and scan TIKKIT X QR passes completely offline. All data syncs when connectivity returns — essential for Islamabad venues, farmhouses, and hotel ballrooms with unreliable internet.',
             },
             {
               q: 'How do I generate a post-event report for leadership?',
-              a: 'Tikkit generates your report automatically. After the event, click Reports in your dashboard. Download attendance data, check-in rate, no-shows, and ticket breakdown as PDF or CSV — ready within minutes of the event ending.',
+              a: 'TIKKIT X generates your report automatically. After the event, click Reports in your dashboard. Download attendance, check-in rate, no-shows, and ticket breakdown as PDF or CSV — ready within minutes of the event ending.',
             },
             {
-              q: 'Does Tikkit support CNIC verification for high-security events?',
-              a: 'Yes. Verified organisers on Tikkit have completed CNIC identity confirmation. For events requiring verified guest lists — board dinners, government functions, diplomatic events — this creates an accountable, secure guest management environment.',
-            },
-            {
-              q: 'What ticket tiers can I set up for a corporate event?',
-              a: 'Unlimited tiers — General Admission, VIP, Press, Speaker, Staff, Early Bird, and any custom tier you need. Each tier has its own capacity, price (including free), and check-in flow. VIP guests can be directed to a separate entrance automatically.',
+              q: 'Does TIKKIT X support CNIC verification for high-security corporate events?',
+              a: 'Yes. Verified organisers have completed CNIC identity confirmation. For events requiring verified guest lists — board dinners, government functions, diplomatic events — this creates an accountable, secure guest management environment.',
             },
           ].map(({ q, a }, i) => (
-            <details key={i} style={{
-              borderBottom: '1px solid rgba(255,255,255,0.07)',
-              padding: '20px 0',
-            }}>
-              <summary style={{
-                fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer',
-                listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}>
+            <details key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '20px 0' }}>
+              <summary style={{ fontSize: 16, fontWeight: 700, color: '#fff', cursor: 'pointer', listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 {q}
                 <ChevronRight size={18} color="#4A90D9" style={{ flexShrink: 0, marginLeft: 16 }} />
               </summary>
@@ -720,15 +783,11 @@ export default function CorporatePage() {
             Your Next Event Should Be the Best One Yet.
           </h2>
           <p style={{ fontSize: 18, color: '#64748B', marginBottom: 40, lineHeight: 1.7 }}>
-            Corporate teams across Pakistan are running events on Tikkit. Time to see what a proper platform feels like.
+            Corporate teams across Pakistan are running events on TIKKIT X. Time to see what the full stack feels like.
           </p>
-          <a href="/corporate/demo" className="corp-btn-primary" style={{ fontSize: 16, padding: '17px 40px', animation: 'corpGlow 3s ease infinite' }}>
-            Book a Demo <ArrowRight size={18} />
+          <a href="mailto:corporate@tikkitx.com" className="corp-btn-primary" style={{ fontSize: 16, padding: '17px 40px', animation: 'corpGlow 3s ease infinite' }}>
+            Get in Touch <ArrowRight size={18} />
           </a>
-          <p style={{ marginTop: 20, fontSize: 14, color: '#475569' }}>
-            Or email us at{' '}
-            <a href="mailto:corporate@tikkitx.com" style={{ color: '#4A90D9', textDecoration: 'none' }}>corporate@tikkitx.com</a>
-          </p>
         </div>
       </section>
 
