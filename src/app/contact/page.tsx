@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const WA_NUMBER = '923322028451'
+const WA_NUMBER = '13074434195'
 const WA_ORGANISER = `https://wa.me/${WA_NUMBER}?text=Hi%20Tikkit%20%E2%80%94%20I%20want%20to%20run%20an%20event`
 const WA_GENERAL   = `https://wa.me/${WA_NUMBER}?text=Hi%20Tikkit%20%E2%80%94%20I%20have%20a%20question`
 const EMAIL        = 'hello@tikkitx.com'

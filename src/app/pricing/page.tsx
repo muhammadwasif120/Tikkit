@@ -241,7 +241,7 @@ export default function PricingPage() {
               ))}
             </div>
             <a
-              href="https://wa.me/923322028451?text=Hi%20Tikkit%20%E2%80%94%20I%27m%20interested%20in%20the%20Corporate%20plan"
+              href="https://wa.me/13074434195?text=Hi%20Tikkit%20%E2%80%94%20I%27m%20interested%20in%20the%20Corporate%20plan"
               target="_blank"
               rel="noopener noreferrer"
               className="cta-ghost"
