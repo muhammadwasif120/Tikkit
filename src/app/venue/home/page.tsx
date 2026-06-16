@@ -40,7 +40,7 @@ const FEATURES = [
   {
     icon: '📲',
     title: 'QR Check-in',
-    body: 'Every registration and booking generates a unique QR pass. Scan at the door — no app required for guests, no manual lists for you.',
+    body: 'Every registration and booking generates a QR pass inside the TIKKIT X app. Guests carry it on their phone, you scan at the door — no lists, no printouts, no chaos.',
   },
   {
     icon: '📊',
