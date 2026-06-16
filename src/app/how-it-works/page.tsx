@@ -1484,19 +1484,6 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer>
-        <div className="footer-inner">
-          <Link href="/" className="footer-brand">
-            <TikkitXLogo size="sm" />
-          </Link>
-          <p className="footer-copy">© {new Date().getFullYear()} TIKKIT X. Built in Pakistan 🇵🇰</p>
-          <div className="footer-links">
-            <Link href="/auth/login" className="footer-link">Log in</Link>
-            <Link href="/auth/login" className="footer-link">Sign up</Link>
-          </div>
-        </div>
-      </footer>
     </>
   )
 }

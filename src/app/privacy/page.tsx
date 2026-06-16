@@ -229,17 +229,6 @@ export default function PrivacyPolicyPage() {
         </LegalSection>
       </main>
 
-      {/* Footer */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '32px 24px', textAlign: 'center' }}>
-        <div style={{ maxWidth: 760, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
-          <p style={{ fontSize: 13, color: '#4A5568' }}>© {new Date().getFullYear()} Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X.</p>
-          <div style={{ display: 'flex', gap: 24 }}>
-            <Link href="/terms" style={{ fontSize: 13, color: '#4A5568', textDecoration: 'none' }}>Terms &amp; Conditions</Link>
-            <Link href="/" style={{ fontSize: 13, color: '#4A5568', textDecoration: 'none' }}>Home</Link>
-          </div>
-        </div>
-      </footer>
-
       <style>{`
         main p { font-size: 15px; line-height: 1.75; color: #9AAAB8; margin-bottom: 14px; }
         main ul { padding-left: 20px; margin-bottom: 14px; }

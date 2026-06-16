@@ -1,6 +1,5 @@
 import type { Metadata } from 'next'
 import PulsePage from './PulseClient'
-import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'Pulse — Host Yoga Retreats, Wellness Events & Workshops in Pakistan',
@@ -92,7 +91,6 @@ export default function Page() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <PulsePage />
-      <SiteFooter />
     </>
   )
 }

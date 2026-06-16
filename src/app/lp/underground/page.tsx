@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import UndergroundHomeClient from './UndergroundHomeClient'
-import SiteFooter from '@/components/SiteFooter'
 
 export const metadata: Metadata = {
   title: 'TIKKIT X — Your night. Your rules.',
@@ -41,7 +40,6 @@ export default function UndergroundPage() {
           </div>
         </div>
       </section>
-      <SiteFooter />
     </>
   )
 }
