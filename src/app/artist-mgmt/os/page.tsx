@@ -1,19 +1,41 @@
-import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
+import RosterClient from '@/components/artist/os/RosterClient'
 
-export const metadata = { title: 'Artist Management — Coming Soon' }
+export default async function RosterPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
 
-export default function ArtistMgmtOsPage() {
+  const { data: mgmt } = await (supabase as any)
+    .from('management_accounts')
+    .select('id, company_name')
+    .eq('user_id', user!.id)
+    .maybeSingle()
+
+  if (!mgmt) redirect('/artist-mgmt/onboarding')
+
+  const { data: artists } = await (supabase as any)
+    .from('artists')
+    .select('id, name, slug, category, sub_tags, based_in_city, profile_photo_url, availability_status, profile_status, verified')
+    .eq('management_id', mgmt.id)
+    .order('name')
+
+  // Open enquiry counts per artist
+  const { data: enquiryCounts } = await (supabase as any)
+    .from('artist_enquiries')
+    .select('artist_id, status')
+    .eq('management_id', mgmt.id)
+    .in('status', ['submitted', 'viewed'])
+
+  const countMap: Record<string, number> = {}
+  for (const e of enquiryCounts ?? []) {
+    countMap[e.artist_id] = (countMap[e.artist_id] ?? 0) + 1
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#050508', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', fontFamily: 'DM Sans, sans-serif', padding: '40px 20px', textAlign: 'center' }}>
-      <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg, #00E5FF, #CC00FF)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22, marginBottom: 28 }}>🎤</div>
-      <h1 style={{ fontSize: 32, fontWeight: 900, color: '#FFFFFF', letterSpacing: '-1px', marginBottom: 12 }}>Artist Management Portal</h1>
-      <p style={{ fontSize: 16, color: 'rgba(255,255,255,0.45)', lineHeight: 1.65, maxWidth: 420, marginBottom: 40 }}>
-        You&rsquo;re in. The full artist management dashboard is launching very soon — we&rsquo;ll email you the moment it&rsquo;s ready.
-      </p>
-      <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.2)', borderRadius: 999, padding: '6px 16px', fontSize: 13, color: '#00E5FF', fontWeight: 700, marginBottom: 40 }}>
-        ⏳ Launching soon
-      </div>
-      <Link href="/auth/login" style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)', textDecoration: 'none' }}>Sign out</Link>
-    </div>
+    <RosterClient
+      artists={artists ?? []}
+      enquiryCounts={countMap}
+    />
   )
 }
