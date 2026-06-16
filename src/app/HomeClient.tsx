@@ -403,7 +403,7 @@ const CSS = `
   .h1-city {
     font-size:.38em; font-weight:900; letter-spacing:0; color:#00E5FF;
     display:inline-block;
-    transition:opacity .2s ease, transform .2s ease;
+    transition:opacity .12s ease, transform .12s ease;
     text-shadow:0 0 40px rgba(0,229,255,.5);
   }
 
@@ -766,8 +766,8 @@ export default function HomeClient() {
   useEffect(() => {
     const t = setInterval(() => {
       setCityVisible(false)
-      setTimeout(() => { setCityIdx(i => (i + 1) % CITIES.length); setCityVisible(true) }, 200)
-    }, 900)
+      setTimeout(() => { setCityIdx(i => (i + 1) % CITIES.length); setCityVisible(true) }, 120)
+    }, 500)
     return () => clearInterval(t)
   }, [])
 
