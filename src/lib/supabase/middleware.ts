@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
-// Subdomains map to their root redirect and protected path prefix
-const SUBDOMAIN_MAP: Record<string, { root: string; prefix: string }> = {
-  'vendor': { root: '/vendor/os',      prefix: '/vendor'      },
-  'venue':  { root: '/venue/os',       prefix: '/venue'       },
-  'artist': { root: '/artist-mgmt/os', prefix: '/artist-mgmt' },
+// Subdomains map to their landing page, authenticated portal, and protected prefix
+const SUBDOMAIN_MAP: Record<string, { landing: string; portal: string; prefix: string }> = {
+  'vendor': { landing: '/vendor/home',      portal: '/vendor/os',      prefix: '/vendor'      },
+  'venue':  { landing: '/venue/home',       portal: '/venue/os',       prefix: '/venue'       },
+  'artist': { landing: '/artist-mgmt/home', portal: '/artist-mgmt/os', prefix: '/artist-mgmt' },
 }
 
 function getSubdomain(host: string): string | null {
@@ -23,13 +23,6 @@ export async function updateSession(request: NextRequest) {
   const host        = request.headers.get('host') ?? ''
   const subdomain   = getSubdomain(host)
   const subConfig   = subdomain ? SUBDOMAIN_MAP[subdomain] : null
-
-  // ── Subdomain root redirect ────────────────────────────────────────────────
-  // vendor.tikkitx.com/ → /vendor/os
-  // venue.tikkitx.com/  → /venue/os
-  if (subConfig && pathname === '/') {
-    return NextResponse.redirect(new URL(subConfig.root, request.url))
-  }
 
   let response = NextResponse.next({ request })
 
@@ -51,6 +44,14 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
+
+  // ── Subdomain root redirect ────────────────────────────────────────────────
+  // Logged-in  → go straight to the portal
+  // Logged-out → show the product landing page
+  if (subConfig && pathname === '/') {
+    const dest = user ? subConfig.portal : subConfig.landing
+    return NextResponse.redirect(new URL(dest, request.url))
+  }
 
   // Public routes — always allow through
   const publicPaths = [
@@ -79,10 +80,13 @@ export async function updateSession(request: NextRequest) {
     '/pricing',
     '/about',
     '/security',
-    '/venues',   // Public venue browse
-    '/venue',    // Public venue profile pages
-    '/v',        // Public vendor profiles
-    '/artists',  // Public artist directory + profiles
+    '/venues',          // Public venue browse
+    '/venue',           // Public venue profile pages
+    '/v',               // Public vendor profiles
+    '/artists',         // Public artist directory + profiles
+    '/vendor/home',     // Vendor X landing page
+    '/venue/home',      // Venues & Experiences landing page
+    '/artist-mgmt/home', // Artist Management landing page
   ]
 
   // On a product subdomain, only its own routes + auth are accessible
@@ -91,7 +95,7 @@ export async function updateSession(request: NextRequest) {
     const isAuth    = pathname.startsWith('/auth')
     const isProduct = pathname.startsWith(subConfig.prefix)
     if (!isAuth && !isProduct) {
-      return NextResponse.redirect(new URL(subConfig.root, request.url))
+      return NextResponse.redirect(new URL(subConfig.portal, request.url))
     }
   }
 
@@ -105,9 +109,9 @@ export async function updateSession(request: NextRequest) {
         const metaRole = user.user_metadata?.role as string | undefined
         const role = profile?.role ?? metaRole ?? 'guest'
 
-        // On a product subdomain, authenticated login always goes to that product's root
+        // On a product subdomain, authenticated login always goes to that product's portal
         if (subConfig) {
-          return NextResponse.redirect(new URL(subConfig.root, request.url))
+          return NextResponse.redirect(new URL(subConfig.portal, request.url))
         }
 
         const dest = role === 'guest'  ? '/explore'
