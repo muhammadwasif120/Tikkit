@@ -3,6 +3,7 @@ import { DM_Sans } from 'next/font/google'
 import { cookies } from 'next/headers'
 import './globals.css'
 import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
+import WAHelpWidget from '@/components/ui/WAHelpWidget'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GoogleAnalytics } from '@next/third-parties/google'
@@ -189,6 +190,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="antialiased">
         <ThemeProvider initialTheme={theme}>
           {children}
+          <WAHelpWidget />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

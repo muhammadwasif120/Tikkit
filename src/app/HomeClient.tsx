@@ -694,16 +694,6 @@ const CSS = `
   .btn-cta-main:hover { transform:translateY(-4px) scale(1.02); box-shadow:0 0 80px rgba(30,94,255,.65), 0 0 160px rgba(30,94,255,.2); }
   .cta-tagline { margin-top:28px; font-size:12px; font-weight:900; letter-spacing:.25em; color:rgba(30,94,255,.5); font-family:var(--font-display); }
 
-  /* ── WA button ── */
-  .wa-btn {
-    position:fixed; bottom:24px; right:24px; z-index:50;
-    display:flex; align-items:center; gap:10px;
-    background:#25D366; color:#000; border-radius:50px; padding:12px 20px 12px 14px;
-    text-decoration:none; font-family:var(--font-display); font-weight:700; font-size:14px;
-    box-shadow:0 4px 24px rgba(37,211,102,.4);
-    transition:transform .2s, box-shadow .2s;
-  }
-  .wa-btn:hover { transform:translateY(-2px); box-shadow:0 8px 32px rgba(37,211,102,.5); }
 
   /* ── Footer ── */
   .footer { border-top:1px solid var(--border); }
@@ -1043,19 +1033,6 @@ export default function HomeClient() {
         </div>
       </section>
 
-      {/* ── WhatsApp ── */}
-      <a
-        href="https://wa.me/13074434195?text=Hi%20TIKKIT%20X%20%E2%80%94%20I%20want%20to%20run%20an%20event"
-        target="_blank" rel="noopener noreferrer"
-        aria-label="Chat with TIKKIT X on WhatsApp"
-        className="wa-btn"
-      >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0 }}>
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
-          <path d="M12 0C5.373 0 0 5.373 0 12c0 2.116.549 4.104 1.508 5.836L.057 23.07a.75.75 0 0 0 .92.921l5.233-1.451A11.945 11.945 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.956 0-3.793-.497-5.388-1.371l-.371-.209-3.849 1.068 1.067-3.847-.217-.383A9.956 9.956 0 0 1 2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
-        </svg>
-        Chat with us
-      </a>
 
       {/* ── Footer ── */}
       <footer className="footer">
