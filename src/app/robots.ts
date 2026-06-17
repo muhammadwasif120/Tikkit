@@ -18,6 +18,8 @@ export default function robots(): MetadataRoute.Robots {
     '/demo',
     '/compare/',
     '/organizer/',
+    '/venue/',
+    '/venues',
     '/guest/explore/',
     '/contact',
     '/pricing',
