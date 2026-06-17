@@ -12,6 +12,8 @@ const STATIC_URLS = [
   `${BASE_URL}/how-it-works`,
   `${BASE_URL}/corporate`,
   `${BASE_URL}/pulse`,
+  `${BASE_URL}/venue/home`,
+  `${BASE_URL}/venues`,
   `${BASE_URL}/blog`,
   `${BASE_URL}/privacy`,
   `${BASE_URL}/terms`,
@@ -27,7 +29,7 @@ async function getDynamicUrls(): Promise<string[]> {
     const sixMonthsAgo = new Date()
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
 
-    const [eventsRes, organizersRes] = await Promise.all([
+    const [eventsRes, organizersRes, venuesRes] = await Promise.all([
       admin
         .from('events')
         .select('id, slug')
@@ -43,6 +45,12 @@ async function getDynamicUrls(): Promise<string[]> {
         .not('username', 'is', null)
         .neq('username', '')
         .limit(500),
+      (admin as any)
+        .from('venues')
+        .select('slug')
+        .eq('active', true)
+        .not('slug', 'is', null)
+        .limit(500),
     ])
 
     const eventUrls = (eventsRes.data ?? []).map((ev: any) =>
@@ -51,8 +59,11 @@ async function getDynamicUrls(): Promise<string[]> {
     const organizerUrls = (organizersRes.data ?? []).map((org: any) =>
       `${BASE_URL}/organizer/${org.username}`
     )
+    const venueUrls = (venuesRes.data ?? []).map((v: any) =>
+      `${BASE_URL}/venue/${v.slug}`
+    )
 
-    return [...eventUrls, ...organizerUrls]
+    return [...eventUrls, ...organizerUrls, ...venueUrls]
   } catch {
     return []
   }
