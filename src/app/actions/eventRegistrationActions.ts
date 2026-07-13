@@ -7,7 +7,7 @@ import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 export async function registerForEvent(formData: FormData) {
   const ip = await getClientIp()
-  if (!checkRateLimit(`register:${ip}`, 5, 600_000)) {
+  if (!(await checkRateLimit(`register:${ip}`, 5, 600_000))) {
     return { error: 'Too many registration attempts. Please try again later.' }
   }
 
@@ -89,7 +89,7 @@ export async function registerForEvent(formData: FormData) {
 
 export async function submitEOI(formData: FormData) {
   const ip = await getClientIp()
-  if (!checkRateLimit(`eoi:${ip}`, 5, 600_000)) {
+  if (!(await checkRateLimit(`eoi:${ip}`, 5, 600_000))) {
     return { error: 'Too many submission attempts. Please try again later.' }
   }
 

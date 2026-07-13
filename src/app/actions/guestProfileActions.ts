@@ -159,7 +159,7 @@ export async function sendPasswordReset() {
 
   // Rate limit: 3 reset emails per hour per user
   const { checkRateLimit } = await import('@/lib/rateLimit')
-  if (!checkRateLimit(`pwreset:${user.id}`, 3, 3_600_000)) {
+  if (!(await checkRateLimit(`pwreset:${user.id}`, 3, 3_600_000))) {
     return { error: 'Too many reset attempts. Please wait before trying again.' }
   }
 
