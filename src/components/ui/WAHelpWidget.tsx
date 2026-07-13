@@ -194,6 +194,12 @@ export default function WAHelpWidget() {
           transition:background .15s, transform .15s, box-shadow .15s;
         }
         .wa-cta:hover { background:#22c55e; transform:translateY(-1px); box-shadow:0 5px 20px rgba(37,211,102,.4); }
+        .wa-email-link {
+          display:block; text-align:center; margin-top:10px;
+          font-size:11px; color:rgba(240,242,255,.3); text-decoration:none;
+          transition:color .15s;
+        }
+        .wa-email-link:hover { color:rgba(240,242,255,.6); }
       `}</style>
 
       {/* Floating button */}
@@ -256,6 +262,13 @@ export default function WAHelpWidget() {
             >
               {WA_SVG}
               {ctx.cta}
+            </a>
+            <a
+              href="mailto:hello@tikkitx.com"
+              className="wa-email-link"
+              onClick={handleClose}
+            >
+              Or email us at hello@tikkitx.com
             </a>
           </div>
         </div>

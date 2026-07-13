@@ -1,4 +1,5 @@
 import { createMobileClient, mobileUnauthorized } from '@/lib/supabase/mobile'
+import { safeDecrypt } from '@/lib/encrypt'
 import { NextRequest } from 'next/server'
 
 export async function GET(req: NextRequest) {
@@ -15,6 +16,6 @@ export async function GET(req: NextRequest) {
   if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({
     status: profile?.cnic_status ?? 'unverified',
-    cnic_number: profile?.cnic_number ?? null,
+    cnic_number: safeDecrypt(profile?.cnic_number) ?? null,
   })
 }

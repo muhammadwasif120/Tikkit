@@ -61,6 +61,7 @@ export default function SiteFooter() {
             { href: '/corporate', label: 'Corporate' },
             { href: '/pulse', label: 'Pulse' },
             { href: '/blog', label: 'Blog' },
+            { href: '/contact', label: 'Contact' },
             { href: '/privacy', label: 'Privacy policy' },
             { href: '/terms', label: 'Terms of service' },
           ].map(({ href, label }) => (
@@ -79,6 +80,19 @@ export default function SiteFooter() {
               {label}
             </Link>
           ))}
+          <a
+            href="mailto:hello@tikkitx.com"
+            style={{
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--guest-muted, rgba(240,242,255,0.45))',
+              textDecoration: 'none',
+              fontFamily: 'var(--font-body, inherit)',
+              transition: 'color 0.15s',
+            }}
+          >
+            hello@tikkitx.com
+          </a>
         </nav>
 
         {/* Right: copyright */}

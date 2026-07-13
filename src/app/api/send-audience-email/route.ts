@@ -1,28 +1,23 @@
 import { Resend } from 'resend'
 import { NextRequest, NextResponse } from 'next/server'
 import { verifyCsrfOrigin } from '@/lib/csrf'
+import { stripHtml } from '@/lib/sanitize'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-
-type Recipient = {
-  email: string
-  full_name: string
-}
 
 export async function POST(req: NextRequest) {
   const csrf = verifyCsrfOrigin(req)
   if (csrf) return csrf
   try {
-    // SECURITY PATCH: Strongly authorize the sender
     const { createClient } = await import('@/lib/supabase/server')
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const { recipients, subject, body, eventId } = await req.json()
+    const { subject, body, eventId } = await req.json()
 
     if (!eventId) return NextResponse.json({ error: 'eventId required' }, { status: 400 })
-    
+
     // Verify the user owns this event
     const { data: event, error: eventError } = await supabase
       .from('events')
@@ -34,20 +29,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    if (!recipients?.length) {
-      return NextResponse.json({ error: 'No recipients provided' }, { status: 400 })
-    }
-
-    // Abuse guard: cap batch size to prevent quota exhaustion
-    if (recipients.length > 500) {
-      return NextResponse.json({ error: 'Maximum 500 recipients per send' }, { status: 400 })
-    }
-
     if (!subject || !body) {
       return NextResponse.json({ error: 'Subject and body are required' }, { status: 400 })
     }
 
-    // Length caps to prevent oversized payloads
     if (subject.length > 200) {
       return NextResponse.json({ error: 'Subject must be 200 characters or fewer' }, { status: 400 })
     }
@@ -55,16 +40,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Body must be 10,000 characters or fewer' }, { status: 400 })
     }
 
-    // Send emails individually so we can personalise with {name}
+    // Fetch recipients from DB — never trust client-supplied email list
+    const { data: registrations, error: regError } = await supabase
+      .from('public_registrations')
+      .select('email, full_name')
+      .eq('event_id', eventId)
+      .in('status', ['approved', 'registered', 'checked_in'])
+
+    if (regError) return NextResponse.json({ error: 'Failed to fetch recipients' }, { status: 500 })
+    if (!registrations?.length) return NextResponse.json({ error: 'No eligible recipients for this event' }, { status: 400 })
+
+    // Strip HTML from organizer-supplied content before embedding in the email template
+    const safeBody = stripHtml(body)
+    const safeSubject = stripHtml(subject)
+
     const results = await Promise.allSettled(
-      recipients.map((recipient: Recipient) => {
-        const firstName = recipient.full_name.split(' ')[0]
-        const personalised = body.replace(/\{name\}/g, firstName)
+      registrations.map(({ email, full_name }) => {
+        const firstName = (full_name ?? '').split(' ')[0] || 'Guest'
+        const personalised = safeBody.replace(/\{name\}/g, firstName)
 
         return resend.emails.send({
           from: 'Tikkit <onboarding@resend.dev>',
-          to: recipient.email,
-          subject,
+          to: email,
+          subject: safeSubject,
           html: `
             <div style="font-family: 'Inter', sans-serif; max-width: 560px; margin: 0 auto; background: #0F1117; color: #F3F4F6; padding: 40px 32px; border-radius: 16px;">
               <div style="margin-bottom: 32px;">
@@ -87,7 +85,7 @@ export async function POST(req: NextRequest) {
     const succeeded = results.filter(r => r.status === 'fulfilled').length
     const failed = results.filter(r => r.status === 'rejected').length
 
-    return NextResponse.json({ succeeded, failed })
+    return NextResponse.json({ succeeded, failed, total: registrations.length })
   } catch (error: unknown) {
     console.error('Email send error:', error)
     return NextResponse.json(

@@ -4,8 +4,7 @@ export interface VerificationSession {
   id: string
   user_id: string
   didit_session_id: string | null
-  paypro_order_id: string | null
-  status: 'pending' | 'id_complete' | 'payment_complete' | 'fully_verified' | 'failed'
+  status: 'pending' | 'id_complete' | 'fully_verified' | 'failed'
   created_at: string
   updated_at: string
 }
@@ -47,25 +46,6 @@ export interface DiditSessionResponse {
   expires_at: string
 }
 
-// PayPro order creation response (https://docs.paypro.com.pk)
-export interface PayProOrderResponse {
-  Message: string
-  ResponseCode: string
-  'Click2Pay URL': string   // redirect user here to pay
-  OrderID?: string
-}
-
-// PayPro IPN webhook payload (POST notification on payment)
-export interface PayProWebhookPayload {
-  BillReference: string     // our order ID, includes user_id
-  Amount: string
-  Status: string            // 'paid' | 'unpaid' | 'cancelled'
-  TransactionID?: string
-  PaymentMode?: string      // 'JazzCash' | 'EasyPaisa' | 'Bank' | 'Card'
-  MerchantId?: string
-  StoreId?: string
-}
-
 // Chat message shape (mirrors event_chats table)
 export interface ChatMessage {
   id: string
@@ -87,7 +67,7 @@ export interface LedgerRecord {
   event_id: string
   user_id: string | null
   ref_id: string
-  ledger_type: 'paypro_charge' | 'didit_verification' | 'chat_purge_record' | 'media_purge_record'
+  ledger_type: 'didit_verification' | 'chat_purge_record' | 'media_purge_record'
   amount: number | null
   currency: string
   metadata: Record<string, unknown>
