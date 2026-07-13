@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import ForceNoir from '@/components/master/ForceNoir'
 
 export default async function MasterLayout({ children }: { children: React.ReactNode }) {
@@ -9,6 +8,13 @@ export default async function MasterLayout({ children }: { children: React.React
 
   if (!user) redirect('/master/login')
 
+  // profiles.role is the single source of truth for admin access. It is
+  // protected by the protect_profile_role trigger, so authenticated/anon
+  // callers cannot elevate it. We must NOT fall back to user_metadata.role
+  // here: it is user-writable (supabase.auth.updateUser), and the previous
+  // fallback additionally persisted that forged value into profiles.role via
+  // the service role — a full privilege-escalation path. Admin is granted only
+  // by setting profiles.role directly (SQL / service role by a human).
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -16,18 +22,7 @@ export default async function MasterLayout({ children }: { children: React.React
     .single()
 
   if (!profile || profile.role !== 'admin') {
-    // DB role doesn't match — check JWT metadata as authoritative fallback.
-    // This fixes the redirect loop caused by a metadata/DB mismatch (e.g. metadata
-    // was back-filled to 'admin' but profiles.role was never updated to match).
-    const metaRole = user.user_metadata?.role
-    if (metaRole === 'admin') {
-      // Auto-correct the DB to match the JWT — breaks the loop permanently.
-      const adminClient = createAdminClient()
-      await adminClient.from('profiles').update({ role: 'admin' } as any).eq('id', user.id)
-      // Continue rendering — user is legitimately admin per their signed JWT
-    } else {
-      redirect('/master/login')
-    }
+    redirect('/master/login')
   }
 
   return (

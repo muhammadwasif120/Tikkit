@@ -3,6 +3,7 @@
 import { useState, useRef, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { notifyGuestAddedByOrganizer } from '@/app/actions/eventNotificationActions'
 import { ArrowLeft, Plus, Upload, FileSpreadsheet, X, Check, AlertCircle, Download } from 'lucide-react'
 import Link from 'next/link'
 
@@ -70,29 +71,9 @@ async function insertGuest(supabase: any, eventId: string, data: {
 
     if (regError) console.error('Registration sync error:', regError)
 
-    // 3. Send in-app notification to the guest if they have a profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', data.email.toLowerCase().trim())
-      .maybeSingle()
-
-    if (profile?.id) {
-      // Fetch event title for notification
-      const { data: event } = await supabase
-        .from('events')
-        .select('title, date_start')
-        .eq('id', eventId)
-        .single()
-
-      await supabase.from('notifications').insert({
-        user_id: profile.id,
-        type:    'organizer_invite',
-        title:   "You're on the list! 🎉",
-        body:    `You've been added to ${event?.title ?? 'an event'}. Check your Tikkit for details.`,
-        data:    { event_id: eventId },
-      })
-    }
+    // 3. Send in-app notification to the guest (server-side, service role).
+    // SEC-04: cross-user notifications can no longer be inserted from the client.
+    await notifyGuestAddedByOrganizer(data.email, eventId)
   }
 
   return { error: null }

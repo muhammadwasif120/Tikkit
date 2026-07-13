@@ -5,6 +5,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -52,10 +53,8 @@ export async function submitPaymentScreenshot(formData: FormData) {
     return { error: 'Upload failed. Please try again.' }
   }
 
-  // payment-screenshots bucket is private; store the path and serve via signed URL as needed
-  const { data: { publicUrl } } = supabase.storage
-    .from('payment-screenshots')
-    .getPublicUrl(path)
+  // payment-screenshots bucket is private (SEC-02); store the object key and
+  // serve via a short-lived signed URL (signPaymentScreenshot) on read.
 
   // H7: Update payment_status (not registration status) to 'submitted'.
   // The previous code incorrectly set status = 'payment_pending' which is not
@@ -64,7 +63,7 @@ export async function submitPaymentScreenshot(formData: FormData) {
     .from('public_registrations')
     .update({
       payment_status: 'submitted',
-      payment_screenshot_url: publicUrl,
+      payment_screenshot_url: path,
       payment_submitted_at: new Date().toISOString(),
     })
     .eq('id', registrationId)
@@ -80,7 +79,8 @@ export async function submitPaymentScreenshot(formData: FormData) {
     .single()
 
   if (event) {
-    await supabase.from('notifications').insert({
+    // Cross-user notification (guest → organizer) → service role (SEC-04).
+    await createAdminClient().from('notifications').insert({
       user_id: event.organizer_id,
       type: 'guest_signup',
       title: 'Payment Screenshot Received',

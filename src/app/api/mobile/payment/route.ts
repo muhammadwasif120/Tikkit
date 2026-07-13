@@ -1,4 +1,5 @@
 import { createMobileClient, mobileUnauthorized } from '@/lib/supabase/mobile'
+import { signPaymentScreenshot } from '@/lib/paymentScreenshot'
 import { NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest) {
@@ -66,14 +67,12 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: 'Failed to upload screenshot. Try again.' }, { status: 500 })
   }
 
-  const { data: { publicUrl } } = adminSupabase.storage
-    .from('payment-screenshots')
-    .getPublicUrl(path)
-
+  // Bucket is private (SEC-02). Store the object key, not a public URL — the
+  // organizer/admin views it via a short-lived signed URL (signPaymentScreenshot).
   // Update registration
   const { data: updated, error: updateError } = await (supabase as any)
     .from('public_registrations')
-    .update({ payment_status: 'submitted', payment_screenshot_url: publicUrl })
+    .update({ payment_status: 'submitted', payment_screenshot_url: path })
     .eq('id', registrationId)
     .select()
     .single()
@@ -85,7 +84,9 @@ export async function POST(req: NextRequest) {
     .from('events').select('title, organizer_id').eq('id', reg.event_id).single()
 
   if (event) {
-    await (supabase as any).from('notifications').insert({
+    // Cross-user notification (guest → organizer) → service role. SEC-04: the
+    // authenticated/bearer client may only create notifications for itself.
+    await (adminSupabase as any).from('notifications').insert({
       user_id: event.organizer_id,
       type: 'payment_submitted',
       title: 'Payment Screenshot Received 💳',
@@ -97,6 +98,8 @@ export async function POST(req: NextRequest) {
   return Response.json({
     registration: {
       ...updated,
+      // Private bucket (SEC-02) — return a signed URL, not the raw object key.
+      payment_screenshot_url: await signPaymentScreenshot(updated.payment_screenshot_url),
       notes: updated.registration_notes ?? null,
       display_status: 'payment_pending',
     }

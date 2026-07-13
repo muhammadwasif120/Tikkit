@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { createNotification, Notifications } from '@/lib/supabase/notifications'
 import { pushToUser } from '@/lib/pushNotifications'
 import { verifyCsrfOrigin } from '@/lib/csrf'
@@ -55,12 +56,15 @@ export async function POST(req: NextRequest) {
         const title = 'Registration update'
         const body  = `Your application for ${event?.title} was not approved this time.`
 
-        await supabase.from('notifications').insert({
-          user_id: profile.id,
-          type:    'registration_rejected',
+        // Cross-user notification → service role (SEC-04: authenticated clients
+        // may only notify themselves).
+        await createAdminClient().from('notifications').insert({
+          user_id:  profile.id,
+          event_id: (reg as any).event_id,
+          type:     'registration_rejected',
           title,
           body,
-          data:    { event_id: (reg as any).event_id, registration_id: registrationId },
+          metadata: { registration_id: registrationId },
         } as any)
 
         pushToUser(profile.id, title, body, { type: 'registration_rejected', eventId: (reg as any).event_id }).catch(() => {})

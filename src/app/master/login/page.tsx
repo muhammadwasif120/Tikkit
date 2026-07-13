@@ -31,11 +31,16 @@ export default function MasterLoginPage() {
       return
     }
 
-    // Middleware gates /master on JWT metadata.role === 'admin'.
-    // The layout does the authoritative DB check.
-    // If the user isn't admin, the middleware will bounce them back here.
-    const metaRole = data.user.user_metadata?.role
-    if (metaRole !== 'admin') {
+    // Authorize on profiles.role (the trigger-protected source of truth), never
+    // user_metadata.role, which the user can write themselves. The middleware
+    // and the /master layout enforce the same check server-side.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', data.user.id)
+      .single()
+
+    if (profile?.role !== 'admin') {
       setError('Access denied. This account does not have admin privileges.')
       setLoading(false)
       return

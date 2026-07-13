@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { VerifiedProfile, PayProOrderResponse } from '@/types/verification'
+import type { VerifiedProfile } from '@/types/verification'
 
 // ─── Didit helpers ────────────────────────────────────────────────
 
@@ -57,92 +57,14 @@ async function createDiditSession(userId: string): Promise<{
   return { sessionId: data.session_id, sessionUrl: data.session_url }
 }
 
-// ─── PayPro helpers ───────────────────────────────────────────────
-
-/**
- * Creates a PayPro order and returns the Click2Pay payment URL.
- * Docs: https://docs.paypro.com.pk
- * BillReference encodes the userId so the IPN webhook can route it back.
- */
-async function createPayProOrder(userId: string): Promise<{
-  paymentUrl: string
-  orderId: string
-} | null> {
-  const apiKey = process.env.PAYPRO_API_KEY
-  const merchantId = process.env.PAYPRO_MERCHANT_ID
-  const storeId = process.env.PAYPRO_STORE_ID
-
-  if (!apiKey || !merchantId || !storeId) {
-    console.error('PayPro env vars missing: PAYPRO_API_KEY, PAYPRO_MERCHANT_ID, PAYPRO_STORE_ID')
-    return null
-  }
-
-  // BillReference: encode userId for routing in IPN — max 50 chars
-  const orderId = `TKT-VRF-${userId.slice(0, 20)}-${Date.now()}`
-
-  // Bill dates: today + 3 days expiry
-  const today = new Date()
-  const expiry = new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000)
-  const fmt = (d: Date) => d.toISOString().slice(0, 10)  // YYYY-MM-DD
-
-  const payload = {
-    MerchantId: merchantId,
-    StoreId: storeId,
-    MerchantName: 'Tikkit X',
-    MerchantEmailAddress: process.env.PAYPRO_MERCHANT_EMAIL ?? 'payments@tikkit.pk',
-    MerchantPhoneNumber: process.env.PAYPRO_MERCHANT_PHONE ?? '03000000000',
-    MerchantProductInformation: 'Tikkit X — Organizer Verification Fee',
-    RedirectURL: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/verify?payment=success`,
-    CancelURL: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/verify?payment=cancelled`,
-    NotificationURL: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/paypro`,
-    BillReference: orderId,
-    Amount: '500',
-    BillDate: fmt(today),
-    BillExpiryDate: fmt(expiry),
-    EnabledPaymentMethods: '1',    // all methods (JazzCash, EasyPaisa, Card, Bank)
-  }
-
-  try {
-    const res = await fetch('https://api.paypro.com.pk/v2/ppro/oms', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: apiKey,
-      },
-      body: JSON.stringify([payload]),   // PayPro expects array
-    })
-
-    if (!res.ok) {
-      console.error('PayPro order error:', res.status, await res.text())
-      return null
-    }
-
-    const data: PayProOrderResponse[] = await res.json()
-    const result = data[0]
-
-    if (result?.ResponseCode !== '00' || !result['Click2Pay URL']) {
-      console.error('PayPro order failed:', result?.Message)
-      return null
-    }
-
-    return { paymentUrl: result['Click2Pay URL'], orderId }
-  } catch (err) {
-    console.error('PayPro order exception:', err)
-    return null
-  }
-}
-
 // ─── Public server actions ────────────────────────────────────────
 
 /**
- * Initiates a dual verification flow:
- * 1. Creates a Didit session (CNIC OCR + liveness)
- * 2. Creates a PayPro order (PKR 500 signup fee)
- * Returns URLs needed by the client.
+ * Initiates a Didit ID verification session (CNIC OCR + liveness).
+ * Returns the session URL the client redirects the user to.
  */
 export async function initiateVerification(): Promise<{
   diditSessionUrl?: string
-  payproPaymentUrl?: string
   sessionId?: string
   error?: string
 }> {
@@ -152,31 +74,24 @@ export async function initiateVerification(): Promise<{
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated' }
 
-  // Check if already verified
   const { data: profile } = await (admin as any)
     .from('profiles')
-    .select('is_id_verified, is_payment_verified')
+    .select('is_id_verified')
     .eq('id', user.id)
     .single()
 
-  if (profile?.is_id_verified && profile?.is_payment_verified) {
-    return { error: 'Already fully verified' }
+  if (profile?.is_id_verified) {
+    return { error: 'Already verified' }
   }
 
-  // Create Didit + PayPro in parallel
-  const [diditResult, payproResult] = await Promise.all([
-    !profile?.is_id_verified ? createDiditSession(user.id) : null,
-    !profile?.is_payment_verified ? createPayProOrder(user.id) : null,
-  ])
+  const diditResult = await createDiditSession(user.id)
 
-  // Persist / upsert session record
   const { data: session, error: sessionErr } = await (admin as any)
     .from('verification_sessions')
     .upsert(
       {
         user_id: user.id,
         didit_session_id: diditResult?.sessionId ?? null,
-        paypro_order_id: payproResult?.orderId ?? null,
         status: 'pending',
       },
       { onConflict: 'user_id', ignoreDuplicates: false }
@@ -191,7 +106,6 @@ export async function initiateVerification(): Promise<{
 
   return {
     diditSessionUrl: diditResult?.sessionUrl,
-    payproPaymentUrl: payproResult?.paymentUrl,
     sessionId: session?.id,
   }
 }
@@ -211,7 +125,7 @@ export async function updateVerificationStatus(params: {
 
   const field = type === 'id' ? 'is_id_verified' : 'is_payment_verified'
   const idField = type === 'id' ? 'didit_verification_id' : 'payment_method_token'
-  const sessionCol = type === 'id' ? 'didit_session_id' : 'paypro_order_id'
+  const sessionCol = 'didit_session_id'
 
   // Security Fix: Prevent race conditions by strictly correlating the external session ID
   const { data: activeSession } = await (admin as any)

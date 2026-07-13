@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { signPaymentScreenshot } from '@/lib/paymentScreenshot'
 import type { CommandAttendee, ChatMessage } from '@/types/verification'
 
 /**
@@ -53,10 +54,8 @@ export async function getCommandCenterData(eventId: string): Promise<{
     }
   }
 
-  const attendees: CommandAttendee[] = (registrations ?? []).map((r: any) => {
+  const attendees: CommandAttendee[] = await Promise.all((registrations ?? []).map(async (r: any) => {
     // There are no user_ids for pure public registrations in this table
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const profile: any = null 
     return {
       registration_id: r.id,
       user_id: null,
@@ -66,13 +65,14 @@ export async function getCommandCenterData(eventId: string): Promise<{
       avatar_url: null,
       status: r.status,
       payment_status: r.payment_status ?? null,
-      payment_screenshot_url: r.payment_screenshot_url ?? null,
+      // Private bucket (SEC-02) — mint a short-lived signed URL for the organizer.
+      payment_screenshot_url: await signPaymentScreenshot(r.payment_screenshot_url),
       is_id_verified: false,
       is_payment_verified: false,
       social_score: 0,
       registered_at: r.created_at,
     }
-  })
+  }))
 
   // Fetch recent chat messages (last 50)
   const { data: rawMessages } = await (admin as any)

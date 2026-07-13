@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { signPaymentScreenshot } from '@/lib/paymentScreenshot'
 import { redirect } from 'next/navigation'
 import MyEventsClient from '@/components/guest/MyEventsClient'
 import GuestLoader from '@/components/guest/GuestLoader'
@@ -15,7 +16,17 @@ async function MyEventsData() {
     .eq('email', user.email!)
     .order('created_at', { ascending: false })
 
-  return <MyEventsClient registrations={(registrations ?? []).map((r: any) => ({ ...r, status: r.status ?? 'pending', payment_status: r.payment_status ?? 'not_required' }))} />
+  const signed = await Promise.all(
+    (registrations ?? []).map(async (r: any) => ({
+      ...r,
+      status: r.status ?? 'pending',
+      payment_status: r.payment_status ?? 'not_required',
+      // Private bucket (SEC-02) — sign for the owning guest.
+      payment_screenshot_url: await signPaymentScreenshot(r.payment_screenshot_url),
+    }))
+  )
+
+  return <MyEventsClient registrations={signed} />
 }
 
 export default function MyEventsPage() {
