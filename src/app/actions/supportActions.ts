@@ -47,7 +47,7 @@ export async function sendSupportMessage(message: string): Promise<{ error?: str
 
   // Rate limit: 20 messages per user per minute
   const { checkRateLimit } = await import('@/lib/rateLimit')
-  if (!checkRateLimit(`support:${user.id}`, 20, 60_000)) {
+  if (!(await checkRateLimit(`support:${user.id}`, 20, 60_000))) {
     return { error: 'Too many messages. Please wait before sending more.' }
   }
 

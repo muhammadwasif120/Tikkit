@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { checkRateLimit } = await import('@/lib/rateLimit')
-    if (!checkRateLimit(`approval-email:${user.id}:${email}`, 5, 3_600_000)) {
+    if (!(await checkRateLimit(`approval-email:${user.id}:${email}`, 5, 3_600_000))) {
       return NextResponse.json({ error: 'Too many emails sent to this address. Please wait before retrying.' }, { status: 429 })
     }
 

@@ -29,6 +29,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
+    // Bulk email is a prime abuse vector — cap broadcasts per organizer+event.
+    const { checkRateLimit } = await import('@/lib/rateLimit')
+    if (!(await checkRateLimit(`audience-email:${user.id}:${eventId}`, 5, 3_600_000))) {
+      return NextResponse.json({ error: 'Too many emails sent for this event. Please try again later.' }, { status: 429 })
+    }
+
     if (!subject || !body) {
       return NextResponse.json({ error: 'Subject and body are required' }, { status: 400 })
     }

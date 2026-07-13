@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const { supabase, userId } = auth
 
   // Rate limit: 120 scans per minute (generous for real scanning, blocks automated probing)
-  if (!checkRateLimit(`scan:${userId}`, 120, 60_000)) {
+  if (!(await checkRateLimit(`scan:${userId}`, 120, 60_000))) {
     return Response.json({ error: 'Scan rate limit exceeded. Please slow down.' }, { status: 429 })
   }
 

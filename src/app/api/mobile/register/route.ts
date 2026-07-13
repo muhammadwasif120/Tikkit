@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   const { supabase, userId } = auth
 
   // Rate limit: 10 registration attempts per user per 10 minutes
-  if (!checkRateLimit(`mobile:register:${userId}`, 10, 600_000)) {
+  if (!(await checkRateLimit(`mobile:register:${userId}`, 10, 600_000))) {
     return Response.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
   }
 

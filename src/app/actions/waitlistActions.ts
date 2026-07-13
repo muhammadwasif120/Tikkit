@@ -23,7 +23,7 @@ export async function joinPlatformWaitlist(data: {
 
   // IP-based rate limit: 3 signups per IP per hour (prevents bot bulk-inserts)
   const ip = await getClientIp()
-  if (!checkRateLimit(`waitlist:${ip}`, 3, 3_600_000)) {
+  if (!(await checkRateLimit(`waitlist:${ip}`, 3, 3_600_000))) {
     return { error: 'Too many requests. Please try again later.' }
   }
 
