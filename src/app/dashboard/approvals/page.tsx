@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { signPaymentScreenshot } from '@/lib/paymentScreenshot'
 import ApprovalsClient from '@/components/approvals/ApprovalsClient'
 import DashboardLoader from '@/components/layout/DashboardLoader'
 
@@ -20,13 +21,19 @@ async function ApprovalsData() {
     .in('event_id', eventIds.length > 0 ? eventIds : ['none'])
     .order('created_at', { ascending: false })
 
+  const signedRegistrations = await Promise.all(
+    (registrations ?? []).map(async (r: any) => ({
+      ...r,
+      id_document_url: r.id_document_url ?? null,
+      reference_code_entered: r.reference_code_entered ?? null,
+      // Private bucket (SEC-02) — sign for the owning organizer.
+      payment_screenshot_url: await signPaymentScreenshot(r.payment_screenshot_url),
+    }))
+  )
+
   return (
     <ApprovalsClient
-      registrations={(registrations ?? []).map((r: any) => ({
-        ...r,
-        id_document_url: r.id_document_url ?? null,
-        reference_code_entered: r.reference_code_entered ?? null
-      }))}
+      registrations={signedRegistrations}
       events={(events ?? []).map((e: any) => ({
         ...e,
         registration_mode: e.registration_mode ?? 'approval'

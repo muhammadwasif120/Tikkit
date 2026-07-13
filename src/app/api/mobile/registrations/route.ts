@@ -1,4 +1,5 @@
 import { createMobileClient, mobileUnauthorized } from '@/lib/supabase/mobile'
+import { signPaymentScreenshot } from '@/lib/paymentScreenshot'
 import { NextRequest } from 'next/server'
 
 export async function GET(req: NextRequest) {
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
   if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
 
   // Enrich with computed display status
-  const mapped = (registrations ?? []).map((r: any) => {
+  const mapped = await Promise.all((registrations ?? []).map(async (r: any) => {
     let displayStatus = r.status
     if (r.status === 'pending') displayStatus = 'eoi_submitted'
     else if (r.status === 'approved') {
@@ -50,10 +51,12 @@ export async function GET(req: NextRequest) {
     }
     return {
       ...r,
+      // Private bucket (SEC-02) — sign for the owning guest.
+      payment_screenshot_url: await signPaymentScreenshot(r.payment_screenshot_url),
       notes: r.registration_notes ?? null,
       display_status: displayStatus,
     }
-  })
+  }))
 
   return Response.json({ registrations: mapped })
 }

@@ -1,9 +1,13 @@
 // ─── Server-only — only import this from server actions or server components ──
-import { createClient } from '@/lib/supabase/server'
+// Notifications are created via the service-role client: recipients are decided
+// by trusted server code, and the notifications_insert RLS policy only permits
+// authenticated clients to notify themselves (SEC-04). Cross-user notifications
+// must therefore bypass RLS through the service role.
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { NotificationPayload } from './notification-types'
 
 export async function createNotification(payload: NotificationPayload) {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { error } = await supabase.from('notifications').insert({
     user_id:  payload.userId,
     event_id: payload.eventId ?? null,
@@ -17,7 +21,7 @@ export async function createNotification(payload: NotificationPayload) {
 
 export async function createNotifications(payloads: NotificationPayload[]) {
   if (!payloads.length) return
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { error } = await supabase.from('notifications').insert(
     payloads.map((p) => ({
       user_id:  p.userId,

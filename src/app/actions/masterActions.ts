@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 import { safeDecrypt } from '@/lib/encrypt'
+import { signPaymentScreenshot } from '@/lib/paymentScreenshot'
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -10,20 +11,31 @@ const EMAIL_FROM = process.env.EMAIL_FROM ?? 'Tikkit Admin <admin@tikkit.app>'
 
 // ─── Auth guard ───────────────────────────────────────────────────────────────
 // Server actions are called directly via POST — they bypass all layout-level
-// auth checks. Every sensitive action must call this before touching any data.
+// auth checks. Every sensitive action must call this before touching any data,
+// and these actions read/write via the service-role client (bypassing RLS), so
+// this guard is the only thing standing between a caller and every org's data.
 //
-// We verify against JWT metadata (user_metadata.role) rather than a DB lookup.
-// getUser() validates the session token against Supabase auth servers so the
-// metadata is cryptographically verified — same source of truth the middleware
-// uses. This avoids the metadata↔DB mismatch that caused Forbidden on every
-// action when profiles.role was out of sync with the JWT.
+// Authorization MUST verify against profiles.role, NOT user_metadata.role.
+// user_metadata is writable by the user themselves (supabase.auth.updateUser),
+// so gating on it is a privilege-escalation hole: any signed-in user could set
+// their own metadata role to 'admin'. profiles.role is protected by the
+// protect_profile_role trigger (authenticated/anon callers cannot change it),
+// making it the only self-elevation-proof source of truth. We read it via the
+// service-role client so the check is authoritative and immune to RLS or
+// JWT-cache staleness.
 export async function requireAdmin(): Promise<void> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
 
-  const metaRole = user.user_metadata?.role
-  if (metaRole !== 'admin') throw new Error('Forbidden')
+  const admin = createAdminClient()
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (profile?.role !== 'admin') throw new Error('Forbidden')
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -791,13 +803,13 @@ export async function getMasterRegistrations(limit = 300): Promise<MasterRegistr
   if (!regs || regs.length === 0) return []
 
   const eventIds = Array.from(new Set(regs.map((r: any) => r.event_id).filter(Boolean))) as string[]
-  if (eventIds.length === 0) return regs.map((r: any) => ({
+  if (eventIds.length === 0) return Promise.all(regs.map(async (r: any) => ({
     id: r.id, guest_name: r.full_name ?? '—', guest_email: r.email ?? '—',
     guest_phone: r.phone ?? null, event_id: r.event_id ?? '',
     event_title: 'Unknown Event', event_date: '', organizer_name: '—',
     status: r.status ?? 'pending', payment_status: r.payment_status ?? null,
-    payment_screenshot_url: r.payment_screenshot_url ?? null, ticket_price: null, created_at: r.created_at,
-  }))
+    payment_screenshot_url: await signPaymentScreenshot(r.payment_screenshot_url), ticket_price: null, created_at: r.created_at,
+  })))
 
   const { data: eventsData, error: eErr } = await supabase
     .from('events')
@@ -817,7 +829,7 @@ export async function getMasterRegistrations(limit = 300): Promise<MasterRegistr
   const events = eventsData
   const orgs = orgsData
 
-  return regs.map((r: any) => {
+  return Promise.all(regs.map(async (r: any) => {
     const ev = events?.find((e: any) => e.id === r.event_id)
     const org = orgs?.find((o: any) => o.id === ev?.organizer_id)
 
@@ -832,11 +844,11 @@ export async function getMasterRegistrations(limit = 300): Promise<MasterRegistr
       organizer_name: org?.company_name || org?.full_name || '—',
       status: r.status ?? 'pending',
       payment_status: r.payment_status ?? null,
-      payment_screenshot_url: r.payment_screenshot_url ?? null,
+      payment_screenshot_url: await signPaymentScreenshot(r.payment_screenshot_url),
       ticket_price: ev?.ticket_price ?? null,
       created_at: r.created_at,
     }
-  })
+  }))
 }
 
 // ─── Event Admin Status ───────────────────────────────────────────────────────

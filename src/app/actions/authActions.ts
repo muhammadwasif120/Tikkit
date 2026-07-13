@@ -12,20 +12,24 @@ type AnyRole  = typeof ALL_ROLES[number]
 type HintRole = typeof HINT_ROLES[number]
 
 /**
- * Guarantees the profiles row has the correct role.
+ * Guarantees the profiles row has a role, without ever letting a caller
+ * self-elevate to a privileged role.
+ *
+ * profiles.role is the authoritative source of truth (protected by the
+ * protect_profile_role trigger). user_metadata is user-writable, so it may
+ * NEVER be used to grant 'admin' or 'staff'. Privileged roles are established
+ * only by setting profiles.role directly (SQL / service role by a human).
  *
  * Priority order:
- *   1. raw_user_meta_data from auth.users (via admin client — bypasses JWT cache)
- *   2. Existing profiles.role (via admin client) — handles accounts whose role
- *      was set directly in the DB (e.g. admin bootstrapped via SQL) but whose
- *      auth metadata was never back-filled.  We trust it and back-fill metadata
- *      so future logins always hit path 1 instead.
- *   3. hintRole — form selection, only used when both metadata and existing
- *      profile have NO valid role, and only for 'organizer' / 'guest'
- *      (admin/staff can NEVER be self-claimed from a form).
+ *   1. Existing profiles.role (via admin client) — always authoritative. If a
+ *      valid role is already stored, we keep it and never overwrite it (covers
+ *      admin/staff bootstrapped in the DB).
+ *   2. metadata.role — accepted ONLY for non-privileged roles (guest/organizer),
+ *      to back-fill a profile that has no role yet.
+ *   3. hintRole — form selection, guest/organizer only.
  *
- * Writes via service-role, bypassing protect_profile_role trigger.
- * Back-fills metadata so future logins need no hint.
+ * Writes via service-role, bypassing the trigger. Back-fills metadata to mirror
+ * the resolved role (metadata is a mirror only — never trusted for privilege).
  */
 export async function ensureProfileRole(hintRole?: HintRole) {
   const supabase = await createClient()
@@ -43,27 +47,23 @@ export async function ensureProfileRole(hintRole?: HintRole) {
   // Determine target role
   let targetRole: AnyRole | undefined
 
-  if (metaRole && (ALL_ROLES as readonly string[]).includes(metaRole)) {
-    // Path 1: metadata has a valid role — always trust it (covers admin/staff too)
-    targetRole = metaRole as AnyRole
-  } else {
-    // Path 2: metadata absent — read the existing profile row via service-role.
-    // This handles accounts bootstrapped by SQL (e.g. manual admin setup) whose
-    // auth metadata was never populated.  We read it, trust it, and back-fill
-    // metadata below so next login always goes through path 1.
-    const { data: existingProfile } = await admin
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-    const existingRole = existingProfile?.role as string | undefined
+  // Path 1: existing profiles.role is authoritative — trust it, never overwrite.
+  const { data: existingProfile } = await admin
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  const existingRole = existingProfile?.role as string | undefined
 
-    if (existingRole && (ALL_ROLES as readonly string[]).includes(existingRole)) {
-      targetRole = existingRole as AnyRole
-    } else if (hintRole && (HINT_ROLES as readonly string[]).includes(hintRole)) {
-      // Path 3: form hint — organizer/guest only, never admin/staff
-      targetRole = hintRole
-    }
+  if (existingRole && (ALL_ROLES as readonly string[]).includes(existingRole)) {
+    targetRole = existingRole as AnyRole
+  } else if (metaRole && (HINT_ROLES as readonly string[]).includes(metaRole)) {
+    // Path 2: back-fill from metadata, but ONLY non-privileged roles.
+    // admin/staff can never be granted from user-writable metadata.
+    targetRole = metaRole as AnyRole
+  } else if (hintRole && (HINT_ROLES as readonly string[]).includes(hintRole)) {
+    // Path 3: form hint — organizer/guest only, never admin/staff
+    targetRole = hintRole
   }
 
   if (!targetRole) return { error: 'Cannot determine correct role' }

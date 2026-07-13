@@ -122,8 +122,11 @@ export async function updateSession(request: NextRequest) {
       }
 
       if (pathname === '/master/login') {
-        const metaRole = user.user_metadata?.role as string | undefined
-        if (metaRole === 'admin') {
+        // Authoritative check against profiles.role (not user_metadata, which is
+        // user-writable) — also prevents a redirect loop with the /master gate.
+        const { data: profile } = await supabase
+          .from('profiles').select('role').eq('id', user.id).single()
+        if (profile?.role === 'admin') {
           return NextResponse.redirect(new URL('/master', request.url))
         }
         return response
@@ -147,16 +150,20 @@ export async function updateSession(request: NextRequest) {
 
   const metaRole = user.user_metadata?.role as string | undefined
 
+  // Authoritative role comes from the trigger-protected profiles.role column.
+  // Never gate access on user_metadata.role — it is writable by the user via
+  // supabase.auth.updateUser, so using it for authorization would let anyone
+  // self-elevate to admin. metaRole is only a cosmetic fallback for display.
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single()
+  const role = profile?.role ?? metaRole ?? 'guest'
+
   if (pathname.startsWith('/master')) {
-    if (metaRole !== 'admin') {
+    if (role !== 'admin') {
       return NextResponse.redirect(new URL('/master/login', request.url))
     }
     return response
   }
-
-  const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
-  const role = profile?.role ?? metaRole ?? 'guest'
 
   if (role === 'guest' && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/explore', request.url))
