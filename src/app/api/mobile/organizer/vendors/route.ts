@@ -5,7 +5,7 @@ async function authorize(authHeader: string | null) {
   const auth = await createMobileClient(authHeader)
   if (!auth) return null
   const { supabase, userId } = auth
-  const { data: profile } = await (supabase as any)
+  const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', userId).single()
   if (!profile || !['organizer', 'staff', 'admin'].includes(profile.role)) return null
   return { supabase, userId }
@@ -16,8 +16,8 @@ export async function GET(req: NextRequest) {
   if (!auth) return mobileUnauthorized()
   const { supabase, userId } = auth
 
-  const { data: vendors, error } = await (supabase as any)
-    .from('vendors')
+  const { data: vendors, error } = await supabase
+    .from('organiser_vendor_contacts')
     .select('*')
     .eq('organizer_id', userId)
     .order('name')
@@ -35,8 +35,8 @@ export async function POST(req: NextRequest) {
   const { name, category, contact_name, contact_email, contact_phone, notes } = body
   if (!name?.trim()) return Response.json({ error: 'name required' }, { status: 400 })
 
-  const { data: vendor, error } = await (supabase as any)
-    .from('vendors')
+  const { data: vendor, error } = await supabase
+    .from('organiser_vendor_contacts')
     .insert({ organizer_id: userId, name: name.trim(), category: category ?? 'General', contact_name, contact_email, contact_phone, notes })
     .select()
     .single()
@@ -53,12 +53,12 @@ export async function PATCH(req: NextRequest) {
   const { id, name, category, contact_name, contact_email, contact_phone, notes } = await req.json()
   if (!id) return Response.json({ error: 'id required' }, { status: 400 })
 
-  const { data: existing } = await (supabase as any)
-    .from('vendors').select('id').eq('id', id).eq('organizer_id', userId).single()
+  const { data: existing } = await supabase
+    .from('organiser_vendor_contacts').select('id').eq('id', id).eq('organizer_id', userId).single()
   if (!existing) return Response.json({ error: 'Vendor not found' }, { status: 404 })
 
-  const { data: vendor, error } = await (supabase as any)
-    .from('vendors')
+  const { data: vendor, error } = await supabase
+    .from('organiser_vendor_contacts')
     .update({ name, category, contact_name, contact_email, contact_phone, notes })
     .eq('id', id)
     .select()
@@ -77,11 +77,11 @@ export async function DELETE(req: NextRequest) {
   const id = searchParams.get('id')
   if (!id) return Response.json({ error: 'id required' }, { status: 400 })
 
-  const { data: existing } = await (supabase as any)
-    .from('vendors').select('id').eq('id', id).eq('organizer_id', userId).single()
+  const { data: existing } = await supabase
+    .from('organiser_vendor_contacts').select('id').eq('id', id).eq('organizer_id', userId).single()
   if (!existing) return Response.json({ error: 'Vendor not found' }, { status: 404 })
 
-  const { error } = await (supabase as any).from('vendors').delete().eq('id', id)
+  const { error } = await supabase.from('organiser_vendor_contacts').delete().eq('id', id)
   if (error) { console.error(error); return Response.json({ error: "Internal server error" }, { status: 500 }) }
   return Response.json({ ok: true })
 }

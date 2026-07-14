@@ -25,7 +25,7 @@ async function DashboardData() {
 
   // Fetch vendor IDs (needed for invoice query)
   const { data: vendorRows } = await supabase
-    .from('vendors')
+    .from('organiser_vendor_contacts')
     .select('id')
     .eq('organizer_id', user!.id)
   const vendorIds = (vendorRows ?? []).map(v => v.id)
@@ -44,7 +44,7 @@ async function DashboardData() {
       : Promise.resolve({ count: 0 }),
     vendorIds.length > 0
       ? supabase
-          .from('vendor_invoices')
+          .from('organiser_vendor_invoices')
           .select('id', { count: 'exact', head: true })
           .in('vendor_id', vendorIds)
           .in('status', ['pending', 'overdue'])

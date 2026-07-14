@@ -25,5 +25,5 @@
     "**/*.tsx",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "supabase/functions", "mobile", "remotion"]
+  "exclude": ["node_modules", "supabase/functions", "mobile", "remotion", "tmp"]
 }

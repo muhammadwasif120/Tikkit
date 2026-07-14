@@ -8,13 +8,13 @@ async function VendorsData() {
   const { data: { user } } = await supabase.auth.getUser()
 
   const { data: vendors } = await supabase
-    .from('vendors')
+    .from('organiser_vendor_contacts')
     .select('*')
     .eq('organizer_id', user!.id)
     .order('created_at', { ascending: false })
 
   const { data: invoices } = await supabase
-    .from('vendor_invoices')
+    .from('organiser_vendor_invoices')
     .select('*')
     .order('due_date', { ascending: true })
 

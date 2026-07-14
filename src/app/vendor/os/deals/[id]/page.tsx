@@ -2,7 +2,8 @@ import { notFound, redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import DealDetailClient from '@/components/vendor/os/DealDetailClient'
 
-export default async function DealDetailPage({ params }: { params: { id: string } }) {
+export default async function DealDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/auth/login')
@@ -18,7 +19,7 @@ export default async function DealDetailPage({ params }: { params: { id: string 
   const { data: deal } = await (supabase as any)
     .from('deals')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('vendor_id', vendor.id)
     .single()
 
@@ -27,14 +28,14 @@ export default async function DealDetailPage({ params }: { params: { id: string 
   const { data: crossHires } = await (supabase as any)
     .from('cross_hires')
     .select('*')
-    .eq('deal_id', params.id)
+    .eq('deal_id', id)
     .eq('vendor_id', vendor.id)
     .order('created_at', { ascending: true })
 
   const { data: invoices } = await (supabase as any)
     .from('invoices')
     .select('id, invoice_number, total, status, due_date')
-    .eq('deal_id', params.id)
+    .eq('deal_id', id)
     .eq('vendor_id', vendor.id)
     .order('created_at', { ascending: false })
 

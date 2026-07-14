@@ -21,7 +21,7 @@ export async function saveVendorAction(payload: {
 
   if (id) {
     const { data, error } = await supabase
-      .from('vendors')
+      .from('organiser_vendor_contacts')
       .update(fields)
       .eq('id', id)
       .eq('organizer_id', user.id)
@@ -32,7 +32,7 @@ export async function saveVendorAction(payload: {
     return { data }
   } else {
     const { data, error } = await supabase
-      .from('vendors')
+      .from('organiser_vendor_contacts')
       .insert({ ...fields, organizer_id: user.id })
       .select()
       .single()
@@ -48,7 +48,7 @@ export async function deleteVendorAction(id: string) {
   if (!user) return { error: 'Not authenticated' }
 
   const { error } = await supabase
-    .from('vendors')
+    .from('organiser_vendor_contacts')
     .delete()
     .eq('id', id)
     .eq('organizer_id', user.id)
@@ -76,7 +76,7 @@ export async function saveInvoiceAction(payload: {
 
   if (id) {
     const { data, error } = await supabase
-      .from('vendor_invoices')
+      .from('organiser_vendor_invoices')
       .update(fields)
       .eq('id', id)
       .select()
@@ -86,7 +86,7 @@ export async function saveInvoiceAction(payload: {
     return { data }
   } else {
     const { data, error } = await supabase
-      .from('vendor_invoices')
+      .from('organiser_vendor_invoices')
       .insert(fields)
       .select()
       .single()
@@ -102,7 +102,7 @@ export async function deleteInvoiceAction(id: string) {
   if (!user) return { error: 'Not authenticated' }
 
   const { error } = await supabase
-    .from('vendor_invoices')
+    .from('organiser_vendor_invoices')
     .delete()
     .eq('id', id)
 
@@ -117,7 +117,7 @@ export async function markInvoicePaidAction(id: string) {
   if (!user) return { error: 'Not authenticated' }
 
   const { data, error } = await supabase
-    .from('vendor_invoices')
+    .from('organiser_vendor_invoices')
     .update({ status: 'paid', paid_at: new Date().toISOString() })
     .eq('id', id)
     .select()
