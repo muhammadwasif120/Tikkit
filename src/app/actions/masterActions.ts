@@ -359,6 +359,25 @@ export async function getMasterAnalytics(): Promise<PlatformAnalytics> {
   await requireAdmin()
   const supabase = createAdminClient()
 
+  // PERF-01: aggregate in Postgres (uncapped, one round-trip). Falls back to the
+  // legacy in-JS aggregation if the RPC isn't present yet or errors — so this is
+  // safe to deploy before/independently of the migration.
+  try {
+    const { data, error } = await (supabase as any).rpc('get_master_analytics')
+    if (!error && data) return data as PlatformAnalytics
+    if (error) console.error('get_master_analytics RPC error; using JS fallback:', error.message)
+  } catch (e) {
+    console.error('get_master_analytics RPC threw; using JS fallback:', e)
+  }
+  return computeMasterAnalyticsInJs(supabase)
+}
+
+// Legacy in-JS aggregation — kept as a fallback for getMasterAnalytics(). The
+// capped fetches below under-count past their limits, so the RPC is the primary
+// path; safe to delete once the RPC is verified in production.
+async function computeMasterAnalyticsInJs(
+  supabase: ReturnType<typeof createAdminClient>,
+): Promise<PlatformAnalytics> {
   // NOTE: These 4 bulk queries + JS aggregation is intentional — avoids N+1.
   // A future optimisation would be Supabase RPCs/views for server-side aggregation.
   const now = new Date()
