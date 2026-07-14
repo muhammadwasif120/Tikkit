@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Check, ChevronDown, Star, Eye, EyeOff, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { PAKISTAN_CITIES } from '@/lib/pakistanCities'
+import { completeSignupProfile } from '@/app/actions/profileCompletionActions'
 
 type TicketType = {
   id: string
@@ -84,6 +85,7 @@ export default function PublicRegistrationForm({
     if (!form.cnic.trim()) { setError('CNIC is required for identity verification.'); setLoading(false); return }
     if (!form.dob) { setError('Date of birth is required.'); setLoading(false); return }
     if (!form.gender) { setError('Please select a gender.'); setLoading(false); return }
+    if (!form.city) { setError('Please select your city.'); setLoading(false); return }
 
     // Step 1: Create the Tikkit X account
     const { data: authData, error: signUpErr } = await supabase.auth.signUp({
@@ -110,18 +112,26 @@ export default function PublicRegistrationForm({
       return
     }
 
-    // Step 2: Extend the user profile with security data
-    await supabase.from('profiles').update({
-      phone_number: form.phone.trim(),
-      cnic_number: form.cnic.trim(),
-      city: form.city || null,
-    }).eq('id', user.id)
+    // Step 2: Extend the user profile with security data via the shared,
+    // service-role signup-completion action — encrypts the CNIC (this used to
+    // be stored in plaintext here) and works even if there's no session yet
+    // (e.g. once email confirmation is enabled, signUp() returns no session
+    // until it's confirmed). bootstrapUserId lets it proceed regardless.
+    const profileRes = await completeSignupProfile({
+      phone:    form.phone.trim(),
+      idType:   'cnic',
+      idNumber: form.cnic.trim(),
+      country:  'Pakistan',
+      city:     form.city,
+      dob:      form.dob,
+      gender:   form.gender,
+    }, user.id)
 
-    await supabase.from('guest_profiles').upsert({
-      id: user.id,
-      date_of_birth: form.dob,
-      gender: form.gender,
-    }, { onConflict: 'id', ignoreDuplicates: false })
+    if (profileRes.error) {
+      setError('Your account was created, but we couldn\'t save your details. Please sign in and complete your profile.')
+      setLoading(false)
+      return
+    }
 
     // Step 3: Check for duplicate registration
     const { data: existing } = await supabase
@@ -138,7 +148,7 @@ export default function PublicRegistrationForm({
     }
 
     // Step 4: Register for the event
-    await supabase.from('public_registrations').insert({
+    const { error: regError } = await supabase.from('public_registrations').insert({
       event_id: event.id,
       ticket_type_id: selectedTicketTypeId || null,
       full_name: form.full_name.trim(),
@@ -149,8 +159,14 @@ export default function PublicRegistrationForm({
       reference_code_entered: form.referenceCode || null,
     })
 
+    if (regError) {
+      setError('Your account was created, but registration failed. Please sign in and try again from the app.')
+      setLoading(false)
+      return
+    }
+
     if (isOpen) {
-      await supabase.from('guests').insert({
+      const { error: guestError } = await supabase.from('guests').insert({
         event_id: event.id,
         ticket_type_id: selectedTicketTypeId || null,
         full_name: form.full_name.trim(),
@@ -161,15 +177,18 @@ export default function PublicRegistrationForm({
         status: 'registered',
         is_vip: selectedTicket?.is_vip ?? false,
       })
+      if (guestError) console.error('guests insert error:', guestError.message)
     }
 
-    // Step 5: Notify organizer
-    await supabase.rpc('notify_guest_signup', {
+    // Step 5: Notify organizer (non-blocking — not worth failing the
+    // registration over a notification not being delivered)
+    const { error: notifyError } = await supabase.rpc('notify_guest_signup', {
       p_event_id: event.id,
       p_guest_name: form.full_name.trim(),
       p_event_title: event.title,
       p_is_interest: !isOpen,
     })
+    if (notifyError) console.error('notify_guest_signup error:', notifyError.message)
 
     // Step 6: Redirect into the native app experience
     router.push(`/guest/explore/${event.id}`)
@@ -310,17 +329,21 @@ export default function PublicRegistrationForm({
         </div>
 
         {/* City */}
-        <div style={{ position: 'relative' }}>
-          <select
-            value={form.city}
-            onChange={e => f('city', e.target.value)}
-            className={inputCls}
-            style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' }}
-          >
-            <option value="">City (optional)</option>
-            {PAKISTAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+        <div>
+          <label className="block text-xs font-medium text-gray-400 mb-1.5">City *</label>
+          <div style={{ position: 'relative' }}>
+            <select
+              required
+              value={form.city}
+              onChange={e => f('city', e.target.value)}
+              className={inputCls}
+              style={{ appearance: 'none', WebkitAppearance: 'none', cursor: 'pointer' }}
+            >
+              <option value="">Select City</option>
+              {PAKISTAN_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+          </div>
         </div>
 
         <div>

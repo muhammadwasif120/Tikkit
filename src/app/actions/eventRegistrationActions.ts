@@ -12,8 +12,14 @@ export async function registerForEvent(formData: FormData) {
   }
 
   const supabase = await createClient()
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: { user } } = await supabase.auth.getUser()
+
+  // Walled-garden defense-in-depth: this action is reachable in the UI only
+  // from /guest/explore/[id], which middleware already redirects anonymous
+  // visitors away from — but a server action can also be invoked directly, so
+  // require a real session here too rather than relying solely on that
+  // redirect. Registering must always require a Tikkit account.
+  if (!user) return { error: 'Please sign in to register for this event.' }
 
   const eventId        = formData.get('eventId')     as string
   const name           = formData.get('name')        as string
@@ -94,8 +100,10 @@ export async function submitEOI(formData: FormData) {
   }
 
   const supabase = await createClient()
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: { user } } = await supabase.auth.getUser()
+
+  // See registerForEvent — same defense-in-depth reasoning.
+  if (!user) return { error: 'Please sign in to apply for this event.' }
 
   const eventId        = formData.get('eventId')     as string
   const name           = formData.get('name')        as string
