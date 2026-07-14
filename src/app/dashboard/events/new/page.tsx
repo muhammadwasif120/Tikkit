@@ -121,6 +121,13 @@ export default function NewEventPage() {
   const updateTier = (key: TierKey, field: keyof Tier, value: string | boolean) =>
     setTiers(prev => ({ ...prev, [key]: { ...prev[key], [field]: value } }))
 
+  // Total capacity is derived from the ticket tiers — the sum of every enabled
+  // tier's available spots — so the guest count and the tiers can never disagree.
+  const tierTotal =
+    (tiers.standard.enabled   ? parseInt(tiers.standard.quantity)   || 0 : 0) +
+    (tiers.vip.enabled        ? parseInt(tiers.vip.quantity)        || 0 : 0) +
+    (tiers.discounted.enabled ? parseInt(tiers.discounted.quantity) || 0 : 0)
+
   const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -144,6 +151,12 @@ export default function NewEventPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { setError('Not authenticated'); setLoading(false); return }
 
+    if (tierTotal <= 0) {
+      setError('Add at least one ticket tier with available spots — the total guest count is the sum of your tiers.')
+      setLoading(false)
+      return
+    }
+
     // 1. Create the event
     const { data: event, error: eventErr } = await supabase
       .from('events')
@@ -155,7 +168,7 @@ export default function NewEventPage() {
         venue_address:           form.venue_address || null,
         date_start:              form.date_start || null,
         date_end:                form.date_end || null,
-        capacity:                parseInt(form.capacity) || 0,
+        capacity:                tierTotal,
         is_private:              form.is_private,
         secret_venue:            form.secret_venue,
         male_ratio:              parseInt(form.male_ratio) || 50,
@@ -198,7 +211,7 @@ export default function NewEventPage() {
         event_id: event.id,
         name:     'Standard',
         price:    parseFloat(tiers.standard.price) || 0,
-        quantity: parseInt(tiers.standard.quantity) || parseInt(form.capacity) || 0,
+        quantity: parseInt(tiers.standard.quantity) || 0,
         is_vip:   false,
       })
     }
@@ -433,9 +446,12 @@ export default function NewEventPage() {
           </h3>
 
           <div>
-            <label className="label">Total Capacity *</label>
-            <input type="number" className="input" placeholder="200" min="1"
-              value={form.capacity} onChange={e => update('capacity', e.target.value)} required />
+            <label className="label">Total Capacity</label>
+            <input type="number" className="input opacity-70 cursor-not-allowed"
+              value={tierTotal || ''} placeholder="Set by your ticket tiers" readOnly disabled />
+            <p className="text-xs text-gray-500 mt-1">
+              Automatically set to the sum of your ticket tiers below — {tierTotal} {tierTotal === 1 ? 'spot' : 'spots'} total.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -503,7 +519,7 @@ export default function NewEventPage() {
               <div>
                 <label className="label">Available Spots</label>
                 <input type="number" className="input" min="0"
-                  placeholder={form.capacity || '100'}
+                  placeholder="100"
                   value={tiers.standard.quantity}
                   onChange={e => updateTier('standard', 'quantity', e.target.value)} />
               </div>

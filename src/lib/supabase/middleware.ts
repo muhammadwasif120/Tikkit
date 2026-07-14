@@ -53,6 +53,65 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(new URL(dest, request.url))
   }
 
+  // ── Mandatory profile completion gate ──────────────────────────────────────
+  // Guests and organizers must have phone, ID (CNIC/passport), city, and their
+  // role-specific fields (guest: DOB + gender, organizer: company) on file —
+  // enforced uniformly regardless of how the account was created (password
+  // signup, Google OAuth, or a legacy account from before this gate existed).
+  // OAuth signup deliberately stays one-click; this is the walled-garden step
+  // that follows it.
+  //
+  // This runs BEFORE the isPublic early-return below because several genuinely
+  // public pages (/explore, /guest/explore, /register) are exactly the pages a
+  // logged-in-but-incomplete guest is most likely to land on — if this ran
+  // after the isPublic branch it would never fire for them. A short allowlist
+  // of pages stays reachable regardless of completeness: auth/API/admin
+  // machinery, and static legal/info pages a user might need mid-signup.
+  //
+  // Cost note: up to two small PK-indexed reads per navigation for
+  // authenticated guest/organizer users. Fine at current traffic; if it ever
+  // shows up in latency, switch to a single denormalised profiles.profile_complete
+  // boolean kept in sync by a trigger.
+  const completionExempt = [
+    '/auth', '/api', '/master',
+    '/privacy', '/terms', '/security', '/about', '/contact', '/how-it-works',
+  ]
+  const isCompletionExempt = completionExempt.some(p => pathname === p || pathname.startsWith(p + '/'))
+
+  if (user && !isCompletionExempt) {
+    const { data: roleProfile } = await supabase
+      .from('profiles')
+      .select('role, phone_number, city, cnic_number, passport_number, company_name')
+      .eq('id', user.id)
+      .single()
+
+    const gateRole = roleProfile?.role
+    if (gateRole === 'guest' || gateRole === 'organizer') {
+      let complete = !!(
+        roleProfile?.phone_number &&
+        roleProfile?.city &&
+        (roleProfile?.cnic_number || roleProfile?.passport_number)
+      )
+
+      if (complete && gateRole === 'organizer') {
+        complete = !!roleProfile?.company_name
+      }
+
+      if (complete && gateRole === 'guest') {
+        const { data: gp } = await supabase
+          .from('guest_profiles')
+          .select('date_of_birth, gender')
+          .eq('id', user.id)
+          .maybeSingle()
+        complete = !!((gp as any)?.date_of_birth && (gp as any)?.gender)
+      }
+
+      if (!complete) {
+        return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
+      }
+    }
+  }
+
   // Public routes — always allow through
   const publicPaths = [
     '/auth/login',

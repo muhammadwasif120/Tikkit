@@ -33,6 +33,14 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
 
   if (!event) notFound()
 
+  // Organizers must be ID-verified to publish (enforced in the DB too).
+  const { data: organizerProfile } = await supabase
+    .from('profiles')
+    .select('is_id_verified')
+    .eq('id', user!.id)
+    .single()
+  const organizerVerified = organizerProfile?.is_id_verified === true
+
   const effStatus  = getEffectiveStatus(event)
   const isArchived = effStatus === 'completed' || effStatus === 'archived' || effStatus === 'cancelled'
   const st = STATUS_CONFIG[effStatus] ?? STATUS_CONFIG.draft
@@ -92,7 +100,7 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
           >
             <ArrowLeft size={14} /> Events
           </Link>
-          {!isArchived && <EventActions event={event} />}
+          {!isArchived && <EventActions event={event} organizerVerified={organizerVerified} />}
         </div>
 
         {/* Title */}
