@@ -1,8 +1,19 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
+import * as Sentry from '@sentry/nextjs'
 
-export default function OrganizerError() {
+export default function OrganizerError({
+  error,
+}: {
+  error: Error & { digest?: string }
+  reset: () => void
+}) {
+  useEffect(() => {
+    Sentry.captureException(error)
+  }, [error])
+
   return (
     <div style={{
       background: '#080A10', minHeight: '100svh',
