@@ -55,7 +55,7 @@ export default function OrganizerView({ invite, events }: { invite: Invite; even
       if (eventIds.length > 0) {
         const [{ data: g }, { data: inv }, { data: reg }] = await Promise.all([
           supabase.from('guests').select('*').in('event_id', eventIds).order('created_at', { ascending: false }),
-          supabase.from('vendor_invoices').select('*').in('event_id', eventIds),
+          supabase.from('organiser_vendor_invoices').select('*').in('event_id', eventIds),
           supabase.from('public_registrations').select('*').in('event_id', eventIds).eq('status', 'pending').order('created_at', { ascending: false }),
         ])
         setGuests((g ?? []) as any)

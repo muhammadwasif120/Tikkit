@@ -4,7 +4,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    // Type errors now fail the build. Keep the schema types current
+    // (supabase gen types typescript --linked --schema public) so this stays green.
+    ignoreBuildErrors: false,
   },
   // Remove the X-Powered-By: Next.js header — no reason to advertise the stack
   poweredByHeader: false,
