@@ -3,6 +3,7 @@
 import { useState, useMemo, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { ensureProfileRole } from '@/app/actions/authActions'
+import { completeSignupProfile } from '@/app/actions/profileCompletionActions'
 import { useRouter, useSearchParams } from 'next/navigation'
 import {
   Mail, Lock, Eye, EyeOff, User,
@@ -140,27 +141,28 @@ function AuthForm({ mode, onBack, initialTab = 'login' }: { mode: Mode; onBack: 
           // Step 1: guarantee the profile row exists with the correct role.
           try { await ensureProfileRole(isOrg ? 'organizer' : 'guest') } catch { /* non-fatal */ }
 
-          // Step 2: write the extended signup fields (never touches role column)
-          await supabase.from('profiles').update({
-            phone_number:    phone.trim(),
-            company_name:    isOrg ? company.trim() : null,
-            id_type:         idType,
-            cnic_number:     idType === 'cnic'     ? cnic.trim() : null,
-            passport_number: idType === 'passport' ? cnic.trim() : null,
-            country:         Country.getCountryByCode(countryIso)?.name ?? 'Pakistan',
-            city:            city || null,
-          }).eq('id', data.user.id)
+          // Step 2: write the extended signup fields via the shared service-role
+          // action — works even with no active session (e.g. once email
+          // confirmation is enabled, signUp() returns no session until the
+          // email is confirmed) and encrypts CNIC consistently with the
+          // dedicated verification flow. Surfaces failures instead of silently
+          // redirecting with the fields dropped.
+          const res = await completeSignupProfile({
+            phone:    phone.trim(),
+            idType,
+            idNumber: cnic.trim(),
+            country:  Country.getCountryByCode(countryIso)?.name ?? 'Pakistan',
+            city:     city.trim(),
+            company:  isOrg ? company.trim() : undefined,
+            dob:      !isOrg ? dob : undefined,
+            gender:   !isOrg ? gender : undefined,
+          }, data.user.id)
 
-          if (!isOrg) {
-            await supabase
-              .from('guest_profiles')
-              .upsert({ 
-                 id: data.user.id,
-                 date_of_birth: dob,
-                 gender: gender
-              }, { onConflict: 'id', ignoreDuplicates: false })
+          if (res.error) {
+            setErr('Your account was created, but we couldn\'t save your details. Please sign in and complete your profile.')
+            return
           }
-          
+
           router.push(nextPath || (isOrg ? '/dashboard' : '/explore'))
         }
       } else if (tab === 'login') {

@@ -3,44 +3,70 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { MoreHorizontal, Edit, Trash2, CheckCircle, XCircle, FlagOff, Share2, Link as LinkIcon, MessageCircle, Mail, UserPlus } from 'lucide-react'
+import { MoreHorizontal, Edit, Trash2, CheckCircle, XCircle, FlagOff, Share2, Link as LinkIcon, MessageCircle, Mail, UserPlus, ShieldCheck } from 'lucide-react'
 import { notifyEventGoingLive, notifyEventEnded } from '@/app/actions/eventNotificationActions'
 import { dismissEventLiveNotification } from '@/app/actions/approvalDismissAction'
+import { initiateVerification } from '@/app/actions/verificationActions'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Event = Database['public']['Tables']['events']['Row']
 
-export default function EventActions({ event }: { event: Event }) {
+export default function EventActions({ event, organizerVerified }: { event: Event; organizerVerified: boolean }) {
   const [open, setOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
   const updateStatus = async (status: Event['status']) => {
     setLoading(true)
+    setErr(null)
     setOpen(false)
 
     const { error } = await supabase.from('events').update({ status }).eq('id', event.id)
-    if (!error) {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        if (status === 'published') {
-          await notifyEventGoingLive(user.id, event.id, event.title)
-        } else if (status === 'completed' || status === 'cancelled') {
-          const { count } = await supabase
-            .from('guests')
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', event.id)
-            .eq('status', 'checked_in')
-          await dismissEventLiveNotification(event.id)
-          await notifyEventEnded(user.id, event.id, event.title, count ?? 0)
-        }
-      }
-      router.refresh()
+    if (error) {
+      // Surface failures instead of silently doing nothing — e.g. the DB-level
+      // ID-verification gate rejecting a publish.
+      setErr(error.message.includes('ID_VERIFICATION_REQUIRED')
+        ? 'Complete your ID verification before publishing this event.'
+        : (error.message || 'Could not update the event. Please try again.'))
+      setLoading(false)
+      return
     }
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      if (status === 'published') {
+        await notifyEventGoingLive(user.id, event.id, event.title)
+      } else if (status === 'completed' || status === 'cancelled') {
+        const { count } = await supabase
+          .from('guests')
+          .select('*', { count: 'exact', head: true })
+          .eq('event_id', event.id)
+          .eq('status', 'checked_in')
+        await dismissEventLiveNotification(event.id)
+        await notifyEventEnded(user.id, event.id, event.title, count ?? 0)
+      }
+    }
+    router.refresh()
     setLoading(false)
+  }
+
+  // Unverified organizers publish-flow: kick off Didit ID verification.
+  const handleVerify = async () => {
+    setLoading(true)
+    setErr(null)
+    try {
+      const res = await initiateVerification()
+      if (res?.diditSessionUrl) { window.location.href = res.diditSessionUrl; return }
+      setErr(res?.error || 'Could not start verification. Please try again from Settings.')
+    } catch {
+      setErr('Could not start verification. Please try again from Settings.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const deleteEvent = async () => {
@@ -68,16 +94,34 @@ export default function EventActions({ event }: { event: Event }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col items-end gap-2">
+      {err && (
+        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 max-w-xs text-right">
+          {err}
+        </div>
+      )}
+      <div className="flex items-center gap-2">
       {event.status === 'draft' && (
-        <button
-          onClick={() => updateStatus('published')}
-          className="btn-primary"
-          style={{ background: '#22C55E', color: 'white' }}
-          disabled={loading}
-        >
-          <CheckCircle className="w-4 h-4" /> Publish Event
-        </button>
+        organizerVerified ? (
+          <button
+            onClick={() => updateStatus('published')}
+            className="btn-primary"
+            style={{ background: '#22C55E', color: 'white' }}
+            disabled={loading}
+          >
+            <CheckCircle className="w-4 h-4" /> Publish Event
+          </button>
+        ) : (
+          <button
+            onClick={handleVerify}
+            className="btn-primary"
+            style={{ background: '#FFC745', color: '#000' }}
+            disabled={loading}
+            title="Verify your identity to publish events"
+          >
+            <ShieldCheck className="w-4 h-4" /> {loading ? 'Starting…' : 'Verify ID to Publish'}
+          </button>
+        )
       )}
 
       {event.status === 'published' && !event.is_private && (
@@ -194,6 +238,7 @@ export default function EventActions({ event }: { event: Event }) {
           </div>
         </>
       )}
+      </div>
       </div>
     </div>
   )
