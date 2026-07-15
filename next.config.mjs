@@ -1,3 +1,5 @@
+import { withSentryConfig } from '@sentry/nextjs'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   eslint: {
@@ -64,4 +66,27 @@ const nextConfig = {
   },
 }
 
-export default nextConfig
+export default withSentryConfig(nextConfig, {
+  // Only used for source-map upload, which needs an org/project + auth
+  // token. All three are optional — without them the plugin skips upload
+  // (with a warning, not a build failure) rather than blocking the build.
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+
+  silent: true, // suppress Sentry CLI build logs
+
+  webpack: {
+    treeshake: { removeDebugLogging: true }, // strip Sentry's internal debug logging from the client bundle
+  },
+
+  // Don't proxy client-side Sentry requests through a first-party route —
+  // keeps this initial rollout simple; revisit if ad-blockers turn out to
+  // meaningfully suppress error reporting.
+  tunnelRoute: undefined,
+
+  // Next.js sets NEXT_PUBLIC_ vars at build time; the client init file reads
+  // NEXT_PUBLIC_SENTRY_DSN directly rather than needing this wrapper to
+  // inject anything extra.
+  widenClientFileUpload: false,
+})
