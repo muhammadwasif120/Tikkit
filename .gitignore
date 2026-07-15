@@ -5,3 +5,6 @@ node_modules/
 out/
 *.logSEO-REPORT.html
 .agent/
+
+# Sentry Config File
+.env.sentry-build-plugin
