@@ -147,6 +147,8 @@ export async function updateSession(request: NextRequest) {
     '/venue/home',      // Venues & Experiences landing page
     '/artist-mgmt/home', // Artist Management landing page
     '/lp',               // Preserved landing pages (/lp/underground etc.)
+    '/sentry-example-page', // Sentry verification page — not linked from nav
+    '/api/sentry-example-api', // matches /api anyway, listed for clarity
   ]
 
   // On a product subdomain, only its own routes + auth are accessible

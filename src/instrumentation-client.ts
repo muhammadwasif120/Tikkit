@@ -15,6 +15,18 @@ Sentry.init({
     httpBodies: [],
   },
   debug: false,
+
+  // Third-party noise, not app bugs — comes from the host app's own injected
+  // code when the site is opened inside an in-app browser (e.g. a
+  // link-in-bio click from Instagram/Facebook), not from anything we ship.
+  // Confirmed from a real production event: Instagram's in-app-browser
+  // bridge script (sendDataToNative / sendPageHideMessage in the stack, but
+  // ignoreErrors matches on the exception message, not stack frames) throwing
+  // when its own native message-handler bridge isn't present. Unactionable —
+  // filtered so it doesn't consume error quota or dilute real signal.
+  ignoreErrors: [
+    /window\.webkit\.messageHandlers/,
+  ],
 })
 
 // Required by the SDK to instrument App Router client-side navigations.
