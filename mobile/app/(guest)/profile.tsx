@@ -1,17 +1,19 @@
 import {
   View, Text, ScrollView, TouchableOpacity, TextInput, StyleSheet,
-  ActivityIndicator, Alert, Switch, Modal, Pressable,
+  ActivityIndicator, Switch, Modal, Pressable,
 } from 'react-native'
 import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as Linking from 'expo-linking'
 import { useAuth } from '@/contexts/AuthContext'
 import { colors, radius } from '@/theme'
-import { getProfile, updateProfile } from '@/lib/api'
+import { getProfile, updateProfile, deleteAccount } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 /* ─── Credit tier helper ─────────────────────────────────────────────────── */
 function creditTier(score: number) {
@@ -147,6 +149,7 @@ const DEFAULT_NOTIFS: NotifPrefs = { registration_updates: true, payment_reminde
 export default function GuestProfileScreen() {
   const { profile: authProfile, signOut } = useAuth()
   const toast = useToast()
+  const confirm = useConfirm()
 
   const [loading, setLoading] = useState(true)
   const [serverData, setServerData] = useState<any>(null)
@@ -251,16 +254,11 @@ export default function GuestProfileScreen() {
   const handleDelete = async () => {
     setDeleteBusy(true)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const token = session?.access_token
-      await fetch(`${process.env.EXPO_PUBLIC_API_URL ?? 'https://tikkit.xyz'}/api/mobile/profile`, {
-        method: 'DELETE',
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      })
+      await deleteAccount()
       await signOut()
     } catch {
       setDeleteBusy(false)
-      Alert.alert('Error', 'Failed to delete account. Please try again.')
+      confirm({ title: 'Error', message: 'Failed to delete account. Please try again.' })
     }
   }
 
@@ -392,10 +390,16 @@ export default function GuestProfileScreen() {
         <View style={s.card}>
           <Text style={s.sectionLabel}>ACCOUNT</Text>
           <MenuRow icon="shield-checkmark-outline" label="Verification" color={colors.success}
-            onPress={() => Alert.alert('Verification', 'Full ID verification is available at tikkit.xyz/guest/profile')} />
+            onPress={() => confirm({ title: 'Verification', message: 'Full ID verification is available at tikkit.xyz/guest/profile' })} />
           <View style={s.divider} />
           <MenuRow icon="flag-outline" label="Report a Problem" color={colors.textSecondary}
-            onPress={() => Alert.alert('Report a Problem', 'Email us at support@tikkit.xyz and we\'ll respond within 24 hours.')} />
+            onPress={() => confirm({ title: 'Report a Problem', message: 'Email us at support@tikkit.xyz and we\'ll respond within 24 hours.' })} />
+          <View style={s.divider} />
+          <MenuRow icon="shield-outline" label="Privacy Policy" color={colors.textSecondary}
+            onPress={() => Linking.openURL('https://tikkit.xyz/privacy')} />
+          <View style={s.divider} />
+          <MenuRow icon="document-text-outline" label="Terms of Service" color={colors.textSecondary}
+            onPress={() => Linking.openURL('https://tikkit.xyz/terms')} />
           <View style={s.divider} />
           <MenuRow icon="trash-outline" label="Delete Account" color={colors.error} onPress={() => setShowDelete(true)} />
         </View>

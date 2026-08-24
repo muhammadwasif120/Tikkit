@@ -1,7 +1,7 @@
 import {
   View, Text, StyleSheet, ActivityIndicator, ScrollView,
   RefreshControl, TouchableOpacity, FlatList, TextInput,
-  Modal, Alert, KeyboardAvoidingView, Platform,
+  Modal, KeyboardAvoidingView, Platform,
 } from 'react-native'
 import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -17,6 +17,7 @@ import {
 } from '@/lib/api'
 import { colors, radius } from '@/theme'
 import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
 
@@ -61,6 +62,7 @@ function VendorSkeleton() {
 
 export default function VendorsScreen() {
   const toast = useToast()
+  const confirm = useConfirm()
   const [vendors, setVendors] = useState<Vendor[]>([])
   const [invoices, setInvoices] = useState<VendorInvoice[]>([])
   const [loading, setLoading] = useState(true)
@@ -129,7 +131,7 @@ export default function VendorsScreen() {
   }
 
   const handleSaveVendor = async () => {
-    if (!vName.trim()) return Alert.alert('Error', 'Vendor name is required')
+    if (!vName.trim()) return toast.show({ type: 'error', message: 'Vendor name is required' })
     setSavingVendor(true)
     try {
       const payload = {
@@ -148,22 +150,26 @@ export default function VendorsScreen() {
       setVendorModal(null)
       await load()
     } catch (err: any) {
-      Alert.alert('Error', err.message ?? 'Failed to save vendor')
+      toast.show({ type: 'error', message: err.message ?? 'Failed to save vendor' })
     } finally {
       setSavingVendor(false)
     }
   }
 
   const handleDeleteVendor = (v: Vendor) => {
-    Alert.alert('Delete Vendor', `Remove "${v.name}"? All associated invoices will also be deleted.`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive', onPress: async () => {
-          try { await deleteVendor(v.id); await load() }
-          catch (err: any) { Alert.alert('Error', err.message ?? 'Failed to delete') }
-        }
-      },
-    ])
+    confirm({
+      title: 'Delete Vendor',
+      message: `Remove "${v.name}"? All associated invoices will also be deleted.`,
+      buttons: [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive', onPress: async () => {
+            try { await deleteVendor(v.id); await load() }
+            catch (err: any) { toast.show({ type: 'error', message: err.message ?? 'Failed to delete' }) }
+          }
+        },
+      ],
+    })
   }
 
   // Invoice actions
@@ -186,7 +192,7 @@ export default function VendorsScreen() {
   }
 
   const handleSaveInvoice = async () => {
-    if (!iAmount.trim() || isNaN(Number(iAmount))) return Alert.alert('Error', 'Valid amount is required')
+    if (!iAmount.trim() || isNaN(Number(iAmount))) return toast.show({ type: 'error', message: 'Valid amount is required' })
     setSavingInvoice(true)
     try {
       const payload = {
@@ -205,7 +211,7 @@ export default function VendorsScreen() {
       setInvoiceModal(null)
       await load()
     } catch (err: any) {
-      Alert.alert('Error', err.message ?? 'Failed to save invoice')
+      toast.show({ type: 'error', message: err.message ?? 'Failed to save invoice' })
     } finally {
       setSavingInvoice(false)
     }
@@ -213,15 +219,19 @@ export default function VendorsScreen() {
 
   const handleDeleteInvoice = (inv: VendorInvoice) => {
     const label = inv.description ?? `PKR ${Number(inv.amount).toLocaleString()}`
-    Alert.alert('Delete Invoice', `Remove invoice "${label}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive', onPress: async () => {
-          try { await deleteInvoice(inv.id); await load() }
-          catch (err: any) { Alert.alert('Error', err.message ?? 'Failed to delete') }
-        }
-      },
-    ])
+    confirm({
+      title: 'Delete Invoice',
+      message: `Remove invoice "${label}"?`,
+      buttons: [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive', onPress: async () => {
+            try { await deleteInvoice(inv.id); await load() }
+            catch (err: any) { toast.show({ type: 'error', message: err.message ?? 'Failed to delete' }) }
+          }
+        },
+      ],
+    })
   }
 
   const vendorInvoices = (vendorId: string) => invoices.filter(i => i.vendor_id === vendorId)
@@ -392,7 +402,7 @@ export default function VendorsScreen() {
       <Modal visible={!!vendorModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setVendorModal(null)}>
         <SafeAreaView style={s.modal}>
           <View style={s.modalNav}>
-            <TouchableOpacity style={s.closeBtn} onPress={() => setVendorModal(null)}>
+            <TouchableOpacity style={s.closeBtn} onPress={() => setVendorModal(null)} accessibilityRole="button" accessibilityLabel="Close">
               <Ionicons name="close" size={20} color={colors.textPrimary} />
             </TouchableOpacity>
             <Text style={s.modalTitle}>{vendorModal === 'edit' ? 'Edit Vendor' : 'Add Vendor'}</Text>
@@ -421,7 +431,7 @@ export default function VendorsScreen() {
       <Modal visible={!!invoiceModal} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setInvoiceModal(null)}>
         <SafeAreaView style={s.modal}>
           <View style={s.modalNav}>
-            <TouchableOpacity style={s.closeBtn} onPress={() => setInvoiceModal(null)}>
+            <TouchableOpacity style={s.closeBtn} onPress={() => setInvoiceModal(null)} accessibilityRole="button" accessibilityLabel="Close">
               <Ionicons name="close" size={20} color={colors.textPrimary} />
             </TouchableOpacity>
             <Text style={s.modalTitle}>{invoiceModal === 'edit' ? 'Edit Invoice' : 'Add Invoice'}</Text>

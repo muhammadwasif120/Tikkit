@@ -1,7 +1,7 @@
 import {
   View, Text, StyleSheet, ActivityIndicator, ScrollView,
   RefreshControl, TouchableOpacity, FlatList, TextInput,
-  KeyboardAvoidingView, Platform, Alert,
+  KeyboardAvoidingView, Platform,
 } from 'react-native'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -63,7 +63,7 @@ export default function CommandEventScreen() {
       await commandUpdateStatus(eventId!, registrationId, action)
       await load()
     } catch (err: any) {
-      Alert.alert('Error', err.message ?? 'Action failed')
+      toast.show({ type: 'error', message: err.message ?? 'Action failed' })
     } finally {
       setActing(null)
     }
@@ -77,7 +77,7 @@ export default function CommandEventScreen() {
       setMessages(prev => [...prev, message])
       setChatMessage('')
     } catch (err: any) {
-      Alert.alert('Error', err.message ?? 'Failed to send message')
+      toast.show({ type: 'error', message: err.message ?? 'Failed to send message' })
     } finally {
       setSendingMsg(false)
     }
@@ -129,7 +129,7 @@ export default function CommandEventScreen() {
 
       {/* Nav */}
       <View style={s.nav}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={s.backBtn} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>

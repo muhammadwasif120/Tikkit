@@ -47,7 +47,7 @@ export default function EventDetailScreen() {
   /* ── Nav bar — always visible ── */
   const NavBar = ({ title }: { title?: string }) => (
     <View style={s.navBar}>
-      <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+      <TouchableOpacity style={s.backBtn} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
         <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
       </TouchableOpacity>
       {title ? (

@@ -1,7 +1,7 @@
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl, ScrollView, TextInput,
-  Alert, Modal,
+  Modal,
 } from 'react-native'
 import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/Skeleton'
 import { getOrganizerGuests, updateOrgGuest, deleteOrgGuest, OrgGuest } from '@/lib/api'
 import { colors, radius } from '@/theme'
 import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 type Tier = 'all' | 'vip' | 'regular' | 'waitlist'
 const TIERS: { key: Tier; label: string }[] = [
@@ -53,6 +54,7 @@ function GuestSkeleton() {
 
 export default function GuestsScreen() {
   const toast = useToast()
+  const confirm = useConfirm()
   const [tier, setTier] = useState<Tier>('all')
   const [guests, setGuests] = useState<OrgGuest[]>([])
   const [events, setEvents] = useState<Array<{ id: string; title: string; status: string }>>([])
@@ -123,26 +125,30 @@ export default function GuestsScreen() {
       setEditGuest(null)
       await load(tier, selectedEventId)
     } catch (err: any) {
-      Alert.alert('Error', err.message ?? 'Failed to save')
+      confirm({ title: 'Error', message: err.message ?? 'Failed to save' })
     } finally {
       setSaving(false)
     }
   }
 
   const handleDelete = (g: OrgGuest) => {
-    Alert.alert('Delete Guest', `Remove ${g.full_name} from the event?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive', onPress: async () => {
-          try {
-            await deleteOrgGuest(g.id)
-            await load(tier, selectedEventId)
-          } catch (err: any) {
-            Alert.alert('Error', err.message ?? 'Failed to delete')
+    confirm({
+      title: 'Delete Guest',
+      message: `Remove ${g.full_name} from the event?`,
+      buttons: [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete', style: 'destructive', onPress: async () => {
+            try {
+              await deleteOrgGuest(g.id)
+              await load(tier, selectedEventId)
+            } catch (err: any) {
+              confirm({ title: 'Error', message: err.message ?? 'Failed to delete' })
+            }
           }
-        }
-      },
-    ])
+        },
+      ],
+    })
   }
 
   const eventMap = Object.fromEntries(events.map(e => [e.id, e]))
@@ -277,7 +283,7 @@ export default function GuestsScreen() {
         {editGuest && (
           <SafeAreaView style={s.modal}>
             <View style={s.modalNav}>
-              <TouchableOpacity style={s.closeBtn} onPress={() => setEditGuest(null)}>
+              <TouchableOpacity style={s.closeBtn} onPress={() => setEditGuest(null)} accessibilityRole="button" accessibilityLabel="Close">
                 <Ionicons name="close" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
               <Text style={s.modalTitle}>Edit Guest</Text>
@@ -302,7 +308,7 @@ export default function GuestsScreen() {
         {qrGuest && (
           <SafeAreaView style={s.modal}>
             <View style={s.modalNav}>
-              <TouchableOpacity style={s.closeBtn} onPress={() => setQrGuest(null)}>
+              <TouchableOpacity style={s.closeBtn} onPress={() => setQrGuest(null)} accessibilityRole="button" accessibilityLabel="Close">
                 <Ionicons name="close" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
               <Text style={s.modalTitle}>Guest QR Code</Text>

@@ -1,7 +1,7 @@
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   ActivityIndicator, RefreshControl, ScrollView, TextInput,
-  Alert, Modal,
+  Modal,
 } from 'react-native'
 import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -95,7 +95,7 @@ export default function ApprovalsScreen() {
       await load(filter)
     } catch (err: any) {
       haptic.error()
-      Alert.alert('Error', err.message ?? 'Action failed')
+      toast.show({ type: 'error', message: err.message ?? 'Action failed' })
     } finally {
       setActing(false)
     }
@@ -233,7 +233,7 @@ export default function ApprovalsScreen() {
         {selected && (
           <SafeAreaView style={s.modal}>
             <View style={s.modalNav}>
-              <TouchableOpacity style={s.closeBtn} onPress={() => { setSelected(null); setShowRejectInput(false); setRejectNotes('') }}>
+              <TouchableOpacity style={s.closeBtn} onPress={() => { setSelected(null); setShowRejectInput(false); setRejectNotes('') }} accessibilityRole="button" accessibilityLabel="Close">
                 <Ionicons name="close" size={20} color={colors.textPrimary} />
               </TouchableOpacity>
               <Text style={s.modalTitle}>Registration Details</Text>

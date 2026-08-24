@@ -1,6 +1,6 @@
 import {
   View, Text, Image, ScrollView, TouchableOpacity,
-  StyleSheet, ActivityIndicator, Alert, Linking, Share,
+  StyleSheet, ActivityIndicator, Linking, Share,
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
@@ -29,7 +29,7 @@ export default function EventDetailScreen() {
     getEvent(id).then(({ event: e }) => {
       setEvent(e)
     }).catch(() => {
-      Alert.alert('Error', 'Could not load event')
+      toast.show({ type: 'error', message: 'Could not load event' })
       router.back()
     }).finally(() => setLoading(false))
   }, [id])
@@ -127,7 +127,7 @@ export default function EventDetailScreen() {
 
           {/* Top bar: back | share + heart */}
           <View style={s.topBar}>
-            <TouchableOpacity style={s.iconBtn} onPress={() => router.back()}>
+            <TouchableOpacity style={s.iconBtn} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
               <Ionicons name="arrow-back" size={20} color={colors.white} />
             </TouchableOpacity>
             <View style={s.topBarRight}>

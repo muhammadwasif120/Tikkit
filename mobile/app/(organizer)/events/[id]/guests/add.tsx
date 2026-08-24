@@ -1,6 +1,6 @@
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native'
 import { useState } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -9,12 +9,16 @@ import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { addGuest } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 const GENDERS = ['Male', 'Female', 'Non-binary', 'Prefer not to say']
 
 export default function AddGuestScreen() {
   const { id: eventId } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
+  const toast = useToast()
+  const confirm = useConfirm()
 
   const [fullName,  setFullName]  = useState('')
   const [email,     setEmail]     = useState('')
@@ -46,11 +50,13 @@ export default function AddGuestScreen() {
       })
       if (another) {
         reset()
-        Alert.alert('Guest Added', `${fullName.trim()} has been added. Fill in the next guest.`)
+        toast.show({ type: 'success', message: `${fullName.trim()} has been added. Fill in the next guest.` })
       } else {
-        Alert.alert('Guest Added', `${fullName.trim()} has been added to the event.`, [
-          { text: 'OK', onPress: () => router.back() },
-        ])
+        confirm({
+          title: 'Guest Added',
+          message: `${fullName.trim()} has been added to the event.`,
+          buttons: [{ text: 'OK', onPress: () => router.back() }],
+        })
       }
     } catch (err: any) {
       setError(err.message ?? 'Failed to add guest')
@@ -64,7 +70,7 @@ export default function AddGuestScreen() {
       <StatusBar style="light" />
 
       <View style={s.nav}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={s.backBtn} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={s.navTitle}>Add Guest</Text>

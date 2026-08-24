@@ -175,6 +175,12 @@ export async function updateProfile(body: ProfileUpdate) {
   })
 }
 
+// Permanently (soft-)deletes the signed-in account — works for any role.
+// Anonymises personal data server-side and ends the session.
+export async function deleteAccount() {
+  return request<{ ok: boolean }>('/api/mobile/profile', { method: 'DELETE' })
+}
+
 // ─── Credits ─────────────────────────────────────────────────────────────────
 
 export type CreditTransaction = {

@@ -1,5 +1,5 @@
 import {
-  View, Text, StyleSheet, ActivityIndicator, Alert, ScrollView,
+  View, Text, StyleSheet, ActivityIndicator, ScrollView,
   TouchableOpacity, Animated, Dimensions,
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import * as SecureStore from 'expo-secure-store'
 import { getTickets, Ticket } from '@/lib/api'
 import { colors, radius, getEventGradient } from '@/theme'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 const { width: SCREEN_W } = Dimensions.get('window')
 const CARD_W = Math.min(SCREEN_W - 32, 380)
@@ -24,6 +25,7 @@ export default function QRTicketScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const confirm = useConfirm()
 
   const [ticket, setTicket]     = useState<Ticket | null>(null)
   const [loading, setLoading]   = useState(true)
@@ -61,7 +63,7 @@ export default function QRTicketScreen() {
           await SecureStore.setItemAsync(QR_CACHE_KEY(id), JSON.stringify(found))
         } else if (!hasCached) {
           // Not in API and nothing in cache — genuinely missing
-          Alert.alert('Not found', 'Ticket not found')
+          confirm({ title: 'Not found', message: 'Ticket not found' })
         }
       } catch {
         // Network failed — already showing cached version, nothing to do
@@ -117,7 +119,7 @@ export default function QRTicketScreen() {
 
       {/* Nav */}
       <View style={[s.nav, { paddingTop: 4 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={s.backBtn}>
+        <TouchableOpacity onPress={() => router.back()} style={s.backBtn} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
         {fromCache && (

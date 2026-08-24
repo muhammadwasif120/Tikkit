@@ -1,6 +1,6 @@
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, ActivityIndicator, Alert,
+  ScrollView, ActivityIndicator,
 } from 'react-native'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
@@ -11,6 +11,7 @@ import { format } from 'date-fns'
 import { getEvent, registerForEvent, EventDetail } from '@/lib/api'
 import { useAuth } from '@/contexts/AuthContext'
 import { colors, radius } from '@/theme'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 /* ─── Focused input component ─────────────────────────────────────────────── */
 function FormField({
@@ -106,6 +107,7 @@ export default function RegisterScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const router = useRouter()
   const { profile } = useAuth()
+  const confirm = useConfirm()
   const [event, setEvent] = useState<EventDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -129,9 +131,9 @@ export default function RegisterScreen() {
   const isEOI = event?.registration_mode === 'expression_of_interest'
 
   const submit = async () => {
-    if (!name.trim() || !email.trim()) return Alert.alert('Required', 'Name and email are required')
+    if (!name.trim() || !email.trim()) return confirm({ title: 'Required', message: 'Name and email are required' })
     if (event?.ticket_types?.length && selectedDays.length === 0)
-      return Alert.alert('Select days', 'Please select at least one day')
+      return confirm({ title: 'Select days', message: 'Please select at least one day' })
     setSubmitting(true)
     try {
       const result = await registerForEvent({
@@ -149,7 +151,7 @@ export default function RegisterScreen() {
         },
       })
     } catch (err: any) {
-      Alert.alert('Registration failed', err.message ?? 'Something went wrong. Please try again.')
+      confirm({ title: 'Registration failed', message: err.message ?? 'Something went wrong. Please try again.' })
     } finally {
       setSubmitting(false)
     }
@@ -167,7 +169,7 @@ export default function RegisterScreen() {
 
       {/* Nav */}
       <View style={s.nav}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={s.backBtn} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={s.navTitle}>{isEOI ? 'Apply' : 'Register'}</Text>

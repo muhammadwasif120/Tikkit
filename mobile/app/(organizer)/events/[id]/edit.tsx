@@ -1,7 +1,7 @@
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator,
-  Alert, Switch,
+  Switch,
 } from 'react-native'
 import { useState, useEffect } from 'react'
 import { useRouter, useLocalSearchParams } from 'expo-router'
@@ -12,6 +12,7 @@ import { getOrganizerEvent, updateEvent, CreateEventPayload } from '@/lib/api'
 import { colors, radius } from '@/theme'
 import { Skeleton } from '@/components/Skeleton'
 import { format } from 'date-fns'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 type RegMode = 'open' | 'expression_of_interest' | 'invite_only'
 
@@ -37,6 +38,7 @@ function validateDate(val: string): string | null {
 
 export default function EditEventScreen() {
   const router = useRouter()
+  const confirm = useConfirm()
   const { id } = useLocalSearchParams<{ id: string }>()
 
   const [loadingEvent, setLoadingEvent] = useState(true)
@@ -110,7 +112,7 @@ export default function EditEventScreen() {
         status: publishNow ? 'published' : 'draft',
       }
       await updateEvent(id!, payload)
-      Alert.alert('Saved', 'Event updated successfully.', [{ text: 'OK', onPress: () => router.back() }])
+      confirm({ title: 'Saved', message: 'Event updated successfully.', buttons: [{ text: 'OK', onPress: () => router.back() }] })
     } catch (err: any) {
       setError(err.message ?? 'Failed to update event')
     } finally {

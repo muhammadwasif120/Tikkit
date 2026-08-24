@@ -60,6 +60,9 @@ export function Button({
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.75}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled: disabled || loading, busy: loading }}
       style={[
         {
           backgroundColor: btnBg[variant],
@@ -192,6 +195,8 @@ export function SectionHeader({ title, action, onAction }: SectionHeaderProps) {
           onPress={onAction}
           activeOpacity={0.7}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          accessibilityRole="button"
+          accessibilityLabel={action}
         >
           <Text style={{ ...typography.labelMD, color: colors.blue }}>{action}</Text>
         </TouchableOpacity>
@@ -237,6 +242,8 @@ export function EmptyState({ icon, title, subtitle, cta, onCta }: EmptyStateProp
         <TouchableOpacity
           onPress={onCta}
           activeOpacity={0.75}
+          accessibilityRole="button"
+          accessibilityLabel={cta}
           style={{
             marginTop: 4,
             backgroundColor: colors.blue,

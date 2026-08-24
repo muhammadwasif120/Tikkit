@@ -1,16 +1,48 @@
 import { useEffect } from 'react'
-import { View, Text, Image, ActivityIndicator, StyleSheet } from 'react-native'
+import { View, Text, Image, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native'
 import { Stack, useRouter, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import * as Linking from 'expo-linking'
+import { Ionicons } from '@expo/vector-icons'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ToastProvider } from '@/components/Toast'
+import { ConfirmProvider } from '@/components/ConfirmDialog'
 import { useFonts } from '@/hooks/useFonts'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import { supabase } from '@/lib/supabase'
-import { colors } from '@/theme'
+import { colors, radius } from '@/theme'
+import { Sentry } from '@/lib/sentry'
 
 SplashScreen.preventAutoHideAsync()
+
+/**
+ * Fallback shown in place of a crashed screen. Matches the app's own dark
+ * theme instead of the SDK's default plain-text crash screen — a render
+ * error is unpleasant enough without also looking broken.
+ */
+function CrashFallback({ resetError }: { error: unknown; resetError: () => void }) {
+  return (
+    <View style={s.crash}>
+      <View style={s.crashIcon}>
+        <Ionicons name="alert-circle-outline" size={32} color={colors.error} />
+      </View>
+      <Text style={s.crashTitle}>Something went wrong</Text>
+      <Text style={s.crashBody}>
+        The app hit an unexpected error. This has been reported — try again, and if it keeps
+        happening, reach out to support@tikkit.xyz.
+      </Text>
+      <TouchableOpacity
+        style={s.crashBtn}
+        onPress={resetError}
+        activeOpacity={0.85}
+        accessibilityRole="button"
+        accessibilityLabel="Try again"
+      >
+        <Text style={s.crashBtnText}>Try Again</Text>
+      </TouchableOpacity>
+    </View>
+  )
+}
 
 /**
  * Parse a deep link URL from Supabase and exchange it for a session.
@@ -147,15 +179,21 @@ function RootNavigator() {
   )
 }
 
-export default function RootLayout() {
+function RootLayout() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <RootNavigator />
-      </ToastProvider>
-    </AuthProvider>
+    <Sentry.ErrorBoundary fallback={CrashFallback}>
+      <AuthProvider>
+        <ToastProvider>
+          <ConfirmProvider>
+            <RootNavigator />
+          </ConfirmProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </Sentry.ErrorBoundary>
   )
 }
+
+export default Sentry.wrap(RootLayout)
 
 const s = StyleSheet.create({
   splash: {
@@ -178,5 +216,43 @@ const s = StyleSheet.create({
   },
   spinner: {
     marginTop: 8,
+  },
+
+  crash: {
+    flex: 1,
+    backgroundColor: colors.pageBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    gap: 12,
+  },
+  crashIcon: {
+    width: 64, height: 64, borderRadius: 32,
+    backgroundColor: colors.errorSubtle,
+    borderWidth: 1, borderColor: colors.errorBorder,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 4,
+  },
+  crashTitle: {
+    color: colors.textPrimary, fontSize: 20, fontWeight: '700',
+    fontFamily: 'Poppins_700Bold',
+  },
+  crashBody: {
+    color: colors.textSecondary, fontSize: 14, textAlign: 'center',
+    lineHeight: 20, fontFamily: 'DMSans_400Regular',
+  },
+  crashBtn: {
+    marginTop: 8,
+    backgroundColor: colors.blue,
+    borderRadius: radius.md,
+    paddingVertical: 13,
+    paddingHorizontal: 28,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  crashBtnText: {
+    color: colors.white, fontSize: 15, fontWeight: '700',
+    fontFamily: 'DMSans_500Medium',
   },
 })

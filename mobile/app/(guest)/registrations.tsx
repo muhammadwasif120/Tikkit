@@ -1,6 +1,6 @@
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  Image, ActivityIndicator, RefreshControl, Alert, Modal,
+  Image, ActivityIndicator, RefreshControl, Modal,
   Pressable,
 } from 'react-native'
 import { Skeleton } from '@/components/Skeleton'
@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker'
 import { getMyRegistrations, submitPaymentScreenshot, MyRegistration } from '@/lib/api'
 import { colors, radius } from '@/theme'
 import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 /* ─── Status step timeline ───────────────────────────────────────────────── */
 type Step = { key: string; label: string; icon: keyof typeof Ionicons.glyphMap }
@@ -179,6 +180,7 @@ function PaymentModal({ registration, onClose, onSuccess }: {
   onClose: () => void
   onSuccess: (updated: MyRegistration) => void
 }) {
+  const confirm = useConfirm()
   const [imageUri, setImageUri] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -186,7 +188,7 @@ function PaymentModal({ registration, onClose, onSuccess }: {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please allow access to your photo library to upload a payment screenshot.')
+      confirm({ title: 'Permission needed', message: 'Please allow access to your photo library to upload a payment screenshot.' })
       return
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -203,7 +205,7 @@ function PaymentModal({ registration, onClose, onSuccess }: {
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync()
     if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please allow camera access to take a photo.')
+      confirm({ title: 'Permission needed', message: 'Please allow camera access to take a photo.' })
       return
     }
     const result = await ImagePicker.launchCameraAsync({
@@ -245,7 +247,7 @@ function PaymentModal({ registration, onClose, onSuccess }: {
             <Text style={pm.title}>Submit Payment</Text>
             <Text style={pm.subtitle} numberOfLines={1}>{event?.title ?? 'Event'}</Text>
           </View>
-          <TouchableOpacity onPress={onClose} style={pm.closeBtn}>
+          <TouchableOpacity onPress={onClose} style={pm.closeBtn} accessibilityRole="button" accessibilityLabel="Close">
             <Ionicons name="close" size={18} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
@@ -337,7 +339,7 @@ export default function RegistrationsScreen() {
   const handlePaymentSuccess = (updated: MyRegistration) => {
     setPaymentTarget(null)
     setRegistrations(prev => prev.map(r => r.id === updated.id ? { ...r, ...updated } : r))
-    Alert.alert('Submitted!', 'Your payment screenshot has been submitted. We will verify it shortly.')
+    toast.show({ type: 'success', message: 'Payment screenshot submitted. We will verify it shortly.' })
   }
 
   if (loading) {

@@ -1,7 +1,7 @@
 import {
   View, Text, StyleSheet, ActivityIndicator, ScrollView,
   RefreshControl, TextInput, TouchableOpacity, KeyboardAvoidingView,
-  Platform, Alert,
+  Platform,
 } from 'react-native'
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -72,7 +72,7 @@ export default function MessagesScreen() {
       setText('')
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100)
     } catch (err: any) {
-      Alert.alert('Error', err.message ?? 'Failed to send message')
+      toast.show({ type: 'error', message: err.message ?? 'Failed to send message' })
     } finally {
       setSending(false)
     }

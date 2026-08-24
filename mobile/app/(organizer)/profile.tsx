@@ -1,6 +1,7 @@
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  Alert, TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Switch,
+  TextInput, ActivityIndicator, KeyboardAvoidingView, Platform, Switch,
+  Modal, Pressable,
 } from 'react-native'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'expo-router'
@@ -8,11 +9,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
+import * as Linking from 'expo-linking'
 import { useAuth } from '@/contexts/AuthContext'
-import { getProfile, updateProfile } from '@/lib/api'
+import { getProfile, updateProfile, deleteAccount } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import { colors, radius } from '@/theme'
 import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 /* ─── Notification config ────────────────────────────────────────────────── */
 type NotifKey = 'guest_signup' | 'guest_cancellation' | 'entry_scan' | 'exit_scan' | 'vendor_payment_due' | 'event_going_live' | 'event_ended'
@@ -84,10 +87,60 @@ function EditField({ label, value, onChangeText, placeholder, keyboardType, secu
   )
 }
 
+/* ─── Delete confirm modal ─────────────────────────────────────────────── */
+function DeleteModal({ onClose, onConfirm, busy }: { onClose: () => void; onConfirm: () => void; busy: boolean }) {
+  return (
+    <Modal visible animationType="slide" transparent onRequestClose={onClose}>
+      <Pressable style={dm.backdrop} onPress={busy ? undefined : onClose} accessibilityLabel="Dismiss" />
+      <View style={dm.box}>
+        <Ionicons name="warning-outline" size={36} color={colors.error} />
+        <Text style={dm.title}>Delete Account</Text>
+        <Text style={dm.body}>
+          This will permanently erase your personal data. Your events and guest records will be anonymised.
+          {'\n\n'}This action cannot be undone.
+        </Text>
+        <TouchableOpacity
+          style={[dm.btn, dm.danger, busy && { opacity: 0.6 }]}
+          onPress={onConfirm}
+          disabled={busy}
+          accessibilityRole="button"
+          accessibilityLabel="Delete my account"
+        >
+          {busy ? <ActivityIndicator color={colors.white} size="small" /> : <Text style={dm.btnText}>Delete My Account</Text>}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[dm.btn, { backgroundColor: colors.surface2 }]}
+          onPress={onClose}
+          disabled={busy}
+          accessibilityRole="button"
+          accessibilityLabel="Cancel"
+        >
+          <Text style={[dm.btnText, { color: colors.textSecondary }]}>Cancel</Text>
+        </TouchableOpacity>
+      </View>
+    </Modal>
+  )
+}
+const dm = StyleSheet.create({
+  backdrop: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.65)' },
+  box: {
+    position: 'absolute', top: '50%', left: 20, right: 20,
+    transform: [{ translateY: -190 }],
+    backgroundColor: colors.surface, borderRadius: radius.xl,
+    borderWidth: 1, borderColor: colors.border, padding: 24, gap: 12, alignItems: 'center',
+  },
+  title: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_700Bold' },
+  body: { color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
+  btn: { width: '100%', alignItems: 'center', paddingVertical: 13, borderRadius: radius.md },
+  danger: { backgroundColor: colors.error },
+  btnText: { color: colors.white, fontSize: 14, fontFamily: 'DMSans_500Medium', fontWeight: '700' },
+})
+
 /* ─── Main screen ────────────────────────────────────────────────────────── */
 export default function OrganizerProfileScreen() {
   const { profile: authProfile, refreshProfile, signOut } = useAuth()
   const toast = useToast()
+  const confirm = useConfirm()
   const router = useRouter()
 
   const [loading, setLoading] = useState(true)
@@ -115,6 +168,10 @@ export default function OrganizerProfileScreen() {
   const [notifPrefs,   setNotifPrefs]   = useState<Record<NotifKey, boolean>>(DEFAULT_NOTIF_PREFS)
   const [notifSaving,  setNotifSaving]  = useState(false)
   const [notifSaved,   setNotifSaved]   = useState(false)
+
+  /* delete */
+  const [showDelete, setShowDelete] = useState(false)
+  const [deleteBusy, setDeleteBusy] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -180,6 +237,18 @@ export default function OrganizerProfileScreen() {
     setPwMsg({ ok: true, text: 'Password updated!' })
     setNewPw(''); setConfirmPw('')
     setTimeout(() => { setPwOpen(false); setPwMsg(null) }, 1500)
+  }
+
+  /* ── Delete account ── */
+  const handleDelete = async () => {
+    setDeleteBusy(true)
+    try {
+      await deleteAccount()
+      await signOut()
+    } catch {
+      setDeleteBusy(false)
+      confirm({ title: 'Error', message: 'Failed to delete account. Please try again.' })
+    }
   }
 
   /* ── Notifications ── */
@@ -365,9 +434,45 @@ export default function OrganizerProfileScreen() {
             <Divider />
             <InfoRow icon="calendar-outline" label="Role" value={displayProfile?.role} />
             <Divider />
-            <TouchableOpacity style={s.editRow} onPress={() => Alert.alert('Report a Problem', 'Email us at support@tikkit.xyz and we\'ll respond within 24 hours.')} activeOpacity={0.7}>
+            <TouchableOpacity style={s.editRow} onPress={() => confirm({ title: 'Report a Problem', message: 'Email us at support@tikkit.xyz and we\'ll respond within 24 hours.' })} activeOpacity={0.7}>
               <Ionicons name="flag-outline" size={15} color={colors.textSecondary} />
               <Text style={[s.editRowText, { color: colors.textPrimary }]}>Report a Problem</Text>
+              <Ionicons name="chevron-forward" size={14} color={colors.textMuted} style={{ marginLeft: 'auto' } as any} />
+            </TouchableOpacity>
+            <Divider />
+            <TouchableOpacity
+              style={s.editRow}
+              onPress={() => Linking.openURL('https://tikkit.xyz/privacy')}
+              activeOpacity={0.7}
+              accessibilityRole="link"
+              accessibilityLabel="Privacy Policy"
+            >
+              <Ionicons name="shield-outline" size={15} color={colors.textSecondary} />
+              <Text style={[s.editRowText, { color: colors.textPrimary }]}>Privacy Policy</Text>
+              <Ionicons name="open-outline" size={14} color={colors.textMuted} style={{ marginLeft: 'auto' } as any} />
+            </TouchableOpacity>
+            <Divider />
+            <TouchableOpacity
+              style={s.editRow}
+              onPress={() => Linking.openURL('https://tikkit.xyz/terms')}
+              activeOpacity={0.7}
+              accessibilityRole="link"
+              accessibilityLabel="Terms of Service"
+            >
+              <Ionicons name="document-text-outline" size={15} color={colors.textSecondary} />
+              <Text style={[s.editRowText, { color: colors.textPrimary }]}>Terms of Service</Text>
+              <Ionicons name="open-outline" size={14} color={colors.textMuted} style={{ marginLeft: 'auto' } as any} />
+            </TouchableOpacity>
+            <Divider />
+            <TouchableOpacity
+              style={s.editRow}
+              onPress={() => setShowDelete(true)}
+              activeOpacity={0.7}
+              accessibilityRole="button"
+              accessibilityLabel="Delete Account"
+            >
+              <Ionicons name="trash-outline" size={15} color={colors.error} />
+              <Text style={[s.editRowText, { color: colors.error }]}>Delete Account</Text>
               <Ionicons name="chevron-forward" size={14} color={colors.textMuted} style={{ marginLeft: 'auto' } as any} />
             </TouchableOpacity>
           </View>
@@ -375,10 +480,14 @@ export default function OrganizerProfileScreen() {
           {/* ── Sign out ── */}
           <TouchableOpacity
             style={s.signOutBtn}
-            onPress={() => Alert.alert('Sign Out', 'Are you sure?', [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Sign Out', style: 'destructive', onPress: signOut },
-            ])}
+            onPress={() => confirm({
+              title: 'Sign Out',
+              message: 'Are you sure?',
+              buttons: [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Sign Out', style: 'destructive', onPress: signOut },
+              ],
+            })}
             activeOpacity={0.8}
           >
             <Ionicons name="log-out-outline" size={18} color={colors.error} />
@@ -387,6 +496,10 @@ export default function OrganizerProfileScreen() {
 
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {showDelete && (
+        <DeleteModal onClose={() => setShowDelete(false)} onConfirm={handleDelete} busy={deleteBusy} />
+      )}
     </SafeAreaView>
   )
 }

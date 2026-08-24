@@ -1,7 +1,7 @@
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator,
-  Alert, Switch,
+  Switch,
 } from 'react-native'
 import { useState } from 'react'
 import { useRouter } from 'expo-router'
@@ -10,6 +10,7 @@ import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { createEvent, CreateEventPayload } from '@/lib/api'
 import { colors, radius } from '@/theme'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 type RegMode = 'open' | 'expression_of_interest' | 'invite_only'
 
@@ -29,6 +30,7 @@ function validateDate(val: string): string | null {
 
 export default function NewEventScreen() {
   const router = useRouter()
+  const confirm = useConfirm()
 
   const [title,            setTitle]            = useState('')
   const [description,      setDescription]      = useState('')
@@ -80,11 +82,11 @@ export default function NewEventScreen() {
         status: publishNow ? 'published' : 'draft',
       }
       const { event } = await createEvent(payload)
-      Alert.alert(
-        publishNow ? 'Event Published!' : 'Draft Saved',
-        `"${event.title}" has been ${publishNow ? 'published' : 'saved as a draft'}.`,
-        [{ text: 'OK', onPress: () => router.back() }]
-      )
+      confirm({
+        title: publishNow ? 'Event Published!' : 'Draft Saved',
+        message: `"${event.title}" has been ${publishNow ? 'published' : 'saved as a draft'}.`,
+        buttons: [{ text: 'OK', onPress: () => router.back() }],
+      })
     } catch (err: any) {
       setError(err.message ?? 'Failed to create event')
     } finally {

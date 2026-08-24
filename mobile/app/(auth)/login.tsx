@@ -9,6 +9,7 @@ import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as SecureStore from 'expo-secure-store'
+import * as Linking from 'expo-linking'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { colors, radius } from '@/theme'
@@ -143,6 +144,30 @@ const eb = StyleSheet.create({
     borderWidth: 1, borderColor: colors.error + '30',
   },
   text: { color: colors.error, fontSize: 13, fontFamily: 'DMSans_400Regular', flex: 1 },
+})
+
+/* ─── Legal consent line ─────────────────────────────────────────────────── */
+function LegalConsent() {
+  return (
+    <Text style={lc.text}>
+      By creating an account, you agree to our{' '}
+      <Text style={lc.link} onPress={() => Linking.openURL('https://tikkit.xyz/terms')}>
+        Terms of Service
+      </Text>{' '}
+      and{' '}
+      <Text style={lc.link} onPress={() => Linking.openURL('https://tikkit.xyz/privacy')}>
+        Privacy Policy
+      </Text>
+      .
+    </Text>
+  )
+}
+const lc = StyleSheet.create({
+  text: {
+    color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular',
+    textAlign: 'center', lineHeight: 17, marginTop: 4,
+  },
+  link: { color: colors.textSecondary, textDecorationLine: 'underline' },
 })
 
 /* ─── CTA button ─────────────────────────────────────────────────────────── */
@@ -447,7 +472,12 @@ export default function AuthScreen() {
               onChangeText={setPassword} secureTextEntry={!showPw} accent={accent}
               autoCapitalize="none"
               rightElement={
-                <TouchableOpacity onPress={() => setShowPw(v => !v)} style={{ padding: 4 }}>
+                <TouchableOpacity
+                  onPress={() => setShowPw(v => !v)}
+                  style={{ padding: 4 }}
+                  accessibilityRole="button"
+                  accessibilityLabel={showPw ? 'Hide password' : 'Show password'}
+                >
                   <Ionicons name={showPw ? 'eye-off-outline' : 'eye-outline'} size={18} color={colors.textMuted} />
                 </TouchableOpacity>
               }
@@ -729,6 +759,8 @@ export default function AuthScreen() {
           <TouchableOpacity onPress={handleSignUp} style={a.skipBtn}>
             <Text style={a.skipText}>Skip and create account</Text>
           </TouchableOpacity>
+
+          <LegalConsent />
         </View>
       </AuthShell>
     )

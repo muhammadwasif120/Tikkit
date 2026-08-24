@@ -48,7 +48,7 @@ const REG_MODE: Record<string, { label: string; color: string; bg: string }> = {
 
 type MyTicket = { eventId: string; status: string }
 
-function groupEvents(events: EventSummary[]) {
+export function groupEvents(events: EventSummary[]) {
   const today: EventSummary[] = []
   const thisWeek: EventSummary[] = []
   const comingUp: EventSummary[] = []
@@ -190,31 +190,39 @@ export default function ExploreScreen() {
 
   const { today, thisWeek, comingUp } = useMemo(() => groupEvents(events), [events])
 
-  const renderSection = (
-    title: string,
-    icon: keyof typeof Ionicons.glyphMap,
-    iconColor: string,
-    sectionEvents: EventSummary[],
-  ) => {
-    if (!sectionEvents.length) return null
-    return (
-      <View key={title} style={s.section}>
-        <View style={s.sectionHeadRow}>
-          <Ionicons name={icon} size={14} color={iconColor} />
-          <Text style={[s.sectionTitle, { color: iconColor }]}>{title.toUpperCase()}</Text>
-        </View>
-        {sectionEvents.map(e => (
-          <EventCard
-            key={e.id}
-            event={e}
-            isFav={favourites.has(e.id)}
-            onPress={() => router.push(`/(guest)/event/${e.id}`)}
-            onFav={() => toggleFav(e.id)}
-          />
-        ))}
-      </View>
-    )
-  }
+  // Flatten hero/strip/section-headers/event-cards into one row list so the
+  // FlatList below actually virtualizes every event card — previously all
+  // cards were rendered up front inside ListHeaderComponent, which defeats
+  // FlatList's windowing and gets expensive once a guest scrolls through
+  // many pages of events.
+  type Row =
+    | { key: string; type: 'carousel' }
+    | { key: string; type: 'my-events' }
+    | { key: string; type: 'section-header'; title: string; icon: keyof typeof Ionicons.glyphMap; color: string }
+    | { key: string; type: 'event'; event: EventSummary }
+
+  const rows = useMemo<Row[]>(() => {
+    const out: Row[] = []
+    if (featured.length > 0 && !search && !category) {
+      out.push({ key: 'carousel', type: 'carousel' })
+    }
+    if (myUpcoming.length > 0) {
+      out.push({ key: 'my-events', type: 'my-events' })
+    }
+    const sections: Array<[string, keyof typeof Ionicons.glyphMap, string, EventSummary[]]> = [
+      ['Today', 'flame-outline', '#FF6B35', today],
+      ['This Week', 'flash-outline', colors.gold, thisWeek],
+      ['Coming Up', 'star-outline', colors.indigo, comingUp],
+    ]
+    for (const [title, icon, color, sectionEvents] of sections) {
+      if (!sectionEvents.length) continue
+      out.push({ key: `header-${title}`, type: 'section-header', title, icon, color })
+      for (const e of sectionEvents) {
+        out.push({ key: `event-${e.id}`, type: 'event', event: e })
+      }
+    }
+    return out
+  }, [featured, myUpcoming, today, thisWeek, comingUp, search, category])
 
   return (
     <SafeAreaView style={s.root}>
@@ -287,98 +295,107 @@ export default function ExploreScreen() {
         </View>
       ) : (
         <FlatList
-          data={events}
-          keyExtractor={item => item.id}
-          renderItem={() => null}
+          data={rows}
+          keyExtractor={row => row.key}
+          contentContainerStyle={s.listContent}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.blue} />
           }
           onEndReached={onLoadMore}
           onEndReachedThreshold={0.5}
-          ListHeaderComponent={
-            <View style={s.listContent}>
+          renderItem={({ item: row, index }) => {
+            switch (row.type) {
+              case 'carousel':
+                return (
+                  <FeaturedCarousel
+                    events={featured}
+                    favourites={favourites}
+                    onPress={id => router.push(`/(guest)/event/${id}`)}
+                    onFav={toggleFav}
+                  />
+                )
 
-              {/* ── Hero Carousel ── */}
-              {featured.length > 0 && !search && !category && (
-                <FeaturedCarousel
-                  events={featured}
-                  favourites={favourites}
-                  onPress={id => router.push(`/(guest)/event/${id}`)}
-                  onFav={toggleFav}
-                />
-              )}
-
-              {/* ── My Events strip ── */}
-              {myUpcoming.length > 0 && (
-                <View style={s.mySection}>
-                  <View style={s.mySectionHeader}>
-                    <View style={s.mySectionTitleRow}>
-                      <Ionicons name="ticket-outline" size={14} color={colors.blue} />
-                      <Text style={s.mySectionTitle}>My Events</Text>
+              case 'my-events':
+                return (
+                  <View style={s.mySection}>
+                    <View style={s.mySectionHeader}>
+                      <View style={s.mySectionTitleRow}>
+                        <Ionicons name="ticket-outline" size={14} color={colors.blue} />
+                        <Text style={s.mySectionTitle}>My Events</Text>
+                      </View>
+                      <TouchableOpacity onPress={() => router.push('/(guest)/registrations')}>
+                        <Text style={s.mySeeAll}>View All →</Text>
+                      </TouchableOpacity>
                     </View>
-                    <TouchableOpacity onPress={() => router.push('/(guest)/registrations')}>
-                      <Text style={s.mySeeAll}>View All →</Text>
-                    </TouchableOpacity>
-                  </View>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={s.myScroll}
-                  >
-                    {myUpcoming.slice(0, 6).map(e => {
-                      const ticket = myTickets.find(t => t.eventId === e.id)
-                      const statusConfig = ticket?.status === 'approved' || ticket?.status === 'confirmed'
-                        ? { color: colors.success, label: 'Confirmed' }
-                        : ticket?.status === 'pending'
-                        ? { color: colors.warning, label: 'Pending' }
-                        : ticket?.status === 'rejected'
-                        ? { color: colors.error, label: 'Rejected' }
-                        : { color: colors.indigo, label: 'Applied' }
-                      const gradient = getEventGradient(e.id)
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={s.myScroll}
+                    >
+                      {myUpcoming.slice(0, 6).map(e => {
+                        const ticket = myTickets.find(t => t.eventId === e.id)
+                        const statusConfig = ticket?.status === 'approved' || ticket?.status === 'confirmed'
+                          ? { color: colors.success, label: 'Confirmed' }
+                          : ticket?.status === 'pending'
+                          ? { color: colors.warning, label: 'Pending' }
+                          : ticket?.status === 'rejected'
+                          ? { color: colors.error, label: 'Rejected' }
+                          : { color: colors.indigo, label: 'Applied' }
+                        const gradient = getEventGradient(e.id)
 
-                      return (
-                        <TouchableOpacity
-                          key={e.id}
-                          style={s.myCard}
-                          onPress={() => router.push(`/(guest)/event/${e.id}`)}
-                          activeOpacity={0.85}
-                        >
-                          {e.cover_image_url
-                            ? <Image source={{ uri: e.cover_image_url }} style={s.myCardImg} />
-                            : <LinearGradient colors={gradient as [string, string]} style={s.myCardImg} start={[0, 0]} end={[1, 1]} />
-                          }
-                          {/* Status pill */}
-                          <View style={[s.myStatusPill, { backgroundColor: statusConfig.color + '22', borderColor: statusConfig.color + '44' }]}>
-                            <View style={[s.myStatusDot, { backgroundColor: statusConfig.color }]} />
-                            <Text style={[s.myStatusText, { color: statusConfig.color }]}>{statusConfig.label}</Text>
-                          </View>
-                          <View style={s.myCardInfo}>
-                            <Text style={s.myCardTitle} numberOfLines={2}>{e.title}</Text>
-                            <Text style={s.myCardDate}>{format(new Date(e.date_start), 'd MMM · h:mm a')}</Text>
-                          </View>
-                        </TouchableOpacity>
-                      )
-                    })}
-                  </ScrollView>
-                </View>
-              )}
-
-              {/* ── Event sections ── */}
-              {events.length === 0 ? (
-                <View style={s.emptyWrap}>
-                  <View style={s.emptyIcon}>
-                    <Ionicons name="calendar-outline" size={32} color={colors.textMuted} />
+                        return (
+                          <TouchableOpacity
+                            key={e.id}
+                            style={s.myCard}
+                            onPress={() => router.push(`/(guest)/event/${e.id}`)}
+                            activeOpacity={0.85}
+                          >
+                            {e.cover_image_url
+                              ? <Image source={{ uri: e.cover_image_url }} style={s.myCardImg} />
+                              : <LinearGradient colors={gradient as [string, string]} style={s.myCardImg} start={[0, 0]} end={[1, 1]} />
+                            }
+                            {/* Status pill */}
+                            <View style={[s.myStatusPill, { backgroundColor: statusConfig.color + '22', borderColor: statusConfig.color + '44' }]}>
+                              <View style={[s.myStatusDot, { backgroundColor: statusConfig.color }]} />
+                              <Text style={[s.myStatusText, { color: statusConfig.color }]}>{statusConfig.label}</Text>
+                            </View>
+                            <View style={s.myCardInfo}>
+                              <Text style={s.myCardTitle} numberOfLines={2}>{e.title}</Text>
+                              <Text style={s.myCardDate}>{format(new Date(e.date_start), 'd MMM · h:mm a')}</Text>
+                            </View>
+                          </TouchableOpacity>
+                        )
+                      })}
+                    </ScrollView>
                   </View>
-                  <Text style={s.emptyTitle}>No events found</Text>
-                  <Text style={s.emptyText}>Try a different category or search term</Text>
-                </View>
-              ) : (
-                <>
-                  {renderSection('Today', 'flame-outline', '#FF6B35', today)}
-                  {renderSection('This Week', 'flash-outline', colors.gold, thisWeek)}
-                  {renderSection('Coming Up', 'star-outline', colors.indigo, comingUp)}
-                </>
-              )}
+                )
+
+              case 'section-header':
+                return (
+                  <View style={[s.sectionHeadRow, index > 0 && { marginTop: 12 }]}>
+                    <Ionicons name={row.icon} size={14} color={row.color} />
+                    <Text style={[s.sectionTitle, { color: row.color }]}>{row.title.toUpperCase()}</Text>
+                  </View>
+                )
+
+              case 'event':
+                return (
+                  <EventCard
+                    event={row.event}
+                    isFav={favourites.has(row.event.id)}
+                    onPress={() => router.push(`/(guest)/event/${row.event.id}`)}
+                    onFav={() => toggleFav(row.event.id)}
+                  />
+                )
+            }
+          }}
+          ListEmptyComponent={
+            <View style={s.emptyWrap}>
+              <View style={s.emptyIcon}>
+                <Ionicons name="calendar-outline" size={32} color={colors.textMuted} />
+              </View>
+              <Text style={s.emptyTitle}>No events found</Text>
+              <Text style={s.emptyText}>Try a different category or search term</Text>
             </View>
           }
           ListFooterComponent={
@@ -469,6 +486,8 @@ const FeaturedCarousel = memo(function FeaturedCarousel({
                 style={s.carouselHeart}
                 onPress={() => onFav(e.id)}
                 hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel={isFav ? 'Remove from favourites' : 'Add to favourites'}
               >
                 <Ionicons
                   name={isFav ? 'heart' : 'heart-outline'}
@@ -583,6 +602,8 @@ const EventCard = memo(function EventCard({
             style={s.cardHeart}
             onPress={onFav}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            accessibilityRole="button"
+            accessibilityLabel={isFav ? 'Remove from favourites' : 'Add to favourites'}
           >
             <Ionicons
               name={isFav ? 'heart' : 'heart-outline'}
@@ -770,7 +791,6 @@ const s = StyleSheet.create({
   myCardDate: { color: colors.textMuted, fontSize: 10, fontFamily: 'DMSans_400Regular' },
 
   // ── Event sections ───────────────────────────────────────────────────────────
-  section: { marginBottom: 24 },
   sectionHeadRow: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
     paddingHorizontal: 16, marginBottom: 10,

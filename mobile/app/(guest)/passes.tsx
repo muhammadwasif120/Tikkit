@@ -139,7 +139,7 @@ function PassModal({ pass, onClose }: { pass: EventPass; onClose: () => void }) 
   return (
     <SafeAreaView style={s.modal}>
       <View style={s.modalNav}>
-        <TouchableOpacity style={s.closeBtn} onPress={onClose}>
+        <TouchableOpacity style={s.closeBtn} onPress={onClose} accessibilityRole="button" accessibilityLabel="Close">
           <Ionicons name="close" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
         <Text style={s.modalTitle}>{passLabel}</Text>

@@ -1,6 +1,6 @@
 import {
   View, Text, StyleSheet, ActivityIndicator, ScrollView,
-  TouchableOpacity, RefreshControl, Linking, Alert,
+  TouchableOpacity, RefreshControl, Linking,
 } from 'react-native'
 import { useState, useEffect, useCallback } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -11,6 +11,7 @@ import { getVerifyStatus } from '@/lib/api'
 import { Skeleton } from '@/components/Skeleton'
 import { colors, radius } from '@/theme'
 import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 type CnicStatus = 'not_submitted' | 'pending' | 'verified' | 'rejected' | null | undefined
 
@@ -47,6 +48,7 @@ const STATUS_META: Record<string, { label: string; desc: string; color: string; 
 
 export default function VerifyScreen() {
   const toast = useToast()
+  const confirm = useConfirm()
   const [status, setStatus] = useState<CnicStatus>(null)
   const [cnicNumber, setCnicNumber] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
@@ -73,17 +75,17 @@ export default function VerifyScreen() {
   }
 
   const handleSubmitOnWeb = () => {
-    Alert.alert(
-      'Verify on Web',
-      'CNIC submission requires photo upload. Please visit the Tikkit web app to complete your verification.',
-      [
+    confirm({
+      title: 'Verify on Web',
+      message: 'CNIC submission requires photo upload. Please visit the Tikkit web app to complete your verification.',
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: 'Open Web App',
           onPress: () => Linking.openURL(`${process.env.EXPO_PUBLIC_APP_URL ?? 'https://www.tikkitx.com'}/dashboard/settings`),
         },
-      ]
-    )
+      ],
+    })
   }
 
   if (loading) {

@@ -1,6 +1,6 @@
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  ActivityIndicator, RefreshControl, Alert, ScrollView, TextInput,
+  ActivityIndicator, RefreshControl, ScrollView, TextInput,
 } from 'react-native'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -13,6 +13,7 @@ import { getOrganizerRegistrations, updateRegistration, Registration } from '@/l
 import { colors, radius } from '@/theme'
 import { Skeleton } from '@/components/Skeleton'
 import { useToast } from '@/components/Toast'
+import { useConfirm } from '@/components/ConfirmDialog'
 
 const STATUS_TABS = ['pending', 'approved', 'all', 'rejected'] as const
 type StatusTab = typeof STATUS_TABS[number]
@@ -64,6 +65,7 @@ export default function RegistrationsScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>()
   const router = useRouter()
   const toast = useToast()
+  const confirm = useConfirm()
   const [registrations, setRegistrations] = useState<Registration[]>([])
   const [loading, setLoading]       = useState(true)
   const [refreshing, setRefreshing] = useState(false)
@@ -107,10 +109,10 @@ export default function RegistrationsScreen() {
   const pendingCount = registrations.filter(r => r.status === 'pending').length
 
   const handleAction = (regId: string, action: 'approve' | 'reject', name: string) => {
-    Alert.alert(
-      action === 'approve' ? 'Approve Registration' : 'Reject Registration',
-      `${action === 'approve' ? 'Approve' : 'Reject'} ${name}'s registration?`,
-      [
+    confirm({
+      title: action === 'approve' ? 'Approve Registration' : 'Reject Registration',
+      message: `${action === 'approve' ? 'Approve' : 'Reject'} ${name}'s registration?`,
+      buttons: [
         { text: 'Cancel', style: 'cancel' },
         {
           text: action === 'approve' ? 'Approve' : 'Reject',
@@ -121,14 +123,14 @@ export default function RegistrationsScreen() {
               await updateRegistration(regId, action)
               await load(activeTab)
             } catch (err: any) {
-              Alert.alert('Error', err.message)
+              toast.show({ type: 'error', message: err.message })
             } finally {
               setUpdating(null)
             }
           },
         },
-      ]
-    )
+      ],
+    })
   }
 
   const empty = EMPTY_META[activeTab]
@@ -139,7 +141,7 @@ export default function RegistrationsScreen() {
 
       {/* Nav */}
       <View style={s.nav}>
-        <TouchableOpacity style={s.backBtn} onPress={() => router.back()}>
+        <TouchableOpacity style={s.backBtn} onPress={() => router.back()} accessibilityRole="button" accessibilityLabel="Go back">
           <Ionicons name="arrow-back" size={20} color={colors.textPrimary} />
         </TouchableOpacity>
         <View style={{ flex: 1 }}>
