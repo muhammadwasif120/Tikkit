@@ -1,43 +1,26 @@
-import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
+import { PageHeader } from '@/components/kit'
 import VendorsClient from '@/components/vendors/VendorsClient'
-import DashboardLoader from '@/components/layout/DashboardLoader'
+import { requireOrganizer } from '@/lib/data/viewer'
 
-async function VendorsData() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export const metadata = { title: 'Vendors and invoices' }
 
-  const { data: vendors } = await supabase
-    .from('organiser_vendor_contacts')
-    .select('*')
-    .eq('organizer_id', user!.id)
-    .order('created_at', { ascending: false })
-
-  const { data: invoices } = await supabase
-    .from('organiser_vendor_invoices')
-    .select('*')
-    .order('due_date', { ascending: true })
-
-  const { data: events } = await supabase
-    .from('events')
-    .select('id, title, status')
-    .eq('organizer_id', user!.id)
-    .order('date_start', { ascending: false })
-
+export default async function VendorsPage() {
+  const { supabase, profile, entitlements } = await requireOrganizer()
+  const [{ data: vendors }, { data: invoices }, { data: events }] = await Promise.all([
+    supabase.from('organizer_vendors').select('*').eq('organizer_id', profile.id).order('name'),
+    supabase.from('organizer_vendor_invoices').select('id, vendor_id, amount_pkr, due_date, status, invoice_number, description, events(title), organizer_vendors(name)').eq('organizer_id', profile.id).order('due_date', { ascending: true, nullsFirst: false }),
+    supabase.from('events').select('id, title').eq('organizer_id', profile.id).order('starts_at', { ascending: false }),
+  ])
+  const lim = entitlements?.limits.vendors
   return (
-    <VendorsClient
-      vendors={(vendors ?? []).map((v: any) => ({ ...v, category: v.category ?? 'General' }))}
-      invoices={(invoices ?? []).map((i: any) => ({ ...i, status: i.status ?? 'pending' }))}
-      events={events ?? []}
-      userId={user!.id}
-    />
-  )
-}
-
-export default function VendorsPage() {
-  return (
-    <Suspense fallback={<DashboardLoader variant="list" />}>
-      <VendorsData />
-    </Suspense>
+    <div className="k-fade-up">
+      <PageHeader title="Vendors and invoices" description="The people you hire and what you owe them." />
+      <VendorsClient
+        limit={typeof lim === 'number' && lim >= 0 ? lim : null}
+        events={events ?? []}
+        vendors={(vendors ?? []).map(v => ({ id: v.id, name: v.name, category: v.category, contact: v.contact_name, phone: v.contact_phone, email: v.contact_email, notes: v.notes }))}
+        invoices={(invoices ?? []).map(i => ({ id: i.id, vendorId: i.vendor_id, vendor: i.organizer_vendors?.name ?? '', eventTitle: i.events?.title ?? null, number: i.invoice_number, amount: i.amount_pkr, due: i.due_date, status: i.status, description: i.description }))}
+      />
+    </div>
   )
 }
