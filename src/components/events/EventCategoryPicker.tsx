@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { getEventCategories } from '@/app/actions/behaviourActions'
-import type { EventCategory } from '@/app/actions/behaviourActions'
+import { getEventCategories } from '@/app/actions/categoryActions'
+import type { EventCategory } from '@/app/actions/categoryActions'
 import { Tag, ChevronDown, Check } from 'lucide-react'
 
 export default function EventCategoryPicker({

@@ -10,7 +10,6 @@ import {
 } from 'lucide-react'
 import { registerForEvent, submitEOI } from '@/app/actions/eventRegistrationActions'
 import { submitPaymentScreenshot } from '@/app/actions/guestPaymentActions'
-import { logBehaviour } from '@/app/actions/behaviourActions'
 import { toggleEventFavourite } from '@/app/actions/eventFavouriteActions'
 
 /* ─── Types ──────────────────────────────────────────────────────── */
@@ -405,13 +404,6 @@ function RegisterSheet({ event, onClose, onSuccess, isEOI, userProfile }: {
       const action = isEOI ? submitEOI : registerForEvent
       const res = await action(fd)
       if (res?.error) { setErr(res.error); return }
-      // Log registration behaviour signal (fire-and-forget)
-      logBehaviour({
-        action: 'register',
-        eventId: event.id,
-        organizerId: (event as any).organizer?.id ?? null,
-        categoryId: (event as any).category_id ?? null,
-      })
       onSuccess(isEOI ? 'eoi_submitted' : 'registered')
     } catch { setErr('Something went wrong. Try again.') }
     finally { setBusy(false) }
@@ -653,18 +645,6 @@ export default function EventDetailClient({
     const t = setInterval(() => setCountdown(msUntil(event.date_start)), 1000)
     return () => clearInterval(t)
   }, [event.date_start])
-
-  // Log view behaviour signal (fire-and-forget, only for logged-in users)
-  useEffect(() => {
-    if (!isLoggedIn) return
-    logBehaviour({
-      action: 'view_event',
-      eventId: event.id,
-      organizerId: event.organizer?.id ?? null,
-      categoryId: event.category_id ?? null,
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [event.id])
 
   const ctaLabel = () => {
     if (!isLoggedIn) return { label: 'Sign in to Register', color: 'var(--brand-blue)', disabled: false }

@@ -11,8 +11,8 @@ import {
 import Link from 'next/link'
 import type { PaymentAccount } from '@/app/actions/paymentAccountActions'
 import { setEventPaymentAccounts } from '@/app/actions/paymentAccountActions'
-import { getEventCategories } from '@/app/actions/behaviourActions'
-import type { EventCategory } from '@/app/actions/behaviourActions'
+import { getEventCategories } from '@/app/actions/categoryActions'
+import type { EventCategory } from '@/app/actions/categoryActions'
 
 /* ─── Ticket tier state ─── */
 type TierKey = 'standard' | 'vip' | 'discounted'

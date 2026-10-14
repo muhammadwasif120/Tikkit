@@ -23,7 +23,7 @@ import ExploreClient from '@/components/guest/ExploreClient'
 import SkeletonExplore from '@/components/guest/SkeletonExplore'
 import { getPublicEvents } from '@/app/actions/guestCreditActions'
 import { getTopOrganizers } from '@/app/actions/organizerActions'
-import { getEventCategories, getUserCategoryOrder } from '@/app/actions/behaviourActions'
+import { getEventCategories } from '@/app/actions/categoryActions'
 import { getUserFavouriteEventIds } from '@/app/actions/eventFavouriteActions'
 
 async function ExploreData() {
@@ -54,24 +54,7 @@ async function ExploreData() {
       .map((r: any) => ({ ...r, status: r.status ?? 'pending' }))
   })() : []
 
-  // Sort events by user's category interest scores (personalised feed)
-  const rawEvents = (events as any[])
-  let sortedEvents = rawEvents
-  if (user) {
-    const categoryOrder = await getUserCategoryOrder()
-    if (categoryOrder.length > 0) {
-      const scoreMap: Record<string, number> = {}
-      categoryOrder.forEach(({ category_id, score }) => {
-        scoreMap[category_id] = score
-      })
-      sortedEvents = [...rawEvents].sort((a, b) => {
-        const aScore = a.category_id ? (scoreMap[a.category_id] ?? 0) : 0
-        const bScore = b.category_id ? (scoreMap[b.category_id] ?? 0) : 0
-        if (aScore !== bScore) return bScore - aScore
-        return new Date(a.date_start).getTime() - new Date(b.date_start).getTime()
-      })
-    }
-  }
+  const sortedEvents = (events as any[])
 
   return (
     <ExploreClient
