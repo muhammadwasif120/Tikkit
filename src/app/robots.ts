@@ -15,9 +15,9 @@ export default function robots(): MetadataRoute.Robots {
     '/demo',
     '/compare/',
     '/organizer/',
-    '/venue/',
-    '/venues',
-    '/guest/explore/',
+    '/events/',
+    '/classes',
+    '/spaces',
     '/contact',
     '/pricing',
     '/about',
@@ -28,12 +28,11 @@ export default function robots(): MetadataRoute.Robots {
     '/dashboard/',
     '/api/',
     '/auth/',
-    '/guest/profile',
-    '/guest/settings',
-    '/guest/my-events',
+    '/guest/',
     '/staff/',
+    '/promoter/',
+    '/itinerary/',
     '/master/',
-    '/register/',
   ]
 
   return {

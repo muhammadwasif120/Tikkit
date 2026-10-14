@@ -6,6 +6,7 @@ import { Check, Copy, Link2, Megaphone, Trash2 } from 'lucide-react'
 import { Badge, Button, Card, CardBody, CardHeader, Field, Textarea, Input } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
 import { fmtDateTime } from '@/lib/format'
+import { flushEmails } from '@/app/actions/emailActions'
 
 function readable(msg: string) {
   const m = msg.match(/^[A-Z_]+(?::[a-z_]+)?: ([\s\S]*)$/)
@@ -66,6 +67,7 @@ export function Announcements({ eventId, items, remaining }: { eventId: string; 
     start(async () => {
       const { error: e } = await supabase.rpc('publish_announcement', { p_event: eventId, p_body: body.trim(), p_send_email: email })
       if (e) return setError(readable(e.message))
+      if (email) void flushEmails()
       setBody(''); setEmail(false); router.refresh()
     })
   }

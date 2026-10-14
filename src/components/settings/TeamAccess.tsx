@@ -7,6 +7,7 @@ import { Avatar, Badge, Button, Card, CardBody, CardHeader, Field, Input } from 
 import { createClient } from '@/lib/supabase/client'
 import { rpcLoose } from '@/lib/rpc'
 import { fmtDate } from '@/lib/format'
+import { flushEmails } from '@/app/actions/emailActions'
 
 export type Member = { id: string; email: string; status: string; invitedAt: string }
 const readable = (m: string) => (m.match(/^[A-Z_]+(?::[a-z_]+)?: ([\s\S]*)$/)?.[1]) ?? m
@@ -17,7 +18,7 @@ export default function TeamAccess({ members, limit }: { members: Member[]; limi
   const active = members.filter(m => m.status !== 'removed')
 
   const invite = (e: React.FormEvent) => { e.preventDefault(); setErr(null); setOk(false)
-    start(async () => { const { error } = await rpcLoose(supabase as never, 'invite_team_member', { p_email: email }); if (error) return setErr(readable(error.message)); setEmail(''); setOk(true); router.refresh() }) }
+    start(async () => { const { error } = await rpcLoose(supabase as never, 'invite_team_member', { p_email: email }); if (error) return setErr(readable(error.message)); void flushEmails(); setEmail(''); setOk(true); router.refresh() }) }
   const remove = (m: Member) => confirm(`Remove ${m.email} from your team?`) && start(async () => { await rpcLoose(supabase as never, 'remove_team_member', { p_id: m.id }); router.refresh() })
 
   return (

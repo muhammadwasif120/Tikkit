@@ -22,6 +22,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/`,            lastModified: now, changeFrequency: 'weekly',  priority: 1.0 },
     { url: `${baseUrl}/explore`,     lastModified: now, changeFrequency: 'daily',   priority: 0.95 },
     { url: `${baseUrl}/how-it-works`,lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${baseUrl}/pricing`,     lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${baseUrl}/about`,       lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${baseUrl}/contact`,     lastModified: now, changeFrequency: 'yearly',  priority: 0.5 },
+    { url: `${baseUrl}/security`,    lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${baseUrl}/classes`,     lastModified: now, changeFrequency: 'daily',   priority: 0.7 },
+    { url: `${baseUrl}/spaces`,      lastModified: now, changeFrequency: 'daily',   priority: 0.7 },
     { url: `${baseUrl}/blog`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${baseUrl}/privacy`,     lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
     { url: `${baseUrl}/terms`,       lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
@@ -74,70 +80,35 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.75,
   }))
 
-  // ─── Dynamic: published events (current + recent past for SEO equity) ─────
+  // ─── Dynamic: published events, organizers, classes and spaces ────────────
   let eventRoutes: MetadataRoute.Sitemap = []
-  let pastEventRoutes: MetadataRoute.Sitemap = []
   let organizerRoutes: MetadataRoute.Sitemap = []
+  let moduleRoutes: MetadataRoute.Sitemap = []
 
   try {
     const admin = createAdminClient()
+    // Public listings view: published, public, live events only. Secret venues stay indexable (only the area is shown).
+    const since = new Date(now); since.setMonth(since.getMonth() - 6)
+    const { data: events } = await admin.from('event_listings').select('slug, starts_at').gte('ends_at', since.toISOString()).order('starts_at', { ascending: false }).limit(700)
+    eventRoutes = (events ?? []).filter(e => e.slug).map(e => {
+      const upcoming = new Date(e.starts_at!) >= now
+      return { url: `${baseUrl}/events/${e.slug}`, lastModified: now, changeFrequency: upcoming ? 'daily' as const : 'monthly' as const, priority: upcoming ? 0.85 : 0.4 }
+    })
 
-    // Six months ago — keep past events for "recap" and historical searches
-    const sixMonthsAgo = new Date(now)
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+    const { data: orgs } = await admin.from('public_organizers').select('username').not('username', 'is', null).limit(500)
+    organizerRoutes = (orgs ?? []).filter(o => o.username).map(o => ({ url: `${baseUrl}/organizer/${o.username}`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.7 }))
 
-    // Upcoming events — highest priority
-    const { data: upcomingEvents } = await admin
-      .from('events')
-      .select('id, slug, date_start, updated_at')
-      .eq('status', 'published')
-      .eq('is_private', false)
-      .gte('date_start', now.toISOString())
-      .order('date_start', { ascending: true })
-      .limit(500)
-
-    eventRoutes = (upcomingEvents ?? []).map((ev: any) => ({
-      url: `${baseUrl}/guest/explore/${ev.slug || ev.id}`,
-      lastModified: ev.updated_at ? new Date(ev.updated_at) : now,
-      changeFrequency: 'daily' as const,
-      priority: 0.85,
-    }))
-
-    // Recent past events — lower priority but still valuable for long-tail
-    const { data: pastEvents } = await admin
-      .from('events')
-      .select('id, slug, date_start, updated_at')
-      .eq('status', 'published')
-      .eq('is_private', false)
-      .gte('date_start', sixMonthsAgo.toISOString())
-      .lt('date_start', now.toISOString())
-      .order('date_start', { ascending: false })
-      .limit(200)
-
-    pastEventRoutes = (pastEvents ?? []).map((ev: any) => ({
-      url: `${baseUrl}/guest/explore/${ev.slug || ev.id}`,
-      lastModified: ev.updated_at ? new Date(ev.updated_at) : now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.4,
-    }))
-
-    // ─── Public organizer profiles ───────────────────────────────────────────
-    const { data: organizers } = await admin
-      .from('profiles')
-      .select('username, updated_at')
-      .eq('role', 'organizer')
-      .not('username', 'is', null)
-      .neq('username', '')
-      .limit(500)
-
-    organizerRoutes = (organizers ?? []).map((org: any) => ({
-      url: `${baseUrl}/organizer/${org.username}`,
-      lastModified: org.updated_at ? new Date(org.updated_at) : now,
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    }))
+    // Classes and spaces (modules migration). Empty until it is applied.
+    const [{ data: classes }, { data: spaces }] = await Promise.all([
+      (admin as unknown as { from: (t: string) => { select: (c: string) => PromiseLike<{ data: { slug: string }[] | null }> } }).from('public_class_series').select('slug'),
+      (admin as unknown as { from: (t: string) => { select: (c: string) => PromiseLike<{ data: { slug: string }[] | null }> } }).from('public_spaces').select('slug'),
+    ])
+    moduleRoutes = [
+      ...(classes ?? []).map(c => ({ url: `${baseUrl}/classes/${c.slug}`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.7 })),
+      ...(spaces ?? []).map(c => ({ url: `${baseUrl}/spaces/${c.slug}`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.7 })),
+    ]
   } catch {
-    // If DB is unreachable at build time, fall back to static-only sitemap
+    // If the database is unreachable at build time, fall back to the static sitemap
   }
 
   return [
@@ -147,7 +118,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...cityCategoryRoutes,
     ...compareRoutes,
     ...eventRoutes,
-    ...pastEventRoutes,
     ...organizerRoutes,
+    ...moduleRoutes,
   ]
 }

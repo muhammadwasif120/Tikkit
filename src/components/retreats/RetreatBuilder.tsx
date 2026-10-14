@@ -9,6 +9,7 @@ import { fromLoose, rpcLoose } from '@/lib/rpc'
 import { KIND, KINDS, type ItemKind, type ItemStatus } from '@/lib/retreats'
 import { fmtDate, fmtTime, pkr } from '@/lib/format'
 import { cn } from '@/lib/cn'
+import { flushEmails } from '@/app/actions/emailActions'
 
 export type BItem = { id: string; day_id: string; kind: ItemKind; title: string; description: string | null; starts_at: string | null; ends_at: string | null; location_name: string | null; location_address: string | null; latitude: number | null; longitude: number | null; cost_pkr: number; status: ItemStatus; assignee: string | null; is_internal: boolean; requires_checkin: boolean; notes: string | null }
 export type BDay = { id: string; day_number: number; day_date: string; title: string | null; summary: string | null }
@@ -237,7 +238,7 @@ function TasksTab({ retreatId, tasks, run, onDone }: { retreatId: string; tasks:
 function UpdatesTab({ retreatId, updates, people, onDone }: { retreatId: string; updates: BUpdate[]; people: number; onDone: () => void }) {
   const supabase = useMemo(() => createClient(), [])
   const [body, setBody] = useState(''); const [email, setEmail] = useState(true); const [busy, setBusy] = useState(false); const [err, setErr] = useState<string | null>(null)
-  async function send() { setErr(null); setBusy(true); const { error } = await rpcLoose(supabase as never, 'post_retreat_update', { p_retreat: retreatId, p_body: body.trim(), p_send_email: email }); setBusy(false); if (error) return setErr(readable(error.message)); setBody(''); onDone() }
+  async function send() { setErr(null); setBusy(true); const { error } = await rpcLoose(supabase as never, 'post_retreat_update', { p_retreat: retreatId, p_body: body.trim(), p_send_email: email }); setBusy(false); if (error) return setErr(readable(error.message)); if (email) void flushEmails(); setBody(''); onDone() }
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_360px]">
       <Card><CardHeader title="Sent updates" />
