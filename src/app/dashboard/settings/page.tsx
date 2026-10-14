@@ -70,7 +70,6 @@ const EXPIRY_OPTIONS = [
   { value: '24h', label: '24 hours' },
   { value: '7d',  label: '7 days' },
   { value: '30d', label: '30 days' },
-  { value: null,  label: 'Never expires' },
 ]
 
 function getRoleConfig(role: string) {
@@ -289,7 +288,7 @@ export default function SettingsPage() {
     setCreating(true)
     setInviteError(null)
     try {
-      const invite = await createTeamInvite(inviteLabel.trim(), inviteRole, inviteExpiry)
+      const invite = await createTeamInvite(inviteLabel.trim(), 'gate_staff', inviteExpiry)
       setInvites(prev => [invite as any, ...prev])
       setInviteLabel('')
     } catch (e) {
@@ -647,11 +646,9 @@ export default function SettingsPage() {
         {teamOpen && (
           <div className="border-t border-[var(--border-faint)] pt-4 space-y-5">
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {[
-                { role: 'admin',      desc: 'Full dashboard access' },
-                { role: 'manager',    desc: 'Events, guests, approvals — no financials' },
-                { role: 'gate_staff', desc: 'QR scanner + guest list only' },
+                { role: 'gate_staff', desc: 'QR scanner and guest lookup only. Temporary access.' },
               ].map(({ role, desc }) => {
                 const cfg = getRoleConfig(role)
                 return (
@@ -677,10 +674,8 @@ export default function SettingsPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label">Role</label>
-                  <select className="input" value={inviteRole} onChange={e => setInviteRole(e.target.value as TeamInviteRole)}>
+                  <select className="input" value={inviteRole} onChange={e => setInviteRole(e.target.value as TeamInviteRole)} disabled>
                     <option value="gate_staff">Gate Staff</option>
-                    <option value="manager">Manager</option>
-                    <option value="admin">Admin</option>
                   </select>
                 </div>
                 <div>

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, Users, ScanLine,
   Building2, BarChart3, Settings, LogOut, ClipboardCheck, X, UserCircle,
-  Radio, MessageSquare, Plus,
+  Radio, Plus,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import { createClient } from '@/lib/supabase/client'

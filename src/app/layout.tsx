@@ -97,24 +97,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const cookieStore = await cookies()
   const rawCookie = cookieStore.get('tikkit-theme')?.value
   const hasCookie = VALID_THEMES.includes(rawCookie as AppTheme)
-  // No explicit choice yet → default to dark server-side (matches the
-  // brand's dark-first identity), then correct client-side before paint
-  // if the system prefers light, so first-time visitors still get their
-  // system preference without a flash.
+  // Dark is the default until the user picks light in Settings.
   const theme: AppTheme = hasCookie ? (rawCookie as AppTheme) : 'dark'
 
   return (
     <html lang="en-PK" className={`${dmSans.variable} ${sora.variable}`} data-theme={theme}>
       <head>
-        {!hasCookie && (
-          // First visit, no explicit theme choice yet: correct the default
-          // 'dark' render to 'light' before paint if the system prefers it.
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `(function(){try{if(window.matchMedia('(prefers-color-scheme: light)').matches){document.documentElement.setAttribute('data-theme','light')}}catch(e){}})();`,
-            }}
-          />
-        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

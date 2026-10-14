@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import StaffScanner from '@/components/staff/StaffScanner'
-import OrganizerView from '@/components/staff/OrganizerView'
 
 export default async function StaffPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
@@ -42,7 +41,18 @@ export default async function StaffPage({ params }: { params: Promise<{ token: s
     return <StaffScanner invite={invite} events={events ?? []} />
   }
 
-  // Admin or manager: full OrganizerView, with manager missing the
-  // financial/vendor data (see OrganizerView's own role check).
-  return <OrganizerView invite={invite} events={events ?? []} />
+  // Legacy admin/manager links are no longer supported: staff links are
+  // gate-staff only (scan and guest lookup).
+  return (
+    <div className="flex-1 flex items-start justify-center p-6">
+      <div className="max-w-md w-full text-center py-20">
+        <h2 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+          Link no longer supported
+        </h2>
+        <p className="text-sm" style={{ color: 'var(--mist-400)' }}>
+          This type of access link has been retired. Ask your organizer for a new gate staff link.
+        </p>
+      </div>
+    </div>
+  )
 }

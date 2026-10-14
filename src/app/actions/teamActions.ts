@@ -3,16 +3,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-export type TeamInviteRole = 'admin' | 'manager' | 'gate_staff'
+// Only gate staff links are issued. Legacy admin/manager rows may still exist in the table.
+export type TeamInviteRole = 'gate_staff'
 
 export async function createTeamInvite(
   label: string,
   role: TeamInviteRole,
-  expiresIn: string | null // '24h', '7d', '30d', or null for never
+  expiresIn: string | null // '24h', '7d', '30d'
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Unauthorized')
+  if (role !== 'gate_staff') throw new Error('Only gate staff access links are supported')
+  if (!expiresIn || !['24h', '7d', '30d'].includes(expiresIn)) throw new Error('A link expiry is required')
 
   let expires_at: string | null = null
   if (expiresIn) {
