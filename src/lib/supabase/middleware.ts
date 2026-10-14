@@ -65,7 +65,7 @@ export async function updateSession(request: NextRequest) {
   // shows up in latency, switch to a single denormalised profiles.profile_complete
   // boolean kept in sync by a trigger.
   const completionExempt = [
-    '/auth', '/api', '/master',
+    '/auth', '/api', '/master', '/design',
     '/privacy', '/terms', '/security', '/about', '/contact', '/how-it-works',
   ]
   const isCompletionExempt = completionExempt.some(p => pathname === p || pathname.startsWith(p + '/'))
@@ -132,6 +132,7 @@ export async function updateSession(request: NextRequest) {
     '/venue',           // Public venue profile pages
     '/v',               // Public vendor profiles
     '/lp',               // Preserved landing pages (/lp/underground etc.)
+    '/design',           // internal design review (404s in production)
     '/sentry-example-page', // Sentry verification page — not linked from nav
     '/api/sentry-example-api', // matches /api anyway, listed for clarity
   ]

@@ -1,0 +1,107 @@
+/* ─────────────────────────────────────────────────────────────────────────
+ * TIKKIT X design tokens ("Midnight" dark, "Daylight" light)
+ *
+ * Colors are stored as space separated RGB triples so Tailwind opacity
+ * modifiers work (bg-accent/10). Components use the semantic names only:
+ * canvas, surface, raised, overlay, line, fg, muted, subtle, accent, violet,
+ * success, warning, danger, info. Never hard code hex in components.
+ * ───────────────────────────────────────────────────────────────────────── */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --k-canvas:      7 9 15;        /* page background */
+  --k-surface:     13 16 25;      /* cards, panels */
+  --k-raised:      19 23 35;      /* inputs, hovered rows, popovers */
+  --k-overlay:     27 32 48;      /* menus, selected states */
+  --k-line:        36 42 60;      /* hairline borders */
+  --k-line-strong: 54 62 86;
+
+  --k-fg:          237 240 247;   /* primary text */
+  --k-muted:       150 159 183;   /* secondary text  (AA on surface) */
+  --k-subtle:      104 113 138;   /* placeholders, disabled */
+
+  --k-accent:      34 211 238;    /* electric cyan */
+  --k-accent-fg:   4 20 26;       /* text on accent */
+  --k-violet:      139 92 246;    /* brand secondary (the X outline) */
+
+  --k-success:     52 211 153;
+  --k-warning:     251 191 36;
+  --k-danger:      248 113 113;
+  --k-info:        96 165 250;
+
+  --k-shadow-card: 0 0 0 1px rgb(var(--k-line) / 1);
+  --k-shadow-pop:  0 12px 40px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(var(--k-line-strong) / 1);
+  --k-glow:        radial-gradient(60rem 28rem at 50% -8rem, rgb(var(--k-accent) / 0.10), transparent 70%);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --k-canvas:      245 246 250;
+  --k-surface:     255 255 255;
+  --k-raised:      248 249 252;
+  --k-overlay:     238 241 247;
+  --k-line:        227 231 241;
+  --k-line-strong: 205 211 226;
+
+  --k-fg:          15 20 36;
+  --k-muted:       78 89 116;
+  --k-subtle:      108 118 143;
+
+  --k-accent:      8 145 178;     /* cyan 600, passes AA on white */
+  --k-accent-fg:   255 255 255;
+  --k-violet:      109 40 217;
+
+  --k-success:     5 150 105;
+  --k-warning:     180 83 9;
+  --k-danger:      220 38 38;
+  --k-info:        37 99 235;
+
+  --k-shadow-card: 0 1px 2px rgb(15 20 36 / 0.05), 0 4px 14px rgb(15 20 36 / 0.04), 0 0 0 1px rgb(var(--k-line) / 1);
+  --k-shadow-pop:  0 12px 40px rgb(15 20 36 / 0.14), 0 0 0 1px rgb(var(--k-line-strong) / 1);
+  --k-glow:        radial-gradient(60rem 28rem at 50% -8rem, rgb(var(--k-accent) / 0.07), transparent 70%);
+}
+
+/* Base for any surface that opts in to the new kit. */
+.kit {
+  background-color: rgb(var(--k-canvas));
+  background-image: var(--k-glow);
+  background-repeat: no-repeat;
+  color: rgb(var(--k-fg));
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.kit * { border-color: rgb(var(--k-line)); }
+.kit ::selection { background: rgb(var(--k-accent) / 0.28); }
+
+/* Tabular figures for any number that should align (money, counts, times). */
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+
+/* Visible, consistent focus ring for keyboard users. */
+.kit :focus-visible {
+  outline: 2px solid rgb(var(--k-accent));
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Thin scrollbars that match the surface. */
+.kit { scrollbar-width: thin; scrollbar-color: rgb(var(--k-line-strong)) transparent; }
+.kit *::-webkit-scrollbar { width: 10px; height: 10px; }
+.kit *::-webkit-scrollbar-thumb { background: rgb(var(--k-line-strong)); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+
+@keyframes k-fade-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes k-shimmer { 100% { transform: translateX(100%); } }
+@keyframes k-pop { from { opacity: 0; transform: scale(.96); } to { opacity: 1; transform: none; } }
+@keyframes k-scan { 0% { top: 8%; } 100% { top: 90%; } }
+
+.k-fade-up { animation: k-fade-up .35s cubic-bezier(.2,.7,.2,1) both; }
+.k-pop { animation: k-pop .18s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .k-fade-up, .k-pop { animation: none; }
+  .kit * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}

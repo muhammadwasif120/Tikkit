@@ -9,6 +9,21 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // TIKKIT X kit tokens (see src/styles/kit.css)
+        canvas:  "rgb(var(--k-canvas) / <alpha-value>)",
+        surface: "rgb(var(--k-surface) / <alpha-value>)",
+        raised:  "rgb(var(--k-raised) / <alpha-value>)",
+        overlay: "rgb(var(--k-overlay) / <alpha-value>)",
+        line:    { DEFAULT: "rgb(var(--k-line) / <alpha-value>)", strong: "rgb(var(--k-line-strong) / <alpha-value>)" },
+        fg:      "rgb(var(--k-fg) / <alpha-value>)",
+        muted:   "rgb(var(--k-muted) / <alpha-value>)",
+        subtle:  "rgb(var(--k-subtle) / <alpha-value>)",
+        accent:  { DEFAULT: "rgb(var(--k-accent) / <alpha-value>)", fg: "rgb(var(--k-accent-fg) / <alpha-value>)" },
+        violet:  { DEFAULT: "rgb(var(--k-violet) / <alpha-value>)" },
+        success: "rgb(var(--k-success) / <alpha-value>)",
+        warning: "rgb(var(--k-warning) / <alpha-value>)",
+        danger:  "rgb(var(--k-danger) / <alpha-value>)",
+        info:    "rgb(var(--k-info) / <alpha-value>)",
         brand: {
           // Use RGB CSS vars so Tailwind opacity modifiers work (bg-brand-blue/10 etc.)
           // Repointed at the cyan accent — see globals.css design tokens.
@@ -35,6 +50,12 @@ const config: Config = {
       fontFamily: {
         display: ["var(--font-sora)", "sans-serif"],
         body: ["var(--font-dm-sans)", "sans-serif"],
+        sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
+      },
+      boxShadow: {
+        card: "var(--k-shadow-card)",
+        pop: "var(--k-shadow-pop)",
       },
       borderRadius: {
         panel: "18px",

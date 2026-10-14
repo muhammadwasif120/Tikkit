@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans, Sora } from 'next/font/google'
+import { DM_Sans, Sora, Geist, Geist_Mono } from 'next/font/google'
 import { cookies } from 'next/headers'
 import './globals.css'
+import '../styles/kit.css'
 import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
 import WAHelpWidget from '@/components/ui/WAHelpWidget'
 import { Analytics } from '@vercel/analytics/react'
@@ -12,6 +13,18 @@ const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-dm-sans',
+  display: 'swap',
+})
+
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-geist-sans',
+  display: 'swap',
+})
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
   display: 'swap',
 })
 
@@ -101,7 +114,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const theme: AppTheme = hasCookie ? (rawCookie as AppTheme) : 'dark'
 
   return (
-    <html lang="en-PK" className={`${dmSans.variable} ${sora.variable}`} data-theme={theme}>
+    <html lang="en-PK" className={`${dmSans.variable} ${sora.variable} ${geist.variable} ${geistMono.variable}`} data-theme={theme}>
       <head>
         <script
           type="application/ld+json"
