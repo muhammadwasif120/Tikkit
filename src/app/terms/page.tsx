@@ -1,8 +1,6 @@
-import Link from 'next/link'
-import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
-import SiteFooter from '@/components/SiteFooter'
-
 import type { Metadata } from 'next'
+import Link from 'next/link'
+import { LegalPage, LegalSection, SubSection, ContactBox } from '@/components/marketing/legal'
 
 export const metadata: Metadata = {
   title: 'Terms & Conditions — Tikkit X',
@@ -24,33 +22,12 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div style={{ background: '#080A10', minHeight: '100vh', color: '#E8EAF0' }}>
-      {/* Nav */}
-      <nav style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 1100, margin: '0 auto' }}>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <TikkitXLogo size="sm" />
-        </Link>
-        <Link href="/privacy" style={{ fontSize: 13, color: '#7A8494', textDecoration: 'none' }}>
-          Privacy Policy →
-        </Link>
-      </nav>
-
-      {/* Content */}
-      <main style={{ maxWidth: 760, margin: '0 auto', padding: '60px 24px 100px' }}>
-        {/* Header */}
-        <div style={{ marginBottom: 48 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', color: '#00C2FF', textTransform: 'uppercase', marginBottom: 12 }}>Legal</p>
-          <h1 style={{ fontSize: 40, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 16 }}>Terms &amp; Conditions</h1>
-          <p style={{ fontSize: 14, color: '#7A8494', lineHeight: 1.6 }}>
-            Effective Date: 1 April 2026 &nbsp;|&nbsp; Last Updated: 1 April 2026
-          </p>
-          <div style={{ marginTop: 24, padding: '16px 20px', background: 'rgba(0,194,255,0.06)', border: '1px solid rgba(0,194,255,0.15)', borderRadius: 10, fontSize: 14, color: '#9AAAB8', lineHeight: 1.7 }}>
-            These Terms and Conditions constitute a legally binding agreement between you and Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X, governing your access to and use of the Tikkit X platform. By using the Platform, you agree to be bound by these Terms.
-          </div>
-        </div>
-
-        {/* Sections */}
-        <LegalSection number="1" title="Introduction and Acceptance">
+    <LegalPage
+      title="Terms &amp; Conditions"
+      effective="Effective Date: 1 April 2026 | Last Updated: 1 April 2026"
+      intro={`These Terms and Conditions constitute a legally binding agreement between you and Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X, governing your access to and use of the Tikkit X platform. By using the Platform, you agree to be bound by these Terms.`}
+    >
+      <LegalSection number="1" title="Introduction and Acceptance">
           <p>These Terms and Conditions ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X ("Tikkit X," "we," "us," or "our"), governing your access to and use of the Tikkit X platform, including our website at tikkitx.com, our mobile applications, and all related services (collectively, the "Platform").</p>
           <p>Two Bit Digital (SMC-PVT) LTD is a software development and automation studio registered in Pakistan, operating as the developer and operator of the Tikkit X Platform.</p>
           <p>By accessing or using the Platform, creating an account, purchasing a ticket, or registering for an event, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy. If you do not agree to these Terms, you must not access or use the Platform.</p>
@@ -90,7 +67,7 @@ export default function TermsPage() {
             <p>You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account. You agree to:</p>
             <ul>
               <li>Maintain the security of your login credentials and not share them with any third party.</li>
-              <li>Immediately notify Tikkit X at <a href="mailto:admin@tikkitx.com" style={{ color: '#00C2FF' }}>admin@tikkitx.com</a> of any unauthorised access to or use of your account.</li>
+              <li>Immediately notify Tikkit X at <a href="mailto:admin@tikkitx.com">admin@tikkitx.com</a> of any unauthorised access to or use of your account.</li>
               <li>Accept responsibility for all activities conducted through your account, whether or not authorised by you.</li>
             </ul>
           </SubSection>
@@ -238,7 +215,7 @@ export default function TermsPage() {
             <li>You engage in ticket scalping or other prohibited conduct.</li>
             <li>Tikkit X is required to do so by law or regulatory authority.</li>
           </ul>
-          <p>You may terminate your account at any time by contacting <a href="mailto:admin@tikkitx.com" style={{ color: '#00C2FF' }}>admin@tikkitx.com</a>. Termination does not relieve you of any obligations incurred prior to termination, including any outstanding payment obligations.</p>
+          <p>You may terminate your account at any time by contacting <a href="mailto:admin@tikkitx.com">admin@tikkitx.com</a>. Termination does not relieve you of any obligations incurred prior to termination, including any outstanding payment obligations.</p>
         </LegalSection>
 
         <LegalSection number="14" title="Dispute Resolution">
@@ -255,7 +232,7 @@ export default function TermsPage() {
         </LegalSection>
 
         <LegalSection number="16" title="Data Protection">
-          <p>Your use of the Platform is subject to our <Link href="/privacy" style={{ color: '#00C2FF' }}>Privacy Policy</Link>, which is incorporated into these Terms by reference. By using the Platform, you consent to the collection, use, and processing of your personal data as described in the Privacy Policy.</p>
+          <p>Your use of the Platform is subject to our <Link href="/privacy">Privacy Policy</Link>, which is incorporated into these Terms by reference. By using the Platform, you consent to the collection, use, and processing of your personal data as described in the Privacy Policy.</p>
           <p>Tikkit X processes personal data in accordance with the Prevention of Electronic Crimes Act, 2016 (PECA) and applicable data protection standards. Where we offer services to users in the United Kingdom or European Economic Area, we additionally comply with the UK GDPR and EU GDPR as applicable.</p>
         </LegalSection>
 
@@ -270,48 +247,14 @@ export default function TermsPage() {
             <li><strong>Waiver:</strong> The failure of Tikkit X to enforce any right or provision of these Terms shall not constitute a waiver of such right or provision.</li>
             <li><strong>Assignment:</strong> You may not assign or transfer your rights or obligations under these Terms without Tikkit X's prior written consent. Tikkit X may assign its rights and obligations without restriction.</li>
             <li><strong>Force Majeure:</strong> Tikkit X shall not be liable for any delay or failure in performance resulting from causes beyond its reasonable control, including but not limited to acts of God, natural disasters, war, terrorism, pandemics, government action, internet or telecommunications failures, or power outages.</li>
-            <li><strong>Notices:</strong> All notices to Tikkit X should be sent to <a href="mailto:admin@tikkitx.com" style={{ color: '#00C2FF' }}>admin@tikkitx.com</a>. Notices to you will be sent to the email address associated with your account.</li>
+            <li><strong>Notices:</strong> All notices to Tikkit X should be sent to <a href="mailto:admin@tikkitx.com">admin@tikkitx.com</a>. Notices to you will be sent to the email address associated with your account.</li>
           </ul>
         </LegalSection>
 
         <LegalSection number="19" title="Contact Information">
           <p>If you have any questions about these Terms, please contact us:</p>
-          <div style={{ margin: '14px 0', padding: '14px 18px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, fontSize: 14, color: '#9AAAB8', lineHeight: 1.8 }}>
-            <strong style={{ color: '#C8D0DC', display: 'block' }}>Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X</strong>
-            Email: <a href="mailto:admin@tikkitx.com" style={{ color: '#00C2FF' }}>admin@tikkitx.com</a><br />
-            Website: <a href="https://tikkitx.com" style={{ color: '#00C2FF' }}>https://tikkitx.com</a>
-          </div>
+          <ContactBox />
         </LegalSection>
-      </main>
-
-      <style>{`
-        main p { font-size: 15px; line-height: 1.75; color: #9AAAB8; margin-bottom: 14px; }
-        main ul { padding-left: 20px; margin-bottom: 14px; }
-        main ul li { font-size: 15px; line-height: 1.75; color: #9AAAB8; margin-bottom: 8px; }
-        main strong { color: #C8D0DC; font-weight: 600; }
-      `}</style>
-      <SiteFooter />
-    </div>
-  )
-}
-
-function LegalSection({ number, title, children }: { number: string; title: string; children: React.ReactNode }) {
-  return (
-    <section style={{ marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 20 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#00C2FF', opacity: 0.6, minWidth: 24 }}>{number}.</span>
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#E8EAF0', letterSpacing: '-0.02em' }}>{title}</h2>
-      </div>
-      <div style={{ paddingLeft: 36 }}>{children}</div>
-    </section>
-  )
-}
-
-function SubSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 20 }}>
-      <h3 style={{ fontSize: 14, fontWeight: 600, color: '#C8D0DC', marginBottom: 10 }}>{title}</h3>
-      {children}
-    </div>
+    </LegalPage>
   )
 }
