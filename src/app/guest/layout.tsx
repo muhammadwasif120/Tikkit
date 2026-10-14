@@ -1,30 +1,8 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import GuestShell from '@/components/guest/GuestShell'
+import AttendeeShell from '@/components/attendee/AttendeeShell'
+import { requireAttendee } from '@/lib/data/viewer'
 
 export default async function GuestLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/auth/login')
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (profile?.role && profile.role !== 'guest') redirect('/dashboard')
-
-  // Fetch actionable notification count for the bell:
-  // Count upcoming registrations that need guest action (payment required)
-  // or were recently reviewed (approved/rejected in last 7 days)
-  const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString()
-  const { count: notifCount } = await supabase
-    .from('public_registrations')
-    .select('*', { count: 'exact', head: true })
-    .eq('email', user.email!)
-    .or(`payment_status.eq.pending,and(reviewed_at.gte.${sevenDaysAgo},status.neq.pending)`)
-
-  return <GuestShell notifCount={notifCount ?? 0}>{children}</GuestShell>
+  const { supabase, profile } = await requireAttendee()
+  const { count } = await supabase.from('notifications').select('id', { count: 'exact', head: true }).is('read_at', null)
+  return <AttendeeShell name={profile.full_name ?? 'Guest'} avatarUrl={profile.avatar_url} unread={count ?? 0}>{children}</AttendeeShell>
 }
