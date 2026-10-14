@@ -101,6 +101,7 @@ export async function updateSession(request: NextRequest) {
     '/demo',
     '/staff',
     '/promoter',
+    '/itinerary',
     '/privacy',
     '/terms',
     '/compare',
