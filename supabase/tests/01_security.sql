@@ -120,8 +120,8 @@ begin
 
   -- ---------- organizer A creates an event ----------
   perform tkx_test.as_user(org_a);
-  insert into public.events (organizer_id, title, starts_at, ends_at, capacity, status, area_label, city, is_secret_venue, venue_name)
-  values (org_a, 'Rooftop Night', now() + interval '2 days', now() + interval '2 days 5 hours', 50, 'draft', 'DHA', 'Karachi', true, 'Secret Place')
+  insert into public.events (organizer_id, title, starts_at, ends_at, capacity, status, area_label, city, is_secret_venue, venue_name, venue_address)
+  values (org_a, 'Rooftop Night', now() + interval '2 days', now() + interval '2 days 5 hours', 50, 'draft', 'DHA', 'Karachi', true, 'Secret Place', 'Plot 7 leak attempt')
   returning id into ev;
   perform tkx_test.t('organizer cannot set admin_status',
     format($q$update public.events set admin_status = 'suspended' where id = %L$q$, ev), 'error:permission denied');
@@ -149,9 +149,10 @@ begin
   perform tkx_test.as_anon();
   perform tkx_test.t('listing visible to anon', format($q$select 1 from public.event_listings where id = %L$q$, ev), 'rows:1');
   perform tkx_test.t('listing hides secret venue name', format($q$select 1 from public.event_listings where id = %L and venue_name is null$q$, ev), 'rows:1');
-  perform tkx_test.t('listing has no venue_address column', 'select venue_address from public.event_listings', 'error:column');
+  perform tkx_test.t('listing venue_address is null for secret venue', format($q$select 1 from public.event_listings where id = %L and venue_address is null$q$, ev), 'rows:1');
   perform tkx_test.t('get_event works for anon', format($q$select * from public.get_event(%L)$q$, v_slug), 'rows:1');
   perform tkx_test.as_root();
+  perform tkx_test.t('secret venue address never stored on events row', format($q$select 1 from public.events where id = %L and venue_address is null$q$, ev), 'rows:1');
 
   -- ---------- organizer B ----------
   perform tkx_test.as_user(org_b);

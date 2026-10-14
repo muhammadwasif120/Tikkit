@@ -23,6 +23,7 @@ create table public.events (
   city                text,
   area_label          text,                 -- public, e.g. "DHA Phase 6"
   venue_name          text,                 -- public unless is_secret_venue
+  venue_address       text,                 -- public address; always null when is_secret_venue (see event_secrets)
   is_secret_venue     boolean not null default false,
   starts_at           timestamptz not null,
   ends_at             timestamptz,
@@ -110,13 +111,17 @@ declare
   published_this_month integer;
   cap_limit integer;
 begin
-  -- slug: title slug plus a short id, set once
+  if new.is_secret_venue then new.venue_address := null; end if;
+
+  -- slug: title slug plus a short id, set once. Imports (service role) may supply their own.
   if tg_op = 'INSERT' then
     if new.id is null then new.id := gen_random_uuid(); end if;
     base_slug := lower(trim(both '-' from regexp_replace(regexp_replace(
                    replace(lower(coalesce(new.title, 'event')), ' ', '-'),
                    '[^a-z0-9-]', '', 'g'), '-+', '-', 'g')));
-    new.slug := coalesce(nullif(base_slug, ''), 'event') || '-' || replace(substr(new.id::text, 1, 8), '-', '');
+    if new.slug is null then
+      new.slug := coalesce(nullif(base_slug, ''), 'event') || '-' || replace(substr(new.id::text, 1, 8), '-', '');
+    end if;
   else
     new.slug := old.slug;
   end if;

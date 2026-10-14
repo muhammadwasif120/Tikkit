@@ -904,6 +904,9 @@ begin
      where event_id = rec.id and status in ('requested', 'awaiting_payment', 'waitlisted');
     update public.events set status = 'completed' where id = rec.id;
   end loop;
+  -- archive three days after the event ended
+  update public.events set status = 'archived'
+   where status = 'completed' and coalesce(ends_at, starts_at + interval '12 hours') + interval '72 hours' < now();
   return n;
 end;
 $$;

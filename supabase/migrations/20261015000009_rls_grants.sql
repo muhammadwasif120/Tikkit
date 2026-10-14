@@ -186,11 +186,11 @@ create policy event_categories_select on public.event_categories for select to a
 
 -- events
 grant select on public.events to authenticated;
-grant insert (organizer_id, title, description, cover_image_url, category_id, tags, city, area_label, venue_name,
+grant insert (organizer_id, title, description, cover_image_url, category_id, tags, city, area_label, venue_name, venue_address,
               is_secret_venue, starts_at, ends_at, capacity, status, visibility, registration_mode,
               require_id_verified, male_ratio_max, female_ratio_max)
   on public.events to authenticated;
-grant update (title, description, cover_image_url, category_id, tags, city, area_label, venue_name,
+grant update (title, description, cover_image_url, category_id, tags, city, area_label, venue_name, venue_address,
               is_secret_venue, starts_at, ends_at, capacity, status, visibility, registration_mode,
               require_id_verified, male_ratio_max, female_ratio_max)
   on public.events to authenticated;

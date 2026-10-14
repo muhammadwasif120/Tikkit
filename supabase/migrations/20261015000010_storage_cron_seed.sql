@@ -80,21 +80,21 @@ insert into public.plan_limits (plan_id, key, value) values
   ('pro', 'spaces', '-1'::jsonb)
 on conflict (plan_id, key) do update set value = excluded.value;
 
-insert into public.event_categories (name, slug, icon, color, sort) values
-  ('Music', 'music', '🎵', '#8B5CF6', 1),
-  ('Tech', 'tech', '💻', '#06B6D4', 2),
-  ('Art & Culture', 'art-culture', '🎨', '#F59E0B', 3),
-  ('Sports', 'sports', '⚽', '#10B981', 4),
-  ('Food & Drink', 'food-drink', '🍔', '#EF4444', 5),
-  ('Business', 'business', '💼', '#1E5EFF', 6),
-  ('Fashion', 'fashion', '👗', '#EC4899', 7),
-  ('Networking', 'networking', '🤝', '#6366F1', 8),
-  ('Education', 'education', '📚', '#14B8A6', 9),
-  ('Gaming', 'gaming', '🎮', '#7C3AED', 10),
-  ('Health & Wellness', 'health-wellness', '💪', '#84CC16', 11),
-  ('Comedy', 'comedy', '😂', '#F97316', 12),
-  ('Social', 'social', '🥳', '#FB7185', 13),
-  ('Charity', 'charity', '❤️', '#F43F5E', 14)
+insert into public.event_categories (id, name, slug, icon, color, sort) values
+  ('033bba95-a74f-4502-b2d7-da3a6bead9d7', 'Music', 'music', '🎵', '#8B5CF6', 1),
+  ('e4d75599-9662-4fe2-aac3-1c197dda2508', 'Tech', 'tech', '💻', '#06B6D4', 2),
+  ('6dcc3362-5e0a-4933-b0e5-95d808218f48', 'Art & Culture', 'art-culture', '🎨', '#F59E0B', 3),
+  ('766223a3-e6a6-41cf-8bf5-111601c019c8', 'Sports', 'sports', '⚽', '#10B981', 4),
+  ('c52ae858-8a5e-43d9-8558-ea0c30556f9b', 'Food & Drink', 'food-drink', '🍔', '#EF4444', 5),
+  ('f02ac773-6b97-4d47-8ddc-9f3db01d736f', 'Business', 'business', '💼', '#1E5EFF', 6),
+  ('cfed7bad-9455-4413-b31e-3127a8188ba5', 'Fashion', 'fashion', '👗', '#EC4899', 7),
+  ('3ec90f28-a3c1-4e20-8806-cb139257393f', 'Networking', 'networking', '🤝', '#6366F1', 8),
+  ('10baea70-2dfc-40af-b574-a885c18bee0d', 'Education', 'education', '📚', '#14B8A6', 9),
+  ('f900c53b-5616-4e72-88d0-dfaa1d995b83', 'Gaming', 'gaming', '🎮', '#7C3AED', 10),
+  ('6178d019-6460-46f5-b778-6682df1e21ba', 'Health & Wellness', 'health-wellness', '💪', '#84CC16', 11),
+  ('4f504d0a-d406-48d4-a547-2a6d6a23f817', 'Comedy', 'comedy', '😂', '#F97316', 12),
+  ('4c46038e-3e85-4cd7-937d-1d65261611d4', 'Social', 'social', '🥳', '#FB7185', 13),
+  ('e8f33122-d048-4e52-a01a-af33777f4133', 'Charity', 'charity', '❤️', '#F43F5E', 14)
 on conflict (slug) do nothing;
 
 -- ---------------------------------------------------------------------------
@@ -158,7 +158,8 @@ create policy "subscription proofs owner or admin read" on storage.objects for s
 -- ---------------------------------------------------------------------------
 create extension if not exists pg_cron;
 
-select cron.unschedule(jobid) from cron.job where jobname in ('tkx_reveal_due_events', 'tkx_process_no_shows');
+select cron.unschedule(jobid) from cron.job
+ where jobname in ('tkx_reveal_due_events', 'tkx_process_no_shows', 'auto-archive-events');  -- legacy job removed
 select cron.schedule('tkx_reveal_due_events', '* * * * *', $$select public.reveal_due_events()$$);
 select cron.schedule('tkx_process_no_shows',  '17 * * * *', $$select public.process_no_shows()$$);
 

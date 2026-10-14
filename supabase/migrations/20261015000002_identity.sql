@@ -7,7 +7,7 @@ create table public.profiles (
   id          uuid primary key references auth.users (id) on delete cascade,
   role        public.user_role not null default 'attendee',
   full_name   text not null,
-  username    text unique check (username is null or username ~ '^[a-z0-9_]{3,30}$'),
+  username    text unique check (username is null or username ~ '^[a-z0-9_-]{3,30}$'),
   avatar_url  text,
   city        text,
   country     text not null default 'PK',

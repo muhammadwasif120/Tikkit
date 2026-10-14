@@ -25,6 +25,7 @@ select
   e.city,
   e.area_label,
   case when e.is_secret_venue then null else e.venue_name end as venue_name,
+  case when e.is_secret_venue then null else e.venue_address end as venue_address,
   e.is_secret_venue,
   es.reveal_at,
   e.starts_at,
@@ -97,6 +98,7 @@ as $$
   select
     e.id, e.slug, e.title, e.description, e.cover_image_url, e.category_id, e.tags, e.city, e.area_label,
     case when e.is_secret_venue then null else e.venue_name end,
+    case when e.is_secret_venue then null else e.venue_address end,
     e.is_secret_venue, es.reveal_at, e.starts_at, e.ends_at, e.capacity, e.registration_mode,
     e.require_id_verified, e.male_ratio_max, e.female_ratio_max, e.organizer_id, e.status,
     (select min(t.price_pkr) from public.ticket_types t
