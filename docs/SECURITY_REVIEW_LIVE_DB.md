@@ -9,7 +9,7 @@ All 52 public tables have row level security enabled and every one has at least 
 | # | Finding | Evidence | Impact |
 |---|---|---|---|
 | H1 | **Organizer profiles are readable by anyone, all columns.** Policies `organizer_profiles_public_read` (role = organizer) and `profiles_public_read` (username not null) grant row access; column privileges are not restricted. | Anonymous request returned all 27 organizers with 27 emails, 15 phone numbers, 15 (encrypted) CNIC numbers and 1 CNIC image path. | Contact data of every organizer is scrapeable. Encrypted CNIC values and storage paths are exposed. |
-| H2 | **Secret venue addresses are readable before reveal.** `venue_secret` and `venue_address` live on `events`, which has a public read policy for published events. | Anonymous request returned `venue_secret` for 1 of the secret-venue events; 2 published events use secret venues. | Defeats the Auto Location Reveal feature and the private-event promise. |
+| H2 | **Secret venue addresses are readable before reveal.** `venue_address` lives on `events` (the `venue_secret` column is only a boolean flag), and `events` has a public read policy for published events. | Anonymous request returned `venue_address` for a secret-venue event; 2 published events use secret venues. | Defeats the Auto Location Reveal feature and the private-event promise. |
 | H3 | **Users can edit their own trust fields.** `profiles: own update` only forbids changing `role` (trigger `protect_profile_role`). `cnic_status`, `is_id_verified`, `social_score`, `admin_status` are editable by the owner. | Policy and trigger source. | Anyone can self-grant the "ID verified" check. |
 | H4 | **Guest score is user-editable.** `guest_profiles: own update` has `with check (id = auth.uid())` and no column limits. | Policy source. | Users can set their own `credit_score`, streaks and attendance. Makes the score worthless as social credibility. |
 | H5 | **Any organizer or staff user can insert score and pass records for any guest.** `credit_transactions: staff insert` and `event_passes: staff insert` only check role. `scan_logs: staff insert` likewise. | Policy source. | Organizers can mint or tamper with another person's score and passes. |
@@ -47,3 +47,8 @@ H1, H2 and H3 are exploitable today. Fixing them on production is a small, separ
 - Tighten `guest_profiles` / `credit_transactions` / `event_passes` writes.
 
 Everything is also applied in the fresh baseline for the new project.
+
+
+## Status
+
+All items above are addressed in the rebuilt schema (`supabase/migrations/20261015*`) and covered by `supabase/tests/01_security.sql` (87 checks, all passing). The old policies no longer exist on the development database, which was rebuilt in place on 2026-10-15.

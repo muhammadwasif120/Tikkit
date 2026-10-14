@@ -1,6 +1,6 @@
 # TIKKIT X baseline schema design (new Supabase project)
 
-Status: design for review. Nothing here has been applied anywhere. It becomes numbered SQL migrations in `supabase/migrations/` once the new project exists. Written from the live schema snapshot (`supabase/baseline/live-2026-10-14/`), the app code, and `docs/SECURITY_REVIEW_LIVE_DB.md`.
+Status: **implemented** as ten migrations in `supabase/migrations/20261015*`, applied to the development database and covered by `supabase/tests/01_security.sql`. Differences from the first draft are listed in section 10. Written from the live schema snapshot (`supabase/baseline/live-2026-10-14/`), the app code, and `docs/SECURITY_REVIEW_LIVE_DB.md`.
 
 ## 1. Finding from the registration trace
 
@@ -165,3 +165,15 @@ Import is a script with a dry-run mode that reports expected row counts per tabl
 2. Confirm ID verification is optional for both roles at signup, with organizers required to verify before their first publish (current behaviour).
 3. Decide whether gate staff links are scoped to specific events (recommended) or all of an organizer's events.
 4. Decide sales cutoff behaviour: `sales_end` per ticket type, or only event start.
+
+## 10. As built (differences from the draft)
+
+- `events.venue_address` is a public column for normal venues. It is forced to null by trigger when `is_secret_venue` is true, and the real address then lives in `event_secrets`.
+- Coupons carry no referrer. A referral link's code acts as the buyer coupon when it has a discount, so attribution stays in `referral_links`.
+- `ticket_types` has no `sold` counter. Seats are counted from registrations, serialized by a row lock on the event inside `register_for_event`.
+- Added: `email_outbox` (announcement and reveal emails, sent by a server route), `organizer_commission_defaults`, `private` schema helpers, `get_registrant_scores()` (plan-aware score detail for organizers), `process_no_shows()` also archives events 72 hours after the end.
+- Trial is a pseudo plan (`trial`) with its own limits: 1 event, 100 registrations, Growth features.
+- `registration_mode` is `open` or `approval` (legacy "expression of interest" and "invite only" both map to `approval`; invite only also becomes a private, unlisted event).
+- pg_cron jobs: `tkx_reveal_due_events` every minute, `tkx_process_no_shows` hourly. The legacy auto-archive job was removed.
+- Replay on a fresh project: link it, then `supabase db push` applies `supabase/migrations/*` in order. `supabase/dev/00_reset_legacy_public.sql` is only for wiping the old development schema and is never needed on a new project.
+- Import: `scripts/import_legacy.py` plus `scripts/copy_legacy_storage.mjs`, run against the export in `~/tikkit-backups`.
