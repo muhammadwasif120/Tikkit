@@ -177,3 +177,30 @@ Import is a script with a dry-run mode that reports expected row counts per tabl
 - pg_cron jobs: `tkx_reveal_due_events` every minute, `tkx_process_no_shows` hourly. The legacy auto-archive job was removed.
 - Replay on a fresh project: link it, then `supabase db push` applies `supabase/migrations/*` in order. `supabase/dev/00_reset_legacy_public.sql` is only for wiping the old development schema and is never needed on a new project.
 - Import: `scripts/import_legacy.py` plus `scripts/copy_legacy_storage.mjs`, run against the export in `~/tikkit-backups`.
+
+## 11. Modules migration (20261016): classes, spaces, retreats, team access
+
+Five additive migrations. Nothing from the 20261015 baseline is dropped or renamed. Same rules as the baseline: deny by default, explicit grants, trust data changes only in security definer functions, limits stored as data in `plan_limits`.
+
+| Migration | Contents |
+|---|---|
+| `20261016000001_platform_extras` | `organizer_team_members` (invite, claim, remove), `private.manages_org` and a team aware `private.manages_event`, `event_favourites`, `product_payments` (proof of payment for passes, drop ins and space bookings), `door_scans`, gate link scope columns for classes, spaces and retreats |
+| `20261016000002_classes` | `class_series` (weekly pattern in Pakistan local time), `class_sessions` (generated 12 weeks ahead), `pass_products` (pack or monthly), `pass_purchases`, `class_bookings`, `pass_redemptions`, public views, `book_class_session`, `purchase_pass`, `cancel_class_booking`, `cancel_class_session`, `process_class_sessions` |
+| `20261016000003_spaces` | `spaces`, `space_hours` (weekly slot grid), `space_blackouts`, `space_bookings`, `space_open_slots`, `book_space` (row lock prevents double booking), `review_space_booking`, `cancel_space_booking`, `process_space_bookings` |
+| `20261016000004_retreats` | `retreats`, `retreat_days`, `retreat_items`, `retreat_participants`, `retreat_checkins`, `retreat_budget_lines`, `retreat_tasks`, `retreat_updates`, `retreat_documents`; sharing by private link, participant itinerary by QR token, `retreat_check_in`, `post_retreat_update`, `duplicate_retreat`, `retreat_summary` |
+| `20261016000005_modules_flows_rls` | `submit_product_payment` and `review_product_payment`, `scan_any` and `gate_scan_any` (one token, any product), `create_gate_link_scoped`, `gate_get_scope`, `my_entitlements` with module usage, `master_modules_overview`, RLS and grants for every new table, plan limits, `retreat-files` bucket, pg_cron jobs |
+
+### Decisions
+- **Statuses reuse `registration_status`** for class bookings and space bookings, so the approval, payment and check in states match events.
+- **Payments:** event tickets keep `payment_submissions`. Everything else uses `product_payments` keyed by `(kind, subject_id)`. Rejecting a proof returns the subject to `awaiting_payment`.
+- **Classes:** recurrence is `weekdays` plus `interval_weeks`, not an RRULE. A pass reserves a session at booking and gives it back if cancelled with at least two hours notice or if the organizer cancels. Attending creates a `pass_redemptions` row and awards guest score. Confirmed bookings of finished sessions become no shows hourly.
+- **Spaces:** `book_space` locks the space row and re-checks the slot, so two people cannot take the same time. `buffer_minutes` is held after each booking.
+- **Retreats (Pro only, `plan_limits.retreats`: 0, 0, 0, -1):** private to the organizer account. The shared itinerary and the participant itinerary are served by functions that omit internal items, costs, notes and participants. Participants can be linked to accounts by email (`claim_retreat_invites`).
+- **Team access:** one role, `manager`. A manager can do everything the owner can through functions and read policies, but direct writes to events still need ownership. Plan limit `team_members`: trial 2, starter 0, growth 3, pro unlimited. The app must also let team managers into `/dashboard` (the role check in middleware is by `profiles.role`).
+- **Not included:** Vendor X marketplace tables, seat or table maps. Both stay deferred.
+
+### Verify after applying
+```
+supabase db query --linked -f supabase/tests/02_modules_security.sql   # self rolling back, prints PASS or FAIL per check
+supabase gen types typescript --linked > src/lib/supabase/database.types.ts
+```
