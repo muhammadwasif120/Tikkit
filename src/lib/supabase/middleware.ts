@@ -102,6 +102,8 @@ export async function updateSession(request: NextRequest) {
     '/staff',
     '/promoter',
     '/itinerary',
+    '/classes',
+    '/spaces',
     '/privacy',
     '/terms',
     '/compare',
