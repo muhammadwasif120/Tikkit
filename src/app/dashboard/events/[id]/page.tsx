@@ -1,259 +1,156 @@
-import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
-import { format } from 'date-fns'
-import { CalendarDays, MapPin, Users, ArrowLeft, Archive } from 'lucide-react'
-import { getEffectiveStatus } from '@/lib/eventStatus'
 import Link from 'next/link'
-import EventActions from '@/components/events/EventActions'
-import GuestTable from '@/components/guests/GuestTable'
-import EventPaymentSetup from '@/components/events/EventPaymentSetup'
-import EventTicketTypes from '@/components/events/EventTicketTypes'
-import EventCoverAndDescription from '@/components/events/EventCoverAndDescription'
-import DashboardLoader from '@/components/layout/DashboardLoader'
+import { headers } from 'next/headers'
+import { notFound } from 'next/navigation'
+import { Eye, Lock, MapPin, QrCode, Share2, Users } from 'lucide-react'
+import { Badge, ButtonLink, Card, CardBody, CardHeader, PageHeader, Progress, StatCard } from '@/components/kit'
+import EventForm, { toLocal, type EventValues } from '@/components/events/EventForm'
+import { Announcements, CopyButton, GateLinks, StatusActions } from '@/components/events/EventManage'
+import { requireOrganizer } from '@/lib/data/viewer'
+import { eventFormContext } from '@/lib/data/events'
+import { fmtDateTime, pkrShort } from '@/lib/format'
+import { cn } from '@/lib/cn'
 
-const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string; label: string }> = {
-  published: { bg: 'rgba(34,197,94,0.1)',  color: 'var(--mint-500)', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
-  completed: { bg: 'rgba(75,85,99,0.1)',   color: '#6B7280', border: 'rgba(75,85,99,0.2)',    label: 'ENDED'    },
-  archived:  { bg: 'rgba(75,85,99,0.06)',  color: '#4B5563', border: 'rgba(75,85,99,0.12)',   label: 'ARCHIVED' },
-  draft:     { bg: 'rgba(250,204,21,0.1)', color: '#FACC15', border: 'rgba(250,204,21,0.2)',  label: 'DRAFT'    },
-  cancelled: { bg: 'rgba(239,68,68,0.1)',  color: '#EF4444', border: 'rgba(239,68,68,0.2)',   label: 'CANCELLED'},
-}
+const TABS = [
+  { id: 'overview', label: 'Overview' }, { id: 'details', label: 'Details and tickets' },
+  { id: 'announce', label: 'Announcements' }, { id: 'door', label: 'Door team' },
+] as const
+const tone = { draft: 'neutral', published: 'success', completed: 'info', cancelled: 'danger', archived: 'neutral' } as const
 
-async function EventDetailData({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+export default async function EventPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
+  const [{ id }, { tab = 'overview' }] = await Promise.all([params, searchParams])
+  const org = await requireOrganizer()
+  const { supabase, entitlements } = org
 
-  const { data: event } = await supabase
-    .from('events')
-    .select('*')
-    .eq('id', (await params).id)
-    .eq('organizer_id', user!.id)
-    .single()
-
+  const { data: event } = await supabase.from('events').select('*').eq('id', id).maybeSingle()
   if (!event) notFound()
 
-  // Organizers must be ID-verified to publish (enforced in the DB too).
-  const { data: organizerProfile } = await supabase
-    .from('profiles')
-    .select('is_id_verified')
-    .eq('id', user!.id)
-    .single()
-  const organizerVerified = organizerProfile?.is_id_verified === true
+  const [{ data: tickets }, { data: secrets }, { data: links }, { data: regs }, { data: anns }, { data: gates }] = await Promise.all([
+    supabase.from('ticket_types').select('*').eq('event_id', id).order('sort'),
+    supabase.from('event_secrets').select('venue_address, reveal_at, reveal_notified_at').eq('event_id', id).maybeSingle(),
+    supabase.from('event_payment_accounts').select('payment_account_id').eq('event_id', id),
+    supabase.from('registrations').select('status, price_paid_pkr, ticket_type_id').eq('event_id', id).limit(10000),
+    supabase.from('event_announcements').select('id, body, created_at, send_email').eq('event_id', id).order('created_at', { ascending: false }),
+    supabase.from('gate_staff_links').select('id, label, expires_at, revoked_at, last_used_at, event_ids').contains('event_ids', [id]).order('created_at', { ascending: false }),
+  ])
 
-  const effStatus  = getEffectiveStatus(event)
-  const isArchived = effStatus === 'completed' || effStatus === 'archived' || effStatus === 'cancelled'
-  const st = STATUS_CONFIG[effStatus] ?? STATUS_CONFIG.draft
-  const isLive = effStatus === 'published'
+  const rows = regs ?? []
+  const confirmed = rows.filter(r => ['confirmed', 'checked_in', 'no_show'].includes(r.status))
+  const checkedIn = rows.filter(r => r.status === 'checked_in').length
+  const pending = rows.filter(r => ['requested', 'payment_submitted'].includes(r.status)).length
+  const revenue = confirmed.reduce((s, r) => s + (r.price_paid_pkr ?? 0), 0)
+  const perTicket = (tickets ?? []).map(t => ({ ...t, sold: confirmed.filter(r => r.ticket_type_id === t.id).length }))
 
-  // Fetch category details for display (read-only — locked after creation)
-  const ev = event as any
-  let category: { name: string; icon: string; color: string } | null = null
-  if (ev.category_id) {
-    const { data: cat } = await (supabase as any)
-      .from('event_categories')
-      .select('name, icon, color')
-      .eq('id', ev.category_id)
-      .single()
-    category = cat ?? null
+  const h = await headers()
+  const origin = `${h.get('x-forwarded-proto') ?? 'http'}://${h.get('host')}`
+  const publicUrl = event.slug ? `${origin}/events/${event.slug}` : ''
+
+  let ctx: Awaited<ReturnType<typeof eventFormContext>> | null = null
+  let initial: EventValues | null = null
+  if (tab === 'details') {
+    ctx = await eventFormContext(org)
+    initial = {
+      id: event.id, title: event.title, description: event.description ?? '', categoryId: event.category_id ?? '', city: event.city ?? '',
+      coverUrl: event.cover_image_url ?? '', startsAt: toLocal(event.starts_at), endsAt: toLocal(event.ends_at),
+      secret: event.is_secret_venue, areaLabel: event.area_label ?? '', venueName: event.venue_name ?? '', venueAddress: event.venue_address ?? '',
+      secretAddress: secrets?.venue_address ?? '', revealAt: toLocal(secrets?.reveal_at),
+      approval: event.registration_mode === 'approval', idOnly: event.require_id_verified, isPrivate: event.visibility === 'private',
+      capacity: event.capacity ? String(event.capacity) : '',
+      tiers: (tickets ?? []).map(t => ({ key: t.id, id: t.id, name: t.name, price: String(t.price_pkr), qty: t.quantity ? String(t.quantity) : '', ends: toLocal(t.sales_end), vip: t.is_vip })),
+      accountIds: (links ?? []).map(l => l.payment_account_id),
+      status: event.status,
+    }
+    if (initial.tiers.length === 0) initial.tiers = [{ key: 'new-1', name: 'General', price: '', qty: '', ends: '', vip: false }]
   }
 
-  const { data: guests } = await supabase
-    .from('guests')
-    .select('*')
-    .eq('event_id', event.id)
-    .order('created_at', { ascending: false })
-    .limit(500)
-
-  const { data: ticketTypes } = await supabase
-    .from('ticket_types')
-    .select('*')
-    .eq('event_id', event.id)
-
-  // Payment accounts — all saved by organizer
-  const { data: allPaymentAccounts } = await supabase
-    .from('payment_accounts')
-    .select('*')
-    .eq('organizer_id', user!.id)
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-
-  // Which accounts are already linked to this event
-  const { data: linkedEPA } = await supabase
-    .from('event_payment_accounts')
-    .select('payment_account_id')
-    .eq('event_id', event.id)
-
-  const linkedAccountIds = (linkedEPA ?? []).map((r: any) => r.payment_account_id)
-
-  const checkedIn = guests?.filter(g => g.status === 'checked_in').length ?? 0
-  const total = guests?.length ?? 0
+  const annLimit = entitlements?.limits.announcements_per_event
+  const remaining = typeof annLimit === 'number' && annLimit >= 0 ? Math.max(0, annLimit - (anns?.length ?? 0)) : null
 
   return (
-    <div className="max-w-5xl space-y-6">
-      {/* Header */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-
-        {/* Breadcrumb row */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <Link href="/dashboard/events" className="hover:text-[var(--mist-300)] transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}
-          >
-            <ArrowLeft size={14} /> Events
-          </Link>
-          {!isArchived && <EventActions event={event} organizerVerified={organizerVerified} />}
-        </div>
-
-        {/* Title */}
-        <h1 style={{
-          color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 900,
-          margin: 0, fontFamily: 'var(--font-display)', letterSpacing: '-0.5px', lineHeight: 1.2,
-        }}>
-          {event.title}
-        </h1>
-
-        {/* Badges row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{
-            padding: '3px 10px', borderRadius: 100, fontSize: 'var(--fs-xs)', fontWeight: 800,
-            letterSpacing: '0.07em', background: st.bg, color: st.color, border: `1px solid ${st.border}`,
-            display: 'inline-flex', alignItems: 'center', gap: 5,
-          }}>
-            {isLive && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--mint-500)', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
-            {st.label}
-          </span>
-          {!event.is_public && (
-            <span style={{ padding: '3px 10px', borderRadius: 100, fontSize: 'var(--fs-xs)', fontWeight: 700, background: 'rgba(255,199,69,0.1)', color: 'var(--cyan-500)', border: '1px solid rgba(255,199,69,0.2)' }}>
-              Private
-            </span>
-          )}
-          {category && (
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 5,
-              padding: '3px 10px', borderRadius: 100, fontSize: 'var(--fs-xs)', fontWeight: 700,
-              background: `${category.color}18`, color: category.color, border: `1px solid ${category.color}30`,
-            }}>
-              {category.icon} {category.name}
-            </span>
-          )}
-        </div>
-
-        {/* Meta row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
-            <CalendarDays size={13} color="var(--text-muted)" />
-            {format(new Date(event.date_start), 'MMM d, yyyy')}
-            <span style={{ color: 'var(--text-muted)' }}>·</span>
-            {format(new Date(event.date_start), 'h:mm a')}
-          </span>
-          {event.venue_name && (
-            <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
-              <MapPin size={13} color="var(--text-muted)" />
-              {event.venue_secret ? '🔒 Secret Venue' : event.venue_name}
-            </span>
-          )}
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
-            <Users size={13} color="var(--text-muted)" />
-            {total} / {event.capacity} guests
-          </span>
-        </div>
-      </div>
-
-      {/* Archived banner */}
-      {isArchived && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--overlay-1)] border border-[var(--border-faint)] text-sm text-[var(--mist-400)]">
-          <Archive className="w-4 h-4 shrink-0 text-[var(--mist-400)]" />
-          <span>
-            This event has ended and is now <span className="text-[var(--text-primary)] font-medium">archived</span>. Analytics and guest records are available below.
-          </span>
-        </div>
-      )}
-
-      {/* Cover image + description — editing only for non-archived events */}
-      <EventCoverAndDescription
-        eventId={event.id}
-        initialCoverUrl={event.cover_image_url ?? null}
-        initialDescription={event.description ?? null}
-        eventTitle={event.title}
-        readOnly={isArchived}
+    <div className="k-fade-up">
+      <PageHeader
+        eyebrow={fmtDateTime(event.starts_at)}
+        title={event.title}
+        description={event.is_secret_venue ? 'Secret location' : [event.venue_name, event.city].filter(Boolean).join(', ') || undefined}
+        actions={
+          <>
+            <Badge tone={tone[event.status]}>{event.status}</Badge>
+            {event.admin_status !== 'live' && <Badge tone="danger">{event.admin_status}</Badge>}
+            <ButtonLink href={`/dashboard/guests?event=${id}`} variant="secondary" leading={<Users className="h-4 w-4" />}>Guests</ButtonLink>
+            <ButtonLink href={`/dashboard/event-day?event=${id}`} leading={<QrCode className="h-4 w-4" />}>Event Day</ButtonLink>
+          </>
+        }
       />
 
-      {/* Capacity bar */}
-      <div className="card">
-        <div className="flex items-center justify-between text-sm mb-3">
-          <span className="text-[var(--mist-400)]">Capacity</span>
-          <span className="text-[var(--text-primary)] font-medium">{total} / {event.capacity}</span>
-        </div>
-        <div className="w-full bg-brand-charcoal-light rounded-full h-2">
-          <div
-            className="h-2 rounded-full bg-brand-blue transition-all"
-            style={{ width: `${Math.min(100, (total / event.capacity) * 100)}%` }}
-          />
-        </div>
-        <div className="flex justify-between text-xs text-[var(--mist-400)] mt-2">
-          <span>{checkedIn} checked in</span>
-          <span>{event.capacity - total} spots remaining</span>
-        </div>
-      </div>
-
-      {/* Stats row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Total Guests',  value: total },
-          { label: 'Checked In',    value: checkedIn },
-          { label: 'Ticket Types',  value: ticketTypes?.length ?? 0 },
-          { label: 'Waitlisted',    value: guests?.filter(g => g.waitlist).length ?? 0 },
-        ].map((s) => (
-          <div key={s.label} className="card text-center py-4">
-            <p className="text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              {s.value}
-            </p>
-            <p className="text-xs text-[var(--mist-400)] mt-1">{s.label}</p>
-          </div>
+      <nav aria-label="Event sections" className="mb-6 flex gap-1 overflow-x-auto border-b border-line">
+        {TABS.map(t => (
+          <Link key={t.id} href={`/dashboard/events/${id}?tab=${t.id}`} aria-current={tab === t.id ? 'page' : undefined}
+            className={cn('-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
+              tab === t.id ? 'border-accent text-fg' : 'border-transparent text-muted hover:text-fg')}>
+            {t.label}
+          </Link>
         ))}
-      </div>
+      </nav>
 
-      {/* Ticket Tiers + Payment Setup — hidden for archived events */}
-      {!isArchived && (
-        <>
-          <EventTicketTypes
-            eventId={event.id}
-            initialTicketTypes={(ticketTypes ?? []).map((t: any) => ({ ...t, price: t.price ?? 0 }))}
-          />
-          <EventPaymentSetup
-            eventId={event.id}
-            allAccounts={(allPaymentAccounts ?? []).map((a: any) => ({ ...a, is_default: false }))}
-            linkedAccountIds={linkedAccountIds}
-          />
-        </>
+      {tab === 'overview' && (
+        <div className="space-y-6">
+          <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Numbers">
+            <StatCard label="Confirmed" value={String(confirmed.length)} hint={event.capacity ? `of ${event.capacity}` : 'no cap'} icon={<Users className="h-4 w-4" />} />
+            <StatCard tone="magenta" label="Revenue" value={pkrShort(revenue)} hint="approved payments" />
+            <StatCard label="Pending" value={String(pending)} hint="waiting on you" />
+            <StatCard label="Checked in" value={String(checkedIn)} hint={confirmed.length ? `${Math.round((checkedIn / Math.max(1, confirmed.length)) * 100)}% of guests` : 'doors closed'} icon={<QrCode className="h-4 w-4" />} />
+          </section>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Card className="lg:col-span-2">
+              <CardHeader title="Tickets" description="Sold per type" action={<ButtonLink href={`/dashboard/events/${id}?tab=details`} variant="ghost" size="sm">Edit</ButtonLink>} />
+              <CardBody className="space-y-4">
+                {perTicket.map(t => (
+                  <div key={t.id}>
+                    <div className="mb-1.5 flex items-baseline justify-between text-sm">
+                      <span className="flex items-center gap-2 font-medium text-fg">{t.name}{t.is_vip && <Badge tone="magenta">VIP</Badge>}</span>
+                      <span className="tnum text-muted">{t.sold}{t.quantity ? ` / ${t.quantity}` : ''} · PKR {t.price_pkr.toLocaleString('en-PK')}</span>
+                    </div>
+                    {t.quantity ? <Progress value={Math.min(100, Math.round((t.sold / t.quantity) * 100))} tone={t.is_vip ? 'accent' : 'accent'} /> : null}
+                  </div>
+                ))}
+                {perTicket.length === 0 && <p className="text-sm text-muted">No tickets yet.</p>}
+              </CardBody>
+            </Card>
+
+            <div className="space-y-6">
+              <Card>
+                <CardHeader title="Status" />
+                <CardBody className="space-y-4"><StatusActions id={id} status={event.status} /></CardBody>
+              </Card>
+              {event.status === 'published' && publicUrl && (
+                <Card>
+                  <CardHeader title="Share" action={<Share2 className="h-4 w-4 text-subtle" aria-hidden />} />
+                  <CardBody className="space-y-3">
+                    <p className="break-all rounded-lg bg-raised p-2.5 font-mono text-xs text-fg">{publicUrl}</p>
+                    <div className="flex gap-2"><CopyButton text={publicUrl} /><ButtonLink href={publicUrl} variant="ghost" size="sm" target="_blank" leading={<Eye className="h-4 w-4" />}>Preview</ButtonLink></div>
+                  </CardBody>
+                </Card>
+              )}
+              {event.is_secret_venue && (
+                <Card>
+                  <CardHeader title="Secret location" action={<Lock className="h-4 w-4 text-violet" aria-hidden />} />
+                  <CardBody className="space-y-1 text-sm">
+                    <p className="flex items-start gap-2 text-fg"><MapPin className="mt-0.5 h-4 w-4 shrink-0 text-subtle" aria-hidden />{secrets?.venue_address || 'No address set yet'}</p>
+                    <p className="text-muted">
+                      {secrets?.reveal_notified_at ? `Revealed ${fmtDateTime(secrets.reveal_notified_at)}`
+                        : secrets?.reveal_at ? `Reveals ${fmtDateTime(secrets.reveal_at)}` : 'You will announce it yourself.'}
+                    </p>
+                  </CardBody>
+                </Card>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* Guest table — always visible, Add Guest hidden for archived events */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-[var(--text-primary)] text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Guest List
-          </h3>
-          {!isArchived && (
-            <div className="flex gap-2">
-              <Link
-                href={`/dashboard/events/${event.id}/guests/add`}
-                className="btn-primary text-xs px-3 py-2"
-              >
-                Add Guest
-              </Link>
-            </div>
-          )}
-        </div>
-        <GuestTable guests={guests ?? []} eventId={event.id} />
-      </div>
+      {tab === 'details' && ctx && initial && <EventForm mode="edit" initial={initial} {...ctx} />}
+      {tab === 'announce' && <Announcements eventId={id} items={anns ?? []} remaining={remaining} />}
+      {tab === 'door' && <GateLinks eventId={id} links={gates ?? []} origin={origin} />}
     </div>
-  )
-}
-
-export default function EventDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  return (
-    <Suspense fallback={<DashboardLoader variant="detail" />}>
-      <EventDetailData params={params} />
-    </Suspense>
   )
 }
