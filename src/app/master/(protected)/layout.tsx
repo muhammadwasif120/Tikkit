@@ -1,34 +1,21 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import ForceNoir from '@/components/master/ForceNoir'
+import { Logo } from '@/components/kit'
+import MasterNav from '@/components/master/MasterNav'
+import { getViewer } from '@/lib/data/viewer'
+
+export const metadata = { title: 'Admin', robots: { index: false, follow: false } }
 
 export default async function MasterLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/master/login')
-
-  // profiles.role is the single source of truth for admin access. It is
-  // protected by the protect_profile_role trigger, so authenticated/anon
-  // callers cannot elevate it. We must NOT fall back to user_metadata.role
-  // here: it is user-writable (supabase.auth.updateUser), and the previous
-  // fallback additionally persisted that forged value into profiles.role via
-  // the service role — a full privilege-escalation path. Admin is granted only
-  // by setting profiles.role directly (SQL / service role by a human).
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'admin') {
-    redirect('/master/login')
-  }
-
+  const viewer = await getViewer()
+  // profiles.role is the only source of truth for admin access (never user metadata).
+  if (!viewer || viewer.profile.role !== 'admin') redirect('/master/login')
   return (
-    <>
-      <ForceNoir />
-      {children}
-    </>
+    <div className="kit min-h-screen bg-canvas text-fg lg:flex">
+      <aside className="border-b border-line bg-surface/60 p-4 lg:sticky lg:top-0 lg:h-screen lg:w-60 lg:border-b-0 lg:border-r">
+        <div className="mb-4 flex items-center gap-2 px-2"><Logo compact /><span className="rounded-md bg-magenta/14 px-1.5 py-0.5 text-[10px] font-semibold text-magenta">ADMIN</span></div>
+        <MasterNav />
+      </aside>
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-8 lg:py-8"><div className="mx-auto max-w-6xl">{children}</div></main>
+    </div>
   )
 }

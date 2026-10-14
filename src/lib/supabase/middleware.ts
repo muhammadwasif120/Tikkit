@@ -5,17 +5,18 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 // sessions (set with this domain) keep working.
 const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.tikkitx.com' : undefined
 
-// Vendor X and the standalone venue portal are built but not open yet: every
-// route within them redirects to the home page. Nothing else about these
-// modules is touched, so re-launching one is deleting its entry here.
-// (The venue code is reworked into the organizer CRM later, see docs/LAUNCH_PLAN.md.)
+// Vendor X is built but not open yet: every route within it redirects to the home
+// page. Re-launching it is deleting its entry here. (Venues became the Spaces module.)
 const GATED_MODULES: { prefixes: string[]; landing: string }[] = [
   { prefixes: ['/vendor'], landing: '/' },
-  { prefixes: ['/venue', '/venues'], landing: '/' },
 ]
 
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
+
+  if (pathname === '/venues' || pathname.startsWith('/venue/') || pathname === '/venue') {
+    return NextResponse.redirect(new URL('/spaces', request.url), 308)
+  }
 
   for (const mod of GATED_MODULES) {
     const inModule = mod.prefixes.some(p => pathname === p || pathname.startsWith(p + '/'))
