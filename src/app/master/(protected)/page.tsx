@@ -16,23 +16,18 @@ import {
   getMasterOrganizers, getMasterEvents, setOrgAdminStatus,
   getMasterOrgProfile, getMasterOrgEvents, getMasterEventGuests,
   getMasterAnalytics,
-  getSupportQueries, updateSupportQueryStatus,
   getMasterCnicVerifications, approveCnicVerification, rejectCnicVerification,
   getMasterAttendees, getMasterRegistrations, getMasterBadgeCounts,
   setEventAdminStatus, removeOrganizer, sendAdminEmailToOrganizer,
   getAdminCategories, createAdminCategory, updateAdminCategory, deleteAdminCategory,
   type MasterOrg, type MasterEvt, type OrgProfile, type OrgEvent, type EventGuest,
-  type PlatformAnalytics, type SupportQuery, type CnicVerification,
+  type PlatformAnalytics, type CnicVerification,
   type MasterAttendee, type MasterRegistration, type AdminCategory,
 } from '@/app/actions/masterActions'
-import {
-  getAdminSupportConversations, getAdminSupportThread, sendAdminSupportReply,
-  type SupportMessage, type SupportConversationSummary,
-} from '@/app/actions/supportActions'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type Tab = 'overview' | 'organizers' | 'events' | 'queries' | 'support' | 'analytics' | 'verifications' | 'attendees' | 'registrations' | 'categories'
+type Tab = 'overview' | 'organizers' | 'events' | 'analytics' | 'verifications' | 'attendees' | 'registrations' | 'categories'
 type OrgStatus = 'active' | 'review' | 'suspended'
 type EventStatus = 'live' | 'draft' | 'flagged' | 'suspended' | 'ended'
 
@@ -182,70 +177,6 @@ function ContactPanel({ org, onClose }: { org: Org; onClose: () => void }) {
           </button>
           <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#6B7280', borderRadius: 10, padding: '10px 16px', fontSize: 'var(--fs-base)', fontWeight: 600, fontFamily: 'var(--font-display)', cursor: 'pointer' }}>
             Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ─── Query Detail Panel ───────────────────────────────────────────────────────
-
-function QueryDetailPanel({ query, onClose }: { query: SupportQuery; onClose: () => void }) {
-  const catLabel: Record<string, string> = {
-    ticket_registration: 'Ticket / Registration', event_cancellation: 'Cancellation / Refund',
-    organizer_dispute: 'Organizer Dispute', attendee_dispute: 'Attendee Complaint',
-    account_access: 'Account Access', payment_billing: 'Payment & Billing',
-    technical_bug: 'Technical Bug', feature_request: 'Feature Request', other: 'Other',
-  }
-  const PC2: Record<string, string> = { high: '#EF4444', medium: '#F59E0B', low: '#6B7280' }
-  const SC2: Record<string, string> = { open: '#EF4444', in_progress: '#F59E0B', resolved: '#22C55E' }
-  const SL2: Record<string, string> = { open: 'Open', in_progress: 'In Progress', resolved: 'Resolved' }
-  return (
-    <div className="ms-overlay">
-      <div className="ms-panel">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF' }}>Report Details</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', fontFamily: 'var(--font-body)', marginTop: 2 }}>{query.id}</div>
-          </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#6B7280' }}>
-            <X size={13} />
-          </button>
-        </div>
-        <div style={{ padding: '20px 24px', flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 18 }}>
-          {/* Meta row */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 999, background: `${PC2[query.priority]}18`, border: `1px solid ${PC2[query.priority]}30`, color: PC2[query.priority] }}>{query.priority.toUpperCase()}</span>
-            <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 9px', borderRadius: 999, background: `${SC2[query.status]}18`, border: `1px solid ${SC2[query.status]}30`, color: SC2[query.status] }}>{SL2[query.status]}</span>
-            {query.category && <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 9px', borderRadius: 999, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#9CA3AF' }}>{catLabel[query.category] ?? query.category}</span>}
-          </div>
-          {/* From */}
-          <div>
-            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 5, fontFamily: 'var(--font-body)' }}>FROM</div>
-            <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', fontFamily: 'var(--font-body)', fontWeight: 600 }}>{query.from_name}</div>
-            <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 2, textTransform: 'capitalize' }}>{query.from_type} · {new Date(query.created_at).toLocaleString('en-PK', { dateStyle: 'medium', timeStyle: 'short' })}</div>
-          </div>
-          {/* Subject */}
-          <div>
-            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 5, fontFamily: 'var(--font-body)' }}>SUBJECT</div>
-            <div style={{ fontSize: 'var(--fs-md)', color: '#F0F2FF', fontFamily: 'var(--font-body)', fontWeight: 600, lineHeight: 1.4 }}>{query.subject}</div>
-          </div>
-          {/* Body */}
-          <div>
-            <div style={{ fontSize: 'var(--fs-2xs)', fontWeight: 700, color: '#4B5563', letterSpacing: '0.08em', marginBottom: 5, fontFamily: 'var(--font-body)' }}>DESCRIPTION</div>
-            {query.body ? (
-              <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', fontFamily: 'var(--font-body)', lineHeight: 1.7, whiteSpace: 'pre-wrap', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: '14px 16px' }}>
-                {query.body}
-              </div>
-            ) : (
-              <div style={{ fontSize: 'var(--fs-base)', color: '#374151', fontFamily: 'var(--font-body)', fontStyle: 'italic' }}>No description provided.</div>
-            )}
-          </div>
-        </div>
-        <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#9CA3AF', borderRadius: 10, padding: '10px 20px', fontSize: 'var(--fs-base)', fontWeight: 600, fontFamily: 'var(--font-display)', cursor: 'pointer', width: '100%' }}>
-            Close
           </button>
         </div>
       </div>
@@ -1073,18 +1004,15 @@ export default function MasterPage() {
   // Eager badge counts — loaded upfront so sidebar badges are accurate immediately
   const [eagerPendingVerif, setEagerPendingVerif] = useState(0)
   const [eagerPendingPayments, setEagerPendingPayments] = useState(0)
-  const [eagerUnreadSupport, setEagerUnreadSupport] = useState(0)
 
   useEffect(() => {
     setLoading(true)
-    Promise.all([getMasterOrganizers(), getMasterEvents(), getSupportQueries(), getMasterBadgeCounts()])
-      .then(([orgsData, evtsData, queriesData, counts]) => {
+    Promise.all([getMasterOrganizers(), getMasterEvents(), getMasterBadgeCounts()])
+      .then(([orgsData, evtsData, counts]) => {
         setOrgs(orgsData as Org[])
         setEvents(evtsData as Evt[])
-        setQueries(queriesData)
         setEagerPendingVerif(counts.pendingVerifications)
         setEagerPendingPayments(counts.pendingPayments)
-        setEagerUnreadSupport(counts.unreadSupport)
       })
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -1106,22 +1034,6 @@ export default function MasterPage() {
   const [openEvtMenu, setOpenEvtMenu] = useState<string | null>(null)
   const [evtMenuPos, setEvtMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 })
   const [guestListEvent, setGuestListEvent] = useState<Evt | null>(null)
-
-  // Queries state — real DB data
-  const [queries, setQueries] = useState<SupportQuery[]>([])
-  const [queriesLoading, setQueriesLoading] = useState(false)
-  const [queryFilter, setQueryFilter] = useState<'all' | SupportQuery['status']>('all')
-  const [selectedQuery, setSelectedQuery] = useState<SupportQuery | null>(null)
-
-  // Support chat state
-  const [supportFilter, setSupportFilter] = useState<'all' | 'organizer' | 'attendee'>('all')
-  const [supportConvos, setSupportConvos] = useState<SupportConversationSummary[]>([])
-  const [supportConvosLoading, setSupportConvosLoading] = useState(false)
-  const [selectedSupportUserId, setSelectedSupportUserId] = useState<string | null>(null)
-  const [supportThread, setSupportThread] = useState<Record<string, SupportMessage[]>>({})
-  const [supportThreadLoading, setSupportThreadLoading] = useState(false)
-  const [supportReplyInput, setSupportReplyInput] = useState('')
-  const [supportReplying, setSupportReplying] = useState(false)
 
   // Attendees state
   const [attendees, setAttendees] = useState<MasterAttendee[]>([])
@@ -1156,50 +1068,6 @@ export default function MasterPage() {
       .then(setRegistrations)
       .finally(() => { setRegsLoading(false); setRegsLoaded(true) })
   }, [tab, regsLoaded])
-
-  useEffect(() => {
-    if (tab !== 'queries' && tab !== 'support') return
-    // queries already loaded upfront — only load support convos lazily
-    if ((tab === 'queries' || tab === 'support') && supportConvos.length === 0) {
-      setSupportConvosLoading(true)
-      getAdminSupportConversations().then(setSupportConvos).finally(() => setSupportConvosLoading(false))
-    }
-  }, [tab]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const loadSupportThread = async (userId: string) => {
-    setSelectedSupportUserId(userId)
-    if (supportThread[userId]) return
-    setSupportThreadLoading(true)
-    const msgs = await getAdminSupportThread(userId)
-    setSupportThread(prev => ({ ...prev, [userId]: msgs }))
-    setSupportThreadLoading(false)
-  }
-
-  const handleSupportReply = async () => {
-    if (!selectedSupportUserId || !supportReplyInput.trim() || supportReplying) return
-    const convo = supportConvos.find(c => c.userId === selectedSupportUserId)
-    if (!convo) return
-    setSupportReplying(true)
-    const msg = supportReplyInput.trim()
-    setSupportReplyInput('')
-    const { error } = await sendAdminSupportReply(selectedSupportUserId, convo.userName, convo.userType as 'organizer' | 'attendee', msg)
-    if (!error) {
-      const newMsg: SupportMessage = {
-        id: Date.now().toString(),
-        user_id: selectedSupportUserId,
-        user_name: convo.userName,
-        user_type: convo.userType as 'organizer' | 'attendee',
-        message: msg,
-        sender: 'admin',
-        created_at: new Date().toISOString(),
-      }
-      setSupportThread(prev => ({ ...prev, [selectedSupportUserId]: [...(prev[selectedSupportUserId] ?? []), newMsg] }))
-      setSupportConvos(prev => prev.map(c => c.userId === selectedSupportUserId ? { ...c, lastMessage: msg, lastAt: new Date().toISOString() } : c))
-    } else {
-      setSupportReplyInput(msg)
-    }
-    setSupportReplying(false)
-  }
 
   // CNIC verifications state
   const [cnicVerifications, setCnicVerifications] = useState<CnicVerification[]>([])
@@ -1258,11 +1126,6 @@ export default function MasterPage() {
     setEventAdminStatus(id, s) // persist to DB — fire and forget
   }
 
-  const setQueryStatus = (id: string, s: SupportQuery['status']) => {
-    setQueries(prev => prev.map(q => q.id === id ? { ...q, status: s } : q))
-    updateSupportQueryStatus(id, s) // persist to DB — fire and forget
-  }
-
   const filteredOrgs = liveOrgs
     .filter(o => orgFilter === 'all' || getOrgStatus(o) === orgFilter)
     .filter(o => !orgSearch || o.name.toLowerCase().includes(orgSearch.toLowerCase()) || (o.username && o.username.toLowerCase().includes(orgSearch.toLowerCase())) || (o.email && o.email.toLowerCase().includes(orgSearch.toLowerCase())))
@@ -1271,17 +1134,12 @@ export default function MasterPage() {
     .filter(e => eventFilter === 'all' || getEvtStatus(e) === eventFilter)
     .filter(e => !eventSearch || e.title.toLowerCase().includes(eventSearch.toLowerCase()) || e.org.toLowerCase().includes(eventSearch.toLowerCase()))
 
-  const filteredQueries = queries
-    .filter(q => queryFilter === 'all' || q.status === queryFilter)
-
-  const openQCount = queries.filter(q => q.status === 'open').length
   const reviewOrgCount = liveOrgs.filter(o => getOrgStatus(o) === 'review').length
   const flaggedEvtCount = events.filter(e => getEvtStatus(e) === 'flagged').length
   const liveEvtCount = events.filter(e => getEvtStatus(e) === 'live').length
   const totalRegistered = events.reduce((a, e) => a + e.registered, 0)
   // Use eager counts until lazy tabs are loaded, then switch to live data
   const pendingCnicCount    = cnicVerifications.length > 0 ? cnicVerifications.filter(v => v.cnic_status === 'pending').length : eagerPendingVerif
-  const unreadSupportCount  = supportConvos.length > 0 ? supportConvos.reduce((sum, c) => sum + c.unreadCount, 0) : eagerUnreadSupport
   const pendingPaymentCount = registrations.length > 0 ? registrations.filter(r => r.payment_status === 'submitted').length : eagerPendingPayments
 
   const NAV = [
@@ -1291,15 +1149,12 @@ export default function MasterPage() {
     { id: 'registrations'  as Tab, icon: Ticket,          label: 'Registrations',      badge: pendingPaymentCount > 0 ? pendingPaymentCount : undefined },
     { id: 'events'         as Tab, icon: Calendar,        label: 'Events',             badge: flaggedEvtCount > 0 ? flaggedEvtCount : undefined },
     { id: 'analytics'      as Tab, icon: BarChart2,       label: 'Analytics'           },
-    { id: 'queries'        as Tab, icon: MessageCircle,   label: 'Queries & Disputes', badge: openQCount > 0 ? openQCount : undefined },
-    { id: 'support'        as Tab, icon: MessageSquare,   label: 'Support Chats',      badge: unreadSupportCount > 0 ? unreadSupportCount : undefined },
     { id: 'verifications'  as Tab, icon: ShieldCheck,     label: 'Verifications',      badge: pendingCnicCount > 0 ? pendingCnicCount : undefined },
     { id: 'categories'     as Tab, icon: Tag,             label: 'Categories'          },
   ]
 
   const PAGE_TITLES: Record<Tab, string> = {
-    overview: 'Overview', organizers: 'Organizers', events: 'Events', queries: 'Queries & Disputes',
-    support: 'Support Chats', analytics: 'Analytics', verifications: 'Verifications',
+    overview: 'Overview', organizers: 'Organizers', events: 'Events', analytics: 'Analytics', verifications: 'Verifications',
     attendees: 'Attendee Accounts', registrations: 'All Registrations', categories: 'Event Categories',
   }
 
@@ -1586,11 +1441,6 @@ export default function MasterPage() {
               </span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {openQCount > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 7, padding: '4px 9px', fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#EF4444', fontFamily: 'var(--font-body)' }}>
-                  <AlertTriangle size={9} /> {openQCount} open
-                </div>
-              )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.18)', borderRadius: 7, padding: '4px 9px', fontSize: 'var(--fs-xs)', fontWeight: 700, color: '#4D82FF', fontFamily: 'var(--font-body)' }}>
                 <Shield size={9} /> ADMIN
               </div>
@@ -1608,7 +1458,7 @@ export default function MasterPage() {
                   <StatCard icon={Users}        label="Total Organizers"   value={String(liveOrgs.length)}          sub={`${reviewOrgCount} under review`}  color="#1E5EFF" />
                   <StatCard icon={Calendar}     label="Live Events"        value={String(liveEvtCount)}             sub={`${flaggedEvtCount} flagged`}       color="#22C55E" />
                   <StatCard icon={TrendingUp}   label="Total Registrations" value={totalRegistered.toLocaleString()} sub="across all events"                  color="#FFC745" />
-                  <StatCard icon={MessageSquare} label="Open Queries"       value={String(openQCount)}              sub={openQCount > 0 ? 'needs attention' : 'all clear'} color={openQCount > 0 ? '#EF4444' : '#22C55E'} />
+                  <StatCard icon={ShieldCheck}  label="Pending Verifications" value={String(pendingCnicCount)} sub={pendingCnicCount > 0 ? 'needs review' : 'all clear'} color={pendingCnicCount > 0 ? '#F59E0B' : '#22C55E'} />
                 </div>
 
                 <div className="ms-two-col">
@@ -1656,17 +1506,6 @@ export default function MasterPage() {
                             <td>
                               <div style={{ display: 'flex', gap: 6 }}>
                                 <button onClick={e => { e.stopPropagation(); setContactTarget(o) }} className="ms-ib blue" title="Email Organizer"><Mail size={12} /></button>
-                                <button onClick={e => {
-                                  e.stopPropagation()
-                                  setTab('support')
-                                  setSelectedSupportUserId(o.id)
-                                  setSupportFilter('organizer')
-                                  import('@/app/actions/supportActions').then(m => m.markAdminSupportMessagesRead(o.id))
-                                  setSupportConvos(prev => {
-                                    if (prev.find(c => c.userId === o.id)) return prev.map(p => p.userId === o.id ? { ...p, unreadCount: 0 } : p)
-                                    return [{ userId: o.id, userName: o.name, userType: 'organizer', lastMessage: 'Chat initiated from admin', lastAt: new Date().toISOString(), unreadCount: 0 }, ...prev]
-                                  })
-                                }} className="ms-ib blue" title="Chat with Organizer"><MessageSquare size={12} /></button>
                               </div>
                             </td>
                           </tr>
@@ -1675,34 +1514,6 @@ export default function MasterPage() {
                     </table>
                   </div>
 
-                  {/* Recent queries */}
-                  <div className="ms-card">
-                    <div className="ms-card-hdr">
-                      <span className="ms-card-title">Recent Queries</span>
-                      <button onClick={() => setTab('queries')} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 'var(--fs-sm)', color: '#4D82FF', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 600 }}>
-                        View all <ChevronRight size={12} />
-                      </button>
-                    </div>
-                    <div>
-                      {queries.length === 0 && (
-                        <div style={{ padding: '20px 0', textAlign: 'center', color: '#4B5563', fontSize: 'var(--fs-sm)' }}>No queries yet</div>
-                      )}
-                      {queries.slice(0, 5).map(q => (
-                        <div key={q.id} className="ms-activity-row">
-                          <div style={{ width: 7, height: 7, borderRadius: '50%', background: PC[q.priority], marginTop: 5, flexShrink: 0 }} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', fontFamily: 'var(--font-body)', lineHeight: 1.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
-                            <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 2, display: 'flex', gap: 8, alignItems: 'center' }}>
-                              <span>{q.from_name}</span>
-                              <span>·</span>
-                              <span>{fmtDate(q.created_at)}</span>
-                            </div>
-                          </div>
-                          <SBadge status={q.status} />
-                        </div>
-                      ))}
-                    </div>
-                  </div>
                 </div>
 
                 {/* City breakdown */}
@@ -1844,17 +1655,6 @@ export default function MasterPage() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, justifyContent: 'flex-end' }}>
                                   <div style={{ display: 'flex', gap: 6 }}>
                                     <button className="ms-ib blue" title="Email Organizer" onClick={e => { e.stopPropagation(); setContactTarget(o) }}><Mail size={12} /></button>
-                                    <button className="ms-ib blue" title="Chat with Organizer" onClick={e => {
-                                      e.stopPropagation()
-                                      setTab('support')
-                                      setSelectedSupportUserId(o.id)
-                                      setSupportFilter('organizer')
-                                      import('@/app/actions/supportActions').then(m => m.markAdminSupportMessagesRead(o.id))
-                                      setSupportConvos(prev => {
-                                        if (prev.find(c => c.userId === o.id)) return prev.map(p => p.userId === o.id ? { ...p, unreadCount: 0 } : p)
-                                        return [{ userId: o.id, userName: o.name, userType: 'organizer', lastMessage: 'Chat initiated from admin', lastAt: new Date().toISOString(), unreadCount: 0 }, ...prev]
-                                      })
-                                    }}><MessageSquare size={12} /></button>
                                   </div>
                                   {o.username ? (
                                     <Link href={`/organizer/${o.username}`} target="_blank" className="ms-ib" title="View public profile" style={{ color: '#6B7280', textDecoration: 'none' }}><ExternalLink size={12} /></Link>
@@ -2012,303 +1812,6 @@ export default function MasterPage() {
             )}
 
             {/* ════════════════════════════════════════════════════ QUERIES */}
-            {tab === 'queries' && (
-              <div>
-                {/* Stats row */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 12, marginBottom: 20 }}>
-                  {[
-                    { label: 'Open',        count: queries.filter(q => q.status === 'open').length,        color: '#EF4444' },
-                    { label: 'In Progress', count: queries.filter(q => q.status === 'in_progress').length, color: '#F59E0B' },
-                    { label: 'Resolved',    count: queries.filter(q => q.status === 'resolved').length,    color: '#22C55E' },
-                  ].map(s => (
-                    <div key={s.label} style={{ background: '#0D0F18', border: `1px solid ${s.color}22`, borderRadius: 12, padding: '16px 18px' }}>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-2xl)', fontWeight: 800, color: s.color, letterSpacing: '-1px' }}>{s.count}</div>
-                      <div style={{ fontSize: 'var(--fs-sm)', color: '#6B7280', fontFamily: 'var(--font-body)', marginTop: 4 }}>{s.label}</div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Category breakdown chips */}
-                {(() => {
-                  const catLabels: Record<string, { label: string; color: string }> = {
-                    ticket_registration:  { label: 'Ticket / Registration',     color: '#1E5EFF' },
-                    event_cancellation:   { label: 'Cancellation / Refund',      color: '#EF4444' },
-                    organizer_dispute:    { label: 'Organizer Dispute',          color: '#F97316' },
-                    attendee_dispute:     { label: 'Attendee Complaint',         color: '#F97316' },
-                    account_access:       { label: 'Account Access',             color: '#8B5CF6' },
-                    payment_billing:      { label: 'Payment & Billing',          color: '#F59E0B' },
-                    technical_bug:        { label: 'Technical Bug',              color: '#06B6D4' },
-                    feature_request:      { label: 'Feature Request',            color: '#FACC15' },
-                    other:                { label: 'Other',                      color: '#6B7280' },
-                  }
-                  const cats = Object.entries(catLabels).map(([key, meta]) => ({
-                    key, ...meta, count: queries.filter(q => (q.category ?? 'other') === key).length,
-                  })).filter(c => c.count > 0)
-                  if (cats.length === 0) return null
-                  return (
-                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
-                      {cats.map(c => (
-                        <div key={c.key} style={{ background: `${c.color}10`, border: `1px solid ${c.color}28`, borderRadius: 20, padding: '4px 12px', fontSize: 12, color: c.color, fontWeight: 600, fontFamily: 'var(--font-body)' }}>
-                          {c.label} <span style={{ opacity: 0.7 }}>({c.count})</span>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                })()}
-
-                <div className="ms-card">
-                  <div className="ms-card-hdr">
-                    <span className="ms-card-title">All Reports</span>
-                    <div className="ms-pills">
-                      {(['all','open','in_progress','resolved'] as const).map(f => {
-                        const active = f === queryFilter
-                        const cls = active ? (f === 'open' ? 'pr' : f === 'in_progress' ? 'py' : f === 'resolved' ? 'pg' : 'pa') : ''
-                        return <button key={f} className={`ms-pill${cls ? ' '+cls : ''}`} onClick={() => setQueryFilter(f)}>{f === 'all' ? 'All' : sl(f)}</button>
-                      })}
-                    </div>
-                  </div>
-
-                  <div style={{ overflowX: 'auto' }}>
-                    <table className="ms-tbl" style={{ minWidth: 720 }}>
-                      <thead>
-                        <tr>
-                          <th>ID</th>
-                          <th>From</th>
-                          <th>Category</th>
-                          <th>Subject</th>
-                          <th className="ms-hide">Priority</th>
-                          <th className="ms-hide">Date</th>
-                          <th>Status</th>
-                          <th style={{ textAlign: 'right' }}>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {loading && (
-                          <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#4B5563' }}>Loading…</td></tr>
-                        )}
-                        {!loading && filteredQueries.length === 0 && (
-                          <tr><td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: '#374151' }}>No reports found</td></tr>
-                        )}
-                        {filteredQueries.map(q => {
-                          const catMap: Record<string, { label: string; color: string }> = {
-                            ticket_registration:  { label: 'Ticket / Reg.',        color: '#1E5EFF' },
-                            event_cancellation:   { label: 'Cancellation',         color: '#EF4444' },
-                            organizer_dispute:    { label: 'Org. Dispute',         color: '#F97316' },
-                            attendee_dispute:     { label: 'Attendee',             color: '#F97316' },
-                            account_access:       { label: 'Account',              color: '#8B5CF6' },
-                            payment_billing:      { label: 'Payment',              color: '#F59E0B' },
-                            technical_bug:        { label: 'Bug',                  color: '#06B6D4' },
-                            feature_request:      { label: 'Feature',              color: '#FACC15' },
-                            other:                { label: 'Other',                color: '#6B7280' },
-                          }
-                          const cat = catMap[q.category ?? 'other'] ?? catMap.other
-                          return (
-                            <tr key={q.id}>
-                              <td style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--fs-sm)', color: '#4B5563', whiteSpace: 'nowrap' }}>{q.id}</td>
-                              <td>
-                                <div style={{ fontSize: 'var(--fs-base)', color: '#D1D5DB', whiteSpace: 'nowrap' }}>{q.from_name}</div>
-                                <div style={{ fontSize: 'var(--fs-xs)', color: '#4B5563', marginTop: 1, textTransform: 'capitalize' }}>{q.from_type}</div>
-                              </td>
-                              <td>
-                                <span style={{ fontSize: 11, fontWeight: 700, color: cat.color, background: `${cat.color}14`, border: `1px solid ${cat.color}30`, borderRadius: 6, padding: '2px 7px', whiteSpace: 'nowrap', fontFamily: 'var(--font-body)' }}>
-                                  {cat.label}
-                                </span>
-                              </td>
-                              <td style={{ maxWidth: 220 }}>
-                                <div style={{ fontSize: 'var(--fs-base)', color: '#F0F2FF', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{q.subject}</div>
-                              </td>
-                              <td className="ms-hide">
-                                <span style={{ fontSize: 'var(--fs-xs)', fontWeight: 700, color: PC[q.priority], background: `${PC[q.priority]}16`, border: `1px solid ${PC[q.priority]}30`, borderRadius: 999, padding: '2px 8px', textTransform: 'capitalize' }}>
-                                  {q.priority}
-                                </span>
-                              </td>
-                              <td className="ms-hide" style={{ color: '#6B7280', fontSize: 'var(--fs-sm)', whiteSpace: 'nowrap' }}>{fmtDate(q.created_at)}</td>
-                              <td><SBadge status={q.status} /></td>
-                              <td>
-                                <div style={{ display: 'flex', gap: 5, justifyContent: 'flex-end' }}>
-                                  <button title="View full report" className="ms-ib" onClick={() => setSelectedQuery(q)} style={{ color: '#9CA3AF', border: '1px solid rgba(255,255,255,0.1)' }}><Eye size={11} /></button>
-                                  {q.status === 'open' && (
-                                    <button title="Mark in progress" className="ms-ib amber" onClick={() => setQueryStatus(q.id, 'in_progress')}><Clock size={11} /></button>
-                                  )}
-                                  {q.status === 'in_progress' && (
-                                    <button title="Mark resolved" className="ms-ib green" onClick={() => setQueryStatus(q.id, 'resolved')}><CheckCircle size={11} /></button>
-                                  )}
-                                  {q.status === 'resolved' && (
-                                    <button title="Re-open" className="ms-ib amber" onClick={() => setQueryStatus(q.id, 'open')}><RefreshCw size={11} /></button>
-                                  )}
-                                  {q.from_type === 'organizer' && (() => {
-                                    const org = orgs.find((o: Org) => o.id === q.from_id || o.name === q.from_name)
-                                    return org ? (
-                                      <button title="Contact via Email" className="ms-ib blue" onClick={() => setContactTarget(org)}><Mail size={11} /></button>
-                                    ) : null
-                                  })()}
-                                  {q.from_id && (
-                                    <button title="Chat with User" className="ms-ib blue" onClick={async () => {
-                                      setTab('support')
-                                      setSelectedSupportUserId(q.from_id!)
-                                      loadSupportThread(q.from_id!)
-                                      setSupportFilter(q.from_type as 'organizer' | 'attendee' | 'all')
-                                      import('@/app/actions/supportActions').then(m => m.markAdminSupportMessagesRead(q.from_id!))
-                                      setSupportConvos(prev => {
-                                        if (prev.find(c => c.userId === q.from_id)) return prev.map(p => p.userId === q.from_id ? { ...p, unreadCount: 0 } : p)
-                                        return [{
-                                          userId: q.from_id!,
-                                          userName: q.from_name,
-                                          userType: q.from_type,
-                                          lastMessage: 'Chat initiated from report',
-                                          lastAt: new Date().toISOString(),
-                                          unreadCount: 0
-                                        }, ...prev]
-                                      })
-                                    }}>
-                                      <MessageSquare size={11} />
-                                    </button>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-              </div>
-            )}
-
-            {tab === 'support' && (
-              <div>
-                {/* ── Support Chats ── */}
-                <div style={{ marginTop: 0 }}>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-lg)', fontWeight: 700, color: '#F0F2FF', marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <MessageSquare size={16} color="#1E5EFF" />
-                      TIKKIT X Support Chats
-                    </div>
-                    <div className="ms-pills" style={{ display: 'flex', gap: 6 }}>
-                      {['all', 'organizer', 'attendee'].map(f => {
-                        const active = supportFilter === f
-                        const cls = active ? (f === 'organizer' ? 'pa' : f === 'attendee' ? 'pr' : 'pg') : ''
-                        return (
-                          <button 
-                            key={f} 
-                            onClick={() => setSupportFilter(f as 'all' | 'organizer' | 'attendee')} 
-                            className={`ms-pill${cls ? ' '+cls : ''}`} 
-                            style={{ textTransform: 'capitalize' }}
-                          >
-                            {f}
-                          </button>
-                        )
-                      })}
-                    </div>
-                  </div>
-                  {supportConvosLoading ? (
-                    <div style={{ color: '#374151', fontSize: 'var(--fs-sm)', padding: 20, textAlign: 'center' }}>Loading conversations…</div>
-                  ) : supportConvos.length === 0 ? (
-                    <div style={{ color: '#374151', fontSize: 'var(--fs-sm)', padding: 20, textAlign: 'center', background: '#0D0F18', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12 }}>No support conversations yet.</div>
-                  ) : (
-                    <div style={{ display: 'grid', gridTemplateColumns: selectedSupportUserId ? '280px 1fr' : '1fr', gap: 12, minHeight: 360 }}>
-                      {/* Conversation list */}
-                      <div style={{ background: '#0D0F18', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                        {supportConvos.filter(c => supportFilter === 'all' || c.userType === supportFilter).map(c => {
-                          const active = selectedSupportUserId === c.userId
-                          return (
-                            <button
-                              key={c.userId}
-                              onClick={() => {
-                                loadSupportThread(c.userId)
-                                setSelectedSupportUserId(c.userId)
-                                import('@/app/actions/supportActions').then(m => m.markAdminSupportMessagesRead(c.userId))
-                                setSupportConvos(prev => prev.map(p => p.userId === c.userId ? { ...p, unreadCount: 0 } : p))
-                              }}
-                              style={{
-                                display: 'flex', gap: 10, padding: '12px 14px', width: '100%', textAlign: 'left',
-                                background: active ? 'rgba(30,94,255,0.1)' : 'transparent',
-                                border: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)',
-                                cursor: 'pointer', alignItems: 'flex-start', transition: 'background 0.15s',
-                              }}
-                            >
-                              <div style={{ width: 32, height: 32, borderRadius: '50%', flexShrink: 0, background: c.userType === 'organizer' ? 'rgba(30,94,255,0.2)' : 'rgba(139,92,246,0.2)', border: `1px solid ${c.userType === 'organizer' ? 'rgba(30,94,255,0.35)' : 'rgba(139,92,246,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, color: c.userType === 'organizer' ? '#1E5EFF' : '#8B5CF6' }}>
-                                {c.userName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()}
-                              </div>
-                              <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 }}>
-                                  <span style={{ fontSize: 13, fontWeight: 700, color: '#D1D5DB', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{c.userName}</span>
-                                  {c.unreadCount > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: '#EF4444', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 999, padding: '1px 6px', flexShrink: 0, marginLeft: 4 }}>{c.unreadCount}</span>}
-                                </div>
-                                <div style={{ fontSize: 11, color: '#4B5563', textTransform: 'capitalize', marginBottom: 2 }}>{c.userType}</div>
-                                <div style={{ fontSize: 12, color: '#6B7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.lastMessage}</div>
-                              </div>
-                            </button>
-                          )
-                        })}
-                      </div>
-
-                      {/* Thread view */}
-                      {selectedSupportUserId && (() => {
-                        const convo = supportConvos.find(c => c.userId === selectedSupportUserId)
-                        const msgs = supportThread[selectedSupportUserId] ?? []
-                        return (
-                          <div style={{ background: '#0D0F18', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 12, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-                            {/* Thread header */}
-                            <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: 10 }}>
-                              <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--fs-md)', fontWeight: 700, color: '#F0F2FF', flex: 1 }}>{convo?.userName}</div>
-                              <span style={{ fontSize: 11, fontWeight: 600, color: convo?.userType === 'organizer' ? '#1E5EFF' : '#8B5CF6', background: convo?.userType === 'organizer' ? 'rgba(30,94,255,0.12)' : 'rgba(139,92,246,0.12)', border: `1px solid ${convo?.userType === 'organizer' ? 'rgba(30,94,255,0.3)' : 'rgba(139,92,246,0.3)'}`, borderRadius: 999, padding: '2px 8px', textTransform: 'capitalize' }}>{convo?.userType}</span>
-                            </div>
-                            {/* Messages */}
-                            <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10, minHeight: 240, maxHeight: 360 }}>
-                              {supportThreadLoading ? (
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-                                  <div style={{ width: 20, height: 20, border: '2px solid rgba(30,94,255,0.2)', borderTopColor: '#1E5EFF', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
-                                </div>
-                              ) : msgs.length === 0 ? (
-                                <div style={{ color: '#374151', fontSize: 'var(--fs-sm)', textAlign: 'center', paddingTop: 40 }}>No messages yet.</div>
-                              ) : msgs.map(m => {
-                                const isAdmin = m.sender === 'admin'
-                                return (
-                                  <div key={m.id} style={{ display: 'flex', gap: 8, maxWidth: '80%', alignSelf: isAdmin ? 'flex-end' : 'flex-start', flexDirection: isAdmin ? 'row-reverse' : 'row' }}>
-                                    <div style={{ width: 24, height: 24, borderRadius: '50%', flexShrink: 0, background: isAdmin ? 'rgba(239,68,68,0.2)' : 'rgba(30,94,255,0.2)', border: `1px solid ${isAdmin ? 'rgba(239,68,68,0.35)' : 'rgba(30,94,255,0.35)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 800, color: isAdmin ? '#EF4444' : '#1E5EFF' }}>
-                                      {isAdmin ? 'TX' : m.user_name.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()}
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                                      <div style={{ fontSize: 9, fontWeight: 600, color: '#4B5563', textAlign: isAdmin ? 'right' : 'left' }}>{isAdmin ? 'TIKKIT Admin' : m.user_name} · {new Date(m.created_at).toLocaleTimeString('en-PK', { hour: '2-digit', minute: '2-digit' })}</div>
-                                      <div style={{ padding: '8px 12px', borderRadius: 10, fontSize: 13, lineHeight: 1.5, wordBreak: 'break-word', background: isAdmin ? 'rgba(239,68,68,0.1)' : 'rgba(30,94,255,0.1)', border: `1px solid ${isAdmin ? 'rgba(239,68,68,0.2)' : 'rgba(30,94,255,0.2)'}`, color: isAdmin ? '#FCA5A5' : '#93C5FD' }}>
-                                        {m.message}
-                                      </div>
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                            {/* Reply input */}
-                            <div style={{ padding: '10px 14px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', gap: 8 }}>
-                              <input
-                                value={supportReplyInput}
-                                onChange={e => setSupportReplyInput(e.target.value)}
-                                onKeyDown={e => { if (e.key === 'Enter') handleSupportReply() }}
-                                placeholder="Reply as TIKKIT Admin…"
-                                className="ms-input"
-                                style={{ flex: 1 }}
-                              />
-                              <button
-                                onClick={handleSupportReply}
-                                disabled={!supportReplyInput.trim() || supportReplying}
-                                style={{ background: 'linear-gradient(135deg,#1E5EFF,#1448CC)', border: 'none', borderRadius: 8, padding: '0 14px', color: 'white', cursor: 'pointer', opacity: !supportReplyInput.trim() || supportReplying ? 0.45 : 1, display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 600, fontFamily: 'var(--font-display)' }}
-                              >
-                                <Send size={13} /> Send
-                              </button>
-                            </div>
-                          </div>
-                        )
-                      })()}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* ── Verifications Tab ── */}
             {tab === 'verifications' && (
               <div>
                 {/* Filter pills */}
@@ -2413,8 +1916,6 @@ export default function MasterPage() {
       {/* Guest list panel */}
       {guestListEvent && <GuestListPanel evt={guestListEvent} onClose={() => setGuestListEvent(null)} />}
 
-      {/* Query detail panel */}
-      {selectedQuery && <QueryDetailPanel query={selectedQuery} onClose={() => setSelectedQuery(null)} />}
 
       {/* CNIC Review Modal */}
       {reviewCnic && (

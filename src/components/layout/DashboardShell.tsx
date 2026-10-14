@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
-import FloatingChat from '@/components/command/FloatingChat'
 import GuidedTour from '@/components/onboarding/GuidedTour'
 import type { Database } from '@/lib/supabase/database.types'
 
@@ -11,11 +10,9 @@ type Profile = Database['public']['Tables']['profiles']['Row']
 
 export default function DashboardShell({
   profile,
-  unreadSupportCount = 0,
   children,
 }: {
   profile: Profile | null
-  unreadSupportCount?: number
   children: React.ReactNode
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -26,7 +23,6 @@ export default function DashboardShell({
     <div className="flex h-screen overflow-hidden overflow-x-hidden">
       <Sidebar
         profile={profile}
-        unreadSupportCount={unreadSupportCount}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
@@ -39,7 +35,6 @@ export default function DashboardShell({
           {children}
         </main>
       </div>
-      <FloatingChat />
       <GuidedTour />
     </div>
   )

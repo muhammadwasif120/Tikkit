@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { X } from 'lucide-react'
 
-const WA_NUMBER   = '13074434195'
+import { SUPPORT_WHATSAPP_NUMBER as WA_NUMBER } from '@/lib/contact'
 const SESSION_KEY = 'wa-popup-shown'   // auto-pop shown this session
 const DISMISS_KEY = 'wa-popup-closed'  // user explicitly closed — don't auto-pop on nav
 const AUTO_CLOSE_MS = 10_000           // 10 s idle → minimize

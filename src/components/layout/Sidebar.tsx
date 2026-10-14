@@ -24,17 +24,15 @@ const navItems = [
   { href: '/dashboard/scan',      label: 'Scanner',   icon: ScanLine,                     tour: 'nav-scan' },
   { href: '/dashboard/vendors',   label: 'Vendors',   icon: Building2,                    tour: 'nav-vendors' },
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3,                    tour: 'nav-analytics' },
-  { href: '/dashboard/messages',  label: 'Support',   icon: MessageSquare,                tour: 'nav-messages' },
 ]
 
 type Props = {
   profile: Profile | null
-  unreadSupportCount?: number
   open: boolean
   onClose: () => void
 }
 
-export default function Sidebar({ profile, unreadSupportCount = 0, open, onClose }: Props) {
+export default function Sidebar({ profile, open, onClose }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -107,9 +105,6 @@ export default function Sidebar({ profile, unreadSupportCount = 0, open, onClose
           >
             <item.icon className="w-[18px] h-[18px] shrink-0" />
             <span style={{ flex: 1 }}>{item.label}</span>
-            {item.label === 'Support' && unreadSupportCount > 0 && (
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--coral-500)', flexShrink: 0, boxShadow: '0 0 6px rgba(255,107,107,0.6)' }} />
-            )}
           </Link>
         ))}
 

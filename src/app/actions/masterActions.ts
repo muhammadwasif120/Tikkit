@@ -523,79 +523,6 @@ async function computeMasterAnalyticsInJs(
 
 // ─── Support Queries ─────────────────────────────────────────────────────────
 
-export type SupportQuery = {
-  id: string
-  from_name: string
-  from_type: 'organizer' | 'attendee'
-  from_id: string | null
-  subject: string
-  body: string | null
-  category: string | null
-  status: 'open' | 'in_progress' | 'resolved'
-  priority: 'high' | 'medium' | 'low'
-  resolved_at: string | null
-  created_at: string
-}
-
-export async function getSupportQueries(): Promise<SupportQuery[]> {
-  await requireAdmin()
-  const supabase = createAdminClient()
-  const { data, error } = await (supabase as any)
-    .from('support_queries')
-    .select('*')
-    .order('created_at', { ascending: false })
-  if (error) return []
-  return (data ?? []) as SupportQuery[]
-}
-
-export async function updateSupportQueryStatus(
-  id: string,
-  status: 'open' | 'in_progress' | 'resolved'
-): Promise<{ error?: string }> {
-  await requireAdmin()
-  const supabase = createAdminClient()
-  const { error } = await (supabase as any)
-    .from('support_queries')
-    .update({
-      status,
-      resolved_at: status === 'resolved' ? new Date().toISOString() : null,
-    })
-    .eq('id', id)
-  return { error: error?.message }
-}
-
-export async function createSupportQuery(query: {
-  from_name: string
-  from_type: 'organizer' | 'attendee'
-  from_id?: string | null
-  subject: string
-  body?: string
-  category?: string
-  priority?: 'high' | 'medium' | 'low'
-}): Promise<{ error?: string; id?: string }> {
-  // C4: Any authenticated user (organizer or attendee) may submit a support ticket.
-  // Without this guard the admin client would insert records for unauthenticated callers.
-  const supabaseAuth = await createClient()
-  const { data: { user } } = await supabaseAuth.auth.getUser()
-  if (!user) return { error: 'Unauthorized' }
-
-  const supabase = createAdminClient()
-  const { data, error } = await (supabase as any)
-    .from('support_queries')
-    .insert({
-      from_name: query.from_name,
-      from_type: query.from_type,
-      from_id: query.from_id ?? null,
-      subject: query.subject,
-      body: query.body ?? null,
-      category: query.category ?? 'other',
-      priority: query.priority ?? 'medium',
-    })
-    .select('id')
-    .single()
-  return { error: error?.message, id: data?.id }
-}
-
 // ─── Mutations ───────────────────────────────────────────────────────────────
 
 export async function setOrgAdminStatus(
@@ -963,14 +890,13 @@ export async function sendAdminEmailToOrganizer(
 export type MasterBadgeCounts = {
   pendingVerifications: number   // CNIC reviews awaiting action
   pendingPayments: number        // registrations with payment submitted, awaiting review
-  unreadSupport: number          // support messages unread by admin
 }
 
 export async function getMasterBadgeCounts(): Promise<MasterBadgeCounts> {
   await requireAdmin()
   const supabase = createAdminClient()
 
-  const [verif, payments, support] = await Promise.all([
+  const [verif, payments] = await Promise.all([
     (supabase as any)
       .from('profiles')
       .select('id', { count: 'exact', head: true })
@@ -978,18 +904,12 @@ export async function getMasterBadgeCounts(): Promise<MasterBadgeCounts> {
     (supabase as any)
       .from('public_registrations')
       .select('id', { count: 'exact', head: true })
-      .eq('payment_status', 'submitted'),
-    (supabase as any)
-      .from('support_messages')
-      .select('id', { count: 'exact', head: true })
-      .eq('sender', 'user')
-      .eq('read_by_admin', false),
+      .eq('payment_status', 'submitted')
   ])
 
   return {
     pendingVerifications: verif.count ?? 0,
     pendingPayments:      payments.count ?? 0,
-    unreadSupport:        support.count ?? 0,
   }
 }
 

@@ -29,18 +29,16 @@ function TikkitXTabIcon({ active }: { active: boolean }) {
 }
 
 /* ── Tab definitions ─────────────────────────────────────────────── */
-type TabIcon = 'compass' | 'x' | 'messages' | 'user'
+type TabIcon = 'compass' | 'x' | 'user'
 const TABS: { href: string; label: string; icon: TabIcon }[] = [
   { href: '/guest/explore',   label: 'Explore',   icon: 'compass'   },
   { href: '/guest/tikkit',    label: 'My Tikkit', icon: 'x'         },
-  { href: '/guest/messages',  label: 'Messages',  icon: 'messages'  },
   { href: '/guest/profile',   label: 'Profile',   icon: 'user'      },
 ]
 
 function NavIcon({ type, active }: { type: TabIcon; active: boolean }) {
   if (type === 'x')        return <TikkitXTabIcon active={active} />
   if (type === 'compass')  return <Compass       size={20} color={active ? 'var(--brand-blue)' : 'var(--text-muted)'} strokeWidth={active ? 2.2 : 1.8} />
-  if (type === 'messages') return <MessageSquare size={20} color={active ? 'var(--brand-blue)' : 'var(--text-muted)'} strokeWidth={active ? 2.2 : 1.8} />
   return                          <User          size={20} color={active ? 'var(--brand-blue)' : 'var(--text-muted)'} strokeWidth={active ? 2.2 : 1.8} />
 }
 
@@ -48,11 +46,9 @@ function NavIcon({ type, active }: { type: TabIcon; active: boolean }) {
 export default function GuestShell({
   children,
   notifCount = 0,
-  unreadSupportCount = 0,
 }: {
   children:   React.ReactNode
   notifCount?: number
-  unreadSupportCount?: number
 }) {
   const pathname = usePathname()
 
@@ -62,7 +58,6 @@ export default function GuestShell({
   // Event detail pages need full-bleed layout (no padding wrapper, no paddingBottom on mobile main)
   const isEventDetail = /^\/guest\/explore\/.+/.test(pathname)
   // Messages needs overflow:hidden for the 2-pane chat layout to work correctly
-  const isMessages = /^\/guest\/messages/.test(pathname)
 
   return (
     <>
@@ -119,9 +114,6 @@ export default function GuestShell({
                   >
                     <div style={{ position: 'relative' }}>
                       <NavIcon type={icon} active={active} />
-                      {icon === 'messages' && unreadSupportCount > 0 && (
-                        <span style={{ position: 'absolute', top: -2, right: -4, width: 8, height: 8, borderRadius: '50%', background: 'var(--coral-500)', border: '2px solid var(--guest-surface)', boxShadow: '0 0 6px rgba(239,68,68,0.5)' }} />
-                      )}
                     </div>
                   </div>
 
@@ -180,8 +172,8 @@ export default function GuestShell({
         </aside>
 
         {/* ── Main content ── */}
-        <main style={{ flex: 1, overflowY: isMessages ? 'hidden' : 'auto', overflow: isMessages ? 'hidden' : undefined, minWidth: 0, display: isMessages ? 'flex' : undefined, flexDirection: isMessages ? 'column' : undefined }}>
-          {isEventDetail || isMessages ? children : (
+        <main style={{ flex: 1, overflowY: 'auto', minWidth: 0 }}>
+          {isEventDetail ? children : (
             <div style={{ width: '100%', maxWidth: 1100, margin: '0 auto', padding: '32px 40px 48px' }}>
               {children}
             </div>

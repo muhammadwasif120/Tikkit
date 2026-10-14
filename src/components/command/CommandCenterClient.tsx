@@ -3,16 +3,14 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ActionCard from './ActionCard'
-import ChatPanel from './ChatPanel'
 import { Users, MessageSquare, ChevronLeft, Calendar, Clock } from 'lucide-react'
-import type { CommandAttendee, ChatMessage } from '@/types/verification'
+import type { CommandAttendee } from '@/types/verification'
 import { updateRegistrationStatus } from '@/app/actions/commandActions'
 import { isLive as eventIsLive } from '@/lib/eventStatus'
 
 interface Props {
   event: { id: string; title: string; date_start: string; date_end: string | null; status: string }
   attendees: CommandAttendee[]
-  recentMessages: ChatMessage[]
   organizerName: string
 }
 
@@ -121,11 +119,10 @@ const CSS = `
   }
 `
 
-export default function CommandCenterClient({ event, attendees: initial, recentMessages, organizerName }: Props) {
+export default function CommandCenterClient({ event, attendees: initial, organizerName }: Props) {
   const router = useRouter()
   const [attendees, setAttendees] = useState<CommandAttendee[]>(initial)
   const [actioning, setActioning] = useState<string | null>(null)
-  const [mobileTab, setMobileTab] = useState<'attendees' | 'chat'>('attendees')
 
   const pending  = attendees.filter(a => a.status === 'pending').length
   const approved = attendees.filter(a => ['approved','confirmed','checked_in'].includes(a.status)).length
@@ -197,26 +194,9 @@ export default function CommandCenterClient({ event, attendees: initial, recentM
           </div>
         </div>
 
-        {/* Mobile tabs */}
-        <div className="cc-tabs">
-          <button
-            className={`cc-tab${mobileTab === 'attendees' ? ' active' : ''}`}
-            onClick={() => setMobileTab('attendees')}
-          >
-            <Users size={13} /> Attendees
-            {pending > 0 && <span className="cc-tab-badge">{pending}</span>}
-          </button>
-          <button
-            className={`cc-tab${mobileTab === 'chat' ? ' active' : ''}`}
-            onClick={() => setMobileTab('chat')}
-          >
-            <MessageSquare size={13} /> Chat
-          </button>
-        </div>
-
         {/* Body */}
         <div className="cc-body">
-          <div className={`cc-attendees${mobileTab === 'chat' ? ' mobile-hidden' : ''}`}>
+          <div className="cc-attendees">
             {attendees.length === 0 ? (
               <div className="cc-empty">
                 <div className="cc-empty-icon"><Users size={24} color="#374151" /></div>
@@ -241,13 +221,6 @@ export default function CommandCenterClient({ event, attendees: initial, recentM
             )}
           </div>
 
-          <div className={`cc-chat-col${mobileTab === 'chat' ? ' mobile-active' : ''}`}>
-            <ChatPanel
-              eventId={event.id}
-              initialMessages={recentMessages}
-              organizerName={organizerName}
-            />
-          </div>
         </div>
       </div>
     </>

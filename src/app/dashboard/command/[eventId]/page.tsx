@@ -22,7 +22,7 @@ export default async function CommandEventPage({ params }: Props) {
 
   const profile = profileRaw as { full_name: string | null; company_name: string | null } | null
 
-  const { event, attendees, recentMessages, error } = await getCommandCenterData(eventId)
+  const { event, attendees, error } = await getCommandCenterData(eventId)
 
   if (error === 'Event not found or access denied' || !event) notFound()
 
@@ -33,7 +33,6 @@ export default async function CommandEventPage({ params }: Props) {
       <CommandCenterClient
         event={event}
         attendees={attendees}
-        recentMessages={recentMessages}
         organizerName={organizerName}
       />
     </div>
