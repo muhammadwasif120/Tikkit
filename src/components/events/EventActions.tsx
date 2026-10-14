@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { MoreHorizontal, Edit, Trash2, CheckCircle, XCircle, FlagOff, Share2, Link as LinkIcon, MessageCircle, Mail, UserPlus, ShieldCheck } from 'lucide-react'
 import { notifyEventGoingLive, notifyEventEnded } from '@/app/actions/eventNotificationActions'
 import { dismissEventLiveNotification } from '@/app/actions/approvalDismissAction'
-import { initiateVerification } from '@/app/actions/verificationActions'
 import type { Database } from '@/lib/supabase/database.types'
 
 type Event = Database['public']['Tables']['events']['Row']
@@ -54,19 +53,9 @@ export default function EventActions({ event, organizerVerified }: { event: Even
     setLoading(false)
   }
 
-  // Unverified organizers publish-flow: kick off Didit ID verification.
-  const handleVerify = async () => {
-    setLoading(true)
-    setErr(null)
-    try {
-      const res = await initiateVerification()
-      if (res?.diditSessionUrl) { window.location.href = res.diditSessionUrl; return }
-      setErr(res?.error || 'Could not start verification. Please try again from Settings.')
-    } catch {
-      setErr('Could not start verification. Please try again from Settings.')
-    } finally {
-      setLoading(false)
-    }
+  // Unverified organizers publish-flow: send them to the manual CNIC review page.
+  const handleVerify = () => {
+    router.push('/dashboard/verify')
   }
 
   const deleteEvent = async () => {
