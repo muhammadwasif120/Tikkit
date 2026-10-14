@@ -1,22 +1,16 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import DashboardShell from '@/components/layout/DashboardShell'
+import { OrganizerShell, APP_ROUTES } from '@/components/shell/OrganizerShell'
+import { planLabel, requireOrganizer } from '@/lib/data/viewer'
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/auth/login')
-
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { profile, company, logoUrl, entitlements, pendingCount } = await requireOrganizer()
   return (
-    <DashboardShell profile={profile}>
+    <OrganizerShell
+      routes={APP_ROUTES}
+      user={{ name: profile.full_name ?? 'Organizer', company: company ?? undefined, avatarUrl: logoUrl ?? profile.avatar_url }}
+      plan={planLabel(entitlements)}
+      pendingCount={pendingCount}
+    >
       {children}
-    </DashboardShell>
+    </OrganizerShell>
   )
 }

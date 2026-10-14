@@ -71,36 +71,16 @@ export async function updateSession(request: NextRequest) {
   const isCompletionExempt = completionExempt.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (user && !isCompletionExempt) {
-    const { data: roleProfile } = await supabase
+    // profiles.is_complete is maintained by the database: attendees need phone, date of
+    // birth, city and gender; organizers need company, phone and city.
+    const { data: gate } = await supabase
       .from('profiles')
-      .select('role, phone_number, city, cnic_number, passport_number, company_name')
+      .select('role, is_complete')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    const gateRole = roleProfile?.role
-    if (gateRole === 'guest' || gateRole === 'organizer') {
-      let complete = !!(
-        roleProfile?.phone_number &&
-        roleProfile?.city &&
-        (roleProfile?.cnic_number || roleProfile?.passport_number)
-      )
-
-      if (complete && gateRole === 'organizer') {
-        complete = !!roleProfile?.company_name
-      }
-
-      if (complete && gateRole === 'guest') {
-        const { data: gp } = await supabase
-          .from('guest_profiles')
-          .select('date_of_birth, gender')
-          .eq('id', user.id)
-          .maybeSingle()
-        complete = !!((gp as any)?.date_of_birth && (gp as any)?.gender)
-      }
-
-      if (!complete) {
-        return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
-      }
+    if ((gate?.role === 'attendee' || gate?.role === 'organizer') && gate.is_complete === false) {
+      return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
     }
   }
 
@@ -144,10 +124,9 @@ export async function updateSession(request: NextRequest) {
       if (pathname === '/auth/login') {
         const { data: profile } = await supabase
           .from('profiles').select('role').eq('id', user.id).single()
-        const metaRole = user.user_metadata?.role as string | undefined
-        const role = profile?.role ?? metaRole ?? 'guest'
+        const role = profile?.role ?? 'attendee'
 
-        const dest = role === 'guest'  ? '/explore'
+        const dest = role === 'attendee' ? '/explore'
                    : role === 'admin'  ? '/master'
                    : '/dashboard'
         return NextResponse.redirect(new URL(dest, request.url))
@@ -180,15 +159,13 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  const metaRole = user.user_metadata?.role as string | undefined
-
   // Authoritative role comes from the trigger-protected profiles.role column.
   // Never gate access on user_metadata.role — it is writable by the user via
   // supabase.auth.updateUser, so using it for authorization would let anyone
-  // self-elevate to admin. metaRole is only a cosmetic fallback for display.
+  // self-elevate to admin.
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
-  const role = profile?.role ?? metaRole ?? 'guest'
+  const role = profile?.role ?? 'attendee'
 
   if (pathname.startsWith('/master')) {
     if (role !== 'admin') {
@@ -197,11 +174,11 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
-  if (role === 'guest' && pathname.startsWith('/dashboard')) {
+  if (role === 'attendee' && pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/explore', request.url))
   }
 
-  if (role !== 'guest' && (pathname.startsWith('/guest') || pathname.startsWith('/explore'))) {
+  if (role !== 'attendee' && (pathname.startsWith('/guest') || pathname.startsWith('/explore'))) {
     const home = role === 'admin' ? '/master' : '/dashboard'
     return NextResponse.redirect(new URL(home, request.url))
   }
