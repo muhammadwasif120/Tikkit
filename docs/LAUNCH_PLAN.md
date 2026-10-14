@@ -336,6 +336,15 @@ Sizes are relative effort (S under 2 days, M 3 to 5, L 1 to 2 weeks), not calend
 - Build and type check green.
 - Exit: app builds, nav shows only the target IA, no dead links.
 
+**Phase 1 status (done on branch `launch`):** Artist Mgmt, Corporate and Pulse pages, Didit, module and platform waitlists, subdomain routing, behaviour logging, in-app messaging and support tickets, and admin/manager staff links are removed. Vendor X and the venue portal are gated to the home page. Support is WhatsApp. `next build` passes. No database changes were made.
+Deviations and carry-overs for later phases:
+- Corporate and Pulse redirect to `/` with a temporary (307) redirect until final destinations are set.
+- The theme code was already light/dark. The migration `20260920_collapse_ui_theme.sql` must be applied to the database in Phase 2, otherwise saving a theme fails the old check constraint.
+- Mobile API routes for chat and support messages were kept so the frozen app keeps working against the unchanged database. Remove them together with the table drops in Phase 2.
+- Event Day merge, unified guest list, `/events/<slug>` canonical and sidebar IA are Phase 4, not Phase 1.
+- Legacy admin and manager staff links now show a "link no longer supported" page. Active gate staff links keep working.
+- Homepage, blog and terms copy still mention the removed modules. Rewritten in Phase 6.
+
 ### Phase 2. Data model and types (M to L)
 - Trace `guests` vs `public_registrations`, then decide: one `registrations` table with a status machine (pending payment, pending approval, approved, checked in, rejected, cancelled, waitlist), or keep the pipeline and formalize it.
 - Migrations: drop cut tables, referral tables, commissions, `event_announcements`, `reveal_notified_at`, subscription tables, pass products and purchases, venue ownership move, `profile_complete`, theme collapse, gate staff scoping.
