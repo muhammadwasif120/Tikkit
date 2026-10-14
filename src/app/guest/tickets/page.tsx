@@ -32,7 +32,7 @@ export default async function TicketsPage() {
     rpcLoose(supabase as never, 'my_retreats'),
   ])
   type A = Record<string, unknown>
-  const rows: ModRow[] = [
+  const moduleRows: ModRow[] = [
     ...((cb.data ?? []) as A[]).map(r => ({ id: r.id as string, kind: 'class_booking' as const, title: ((r.class_series as A | null)?.title as string) ?? 'Class', when: ((r.class_sessions as A | null)?.starts_at as string) ?? null, status: r.status as string, token: r.qr_token as string, due: r.price_due_pkr as number, organizerId: r.organizer_id as string })),
     ...((sb.data ?? []) as A[]).map(r => ({ id: r.id as string, kind: 'space_booking' as const, title: ((r.spaces as A | null)?.name as string) ?? 'Space', when: r.starts_at as string, status: r.status as string, token: r.qr_token as string, due: r.price_due_pkr as number, organizerId: r.organizer_id as string })),
     ...((pp.data ?? []) as A[]).map(r => ({ id: r.id as string, kind: 'pass_purchase' as const, title: ((r.pass_products as A | null)?.name as string) ?? 'Pass', when: null, status: r.status as string, token: r.qr_token as string, due: r.price_due_pkr as number, organizerId: r.organizer_id as string, note: r.sessions_total === null ? 'Unlimited sessions' : `${(r.sessions_total as number) - (r.sessions_used as number)} sessions left` })),
@@ -42,7 +42,7 @@ export default async function TicketsPage() {
     <div className="k-fade-up">
       <PageHeader title="My tickets" description="Events, passes and reservations in one place." />
       <TicketsClient upcoming={upcoming} past={past} />
-      <ModuleBookings rows={rows} retreats={((rt.data ?? []) as { retreat_id: string; title: string; destination: string | null; starts_on: string; ends_on: string; qr_token: string }[]).map(r => ({ id: r.retreat_id, title: r.title, destination: r.destination, starts_on: r.starts_on, ends_on: r.ends_on, qr_token: r.qr_token })) satisfies RetreatLink[]} />
+      <ModuleBookings rows={moduleRows} retreats={((rt.data ?? []) as { retreat_id: string; title: string; destination: string | null; starts_on: string; ends_on: string; qr_token: string }[]).map(r => ({ id: r.retreat_id, title: r.title, destination: r.destination, starts_on: r.starts_on, ends_on: r.ends_on, qr_token: r.qr_token })) satisfies RetreatLink[]} />
     </div>
   )
 }
