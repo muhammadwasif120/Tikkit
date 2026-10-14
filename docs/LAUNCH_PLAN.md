@@ -345,12 +345,21 @@ Deviations and carry-overs for later phases:
 - Legacy admin and manager staff links now show a "link no longer supported" page. Active gate staff links keep working.
 - Homepage, blog and terms copy still mention the removed modules. Rewritten in Phase 6.
 
-### Phase 2. Data model and types (M to L)
-- Trace `guests` vs `public_registrations`, then decide: one `registrations` table with a status machine (pending payment, pending approval, approved, checked in, rejected, cancelled, waitlist), or keep the pipeline and formalize it.
-- Migrations: drop cut tables, referral tables, commissions, `event_announcements`, `reveal_notified_at`, subscription tables, pass products and purchases, venue ownership move, `profile_complete`, theme collapse, gate staff scoping.
-- RLS review for every new and touched table, including the `venue_secret` exposure.
-- Regenerate `database.types.ts` after every migration (the build gates on types).
-- Exit: staging DB at target schema, types green, RLS tests pass.
+### Phase 2. New database, schema from scratch, data import (M to L)
+Decision (2026-10-14): a **new Supabase project on a Pro plan** replaces the current one. The old project stays untouched and read-only until cutover, so nothing is dropped and no migration risk touches live data. The old data was exported (`~/tikkit-backups/2026-10-14-pre-phase2`).
+
+Work:
+1. **Trace** how `guests` and `public_registrations` relate (read-only), then decide the registration model for the new schema (one `registrations` table with a status machine, or a formalized pipeline).
+2. **Write a clean baseline schema** (new migration files, applied only to the new project) from `database.types.ts` and the existing migrations, keeping the core: profiles, events, ticket types, registrations/guests, passes, payment accounts and submissions, scan logs, notifications, categories, organizer vendor contacts and invoices, guest profiles and score, team (gate staff) invites, favourites. Dead weight is not recreated: artists, management, Didit verifications, chats, support tables, behaviour log, waitlists, corporate leads, vendor marketplace tables (deals, cross hires, bills, inventory, reviews) and venue marketplace tables are deferred until their modules ship.
+3. **New tables** for referrals, commissions, announcements, subscriptions and plan limits, invoices, and (v1.1/v1.2) pass products and spaces.
+4. **Fresh RLS** written per table with a test script (anon, attendee, organizer, other organizer, gate staff, admin). The old policies are reviewed first for lessons (133 policy statements in the repo, plus manual ones in `supabase/manual/`), including the `venue_secret` column exposure.
+5. **Storage buckets and policies** recreated: payment screenshots (private), CNIC documents (private), uploads (public images).
+6. **Import script** that maps old IDs to new, brings over organizers, attendees, their events, ticket types, registrations, payment accounts, vendor contacts and invoices, and guest scores. Leaves behind chats, behaviour data, support, artist and test rows.
+7. **Accounts:** password hashes were not exported (the admin API does not return them), so users cannot sign in on the new project with their old password. Plan: create each account in the new project with the same email (and the same user id if the auth API allows it, otherwise map ids), then send a "set your password" email, or let them use Google sign-in. 27 organizers and 13 attendees exist, with contact CSVs in the backup folder for personal outreach by email or WhatsApp.
+8. Keep `CNIC_ENCRYPTION_KEY` identical in the new project's environment, or stored CNIC numbers cannot be decrypted.
+9. Configure auth (email templates, redirect URLs, Google provider), Resend, Sentry and Vercel env vars for the new project. Cutover is a Vercel env switch.
+10. Regenerate `database.types.ts` from the new project.
+- Exit: new project has the full schema, RLS tests pass, import dry run reproduces expected row counts, a test organizer can complete the core flow against it.
 
 ### Phase 3. Design foundation (M)
 - Tokens, components, shells, light/dark. Prototype the 8 anchor screens and get approval.
@@ -413,7 +422,7 @@ Answered: launch cities are Karachi, Lahore and Islamabad. Trial is 14 days. Upg
 
 ## 13. Risks
 
-1. **Data loss on drops.** There is no staging project for now, so migrations run on the current database. You told us the existing data is small and not important, but we still export every table before dropping it, ship each drop in its own migration, and never edit an applied migration. A staging project should exist before real organizers are onboarded.
+1. **Data loss.** The old project is never modified. The export covers all 51 tables, 42 auth users and a listing of storage files. Storage files themselves (payment screenshots, CNIC documents) still need copying at cutover if you want them kept.
 2. **Registration model merge** touches payments, QR, scanning and analytics (29 plus 43 files reference the two tables). Mitigation: trace first, migrate behind a compatibility view, end-to-end tests before switching.
 3. **Mobile drift.** The frozen mobile app calls APIs we are removing. It stays in the repo and builds, but is not shipped until a dedicated pass.
 4. **Secret venue leak.** `venue_secret` on a public-readable table could expose addresses early. Audit in Phase 2, before announcing the feature.
