@@ -5,7 +5,6 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 const SUBDOMAIN_MAP: Record<string, { landing: string; portal: string; prefix: string }> = {
   'vendor': { landing: '/vendor/home',      portal: '/vendor/os',      prefix: '/vendor'      },
   'venue':  { landing: '/venue/home',       portal: '/venue/os',       prefix: '/venue'       },
-  'artist': { landing: '/artist-mgmt/home', portal: '/artist-mgmt/os', prefix: '/artist-mgmt' },
 }
 
 function getSubdomain(host: string): string | null {
@@ -18,14 +17,13 @@ function getSubdomain(host: string): string | null {
 // Share the auth session across all *.tikkitx.com subdomains in production
 const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.tikkitx.com' : undefined
 
-// Vendor X, Venues & Experiences, and Artist Management are fully built but not
+// Vendor X and Venues & Experiences are fully built but not
 // open yet — every route within them bounces to that module's intro/waitlist
 // page instead of the live product. Nothing else about these modules is
 // touched, so re-launching one is deleting its entry here.
 const GATED_MODULES: { prefixes: string[]; landing: string }[] = [
   { prefixes: ['/vendor'], landing: '/vendor/home' },
   { prefixes: ['/venue', '/venues'], landing: '/venue/home' },
-  { prefixes: ['/artist-mgmt', '/artists'], landing: '/artist-mgmt/home' },
 ]
 
 export async function updateSession(request: NextRequest) {
@@ -158,10 +156,8 @@ export async function updateSession(request: NextRequest) {
     '/venues',          // Public venue browse
     '/venue',           // Public venue profile pages
     '/v',               // Public vendor profiles
-    '/artists',         // Public artist directory + profiles
     '/vendor/home',     // Vendor X landing page
     '/venue/home',      // Venues & Experiences landing page
-    '/artist-mgmt/home', // Artist Management landing page
     '/lp',               // Preserved landing pages (/lp/underground etc.)
     '/sentry-example-page', // Sentry verification page — not linked from nav
     '/api/sentry-example-api', // matches /api anyway, listed for clarity

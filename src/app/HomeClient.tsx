@@ -45,7 +45,7 @@ const CITIES = [
 ]
 
 const TICKER_ITEMS = [
-  'EVENTS', 'VENDOR X', 'VENUES & EXPERIENCES', 'ARTIST MANAGEMENT',
+  'EVENTS', 'VENDOR X', 'VENUES & EXPERIENCES',
   'GUEST APP', 'X ANALYTICS', 'QR CHECK-IN', 'DEAL PIPELINE',
   'SPOT BOOKING', 'ROSTER MANAGEMENT', 'LIVE TRACKING', 'ZERO COMMISSION',
 ]
@@ -74,14 +74,6 @@ const MODULES = [
     stat: { v: '48h', l: 'to go live' },
     features: ['Live availability calendar', 'Spot-map seat selection', 'Programme management'],
     href: '/venue/home', cta: 'List your venue',
-  },
-  {
-    id: 'artists', icon: '🎤', name: 'Artist Management',
-    tagline: 'Your roster. Bookings that find you.',
-    color: '#00E5FF', glow: 'rgba(0,229,255,0.45)', border: 'rgba(0,229,255,0.2)', bg: 'rgba(0,229,255,0.05)',
-    stat: { v: '✓', l: 'verified only' },
-    features: ['Verified artist profiles', 'Structured booking enquiries', 'Management company portal'],
-    href: '/artist-mgmt/home', cta: 'Get access',
   },
   {
     id: 'guest', icon: '📱', name: 'Guest App',

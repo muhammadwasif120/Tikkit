@@ -16,8 +16,6 @@ function getContext(pathname: string) {
     return { heading: 'Questions about Vendor X?',          sub: 'Deals, invoices, cross-hires — we reply in 30 mins.', cta: 'Chat on WhatsApp' }
   if (pathname.startsWith('/venue/os'))
     return { heading: 'Questions about your venue?',        sub: 'Listings, bookings, spot maps — we reply in 30 mins.', cta: 'Chat on WhatsApp' }
-  if (pathname.startsWith('/artist-mgmt/os'))
-    return { heading: 'Questions about Artist Management?', sub: 'Rosters, enquiries, bookings — we reply in 30 mins.', cta: 'Chat on WhatsApp' }
   if (pathname.startsWith('/guest') || pathname.startsWith('/explore'))
     return { heading: 'Having trouble?',                    sub: "Can't find your ticket or pass? We reply in 30 mins.", cta: 'Get help now' }
   if (pathname.startsWith('/auth'))
