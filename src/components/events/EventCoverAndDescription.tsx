@@ -166,7 +166,7 @@ export default function EventCoverAndDescription({
             />
             <div className="absolute bottom-3 right-3 flex gap-2">
               {coverUploading ? (
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-black/50 border border-white/20 backdrop-blur-sm">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--text-primary)] bg-black/50 border border-[var(--guest-border-hover)] backdrop-blur-sm">
                   <Loader2 size={12} className="animate-spin" />
                   Uploading…
                 </div>
@@ -175,7 +175,7 @@ export default function EventCoverAndDescription({
                   <button
                     type="button"
                     onClick={() => coverInputRef.current?.click()}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white bg-black/50 border border-white/20 backdrop-blur-sm hover:bg-black/70 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--text-primary)] bg-black/50 border border-[var(--guest-border-hover)] backdrop-blur-sm hover:bg-black/70 transition-all"
                   >
                     <ImagePlus size={13} />
                     {coverUrl ? 'Change' : 'Add Cover'}
@@ -184,7 +184,7 @@ export default function EventCoverAndDescription({
                     <button
                       type="button"
                       onClick={removeCover}
-                      className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/50 border border-white/20 text-gray-300 hover:text-red-400 transition-colors backdrop-blur-sm"
+                      className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/50 border border-[var(--guest-border-hover)] text-[var(--mist-300)] hover:text-red-400 transition-colors backdrop-blur-sm"
                     >
                       <X size={13} />
                     </button>
@@ -205,13 +205,13 @@ export default function EventCoverAndDescription({
       {/* ── Description zone ── */}
       <div className="px-5 py-4 space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-white">Description</h3>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]">Description</h3>
           {/* Edit button hidden in readOnly mode */}
           {!readOnly && !editingDesc && (
             <button
               type="button"
               onClick={() => { setDraftDesc(description); setEditingDesc(true) }}
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors"
+              className="flex items-center gap-1.5 text-xs text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors"
             >
               <Pencil size={12} />
               {description ? 'Edit' : 'Add description'}
@@ -235,7 +235,7 @@ export default function EventCoverAndDescription({
               <button
                 type="button"
                 onClick={cancelDesc}
-                className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors px-3 py-1.5"
+                className="flex items-center gap-1.5 text-xs text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors px-3 py-1.5"
               >
                 <X size={12} /> Cancel
               </button>
@@ -243,7 +243,7 @@ export default function EventCoverAndDescription({
                 type="button"
                 onClick={saveDescription}
                 disabled={descSaving}
-                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-[#1E5EFF] hover:bg-[#1448CC] disabled:opacity-50 transition-colors rounded-lg px-3 py-1.5"
+                className="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-primary)] bg-[var(--brand-blue)] hover:bg-[#1448CC] disabled:opacity-50 transition-colors rounded-lg px-3 py-1.5"
               >
                 {descSaving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
                 {descSaving ? 'Saving…' : 'Save'}
@@ -251,19 +251,19 @@ export default function EventCoverAndDescription({
             </div>
           </div>
         ) : description ? (
-          <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-[var(--mist-300)] leading-relaxed whitespace-pre-wrap">
             {description}
           </p>
         ) : !readOnly ? (
           <button
             type="button"
             onClick={() => { setDraftDesc(''); setEditingDesc(true) }}
-            className="w-full py-4 rounded-xl border border-dashed border-white/10 hover:border-white/20 transition-all text-sm text-gray-500 hover:text-gray-400"
+            className="w-full py-4 rounded-xl border border-dashed border-[var(--guest-border)] hover:border-[var(--guest-border-hover)] transition-all text-sm text-[var(--mist-400)] hover:text-[var(--mist-300)]"
           >
             + Add a description for guests
           </button>
         ) : (
-          <p className="text-sm text-gray-500 italic">No description added</p>
+          <p className="text-sm text-[var(--mist-400)] italic">No description added</p>
         )}
       </div>
     </div>

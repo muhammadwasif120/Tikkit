@@ -25,7 +25,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/corporate`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/pulse`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${baseUrl}/venue/home`,  lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${baseUrl}/venues`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.75 },
     { url: `${baseUrl}/blog`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${baseUrl}/coming-soon`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${baseUrl}/privacy`,     lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
@@ -83,7 +82,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let eventRoutes: MetadataRoute.Sitemap = []
   let pastEventRoutes: MetadataRoute.Sitemap = []
   let organizerRoutes: MetadataRoute.Sitemap = []
-  let venueRoutes: MetadataRoute.Sitemap = []
 
   try {
     const admin = createAdminClient()
@@ -142,21 +140,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly' as const,
       priority: 0.7,
     }))
-
-    // ─── Public venue pages ──────────────────────────────────────────────────
-    const { data: venues } = await (admin as any)
-      .from('venues')
-      .select('slug, updated_at')
-      .eq('active', true)
-      .not('slug', 'is', null)
-      .limit(500)
-
-    venueRoutes = (venues ?? []).map((v: any) => ({
-      url: `${baseUrl}/venue/${v.slug}`,
-      lastModified: v.updated_at ? new Date(v.updated_at) : now,
-      changeFrequency: 'weekly' as const,
-      priority: 0.75,
-    }))
   } catch {
     // If DB is unreachable at build time, fall back to static-only sitemap
   }
@@ -170,6 +153,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...eventRoutes,
     ...pastEventRoutes,
     ...organizerRoutes,
-    ...venueRoutes,
   ]
 }

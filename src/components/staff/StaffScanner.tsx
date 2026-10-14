@@ -58,7 +58,7 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
       }`}>
         <div className={`h-1 w-full ${result.success ? 'bg-green-500' : 'bg-red-500'}`} />
         <div className="p-6">
-          <button onClick={onClose} className="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+          <button onClick={onClose} className="absolute top-4 right-4 text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
             <X className="w-4 h-4" />
           </button>
           <div className="flex items-center gap-3 mb-5">
@@ -74,8 +74,8 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
                 {result.message}
               </p>
               <div className="flex items-center gap-1 mt-0.5">
-                <LogIn className="w-3 h-3 text-gray-500" />
-                <span className="text-xs text-gray-500">Entry</span>
+                <LogIn className="w-3 h-3 text-[var(--mist-400)]" />
+                <span className="text-xs text-[var(--mist-400)]">Entry</span>
               </div>
             </div>
           </div>
@@ -85,8 +85,8 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
               <div className="space-y-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-xs text-gray-500 mb-0.5 uppercase tracking-wider">Guest</p>
-                    <p className="text-xl font-bold text-white leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                    <p className="text-xs text-[var(--mist-400)] mb-0.5 uppercase tracking-wider">Guest</p>
+                    <p className="text-xl font-bold text-[var(--text-primary)] leading-tight" style={{ fontFamily: 'var(--font-display)' }}>
                       {result.guestName}
                     </p>
                   </div>
@@ -99,21 +99,21 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   {result.email && (
-                    <div className="col-span-2 bg-white/5 rounded-lg px-3 py-2">
-                      <p className="text-xs text-gray-500 mb-0.5">Email</p>
-                      <p className="text-sm text-gray-200 truncate">{result.email}</p>
+                    <div className="col-span-2 bg-[var(--overlay-2)] rounded-lg px-3 py-2">
+                      <p className="text-xs text-[var(--mist-400)] mb-0.5">Email</p>
+                      <p className="text-sm text-[var(--mist-300)] truncate">{result.email}</p>
                     </div>
                   )}
                   {result.ticketType && (
-                    <div className="bg-white/5 rounded-lg px-3 py-2">
-                      <p className="text-xs text-gray-500 mb-0.5">Ticket</p>
-                      <p className="text-sm text-gray-200 capitalize">{result.ticketType.replace(/_/g, ' ')}</p>
+                    <div className="bg-[var(--overlay-2)] rounded-lg px-3 py-2">
+                      <p className="text-xs text-[var(--mist-400)] mb-0.5">Ticket</p>
+                      <p className="text-sm text-[var(--mist-300)] capitalize">{result.ticketType.replace(/_/g, ' ')}</p>
                     </div>
                   )}
                   {result.checkedInAt && (
-                    <div className="bg-white/5 rounded-lg px-3 py-2">
-                      <p className="text-xs text-gray-500 mb-0.5">Checked In</p>
-                      <p className="text-sm text-gray-200">
+                    <div className="bg-[var(--overlay-2)] rounded-lg px-3 py-2">
+                      <p className="text-xs text-[var(--mist-400)] mb-0.5">Checked In</p>
+                      <p className="text-sm text-[var(--mist-300)]">
                         {new Date(result.checkedInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -122,7 +122,7 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
               </div>
             </>
           )}
-          <div className="mt-5 h-0.5 bg-white/10 rounded-full overflow-hidden">
+          <div className="mt-5 h-0.5 bg-[var(--overlay-3)] rounded-full overflow-hidden">
             <div
               className={`h-full rounded-full ${result.success ? 'bg-green-500' : 'bg-red-500'}`}
               style={{ animation: `shrink ${OVERLAY_DURATION}ms linear forwards` }}
@@ -274,21 +274,53 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
     }
 
     // ── ONLINE PATH ───────────────────────────────────────────────────
-    let filterField = 'qr_code'
-    let filterValue = qrCode
+    // Anonymous token holders have no Supabase session, so guest lookup/
+    // check-in can't go through RLS directly — it's validated server-side
+    // against the invite token instead, via the same endpoint the mobile
+    // app's team-access scanner uses.
     if (isQRToken(qrCode)) {
       try {
-        const parts = qrCode.split('.')
-        const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/'))) as QRPayload
-        filterField = 'id'
-        filterValue = payload.gid
-      } catch { /* fall through to qr_code lookup */ }
+        const res = await fetch('/api/staff/scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ inviteToken: invite.token, qrToken: qrCode, eventId: currentEventId, scanType: 'entry' }),
+        })
+        const data = await res.json()
+
+        if (!data.valid) {
+          setResult({ success: false, message: data.error ?? 'Invalid QR code.' })
+          setTimeout(resetForNextScan, OVERLAY_DURATION)
+          return
+        }
+        if (data.already_checked_in) {
+          setResult({
+            success: false, message: 'Already checked in.',
+            guestName: data.guest?.name, isVip: data.guest?.is_vip,
+            email: data.guest?.email, checkedInAt: data.checked_in_at,
+          })
+          setTimeout(resetForNextScan, OVERLAY_DURATION)
+          return
+        }
+
+        setScanCount(c => c + 1)
+        setResult({
+          success: true, message: 'Entry granted ✓',
+          guestName: data.guest?.name, isVip: data.guest?.is_vip,
+          email: data.guest?.email, checkedInAt: new Date().toISOString(),
+        })
+        setTimeout(resetForNextScan, OVERLAY_DURATION)
+      } catch {
+        setResult({ success: false, message: 'Network error — check your connection.' })
+        setTimeout(resetForNextScan, OVERLAY_DURATION)
+      }
+      return
     }
 
+    // Legacy plain QR codes (pre-dates signed tokens) — direct lookup.
     const { data: guest } = await (supabase as any)
       .from('guests').select('*')
       .eq('event_id', currentEventId)
-      .eq(filterField, filterValue)
+      .eq('qr_code', qrCode)
       .single()
 
     if (!guest) {
@@ -301,24 +333,6 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
       setResult({ success: false, message: 'Ticket cancelled.', guestName: guest.full_name, isVip: guest.is_vip })
       setTimeout(resetForNextScan, OVERLAY_DURATION)
       return
-    }
-
-    // Multi-day ticket: check today is a valid day
-    const ticketDays: string[] | null = (guest as any).ticket_days ?? null
-    if (ticketDays && ticketDays.length > 0) {
-      const todayStr = new Date().toISOString().slice(0, 10)
-      if (!ticketDays.includes(todayStr)) {
-        const fmtDay = (d: string) =>
-          new Date(d + 'T12:00:00').toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' })
-        setResult({
-          success: false,
-          message: `Not valid today — ticket is for: ${ticketDays.map(fmtDay).join(', ')}`,
-          guestName: guest.full_name,
-          isVip: guest.is_vip,
-        })
-        setTimeout(resetForNextScan, OVERLAY_DURATION)
-        return
-      }
     }
 
     if (guest.status === 'checked_in') {
@@ -348,7 +362,7 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
       checkedInAt: now,
     })
     setTimeout(resetForNextScan, OVERLAY_DURATION)
-  }, [supabase, resetForNextScan])
+  }, [supabase, resetForNextScan, invite.token])
 
   const startScanner = () => {
     if (!eventId) return
@@ -397,7 +411,7 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
   const statusColor: Record<string, string> = {
     registered:  'text-blue-400 bg-blue-500/10 border-blue-500/20',
     checked_in:  'text-green-400 bg-green-500/10 border-green-500/20',
-    checked_out: 'text-gray-400 bg-white/5 border-white/10',
+    checked_out: 'text-[var(--mist-400)] bg-[var(--overlay-2)] border-[var(--guest-border)]',
     cancelled:   'text-red-400 bg-red-500/10 border-red-500/20',
   }
 
@@ -411,10 +425,10 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <h2 className="text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
                 {invite.label}
               </h2>
-              <p className="text-gray-400 text-sm mt-1 capitalize">{invite.role} access</p>
+              <p className="text-[var(--mist-400)] text-sm mt-1 capitalize">{invite.role} access</p>
             </div>
             {scanCount > 0 && (
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20">
@@ -450,12 +464,12 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
                 onChange={e => { setEventId(e.target.value); stopScanner() }} disabled={scanning}>
                 {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
             </div>
           </div>
 
           {/* Tabs */}
-          <div className="flex items-center gap-1 bg-brand-charcoal-light rounded-lg p-1 border border-white/5">
+          <div className="flex items-center gap-1 bg-brand-charcoal-light rounded-lg p-1 border border-[var(--border-faint)]">
             {[
               { key: 'scanner' as const, label: 'Scanner', icon: ScanLine },
               { key: 'guestlist' as const, label: 'Guest List', icon: Users },
@@ -463,7 +477,7 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
               <button key={tab.key}
                 onClick={() => { setActiveTab(tab.key); if (tab.key !== 'scanner') stopScanner() }}
                 className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-md text-sm font-medium transition-all ${
-                  activeTab === tab.key ? 'bg-[#1E5EFF] text-white' : 'text-gray-400 hover:text-white'
+                  activeTab === tab.key ? 'bg-[var(--brand-blue)] text-[color:var(--navy-950)]' : 'text-[var(--mist-400)] hover:text-[var(--text-primary)]'
                 }`}>
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -476,14 +490,14 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
             <div className="space-y-4">
               {!scanning ? (
                 <div className="card text-center py-12 space-y-4">
-                  <div className="w-16 h-16 rounded-2xl bg-[#1E5EFF15] border border-[#1E5EFF20] flex items-center justify-center mx-auto">
-                    <ScanLine className="w-8 h-8 text-[#1E5EFF]" />
+                  <div className="w-16 h-16 rounded-2xl bg-[rgba(0,229,255,0.08)] border border-[rgba(0,229,255,0.12)] flex items-center justify-center mx-auto">
+                    <ScanLine className="w-8 h-8 text-[var(--brand-blue)]" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-lg" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                    <p className="text-[var(--text-primary)] font-semibold text-lg" style={{ fontFamily: 'var(--font-display)' }}>
                       Entry Scanner
                     </p>
-                    <p className="text-gray-500 text-sm mt-1">Scan guest QR codes to check them in</p>
+                    <p className="text-[var(--mist-400)] text-sm mt-1">Scan guest QR codes to check them in</p>
                   </div>
                   <button onClick={startScanner} disabled={!eventId} className="btn-primary mx-auto">
                     <Camera className="w-4 h-4" /> Start Scanner
@@ -491,22 +505,22 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
                 </div>
               ) : (
                 <div className="card overflow-hidden p-0">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-white/8">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-faint)]">
                     <div className="flex items-center gap-2">
                       <span className={`w-2 h-2 rounded-full animate-pulse ${isOnline ? 'bg-green-400' : 'bg-amber-400'}`} />
                       <span className={`text-xs font-medium ${isOnline ? 'text-green-400' : 'text-amber-400'}`}>
                         {isOnline ? 'Live' : 'Offline'}
                       </span>
-                      <span className="text-xs text-gray-600">·</span>
-                      <span className="text-xs text-gray-400">Entry</span>
+                      <span className="text-xs text-[var(--mist-500)]">·</span>
+                      <span className="text-xs text-[var(--mist-400)]">Entry</span>
                     </div>
                     <div className="flex items-center gap-3">
                       {scanCount > 0 && (
-                        <div className="flex items-center gap-1 text-xs text-gray-400">
+                        <div className="flex items-center gap-1 text-xs text-[var(--mist-400)]">
                           <Hash className="w-3 h-3" />{scanCount} scanned
                         </div>
                       )}
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                      <div className="flex items-center gap-1 text-xs text-[var(--mist-400)]">
                         {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
                         <span className="truncate max-w-[120px]">{selectedEvent?.title}</span>
                       </div>
@@ -529,8 +543,8 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
                     </div>
                   </div>
                   <div className="px-4 py-3 flex items-center justify-center gap-2">
-                    <ScanLine className="w-3.5 h-3.5 text-gray-500" />
-                    <p className="text-xs text-gray-500">Align QR code within the frame</p>
+                    <ScanLine className="w-3.5 h-3.5 text-[var(--mist-400)]" />
+                    <p className="text-xs text-[var(--mist-400)]">Align QR code within the frame</p>
                   </div>
                 </div>
               )}
@@ -542,35 +556,35 @@ export default function StaffScanner({ invite, events }: { invite: Invite; event
             <div className="card space-y-3">
               {guestsLoading ? (
                 <div className="py-12 text-center">
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin mx-auto" />
+                  <div className="w-5 h-5 border-2 border-[var(--guest-border-hover)] border-t-white/60 rounded-full animate-spin mx-auto" />
                 </div>
               ) : guests.length === 0 ? (
                 <div className="py-12 text-center">
-                  <Users className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                  <p className="text-sm text-gray-500">No guests for this event</p>
+                  <Users className="w-8 h-8 text-[var(--mist-500)] mx-auto mb-2" />
+                  <p className="text-sm text-[var(--mist-400)]">No guests for this event</p>
                 </div>
               ) : (
                 <>
-                  <div className="flex items-center justify-between text-xs text-gray-500 px-1">
+                  <div className="flex items-center justify-between text-xs text-[var(--mist-400)] px-1">
                     <span>{guests.length} guests</span>
                     <span>{guests.filter(g => g.status === 'checked_in').length} checked in</span>
                   </div>
                   <div className="space-y-2">
                     {guests.map(g => (
-                      <div key={g.id} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                      <div key={g.id} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)]">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-8 h-8 rounded-full bg-[#1E5EFF15] border border-[#1E5EFF20] flex items-center justify-center shrink-0">
-                            <span className="text-xs font-bold text-[#1E5EFF]">{g.full_name.charAt(0).toUpperCase()}</span>
+                          <div className="w-8 h-8 rounded-full bg-[rgba(0,229,255,0.08)] border border-[rgba(0,229,255,0.12)] flex items-center justify-center shrink-0">
+                            <span className="text-xs font-bold text-[var(--brand-blue)]">{g.full_name.charAt(0).toUpperCase()}</span>
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-1.5">
-                              <p className="text-sm font-medium text-white truncate">{g.full_name}</p>
+                              <p className="text-sm font-medium text-[var(--text-primary)] truncate">{g.full_name}</p>
                               {g.is_vip && <Crown className="w-3 h-3 text-yellow-400 shrink-0" />}
                             </div>
-                            <p className="text-xs text-gray-500 truncate">{g.email}</p>
+                            <p className="text-xs text-[var(--mist-400)] truncate">{g.email}</p>
                           </div>
                         </div>
-                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border capitalize shrink-0 ml-2 ${statusColor[g.status] ?? 'text-gray-400 bg-white/5 border-white/10'}`}>
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border capitalize shrink-0 ml-2 ${statusColor[g.status] ?? 'text-[var(--mist-400)] bg-[var(--overlay-2)] border-[var(--guest-border)]'}`}>
                           {g.status.replace('_', ' ')}
                         </span>
                       </div>

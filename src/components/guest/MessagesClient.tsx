@@ -406,7 +406,7 @@ export default function MessagesClient({
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ color: 'var(--text-primary)', fontSize: 14, fontWeight: 700, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{selectedThread.eventTitle}</p>
           <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: '1px 0 0', display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', boxShadow: '0 0 6px rgba(34,197,94,0.6)', flexShrink: 0 }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--mint-500)', boxShadow: '0 0 6px rgba(34,197,94,0.6)', flexShrink: 0 }} />
             {selectedThread.organizerName} · Live chat
           </p>
         </div>

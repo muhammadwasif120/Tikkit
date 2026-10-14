@@ -6,7 +6,7 @@ import {
   Lock, Users, Bell, Save, Check,
   Eye, EyeOff, UserPlus, UserMinus, LogIn, LogOut,
   CreditCard, Zap, Flag, Trash2, Link2,
-  Copy, ExternalLink, Shield, Crown, AlertCircle,
+  Copy, ExternalLink, Shield, Crown, ScanLine, AlertCircle,
   Clock, RefreshCw, ChevronDown, Phone, Building2,
   Camera, Loader2, ImageIcon, AtSign, X, ShieldCheck, ArrowRight, MapPin, Palette,
 } from 'lucide-react'
@@ -44,10 +44,12 @@ type Profile = {
 const MAX_UPLOAD_SIZE = 10 * 1024 * 1024 // 10 MB
 const SLUG_RE = /^[a-z0-9-]+$/
 
+type TeamInviteRole = 'admin' | 'manager' | 'gate_staff'
+
 type TeamInvite = {
   id: string
   label: string
-  role: 'staff' | 'organizer'
+  role: TeamInviteRole
   token: string
   expires_at: string | null
   revoked: boolean
@@ -58,7 +60,7 @@ const notifConfig: Record<string, { label: string; description: string; icon: Re
   guest_signup:        { label: 'Guest signs up',     description: 'When a new guest registers for your event',   icon: UserPlus,   color: 'text-green-400' },
   guest_cancellation:  { label: 'Guest cancels',      description: 'When a guest cancels their registration',     icon: UserMinus,  color: 'text-red-400' },
   entry_scan:          { label: 'Guest checks in',    description: 'When a QR code is scanned for entry',         icon: LogIn,      color: 'text-blue-400' },
-  exit_scan:           { label: 'Guest checks out',   description: 'When a QR code is scanned for exit',          icon: LogOut,     color: 'text-gray-400' },
+  exit_scan:           { label: 'Guest checks out',   description: 'When a QR code is scanned for exit',          icon: LogOut,     color: 'text-[var(--mist-400)]' },
   vendor_payment_due:  { label: 'Vendor payment due', description: 'When a vendor invoice is created or overdue', icon: CreditCard, color: 'text-yellow-400' },
   event_going_live:    { label: 'Event goes live',    description: 'When you publish an event',                   icon: Zap,        color: 'text-purple-400' },
   event_ended:         { label: 'Event ends',         description: 'When an event is cancelled or concluded',     icon: Flag,       color: 'text-orange-400' },
@@ -72,8 +74,9 @@ const EXPIRY_OPTIONS = [
 ]
 
 function getRoleConfig(role: string) {
-  if (role === 'organizer') return { label: 'Organizer', color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20', icon: Crown }
-  return { label: 'Staff', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: Shield }
+  if (role === 'admin')   return { label: 'Admin',       color: 'text-purple-400',       bg: 'bg-purple-500/10',       border: 'border-purple-500/20',       icon: Crown }
+  if (role === 'manager') return { label: 'Manager',      color: 'text-brand-blue',       bg: 'bg-brand-blue/10',       border: 'border-brand-blue/20',       icon: Shield }
+  return                       { label: 'Gate Staff',  color: 'text-[var(--sky-500)]', bg: 'bg-[var(--sky-500)]/10', border: 'border-[var(--sky-500)]/20', icon: ScanLine }
 }
 
 function isExpired(invite: TeamInvite) {
@@ -82,7 +85,7 @@ function isExpired(invite: TeamInvite) {
 
 function InviteStatus({ invite }: { invite: TeamInvite }) {
   if (invite.revoked) return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400">Revoked</span>
-  if (isExpired(invite)) return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-gray-500/10 border border-gray-500/20 text-gray-400">Expired</span>
+  if (isExpired(invite)) return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-[var(--mist-400)]/10 border border-[var(--mist-400)]/20 text-[var(--mist-400)]">Expired</span>
   return <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400">Active</span>
 }
 
@@ -132,7 +135,7 @@ export default function SettingsPage() {
   // Team
   const [invites, setInvites] = useState<TeamInvite[]>([])
   const [inviteLabel, setInviteLabel] = useState('')
-  const [inviteRole, setInviteRole] = useState<'staff' | 'organizer'>('staff')
+  const [inviteRole, setInviteRole] = useState<TeamInviteRole>('gate_staff')
   const [inviteExpiry, setInviteExpiry] = useState<string | null>('7d')
   const [creating, setCreating] = useState(false)
   const [inviteError, setInviteError] = useState<string | null>(null)
@@ -305,7 +308,7 @@ export default function SettingsPage() {
 
   const shareWhatsApp = (invite: TeamInvite) => {
     const url = `${window.location.origin}/staff/${invite.token}`
-    const text = `You've been invited to Tikkit as ${invite.role} (${invite.label}). Access your dashboard here: ${url}`
+    const text = `You've been invited to Tikkit as ${getRoleConfig(invite.role).label} (${invite.label}). Access your dashboard here: ${url}`
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
 
@@ -344,21 +347,21 @@ export default function SettingsPage() {
           className="w-full flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#1E5EFF20] border-2 border-[#1E5EFF33] flex items-center justify-center shrink-0">
-              <span className="text-base font-bold text-[#1E5EFF]">{(companyName || fullName)?.charAt(0)?.toUpperCase() ?? 'U'}</span>
+            <div className="w-10 h-10 rounded-full bg-[rgba(0,229,255,0.12)] border-2 border-[rgba(0,229,255,0.20)] flex items-center justify-center shrink-0">
+              <span className="text-base font-bold text-[var(--brand-blue)]">{(companyName || fullName)?.charAt(0)?.toUpperCase() ?? 'U'}</span>
             </div>
             <div className="text-left">
               <p className="text-sm font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{companyName || fullName || 'Your Name'}</p>
-              {companyName && <p className="text-xs text-gray-500 mt-0.5">{fullName}</p>}
-              <p className="text-xs text-gray-500">{profile?.email}</p>
+              {companyName && <p className="text-xs text-[var(--mist-400)] mt-0.5">{fullName}</p>}
+              <p className="text-xs text-[var(--mist-400)]">{profile?.email}</p>
             </div>
           </div>
-          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', profileOpen && 'rotate-180')} />
+          <ChevronDown className={clsx('w-4 h-4 text-[var(--mist-400)] transition-transform', profileOpen && 'rotate-180')} />
         </button>
 
         {/* Expandable edit form */}
         {profileOpen && (
-          <div className="border-t border-white/5 pt-4 space-y-4">
+          <div className="border-t border-[var(--border-faint)] pt-4 space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
                 <label className="label">Full Name</label>
@@ -367,12 +370,12 @@ export default function SettingsPage() {
               <div className="sm:col-span-2">
                 <label className="label">Email Address</label>
                 <input type="email" className="input opacity-50 cursor-not-allowed" value={profile?.email ?? ''} disabled />
-                <p className="text-xs text-gray-600 mt-1">Email cannot be changed here</p>
+                <p className="text-xs text-[var(--mist-500)] mt-1">Email cannot be changed here</p>
               </div>
               <div>
                 <label className="label">Phone Number</label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
                   <input
                     type="tel"
                     className="input pl-9"
@@ -385,7 +388,7 @@ export default function SettingsPage() {
               <div>
                 <label className="label">Company / Organization</label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
                   <input
                     type="text"
                     className="input pl-9"
@@ -394,12 +397,12 @@ export default function SettingsPage() {
                     onChange={e => setCompanyName(e.target.value)}
                   />
                 </div>
-                <p className="text-xs text-gray-600 mt-1">Used in guest emails and communications</p>
+                <p className="text-xs text-[var(--mist-500)] mt-1">Used in guest emails and communications</p>
               </div>
               <div className="sm:col-span-2">
                 <label className="label">Profile URL / Username</label>
                 <div className="relative">
-                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                  <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
                   <input
                     type="text"
                     className="input pl-9"
@@ -410,8 +413,8 @@ export default function SettingsPage() {
                 </div>
                 {usernameError
                   ? <p className="text-xs text-red-400 mt-1">{usernameError}</p>
-                  : <p className="text-xs text-gray-600 mt-1">
-                      Public profile URL: <span className="text-gray-400">tikkit.app/organizer/{username || 'your-username'}</span>
+                  : <p className="text-xs text-[var(--mist-500)] mt-1">
+                      Public profile URL: <span className="text-[var(--mist-400)]">tikkit.app/organizer/{username || 'your-username'}</span>
                     </p>
                 }
               </div>
@@ -425,19 +428,19 @@ export default function SettingsPage() {
         )}
 
         {/* Change Password — expandable */}
-        <div className="border-t border-white/5 pt-4">
+        <div className="border-t border-[var(--border-faint)] pt-4">
           <button
             type="button"
             onClick={() => { setPasswordOpen(!passwordOpen); setPasswordError(null); setPasswordSaved(false) }}
             className="w-full flex items-center justify-between group"
           >
             <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-md bg-[#FFC74520] flex items-center justify-center">
-                <Lock className="w-3.5 h-3.5 text-[#FFC745]" />
+              <div className="w-7 h-7 rounded-md bg-[rgba(0,229,255,0.12)] flex items-center justify-center">
+                <Lock className="w-3.5 h-3.5 text-[var(--cyan-500)]" />
               </div>
               <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Change Password</span>
             </div>
-            <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', passwordOpen && 'rotate-180')} />
+            <ChevronDown className={clsx('w-4 h-4 text-[var(--mist-400)] transition-transform', passwordOpen && 'rotate-180')} />
           </button>
 
           {passwordOpen && (
@@ -453,7 +456,7 @@ export default function SettingsPage() {
                     onChange={e => setCurrentPassword(e.target.value)}
                   />
                   <button type="button" onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
                     {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -470,7 +473,7 @@ export default function SettingsPage() {
                     onChange={e => setNewPassword(e.target.value)}
                   />
                   <button type="button" onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
                     {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -515,19 +518,19 @@ export default function SettingsPage() {
           className="w-full flex items-center justify-between group"
         >
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#1E5EFF]/10 flex items-center justify-center shrink-0">
-              <ImageIcon className="w-4 h-4 text-[#1E5EFF]" />
+            <div className="w-8 h-8 rounded-lg bg-[var(--brand-blue)]/10 flex items-center justify-center shrink-0">
+              <ImageIcon className="w-4 h-4 text-[var(--brand-blue)]" />
             </div>
             <div className="text-left">
               <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Branding</p>
-              <p className="text-xs text-gray-500 mt-0.5">Profile cover photo and company logo</p>
+              <p className="text-xs text-[var(--mist-400)] mt-0.5">Profile cover photo and company logo</p>
             </div>
           </div>
-          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', brandingOpen && 'rotate-180')} />
+          <ChevronDown className={clsx('w-4 h-4 text-[var(--mist-400)] transition-transform', brandingOpen && 'rotate-180')} />
         </button>
 
         {brandingOpen && (
-          <div className="border-t border-white/5 pt-4 space-y-5">
+          <div className="border-t border-[var(--border-faint)] pt-4 space-y-5">
             {brandingError && (
               <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-2.5">
                 {brandingError}
@@ -537,16 +540,16 @@ export default function SettingsPage() {
             {/* Cover Photo */}
             <div className="space-y-2">
               <label className="label">Cover Photo</label>
-              <p className="text-xs text-gray-600 -mt-1">Displayed as the banner on your public organizer profile</p>
+              <p className="text-xs text-[var(--mist-500)] -mt-1">Displayed as the banner on your public organizer profile</p>
               <div
-                className="relative w-full rounded-xl overflow-hidden border border-white/10"
+                className="relative w-full rounded-xl overflow-hidden border border-[var(--guest-border)]"
                 style={{ height: 120, background: coverUrl ? 'transparent' : '#161820' }}
               >
                 {coverUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={coverUrl} alt="Cover" className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-gray-600">
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-[var(--mist-500)]">
                     <ImageIcon className="w-6 h-6" />
                     <p className="text-xs">No cover photo set</p>
                   </div>
@@ -554,37 +557,37 @@ export default function SettingsPage() {
                 <div className="absolute bottom-2 right-2 flex items-center gap-1.5">
                   {coverUrl && (
                     <button onClick={removeCover}
-                      className="flex items-center gap-1 text-xs text-gray-300 hover:text-white bg-black/60 hover:bg-black/80 rounded-lg px-2 py-1 transition-all backdrop-blur-sm">
+                      className="flex items-center gap-1 text-xs text-[var(--mist-300)] hover:text-[var(--text-primary)] bg-black/60 hover:bg-black/80 rounded-lg px-2 py-1 transition-all backdrop-blur-sm">
                       <X size={11} /> Remove
                     </button>
                   )}
                   <button
                     onClick={() => coverInputRef.current?.click()}
                     disabled={coverUploading}
-                    className="flex items-center gap-1.5 text-xs text-white bg-black/60 hover:bg-black/80 disabled:opacity-60 rounded-lg px-2.5 py-1 transition-all backdrop-blur-sm"
+                    className="flex items-center gap-1.5 text-xs text-[var(--text-primary)] bg-black/60 hover:bg-black/80 disabled:opacity-60 rounded-lg px-2.5 py-1 transition-all backdrop-blur-sm"
                   >
                     {coverUploading ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
                     {coverUrl ? 'Change Cover' : 'Upload Cover'}
                   </button>
                 </div>
               </div>
-              <p className="text-xs text-gray-600">Max 10 MB · Recommended 1500 × 500 px</p>
+              <p className="text-xs text-[var(--mist-500)]">Max 10 MB · Recommended 1500 × 500 px</p>
             </div>
 
             {/* Company Logo */}
             <div className="space-y-2">
               <label className="label">Company Logo</label>
-              <p className="text-xs text-gray-600 -mt-1">Shown as your profile badge on events and your public profile</p>
+              <p className="text-xs text-[var(--mist-500)] -mt-1">Shown as your profile badge on events and your public profile</p>
               <div className="flex items-center gap-4">
                 <div
-                  className="relative w-20 h-20 rounded-2xl overflow-hidden border border-white/10 shrink-0 flex items-center justify-center"
+                  className="relative w-20 h-20 rounded-2xl overflow-hidden border border-[var(--guest-border)] shrink-0 flex items-center justify-center"
                   style={{ background: logoUrl ? 'transparent' : '#161820' }}
                 >
                   {logoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
                   ) : (
-                    <Building2 className="w-6 h-6 text-gray-600" />
+                    <Building2 className="w-6 h-6 text-[var(--mist-500)]" />
                   )}
                 </div>
                 <div className="flex-1 space-y-2">
@@ -592,19 +595,19 @@ export default function SettingsPage() {
                     <button
                       onClick={() => logoInputRef.current?.click()}
                       disabled={logoUploading}
-                      className="flex items-center gap-1.5 text-xs text-white bg-[#1E5EFF] hover:bg-[#1448CC] disabled:opacity-60 rounded-lg px-3 py-1.5 transition-colors"
+                      className="flex items-center gap-1.5 text-xs text-[var(--text-primary)] bg-[var(--brand-blue)] hover:bg-[#1448CC] disabled:opacity-60 rounded-lg px-3 py-1.5 transition-colors"
                     >
                       {logoUploading ? <Loader2 size={12} className="animate-spin" /> : <Camera size={12} />}
                       {logoUrl ? 'Change Logo' : 'Upload Logo'}
                     </button>
                     {logoUrl && (
                       <button onClick={removeLogo}
-                        className="flex items-center gap-1 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-3 py-1.5 transition-all">
+                        className="flex items-center gap-1 text-xs text-[var(--mist-400)] hover:text-[var(--text-primary)] border border-[var(--guest-border)] hover:border-[var(--guest-border-hover)] rounded-lg px-3 py-1.5 transition-all">
                         <X size={11} /> Remove
                       </button>
                     )}
                   </div>
-                  <p className="text-xs text-gray-600">Max 10 MB · Square image recommended (1:1)</p>
+                  <p className="text-xs text-[var(--mist-500)]">Max 10 MB · Square image recommended (1:1)</p>
                 </div>
               </div>
             </div>
@@ -631,51 +634,53 @@ export default function SettingsPage() {
             </div>
             <div className="text-left">
               <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Team Access</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-[var(--mist-400)] mt-0.5">
                 {activeInvites.length > 0
                   ? `${activeInvites.length} active link${activeInvites.length !== 1 ? 's' : ''}`
                   : 'No active invite links'}
               </p>
             </div>
           </div>
-          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', teamOpen && 'rotate-180')} />
+          <ChevronDown className={clsx('w-4 h-4 text-[var(--mist-400)] transition-transform', teamOpen && 'rotate-180')} />
         </button>
 
         {teamOpen && (
-          <div className="border-t border-white/5 pt-4 space-y-5">
+          <div className="border-t border-[var(--border-faint)] pt-4 space-y-5">
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {[
-                { role: 'staff',     desc: 'QR scanner + guest list only' },
-                { role: 'organizer', desc: 'Full dashboard access' },
+                { role: 'admin',      desc: 'Full dashboard access' },
+                { role: 'manager',    desc: 'Events, guests, approvals — no financials' },
+                { role: 'gate_staff', desc: 'QR scanner + guest list only' },
               ].map(({ role, desc }) => {
                 const cfg = getRoleConfig(role)
                 return (
                   <div key={role} className={clsx('p-3 rounded-lg border', cfg.bg, cfg.border)}>
                     <div className="flex items-center gap-2 mb-1">
                       <cfg.icon className={clsx('w-3.5 h-3.5', cfg.color)} />
-                      <span className={clsx('text-xs font-semibold capitalize', cfg.color)}>{cfg.label}</span>
+                      <span className={clsx('text-xs font-semibold', cfg.color)}>{cfg.label}</span>
                     </div>
-                    <p className="text-xs text-gray-500">{desc}</p>
+                    <p className="text-xs text-[var(--mist-400)]">{desc}</p>
                   </div>
                 )
               })}
             </div>
 
-            <div className="border-t border-white/5 pt-4 space-y-3">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Create Invite Link</p>
+            <div className="border-t border-[var(--border-faint)] pt-4 space-y-3">
+              <p className="text-xs font-semibold text-[var(--mist-400)] uppercase tracking-wide">Create Invite Link</p>
               <div>
                 <label className="label">Label</label>
                 <input type="text" className="input" placeholder="e.g. Ali - Door Security"
                   value={inviteLabel} onChange={e => setInviteLabel(e.target.value)} />
-                <p className="text-xs text-gray-600 mt-1">A name to identify who this link is for</p>
+                <p className="text-xs text-[var(--mist-500)] mt-1">A name to identify who this link is for</p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="label">Role</label>
-                  <select className="input" value={inviteRole} onChange={e => setInviteRole(e.target.value as 'staff' | 'organizer')}>
-                    <option value="staff">Staff</option>
-                    <option value="organizer">Organizer</option>
+                  <select className="input" value={inviteRole} onChange={e => setInviteRole(e.target.value as TeamInviteRole)}>
+                    <option value="gate_staff">Gate Staff</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
                   </select>
                 </div>
                 <div>
@@ -700,24 +705,24 @@ export default function SettingsPage() {
             </div>
 
             {activeInvites.length > 0 && (
-              <div className="border-t border-white/5 pt-4 space-y-2">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Active Links</p>
+              <div className="border-t border-[var(--border-faint)] pt-4 space-y-2">
+                <p className="text-xs font-semibold text-[var(--mist-400)] uppercase tracking-wide">Active Links</p>
                 {activeInvites.map(invite => {
                   const cfg = getRoleConfig(invite.role)
                   return (
-                    <div key={invite.id} className="p-3 rounded-lg bg-brand-charcoal-light border border-white/5 space-y-2">
+                    <div key={invite.id} className="p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)] space-y-2">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
                           <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
                           <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{invite.label}</p>
-                          <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
-                            {invite.role}
+                          <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0', cfg.bg, cfg.color, cfg.border)}>
+                            {cfg.label}
                           </span>
                         </div>
                         <InviteStatus invite={invite} />
                       </div>
                       {invite.expires_at && (
-                        <div className="flex items-center gap-1 text-xs text-gray-500">
+                        <div className="flex items-center gap-1 text-xs text-[var(--mist-400)]">
                           <Clock className="w-3 h-3" />
                           Expires {new Date(invite.expires_at).toLocaleDateString('en-PK', { dateStyle: 'medium' })}
                         </div>
@@ -727,7 +732,7 @@ export default function SettingsPage() {
                           className={clsx('flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border transition-all',
                             copiedId === invite.id
                               ? 'text-green-400 border-green-500/30 bg-green-500/10'
-                              : 'text-gray-400 border-white/10 hover:text-white hover:border-white/20 bg-white/3')}>
+                              : 'text-[var(--mist-400)] border-[var(--guest-border)] hover:text-[var(--text-primary)] hover:border-[var(--guest-border-hover)] bg-[var(--overlay-1)]')}>
                           {copiedId === invite.id ? <><Check className="w-3 h-3" /> Copied!</> : <><Copy className="w-3 h-3" /> Copy Link</>}
                         </button>
                         <button onClick={() => shareWhatsApp(invite)}
@@ -735,7 +740,7 @@ export default function SettingsPage() {
                           <ExternalLink className="w-3 h-3" /> WhatsApp
                         </button>
                         <a href={`/staff/${invite.token}`} target="_blank" rel="noopener noreferrer"
-                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-white/20 bg-white/3 transition-colors">
+                          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[var(--guest-border)] text-[var(--mist-400)] hover:text-[var(--text-primary)] hover:border-[var(--guest-border-hover)] bg-[var(--overlay-1)] transition-colors">
                           <ExternalLink className="w-3 h-3" /> Preview
                         </a>
                         <button onClick={() => handleRevoke(invite)}
@@ -750,29 +755,29 @@ export default function SettingsPage() {
             )}
 
             {inactiveInvites.length > 0 && (
-              <div className="border-t border-white/5 pt-4 space-y-2">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Inactive Links</p>
+              <div className="border-t border-[var(--border-faint)] pt-4 space-y-2">
+                <p className="text-xs font-semibold text-[var(--mist-400)] uppercase tracking-wide">Inactive Links</p>
                 {inactiveInvites.map(invite => {
                   const cfg = getRoleConfig(invite.role)
                   return (
-                    <div key={invite.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-brand-charcoal-light border border-white/5 opacity-60">
+                    <div key={invite.id} className="flex items-center justify-between gap-3 p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)] opacity-60">
                       <div className="flex items-center gap-2 min-w-0">
                         <cfg.icon className={clsx('w-3.5 h-3.5 shrink-0', cfg.color)} />
                         <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{invite.label}</p>
-                        <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border capitalize shrink-0', cfg.bg, cfg.color, cfg.border)}>
-                          {invite.role}
+                        <span className={clsx('text-[10px] font-semibold px-1.5 py-0.5 rounded-full border shrink-0', cfg.bg, cfg.color, cfg.border)}>
+                          {cfg.label}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <InviteStatus invite={invite} />
                         {invite.revoked && (
                           <button onClick={() => handleReactivate(invite)} title="Reactivate"
-                            className="p-1.5 text-gray-500 hover:text-green-400 transition-colors">
+                            className="p-1.5 text-[var(--mist-400)] hover:text-green-400 transition-colors">
                             <RefreshCw className="w-3.5 h-3.5" />
                           </button>
                         )}
                         <button onClick={() => handleDelete(invite.id)} title="Delete"
-                          className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
+                          className="p-1.5 text-[var(--mist-400)] hover:text-red-400 transition-colors">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -784,9 +789,9 @@ export default function SettingsPage() {
 
             {invites.length === 0 && (
               <div className="text-center py-4">
-                <Link2 className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No invite links yet</p>
-                <p className="text-xs text-gray-600 mt-0.5">Create a link above to give someone access</p>
+                <Link2 className="w-8 h-8 text-[var(--mist-500)] mx-auto mb-2" />
+                <p className="text-sm text-[var(--mist-400)]">No invite links yet</p>
+                <p className="text-xs text-[var(--mist-500)] mt-0.5">Create a link above to give someone access</p>
               </div>
             )}
 
@@ -807,34 +812,34 @@ export default function SettingsPage() {
             </div>
             <div className="text-left">
               <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Notification Preferences</p>
-              <p className="text-xs text-gray-500 mt-0.5">
+              <p className="text-xs text-[var(--mist-400)] mt-0.5">
                 {Object.values(notifications).filter(Boolean).length} of {Object.values(notifications).length} enabled
               </p>
             </div>
           </div>
-          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', notifOpen && 'rotate-180')} />
+          <ChevronDown className={clsx('w-4 h-4 text-[var(--mist-400)] transition-transform', notifOpen && 'rotate-180')} />
         </button>
 
         {notifOpen && (
-          <div className="border-t border-white/5 pt-4 space-y-5">
+          <div className="border-t border-[var(--border-faint)] pt-4 space-y-5">
             <div className="space-y-2">
               {Object.entries(notifConfig).map(([key, config]) => {
                 const Icon = config.icon
                 const enabled = notifications[key as keyof typeof notifications]
                 return (
-                  <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                  <div key={key} className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)]">
                     <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-md bg-white/5 flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-md bg-[var(--overlay-2)] flex items-center justify-center shrink-0">
                         <Icon className={`w-3.5 h-3.5 ${config.color}`} />
                       </div>
                       <div>
                         <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{config.label}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{config.description}</p>
+                        <p className="text-xs text-[var(--mist-400)] mt-0.5">{config.description}</p>
                       </div>
                     </div>
                     <button type="button"
                       onClick={() => setNotifications(prev => ({ ...prev, [key]: !prev[key as keyof typeof prev] }))}
-                      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[#1E5EFF]' : 'bg-white/10'}`}>
+                      className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ml-4 ${enabled ? 'bg-[var(--brand-blue)]' : 'bg-[var(--overlay-3)]'}`}>
                       <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${enabled ? 'translate-x-5' : ''}`} />
                     </button>
                   </div>
@@ -858,7 +863,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Triple Verification</p>
-              <p className="text-xs text-gray-500 mt-0.5">ID, payment & Social Score — completed once</p>
+              <p className="text-xs text-[var(--mist-400)] mt-0.5">ID, payment & Social Score — completed once</p>
             </div>
           </div>
           <Link href="/dashboard/verify" className="flex items-center gap-1.5 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors shrink-0">
@@ -876,7 +881,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>Guided Tour</p>
-              <p className="text-xs text-gray-500 mt-0.5">Replay the app walkthrough to explore all features</p>
+              <p className="text-xs text-[var(--mist-400)] mt-0.5">Replay the app walkthrough to explore all features</p>
             </div>
           </div>
           <button
@@ -904,14 +909,14 @@ export default function SettingsPage() {
             </div>
             <div className="text-left">
               <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Appearance</p>
-              <p className="text-xs text-gray-500 mt-0.5">Choose the visual theme for your dashboard</p>
+              <p className="text-xs text-[var(--mist-400)] mt-0.5">Choose the visual theme for your dashboard</p>
             </div>
           </div>
-          <ChevronDown className={clsx('w-4 h-4 text-gray-500 transition-transform', appearanceOpen && 'rotate-180')} />
+          <ChevronDown className={clsx('w-4 h-4 text-[var(--mist-400)] transition-transform', appearanceOpen && 'rotate-180')} />
         </button>
 
         {appearanceOpen && (
-          <div className="border-t border-white/5 pt-4">
+          <div className="border-t border-[var(--border-faint)] pt-4">
             <ThemePicker />
           </div>
         )}

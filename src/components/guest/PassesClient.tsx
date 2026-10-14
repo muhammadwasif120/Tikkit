@@ -30,7 +30,7 @@ const RARITY_CONFIG: Record<string, { color: string; bg: string; border: string;
   Uncommon:  { color: '#34D399', bg: 'rgba(52,211,153,0.1)',  border: 'rgba(52,211,153,0.2)',  glow: 'rgba(52,211,153,0.1)',  order: 1 },
   Rare:      { color: '#60A5FA', bg: 'rgba(96,165,250,0.1)',  border: 'rgba(96,165,250,0.25)', glow: 'rgba(96,165,250,0.15)', order: 2 },
   Epic:      { color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.25)', glow: 'rgba(168,85,247,0.2)',  order: 3 },
-  Legendary: { color: '#FFC745', bg: 'rgba(255,199,69,0.12)', border: 'rgba(255,199,69,0.3)',  glow: 'rgba(255,199,69,0.25)', order: 4 },
+  Legendary: { color: 'var(--cyan-500)', bg: 'rgba(255,199,69,0.12)', border: 'rgba(255,199,69,0.3)',  glow: 'rgba(255,199,69,0.25)', order: 4 },
 }
 
 /* ─── Pass icon helper ───────────────────────────────────────────── */
@@ -50,8 +50,8 @@ function getPassIcon(type: string, size: number, color: string): React.ReactNode
 /* ─── Confetti ───────────────────────────────────────────────────── */
 function Confetti({ active, rarity }: { active: boolean; rarity: string }) {
   if (!active) return null
-  const rarityClr = RARITY_CONFIG[rarity]?.color ?? '#FFC745'
-  const colors = [rarityClr, '#1E5EFF', '#FFFFFF', '#FFC745', '#EF4444']
+  const rarityClr = RARITY_CONFIG[rarity]?.color ?? 'var(--cyan-500)'
+  const colors = [rarityClr, 'var(--brand-blue)', '#FFFFFF', 'var(--cyan-500)', '#EF4444']
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
       {Array.from({ length: 80 }).map((_, i) => (

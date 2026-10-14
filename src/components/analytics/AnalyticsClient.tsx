@@ -134,7 +134,7 @@ export default function AnalyticsClient({
   }, [guests])
 
   const tiers: AudienceTier[] = [
-    { key: 'most_loyal', label: 'Most Loyal', description: 'VIP · Always checked in · 2+ events', icon: Crown, color: 'text-[#FFC745]', bgColor: 'bg-[#FFC74515]', borderColor: 'border-[#FFC74530]', guests: audienceGuests.filter(g => g.tier === 'most_loyal') },
+    { key: 'most_loyal', label: 'Most Loyal', description: 'VIP · Always checked in · 2+ events', icon: Crown, color: 'text-[var(--cyan-500)]', bgColor: 'bg-[rgba(0,229,255,0.08)]', borderColor: 'border-[rgba(0,229,255,0.18)]', guests: audienceGuests.filter(g => g.tier === 'most_loyal') },
     { key: 'vip', label: 'VIPs', description: 'Marked VIP on any event', icon: Star, color: 'text-purple-400', bgColor: 'bg-purple-500/10', borderColor: 'border-purple-500/20', guests: audienceGuests.filter(g => g.tier === 'vip') },
     { key: 'always_checked_in', label: 'Always Show Up', description: 'Never a no-show across all events', icon: CheckCircle, color: 'text-green-400', bgColor: 'bg-green-500/10', borderColor: 'border-green-500/20', guests: audienceGuests.filter(g => g.tier === 'always_checked_in') },
     { key: 'returning', label: 'Returning', description: 'Attended 2+ events', icon: RefreshCw, color: 'text-brand-blue', bgColor: 'bg-brand-blue/[0.08]', borderColor: 'border-brand-blue/20', guests: audienceGuests.filter(g => g.tier === 'returning' && g.eventsAttended >= 2) },
@@ -217,14 +217,14 @@ export default function AnalyticsClient({
               'flex items-center justify-center sm:justify-between p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer',
               activeTab === tab.key
                 ? 'bg-brand-blue/[0.08] border-brand-blue/25 text-[color:var(--text-primary)]'
-                : 'bg-brand-charcoal border-white/5 text-gray-400 hover:border-white/10 hover:text-gray-200'
+                : 'bg-brand-charcoal border-[var(--border-faint)] text-[var(--mist-400)] hover:border-[var(--guest-border)] hover:text-[var(--mist-300)]'
             )}>
             <div className="flex items-center gap-2 min-w-0">
-              <tab.icon className={clsx('w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0', activeTab === tab.key ? 'text-brand-blue' : 'text-gray-500')} />
+              <tab.icon className={clsx('w-4 h-4 sm:w-3.5 sm:h-3.5 shrink-0', activeTab === tab.key ? 'text-brand-blue' : 'text-[var(--mist-400)]')} />
               <span className="hidden sm:block text-sm font-medium truncate">{tab.label}</span>
             </div>
             <span className={clsx('hidden sm:inline-flex ml-2 shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full',
-              activeTab === tab.key ? 'bg-brand-blue/[0.15] text-brand-blue' : 'bg-white/5 text-gray-500'
+              activeTab === tab.key ? 'bg-brand-blue/[0.15] text-brand-blue' : 'bg-[var(--overlay-2)] text-[var(--mist-400)]'
             )}>{tab.count}</span>
           </button>
         ))}
@@ -244,7 +244,7 @@ export default function AnalyticsClient({
             ].map((s) => (
               <div key={s.label} className="stat-card">
                 <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.75px', color: 'var(--text-primary)' }}>{s.value}</p>
-                <p className="text-xs text-gray-500">{s.label}</p>
+                <p className="text-xs text-[var(--mist-400)]">{s.label}</p>
               </div>
             ))}
           </div>
@@ -256,7 +256,7 @@ export default function AnalyticsClient({
                 <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
                   Arrival Heatmap
                 </h3>
-                <p className="text-xs text-gray-500 mt-0.5">When did the crowd show up?</p>
+                <p className="text-xs text-[var(--mist-400)] mt-0.5">When did the crowd show up?</p>
               </div>
               <div className="relative">
                 <select
@@ -266,15 +266,15 @@ export default function AnalyticsClient({
                 >
                   {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
                 </select>
-                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-[var(--mist-400)] pointer-events-none" />
               </div>
             </div>
 
             {arrivalData.length === 0 ? (
               <div className="text-center py-10">
-                <Clock className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No scan data yet for this event</p>
-                <p className="text-xs text-gray-600 mt-1">Data appears once guests are scanned in</p>
+                <Clock className="w-8 h-8 text-[var(--mist-500)] mx-auto mb-2" />
+                <p className="text-sm text-[var(--mist-400)]">No scan data yet for this event</p>
+                <p className="text-xs text-[var(--mist-500)] mt-1">Data appears once guests are scanned in</p>
               </div>
             ) : (
               <>
@@ -292,7 +292,7 @@ export default function AnalyticsClient({
                     <div key={hour} className="flex-1 flex flex-col items-center gap-1 group">
                       <div className="relative w-full flex items-end justify-center" style={{ height: '96px' }}>
                         {/* Tooltip */}
-                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-brand-charcoal border border-white/10 text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" style={{ color: 'var(--text-primary)' }}>
+                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-brand-charcoal border border-[var(--guest-border)] text-[10px] px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none" style={{ color: 'var(--text-primary)' }}>
                           {count} guest{count !== 1 ? 's' : ''}
                         </div>
                         <div
@@ -300,18 +300,18 @@ export default function AnalyticsClient({
                           style={{ height: `${Math.max(pct, 4)}%` }}
                         />
                       </div>
-                      <span className="text-[10px] text-gray-500">{formatHour(hour)}</span>
+                      <span className="text-[10px] text-[var(--mist-400)]">{formatHour(hour)}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Legend */}
                 <div className="flex items-center gap-3 mt-4 justify-end">
-                  <span className="text-[10px] text-gray-500">Low</span>
+                  <span className="text-[10px] text-[var(--mist-400)]">Low</span>
                   {[20, 40, 60, 80, 100].map(v => (
                     <div key={v} className={clsx('w-4 h-3 rounded-sm bg-brand-blue')} style={{ opacity: v / 100 }} />
                   ))}
-                  <span className="text-[10px] text-gray-500">High</span>
+                  <span className="text-[10px] text-[var(--mist-400)]">High</span>
                 </div>
               </>
             )}
@@ -324,44 +324,44 @@ export default function AnalyticsClient({
             </h3>
             {eventStats.length === 0 ? (
               <div className="text-center py-8">
-                <BarChart3 className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">No events to analyse yet</p>
+                <BarChart3 className="w-8 h-8 text-[var(--mist-500)] mx-auto mb-2" />
+                <p className="text-sm text-[var(--mist-400)]">No events to analyse yet</p>
               </div>
             ) : (
               <>
                 {/* Mobile cards */}
                 <div className="md:hidden space-y-2">
                   {eventStats.map((e) => (
-                    <div key={e.id} className="p-3 rounded-xl border border-white/5 hover:border-white/10 transition-colors">
+                    <div key={e.id} className="p-3 rounded-xl border border-[var(--border-faint)] hover:border-[var(--guest-border)] transition-colors">
                       <div className="flex items-center justify-between mb-2.5">
                         <p className="text-sm font-semibold truncate flex-1 mr-2" style={{ color: 'var(--text-primary)' }}>{e.title}</p>
                         <span className={clsx('badge shrink-0', e.status === 'published' ? 'badge-green' : e.status === 'completed' ? 'badge-blue' : e.status === 'cancelled' ? 'badge-red' : 'badge-gray')}>{e.status}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                         <div>
-                          <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-0.5">Guests</p>
+                          <p className="text-[10px] text-[var(--mist-500)] uppercase tracking-wide mb-0.5">Guests</p>
                           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{e.total}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-0.5">Check-ins</p>
+                          <p className="text-[10px] text-[var(--mist-500)] uppercase tracking-wide mb-0.5">Check-ins</p>
                           <p className="text-sm font-semibold" style={{ color: 'var(--text-primary)' }}>{e.checkedIn}</p>
                         </div>
                         <div>
-                          <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-1">Show-up</p>
+                          <p className="text-[10px] text-[var(--mist-500)] uppercase tracking-wide mb-1">Show-up</p>
                           <div className="flex items-center gap-1.5">
                             <div className="flex-1 bg-brand-charcoal-light rounded-full h-1">
-                              <div className={clsx('h-1 rounded-full', e.showUpRate >= 70 ? 'bg-green-500' : e.showUpRate >= 40 ? 'bg-[#FFC745]' : 'bg-red-500')} style={{ width: `${e.showUpRate}%` }} />
+                              <div className={clsx('h-1 rounded-full', e.showUpRate >= 70 ? 'bg-green-500' : e.showUpRate >= 40 ? 'bg-[var(--cyan-500)]' : 'bg-red-500')} style={{ width: `${e.showUpRate}%` }} />
                             </div>
-                            <span className="text-xs text-gray-400 shrink-0">{e.showUpRate}%</span>
+                            <span className="text-xs text-[var(--mist-400)] shrink-0">{e.showUpRate}%</span>
                           </div>
                         </div>
                         <div>
-                          <p className="text-[10px] text-gray-600 uppercase tracking-wide mb-1">Fill rate</p>
+                          <p className="text-[10px] text-[var(--mist-500)] uppercase tracking-wide mb-1">Fill rate</p>
                           <div className="flex items-center gap-1.5">
                             <div className="flex-1 bg-brand-charcoal-light rounded-full h-1">
                               <div className="h-1 rounded-full bg-brand-blue" style={{ width: `${e.fillRate}%` }} />
                             </div>
-                            <span className="text-xs text-gray-400 shrink-0">{e.fillRate}%</span>
+                            <span className="text-xs text-[var(--mist-400)] shrink-0">{e.fillRate}%</span>
                           </div>
                         </div>
                       </div>
@@ -373,7 +373,7 @@ export default function AnalyticsClient({
                 <div className="hidden md:block overflow-x-auto -mx-6 px-6">
                   <table className="w-full min-w-[560px]">
                     <thead>
-                      <tr className="border-b border-white/5">
+                      <tr className="border-b border-[var(--border-faint)]">
                         <th className="table-header">Event</th>
                         <th className="table-header">Status</th>
                         <th className="table-header">Guests</th>
@@ -384,7 +384,7 @@ export default function AnalyticsClient({
                     </thead>
                     <tbody>
                       {eventStats.map((e) => (
-                        <tr key={e.id} className="border-b border-white/5">
+                        <tr key={e.id} className="border-b border-[var(--border-faint)]">
                           <td className="table-cell font-medium" style={{ color: 'var(--text-primary)' }}>{e.title}</td>
                           <td className="table-cell">
                             <span className={clsx('badge', e.status === 'published' ? 'badge-green' : e.status === 'completed' ? 'badge-blue' : e.status === 'cancelled' ? 'badge-red' : 'badge-gray')}>{e.status}</span>
@@ -394,9 +394,9 @@ export default function AnalyticsClient({
                           <td className="table-cell">
                             <div className="flex items-center gap-2">
                               <div className="w-16 bg-brand-charcoal-light rounded-full h-1.5">
-                                <div className={clsx('h-1.5 rounded-full transition-all', e.showUpRate >= 70 ? 'bg-green-500' : e.showUpRate >= 40 ? 'bg-[#FFC745]' : 'bg-red-500')} style={{ width: `${e.showUpRate}%` }} />
+                                <div className={clsx('h-1.5 rounded-full transition-all', e.showUpRate >= 70 ? 'bg-green-500' : e.showUpRate >= 40 ? 'bg-[var(--cyan-500)]' : 'bg-red-500')} style={{ width: `${e.showUpRate}%` }} />
                               </div>
-                              <span className="text-xs text-gray-400">{e.showUpRate}%</span>
+                              <span className="text-xs text-[var(--mist-400)]">{e.showUpRate}%</span>
                             </div>
                           </td>
                           <td className="table-cell">
@@ -404,7 +404,7 @@ export default function AnalyticsClient({
                               <div className="w-16 bg-brand-charcoal-light rounded-full h-1.5">
                                 <div className="h-1.5 rounded-full bg-brand-blue" style={{ width: `${e.fillRate}%` }} />
                               </div>
-                              <span className="text-xs text-gray-400">{e.fillRate}%</span>
+                              <span className="text-xs text-[var(--mist-400)]">{e.fillRate}%</span>
                             </div>
                           </td>
                         </tr>
@@ -426,7 +426,7 @@ export default function AnalyticsClient({
               <Users className="w-5 h-5 text-brand-blue shrink-0 mt-0.5" />
               <div>
                 <p className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>Audience Intelligence</p>
-                <p className="text-xs text-gray-400 mt-0.5">Your guests ranked by loyalty. Send early access emails to your most valuable crowd before anyone else.</p>
+                <p className="text-xs text-[var(--mist-400)] mt-0.5">Your guests ranked by loyalty. Send early access emails to your most valuable crowd before anyone else.</p>
               </div>
             </div>
           </div>
@@ -443,7 +443,7 @@ export default function AnalyticsClient({
                       <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>{tier.label}</h3>
                       <span className={clsx('px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0', tier.bgColor, tier.color)}>{tier.guests.length}</span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-0.5">{tier.description}</p>
+                    <p className="text-xs text-[var(--mist-400)] mt-0.5">{tier.description}</p>
                   </div>
                 </div>
                 {tier.guests.length > 0 && (
@@ -459,32 +459,32 @@ export default function AnalyticsClient({
               </div>
 
               {tier.guests.length === 0 ? (
-                <p className="text-xs text-gray-500 text-center py-4">No guests in this tier yet. Keep running events!</p>
+                <p className="text-xs text-[var(--mist-400)] text-center py-4">No guests in this tier yet. Keep running events!</p>
               ) : (
                 <div className="space-y-1">
                   {tier.guests.slice(0, 5).map((guest) => (
-                    <div key={guest.email} className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg hover:bg-white/5 transition-colors">
+                    <div key={guest.email} className="flex items-center justify-between gap-2 px-3 py-2 rounded-lg hover:bg-[var(--overlay-2)] transition-colors">
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className={clsx('w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0', tier.bgColor, tier.color)}>
                           {guest.full_name.charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0">
                           <p className="text-sm font-medium truncate" style={{ color: 'var(--text-primary)' }}>{guest.full_name}</p>
-                          <p className="text-xs text-gray-500 truncate">{guest.email}</p>
+                          <p className="text-xs text-[var(--mist-400)] truncate">{guest.email}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
                         {guest.isVip && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#FFC74520] text-[#FFC745] border border-[#FFC74533]">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[rgba(0,229,255,0.12)] text-[var(--cyan-500)] border border-[rgba(0,229,255,0.20)]">
                             <Crown className="w-2.5 h-2.5" /> VIP
                           </span>
                         )}
-                        <span className="text-xs text-gray-500">{guest.eventsAttended} event{guest.eventsAttended !== 1 ? 's' : ''}</span>
+                        <span className="text-xs text-[var(--mist-400)]">{guest.eventsAttended} event{guest.eventsAttended !== 1 ? 's' : ''}</span>
                       </div>
                     </div>
                   ))}
                   {tier.guests.length > 5 && (
-                    <p className="text-xs text-gray-500 text-center pt-2">+{tier.guests.length - 5} more guests</p>
+                    <p className="text-xs text-[var(--mist-400)] text-center pt-2">+{tier.guests.length - 5} more guests</p>
                   )}
                 </div>
               )}
@@ -510,9 +510,9 @@ export default function AnalyticsClient({
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>Email — {emailModal.tier.label}</h3>
-                <p className="text-xs text-gray-500 mt-0.5">{selectedGuests.size} recipients selected</p>
+                <p className="text-xs text-[var(--mist-400)] mt-0.5">{selectedGuests.size} recipients selected</p>
               </div>
-              <button onClick={() => setEmailModal(null)} className="text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+              <button onClick={() => setEmailModal(null)} className="text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="mb-4">
@@ -522,7 +522,7 @@ export default function AnalyticsClient({
                   <option value="">No specific event</option>
                   {upcomingEvents.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
                 </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
               </div>
             </div>
 
@@ -534,7 +534,7 @@ export default function AnalyticsClient({
             <div className="mb-4">
               <label className="label">Message</label>
               <textarea className="input min-h-36 resize-none font-mono text-xs" value={emailBody} onChange={(e) => setEmailBody(e.target.value)} />
-              <p className="text-xs text-gray-600 mt-1">Use {'{name}'} to personalise with guest&apos;s first name</p>
+              <p className="text-xs text-[var(--mist-500)] mt-1">Use {'{name}'} to personalise with guest&apos;s first name</p>
             </div>
 
             <div className="mb-5">
@@ -547,13 +547,13 @@ export default function AnalyticsClient({
               <div className="space-y-1 max-h-40 overflow-y-auto">
                 {emailModal.guests.map((guest) => (
                   <div key={guest.email} onClick={() => { const next = new Set(selectedGuests); if (next.has(guest.email)) next.delete(guest.email); else next.add(guest.email); setSelectedGuests(next) }}
-                    className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors', selectedGuests.has(guest.email) ? 'bg-brand-blue/[0.08] border border-brand-blue/20' : 'hover:bg-white/5 border border-transparent')}>
-                    <div className={clsx('w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors', selectedGuests.has(guest.email) ? 'bg-brand-blue border-brand-blue' : 'border-white/20')}>
-                      {selectedGuests.has(guest.email) && <CheckCircle className="w-3 h-3 text-white" />}
+                    className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors', selectedGuests.has(guest.email) ? 'bg-brand-blue/[0.08] border border-brand-blue/20' : 'hover:bg-[var(--overlay-2)] border border-transparent')}>
+                    <div className={clsx('w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors', selectedGuests.has(guest.email) ? 'bg-brand-blue border-brand-blue' : 'border-[var(--guest-border-hover)]')}>
+                      {selectedGuests.has(guest.email) && <CheckCircle className="w-3 h-3 text-[color:var(--navy-950)]" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm truncate" style={{ color: 'var(--text-primary)' }}>{guest.full_name}</p>
-                      <p className="text-xs text-gray-500 truncate">{guest.email}</p>
+                      <p className="text-xs text-[var(--mist-400)] truncate">{guest.email}</p>
                     </div>
                   </div>
                 ))}

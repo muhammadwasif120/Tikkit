@@ -343,7 +343,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  navTitle: { flex: 1, color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+  navTitle: { flex: 1, color: colors.textPrimary, fontSize: 15, fontFamily: 'Sora_600SemiBold' },
   editNavBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
     paddingHorizontal: 12, paddingVertical: 7,
@@ -354,7 +354,7 @@ const s = StyleSheet.create({
   // Hero image
   heroImgWrap: { height: 210, overflow: 'hidden', position: 'relative' },
   heroGradCenter: { alignItems: 'center', justifyContent: 'center' },
-  heroInitial: { color: 'rgba(255,255,255,0.55)', fontSize: 56, fontFamily: 'Poppins_700Bold' },
+  heroInitial: { color: 'rgba(255,255,255,0.55)', fontSize: 56, fontFamily: 'Sora_700Bold' },
   heroStatusBadge: {
     position: 'absolute', top: 12, right: 12,
     flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -365,7 +365,7 @@ const s = StyleSheet.create({
   liveDot: { width: 5, height: 5, borderRadius: 3 },
   heroStatusText: { fontSize: 10, fontFamily: 'DMSans_500Medium', fontWeight: '700', letterSpacing: 0.5 },
   heroOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 14 },
-  heroTitle: { color: colors.white, fontSize: 20, fontFamily: 'Poppins_700Bold', marginBottom: 4, lineHeight: 26 },
+  heroTitle: { color: colors.white, fontSize: 20, fontFamily: 'Sora_700Bold', marginBottom: 4, lineHeight: 26 },
   heroMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   heroMode: { color: 'rgba(255,255,255,0.65)', fontSize: 12, fontFamily: 'DMSans_400Regular' },
   heroMeta: { color: 'rgba(255,255,255,0.65)', fontSize: 12, fontFamily: 'DMSans_400Regular' },
@@ -386,7 +386,7 @@ const s = StyleSheet.create({
     padding: 10, gap: 2,
   },
   statIcon: { width: 26, height: 26, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  statValue: { fontSize: 18, fontFamily: 'Poppins_700Bold', lineHeight: 22 },
+  statValue: { fontSize: 18, fontFamily: 'Sora_700Bold', lineHeight: 22 },
   statLabel: { color: colors.textMuted, fontSize: 9, fontFamily: 'DMSans_400Regular', marginTop: 1 },
 
   // Fill rate card
@@ -396,7 +396,7 @@ const s = StyleSheet.create({
   },
   cardHeaderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardLabel: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_500Medium', textTransform: 'uppercase', letterSpacing: 1 },
-  fillPct: { fontSize: 16, fontFamily: 'Poppins_700Bold' },
+  fillPct: { fontSize: 16, fontFamily: 'Sora_700Bold' },
   barTrack: { height: 6, backgroundColor: colors.surface2, borderRadius: 3, overflow: 'hidden' },
   barFill: { height: '100%', borderRadius: 3 },
   barMeta: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular' },
@@ -439,7 +439,7 @@ const s = StyleSheet.create({
     width: 64, height: 64, borderRadius: 32,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  errorTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  errorTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_600SemiBold' },
   errorBody: {
     color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular',
     textAlign: 'center', lineHeight: 20, maxWidth: 260,

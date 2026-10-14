@@ -21,7 +21,9 @@ export default function DashboardShell({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--guest-bg)' }}>
+    // No background here — the layered navy gradient on <body> shows through,
+    // giving the glass panels something to blur against.
+    <div className="flex h-screen overflow-hidden overflow-x-hidden">
       <Sidebar
         profile={profile}
         unreadSupportCount={unreadSupportCount}

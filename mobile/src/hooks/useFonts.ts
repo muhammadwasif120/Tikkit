@@ -1,10 +1,10 @@
 import { useFonts as useExpoFonts } from 'expo-font'
 import {
-  Poppins_400Regular,
-  Poppins_500Medium,
-  Poppins_600SemiBold,
-  Poppins_700Bold,
-} from '@expo-google-fonts/poppins'
+  Sora_400Regular,
+  Sora_500Medium,
+  Sora_600SemiBold,
+  Sora_700Bold,
+} from '@expo-google-fonts/sora'
 import {
   DMSans_400Regular,
   DMSans_500Medium,
@@ -13,10 +13,10 @@ import {
 
 export function useFonts(): [boolean, Error | null] {
   const [fontsLoaded, fontError] = useExpoFonts({
-    Poppins_400Regular,
-    Poppins_500Medium,
-    Poppins_600SemiBold,
-    Poppins_700Bold,
+    Sora_400Regular,
+    Sora_500Medium,
+    Sora_600SemiBold,
+    Sora_700Bold,
     DMSans_400Regular,
     DMSans_500Medium,
     DMSans_700Bold,

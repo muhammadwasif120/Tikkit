@@ -21,10 +21,10 @@ export default async function StaffPage({ params }: { params: Promise<{ token: s
       <div className="flex-1 flex items-start justify-center p-6">
         <div className="max-w-md w-full text-center py-20">
           <div className="text-4xl mb-4">⏰</div>
-          <h2 className="text-xl font-bold text-white mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h2 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
             Link Expired
           </h2>
-          <p className="text-gray-400 text-sm">This access link has expired. Ask your organizer for a new one.</p>
+          <p className="text-sm" style={{ color: 'var(--mist-400)' }}>This access link has expired. Ask your organizer for a new one.</p>
         </div>
       </div>
     )
@@ -37,10 +37,12 @@ export default async function StaffPage({ params }: { params: Promise<{ token: s
     .in('status', ['published', 'draft'])
     .order('date_start', { ascending: false })
 
-  if (invite.role === 'organizer') {
-    return <OrganizerView invite={invite} events={events ?? []} />
+  // Gate staff: scan-only, StaffScanner owns its own p-6 wrapper.
+  if (invite.role === 'gate_staff') {
+    return <StaffScanner invite={invite} events={events ?? []} />
   }
 
-  // Staff: StaffScanner owns its own p-6 wrapper
-  return <StaffScanner invite={invite} events={events ?? []} />
+  // Admin or manager: full OrganizerView, with manager missing the
+  // financial/vendor data (see OrganizerView's own role check).
+  return <OrganizerView invite={invite} events={events ?? []} />
 }

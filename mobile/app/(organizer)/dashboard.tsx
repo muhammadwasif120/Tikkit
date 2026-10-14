@@ -323,7 +323,7 @@ const s = StyleSheet.create({
     color: colors.blue + 'BB', fontSize: 10, fontFamily: 'DMSans_500Medium',
     letterSpacing: 2, textTransform: 'uppercase', marginBottom: 6,
   },
-  heroTitle: { color: colors.textPrimary, fontSize: 24, fontFamily: 'Poppins_700Bold', lineHeight: 30 },
+  heroTitle: { color: colors.textPrimary, fontSize: 24, fontFamily: 'Sora_700Bold', lineHeight: 30 },
   heroSub: { color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 4 },
   heroAvatar: {
     width: 48, height: 48, borderRadius: 24,
@@ -331,7 +331,7 @@ const s = StyleSheet.create({
     borderWidth: 2, borderColor: colors.blue + '55',
     alignItems: 'center', justifyContent: 'center',
   },
-  heroAvatarText: { color: colors.blue, fontSize: 20, fontFamily: 'Poppins_700Bold' },
+  heroAvatarText: { color: colors.blue, fontSize: 20, fontFamily: 'Sora_700Bold' },
 
   // Pending banner
   pendingBanner: {
@@ -355,7 +355,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8,
   },
   statIcon: { width: 30, height: 30, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center' },
-  statValue: { fontSize: 28, fontFamily: 'Poppins_700Bold', lineHeight: 34 },
+  statValue: { fontSize: 28, fontFamily: 'Sora_700Bold', lineHeight: 34 },
   statLabel: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   // Section layout
@@ -363,7 +363,7 @@ const s = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12,
   },
-  sectionTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+  sectionTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Sora_600SemiBold' },
   seeAll: { color: colors.blue, fontSize: 13, fontFamily: 'DMSans_500Medium' },
 
   // Quick actions
@@ -393,7 +393,7 @@ const s = StyleSheet.create({
     marginBottom: 10,
   },
   eventImgCenter: { alignItems: 'center', justifyContent: 'center' },
-  eventImgInitial: { color: 'rgba(255,255,255,0.55)', fontSize: 38, fontFamily: 'Poppins_700Bold' },
+  eventImgInitial: { color: 'rgba(255,255,255,0.55)', fontSize: 38, fontFamily: 'Sora_700Bold' },
   eventStatusBadge: {
     position: 'absolute', top: 10, right: 10,
     flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -404,7 +404,7 @@ const s = StyleSheet.create({
   liveDot: { width: 5, height: 5, borderRadius: 3 },
   eventStatusText: { fontSize: 10, fontFamily: 'DMSans_500Medium', fontWeight: '600' },
   eventOverlay: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 12 },
-  eventTitle: { color: colors.white, fontSize: 15, fontFamily: 'Poppins_600SemiBold', marginBottom: 4 },
+  eventTitle: { color: colors.white, fontSize: 15, fontFamily: 'Sora_600SemiBold', marginBottom: 4 },
   eventMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap' },
   eventMetaText: { color: 'rgba(255,255,255,0.6)', fontSize: 11, fontFamily: 'DMSans_400Regular' },
   eventMetaDot: { color: 'rgba(255,255,255,0.3)', fontSize: 11 },
@@ -415,7 +415,7 @@ const s = StyleSheet.create({
     width: 64, height: 64, borderRadius: 32,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold' },
   emptyBody: {
     color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular',
     textAlign: 'center', maxWidth: 240, lineHeight: 20,

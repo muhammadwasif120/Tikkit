@@ -137,7 +137,7 @@ const STATUS: Record<string, { label: string; color: string; bg: string; icon: s
   },
   payment_pending: {
     label: 'Payment Verifying',
-    color: '#818CF8', bg: 'rgba(129,140,248,0.1)',
+    color: '#7FA7FF', bg: 'rgba(127,167,255,0.1)',
     icon: 'hourglass-outline',
     info: 'Your payment screenshot is being verified.',
   },
@@ -512,7 +512,7 @@ const s = StyleSheet.create({
   },
 
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
-  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   list: { paddingHorizontal: 16, paddingBottom: 24, gap: 16 },
@@ -525,7 +525,7 @@ const s = StyleSheet.create({
   coverFallback: { backgroundColor: colors.surface2, alignItems: 'center', justifyContent: 'center' },
 
   cardBody: { padding: 14, gap: 10 },
-  cardTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+  cardTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Sora_600SemiBold' },
 
   statusInfoRow: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 8,
@@ -566,7 +566,7 @@ const s = StyleSheet.create({
     width: 56, height: 56, borderRadius: 28,
     backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_600SemiBold' },
   emptyText: { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center' },
   exploreBtn: {
     backgroundColor: colors.blue, borderRadius: radius.md,
@@ -593,7 +593,7 @@ const pm = StyleSheet.create({
     backgroundColor: colors.border, alignSelf: 'center', marginBottom: 4,
   },
   header: { flexDirection: 'row', alignItems: 'flex-start', gap: 12 },
-  title: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_700Bold' },
+  title: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_700Bold' },
   subtitle: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular' },
   closeBtn: {
     width: 32, height: 32, borderRadius: 16,
@@ -604,7 +604,7 @@ const pm = StyleSheet.create({
     backgroundColor: colors.blueSubtle, borderRadius: radius.md, padding: 12,
   },
   priceLabel: { color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular', flex: 1 },
-  priceValue: { color: colors.blue, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+  priceValue: { color: colors.blue, fontSize: 15, fontFamily: 'Sora_600SemiBold' },
   pickerRow: { flexDirection: 'row', gap: 12 },
   pickerBtn: {
     flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8,
@@ -626,5 +626,5 @@ const pm = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     backgroundColor: colors.blue, borderRadius: radius.md, paddingVertical: 14,
   },
-  submitText: { color: colors.white, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+  submitText: { color: colors.white, fontSize: 15, fontFamily: 'Sora_600SemiBold' },
 })

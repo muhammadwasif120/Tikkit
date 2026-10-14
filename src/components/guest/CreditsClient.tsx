@@ -24,10 +24,10 @@ type TierInfo = {
 /* ─── Tier config — aligned with creditUtils.ts ─────── */
 const TIERS: TierInfo[] = [
   { name: 'Newcomer', color: 'var(--text-muted)', minScore: 0,    maxScore: 49,   perks: ['Basic access to public events', 'Collect attendance passes'] },
-  { name: 'Rising',   color: '#22C55E', minScore: 50,   maxScore: 199,  perks: ['Priority waitlist placement', 'Early event notifications'] },
+  { name: 'Rising',   color: 'var(--mint-500)', minScore: 50,   maxScore: 199,  perks: ['Priority waitlist placement', 'Early event notifications'] },
   { name: 'Regular',  color: 'var(--brand-blue)', minScore: 200,  maxScore: 499,  perks: ['Early access to select events', 'Regular member badge'] },
   { name: 'VIP',      color: '#A855F7', minScore: 500,  maxScore: 999,  perks: ['Direct invites from organizers', 'VIP pass eligibility'] },
-  { name: 'Elite',    color: '#FFC745', minScore: 1000, maxScore: null, perks: ['Auto-approved for all events', 'Lifetime platinum status'] },
+  { name: 'Elite',    color: 'var(--cyan-500)', minScore: 1000, maxScore: null, perks: ['Auto-approved for all events', 'Lifetime platinum status'] },
 ]
 
 function getTierIcon(name: string, size: number, color: string): React.ReactNode {

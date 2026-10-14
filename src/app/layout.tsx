@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans } from 'next/font/google'
+import { DM_Sans, Sora } from 'next/font/google'
 import { cookies } from 'next/headers'
 import './globals.css'
 import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
@@ -12,6 +12,13 @@ const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-dm-sans',
+  display: 'swap',
+})
+
+const sora = Sora({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sora',
   display: 'swap',
 })
 
@@ -84,16 +91,30 @@ export const metadata: Metadata = {
   },
 }
 
-const VALID_THEMES: AppTheme[] = ['noir', 'corporate', 'pulse']
+const VALID_THEMES: AppTheme[] = ['light', 'dark']
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
-  const raw = cookieStore.get('tikkit-theme')?.value ?? 'noir'
-  const theme: AppTheme = VALID_THEMES.includes(raw as AppTheme) ? (raw as AppTheme) : 'noir'
+  const rawCookie = cookieStore.get('tikkit-theme')?.value
+  const hasCookie = VALID_THEMES.includes(rawCookie as AppTheme)
+  // No explicit choice yet → default to dark server-side (matches the
+  // brand's dark-first identity), then correct client-side before paint
+  // if the system prefers light, so first-time visitors still get their
+  // system preference without a flash.
+  const theme: AppTheme = hasCookie ? (rawCookie as AppTheme) : 'dark'
 
   return (
-    <html lang="en-PK" className={dmSans.variable} data-theme={theme}>
+    <html lang="en-PK" className={`${dmSans.variable} ${sora.variable}`} data-theme={theme}>
       <head>
+        {!hasCookie && (
+          // First visit, no explicit theme choice yet: correct the default
+          // 'dark' render to 'light' before paint if the system prefers it.
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `(function(){try{if(window.matchMedia('(prefers-color-scheme: light)').matches){document.documentElement.setAttribute('data-theme','light')}}catch(e){}})();`,
+            }}
+          />
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -168,7 +189,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             })
           }}
         />
-        {/* Fonts */}
+        {/* Clash Display / Cabinet Grotesk — used only by the marketing
+            landing pages (HomeClient, coming-soon, corporate, pulse, the
+            vendor/venue/artist landers), which hardcode the font-family
+            inline rather than going through --font-display. Sora (below,
+            via next/font) is the CRM/guest display font. */}
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.fontshare.com" />
         <link

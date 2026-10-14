@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { ModuleWaitlistForm } from '@/components/waitlist/ModuleWaitlistForm'
 
 export const metadata: Metadata = {
   title: 'Venues & Experiences — Run Your Space on TIKKIT X',
@@ -118,14 +119,14 @@ export default function VenueHomePage() {
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Link href="/auth/login" className="btn-ghost" style={{ padding: '9px 20px', fontSize: 14 }}>Sign In</Link>
-            <Link href="mailto:hello@tikkitx.com?subject=List My Venue" className="btn-primary" style={{ padding: '9px 20px', fontSize: 14 }}>Get Started →</Link>
+            <Link href="#waitlist" className="btn-primary" style={{ padding: '9px 20px', fontSize: 14 }}>Join Waitlist →</Link>
           </div>
         </nav>
 
         {/* ── Hero ── */}
         <section style={{ padding: '100px 40px 80px', textAlign: 'center', maxWidth: 820, margin: '0 auto' }}>
           <div className="fade-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${C.gold}14`, border: `1px solid ${C.gold}30`, borderRadius: 999, padding: '5px 14px', fontSize: 12, fontWeight: 700, color: C.gold, marginBottom: 28, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            ✦ Now Onboarding Venues
+            ✦ Coming Soon
           </div>
 
           <h1 className="fade-up" style={{ fontFamily: 'var(--font-display, inherit)', fontSize: 'clamp(38px, 6vw, 66px)', fontWeight: 900, lineHeight: 1.15, letterSpacing: '-0.5px', marginBottom: 24 }}>
@@ -141,8 +142,8 @@ export default function VenueHomePage() {
           </p>
 
           <div className="fade-up-3" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="mailto:hello@tikkitx.com?subject=List My Venue" className="btn-primary">Get Your Venue Live →</Link>
-            <Link href="/venues" className="btn-ghost">Browse Venues</Link>
+            <Link href="#waitlist" className="btn-primary">Join the Waitlist →</Link>
+            <Link href="/auth/login" className="btn-ghost">Sign In</Link>
           </div>
         </section>
 
@@ -222,12 +223,15 @@ export default function VenueHomePage() {
         {/* ── CTA ── */}
         <section style={{ padding: '0 40px 120px', textAlign: 'center' }}>
           <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: '64px 40px', maxWidth: 680, margin: '0 auto' }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: C.gold, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 20 }}>✦ Ready to go live?</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: C.gold, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 20 }}>✦ Coming Soon</div>
             <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 900, letterSpacing: '-1px', marginBottom: 16 }}>Stop leaving your space empty</h2>
             <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.65, marginBottom: 36 }}>
-              Drop us a message and we'll have you live within 48 hours. No setup fee, no commission — ever.
+              Venues & Experiences isn&apos;t open yet. Join the waitlist and we&apos;ll email you the moment it launches — no setup fee, no commission, ever.
             </p>
-            <Link href="mailto:hello@tikkitx.com?subject=List My Venue" className="btn-primary" style={{ fontSize: 16, padding: '16px 40px' }}>Get Your Venue Live →</Link>
+            <ModuleWaitlistForm
+              module="venue"
+              theme={{ accentFrom: C.gold, accentTo: '#B8960C', accentText: C.gold, buttonTextColor: '#0A0C0F', surface: C.surface, border: C.border, text: C.text, muted: C.muted }}
+            />
           </div>
         </section>
 
@@ -236,7 +240,6 @@ export default function VenueHomePage() {
           <span style={{ fontSize: 13, color: C.muted }}>© 2026 TIKKIT X · Venues & Experiences</span>
           <div style={{ display: 'flex', gap: 24 }}>
             <Link href="https://tikkitx.com" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>tikkitx.com</Link>
-            <Link href="/venues" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>Browse Venues</Link>
             <Link href="/auth/login" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>Sign In</Link>
             <Link href="mailto:hello@tikkitx.com" style={{ fontSize: 13, color: C.muted, textDecoration: 'none' }}>Contact</Link>
           </div>

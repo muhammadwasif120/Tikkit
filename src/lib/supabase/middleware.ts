@@ -18,11 +18,28 @@ function getSubdomain(host: string): string | null {
 // Share the auth session across all *.tikkitx.com subdomains in production
 const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.tikkitx.com' : undefined
 
+// Vendor X, Venues & Experiences, and Artist Management are fully built but not
+// open yet — every route within them bounces to that module's intro/waitlist
+// page instead of the live product. Nothing else about these modules is
+// touched, so re-launching one is deleting its entry here.
+const GATED_MODULES: { prefixes: string[]; landing: string }[] = [
+  { prefixes: ['/vendor'], landing: '/vendor/home' },
+  { prefixes: ['/venue', '/venues'], landing: '/venue/home' },
+  { prefixes: ['/artist-mgmt', '/artists'], landing: '/artist-mgmt/home' },
+]
+
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
   const host        = request.headers.get('host') ?? ''
   const subdomain   = getSubdomain(host)
   const subConfig   = subdomain ? SUBDOMAIN_MAP[subdomain] : null
+
+  for (const mod of GATED_MODULES) {
+    const inModule = mod.prefixes.some(p => pathname === p || pathname.startsWith(p + '/'))
+    if (inModule && pathname !== mod.landing) {
+      return NextResponse.redirect(new URL(mod.landing, request.url))
+    }
+  }
 
   let response = NextResponse.next({ request })
 
@@ -46,11 +63,10 @@ export async function updateSession(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // ── Subdomain root redirect ────────────────────────────────────────────────
-  // Logged-in  → go straight to the portal
-  // Logged-out → show the product landing page
+  // The portal is gated (see GATED_MODULES above), so root always shows the
+  // product's landing/waitlist page regardless of auth state.
   if (subConfig && pathname === '/') {
-    const dest = user ? subConfig.portal : subConfig.landing
-    return NextResponse.redirect(new URL(dest, request.url))
+    return NextResponse.redirect(new URL(subConfig.landing, request.url))
   }
 
   // ── Mandatory profile completion gate ──────────────────────────────────────

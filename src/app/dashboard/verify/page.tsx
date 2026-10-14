@@ -18,7 +18,7 @@ const WHY_CARDS = [
   },
   {
     icon: Clock,
-    color: '#1E5EFF',
+    color: 'var(--brand-blue)',
     title: 'Quick review',
     text: 'Our team reviews submitted CNICs within 1–2 business days.',
   },
@@ -47,7 +47,7 @@ export default async function VerifyPage() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: isVerified ? '0 8px 24px rgba(34,197,94,0.15)' : '0 8px 24px rgba(30,94,255,0.15)',
         }}>
-          <ShieldCheck size={22} color={isVerified ? '#22C55E' : isPending ? '#FFC745' : '#1E5EFF'} />
+          <ShieldCheck size={22} color={isVerified ? 'var(--mint-500)' : isPending ? 'var(--cyan-500)' : 'var(--brand-blue)'} />
         </div>
         <div>
           <h1 style={{ color: 'var(--text-primary)', fontSize: 24, fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
@@ -70,9 +70,9 @@ export default async function VerifyPage() {
           borderRadius: 14, padding: '14px 18px', marginBottom: 24,
           display: 'flex', alignItems: 'center', gap: 12,
         }}>
-          <ShieldCheck size={16} color={isVerified ? '#22C55E' : '#FFC745'} style={{ flexShrink: 0 }} />
+          <ShieldCheck size={16} color={isVerified ? 'var(--mint-500)' : 'var(--cyan-500)'} style={{ flexShrink: 0 }} />
           <div>
-            <p style={{ color: isVerified ? '#22C55E' : '#FFC745', fontSize: 13, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>
+            <p style={{ color: isVerified ? 'var(--mint-500)' : 'var(--cyan-500)', fontSize: 13, fontWeight: 700, margin: '0 0 2px', fontFamily: 'var(--font-display)' }}>
               {isVerified ? 'Verified' : 'Under Review'}
             </p>
             {profile.cnic_number && (

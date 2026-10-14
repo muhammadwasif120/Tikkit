@@ -70,7 +70,7 @@ const STATUS: Record<string, { label: string; color: string; bg: string; border:
 /* ─── Confetti ───────────────────────────────────────────────────── */
 function Confetti({ active }: { active: boolean }) {
   if (!active) return null
-  const colors = ['#1E5EFF','#FFC745','#EF4444','#10B981','#A855F7','#fff']
+  const colors = ['var(--brand-blue)','var(--cyan-500)','#EF4444','#10B981','#A855F7','#fff']
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
       {Array.from({ length: 60 }).map((_, i) => (
@@ -421,7 +421,7 @@ const PASS_ICONS: Record<string, React.ReactNode> = {
 const PASS_CFG: Record<string, { color: string; bg: string; label: string }> = {
   attendance:  { color: 'var(--text-secondary)', bg: 'rgba(156,163,175,0.1)', label: 'Attendance'  },
   early_bird:  { color: '#34D399', bg: 'rgba(52,211,153,0.1)',  label: 'Early Bird'  },
-  vip:         { color: '#FFC745', bg: 'rgba(255,199,69,0.1)',  label: 'VIP'         },
+  vip:         { color: 'var(--cyan-500)', bg: 'rgba(255,199,69,0.1)',  label: 'VIP'         },
   first_timer: { color: '#60A5FA', bg: 'rgba(96,165,250,0.1)',  label: 'First Timer' },
   streak_3:    { color: '#F97316', bg: 'rgba(249,115,22,0.1)',  label: '3× Streak'   },
   streak_5:    { color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  label: '5× Streak'   },
@@ -515,7 +515,7 @@ function RegCard({ reg, onPay, onViewTicket }: {
             {ev.secret_venue
               ? isConfirmed
                 ? <span style={{ color: '#10B981' }}>{ev.venue_name ?? 'TBA'}</span>
-                : <span style={{ color: '#FFC745' }}><Lock size={9} style={{ display: 'inline', marginRight: 3 }} />Secret Venue</span>
+                : <span style={{ color: 'var(--cyan-500)' }}><Lock size={9} style={{ display: 'inline', marginRight: 3 }} />Secret Venue</span>
               : ev.venue_name ?? 'TBA'
             }
           </span>

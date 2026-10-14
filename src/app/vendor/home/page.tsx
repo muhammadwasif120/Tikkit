@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { ModuleWaitlistForm } from '@/components/waitlist/ModuleWaitlistForm'
 
 export const metadata: Metadata = {
   title: 'Vendor X — Run Your Event Services Business',
@@ -27,7 +28,7 @@ const FEATURES = [
 ]
 
 const STEPS = [
-  { n: '01', title: 'Apply for access',    body: 'Vendor X is invite-only. Get in touch and our team onboards you within 48 hours.' },
+  { n: '01', title: 'Join the waitlist',   body: 'Vendor X isn\'t open yet — pop your details in and we\'ll email you the moment it launches.' },
   { n: '02', title: 'Set up your profile', body: 'Add your services, coverage area, and team. Your public profile goes live immediately.' },
   { n: '03', title: 'Start winning deals', body: 'Receive enquiries from organisers, manage your pipeline, and get paid faster.' },
 ]
@@ -77,14 +78,14 @@ export default function VendorHomePage() {
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Link href="/auth/login" className="btn-ghost" style={{ padding: '9px 20px', fontSize: 14 }}>Sign In</Link>
-            <Link href="mailto:hello@tikkitx.com?subject=Vendor X Access" className="btn-primary" style={{ padding: '9px 20px', fontSize: 14 }}>Get Access →</Link>
+            <Link href="#waitlist" className="btn-primary" style={{ padding: '9px 20px', fontSize: 14 }}>Join Waitlist →</Link>
           </div>
         </nav>
 
         {/* ── Hero ── */}
         <section style={{ padding: '100px 40px 80px', textAlign: 'center', maxWidth: 760, margin: '0 auto' }}>
           <div className="fade-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${C.blue}14`, border: `1px solid ${C.blue}30`, borderRadius: 999, padding: '5px 14px', fontSize: 12, fontWeight: 700, color: C.blue, marginBottom: 28, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            ✦ Invite-Only Beta
+            ✦ Coming Soon
           </div>
           <h1 className="fade-up" style={{ fontFamily: 'var(--font-display, inherit)', fontSize: 'clamp(38px, 6vw, 68px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-2px', marginBottom: 24 }}>
             Run your event vendor{' '}
@@ -96,7 +97,7 @@ export default function VendorHomePage() {
             Vendor X is the all-in-one CRM for sound engineers, lighting crews, caterers, photographers and every other vendor that powers live events. Pipeline, invoices, inventory, analytics — all in one place.
           </p>
           <div className="fade-up-3" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="mailto:hello@tikkitx.com?subject=Vendor X Access" className="btn-primary">Request Access →</Link>
+            <Link href="#waitlist" className="btn-primary">Join the Waitlist →</Link>
             <Link href="/auth/login" className="btn-ghost">Sign In</Link>
           </div>
         </section>
@@ -173,8 +174,11 @@ export default function VendorHomePage() {
         <section style={{ padding: '0 40px 120px', textAlign: 'center' }}>
           <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 24, padding: '64px 40px', maxWidth: 680, margin: '0 auto' }}>
             <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 900, letterSpacing: '-1px', marginBottom: 16 }}>Ready to grow your business?</h2>
-            <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.65, marginBottom: 36 }}>Vendor X is currently in invite-only beta. Get in touch and we'll onboard your team within 48 hours.</p>
-            <Link href="mailto:hello@tikkitx.com?subject=Vendor X Access" className="btn-primary" style={{ fontSize: 16, padding: '16px 40px' }}>Request Access →</Link>
+            <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.65, marginBottom: 36 }}>Vendor X isn&apos;t open yet. Join the waitlist and we&apos;ll email you the moment it launches.</p>
+            <ModuleWaitlistForm
+              module="vendor"
+              theme={{ accentFrom: C.blue, accentTo: C.purple, accentText: C.blue, buttonTextColor: '#fff', surface: C.surface, border: C.border, text: C.text, muted: C.muted }}
+            />
           </div>
         </section>
 

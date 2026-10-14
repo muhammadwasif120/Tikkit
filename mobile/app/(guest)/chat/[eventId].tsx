@@ -268,7 +268,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border,
   },
   headerInfo: { flex: 1 },
-  headerTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+  headerTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Sora_600SemiBold' },
   headerSub: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular' },
   onlineRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 1 },
   onlineDot: {
@@ -315,7 +315,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.border,
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_600SemiBold' },
   emptyText: { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 21 },
 
   inputBar: {

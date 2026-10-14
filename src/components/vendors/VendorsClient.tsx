@@ -42,10 +42,10 @@ const CATEGORIES = [
 ]
 
 const statusConfig = {
-  pending:   { label: 'Pending',   color: 'text-[#FFC745]',  bg: 'bg-[#FFC74520]',  border: 'border-[#FFC74533]',  icon: Clock },
+  pending:   { label: 'Pending',   color: 'text-[var(--cyan-500)]',  bg: 'bg-[rgba(0,229,255,0.12)]',  border: 'border-[rgba(0,229,255,0.20)]',  icon: Clock },
   paid:      { label: 'Paid',      color: 'text-green-400',  bg: 'bg-green-500/10', border: 'border-green-500/20', icon: CheckCircle },
   overdue:   { label: 'Overdue',   color: 'text-red-400',    bg: 'bg-red-500/10',   border: 'border-red-500/20',   icon: AlertCircle },
-  cancelled: { label: 'Cancelled', color: 'text-gray-500',   bg: 'bg-white/5',      border: 'border-white/10',     icon: X },
+  cancelled: { label: 'Cancelled', color: 'text-[var(--mist-400)]',   bg: 'bg-[var(--overlay-2)]',      border: 'border-[var(--guest-border)]',     icon: X },
 }
 
 const formatCurrency = (amount: number) =>
@@ -255,7 +255,7 @@ export default function VendorsClient({
             <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
               Vendors
             </h1>
-            <p className="text-gray-400 text-sm" style={{ margin: 0, lineHeight: 1.6 }}>
+            <p className="text-[var(--mist-400)] text-sm" style={{ margin: 0, lineHeight: 1.6 }}>
               {vendors.length} vendors<br />{invoices.length} invoices
             </p>
           </div>
@@ -269,14 +269,14 @@ export default function VendorsClient({
       {/* Summary stats */}
       <div className="grid grid-cols-3 gap-2">
         {[
-          { label: 'Pending', value: totalPending, color: 'text-[#FFC745]', icon: Clock },
+          { label: 'Pending', value: totalPending, color: 'text-[var(--cyan-500)]', icon: Clock },
           { label: 'Paid',    value: totalPaid,    color: 'text-green-400',  icon: CheckCircle },
           { label: 'Overdue', value: totalOverdue, color: 'text-red-400',    icon: AlertCircle },
         ].map(s => (
-          <div key={s.label} className="bg-brand-charcoal rounded-xl border border-white/5 p-3 sm:p-5 flex flex-col gap-1">
+          <div key={s.label} className="bg-brand-charcoal rounded-xl border border-[var(--border-faint)] p-3 sm:p-5 flex flex-col gap-1">
             <div className="flex items-center gap-1.5">
               <s.icon className={clsx('w-3.5 h-3.5 shrink-0', s.color)} />
-              <p className="text-[10px] sm:text-xs text-gray-500 truncate">{s.label}</p>
+              <p className="text-[10px] sm:text-xs text-[var(--mist-400)] truncate">{s.label}</p>
             </div>
             <p className={clsx('text-base sm:text-xl font-bold truncate', s.color)} style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
               {formatCurrency(s.value)}
@@ -296,14 +296,14 @@ export default function VendorsClient({
               'flex items-center justify-between p-3 sm:p-3.5 rounded-xl border transition-all duration-200 cursor-pointer',
               activeTab === tab.key
                 ? 'bg-brand-blue/[0.08] border-brand-blue/25 text-[color:var(--text-primary)]'
-                : 'bg-brand-charcoal border-white/5 text-gray-400 hover:border-white/10 hover:text-gray-200'
+                : 'bg-brand-charcoal border-[var(--border-faint)] text-[var(--mist-400)] hover:border-[var(--guest-border)] hover:text-[var(--mist-300)]'
             )}>
             <div className="flex items-center gap-2">
-              <tab.icon className={clsx('w-3.5 h-3.5 shrink-0', activeTab === tab.key ? 'text-brand-blue' : 'text-gray-500')} />
+              <tab.icon className={clsx('w-3.5 h-3.5 shrink-0', activeTab === tab.key ? 'text-brand-blue' : 'text-[var(--mist-400)]')} />
               <span className="text-sm font-medium">{tab.label}</span>
             </div>
             <span className={clsx('ml-2 text-xs font-semibold px-2 py-0.5 rounded-full',
-              activeTab === tab.key ? 'bg-brand-blue/[0.15] text-brand-blue' : 'bg-white/5 text-gray-500'
+              activeTab === tab.key ? 'bg-brand-blue/[0.15] text-brand-blue' : 'bg-[var(--overlay-2)] text-[var(--mist-400)]'
             )}>{tab.count}</span>
           </button>
         ))}
@@ -312,9 +312,9 @@ export default function VendorsClient({
       {/* VENDORS TAB */}
       {activeTab === 'vendors' && (
         <div className="space-y-4 animate-fade-in">
-          <div className="bg-brand-charcoal rounded-xl border border-white/5 p-4 space-y-3">
+          <div className="bg-brand-charcoal rounded-xl border border-[var(--border-faint)] p-4 space-y-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)]" />
               <input type="text" className="input pl-9 w-full" placeholder="Search vendors…" value={vendorSearch} onChange={e => setVendorSearch(e.target.value)} />
             </div>
             <div className="relative">
@@ -322,15 +322,15 @@ export default function VendorsClient({
                 <option value="all">All Categories</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
-              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
             </div>
           </div>
 
           {filteredVendors.length === 0 ? (
             <div className="card text-center py-12">
-              <Building2 className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400 font-medium text-sm">No vendors yet</p>
-              <p className="text-gray-600 text-xs mt-1">Add your first vendor to get started</p>
+              <Building2 className="w-10 h-10 text-[var(--mist-500)] mx-auto mb-3" />
+              <p className="text-[var(--mist-400)] font-medium text-sm">No vendors yet</p>
+              <p className="text-[var(--mist-500)] text-xs mt-1">Add your first vendor to get started</p>
             </div>
           ) : (
             <div className="grid gap-3">
@@ -350,18 +350,18 @@ export default function VendorsClient({
                         <div>
                           <div className="flex items-center gap-2">
                             <h3 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{vendor.name}</h3>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/5 text-gray-400 border border-white/10">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-[var(--overlay-2)] text-[var(--mist-400)] border border-[var(--guest-border)]">
                               <Tag className="w-2.5 h-2.5" /> {vendor.category}
                             </span>
                           </div>
-                          {vendor.contact_name  && <p className="text-sm text-gray-400 mt-0.5">{vendor.contact_name}</p>}
-                          {vendor.contact_email && <p className="text-xs text-gray-600">{vendor.contact_email}</p>}
-                          {vendor.contact_phone && <p className="text-xs text-gray-600">{vendor.contact_phone}</p>}
+                          {vendor.contact_name  && <p className="text-sm text-[var(--mist-400)] mt-0.5">{vendor.contact_name}</p>}
+                          {vendor.contact_email && <p className="text-xs text-[var(--mist-500)]">{vendor.contact_email}</p>}
+                          {vendor.contact_phone && <p className="text-xs text-[var(--mist-500)]">{vendor.contact_phone}</p>}
                           {linkedEvents.length > 0 && (
                             <div className="flex items-center gap-1 mt-2 flex-wrap">
-                              <LinkIcon className="w-3 h-3 text-gray-600" />
+                              <LinkIcon className="w-3 h-3 text-[var(--mist-500)]" />
                               {linkedEvents.map(e => (
-                                <span key={e.id} className="text-[10px] text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">{e.title}</span>
+                                <span key={e.id} className="text-[10px] text-[var(--mist-400)] bg-[var(--overlay-2)] px-2 py-0.5 rounded-full">{e.title}</span>
                               ))}
                             </div>
                           )}
@@ -369,21 +369,21 @@ export default function VendorsClient({
                       </div>
                       <div className="flex items-center gap-2">
                         {totalOwed > 0 && (
-                          <span className="text-xs font-medium text-[#FFC745]">{formatCurrency(totalOwed)} owed</span>
+                          <span className="text-xs font-medium text-[var(--cyan-500)]">{formatCurrency(totalOwed)} owed</span>
                         )}
-                        <button onClick={() => openVendorModal(vendor)} className="p-1.5 text-gray-500 hover:text-white transition-colors">
+                        <button onClick={() => openVendorModal(vendor)} className="p-1.5 text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => deleteVendor(vendor.id)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
+                        <button onClick={() => deleteVendor(vendor.id)} className="p-1.5 text-[var(--mist-400)] hover:text-red-400 transition-colors">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
                     {vendor.notes && (
-                      <p className="text-xs text-gray-600 mt-3 pt-3 border-t border-white/5">{vendor.notes}</p>
+                      <p className="text-xs text-[var(--mist-500)] mt-3 pt-3 border-t border-[var(--border-faint)]">{vendor.notes}</p>
                     )}
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/5">
-                      <p className="text-xs text-gray-600">{vendorInvoices.length} invoice{vendorInvoices.length !== 1 ? 's' : ''}</p>
+                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--border-faint)]">
+                      <p className="text-xs text-[var(--mist-500)]">{vendorInvoices.length} invoice{vendorInvoices.length !== 1 ? 's' : ''}</p>
                       <button onClick={() => { setActiveTab('invoices'); setSelectedVendorId(vendor.id) }}
                         className="text-xs text-brand-blue hover:text-brand-blue/80 transition-colors">
                         View invoices →
@@ -400,9 +400,9 @@ export default function VendorsClient({
       {/* INVOICES TAB */}
       {activeTab === 'invoices' && (
         <div className="space-y-4 animate-fade-in">
-          <div className="bg-brand-charcoal rounded-xl border border-white/5 p-4 space-y-3">
+          <div className="bg-brand-charcoal rounded-xl border border-[var(--border-faint)] p-4 space-y-3">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)]" />
               <input type="text" className="input pl-9 w-full" placeholder="Search invoices…" value={invoiceSearch} onChange={e => setInvoiceSearch(e.target.value)} />
             </div>
             <div className="flex gap-2">
@@ -411,7 +411,7 @@ export default function VendorsClient({
                   <option value="all">All Vendors</option>
                   {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
                 </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--mist-400)] pointer-events-none" />
               </div>
               <div className="relative flex-1">
                 <select className="appearance-none input pr-8 w-full cursor-pointer" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
@@ -421,21 +421,21 @@ export default function VendorsClient({
                   <option value="overdue">Overdue</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--mist-400)] pointer-events-none" />
               </div>
             </div>
           </div>
 
           {filteredInvoices.length === 0 ? (
             <div className="card text-center py-12">
-              <FileText className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-              <p className="text-gray-400 font-medium text-sm">No invoices yet</p>
+              <FileText className="w-10 h-10 text-[var(--mist-500)] mx-auto mb-3" />
+              <p className="text-[var(--mist-400)] font-medium text-sm">No invoices yet</p>
             </div>
           ) : (
             <div className="card overflow-x-auto -mx-6 px-6">
               <table className="w-full min-w-[600px]">
                 <thead>
-                  <tr className="border-b border-white/5">
+                  <tr className="border-b border-[var(--border-faint)]">
                     <th className="table-header">Vendor</th>
                     <th className="table-header">Description</th>
                     <th className="table-header">Event</th>
@@ -451,12 +451,12 @@ export default function VendorsClient({
                     const event  = events.find(e => e.id === invoice.event_id)
                     const s = statusConfig[invoice.status]
                     return (
-                      <tr key={invoice.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                      <tr key={invoice.id} className="border-b border-[var(--border-faint)] hover:bg-[var(--overlay-1)] transition-colors">
                         <td className="table-cell font-medium" style={{ color: 'var(--text-primary)' }}>{vendor?.name ?? '—'}</td>
-                        <td className="table-cell text-gray-400 max-w-[160px] truncate">{invoice.description ?? '—'}</td>
-                        <td className="table-cell text-gray-400 text-xs">{event?.title ?? '—'}</td>
+                        <td className="table-cell text-[var(--mist-400)] max-w-[160px] truncate">{invoice.description ?? '—'}</td>
+                        <td className="table-cell text-[var(--mist-400)] text-xs">{event?.title ?? '—'}</td>
                         <td className="table-cell font-medium" style={{ color: 'var(--text-primary)' }}>{formatCurrency(invoice.amount)}</td>
-                        <td className="table-cell text-gray-400 text-xs">
+                        <td className="table-cell text-[var(--mist-400)] text-xs">
                           {invoice.due_date ? new Date(invoice.due_date).toLocaleDateString('en-PK') : '—'}
                         </td>
                         <td className="table-cell">
@@ -468,14 +468,14 @@ export default function VendorsClient({
                           <div className="flex items-center gap-1">
                             {(invoice.status === 'pending' || invoice.status === 'overdue') && (
                               <button onClick={() => markPaid(invoice)} title="Mark Paid"
-                                className="p-1.5 text-gray-500 hover:text-green-400 transition-colors">
+                                className="p-1.5 text-[var(--mist-400)] hover:text-green-400 transition-colors">
                                 <Check className="w-3.5 h-3.5" />
                               </button>
                             )}
-                            <button onClick={() => openInvoiceModal(invoice)} className="p-1.5 text-gray-500 hover:text-white transition-colors">
+                            <button onClick={() => openInvoiceModal(invoice)} className="p-1.5 text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
                               <Edit2 className="w-3.5 h-3.5" />
                             </button>
-                            <button onClick={() => deleteInvoice(invoice.id)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors">
+                            <button onClick={() => deleteInvoice(invoice.id)} className="p-1.5 text-[var(--mist-400)] hover:text-red-400 transition-colors">
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
                           </div>
@@ -498,7 +498,7 @@ export default function VendorsClient({
               <h3 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
                 {editingVendor ? 'Edit Vendor' : 'Add Vendor'}
               </h3>
-              <button onClick={() => setVendorModal(false)} className="text-gray-500 hover:text-white transition-colors">
+              <button onClick={() => setVendorModal(false)} className="text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -514,7 +514,7 @@ export default function VendorsClient({
                   <select className="input appearance-none pr-10" value={vendorForm.category} onChange={e => setVendorForm(p => ({ ...p, category: e.target.value }))}>
                     {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
@@ -542,10 +542,10 @@ export default function VendorsClient({
                       setVendorForm(p => ({ ...p, event_ids: ids }))
                     }}
                       className={clsx('flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors border',
-                        vendorForm.event_ids.includes(event.id) ? 'bg-brand-blue/[0.08] border-brand-blue/20' : 'border-transparent hover:bg-white/5')}>
+                        vendorForm.event_ids.includes(event.id) ? 'bg-brand-blue/[0.08] border-brand-blue/20' : 'border-transparent hover:bg-[var(--overlay-2)]')}>
                       <div className={clsx('w-4 h-4 rounded border flex items-center justify-center shrink-0',
-                        vendorForm.event_ids.includes(event.id) ? 'bg-brand-blue border-brand-blue' : 'border-white/20')}>
-                        {vendorForm.event_ids.includes(event.id) && <Check className="w-3 h-3 text-white" />}
+                        vendorForm.event_ids.includes(event.id) ? 'bg-brand-blue border-brand-blue' : 'border-[var(--guest-border-hover)]')}>
+                        {vendorForm.event_ids.includes(event.id) && <Check className="w-3 h-3 text-[color:var(--navy-950)]" />}
                       </div>
                       <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{event.title}</p>
                     </div>
@@ -579,7 +579,7 @@ export default function VendorsClient({
               <h3 className="font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
                 {editingInvoice ? 'Edit Invoice' : 'New Invoice'}
               </h3>
-              <button onClick={() => setInvoiceModal(false)} className="text-gray-500 hover:text-white transition-colors">
+              <button onClick={() => setInvoiceModal(false)} className="text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -592,7 +592,7 @@ export default function VendorsClient({
                     <option value="">Select vendor</option>
                     {vendors.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
                 </div>
               </div>
               <div>
@@ -602,14 +602,14 @@ export default function VendorsClient({
                     <option value="">No specific event</option>
                     {events.map(e => <option key={e.id} value={e.id}>{e.title}</option>)}
                   </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="label">Amount (PKR) *</label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">₨</span>
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mist-400)] text-sm">₨</span>
                     <input type="number" className="input pl-7" placeholder="0" min="0" value={invoiceForm.amount} onChange={e => setInvoiceForm(p => ({ ...p, amount: e.target.value }))} />
                   </div>
                 </div>
@@ -630,7 +630,7 @@ export default function VendorsClient({
                     return (
                       <button key={s} type="button" onClick={() => setInvoiceForm(p => ({ ...p, status: s }))}
                         className={clsx('p-2.5 rounded-lg border text-xs font-medium flex items-center gap-2 transition-all',
-                          invoiceForm.status === s ? clsx(config.bg, config.color, config.border) : 'border-white/10 text-gray-500 hover:border-white/20')}>
+                          invoiceForm.status === s ? clsx(config.bg, config.color, config.border) : 'border-[var(--guest-border)] text-[var(--mist-400)] hover:border-[var(--guest-border-hover)]')}>
                         <config.icon className="w-3.5 h-3.5" /> {config.label}
                       </button>
                     )

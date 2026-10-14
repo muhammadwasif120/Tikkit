@@ -198,7 +198,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  navTitle: { flex: 1, color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  navTitle: { flex: 1, color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
 
   scroll: { padding: 16, paddingBottom: 48, gap: 0 },
 
@@ -255,5 +255,5 @@ const s = StyleSheet.create({
     flex: 1.5, flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, backgroundColor: colors.blue, borderRadius: radius.md, paddingVertical: 14,
   },
-  addBtnText: { color: colors.white, fontSize: 15, fontFamily: 'Poppins_600SemiBold', fontWeight: '700' },
+  addBtnText: { color: colors.white, fontSize: 15, fontFamily: 'Sora_600SemiBold', fontWeight: '700' },
 })

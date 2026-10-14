@@ -490,7 +490,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12,
   },
-  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
   addBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -507,7 +507,7 @@ const s = StyleSheet.create({
     borderWidth: 1,
     padding: 10, alignItems: 'center',
   },
-  summaryChipValue: { fontSize: 13, fontFamily: 'Poppins_700Bold' },
+  summaryChipValue: { fontSize: 13, fontFamily: 'Sora_700Bold' },
   summaryChipLabel: { color: colors.textMuted, fontSize: 10, fontFamily: 'DMSans_400Regular' },
 
   list: { padding: 16, gap: 12, paddingBottom: 40 },
@@ -524,12 +524,12 @@ const s = StyleSheet.create({
     backgroundColor: colors.blueSubtle, borderWidth: 1, borderColor: colors.blueBorder,
     alignItems: 'center', justifyContent: 'center',
   },
-  vendorAvatarText: { color: colors.blue, fontSize: 16, fontFamily: 'Poppins_700Bold' },
+  vendorAvatarText: { color: colors.blue, fontSize: 16, fontFamily: 'Sora_700Bold' },
   vendorName: { color: colors.textPrimary, fontSize: 15, fontFamily: 'DMSans_500Medium' },
   vendorCategory: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular', marginTop: 1 },
   vendorContact: { color: colors.textSecondary, fontSize: 12, fontFamily: 'DMSans_400Regular' },
   vendorMeta: { alignItems: 'flex-end' },
-  vendorTotal: { color: colors.textPrimary, fontSize: 13, fontFamily: 'Poppins_600SemiBold' },
+  vendorTotal: { color: colors.textPrimary, fontSize: 13, fontFamily: 'Sora_600SemiBold' },
   vendorInvCount: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular' },
 
   vendorActions: {
@@ -553,7 +553,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border, padding: 10,
   },
   invoiceDesc: { color: colors.textPrimary, fontSize: 13, fontFamily: 'DMSans_500Medium' },
-  invoiceAmount: { color: colors.blue, fontSize: 13, fontFamily: 'Poppins_600SemiBold', marginTop: 2 },
+  invoiceAmount: { color: colors.blue, fontSize: 13, fontFamily: 'Sora_600SemiBold', marginTop: 2 },
   invoiceDue: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 2 },
   invoiceRight: { alignItems: 'flex-end', gap: 6 },
   invoiceBadge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: radius.full },
@@ -562,7 +562,7 @@ const s = StyleSheet.create({
 
   empty:          { alignItems: 'center', paddingTop: 64, paddingHorizontal: 32, gap: 10 },
   emptyIconCircle:{ width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  emptyTitle:     { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle:     { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_600SemiBold' },
   emptyDesc:      { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
   emptyBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -583,7 +583,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  modalTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  modalTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
   saveBtn: { backgroundColor: colors.blue, borderRadius: radius.md, paddingHorizontal: 16, paddingVertical: 8 },
   saveBtnText: { color: colors.white, fontSize: 14, fontFamily: 'DMSans_500Medium', fontWeight: '700' },
   modalContent: { padding: 16, gap: 12, paddingBottom: 40 },

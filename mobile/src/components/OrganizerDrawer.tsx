@@ -41,18 +41,18 @@ const SECTIONS: Array<{ title: string; items: NavItem[] }> = [
     title: 'OPERATIONS',
     items: [
       { icon: 'time-outline',             label: 'Approvals',        route: '/(organizer)/approvals',  color: '#F97316' },
-      { icon: 'terminal-outline',         label: 'Command Center',   route: '/(organizer)/command',    color: '#818CF8' },
-      { icon: 'qr-code-outline',          label: 'QR Scanner',       route: '/(organizer)/scan',       color: '#22C55E' },
-      { icon: 'chatbubble-ellipses-outline', label: 'Messages',      route: '/(organizer)/messages',   color: '#818CF8' },
+      { icon: 'terminal-outline',         label: 'Command Center',   route: '/(organizer)/command',    color: colors.indigo },
+      { icon: 'qr-code-outline',          label: 'QR Scanner',       route: '/(organizer)/scan',       color: colors.success },
+      { icon: 'chatbubble-ellipses-outline', label: 'Messages',      route: '/(organizer)/messages',   color: colors.indigo },
     ],
   },
   {
     title: 'MANAGEMENT',
     items: [
       { icon: 'bar-chart-outline',        label: 'Analytics',        route: '/(organizer)/analytics',  color: '#38BDF8' },
-      { icon: 'people-outline',           label: 'Guests',           route: '/(organizer)/guests',     color: '#A78BFA' },
-      { icon: 'business-outline',         label: 'Vendors & Invoices', route: '/(organizer)/vendors',  color: '#EAB308' },
-      { icon: 'shield-checkmark-outline', label: 'ID Verification',  route: '/(organizer)/verify',     color: '#10B981' },
+      { icon: 'people-outline',           label: 'Guests',           route: '/(organizer)/guests',     color: colors.gold },
+      { icon: 'business-outline',         label: 'Vendors & Invoices', route: '/(organizer)/vendors',  color: colors.warning },
+      { icon: 'shield-checkmark-outline', label: 'ID Verification',  route: '/(organizer)/verify',     color: colors.success },
     ],
   },
   {
@@ -263,8 +263,8 @@ const ds = StyleSheet.create({
     borderWidth: 2, borderColor: colors.blue,
     alignItems: 'center', justifyContent: 'center',
   },
-  profileInitials: { color: colors.blue, fontSize: 16, fontFamily: 'Poppins_700Bold' },
-  profileName: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+  profileInitials: { color: colors.blue, fontSize: 16, fontFamily: 'Sora_700Bold' },
+  profileName: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Sora_600SemiBold' },
   profileMeta: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 1 },
   rolePill: {
     flexDirection: 'row', alignItems: 'center', gap: 4,

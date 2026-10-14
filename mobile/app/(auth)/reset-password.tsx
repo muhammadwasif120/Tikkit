@@ -169,7 +169,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center', alignSelf: 'center', marginBottom: 4,
   },
   headline: {
-    color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold',
+    color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold',
     textAlign: 'center', letterSpacing: -0.3,
   },
   sub: {
@@ -209,7 +209,7 @@ const s = StyleSheet.create({
     marginTop: 4,
   },
   btnDisabled: { opacity: 0.5, shadowOpacity: 0, elevation: 0 },
-  btnText: { color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold', fontWeight: '700' },
+  btnText: { color: colors.white, fontSize: 16, fontFamily: 'Sora_600SemiBold', fontWeight: '700' },
 
   // Done state
   doneWrap: { alignItems: 'center', gap: 14 },
@@ -218,6 +218,6 @@ const s = StyleSheet.create({
     backgroundColor: colors.successSubtle, borderWidth: 1, borderColor: colors.success + '40',
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  doneTitle: { color: colors.textPrimary, fontSize: 24, fontFamily: 'Poppins_700Bold', textAlign: 'center' },
+  doneTitle: { color: colors.textPrimary, fontSize: 24, fontFamily: 'Sora_700Bold', textAlign: 'center' },
   doneSub: { color: colors.textSecondary, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center' },
 })

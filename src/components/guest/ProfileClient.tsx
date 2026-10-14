@@ -40,19 +40,19 @@ const CYBER_AVATARS = [
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
         <rect width="64" height="64" rx="16" fill="#050918"/>
         <rect x="8" y="28" width="48" height="24" rx="4" fill="#0D1F4E"/>
-        <rect x="10" y="30" width="44" height="20" rx="3" fill="none" stroke="#1E5EFF" strokeWidth="0.8" strokeOpacity="0.6"/>
-        <rect x="14" y="34" width="14" height="8" rx="2" fill="#1E5EFF" fillOpacity="0.2"/>
+        <rect x="10" y="30" width="44" height="20" rx="3" fill="none" stroke="var(--brand-blue)" strokeWidth="0.8" strokeOpacity="0.6"/>
+        <rect x="14" y="34" width="14" height="8" rx="2" fill="var(--brand-blue)" fillOpacity="0.2"/>
         <rect x="14" y="34" width="14" height="8" rx="2" fill="none" stroke="#00D4FF" strokeWidth="0.8"/>
-        <rect x="36" y="34" width="14" height="8" rx="2" fill="#1E5EFF" fillOpacity="0.2"/>
+        <rect x="36" y="34" width="14" height="8" rx="2" fill="var(--brand-blue)" fillOpacity="0.2"/>
         <rect x="36" y="34" width="14" height="8" rx="2" fill="none" stroke="#00D4FF" strokeWidth="0.8"/>
         <circle cx="21" cy="38" r="2.5" fill="#00D4FF" fillOpacity="0.8"/>
         <circle cx="43" cy="38" r="2.5" fill="#00D4FF" fillOpacity="0.8"/>
-        <rect x="24" y="46" width="16" height="2" rx="1" fill="#1E5EFF" fillOpacity="0.5"/>
-        <path d="M24 12 L40 12 L44 20 L32 24 L20 20 Z" fill="#0A1530" stroke="#1E5EFF" strokeWidth="0.8"/>
+        <rect x="24" y="46" width="16" height="2" rx="1" fill="var(--brand-blue)" fillOpacity="0.5"/>
+        <path d="M24 12 L40 12 L44 20 L32 24 L20 20 Z" fill="#0A1530" stroke="var(--brand-blue)" strokeWidth="0.8"/>
         <path d="M28 16 L36 16" stroke="#00D4FF" strokeWidth="1" strokeOpacity="0.6"/>
-        <circle cx="32" cy="9" r="3" fill="#1E5EFF" fillOpacity="0.4" stroke="#00D4FF" strokeWidth="0.8"/>
-        <line x1="20" y1="20" x2="16" y2="28" stroke="#1E5EFF" strokeWidth="0.8"/>
-        <line x1="44" y1="20" x2="48" y2="28" stroke="#1E5EFF" strokeWidth="0.8"/>
+        <circle cx="32" cy="9" r="3" fill="var(--brand-blue)" fillOpacity="0.4" stroke="#00D4FF" strokeWidth="0.8"/>
+        <line x1="20" y1="20" x2="16" y2="28" stroke="var(--brand-blue)" strokeWidth="0.8"/>
+        <line x1="44" y1="20" x2="48" y2="28" stroke="var(--brand-blue)" strokeWidth="0.8"/>
       </svg>
     ),
     color: '#00D4FF',
@@ -133,18 +133,18 @@ const CYBER_AVATARS = [
     render: () => (
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
         <rect width="64" height="64" rx="16" fill="#120A00"/>
-        <path d="M32 6 L40 14 L48 14 L48 48 L16 48 L16 14 L24 14 Z" fill="#1A0E00" stroke="#FFC745" strokeWidth="0.8" strokeOpacity="0.6"/>
-        <path d="M16 14 L32 8 L48 14" fill="none" stroke="#FFC745" strokeWidth="1"/>
-        <rect x="20" y="24" width="10" height="6" rx="2" fill="#FFC745" fillOpacity="0.15" stroke="#FFC745" strokeWidth="0.8"/>
-        <rect x="34" y="24" width="10" height="6" rx="2" fill="#FFC745" fillOpacity="0.15" stroke="#FFC745" strokeWidth="0.8"/>
+        <path d="M32 6 L40 14 L48 14 L48 48 L16 48 L16 14 L24 14 Z" fill="#1A0E00" stroke="var(--cyan-500)" strokeWidth="0.8" strokeOpacity="0.6"/>
+        <path d="M16 14 L32 8 L48 14" fill="none" stroke="var(--cyan-500)" strokeWidth="1"/>
+        <rect x="20" y="24" width="10" height="6" rx="2" fill="var(--cyan-500)" fillOpacity="0.15" stroke="var(--cyan-500)" strokeWidth="0.8"/>
+        <rect x="34" y="24" width="10" height="6" rx="2" fill="var(--cyan-500)" fillOpacity="0.15" stroke="var(--cyan-500)" strokeWidth="0.8"/>
         <circle cx="25" cy="27" r="2" fill="#FFD700"/>
         <circle cx="39" cy="27" r="2" fill="#FFD700"/>
-        <path d="M25 36 L39 36" stroke="#FFC745" strokeWidth="0.8" strokeOpacity="0.5"/>
-        <path d="M27 38 L37 38" stroke="#FFC745" strokeWidth="0.6" strokeOpacity="0.4"/>
-        <path d="M16 48 L16 52 L20 52" stroke="#FFC745" strokeWidth="0.8"/>
-        <path d="M48 48 L48 52 L44 52" stroke="#FFC745" strokeWidth="0.8"/>
-        <line x1="20" y1="18" x2="44" y2="18" stroke="#FFC745" strokeWidth="0.5" strokeOpacity="0.5"/>
-        <circle cx="32" cy="16" r="2" fill="#FFC745" fillOpacity="0.4"/>
+        <path d="M25 36 L39 36" stroke="var(--cyan-500)" strokeWidth="0.8" strokeOpacity="0.5"/>
+        <path d="M27 38 L37 38" stroke="var(--cyan-500)" strokeWidth="0.6" strokeOpacity="0.4"/>
+        <path d="M16 48 L16 52 L20 52" stroke="var(--cyan-500)" strokeWidth="0.8"/>
+        <path d="M48 48 L48 52 L44 52" stroke="var(--cyan-500)" strokeWidth="0.8"/>
+        <line x1="20" y1="18" x2="44" y2="18" stroke="var(--cyan-500)" strokeWidth="0.5" strokeOpacity="0.5"/>
+        <circle cx="32" cy="16" r="2" fill="var(--cyan-500)" fillOpacity="0.4"/>
       </svg>
     ),
     color: '#FFD700',
@@ -351,7 +351,7 @@ function AvatarDisplay({ url, initials, tier, size = 64 }: { url: string | null;
 /* ─── Fireworks ──────────────────────────────────────────────────── */
 function Fireworks({ active }: { active: boolean }) {
   if (!active) return null
-  const colors = ['#FFC745', '#EF4444', '#1E5EFF', '#10B981', '#A855F7', '#FFFFFF']
+  const colors = ['var(--cyan-500)', '#EF4444', 'var(--brand-blue)', '#10B981', '#A855F7', '#FFFFFF']
   return (
     <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 9999, overflow: 'hidden' }}>
       {Array.from({ length: 100 }).map((_, i) => {
@@ -455,7 +455,7 @@ function EditSheet({ profile, email, onClose, onSave }: {
         {/* Identity fields — editable if not yet verified, locked once verified */}
         {profile.is_id_verified ? (
           <div style={{ padding: '12px 14px', background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 14, marginBottom: 16 }}>
-            <p style={{ color: '#22C55E', fontSize: 10, fontWeight: 700, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5 }}>
+            <p style={{ color: 'var(--mint-500)', fontSize: 10, fontWeight: 700, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 5 }}>
               <ShieldCheck size={11} /> Identity Verified — details are locked
             </p>
             {[
@@ -472,8 +472,8 @@ function EditSheet({ profile, email, onClose, onSave }: {
         ) : (
           <div style={{ marginBottom: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 10 }}>
-              <Lock size={11} color="#FFC745" />
-              <p style={{ color: '#FFC745', fontSize: 10, fontWeight: 700, margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              <Lock size={11} color="var(--cyan-500)" />
+              <p style={{ color: 'var(--cyan-500)', fontSize: 10, fontWeight: 700, margin: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                 Identity — complete Verification to lock these in
               </p>
             </div>
@@ -674,7 +674,7 @@ const statusLabel: Record<string, { label: string; color: string }> = {
   checked_in:      { label: 'Attended', color: 'var(--brand-blue)' },
   attended:        { label: 'Attended', color: 'var(--brand-blue)' },
   registered:      { label: 'Registered', color: '#A855F7' },
-  payment_pending: { label: 'Paying', color: '#FFC745' },
+  payment_pending: { label: 'Paying', color: 'var(--cyan-500)' },
   eoi_approved:    { label: 'Approved', color: '#10B981' },
 }
 
@@ -787,7 +787,7 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
 
   const stats: { label: string; value: number; color: string; icon: React.ReactNode }[] = [
     { label: 'Attended',  value: profile.total_attended,    color: '#10B981', icon: null },
-    { label: 'Streak',    value: profile.attendance_streak, color: '#FFC745', icon: <Flame size={14} color="#FFC745" /> },
+    { label: 'Streak',    value: profile.attendance_streak, color: 'var(--cyan-500)', icon: <Flame size={14} color="var(--cyan-500)" /> },
     { label: 'No-shows',  value: profile.total_no_shows,    color: '#EF4444', icon: null },
     { label: 'Score',     value: profile.social_score,      color: '#A855F7', icon: <Star size={14} color="#A855F7" /> },
   ]
@@ -1011,11 +1011,11 @@ export default function ProfileClient({ profile: initialProfile, email: initialE
             onClick={() => setShowVerify(true)}
             style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 12, padding: '14px 16px', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-body)', borderBottom: '1px solid var(--guest-border)' }}
           >
-            <span style={{ color: profile.is_id_verified && profile.is_payment_verified ? '#22C55E' : 'var(--text-muted)' }}>
+            <span style={{ color: profile.is_id_verified && profile.is_payment_verified ? 'var(--mint-500)' : 'var(--text-muted)' }}>
               <ShieldCheck size={16} />
             </span>
             <span style={{ flex: 1, textAlign: 'left', fontSize: 14, color: 'var(--text-primary)' }}>Verification</span>
-            <span style={{ fontSize: 11, fontWeight: 700, color: profile.is_id_verified && profile.is_payment_verified ? '#22C55E' : '#FFC745', marginRight: 4 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: profile.is_id_verified && profile.is_payment_verified ? 'var(--mint-500)' : 'var(--cyan-500)', marginRight: 4 }}>
               {profile.is_id_verified && profile.is_payment_verified ? 'Verified ✓' : 'Not verified'}
             </span>
             <ChevronRight size={14} color="var(--text-muted)" />

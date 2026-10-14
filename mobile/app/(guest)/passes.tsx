@@ -191,7 +191,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.pageBg },
 
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
-  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   list: { padding: 16, gap: 12, paddingBottom: 32 },
@@ -217,14 +217,14 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.gold + '44',
   },
   newBadgeText: { color: colors.gold, fontSize: 9, fontFamily: 'DMSans_500Medium', fontWeight: '700' },
-  eventTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold', marginBottom: 4 },
+  eventTitle: { color: colors.textPrimary, fontSize: 15, fontFamily: 'Sora_600SemiBold', marginBottom: 4 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
   metaText: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular' },
   metaDot: { color: colors.textMuted, fontSize: 12 },
   issuedText: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular' },
 
   empty: { alignItems: 'center', paddingTop: 80, paddingHorizontal: 40, gap: 12 },
-  emptyTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_600SemiBold' },
   emptyText: { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 22 },
 
   // Modal
@@ -238,7 +238,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  modalTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  modalTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
   modalContent: { alignItems: 'center', padding: 24, gap: 24 },
 
   qrWrap: {
@@ -250,7 +250,7 @@ const s = StyleSheet.create({
   },
 
   passInfo: { alignSelf: 'stretch', alignItems: 'center', gap: 8 },
-  passEventTitle: { color: colors.textPrimary, fontSize: 20, fontFamily: 'Poppins_700Bold', textAlign: 'center' },
+  passEventTitle: { color: colors.textPrimary, fontSize: 20, fontFamily: 'Sora_700Bold', textAlign: 'center' },
   passMetaRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   passMetaText: { color: colors.textSecondary, fontSize: 14, fontFamily: 'DMSans_400Regular' },
 

@@ -11,7 +11,7 @@ import Link from 'next/link'
 const getGrad = (id: string) => `var(--event-gradient-${id.charCodeAt(0) % 8})`
 
 const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string; label: string }> = {
-  published: { bg: 'rgba(34,197,94,0.1)',   color: '#22C55E', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
+  published: { bg: 'rgba(34,197,94,0.1)',   color: 'var(--mint-500)', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
   completed: { bg: 'rgba(75,85,99,0.1)',    color: 'var(--text-muted)', border: 'rgba(75,85,99,0.2)',    label: 'ENDED'    },
   archived:  { bg: 'rgba(75,85,99,0.06)',   color: 'var(--text-muted)', border: 'rgba(75,85,99,0.12)',   label: 'ARCHIVED' },
   draft:     { bg: 'rgba(250,204,21,0.1)',  color: '#FACC15', border: 'rgba(250,204,21,0.2)',  label: 'DRAFT'    },
@@ -143,7 +143,7 @@ export default function EventsClient({
             background: 'rgba(30,94,255,0.12)', border: '1px solid rgba(30,94,255,0.2)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <CalendarDays size={20} color="#1E5EFF" />
+            <CalendarDays size={20} color="var(--brand-blue)" />
           </div>
           <div>
             <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 800, margin: '0 0 2px', fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
@@ -217,12 +217,12 @@ export default function EventsClient({
                           background: st.bg, color: st.color, border: `1px solid ${st.border}`,
                           display: 'inline-flex', alignItems: 'center', gap: 4,
                         }}>
-                          {isLive && <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
+                          {isLive && <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--mint-500)', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
                           {st.label}
                         </span>
                         {/* Private badge */}
                         {event.is_private && (
-                          <span style={{ padding: '2px 8px', borderRadius: 100, fontSize: 'var(--fs-2xs)', fontWeight: 700, background: 'rgba(255,199,69,0.1)', color: '#FFC745', border: '1px solid rgba(255,199,69,0.2)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                          <span style={{ padding: '2px 8px', borderRadius: 100, fontSize: 'var(--fs-2xs)', fontWeight: 700, background: 'rgba(255,199,69,0.1)', color: 'var(--cyan-500)', border: '1px solid rgba(255,199,69,0.2)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                             <Lock size={9} /> Private
                           </span>
                         )}
@@ -250,8 +250,8 @@ export default function EventsClient({
                           </span>
                         )}
                         {event.secret_venue && (
-                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: '#FFC745', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
-                            <MapPin size={10} color="#FFC745" />Secret Venue
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--cyan-500)', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>
+                            <MapPin size={10} color="var(--cyan-500)" />Secret Venue
                           </span>
                         )}
                       </div>
@@ -286,7 +286,7 @@ export default function EventsClient({
                         background: 'rgba(30,94,255,0.08)', border: '1px solid rgba(30,94,255,0.15)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
-                        <ChevronRight size={15} color="#1E5EFF" />
+                        <ChevronRight size={15} color="var(--brand-blue)" />
                       </div>
                     </div>
                   </div>
@@ -319,8 +319,8 @@ export default function EventsClient({
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="card w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>Edit Event</h3>
-              <button onClick={() => setEditEvent(null)} className="text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+              <h3 className="font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>Edit Event</h3>
+              <button onClick={() => setEditEvent(null)} className="text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors"><X className="w-4 h-4" /></button>
             </div>
 
             <div className="space-y-4">
@@ -364,7 +364,7 @@ export default function EventsClient({
                       <option value="completed">Completed</option>
                       <option value="cancelled">Cancelled</option>
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)] pointer-events-none" />
                   </div>
                 </div>
               </div>
@@ -372,19 +372,19 @@ export default function EventsClient({
                 <label className="label">Budget (PKR)</label>
                 <input type="number" className="input" value={editForm.budget} onChange={e => setEditForm(p => ({ ...p, budget: e.target.value }))} />
               </div>
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[#FFC745]/5 border border-[#FFC745]/15 text-xs text-gray-400">
-                <span className="text-[#FFC745]">🎫</span>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--cyan-500)]/5 border border-[var(--cyan-500)]/15 text-xs text-[var(--mist-400)]">
+                <span className="text-[var(--cyan-500)]">🎫</span>
                 Ticket tiers are managed in the event detail page
               </div>
 
               <div className="space-y-2">
-                <div className="flex flex-col p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                <div className="flex flex-col p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-white flex items-center gap-2">
-                        <Lock className="w-3.5 h-3.5 text-gray-400" /> Private Event
+                      <p className="text-sm font-medium text-[var(--text-primary)] flex items-center gap-2">
+                        <Lock className="w-3.5 h-3.5 text-[var(--mist-400)]" /> Private Event
                       </p>
-                      <p className="text-xs text-gray-500">Only invited guests can see this event</p>
+                      <p className="text-xs text-[var(--mist-400)]">Only invited guests can see this event</p>
                     </div>
                     <Toggle
                       on={editForm.is_private}
@@ -392,17 +392,17 @@ export default function EventsClient({
                     />
                   </div>
                   {editForm.is_private && (
-                    <div className="text-[11px] text-[#FFC745] bg-[#FFC745]/10 px-2.5 py-1.5 rounded border border-[#FFC745]/20 mt-3 leading-relaxed">
+                    <div className="text-[11px] text-[var(--cyan-500)] bg-[var(--cyan-500)]/10 px-2.5 py-1.5 rounded border border-[var(--cyan-500)]/20 mt-3 leading-relaxed">
                       Attendees must have a Tikkit X account to receive their private QR pass. Nothing is shared off-platform to protect your privacy.
                     </div>
                   )}
                 </div>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)]">
                   <div>
-                    <p className="text-sm font-medium text-white flex items-center gap-2">
-                      <Eye className="w-3.5 h-3.5 text-gray-400" /> Secret Venue
+                    <p className="text-sm font-medium text-[var(--text-primary)] flex items-center gap-2">
+                      <Eye className="w-3.5 h-3.5 text-[var(--mist-400)]" /> Secret Venue
                     </p>
-                    <p className="text-xs text-gray-500">Hide address until guests are confirmed</p>
+                    <p className="text-xs text-[var(--mist-400)]">Hide address until guests are confirmed</p>
                   </div>
                   <Toggle
                     on={editForm.secret_venue}
@@ -434,9 +434,9 @@ export default function EventsClient({
             <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-5 h-5 text-red-400" />
             </div>
-            <h3 className="font-semibold text-white mb-1" style={{ fontFamily: 'var(--font-display)' }}>Delete Event</h3>
-            <p className="text-gray-400 text-sm mb-5">
-              Are you sure you want to delete <span className="text-white font-medium">{deleteEvent.title}</span>? All guests and data will be permanently removed.
+            <h3 className="font-semibold text-[var(--text-primary)] mb-1" style={{ fontFamily: 'var(--font-display)' }}>Delete Event</h3>
+            <p className="text-[var(--mist-400)] text-sm mb-5">
+              Are you sure you want to delete <span className="text-[var(--text-primary)] font-medium">{deleteEvent.title}</span>? All guests and data will be permanently removed.
             </p>
             <div className="flex gap-3 justify-center">
               <button onClick={() => setDeleteEvent(null)} className="btn-secondary">Cancel</button>

@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, CalendarDays, Users, ScanLine,
   Building2, BarChart3, Settings, LogOut, ClipboardCheck, X, UserCircle,
-  Radio, MessageSquare,
+  Radio, MessageSquare, Plus,
 } from 'lucide-react'
 import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
 import { createClient } from '@/lib/supabase/client'
@@ -55,24 +55,47 @@ export default function Sidebar({ profile, unreadSupportCount = 0, open, onClose
   }
 
   const sidebarContent = (
-    <aside className="w-60 bg-brand-charcoal flex flex-col h-full border-r border-white/[0.04]" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
+    <aside
+      className="w-64 flex flex-col h-full"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        background: 'var(--chrome-fill)',
+        backdropFilter: 'blur(40px)',
+        WebkitBackdropFilter: 'blur(40px)',
+        borderRight: '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
       {/* Logo */}
-      <div className="h-16 flex items-center justify-between px-5 border-b border-white/[0.04] shrink-0">
+      <div className="h-16 flex items-center justify-between px-5 border-b border-[var(--border-faint)] shrink-0">
         <div className="flex items-center gap-2.5">
           <TikkitXLogo size="md" />
         </div>
         {/* Close button — mobile only */}
         <button
           onClick={onClose}
-          className="lg:hidden text-gray-500 hover:text-white transition-colors p-1"
+          className="lg:hidden transition-colors p-1"
+          style={{ color: 'var(--mist-500)' }}
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
+      {/* Primary CTA */}
+      <div className="px-3 pt-4">
+        <Link
+          href="/dashboard/events/new"
+          onClick={handleNavClick}
+          className="btn-primary w-full"
+        >
+          <Plus className="w-4 h-4 shrink-0" />
+          <span style={{ flex: 1, textAlign: 'left' }}>New event</span>
+          <span style={{ fontSize: 11, fontWeight: 700, opacity: 0.55 }}>N</span>
+        </Link>
+      </div>
+
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-widest px-3 pb-2">Main Menu</p>
+        <p className="text-xs font-medium px-3 pb-2" style={{ color: 'var(--mist-500)' }}>Main menu</p>
         {navItems.map((item) => (
           <Link
             key={item.href}
@@ -82,22 +105,22 @@ export default function Sidebar({ profile, unreadSupportCount = 0, open, onClose
             className={clsx(isActive(item.href, item.exact) ? 'sidebar-link-active' : 'sidebar-link')}
             style={{ display: 'flex', alignItems: 'center' }}
           >
-            <item.icon className="w-4 h-4 shrink-0" />
+            <item.icon className="w-[18px] h-[18px] shrink-0" />
             <span style={{ flex: 1 }}>{item.label}</span>
             {item.label === 'Support' && unreadSupportCount > 0 && (
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF4444', flexShrink: 0, boxShadow: '0 0 6px rgba(239,68,68,0.6)' }} />
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--coral-500)', flexShrink: 0, boxShadow: '0 0 6px rgba(255,107,107,0.6)' }} />
             )}
           </Link>
         ))}
 
         <div className="divider" />
-        <p className="text-[10px] font-semibold text-gray-600 uppercase tracking-widest px-3 pb-2">Account</p>
+        <p className="text-xs font-medium px-3 pb-2" style={{ color: 'var(--mist-500)' }}>Account</p>
         <Link
           href="/dashboard/profile"
           onClick={handleNavClick}
           className={clsx(isActive('/dashboard/profile') ? 'sidebar-link-active' : 'sidebar-link')}
         >
-          <UserCircle className="w-4 h-4 shrink-0" />
+          <UserCircle className="w-[18px] h-[18px] shrink-0" />
           Profile
         </Link>
         <Link
@@ -105,34 +128,34 @@ export default function Sidebar({ profile, unreadSupportCount = 0, open, onClose
           onClick={handleNavClick}
           className={clsx(isActive('/dashboard/settings') ? 'sidebar-link-active' : 'sidebar-link')}
         >
-          <Settings className="w-4 h-4 shrink-0" />
+          <Settings className="w-[18px] h-[18px] shrink-0" />
           Settings
         </Link>
       </nav>
 
       {/* Profile footer */}
-      <div className="p-3 border-t border-white/[0.04] shrink-0">
-        <div data-tour="profile-footer" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+      <div className="p-3 border-t border-[var(--border-faint)] shrink-0">
+        <div data-tour="profile-footer" className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[var(--overlay-1)] border border-[var(--border-faint)]">
           <Link href="/dashboard/profile" onClick={handleNavClick} style={{ textDecoration: 'none', flexShrink: 0 }}>
             <div style={{
               width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, rgba(30,94,255,0.25), rgba(30,94,255,0.1))',
-              border: '1px solid rgba(30,94,255,0.3)',
+              background: 'linear-gradient(135deg, rgba(var(--brand-blue-rgb),0.25), rgba(var(--brand-blue-rgb),0.1))',
+              border: '1px solid rgba(var(--brand-blue-rgb),0.3)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer',
             }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: '#1E5EFF', fontFamily: 'var(--font-display)' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand-blue)', fontFamily: 'var(--font-display)' }}>
                 {(profile?.company_name ?? profile?.full_name)?.charAt(0)?.toUpperCase() ?? 'U'}
               </span>
             </div>
           </Link>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-white truncate" style={{ fontFamily: 'var(--font-display)' }}>
+            <p className="text-sm font-medium truncate" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
               {profile?.company_name ?? profile?.full_name ?? 'Organizer'}
             </p>
-            <p className="text-xs text-gray-500 capitalize">{profile?.role}</p>
+            <span className="badge-gray" style={{ marginTop: 2, textTransform: 'capitalize' }}>{profile?.role}</span>
           </div>
-          <button onClick={handleSignOut} className="text-gray-500 hover:text-red-400 transition-colors p-1 rounded-lg hover:bg-red-500/5" title="Sign out">
+          <button onClick={handleSignOut} className="transition-colors p-1 rounded-lg hover:bg-red-500/5" style={{ color: 'var(--mist-500)' }} title="Sign out" aria-label="Sign out">
             <LogOut className="w-4 h-4" />
           </button>
         </div>
@@ -143,7 +166,7 @@ export default function Sidebar({ profile, unreadSupportCount = 0, open, onClose
   return (
     <>
       {/* Desktop — always visible */}
-      <div className="hidden lg:flex shrink-0 border-r border-white/5">
+      <div className="hidden lg:flex shrink-0 border-r border-[var(--border-faint)]">
         {sidebarContent}
       </div>
 

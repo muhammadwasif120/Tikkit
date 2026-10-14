@@ -28,14 +28,14 @@ const TIER_META: Record<string, {
   dot: string; iconColor: string; headerBg: string; border: string; badgeBg: string; badgeText: string
 }> = {
   Standard: {
-    dot: 'bg-[#1E5EFF]', iconColor: 'text-[#1E5EFF]',
-    headerBg: 'bg-[#1E5EFF08]', border: 'border-[#1E5EFF25]',
-    badgeBg: 'bg-[#1E5EFF15]', badgeText: 'text-[#1E5EFF]',
+    dot: 'bg-[var(--brand-blue)]', iconColor: 'text-[var(--brand-blue)]',
+    headerBg: 'bg-[rgba(0,229,255,0.05)]', border: 'border-[rgba(0,229,255,0.15)]',
+    badgeBg: 'bg-[rgba(0,229,255,0.08)]', badgeText: 'text-[var(--brand-blue)]',
   },
   VIP: {
-    dot: 'bg-[#FFC745]', iconColor: 'text-[#FFC745]',
-    headerBg: 'bg-[#FFC74508]', border: 'border-[#FFC74525]',
-    badgeBg: 'bg-[#FFC74515]', badgeText: 'text-[#FFC745]',
+    dot: 'bg-[var(--cyan-500)]', iconColor: 'text-[var(--cyan-500)]',
+    headerBg: 'bg-[rgba(0,229,255,0.05)]', border: 'border-[rgba(0,229,255,0.15)]',
+    badgeBg: 'bg-[rgba(0,229,255,0.08)]', badgeText: 'text-[var(--cyan-500)]',
   },
   Discounted: {
     dot: 'bg-green-400', iconColor: 'text-green-400',
@@ -55,7 +55,7 @@ const tierIcon = (name: string) => {
 function PriceInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   return (
     <div className="relative">
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">₨</span>
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mist-400)] text-sm">₨</span>
       <input type="number" className="input pl-7" min="0" placeholder="0"
         value={value} onChange={e => onChange(e.target.value)} />
     </div>
@@ -216,17 +216,17 @@ export default function EventTicketTypes({
     <div className="card space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-          <Ticket className="w-4 h-4 text-[#FFC745]" /> Ticket Tiers
+        <h3 className="font-semibold text-[var(--text-primary)] text-sm flex items-center gap-2">
+          <Ticket className="w-4 h-4 text-[var(--cyan-500)]" /> Ticket Tiers
         </h3>
         {tiers.length > 0 && (
-          <span className="text-xs text-gray-500">{tiers.length} tier{tiers.length !== 1 ? 's' : ''}</span>
+          <span className="text-xs text-[var(--mist-400)]">{tiers.length} tier{tiers.length !== 1 ? 's' : ''}</span>
         )}
       </div>
 
       {/* Tiers list */}
       {tiers.length === 0 && !addingKey && (
-        <div className="text-sm text-gray-500 bg-white/5 rounded-lg px-4 py-3 text-center">
+        <div className="text-sm text-[var(--mist-400)] bg-[var(--overlay-2)] rounded-lg px-4 py-3 text-center">
           No ticket tiers yet. Add one below.
         </div>
       )}
@@ -245,7 +245,7 @@ export default function EventTicketTypes({
                   <span className={`w-2 h-2 rounded-full shrink-0 ${meta.dot}`} />
                   <div>
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold text-white">{t.name}</p>
+                      <p className="text-sm font-semibold text-[var(--text-primary)]">{t.name}</p>
                       {t.is_vip && (
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${meta.badgeBg} ${meta.badgeText}`}>
                           VIP
@@ -253,12 +253,12 @@ export default function EventTicketTypes({
                       )}
                     </div>
                     {!isEditing && (
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-[var(--mist-400)]">
                         {t.price === 0 ? 'Free' : `₨${t.price.toLocaleString()}`}
                         {isDisc && t.original_price && t.original_price > t.price && (
-                          <span className="ml-1.5 line-through text-gray-600">₨{t.original_price.toLocaleString()}</span>
+                          <span className="ml-1.5 line-through text-[var(--mist-500)]">₨{t.original_price.toLocaleString()}</span>
                         )}
-                        <span className="mx-1.5 text-gray-600">·</span>
+                        <span className="mx-1.5 text-[var(--mist-500)]">·</span>
                         {t.quantity.toLocaleString()} spots
                       </p>
                     )}
@@ -269,14 +269,14 @@ export default function EventTicketTypes({
                   {!isEditing ? (
                     <>
                       <button type="button" onClick={() => startEdit(t)}
-                        className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-[var(--overlay-3)] text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors"
                         title="Edit tier">
                         <Pencil className="w-3.5 h-3.5" />
                       </button>
                       <button type="button"
                         onClick={() => deleteTier(t.id)}
                         disabled={deleting === t.id}
-                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--mist-400)] hover:text-red-400 transition-colors"
                         title="Delete tier">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -284,12 +284,12 @@ export default function EventTicketTypes({
                   ) : (
                     <>
                       <button type="button" onClick={() => saveEdit(t)} disabled={saving}
-                        className="p-1.5 rounded-lg hover:bg-green-500/10 text-gray-400 hover:text-green-400 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-green-500/10 text-[var(--mist-400)] hover:text-green-400 transition-colors"
                         title="Save">
                         <Check className="w-3.5 h-3.5" />
                       </button>
                       <button type="button" onClick={() => setEditingId(null)}
-                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-gray-400 hover:text-red-400 transition-colors"
+                        className="p-1.5 rounded-lg hover:bg-red-500/10 text-[var(--mist-400)] hover:text-red-400 transition-colors"
                         title="Cancel">
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -300,12 +300,12 @@ export default function EventTicketTypes({
 
               {/* Edit body */}
               {isEditing && (
-                <div className="px-4 py-4 border-t border-white/5 space-y-3 bg-white/[0.01]">
+                <div className="px-4 py-4 border-t border-[var(--border-faint)] space-y-3 bg-[var(--overlay-1)]">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="label">{isDisc ? 'Original Price (PKR)' : 'Price (PKR)'}</label>
                       <PriceInput value={editState.price} onChange={v => setEditState(p => ({ ...p, price: v }))} />
-                      {!isDisc && <p className="text-xs text-gray-600 mt-1">Leave 0 for free entry</p>}
+                      {!isDisc && <p className="text-xs text-[var(--mist-500)] mt-1">Leave 0 for free entry</p>}
                     </div>
                     <div>
                       <label className="label">Available Spots</label>
@@ -319,14 +319,14 @@ export default function EventTicketTypes({
                     <div>
                       <label className="label">Discount</label>
                       <div className="flex gap-2">
-                        <div className="flex rounded-lg border border-white/10 overflow-hidden shrink-0">
+                        <div className="flex rounded-lg border border-[var(--guest-border)] overflow-hidden shrink-0">
                           {(['percentage', 'fixed'] as const).map(dt => (
                             <button key={dt} type="button"
                               onClick={() => setEditState(p => ({ ...p, discountType: dt }))}
                               className={`px-3 py-2 text-xs font-semibold transition-colors ${
                                 editState.discountType === dt
                                   ? 'bg-green-500 text-white'
-                                  : 'text-gray-400 hover:text-white bg-brand-charcoal-light'
+                                  : 'text-[var(--mist-400)] hover:text-[var(--text-primary)] bg-brand-charcoal-light'
                               }`}>
                               {dt === 'percentage' ? '%' : '₨ Fixed'}
                             </button>
@@ -348,7 +348,7 @@ export default function EventTicketTypes({
                     return saving > 0 ? (
                       <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-green-500/10 border border-green-500/20 text-xs">
                         <div>
-                          <p className="text-gray-400">Final discounted price</p>
+                          <p className="text-[var(--mist-400)]">Final discounted price</p>
                           <p className="text-green-500 mt-0.5">
                             Guests save ₨{saving.toLocaleString()}
                             {editState.discountType === 'percentage' && ` (${editState.discountValue}% off)`}
@@ -392,19 +392,19 @@ export default function EventTicketTypes({
           return (
             <div className={`rounded-xl border overflow-hidden ${meta.border}`}>
               <div className={`flex items-center justify-between px-4 py-3 ${meta.headerBg}`}>
-                <p className="text-sm font-semibold text-white">New {nameMap[addingKey]} Tier</p>
+                <p className="text-sm font-semibold text-[var(--text-primary)]">New {nameMap[addingKey]} Tier</p>
                 <button type="button" onClick={() => setAddingKey(null)}
-                  className="p-1.5 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white transition-colors">
+                  className="p-1.5 rounded-lg hover:bg-[var(--overlay-3)] text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
                   <X className="w-3.5 h-3.5" />
                 </button>
               </div>
 
-              <div className="px-4 py-4 border-t border-white/5 space-y-3 bg-white/[0.01]">
+              <div className="px-4 py-4 border-t border-[var(--border-faint)] space-y-3 bg-[var(--overlay-1)]">
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="label">{isDisc ? 'Original Price (PKR)' : 'Price (PKR)'}</label>
                     <PriceInput value={newState.price} onChange={v => setNewState(p => ({ ...p, price: v }))} />
-                    {!isDisc && <p className="text-xs text-gray-600 mt-1">Leave 0 for free entry</p>}
+                    {!isDisc && <p className="text-xs text-[var(--mist-500)] mt-1">Leave 0 for free entry</p>}
                   </div>
                   <div>
                     <label className="label">Available Spots</label>
@@ -419,14 +419,14 @@ export default function EventTicketTypes({
                     <div>
                       <label className="label">Discount</label>
                       <div className="flex gap-2">
-                        <div className="flex rounded-lg border border-white/10 overflow-hidden shrink-0">
+                        <div className="flex rounded-lg border border-[var(--guest-border)] overflow-hidden shrink-0">
                           {(['percentage', 'fixed'] as const).map(dt => (
                             <button key={dt} type="button"
                               onClick={() => setNewState(p => ({ ...p, discountType: dt }))}
                               className={`px-3 py-2 text-xs font-semibold transition-colors ${
                                 newState.discountType === dt
                                   ? 'bg-green-500 text-white'
-                                  : 'text-gray-400 hover:text-white bg-brand-charcoal-light'
+                                  : 'text-[var(--mist-400)] hover:text-[var(--text-primary)] bg-brand-charcoal-light'
                               }`}>
                               {dt === 'percentage' ? '%' : '₨ Fixed'}
                             </button>
@@ -446,7 +446,7 @@ export default function EventTicketTypes({
                       return save > 0 ? (
                         <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-green-500/10 border border-green-500/20 text-xs">
                           <div>
-                            <p className="text-gray-400">Final discounted price</p>
+                            <p className="text-[var(--mist-400)]">Final discounted price</p>
                             <p className="text-green-500 mt-0.5">
                               Guests save ₨{save.toLocaleString()}
                               {newState.discountType === 'percentage' && ` (${newState.discountValue}% off)`}
@@ -485,17 +485,17 @@ export default function EventTicketTypes({
       {/* Add buttons */}
       {hasAddable && !addingKey && (
         <div className="pt-1">
-          <p className="text-xs text-gray-600 mb-2">Add a tier</p>
+          <p className="text-xs text-[var(--mist-500)] mb-2">Add a tier</p>
           <div className="flex gap-2 flex-wrap">
             {canAdd.standard && (
               <button type="button" onClick={() => setAddingKey('standard')}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#1E5EFF30] bg-[#1E5EFF08] text-[#1E5EFF] text-xs font-medium hover:border-[#1E5EFF70] transition-colors">
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[rgba(0,229,255,0.18)] bg-[rgba(0,229,255,0.05)] text-[var(--brand-blue)] text-xs font-medium hover:border-[rgba(0,229,255,0.45)] transition-colors">
                 <Plus className="w-3.5 h-3.5" /> Standard
               </button>
             )}
             {canAdd.vip && (
               <button type="button" onClick={() => setAddingKey('vip')}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[#FFC74530] bg-[#FFC74508] text-[#FFC745] text-xs font-medium hover:border-[#FFC74570] transition-colors">
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[rgba(0,229,255,0.18)] bg-[rgba(0,229,255,0.05)] text-[var(--cyan-500)] text-xs font-medium hover:border-[rgba(0,229,255,0.45)] transition-colors">
                 <Plus className="w-3.5 h-3.5" /> VIP
               </button>
             )}

@@ -314,7 +314,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.border,
   },
-  navTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  navTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
 
   body: { paddingHorizontal: 16, alignItems: 'center' },
 
@@ -348,7 +348,7 @@ const s = StyleSheet.create({
     fontFamily: 'DMSans_500Medium', fontWeight: '700', letterSpacing: 1.5,
   },
   eventTitle: {
-    color: colors.white, fontSize: 22, fontFamily: 'Poppins_700Bold',
+    color: colors.white, fontSize: 22, fontFamily: 'Sora_700Bold',
     lineHeight: 28, letterSpacing: -0.2,
   },
   headerMeta: { gap: 5, marginTop: 4 },
@@ -386,12 +386,12 @@ const s = StyleSheet.create({
     borderWidth: 2, borderColor: colors.blueBorder,
     alignItems: 'center', justifyContent: 'center',
   },
-  guestAvatarText: { color: colors.blue, fontSize: 18, fontFamily: 'Poppins_700Bold' },
+  guestAvatarText: { color: colors.blue, fontSize: 18, fontFamily: 'Sora_700Bold' },
   guestLabel: {
     color: colors.textMuted, fontSize: 9, fontFamily: 'DMSans_500Medium',
     letterSpacing: 1.5, marginBottom: 2,
   },
-  guestName: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold' },
+  guestName: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold' },
   guestEmail: { color: colors.textSecondary, fontSize: 12, fontFamily: 'DMSans_400Regular', marginTop: 1 },
   vipBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -459,7 +459,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.warning + '40',
     alignItems: 'center', justifyContent: 'center',
   },
-  qrPendingTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold' },
+  qrPendingTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold' },
   qrPendingText: {
     color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular',
     textAlign: 'center', maxWidth: 250, lineHeight: 19,

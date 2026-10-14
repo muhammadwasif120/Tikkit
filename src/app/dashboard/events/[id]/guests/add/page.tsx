@@ -12,10 +12,10 @@ function Toggle({
   on, onToggle, color = 'blue',
 }: { on: boolean; onToggle: () => void; color?: 'blue' | 'yellow' | 'green' }) {
   const bg = on
-    ? color === 'yellow' ? 'bg-[#FFC745]'
+    ? color === 'yellow' ? 'bg-[var(--cyan-500)]'
     : color === 'green'  ? 'bg-green-500'
-    : 'bg-[#1E5EFF]'
-    : 'bg-white/10'
+    : 'bg-[var(--brand-blue)]'
+    : 'bg-[var(--overlay-3)]'
   return (
     <button type="button" onClick={onToggle}
       className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${bg}`}>
@@ -206,12 +206,12 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
   return (
     <div className="max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href={`/dashboard/events/${resolvedParams.id}`} className="text-gray-400 hover:text-white transition-colors">
+        <Link href={`/dashboard/events/${resolvedParams.id}`} className="text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Add Guests</h2>
-          <p className="text-gray-400 text-sm mt-0.5">Add individually or import from a file</p>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: 'Poppins, sans-serif' }}>Add Guests</h2>
+          <p className="text-[var(--mist-400)] text-sm mt-0.5">Add individually or import from a file</p>
         </div>
       </div>
 
@@ -221,10 +221,10 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
           { key: 'import', icon: FileSpreadsheet, label: 'Import File', desc: 'Upload CSV or Excel sheet' },
         ].map(opt => (
           <button key={opt.key} onClick={() => setMode(opt.key as 'single' | 'import')}
-            className={`p-4 rounded-lg border text-left transition-all ${mode === opt.key ? 'border-[#1E5EFF] bg-[#1E5EFF15]' : 'border-white/10 bg-brand-charcoal hover:border-white/20'}`}>
-            <opt.icon className={`w-5 h-5 mb-2 ${mode === opt.key ? 'text-[#1E5EFF]' : 'text-gray-400'}`} />
-            <p className="font-medium text-white text-sm">{opt.label}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{opt.desc}</p>
+            className={`p-4 rounded-lg border text-left transition-all ${mode === opt.key ? 'border-[var(--brand-blue)] bg-[rgba(0,229,255,0.08)]' : 'border-[var(--guest-border)] bg-brand-charcoal hover:border-[var(--guest-border-hover)]'}`}>
+            <opt.icon className={`w-5 h-5 mb-2 ${mode === opt.key ? 'text-[var(--brand-blue)]' : 'text-[var(--mist-400)]'}`} />
+            <p className="font-medium text-[var(--text-primary)] text-sm">{opt.label}</p>
+            <p className="text-xs text-[var(--mist-400)] mt-0.5">{opt.desc}</p>
           </button>
         ))}
       </div>
@@ -232,7 +232,7 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
       {mode === 'single' && (
         <form onSubmit={handleSubmit} className="space-y-6 animate-fade-in">
           <div className="card space-y-4">
-            <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>Guest Details</h3>
+            <h3 className="font-semibold text-[var(--text-primary)] text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>Guest Details</h3>
             <div>
               <label className="label">Full Name *</label>
               <input type="text" className="input" placeholder="Ahmed Raza" value={form.full_name} onChange={e => update('full_name', e.target.value)} required />
@@ -241,7 +241,7 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
               <div>
                 <label className="label">Email</label>
                 <input type="email" className="input" placeholder="guest@example.com" value={form.email} onChange={e => update('email', e.target.value)} />
-                <p className="text-xs text-gray-600 mt-1">If they have a Tikkit account, they&apos;ll be notified</p>
+                <p className="text-xs text-[var(--mist-500)] mt-1">If they have a Tikkit account, they&apos;ll be notified</p>
               </div>
               <div>
                 <label className="label">Phone</label>
@@ -260,17 +260,17 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
           </div>
 
           <div className="card space-y-3">
-            <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>Guest Options</h3>
+            <h3 className="font-semibold text-[var(--text-primary)] text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>Guest Options</h3>
             {([
               { key: 'is_vip',   label: 'VIP Guest',         desc: 'Marked with VIP badge on entry',           color: 'yellow' as const },
               { key: 'plus_one', label: 'Plus One',           desc: 'Guest is bringing a +1',                    color: 'blue'   as const },
               { key: 'waitlist', label: 'Add to Waitlist',    desc: 'Guest is on waitlist, not confirmed',        color: 'blue'   as const },
             ]).map(opt => (
               <div key={opt.key}>
-                <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)]">
                   <div>
-                    <p className="text-sm font-medium text-white">{opt.label}</p>
-                    <p className="text-xs text-gray-500">{opt.desc}</p>
+                    <p className="text-sm font-medium text-[var(--text-primary)]">{opt.label}</p>
+                    <p className="text-xs text-[var(--mist-400)]">{opt.desc}</p>
                   </div>
                   <Toggle
                     on={!!form[opt.key as keyof typeof form]}
@@ -305,8 +305,8 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
         <div className="space-y-4 animate-fade-in">
           <div className="card flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-white">Download Template</p>
-              <p className="text-xs text-gray-500 mt-0.5">Use our CSV template for correct formatting</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">Download Template</p>
+              <p className="text-xs text-[var(--mist-400)] mt-0.5">Use our CSV template for correct formatting</p>
             </div>
             <button onClick={downloadTemplate} className="btn-secondary text-xs px-3 py-2">
               <Download className="w-3 h-3" /> Template
@@ -314,10 +314,10 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
           </div>
 
           <div onClick={() => fileInputRef.current?.click()}
-            className="card border-dashed border-white/20 hover:border-[#1E5EFF]/50 hover:bg-[#1E5EFF08] transition-all cursor-pointer text-center py-10">
-            <Upload className="w-8 h-8 text-gray-500 mx-auto mb-3" />
-            <p className="text-sm font-medium text-white">Click to upload file</p>
-            <p className="text-xs text-gray-500 mt-1">Supports .csv and .xlsx files</p>
+            className="card border-dashed border-[var(--guest-border-hover)] hover:border-[var(--brand-blue)]/50 hover:bg-[rgba(0,229,255,0.05)] transition-all cursor-pointer text-center py-10">
+            <Upload className="w-8 h-8 text-[var(--mist-400)] mx-auto mb-3" />
+            <p className="text-sm font-medium text-[var(--text-primary)]">Click to upload file</p>
+            <p className="text-xs text-[var(--mist-400)] mt-1">Supports .csv and .xlsx files</p>
             <input ref={fileInputRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleFileUpload} />
           </div>
 
@@ -325,24 +325,24 @@ export default function AddGuestPage({ params }: { params: Promise<{ id: string 
             <div className="card space-y-4 animate-slide-up">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-semibold text-white text-sm">{importRows.length} guests found</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{importRows.filter(r => r.status === 'ready').length} ready · {importRows.filter(r => r.status === 'error').length} errors</p>
+                  <p className="font-semibold text-[var(--text-primary)] text-sm">{importRows.length} guests found</p>
+                  <p className="text-xs text-[var(--mist-400)] mt-0.5">{importRows.filter(r => r.status === 'ready').length} ready · {importRows.filter(r => r.status === 'error').length} errors</p>
                 </div>
-                <button onClick={() => setImportRows([])} className="text-gray-500 hover:text-white transition-colors"><X className="w-4 h-4" /></button>
+                <button onClick={() => setImportRows([])} className="text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors"><X className="w-4 h-4" /></button>
               </div>
               <div className="overflow-x-auto -mx-6 px-6">
                 <table className="w-full min-w-[500px]">
                   <thead>
-                    <tr className="border-b border-white/5">
+                    <tr className="border-b border-[var(--border-faint)]">
                       {['Name','Email','Gender','VIP','+1','Status'].map(h => <th key={h} className="table-header">{h}</th>)}
                     </tr>
                   </thead>
                   <tbody>
                     {importRows.map((row, i) => (
-                      <tr key={i} className="border-b border-white/5">
-                        <td className="table-cell font-medium text-white">{row.full_name}</td>
-                        <td className="table-cell text-gray-400">{row.email || '—'}</td>
-                        <td className="table-cell text-gray-400 capitalize">{row.gender || '—'}</td>
+                      <tr key={i} className="border-b border-[var(--border-faint)]">
+                        <td className="table-cell font-medium text-[var(--text-primary)]">{row.full_name}</td>
+                        <td className="table-cell text-[var(--mist-400)]">{row.email || '—'}</td>
+                        <td className="table-cell text-[var(--mist-400)] capitalize">{row.gender || '—'}</td>
                         <td className="table-cell">{row.is_vip ? '⭐' : '—'}</td>
                         <td className="table-cell">{row.plus_one ? '✓' : '—'}</td>
                         <td className="table-cell">

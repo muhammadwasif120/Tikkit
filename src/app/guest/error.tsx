@@ -48,7 +48,7 @@ export default function GuestError({
           <button
             onClick={reset}
             style={{
-              background: '#1E5EFF',
+              background: 'var(--brand-blue)',
               border: 'none',
               borderRadius: 8,
               padding: '10px 20px',

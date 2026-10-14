@@ -32,7 +32,7 @@ function Card({ children, style = {} }: { children: React.ReactNode; style?: Rea
   return (
     <div className="skeleton-card" style={{
       background: 'rgba(255,255,255,0.02)',
-      border: '1px solid rgba(30,94,255,0.08)',
+      border: '1px solid rgba(0,229,255,0.08)',
       borderRadius: 14, padding: '16px 18px',
       ...style,
     }}>

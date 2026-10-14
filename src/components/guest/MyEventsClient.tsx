@@ -252,7 +252,7 @@ function RegCard({ reg, onPay }: { reg: Registration; onPay: (r: Registration) =
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 12 }}>
             <MapPin size={11} color="var(--brand-blue)" />
             {event.secret_venue && !isConfirmed
-              ? <span style={{ color: '#FFC745' }}>Secret venue</span>
+              ? <span style={{ color: 'var(--cyan-500)' }}>Secret venue</span>
               : (event.venue_name ?? 'TBA')}
           </span>
         </div>

@@ -10,17 +10,6 @@ import {
 import { toggleFavouriteOrganizer } from '@/app/actions/organizerActions'
 import { toggleEventFavourite } from '@/app/actions/eventFavouriteActions'
 import type { TopOrganizer } from '@/app/actions/organizerActions'
-import ExperiencesStrip from './ExperiencesStrip'
-import VenuesStrip from './VenuesStrip'
-
-function ExperiencesStripLazy({ experiences }: { experiences: any[] }) {
-  return <ExperiencesStrip experiences={experiences} />
-}
-
-function VenuesStripLazy({ venues }: { venues: any[] }) {
-  return <VenuesStrip venues={venues} />
-}
-
 
 /* ─── Types ──────────────────────────────────────────────────── */
 type Organizer = {
@@ -75,7 +64,7 @@ function groupEvents(events: Event[]) {
   const weekEnd = new Date(); weekEnd.setDate(new Date().getDate() + 7)
   const groups = [
     { key: 'today', label: 'Today',     icon: <Flame size={13} color="#FF6B35" />, events: [] as Event[] },
-    { key: 'week',  label: 'This Week', icon: <Zap   size={13} color="#FFC745" />, events: [] as Event[] },
+    { key: 'week',  label: 'This Week', icon: <Zap   size={13} color="var(--cyan-500)" />, events: [] as Event[] },
     { key: 'later', label: 'Coming Up', icon: <Star  size={13} color="#818CF8" />, events: [] as Event[] },
   ]
   for (const e of events) {
@@ -228,8 +217,8 @@ function TopOrganizersStrip({
       {/* Header */}
       <div className="exp-strip-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 16px', marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <div style={{ width: 3, height: 13, borderRadius: 2, background: '#FFC745' }} />
-          <Building2 size={12} color="#FFC745" />
+          <div style={{ width: 3, height: 13, borderRadius: 2, background: 'var(--cyan-500)' }} />
+          <Building2 size={12} color="var(--cyan-500)" />
           <span className="exp-section-lbl" style={{ color: 'var(--text-primary)', fontSize: 12, fontWeight: 800, fontFamily: 'var(--font-display)', letterSpacing: '0.3px' }}>
             TOP ORGANIZERS
           </span>
@@ -602,7 +591,7 @@ function EventCard({ event, index, isFavourited, onToggleFav }: {
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'var(--text-secondary)', fontSize: 12 }}>
             <MapPin size={11} style={{ flexShrink: 0, opacity: 0.7 }} />
             {event.secret_venue
-              ? <span style={{ color: '#FFC745', display: 'flex', alignItems: 'center', gap: 3 }}><Lock size={10} />Secret venue</span>
+              ? <span style={{ color: 'var(--cyan-500)', display: 'flex', alignItems: 'center', gap: 3 }}><Lock size={10} />Secret venue</span>
               : (event.venue_name ?? 'TBA')
             }
           </span>
@@ -708,7 +697,7 @@ function EventRow({ event, index, isFavourited, onToggleFav }: {
             <span style={{ display: 'flex', alignItems: 'center', gap: 3, color: 'var(--text-secondary)', fontSize: 10 }}>
               <MapPin size={9} />
               {event.secret_venue
-                ? <span style={{ color: '#FFC745', display: 'flex', alignItems: 'center', gap: 2 }}><Lock size={8} />Secret</span>
+                ? <span style={{ color: 'var(--cyan-500)', display: 'flex', alignItems: 'center', gap: 2 }}><Lock size={8} />Secret</span>
                 : (event.venue_name ?? 'TBA')}
             </span>
           </div>
@@ -810,8 +799,6 @@ export default function ExploreClient({
   categories = [],
   userId = null,
   favouritedEventIds = [],
-  experiences = [],
-  venues = [],
 }: {
   events: Event[]
   myEvents: MyEvent[]
@@ -819,8 +806,6 @@ export default function ExploreClient({
   categories?: { id: string; name: string; slug: string; icon: string; color: string }[]
   userId?: string | null
   favouritedEventIds?: string[]
-  experiences?: any[]
-  venues?: any[]
 }) {
   const [query, setQuery] = useState('')
   const [selectedTag, setSelectedTag] = useState<string | null>(null)
@@ -1113,16 +1098,6 @@ export default function ExploreClient({
           {/* Top Organizers strip */}
           {!isFiltering && topOrganizers.length > 0 && (
             <TopOrganizersStrip organizers={topOrganizers} userId={userId} />
-          )}
-
-          {/* Venues strip */}
-          {!isFiltering && venues.length > 0 && (
-            <VenuesStripLazy venues={venues} />
-          )}
-
-          {/* Experiences strip */}
-          {!isFiltering && experiences.length > 0 && (
-            <ExperiencesStripLazy experiences={experiences} />
           )}
         </div>
 

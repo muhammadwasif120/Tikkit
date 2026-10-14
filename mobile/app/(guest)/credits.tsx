@@ -34,19 +34,19 @@ const TIER_META: Record<string, {
   },
   regular: {
     gradient: ['#080F28', '#0A1640', '#060C1E'],
-    glow: '#1E5EFF',
+    glow: colors.blue,
     icon: 'star-outline',
     next: 'VIP',
   },
   vip: {
     gradient: ['#1A1000', '#261800', '#160E00'],
-    glow: '#FFC745',
+    glow: colors.gold,
     icon: 'ribbon-outline',
     next: 'Elite',
   },
   elite: {
     gradient: ['#140820', '#1E0A38', '#100618'],
-    glow: '#818CF8',
+    glow: colors.indigo,
     icon: 'diamond-outline',
     next: null as any,
   },
@@ -329,7 +329,7 @@ const s = StyleSheet.create({
     marginBottom: 4,
   },
   balance: {
-    fontSize: 52, fontFamily: 'Poppins_700Bold', lineHeight: 56, letterSpacing: -1,
+    fontSize: 52, fontFamily: 'Sora_700Bold', lineHeight: 56, letterSpacing: -1,
   },
   balancePts: {
     fontSize: 18, fontFamily: 'DMSans_400Regular',
@@ -367,7 +367,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12,
   },
   sectionTitle: {
-    color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold',
+    color: colors.textPrimary, fontSize: 15, fontFamily: 'Sora_600SemiBold',
   },
   sectionCount: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular' },
 
@@ -386,7 +386,7 @@ const s = StyleSheet.create({
   txEvent: { color: colors.textPrimary, fontSize: 14, fontFamily: 'DMSans_500Medium' },
   txType: { color: colors.textSecondary, fontSize: 12, fontFamily: 'DMSans_400Regular', marginTop: 2 },
   txDate: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 2 },
-  txPoints: { fontSize: 18, fontFamily: 'Poppins_700Bold' },
+  txPoints: { fontSize: 18, fontFamily: 'Sora_700Bold' },
 
   // Empty
   empty: { alignItems: 'center', paddingTop: 48, gap: 12, paddingHorizontal: 24 },
@@ -395,7 +395,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
   emptyText: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 19 },
   emptyBtn: {
     backgroundColor: colors.blue, borderRadius: radius.md,

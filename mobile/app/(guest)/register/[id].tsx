@@ -325,7 +325,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.border,
   },
-  navTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  navTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
 
   body: { padding: 16, paddingBottom: 48, gap: 12 },
 
@@ -342,7 +342,7 @@ const s = StyleSheet.create({
     flexShrink: 0,
   },
   eventTitle: {
-    color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold', marginBottom: 2,
+    color: colors.textPrimary, fontSize: 15, fontFamily: 'Sora_600SemiBold', marginBottom: 2,
   },
   eventMeta: { color: colors.textSecondary, fontSize: 12, fontFamily: 'DMSans_400Regular' },
   priceTag: {
@@ -417,6 +417,6 @@ const s = StyleSheet.create({
     elevation: 0,
   },
   submitText: {
-    color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold', fontWeight: '700',
+    color: colors.white, fontSize: 16, fontFamily: 'Sora_600SemiBold', fontWeight: '700',
   },
 })

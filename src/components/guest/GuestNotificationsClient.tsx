@@ -33,7 +33,7 @@ function getNotif(reg: Registration): { icon: typeof Bell; color: string; bg: st
   }
 
   if (reg.status === 'approved' && reg.payment_status === 'pending') return {
-    icon: AlertCircle, color: '#FFC745', bg: 'rgba(255,199,69,0.1)',
+    icon: AlertCircle, color: 'var(--cyan-500)', bg: 'rgba(255,199,69,0.1)',
     title: 'Payment Required',
     body: `You've been approved for "${name}". Complete payment to confirm your spot.`,
     cta: { label: 'Pay Now', href: `/guest/tikkit` },
@@ -46,7 +46,7 @@ function getNotif(reg: Registration): { icon: typeof Bell; color: string; bg: st
   }
 
   if (reg.status === 'approved' && (reg.payment_status === 'confirmed' || reg.payment_status === 'not_required')) return {
-    icon: CheckCircle, color: '#22C55E', bg: 'rgba(34,197,94,0.1)',
+    icon: CheckCircle, color: 'var(--mint-500)', bg: 'rgba(34,197,94,0.1)',
     title: "You're In!",
     body: `Your spot at "${name}" is confirmed. Check your tickets for the QR code.`,
     cta: { label: 'View Ticket', href: '/guest/tikkit' },
@@ -54,7 +54,7 @@ function getNotif(reg: Registration): { icon: typeof Bell; color: string; bg: st
 
   // Open-registration events: user self-registered, immediately confirmed
   if (reg.status === 'registered' || reg.status === 'confirmed') return {
-    icon: CheckCircle, color: '#22C55E', bg: 'rgba(34,197,94,0.1)',
+    icon: CheckCircle, color: 'var(--mint-500)', bg: 'rgba(34,197,94,0.1)',
     title: "You're Registered!",
     body: `Your spot at "${name}" is all set. Your QR ticket is ready.`,
     cta: { label: 'View Ticket', href: '/guest/tikkit' },

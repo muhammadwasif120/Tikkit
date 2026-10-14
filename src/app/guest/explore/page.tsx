@@ -25,20 +25,17 @@ import { getPublicEvents } from '@/app/actions/guestCreditActions'
 import { getTopOrganizers } from '@/app/actions/organizerActions'
 import { getEventCategories, getUserCategoryOrder } from '@/app/actions/behaviourActions'
 import { getUserFavouriteEventIds } from '@/app/actions/eventFavouriteActions'
-import { getExperiencesForExplore, getVenuesForExplore } from '@/app/actions/venueActions'
 
 async function ExploreData() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   // Fetch all data in parallel
-  const [events, topOrganizers, categories, favouritedEventIds, experiences, venues] = await Promise.all([
+  const [events, topOrganizers, categories, favouritedEventIds] = await Promise.all([
     getPublicEvents(60),
     getTopOrganizers(12),
     getEventCategories(),
     user ? getUserFavouriteEventIds() : Promise.resolve([]),
-    getExperiencesForExplore(12),
-    getVenuesForExplore(10),
   ])
 
   const myEvents = user ? await (async () => {
@@ -84,8 +81,6 @@ async function ExploreData() {
       categories={categories}
       userId={user?.id ?? null}
       favouritedEventIds={favouritedEventIds}
-      experiences={experiences}
-      venues={venues}
     />
   )
 }

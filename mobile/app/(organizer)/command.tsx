@@ -180,7 +180,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.pageBg },
 
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 },
-  heading:    { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading:    { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.textMuted,   fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   howItWorks: {
@@ -205,7 +205,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     position: 'relative',
   },
-  cardInitial: { color: colors.white, fontSize: 42, fontFamily: 'Poppins_700Bold' },
+  cardInitial: { color: colors.white, fontSize: 42, fontFamily: 'Sora_700Bold' },
 
   statusBadge: {
     position: 'absolute', top: 10, right: 10,
@@ -219,7 +219,7 @@ const s = StyleSheet.create({
   statusBadgeText: { fontSize: 10, fontFamily: 'DMSans_500Medium', fontWeight: '700' },
 
   cardBody:   { padding: 14 },
-  cardTitle:  { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold', marginBottom: 6 },
+  cardTitle:  { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold', marginBottom: 6 },
   cardMeta:   { flexDirection: 'row', alignItems: 'center', gap: 5, marginBottom: 10 },
   cardMetaText: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular' },
   cardFooter: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
@@ -230,7 +230,7 @@ const s = StyleSheet.create({
 
   empty:          { alignItems: 'center', paddingTop: 64, paddingHorizontal: 32, gap: 10 },
   emptyIconCircle:{ width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  emptyTitle:     { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle:     { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_600SemiBold' },
   emptyBody:      { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
   emptyBtn:       { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: colors.blue, borderRadius: radius.md, paddingHorizontal: 20, paddingVertical: 10, marginTop: 6 },
   emptyBtnText:   { color: colors.white, fontFamily: 'DMSans_500Medium', fontSize: 14, fontWeight: '700' },

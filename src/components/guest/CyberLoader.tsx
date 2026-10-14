@@ -32,7 +32,7 @@ export default function CyberLoader() {
         >
           <defs>
             <linearGradient id="outerG" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%"   stopColor="#1E5EFF" stopOpacity="0.9" />
+              <stop offset="0%"   stopColor="var(--brand-blue)" stopOpacity="0.9" />
               <stop offset="100%" stopColor="#A855F7" stopOpacity="0.1" />
             </linearGradient>
           </defs>
@@ -51,7 +51,7 @@ export default function CyberLoader() {
           <defs>
             <linearGradient id="midG" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%"   stopColor="#A855F7" stopOpacity="0.9" />
-              <stop offset="100%" stopColor="#1E5EFF" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="var(--brand-blue)" stopOpacity="0.1" />
             </linearGradient>
           </defs>
           <circle cx="40" cy="40" r="26"
@@ -106,7 +106,7 @@ export default function CyberLoader() {
           {[0, 1, 2].map(i => (
             <div key={i} style={{
               width: 4, height: 4, borderRadius: '50%',
-              background: i === 1 ? '#A855F7' : '#1E5EFF',
+              background: i === 1 ? '#A855F7' : 'var(--brand-blue)',
               animation: `pulseDot 1.1s ease-in-out ${i * 0.18}s infinite`,
               boxShadow: i === 1
                 ? '0 0 6px rgba(168,85,247,0.8)'

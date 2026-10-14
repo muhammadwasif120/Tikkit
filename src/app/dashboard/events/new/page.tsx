@@ -42,10 +42,10 @@ function computeFinalPrice(tier: Tier): number | null {
 /* ─── Toggle ─── */
 function Toggle({ on, onToggle, color = 'blue' }: { on: boolean; onToggle: () => void; color?: string }) {
   const bg = on
-    ? color === 'yellow' ? 'bg-[#FFC745]'
+    ? color === 'yellow' ? 'bg-[var(--cyan-500)]'
     : color === 'green'  ? 'bg-green-500'
-    : 'bg-[#1E5EFF]'
-    : 'bg-white/10'
+    : 'bg-[var(--brand-blue)]'
+    : 'bg-[var(--overlay-3)]'
   return (
     <button type="button" onClick={onToggle}
       className={`relative w-10 h-5 rounded-full transition-colors shrink-0 ${bg}`}>
@@ -265,14 +265,14 @@ export default function NewEventPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/dashboard/events" className="text-gray-400 hover:text-white transition-colors">
+        <Link href="/dashboard/events" className="text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>
             Create Event
           </h2>
-          <p className="text-gray-400 text-sm mt-0.5">Set up a new event</p>
+          <p className="text-[var(--mist-400)] text-sm mt-0.5">Set up a new event</p>
         </div>
       </div>
 
@@ -280,8 +280,8 @@ export default function NewEventPage() {
 
         {/* ── Basic Info ── */}
         <div className="card space-y-4">
-          <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-[#1E5EFF]" /> Event Details
+          <h3 className="font-semibold text-[var(--text-primary)] text-sm flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[var(--brand-blue)]" /> Event Details
           </h3>
 
           <div>
@@ -308,7 +308,7 @@ export default function NewEventPage() {
             />
 
             {coverPreview ? (
-              <div className="relative rounded-xl overflow-hidden border border-white/10" style={{ aspectRatio: '16/7' }}>
+              <div className="relative rounded-xl overflow-hidden border border-[var(--guest-border)]" style={{ aspectRatio: '16/7' }}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={coverPreview} alt="Cover preview" className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -320,14 +320,14 @@ export default function NewEventPage() {
                     <button
                       type="button"
                       onClick={() => coverInputRef.current?.click()}
-                      className="text-xs text-white bg-black/50 rounded-lg px-2.5 py-1 border border-white/20 hover:bg-black/70 transition-colors backdrop-blur-sm"
+                      className="text-xs text-[var(--text-primary)] bg-black/50 rounded-lg px-2.5 py-1 border border-[var(--guest-border-hover)] hover:bg-black/70 transition-colors backdrop-blur-sm"
                     >
                       Change
                     </button>
                     <button
                       type="button"
                       onClick={removeCover}
-                      className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/50 border border-white/20 text-gray-300 hover:text-red-400 transition-colors backdrop-blur-sm"
+                      className="flex items-center justify-center w-7 h-7 rounded-lg bg-black/50 border border-[var(--guest-border-hover)] text-[var(--mist-300)] hover:text-red-400 transition-colors backdrop-blur-sm"
                     >
                       <X size={13} />
                     </button>
@@ -338,17 +338,17 @@ export default function NewEventPage() {
               <button
                 type="button"
                 onClick={() => coverInputRef.current?.click()}
-                className="w-full rounded-xl border-2 border-dashed border-white/10 hover:border-[#1E5EFF]/40 transition-all group"
+                className="w-full rounded-xl border-2 border-dashed border-[var(--guest-border)] hover:border-[var(--brand-blue)]/40 transition-all group"
                 style={{ aspectRatio: '16/7' }}
               >
                 <div className="flex flex-col items-center justify-center gap-2 py-2">
-                  <div className="w-10 h-10 rounded-xl bg-[#1E5EFF]/10 border border-[#1E5EFF]/20 flex items-center justify-center group-hover:bg-[#1E5EFF]/15 transition-colors">
-                    <ImagePlus size={20} color="#1E5EFF" />
+                  <div className="w-10 h-10 rounded-xl bg-[var(--brand-blue)]/10 border border-[var(--brand-blue)]/20 flex items-center justify-center group-hover:bg-[var(--brand-blue)]/15 transition-colors">
+                    <ImagePlus size={20} color="var(--brand-blue)" />
                   </div>
-                  <p className="text-sm font-medium text-gray-400 group-hover:text-gray-300 transition-colors">
+                  <p className="text-sm font-medium text-[var(--mist-400)] group-hover:text-[var(--mist-300)] transition-colors">
                     Add cover image
                   </p>
-                  <p className="text-xs text-gray-600">JPG, PNG or WebP · max 10 MB · 16:9 recommended</p>
+                  <p className="text-xs text-[var(--mist-500)]">JPG, PNG or WebP · max 10 MB · 16:9 recommended</p>
                 </div>
               </button>
             )}
@@ -379,7 +379,7 @@ export default function NewEventPage() {
                       </option>
                     ))}
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)]" />
                 </div>
               </div>
             )
@@ -401,8 +401,8 @@ export default function NewEventPage() {
 
         {/* ── Venue ── */}
         <div className="card space-y-4">
-          <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-[#1E5EFF]" /> Venue
+          <h3 className="font-semibold text-[var(--text-primary)] text-sm flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-[var(--brand-blue)]" /> Venue
           </h3>
 
           <div>
@@ -428,12 +428,12 @@ export default function NewEventPage() {
             </select>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+          <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)]">
             <div>
-              <p className="text-sm font-medium text-white flex items-center gap-2">
+              <p className="text-sm font-medium text-[var(--text-primary)] flex items-center gap-2">
                 <Eye className="w-3.5 h-3.5" /> Secret Venue
               </p>
-              <p className="text-xs text-gray-500">Hide address until confirmed guests receive it</p>
+              <p className="text-xs text-[var(--mist-400)]">Hide address until confirmed guests receive it</p>
             </div>
             <Toggle on={form.secret_venue} onToggle={() => update('secret_venue', !form.secret_venue)} />
           </div>
@@ -441,15 +441,15 @@ export default function NewEventPage() {
 
         {/* ── Capacity & Demographics ── */}
         <div className="card space-y-4">
-          <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#1E5EFF]" /> Capacity & Demographics
+          <h3 className="font-semibold text-[var(--text-primary)] text-sm flex items-center gap-2">
+            <Users className="w-4 h-4 text-[var(--brand-blue)]" /> Capacity & Demographics
           </h3>
 
           <div>
             <label className="label">Total Capacity</label>
             <input type="number" className="input opacity-70 cursor-not-allowed"
               value={tierTotal || ''} placeholder="Set by your ticket tiers" readOnly disabled />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-[var(--mist-400)] mt-1">
               Automatically set to the sum of your ticket tiers below — {tierTotal} {tierTotal === 1 ? 'spot' : 'spots'} total.
             </p>
           </div>
@@ -467,18 +467,18 @@ export default function NewEventPage() {
             </div>
           </div>
 
-          <div className="flex flex-col p-3 rounded-lg bg-brand-charcoal-light border border-white/5 space-y-2">
+          <div className="flex flex-col p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)] space-y-2">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-white flex items-center gap-2">
+                <p className="text-sm font-medium text-[var(--text-primary)] flex items-center gap-2">
                   <Lock className="w-3.5 h-3.5" /> Private Event
                 </p>
-                <p className="text-xs text-gray-500">Only invited guests can see this event</p>
+                <p className="text-xs text-[var(--mist-400)]">Only invited guests can see this event</p>
               </div>
               <Toggle on={form.is_private} onToggle={() => update('is_private', !form.is_private)} />
             </div>
             {form.is_private && (
-              <div className="text-[11px] text-[#FFC745] bg-[#FFC745]/10 px-2.5 py-1.5 rounded border border-[#FFC745]/20 mt-1 leading-relaxed">
+              <div className="text-[11px] text-[var(--cyan-500)] bg-[var(--cyan-500)]/10 px-2.5 py-1.5 rounded border border-[var(--cyan-500)]/20 mt-1 leading-relaxed">
                 Attendees must have a Tikkit X account to receive their private QR pass. Nothing is shared off-platform to protect your privacy.
               </div>
             )}
@@ -488,10 +488,10 @@ export default function NewEventPage() {
         {/* ── Ticket Tiers ── */}
         <div className="card space-y-3">
           <div>
-            <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-              <Ticket className="w-4 h-4 text-[#FFC745]" /> Ticket Tiers
+            <h3 className="font-semibold text-[var(--text-primary)] text-sm flex items-center gap-2">
+              <Ticket className="w-4 h-4 text-[var(--cyan-500)]" /> Ticket Tiers
             </h3>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <p className="text-xs text-[var(--mist-400)] mt-0.5">
               Enable the tiers you want to offer. Each tier can have its own price and quantity.
             </p>
           </div>
@@ -500,8 +500,8 @@ export default function NewEventPage() {
           <TierCard
             label="Standard"
             description="General admission"
-            dot="bg-[#1E5EFF]"
-            icon={<Ticket className="w-3.5 h-3.5 text-[#1E5EFF]" />}
+            dot="bg-[var(--brand-blue)]"
+            icon={<Ticket className="w-3.5 h-3.5 text-[var(--brand-blue)]" />}
             enabled={tiers.standard.enabled}
             toggleColor="blue"
             onToggle={() => updateTier('standard', 'enabled', !tiers.standard.enabled)}
@@ -514,7 +514,7 @@ export default function NewEventPage() {
                   onChange={v => updateTier('standard', 'price', v)}
                   placeholder="0"
                 />
-                <p className="text-xs text-gray-600 mt-1">Leave 0 for free entry</p>
+                <p className="text-xs text-[var(--mist-500)] mt-1">Leave 0 for free entry</p>
               </div>
               <div>
                 <label className="label">Available Spots</label>
@@ -530,8 +530,8 @@ export default function NewEventPage() {
           <TierCard
             label="VIP"
             description="Premium access with exclusive perks"
-            dot="bg-[#FFC745]"
-            icon={<Star className="w-3.5 h-3.5 text-[#FFC745]" />}
+            dot="bg-[var(--cyan-500)]"
+            icon={<Star className="w-3.5 h-3.5 text-[var(--cyan-500)]" />}
             enabled={tiers.vip.enabled}
             toggleColor="yellow"
             onToggle={() => updateTier('vip', 'enabled', !tiers.vip.enabled)}
@@ -587,13 +587,13 @@ export default function NewEventPage() {
                 <label className="label">Discount</label>
                 <div className="flex gap-2">
                   {/* Toggle buttons */}
-                  <div className="flex rounded-lg border border-white/10 overflow-hidden shrink-0">
+                  <div className="flex rounded-lg border border-[var(--guest-border)] overflow-hidden shrink-0">
                     <button type="button"
                       onClick={() => updateTier('discounted', 'discountType', 'percentage')}
                       className={`px-3 py-2 text-xs font-semibold transition-colors ${
                         tiers.discounted.discountType === 'percentage'
                           ? 'bg-green-500 text-white'
-                          : 'text-gray-400 hover:text-white bg-brand-charcoal-light'
+                          : 'text-[var(--mist-400)] hover:text-[var(--text-primary)] bg-brand-charcoal-light'
                       }`}>
                       %
                     </button>
@@ -602,7 +602,7 @@ export default function NewEventPage() {
                       className={`px-3 py-2 text-xs font-semibold transition-colors ${
                         tiers.discounted.discountType === 'fixed'
                           ? 'bg-green-500 text-white'
-                          : 'text-gray-400 hover:text-white bg-brand-charcoal-light'
+                          : 'text-[var(--mist-400)] hover:text-[var(--text-primary)] bg-brand-charcoal-light'
                       }`}>
                       ₨ Fixed
                     </button>
@@ -623,7 +623,7 @@ export default function NewEventPage() {
                 return (
                   <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-green-500/10 border border-green-500/20 text-xs">
                     <div>
-                      <p className="text-gray-400">Final discounted price</p>
+                      <p className="text-[var(--mist-400)]">Final discounted price</p>
                       {saving > 0 && (
                         <p className="text-green-500 mt-0.5">
                           Guests save ₨{saving.toLocaleString()}
@@ -662,24 +662,24 @@ export default function NewEventPage() {
 
         {/* ── Budget ── */}
         <div className="card space-y-4">
-          <h3 className="font-semibold text-white text-sm flex items-center gap-2">
+          <h3 className="font-semibold text-[var(--text-primary)] text-sm flex items-center gap-2">
             <Wallet className="w-4 h-4 text-green-400" /> Event Budget
           </h3>
           <div>
             <label className="label">Total Budget (PKR)</label>
             <div className="relative">
-              <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+              <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)]" />
               <input type="number" className="input pl-9" placeholder="0" min="0"
                 value={form.budget} onChange={e => update('budget', e.target.value)} />
             </div>
-            <p className="text-xs text-gray-600 mt-1">Total cost to run this event</p>
+            <p className="text-xs text-[var(--mist-500)] mt-1">Total cost to run this event</p>
           </div>
         </div>
 
         {/* ── Registration Mode ── */}
         <div className="card space-y-4">
-          <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#1E5EFF]" /> Registration Mode
+          <h3 className="font-semibold text-[var(--text-primary)] text-sm flex items-center gap-2">
+            <Users className="w-4 h-4 text-[var(--brand-blue)]" /> Registration Mode
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -692,8 +692,8 @@ export default function NewEventPage() {
                 onClick={() => update('registration_mode', opt.value)}
                 className={`p-3 rounded-lg border text-left transition-all ${
                   form.registration_mode === opt.value
-                    ? 'border-[#1E5EFF] bg-[#1E5EFF15] text-white'
-                    : 'border-white/10 text-gray-400 hover:border-white/20'
+                    ? 'border-[var(--brand-blue)] bg-[rgba(0,229,255,0.08)] text-[var(--text-primary)]'
+                    : 'border-[var(--guest-border)] text-[var(--mist-400)] hover:border-[var(--guest-border-hover)]'
                 }`}>
                 <p className="text-xs font-semibold">{opt.label}</p>
                 <p className="text-[10px] mt-0.5 opacity-70">{opt.desc}</p>
@@ -703,10 +703,10 @@ export default function NewEventPage() {
 
           {form.registration_mode !== 'invite_only' && (
             <div className="space-y-3 pt-1">
-              <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)]">
                 <div>
-                  <p className="text-sm font-medium text-white">Require ID Verification</p>
-                  <p className="text-xs text-gray-500">Guests must show ID at the door</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">Require ID Verification</p>
+                  <p className="text-xs text-[var(--mist-400)]">Guests must show ID at the door</p>
                 </div>
                 <Toggle
                   on={form.require_id_verification}
@@ -714,10 +714,10 @@ export default function NewEventPage() {
                 />
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-white/5">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-brand-charcoal-light border border-[var(--border-faint)]">
                 <div>
-                  <p className="text-sm font-medium text-white">Require Reference Code</p>
-                  <p className="text-xs text-gray-500">Guests need a code to complete registration</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">Require Reference Code</p>
+                  <p className="text-xs text-[var(--mist-400)]">Guests need a code to complete registration</p>
                 </div>
                 <Toggle
                   on={form.require_reference_code}
@@ -765,7 +765,7 @@ const accountTypeColor = (type: string) => {
   if (type === 'bank')      return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
   if (type === 'jazzcash')  return 'text-red-400 bg-red-500/10 border-red-500/20'
   if (type === 'easypaisa') return 'text-green-400 bg-green-500/10 border-green-500/20'
-  return 'text-gray-400 bg-white/5 border-white/10'
+  return 'text-[var(--mist-400)] bg-[var(--overlay-2)] border-[var(--guest-border)]'
 }
 
 const accountTypeIcon = (type: string) => (type === 'bank' ? Building2 : Smartphone)
@@ -792,8 +792,8 @@ function PaymentSection({
             <CreditCard className="w-3.5 h-3.5 text-yellow-400" />
           </div>
           <div>
-            <h3 className="font-semibold text-white text-sm">Payment Collection</h3>
-            <p className="text-xs text-gray-500 mt-0.5">
+            <h3 className="font-semibold text-[var(--text-primary)] text-sm">Payment Collection</h3>
+            <p className="text-xs text-[var(--mist-400)] mt-0.5">
               {collectPayment
                 ? 'Guests will see your payment details at checkout'
                 : 'No in-app payment — free or handled externally'}
@@ -804,21 +804,21 @@ function PaymentSection({
       </div>
 
       {!collectPayment ? (
-        <div className="text-xs text-gray-500 bg-white/5 rounded-lg px-4 py-3">
+        <div className="text-xs text-[var(--mist-400)] bg-[var(--overlay-2)] rounded-lg px-4 py-3">
           Turn on to collect payments through the app. You can also configure this after creating the event.
         </div>
       ) : accounts.length === 0 ? (
         <div className="text-center py-5 space-y-2">
-          <CreditCard className="w-8 h-8 text-gray-600 mx-auto" />
-          <p className="text-sm text-gray-400">No payment accounts saved yet</p>
+          <CreditCard className="w-8 h-8 text-[var(--mist-500)] mx-auto" />
+          <p className="text-sm text-[var(--mist-400)]">No payment accounts saved yet</p>
           <Link
             href="/dashboard/settings"
             target="_blank"
-            className="inline-flex items-center gap-1.5 text-xs text-[#1E5EFF] hover:text-white transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs text-[var(--brand-blue)] hover:text-[var(--text-primary)] transition-colors"
           >
             <ExternalLink className="w-3 h-3" /> Add accounts in Settings
           </Link>
-          <p className="text-xs text-gray-600">You can link accounts after creating the event too</p>
+          <p className="text-xs text-[var(--mist-500)]">You can link accounts after creating the event too</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -833,21 +833,21 @@ function PaymentSection({
                 onClick={() => onToggleAccount(acc.id)}
                 className={`w-full flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
                   isSelected
-                    ? 'border-[#1E5EFF] bg-[#1E5EFF08]'
-                    : 'border-white/10 hover:border-white/20 bg-brand-charcoal-light'
+                    ? 'border-[var(--brand-blue)] bg-[rgba(0,229,255,0.05)]'
+                    : 'border-[var(--guest-border)] hover:border-[var(--guest-border-hover)] bg-brand-charcoal-light'
                 }`}
               >
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border ${colorClass}`}>
                   <Icon className="w-4 h-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">{acc.label}</p>
-                  <p className="text-xs text-gray-500">{acc.account_title} · {acc.account_number}</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">{acc.label}</p>
+                  <p className="text-xs text-[var(--mist-400)]">{acc.account_title} · {acc.account_number}</p>
                 </div>
                 <div className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
-                  isSelected ? 'bg-[#1E5EFF] border-[#1E5EFF]' : 'border-white/20'
+                  isSelected ? 'bg-[var(--brand-blue)] border-[var(--brand-blue)]' : 'border-[var(--guest-border-hover)]'
                 }`}>
-                  {isSelected && <Check className="w-3 h-3 text-white" />}
+                  {isSelected && <Check className="w-3 h-3 text-[var(--text-primary)]" />}
                 </div>
               </button>
             )
@@ -873,7 +873,7 @@ function PriceInput({ value, onChange, placeholder }: {
 }) {
   return (
     <div className="relative">
-      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">₨</span>
+      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--mist-400)] text-sm">₨</span>
       <input
         type="number" className="input pl-7" min="0"
         placeholder={placeholder ?? '0'}
@@ -898,7 +898,7 @@ function TierCard({
 }) {
   return (
     <div className={`rounded-xl border overflow-hidden transition-all ${
-      enabled ? 'border-white/15' : 'border-white/8'
+      enabled ? 'border-[var(--guest-border)]' : 'border-[var(--border-faint)]'
     }`}>
       {/* Header */}
       <div className={`flex items-center justify-between px-4 py-3 ${
@@ -907,8 +907,8 @@ function TierCard({
         <div className="flex items-center gap-2.5">
           <span className={`w-2 h-2 rounded-full shrink-0 ${dot}`} />
           <div>
-            <p className="text-sm font-semibold text-white">{label}</p>
-            <p className="text-xs text-gray-500">{description}</p>
+            <p className="text-sm font-semibold text-[var(--text-primary)]">{label}</p>
+            <p className="text-xs text-[var(--mist-400)]">{description}</p>
           </div>
         </div>
         <Toggle on={enabled} onToggle={onToggle} color={toggleColor} />
@@ -916,7 +916,7 @@ function TierCard({
 
       {/* Body */}
       {enabled && (
-        <div className="px-4 py-4 border-t border-white/5 space-y-3 bg-white/[0.01]">
+        <div className="px-4 py-4 border-t border-[var(--border-faint)] space-y-3 bg-[var(--overlay-1)]">
           {children}
         </div>
       )}

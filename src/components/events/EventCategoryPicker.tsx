@@ -44,15 +44,15 @@ export default function EventCategoryPicker({
 
   return (
     <div className="card space-y-3">
-      <h3 className="font-semibold text-white text-sm flex items-center gap-2">
-        <Tag className="w-4 h-4 text-[#1E5EFF]" /> Category
+      <h3 className="font-semibold text-[var(--text-primary)] text-sm flex items-center gap-2">
+        <Tag className="w-4 h-4 text-[var(--brand-blue)]" /> Category
         {saved && (
           <span className="ml-auto flex items-center gap-1 text-green-400 text-xs font-normal">
             <Check size={12} /> Saved
           </span>
         )}
         {isPending && !saved && (
-          <span className="ml-auto text-gray-500 text-xs font-normal">Saving…</span>
+          <span className="ml-auto text-[var(--mist-400)] text-xs font-normal">Saving…</span>
         )}
       </h3>
 
@@ -75,11 +75,11 @@ export default function EventCategoryPicker({
             </option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+        <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--mist-400)]" />
       </div>
 
       {!selected && !isArchived && (
-        <p className="text-xs text-gray-600">
+        <p className="text-xs text-[var(--mist-500)]">
           Tag this event so guests can find it under the right category on Explore.
         </p>
       )}

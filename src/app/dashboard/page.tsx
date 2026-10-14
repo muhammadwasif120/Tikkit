@@ -61,127 +61,138 @@ async function DashboardData() {
 
   const stats = [
     {
-      label: 'Total Events',
+      label: 'Total events',
       value: events.length,
       sub: `${publishedEvents} published`,
       icon: CalendarDays,
-      color: '#1E5EFF',
-      bg: 'rgba(30,94,255,0.1)',
-      border: 'rgba(30,94,255,0.15)',
+      color: 'var(--cyan-500)',
       href: '/dashboard/events',
     },
     {
-      label: 'Total Guests',
+      label: 'Total guests',
       value: guests.length,
       sub: `${checkedIn} checked in`,
       icon: Users,
-      color: '#22C55E',
-      bg: 'rgba(34,197,94,0.1)',
-      border: 'rgba(34,197,94,0.15)',
+      color: 'var(--mint-500)',
       href: '/dashboard/guests',
     },
     {
-      label: 'Pending Approvals',
+      label: 'Pending approvals',
       value: pendingApprovals,
       sub: pendingApprovals === 1 ? '1 awaiting review' : `${pendingApprovals} awaiting review`,
       icon: ClipboardList,
-      color: '#FFC745',
-      bg: 'rgba(255,199,69,0.1)',
-      border: pendingApprovals > 0 ? 'rgba(255,199,69,0.35)' : 'rgba(255,199,69,0.15)',
+      color: 'var(--sky-500)',
       href: '/dashboard/approvals',
     },
     {
-      label: 'Pending Invoices',
+      label: 'Pending invoices',
       value: pendingInvoices,
       sub: pendingInvoices === 1 ? '1 unpaid' : `${pendingInvoices} unpaid`,
       icon: Receipt,
-      color: '#A78BFA',
-      bg: 'rgba(167,139,250,0.1)',
-      border: pendingInvoices > 0 ? 'rgba(167,139,250,0.35)' : 'rgba(167,139,250,0.15)',
+      color: 'var(--sky-500)',
       href: '/dashboard/vendors',
     },
   ]
 
   const quickActions = [
-    { href: '/dashboard/events/new', label: 'Create a new event',  desc: 'Set up public or private event', Icon: CalendarDays, color: '#1E5EFF',  bg: 'rgba(30,94,255,0.1)',   border: 'rgba(30,94,255,0.15)'  },
-    { href: '/dashboard/guests',    label: 'Manage guests',        desc: 'Invite guests and manage list',  Icon: Users,        color: '#22C55E',  bg: 'rgba(34,197,94,0.1)',   border: 'rgba(34,197,94,0.15)'  },
-    { href: '/dashboard/scan',      label: 'Open scanner',         desc: 'QR entry/exit scanning',         Icon: ScanLine,     color: '#FFC745',  bg: 'rgba(255,199,69,0.1)',  border: 'rgba(255,199,69,0.15)' },
-    { href: '/dashboard/vendors',   label: 'Add a vendor',         desc: 'Track vendors and invoices',     Icon: Building2,    color: '#A78BFA',  bg: 'rgba(167,139,250,0.1)', border: 'rgba(167,139,250,0.15)'},
+    { href: '/dashboard/events/new', label: 'Create a new event',  desc: 'Set up public or private event', Icon: CalendarDays, color: 'var(--cyan-500)', bg: 'rgba(0,229,255,0.1)',  border: 'rgba(0,229,255,0.15)'  },
+    { href: '/dashboard/guests',    label: 'Manage guests',        desc: 'Invite guests and manage list',  Icon: Users,        color: 'var(--mint-500)', bg: 'rgba(61,214,140,0.1)', border: 'rgba(61,214,140,0.15)' },
+    { href: '/dashboard/scan',      label: 'Open scanner',         desc: 'QR entry/exit scanning',         Icon: ScanLine,     color: 'var(--sky-500)',  bg: 'rgba(127,167,255,0.1)', border: 'rgba(127,167,255,0.15)' },
+    { href: '/dashboard/vendors',   label: 'Add a vendor',         desc: 'Track vendors and invoices',     Icon: Building2,    color: 'var(--magenta-500)', bg: 'rgba(204,0,255,0.08)', border: 'rgba(204,0,255,0.15)'},
   ]
 
   return (
-    <div className="space-y-6 max-w-5xl px-0 pt-2 pb-6 sm:px-6 sm:pt-7">
-      {/* ── Header ── */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 4 }}>
-        <div style={{
-          width: 52, height: 52, borderRadius: 16, flexShrink: 0,
-          background: 'linear-gradient(135deg, rgba(var(--brand-blue-rgb),0.2), rgba(var(--brand-blue-rgb),0.08))',
-          border: '1px solid rgba(var(--brand-blue-rgb),0.25)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 8px 24px rgba(var(--brand-blue-rgb),0.15)',
-        }}>
-          <LayoutDashboard size={22} color="var(--brand-blue)" />
+    <div className="space-y-5 max-w-5xl px-0 pt-2 pb-6 sm:px-6 sm:pt-7">
+      {/* ── Hero panel — the one glass-strong panel on this screen ── */}
+      <div className="glass-strong" style={{ padding: '28px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: 16, flexShrink: 0,
+            background: 'linear-gradient(135deg, rgba(var(--brand-blue-rgb),0.2), rgba(var(--brand-blue-rgb),0.08))',
+            border: '1px solid rgba(var(--brand-blue-rgb),0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <LayoutDashboard size={22} color="var(--brand-blue)" />
+          </div>
+          <div>
+            <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 600, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
+              Dashboard
+            </h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5, maxWidth: '65ch' }}>
+              {"Here's what's happening across your events."}
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 style={{ color: 'var(--text-primary)', fontSize: 'var(--fs-2xl)', fontWeight: 900, margin: '0 0 4px', fontFamily: 'var(--font-display)', letterSpacing: '-0.4px' }}>
-            Dashboard
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: 'var(--fs-base)', margin: 0, lineHeight: 1.5 }}>
-            {"Here's what's happening across your events."}
-          </p>
+
+        {/* Signature element — a ticket stub tear-line, this product's one
+            memorable domain flourish (thin, cyan at ~70% opacity, no illustration) */}
+        <div style={{ position: 'relative', height: 1, margin: '24px 0 20px' }} aria-hidden="true">
+          <div style={{ position: 'absolute', inset: 0, borderTop: '1px dashed rgba(0,229,255,0.7)' }} />
+          <div style={{ position: 'absolute', left: -20, top: -7, width: 14, height: 14, borderRadius: '50%', background: 'rgba(6,11,34,0.9)', border: '1px solid rgba(255,255,255,0.08)' }} />
+          <div style={{ position: 'absolute', right: -20, top: -7, width: 14, height: 14, borderRadius: '50%', background: 'rgba(6,11,34,0.9)', border: '1px solid rgba(255,255,255,0.08)' }} />
         </div>
+
+        <p style={{ color: 'var(--mist-400)', fontSize: 13, margin: 0 }}>
+          {events.length === 0
+            ? 'Create your first event to start selling tickets.'
+            : `${publishedEvents} of ${events.length} event${events.length === 1 ? '' : 's'} published · ${checkedIn} checked in so far.`}
+        </p>
       </div>
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
-        {stats.map((stat) => {
-          const inner = (
-            <>
-              <div className="flex items-center gap-1.5 mb-0.5">
-                <div style={{ width: 26, height: 26, borderRadius: 8, background: stat.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+      {/* ── Stat tile strip — one glass panel, tiles divided by rules not gaps ── */}
+      <div className="glass" style={{ padding: 0 }}>
+        <div className="grid grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat, i) => {
+            const inner = (
+              <>
+                <div className="flex items-center gap-1.5 mb-1">
                   <stat.icon style={{ width: 14, height: 14, color: stat.color }} />
+                  <p className="text-xs truncate" style={{ color: 'var(--mist-400)' }}>{stat.label}</p>
                 </div>
-                <p className="text-[10px] sm:text-xs text-gray-500 truncate">{stat.label}</p>
+                <p className="figure text-xl font-semibold truncate" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
+                  {stat.value}
+                </p>
+                <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--mist-500)' }}>{stat.sub}</p>
+              </>
+            )
+            const borderStyle: React.CSSProperties = {
+              borderTop: i >= 2 ? '1px solid rgba(255,255,255,0.07)' : undefined,
+              borderLeft: i % 2 === 1 ? '1px solid rgba(255,255,255,0.07)' : undefined,
+            }
+            return 'href' in stat && stat.href ? (
+              <Link
+                key={stat.label}
+                href={stat.href}
+                className="flex flex-col gap-0.5 p-4 sm:p-5 transition-colors hover:bg-[var(--overlay-1)]"
+                style={{ ...borderStyle, textDecoration: 'none' }}
+              >
+                {inner}
+              </Link>
+            ) : (
+              <div key={stat.label} className="flex flex-col gap-0.5 p-4 sm:p-5" style={borderStyle}>
+                {inner}
               </div>
-              <p className="text-base sm:text-xl font-bold truncate" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
-                {stat.value}
-              </p>
-              <p className="text-[10px] text-gray-600 mt-0.5 truncate">{stat.sub}</p>
-            </>
-          )
-          return 'href' in stat && stat.href ? (
-            <Link
-              key={stat.label}
-              href={stat.href}
-              className="bg-brand-charcoal rounded-xl border p-3 sm:p-5 flex flex-col gap-0.5 animate-slide-up hover:border-opacity-60 transition-all"
-              style={{ border: `1px solid ${stat.border}`, textDecoration: 'none' }}
-            >
-              {inner}
-            </Link>
-          ) : (
-            <div key={stat.label} className="bg-brand-charcoal rounded-xl border p-3 sm:p-5 flex flex-col gap-0.5 animate-slide-up" style={{ border: `1px solid ${stat.border}` }}>
-              {inner}
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
 
-      {/* Upcoming events + Quick actions */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <div className="card">
+      {/* ── Upcoming events (3) + Quick actions (2) ── */}
+      <div className="grid lg:grid-cols-5 gap-5">
+        <div className="card lg:col-span-3">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-sm" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
-              Upcoming Events
+              Upcoming events
             </h3>
-            <Link href="/dashboard/events" className="text-xs text-brand-blue hover:text-brand-blue-light transition-colors">
+            <Link href="/dashboard/events" className="text-xs transition-colors" style={{ color: 'var(--brand-blue)' }}>
               View all →
             </Link>
           </div>
 
           {upcomingEvents.length === 0 ? (
             <div className="text-center py-8">
-              <CalendarDays className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">No upcoming events</p>
+              <CalendarDays className="w-8 h-8 mx-auto mb-2" style={{ color: 'var(--mist-500)' }} />
+              <p className="text-sm" style={{ color: 'var(--mist-400)' }}>No upcoming events</p>
               <Link href="/dashboard/events/new" className="btn-primary mt-4 text-xs justify-center">
                 Create event
               </Link>
@@ -192,13 +203,13 @@ async function DashboardData() {
                 <Link
                   key={event.id}
                   href={`/dashboard/events/${event.id}`}
-                  className="flex items-center justify-between p-3 rounded-lg hover:bg-white/5 transition-colors group"
+                  className="flex items-center justify-between p-3 rounded-xl transition-colors group hover:bg-[var(--overlay-2)]"
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium group-hover:text-brand-blue transition-colors truncate" style={{ color: 'var(--text-primary)' }}>
+                    <p className="text-sm font-medium transition-colors truncate" style={{ color: 'var(--text-primary)' }}>
                       {event.title}
                     </p>
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--mist-500)' }}>
                       {formatDistanceToNow(new Date(event.date_start), { addSuffix: true })}
                     </p>
                   </div>
@@ -210,16 +221,16 @@ async function DashboardData() {
         </div>
 
         {/* Quick actions */}
-        <div className="card">
+        <div className="card lg:col-span-2">
           <h3 className="font-semibold text-sm mb-4" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px', color: 'var(--text-primary)' }}>
-            Quick Actions
+            Quick actions
           </h3>
           <div className="space-y-2">
             {quickActions.map((action) => (
               <Link
                 key={action.href}
                 href={action.href}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06] transition-all group"
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-[var(--overlay-2)] border border-transparent hover:border-[var(--border-faint)] transition-colors group"
               >
                 <div style={{
                   width: 36, height: 36, borderRadius: 10,
@@ -229,10 +240,10 @@ async function DashboardData() {
                   <action.Icon style={{ width: 16, height: 16, color: action.color }} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium group-hover:text-brand-blue transition-colors" style={{ color: 'var(--text-primary)' }}>
+                  <p className="text-sm font-medium transition-colors" style={{ color: 'var(--text-primary)' }}>
                     {action.label}
                   </p>
-                  <p className="text-xs text-gray-500">{action.desc}</p>
+                  <p className="text-xs" style={{ color: 'var(--mist-500)' }}>{action.desc}</p>
                 </div>
               </Link>
             ))}

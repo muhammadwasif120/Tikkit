@@ -826,7 +826,7 @@ export default function EventDetailClient({
                     {item.icon}
                     <span style={{ color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</span>
                   </div>
-                  <p style={{ color: item.label === 'Venue' && event.secret_venue && !isConfirmedGuest ? '#FFC745' : 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: 'var(--font-display)' }}>
+                  <p style={{ color: item.label === 'Venue' && event.secret_venue && !isConfirmedGuest ? 'var(--cyan-500)' : 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: '0 0 1px', fontFamily: 'var(--font-display)' }}>
                     {item.label === 'Venue' && event.secret_venue && !isConfirmedGuest
                       ? <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Lock size={11} />{item.value}</span>
                       : item.value

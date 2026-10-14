@@ -47,17 +47,17 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)' }}>
       <div style={{ position: 'relative', width: '100%', maxWidth: 380, borderRadius: 20, border: `1px solid ${ok ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}`, background: 'var(--surface-card)', overflow: 'hidden', boxShadow: '0 24px 80px rgba(0,0,0,0.5)' }}>
-        <div style={{ height: 3, background: ok ? '#22C55E' : '#EF4444' }} />
+        <div style={{ height: 3, background: ok ? 'var(--mint-500)' : '#EF4444' }} />
         <div style={{ padding: '20px 20px 16px' }}>
           <button onClick={onClose} style={{ position: 'absolute', top: 14, right: 14, background: 'var(--guest-surface-2)', border: '1px solid var(--guest-border)', borderRadius: 8, width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)' }}>
             <X size={12} />
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: result.guestName ? 16 : 0 }}>
             <div style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: ok ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)' }}>
-              {ok ? <CheckCircle size={22} color="#22C55E" /> : <XCircle size={22} color="#EF4444" />}
+              {ok ? <CheckCircle size={22} color="var(--mint-500)" /> : <XCircle size={22} color="#EF4444" />}
             </div>
             <div>
-              <p style={{ color: ok ? '#22C55E' : '#EF4444', fontSize: 15, fontWeight: 700, margin: 0 }}>{result.message}</p>
+              <p style={{ color: ok ? 'var(--mint-500)' : '#EF4444', fontSize: 15, fontWeight: 700, margin: 0 }}>{result.message}</p>
               {result.scanType && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
                   {result.scanType === 'entry' ? <LogIn size={11} color="var(--text-muted)" /> : <LogOut size={11} color="var(--text-muted)" />}
@@ -76,8 +76,8 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
                 </div>
                 {result.isVip && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', borderRadius: 20, background: 'rgba(255,199,69,0.12)', border: '1px solid rgba(255,199,69,0.3)', flexShrink: 0, marginTop: 4 }}>
-                    <Crown size={12} color="#FFC745" />
-                    <span style={{ color: '#FFC745', fontSize: 11, fontWeight: 800, letterSpacing: '0.06em' }}>VIP</span>
+                    <Crown size={12} color="var(--cyan-500)" />
+                    <span style={{ color: 'var(--cyan-500)', fontSize: 11, fontWeight: 800, letterSpacing: '0.06em' }}>VIP</span>
                   </div>
                 )}
               </div>
@@ -116,7 +116,7 @@ function ScanResultOverlay({ result, onClose }: { result: ScanResult; onClose: (
             </>
           )}
           <div style={{ marginTop: 14, height: 3, borderRadius: 99, background: 'var(--guest-border)', overflow: 'hidden' }}>
-            <div style={{ height: '100%', borderRadius: 99, background: ok ? '#22C55E' : '#EF4444', animation: `shrinkbar ${OVERLAY_DURATION}ms linear forwards` }} />
+            <div style={{ height: '100%', borderRadius: 99, background: ok ? 'var(--mint-500)' : '#EF4444', animation: `shrinkbar ${OVERLAY_DURATION}ms linear forwards` }} />
           </div>
         </div>
       </div>
@@ -468,7 +468,7 @@ export default function ScannerPage() {
                       ? type === 'entry' ? 'rgba(34,197,94,0.1)' : 'rgba(255,199,69,0.1)'
                       : 'var(--guest-surface-2)',
                     color: scanType === type
-                      ? type === 'entry' ? '#22C55E' : '#FFC745'
+                      ? type === 'entry' ? 'var(--mint-500)' : 'var(--cyan-500)'
                       : 'var(--text-muted)',
                     transition: 'all 0.15s',
                   }}
@@ -502,9 +502,9 @@ export default function ScannerPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 16 }} className="stats-grid">
           {[
             { label: 'Total', value: stats.total, color: '#4D82FF', icon: Users },
-            { label: 'Checked In', value: stats.checkedIn, color: '#22C55E', icon: UserCheck },
-            { label: 'Checked Out', value: stats.checkedOut, color: '#A78BFA', icon: UserMinus },
-            { label: 'Remaining', value: stats.remaining, color: '#FFC745', icon: Hourglass },
+            { label: 'Checked In', value: stats.checkedIn, color: 'var(--mint-500)', icon: UserCheck },
+            { label: 'Checked Out', value: stats.checkedOut, color: 'var(--magenta-500)', icon: UserMinus },
+            { label: 'Remaining', value: stats.remaining, color: 'var(--cyan-500)', icon: Hourglass },
           ].map(({ label, value, color, icon: Icon }) => (
             <div key={label} style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 14, padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -523,8 +523,8 @@ export default function ScannerPage() {
           <div style={{ background: 'var(--surface-card)', border: '1px solid var(--guest-border)', borderRadius: 16, overflow: 'hidden' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 14px', borderBottom: '1px solid var(--guest-border)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: scanning ? (isOnline ? '#22C55E' : '#F59E0B') : 'var(--guest-border)', display: 'inline-block', ...(scanning ? { animation: 'pulse 2s infinite' } : {}) }} />
-                <span style={{ color: scanning ? (isOnline ? '#22C55E' : '#F59E0B') : 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: scanning ? (isOnline ? 'var(--mint-500)' : '#F59E0B') : 'var(--guest-border)', display: 'inline-block', ...(scanning ? { animation: 'pulse 2s infinite' } : {}) }} />
+                <span style={{ color: scanning ? (isOnline ? 'var(--mint-500)' : '#F59E0B') : 'var(--text-muted)', fontSize: 12, fontWeight: 600 }}>
                   {scanning ? (isOnline ? 'Live' : 'Offline') : 'Ready to scan'}
                 </span>
                 {scanning && selectedEvent && (
@@ -549,7 +549,7 @@ export default function ScannerPage() {
                     <span style={{ position: 'absolute', top: 0, right: 0, width: 24, height: 24, borderTop: '2px solid rgba(255,255,255,0.75)', borderRight: '2px solid rgba(255,255,255,0.75)', borderRadius: '0 3px 0 0' }} />
                     <span style={{ position: 'absolute', bottom: 0, left: 0, width: 24, height: 24, borderBottom: '2px solid rgba(255,255,255,0.75)', borderLeft: '2px solid rgba(255,255,255,0.75)', borderRadius: '0 0 0 3px' }} />
                     <span style={{ position: 'absolute', bottom: 0, right: 0, width: 24, height: 24, borderBottom: '2px solid rgba(255,255,255,0.75)', borderRight: '2px solid rgba(255,255,255,0.75)', borderRadius: '0 0 3px 0' }} />
-                    <div style={{ position: 'absolute', left: 6, right: 6, height: 2, background: 'linear-gradient(90deg, transparent, #22C55E, transparent)', animation: 'scanline 2s ease-in-out infinite' }} />
+                    <div style={{ position: 'absolute', left: 6, right: 6, height: 2, background: 'linear-gradient(90deg, transparent, var(--mint-500), transparent)', animation: 'scanline 2s ease-in-out infinite' }} />
                   </div>
                 </div>
               )}
@@ -577,7 +577,7 @@ export default function ScannerPage() {
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--guest-border)' }}>
                 <p style={{ color: 'var(--text-primary)', fontSize: 13, fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>Check-in Log</p>
                 {log.length > 0 && (
-                  <span style={{ background: 'rgba(34,197,94,0.1)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 20, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>
+                  <span style={{ background: 'rgba(34,197,94,0.1)', color: 'var(--mint-500)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 20, padding: '2px 8px', fontSize: 10, fontWeight: 700 }}>
                     {log.filter(e => e.success && e.scanType === 'entry').length} in
                   </span>
                 )}
@@ -591,14 +591,14 @@ export default function ScannerPage() {
                 ) : (
                   log.map((entry, i) => (
                     <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', borderBottom: i < log.length - 1 ? '1px solid var(--guest-border)' : 'none', background: i === 0 ? 'var(--guest-surface-2)' : 'transparent' }}>
-                      <div style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: entry.success ? (entry.scanType === 'entry' ? '#22C55E' : '#A78BFA') : '#EF4444', ...(i === 0 ? { boxShadow: `0 0 6px ${entry.success ? (entry.scanType === 'entry' ? 'rgba(34,197,94,0.7)' : 'rgba(167,139,250,0.7)') : 'rgba(239,68,68,0.7)'}` } : {}) }} />
+                      <div style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: entry.success ? (entry.scanType === 'entry' ? 'var(--mint-500)' : 'var(--magenta-500)') : '#EF4444', ...(i === 0 ? { boxShadow: `0 0 6px ${entry.success ? (entry.scanType === 'entry' ? 'rgba(34,197,94,0.7)' : 'rgba(167,139,250,0.7)') : 'rgba(239,68,68,0.7)'}` } : {}) }} />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                           <p style={{ color: entry.success ? 'var(--text-primary)' : 'var(--text-muted)', fontSize: 12, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.name}</p>
-                          {entry.isVip && <Crown size={10} color="#FFC745" />}
+                          {entry.isVip && <Crown size={10} color="var(--cyan-500)" />}
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 1 }}>
-                          {entry.scanType === 'entry' ? <LogIn size={9} color={entry.success ? '#22C55E' : 'var(--text-muted)'} /> : <LogOut size={9} color={entry.success ? '#A78BFA' : 'var(--text-muted)'} />}
+                          {entry.scanType === 'entry' ? <LogIn size={9} color={entry.success ? 'var(--mint-500)' : 'var(--text-muted)'} /> : <LogOut size={9} color={entry.success ? 'var(--magenta-500)' : 'var(--text-muted)'} />}
                           <span style={{ color: 'var(--text-muted)', fontSize: 10 }}>{entry.scanType}</span>
                         </div>
                       </div>
@@ -614,14 +614,14 @@ export default function ScannerPage() {
             {/* Staff Mode */}
             <div style={{ background: 'rgba(var(--brand-blue-rgb),0.05)', border: '1px solid rgba(var(--brand-blue-rgb),0.16)', borderRadius: 14, padding: '14px 16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
-                <Zap size={13} color="#FFC745" />
-                <p style={{ color: '#FFC745', fontSize: 13, fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>Staff Mode</p>
+                <Zap size={13} color="var(--cyan-500)" />
+                <p style={{ color: 'var(--cyan-500)', fontSize: 13, fontWeight: 700, margin: 0, fontFamily: 'var(--font-display)' }}>Staff Mode</p>
               </div>
               <p style={{ color: 'var(--text-muted)', fontSize: 11, margin: '0 0 10px', lineHeight: 1.55 }}>
                 Share a scanner-only link with your team — they can scan without seeing your dashboard or guest data.
               </p>
               {eventId && (
-                <button onClick={copyStaffLink} style={{ background: staffCopied ? 'rgba(34,197,94,0.1)' : 'var(--guest-surface-2)', border: `1px solid ${staffCopied ? 'rgba(34,197,94,0.3)' : 'var(--guest-border)'}`, borderRadius: 8, padding: '7px 12px', color: staffCopied ? '#22C55E' : 'var(--text-muted)', fontSize: 11, fontWeight: 600, cursor: 'pointer', width: '100%', transition: 'all 0.2s' }}>
+                <button onClick={copyStaffLink} style={{ background: staffCopied ? 'rgba(34,197,94,0.1)' : 'var(--guest-surface-2)', border: `1px solid ${staffCopied ? 'rgba(34,197,94,0.3)' : 'var(--guest-border)'}`, borderRadius: 8, padding: '7px 12px', color: staffCopied ? 'var(--mint-500)' : 'var(--text-muted)', fontSize: 11, fontWeight: 600, cursor: 'pointer', width: '100%', transition: 'all 0.2s' }}>
                   {staffCopied ? '✓ Link copied!' : 'Copy staff scanner link'}
                 </button>
               )}

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { ModuleWaitlistForm } from '@/components/waitlist/ModuleWaitlistForm'
 
 export const metadata: Metadata = {
   title: 'Artist Management — Grow Your Roster on TIKKIT X',
@@ -78,14 +79,14 @@ export default function ArtistMgmtHomePage() {
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <Link href="/auth/login" className="btn-ghost" style={{ padding: '9px 20px', fontSize: 14 }}>Sign In</Link>
-            <Link href="mailto:hello@tikkitx.com?subject=Artist Management Access" className="btn-primary" style={{ padding: '9px 20px', fontSize: 14 }}>Get Access →</Link>
+            <Link href="#waitlist" className="btn-primary" style={{ padding: '9px 20px', fontSize: 14 }}>Join Waitlist →</Link>
           </div>
         </nav>
 
         {/* ── Hero ── */}
         <section style={{ padding: '100px 40px 80px', textAlign: 'center', maxWidth: 800, margin: '0 auto' }}>
           <div className="fade-up" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: `${C.cyan}12`, border: `1px solid ${C.cyan}28`, borderRadius: 999, padding: '5px 14px', fontSize: 12, fontWeight: 700, color: C.cyan, marginBottom: 28, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-            ✦ For Management Companies
+            ✦ Coming Soon
           </div>
           <h1 className="fade-up" style={{ fontFamily: 'var(--font-display, inherit)', fontSize: 'clamp(38px, 6vw, 66px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-2px', marginBottom: 24 }}>
             Manage your roster.{' '}
@@ -97,7 +98,7 @@ export default function ArtistMgmtHomePage() {
             TIKKIT X Artist Management is built for management companies and agencies. Create verified profiles for your artists, receive structured booking enquiries from organisers, and manage your entire pipeline in one place.
           </p>
           <div className="fade-up-3" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="mailto:hello@tikkitx.com?subject=Artist Management Access" className="btn-primary">Request Access →</Link>
+            <Link href="#waitlist" className="btn-primary">Join the Waitlist →</Link>
             <Link href="/auth/login" className="btn-ghost">Sign In</Link>
           </div>
         </section>
@@ -159,7 +160,7 @@ export default function ArtistMgmtHomePage() {
           <h2 style={{ fontSize: 'clamp(26px, 3.5vw, 38px)', fontWeight: 900, letterSpacing: '-1px', textAlign: 'center', marginBottom: 56 }}>How it works</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {[
-              { n: '01', title: 'Contact us for access',    body: 'Artist Management is for verified management companies and agencies. Email us and we\'ll onboard you within 48 hours.' },
+              { n: '01', title: 'Join the waitlist',        body: 'Artist Management isn\'t open yet — pop your details in and we\'ll email you the moment it launches.' },
               { n: '02', title: 'Add your artists',          body: 'Create profiles for each artist on your roster. Our team reviews and publishes each one with a verified badge.' },
               { n: '03', title: 'Receive enquiries',         body: 'Verified organisers on TIKKIT X send structured booking requests. You respond, negotiate, and confirm — all in your inbox.' },
             ].map(s => (
@@ -180,8 +181,13 @@ export default function ArtistMgmtHomePage() {
             <div style={{ position: 'absolute', top: -80, right: -80, width: 240, height: 240, borderRadius: '50%', background: `${C.cyan}06`, filter: 'blur(40px)' }} />
             <div style={{ position: 'absolute', bottom: -80, left: -80, width: 240, height: 240, borderRadius: '50%', background: `${C.magenta}06`, filter: 'blur(40px)' }} />
             <h2 style={{ fontSize: 'clamp(26px, 4vw, 40px)', fontWeight: 900, letterSpacing: '-1px', marginBottom: 16, position: 'relative' }}>Ready to bring your roster online?</h2>
-            <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.65, marginBottom: 36, position: 'relative' }}>Get your management company set up on TIKKIT X. Direct enquiries from verified organisers, zero commission.</p>
-            <Link href="mailto:hello@tikkitx.com?subject=Artist Management Access" className="btn-primary" style={{ fontSize: 16, padding: '16px 40px', position: 'relative' }}>Request Access →</Link>
+            <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.65, marginBottom: 36, position: 'relative' }}>Artist Management isn&apos;t open yet. Join the waitlist and we&apos;ll email you the moment it launches.</p>
+            <div style={{ position: 'relative' }}>
+              <ModuleWaitlistForm
+                module="artist"
+                theme={{ accentFrom: C.cyan, accentTo: C.magenta, accentText: C.cyan, buttonTextColor: '#050508', surface: C.surface, border: C.border, text: C.text, muted: C.muted }}
+              />
+            </div>
           </div>
         </section>
 

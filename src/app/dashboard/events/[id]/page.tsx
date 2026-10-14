@@ -13,7 +13,7 @@ import EventCoverAndDescription from '@/components/events/EventCoverAndDescripti
 import DashboardLoader from '@/components/layout/DashboardLoader'
 
 const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string; label: string }> = {
-  published: { bg: 'rgba(34,197,94,0.1)',  color: '#22C55E', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
+  published: { bg: 'rgba(34,197,94,0.1)',  color: 'var(--mint-500)', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
   completed: { bg: 'rgba(75,85,99,0.1)',   color: '#6B7280', border: 'rgba(75,85,99,0.2)',    label: 'ENDED'    },
   archived:  { bg: 'rgba(75,85,99,0.06)',  color: '#4B5563', border: 'rgba(75,85,99,0.12)',   label: 'ARCHIVED' },
   draft:     { bg: 'rgba(250,204,21,0.1)', color: '#FACC15', border: 'rgba(250,204,21,0.2)',  label: 'DRAFT'    },
@@ -96,7 +96,7 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
 
         {/* Breadcrumb row */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <Link href="/dashboard/events" className="hover:text-gray-400 transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}
+          <Link href="/dashboard/events" className="hover:text-[var(--mist-300)] transition-colors" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-muted)', textDecoration: 'none', fontSize: 'var(--fs-sm)', fontWeight: 600 }}
           >
             <ArrowLeft size={14} /> Events
           </Link>
@@ -118,11 +118,11 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
             letterSpacing: '0.07em', background: st.bg, color: st.color, border: `1px solid ${st.border}`,
             display: 'inline-flex', alignItems: 'center', gap: 5,
           }}>
-            {isLive && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
+            {isLive && <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--mint-500)', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
             {st.label}
           </span>
           {!event.is_public && (
-            <span style={{ padding: '3px 10px', borderRadius: 100, fontSize: 'var(--fs-xs)', fontWeight: 700, background: 'rgba(255,199,69,0.1)', color: '#FFC745', border: '1px solid rgba(255,199,69,0.2)' }}>
+            <span style={{ padding: '3px 10px', borderRadius: 100, fontSize: 'var(--fs-xs)', fontWeight: 700, background: 'rgba(255,199,69,0.1)', color: 'var(--cyan-500)', border: '1px solid rgba(255,199,69,0.2)' }}>
               Private
             </span>
           )}
@@ -160,10 +160,10 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
 
       {/* Archived banner */}
       {isArchived && (
-        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/3 border border-white/8 text-sm text-gray-400">
-          <Archive className="w-4 h-4 shrink-0 text-gray-500" />
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-[var(--overlay-1)] border border-[var(--border-faint)] text-sm text-[var(--mist-400)]">
+          <Archive className="w-4 h-4 shrink-0 text-[var(--mist-400)]" />
           <span>
-            This event has ended and is now <span className="text-white font-medium">archived</span>. Analytics and guest records are available below.
+            This event has ended and is now <span className="text-[var(--text-primary)] font-medium">archived</span>. Analytics and guest records are available below.
           </span>
         </div>
       )}
@@ -180,8 +180,8 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
       {/* Capacity bar */}
       <div className="card">
         <div className="flex items-center justify-between text-sm mb-3">
-          <span className="text-gray-400">Capacity</span>
-          <span className="text-white font-medium">{total} / {event.capacity}</span>
+          <span className="text-[var(--mist-400)]">Capacity</span>
+          <span className="text-[var(--text-primary)] font-medium">{total} / {event.capacity}</span>
         </div>
         <div className="w-full bg-brand-charcoal-light rounded-full h-2">
           <div
@@ -189,7 +189,7 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
             style={{ width: `${Math.min(100, (total / event.capacity) * 100)}%` }}
           />
         </div>
-        <div className="flex justify-between text-xs text-gray-500 mt-2">
+        <div className="flex justify-between text-xs text-[var(--mist-400)] mt-2">
           <span>{checkedIn} checked in</span>
           <span>{event.capacity - total} spots remaining</span>
         </div>
@@ -204,10 +204,10 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
           { label: 'Waitlisted',    value: guests?.filter(g => g.waitlist).length ?? 0 },
         ].map((s) => (
           <div key={s.label} className="card text-center py-4">
-            <p className="text-2xl font-bold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            <p className="text-2xl font-bold text-[var(--text-primary)]" style={{ fontFamily: 'Poppins, sans-serif' }}>
               {s.value}
             </p>
-            <p className="text-xs text-gray-500 mt-1">{s.label}</p>
+            <p className="text-xs text-[var(--mist-400)] mt-1">{s.label}</p>
           </div>
         ))}
       </div>
@@ -230,7 +230,7 @@ async function EventDetailData({ params }: { params: Promise<{ id: string }> }) 
       {/* Guest table — always visible, Add Guest hidden for archived events */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-white text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h3 className="font-semibold text-[var(--text-primary)] text-sm" style={{ fontFamily: 'Poppins, sans-serif' }}>
             Guest List
           </h3>
           {!isArchived && (

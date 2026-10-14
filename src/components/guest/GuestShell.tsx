@@ -11,7 +11,7 @@ function TikkitXTabIcon({ active }: { active: boolean }) {
   return (
     <span
       style={{
-        fontFamily:       "'Clash Display', 'Poppins', sans-serif",
+        fontFamily:       'var(--font-display)',
         fontWeight:       700,
         fontSize:         22,
         lineHeight:       1,
@@ -79,7 +79,9 @@ export default function GuestShell({
             width: 220, flexShrink: 0,
             position: 'sticky', top: 0, height: '100vh', overflow: 'hidden',
             display: 'flex', flexDirection: 'column',
-            background: 'var(--guest-surface)',
+            background: 'var(--chrome-fill)',
+            backdropFilter: 'blur(40px)',
+            WebkitBackdropFilter: 'blur(40px)',
             borderRight: '1px solid var(--guest-border)',
           }}
         >
@@ -118,7 +120,7 @@ export default function GuestShell({
                     <div style={{ position: 'relative' }}>
                       <NavIcon type={icon} active={active} />
                       {icon === 'messages' && unreadSupportCount > 0 && (
-                        <span style={{ position: 'absolute', top: -2, right: -4, width: 8, height: 8, borderRadius: '50%', background: '#EF4444', border: '2px solid var(--guest-surface)', boxShadow: '0 0 6px rgba(239,68,68,0.5)' }} />
+                        <span style={{ position: 'absolute', top: -2, right: -4, width: 8, height: 8, borderRadius: '50%', background: 'var(--coral-500)', border: '2px solid var(--guest-surface)', boxShadow: '0 0 6px rgba(239,68,68,0.5)' }} />
                       )}
                     </div>
                   </div>
@@ -161,7 +163,7 @@ export default function GuestShell({
                     style={{
                       position: 'absolute', top: -4, right: -4,
                       width: 16, height: 16, borderRadius: '50%',
-                      background: '#EF4444', color: 'white',
+                      background: 'var(--coral-500)', color: 'white',
                       fontSize: 9, fontWeight: 700,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}
@@ -222,7 +224,7 @@ export default function GuestShell({
             }}
             aria-label="Notifications"
           >
-            <Bell size={17} className="text-gray-400" />
+            <Bell size={17} className="text-[var(--mist-400)]" />
             {notifCount > 0 && (
               <span
                 className="absolute -top-1 -right-1 flex items-center justify-center rounded-full bg-red-500 text-white font-bold border-2"

@@ -220,7 +220,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.pageBg },
 
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
-  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   summaryGrid: {
@@ -237,7 +237,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     marginBottom: 4,
   },
-  summaryValue: { fontSize: 22, fontFamily: 'Poppins_700Bold', lineHeight: 28 },
+  summaryValue: { fontSize: 22, fontFamily: 'Sora_700Bold', lineHeight: 28 },
   summaryLabel: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   sectionLabel: {
@@ -264,7 +264,7 @@ const s = StyleSheet.create({
     paddingTop: 10,
   },
   metric: { flex: 1, alignItems: 'center', gap: 3 },
-  metricValue: { fontSize: 13, fontFamily: 'Poppins_600SemiBold' },
+  metricValue: { fontSize: 13, fontFamily: 'Sora_600SemiBold' },
   metricLabel: { color: colors.textMuted, fontSize: 10, fontFamily: 'DMSans_400Regular' },
 
   empty: { alignItems: 'center', paddingVertical: 60, gap: 10 },
@@ -272,7 +272,7 @@ const s = StyleSheet.create({
     width: 64, height: 64, borderRadius: 32,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold' },
   emptyBody: {
     color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular',
     textAlign: 'center', maxWidth: 240, lineHeight: 20,

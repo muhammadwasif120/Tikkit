@@ -3,9 +3,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
+export type TeamInviteRole = 'admin' | 'manager' | 'gate_staff'
+
 export async function createTeamInvite(
   label: string,
-  role: 'staff' | 'organizer',
+  role: TeamInviteRole,
   expiresIn: string | null // '24h', '7d', '30d', or null for never
 ) {
   const supabase = await createClient()

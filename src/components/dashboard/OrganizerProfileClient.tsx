@@ -39,7 +39,7 @@ export type EventWithStats = {
 
 /* ─── Helpers ─────────────────────────────────────────────────────── */
 const STATUS_CONFIG: Record<string, { bg: string; color: string; border: string; label: string }> = {
-  published: { bg: 'rgba(34,197,94,0.1)',  color: '#22C55E', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
+  published: { bg: 'rgba(34,197,94,0.1)',  color: 'var(--mint-500)', border: 'rgba(34,197,94,0.25)',  label: 'LIVE'     },
   completed: { bg: 'rgba(75,85,99,0.1)',   color: '#6B7280', border: 'rgba(75,85,99,0.2)',    label: 'ENDED'    },
   archived:  { bg: 'rgba(75,85,99,0.06)',  color: '#4B5563', border: 'rgba(75,85,99,0.12)',   label: 'ARCHIVED' },
   draft:     { bg: 'rgba(250,204,21,0.1)', color: '#FACC15', border: 'rgba(250,204,21,0.2)',  label: 'DRAFT'    },
@@ -88,11 +88,11 @@ function NameEditor({ profileId, initial }: { profileId: string; initial: string
             autoFocus
           />
           <button onClick={save} disabled={saving}
-            className="flex items-center gap-1 text-xs font-semibold text-white bg-[#1E5EFF] hover:bg-[#1448CC] disabled:opacity-50 rounded-lg px-3 py-1.5 transition-colors shrink-0">
+            className="flex items-center gap-1 text-xs font-semibold text-[var(--text-primary)] bg-[var(--brand-blue)] hover:bg-[#1448CC] disabled:opacity-50 rounded-lg px-3 py-1.5 transition-colors shrink-0">
             {saving ? <Loader2 size={12} className="animate-spin" /> : <Check size={12} />}
           </button>
           <button onClick={() => { setEditing(false); setDraft(name); setSaveErr('') }}
-            className="p-1.5 text-gray-500 hover:text-white transition-colors shrink-0">
+            className="p-1.5 text-[var(--mist-400)] hover:text-[var(--text-primary)] transition-colors shrink-0">
             <X size={14} />
           </button>
         </div>
@@ -103,10 +103,10 @@ function NameEditor({ profileId, initial }: { profileId: string; initial: string
 
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-sm text-gray-400" style={{ fontFamily: 'var(--font-body)' }}>
+      <span className="text-sm text-[var(--mist-400)]" style={{ fontFamily: 'var(--font-body)' }}>
         {name || 'Organizer'}
       </span>
-      <button onClick={() => setEditing(true)} className="text-gray-600 hover:text-gray-400 transition-colors">
+      <button onClick={() => setEditing(true)} className="text-[var(--mist-500)] hover:text-[var(--mist-300)] transition-colors">
         <Edit3 size={12} />
       </button>
       {saved && <span className="flex items-center gap-1 text-xs text-[#10B981]"><Check size={11} /> Saved</span>}
@@ -131,7 +131,7 @@ function EventStatCard({ event }: { event: EventWithStats }) {
 
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-2 mb-1">
-          <h4 className="text-sm font-semibold text-white group-hover:text-[#1E5EFF] transition-colors leading-tight truncate">
+          <h4 className="text-sm font-semibold text-[var(--text-primary)] group-hover:text-[var(--brand-blue)] transition-colors leading-tight truncate">
             {event.title}
           </h4>
           <span style={{
@@ -141,13 +141,13 @@ function EventStatCard({ event }: { event: EventWithStats }) {
             display: 'inline-flex', alignItems: 'center', gap: 4,
           }}>
             {effStatus === 'published' && (
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', display: 'inline-block' }} />
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--mint-500)', display: 'inline-block' }} />
             )}
             {st.label}
           </span>
         </div>
 
-        <div className="flex items-center gap-4 text-xs text-gray-500 mb-3 flex-wrap">
+        <div className="flex items-center gap-4 text-xs text-[var(--mist-400)] mb-3 flex-wrap">
           <span className="flex items-center gap-1">
             <CalendarDays className="w-3 h-3" />
             {format(new Date(event.date_start), 'MMM d, yyyy')}
@@ -162,34 +162,34 @@ function EventStatCard({ event }: { event: EventWithStats }) {
 
         <div className="grid grid-cols-3 gap-3 mb-2">
           <div className="text-center">
-            <p className="text-base font-bold text-white" style={{ fontFamily: 'var(--font-display)' }}>{event.guest_count}</p>
-            <p className="text-[10px] text-gray-500">Registered</p>
+            <p className="text-base font-bold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>{event.guest_count}</p>
+            <p className="text-[10px] text-[var(--mist-400)]">Registered</p>
           </div>
           <div className="text-center">
             <p className="text-base font-bold text-[#10B981]" style={{ fontFamily: 'var(--font-display)' }}>{event.checked_in_count}</p>
-            <p className="text-[10px] text-gray-500">Attended</p>
+            <p className="text-[10px] text-[var(--mist-400)]">Attended</p>
           </div>
           <div className="text-center">
-            <p className="text-base font-bold text-[#FFC745]" style={{ fontFamily: 'var(--font-display)' }}>{event.capacity}</p>
-            <p className="text-[10px] text-gray-500">Capacity</p>
+            <p className="text-base font-bold text-[var(--cyan-500)]" style={{ fontFamily: 'var(--font-display)' }}>{event.capacity}</p>
+            <p className="text-[10px] text-[var(--mist-400)]">Capacity</p>
           </div>
         </div>
 
         <div className="space-y-1">
-          <div className="flex justify-between text-[10px] text-gray-600">
+          <div className="flex justify-between text-[10px] text-[var(--mist-500)]">
             <span>Capacity fill</span>
             <span>{Math.round(fillPct)}%</span>
           </div>
-          <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-            <div className="h-full bg-[#1E5EFF] rounded-full" style={{ width: `${fillPct}%` }} />
+          <div className="h-1.5 bg-[var(--overlay-2)] rounded-full overflow-hidden">
+            <div className="h-full bg-[var(--brand-blue)] rounded-full" style={{ width: `${fillPct}%` }} />
           </div>
           {event.status === 'completed' && event.guest_count > 0 && (
             <>
-              <div className="flex justify-between text-[10px] text-gray-600">
+              <div className="flex justify-between text-[10px] text-[var(--mist-500)]">
                 <span>Check-in rate</span>
                 <span className="text-[#10B981]">{Math.round(checkinPct)}%</span>
               </div>
-              <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+              <div className="h-1.5 bg-[var(--overlay-2)] rounded-full overflow-hidden">
                 <div className="h-full bg-[#10B981] rounded-full" style={{ width: `${checkinPct}%` }} />
               </div>
             </>
@@ -300,7 +300,7 @@ export default function OrganizerProfileClient({
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           boxShadow: '0 8px 24px rgba(30,94,255,0.15)',
         }}>
-          <UserCircle size={22} color="#1E5EFF" />
+          <UserCircle size={22} color="var(--brand-blue)" />
         </div>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
@@ -311,13 +311,13 @@ export default function OrganizerProfileClient({
               <Link
                 href={`/organizer/${profile.username}`}
                 target="_blank"
-                className="flex items-center gap-1.5 text-xs text-[#1E5EFF] hover:text-white border border-[#1E5EFF]/30 hover:border-white/25 rounded-lg px-2.5 py-1 transition-all"
+                className="flex items-center gap-1.5 text-xs text-[var(--brand-blue)] hover:text-[var(--text-primary)] border border-[var(--brand-blue)]/30 hover:border-[var(--guest-border-hover)] rounded-lg px-2.5 py-1 transition-all"
               >
                 <ExternalLink size={12} /> <span className="hidden sm:inline">View Public Profile</span>
               </Link>
             )}
             <Link href="/dashboard/settings"
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white border border-white/10 hover:border-white/25 rounded-lg px-2.5 py-1 transition-all">
+              className="flex items-center gap-1.5 text-xs text-[var(--mist-400)] hover:text-[var(--text-primary)] border border-[var(--guest-border)] hover:border-[var(--guest-border-hover)] rounded-lg px-2.5 py-1 transition-all">
               <Settings size={13} /> <span className="hidden sm:inline">Edit Details</span>
             </Link>
           </div>
@@ -366,7 +366,7 @@ export default function OrganizerProfileClient({
             {profile.cover_image_url && (
               <button
                 onClick={removeCover}
-                className="flex items-center gap-1 text-xs text-gray-300 hover:text-white bg-black/50 hover:bg-black/70 rounded-lg px-2 py-1 transition-all backdrop-blur-sm"
+                className="flex items-center gap-1 text-xs text-[var(--mist-300)] hover:text-[var(--text-primary)] bg-black/50 hover:bg-black/70 rounded-lg px-2 py-1 transition-all backdrop-blur-sm"
               >
                 <X size={11} /> Remove
               </button>
@@ -374,7 +374,7 @@ export default function OrganizerProfileClient({
             <button
               onClick={() => coverInputRef.current?.click()}
               disabled={coverUploading}
-              className="flex items-center gap-1.5 text-xs text-white bg-black/50 hover:bg-black/70 disabled:opacity-60 rounded-lg px-2.5 py-1 transition-all backdrop-blur-sm"
+              className="flex items-center gap-1.5 text-xs text-[var(--text-primary)] bg-black/50 hover:bg-black/70 disabled:opacity-60 rounded-lg px-2.5 py-1 transition-all backdrop-blur-sm"
             >
               {coverUploading
                 ? <Loader2 size={12} className="animate-spin" />
@@ -399,7 +399,7 @@ export default function OrganizerProfileClient({
               {profile.logo_url ? (
                 <Image src={profile.logo_url} alt={`${profile.company_name || profile.full_name || 'Organizer'} logo`} width={80} height={80} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
               ) : (
-                <span className="text-2xl font-black text-[#1E5EFF]" style={{ fontFamily: 'var(--font-display)' }}>
+                <span className="text-2xl font-black text-[var(--brand-blue)]" style={{ fontFamily: 'var(--font-display)' }}>
                   {initials}
                 </span>
               )}
@@ -412,8 +412,8 @@ export default function OrganizerProfileClient({
               title="Change logo"
             >
               {logoUploading
-                ? <Loader2 size={16} className="text-white animate-spin" />
-                : <Camera size={16} className="text-white" />
+                ? <Loader2 size={16} className="text-[var(--text-primary)] animate-spin" />
+                : <Camera size={16} className="text-[var(--text-primary)]" />
               }
             </button>
           </div>
@@ -423,11 +423,11 @@ export default function OrganizerProfileClient({
         <div className="px-5 pb-6" style={{ paddingTop: AVATAR_H / 2 + 16 }}>
           {/* Organisation name — primary bold */}
           {profile.company_name ? (
-            <h3 className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
+            <h3 className="text-lg font-bold text-[var(--text-primary)] leading-tight" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.3px' }}>
               {profile.company_name}
             </h3>
           ) : (
-            <p className="text-sm text-gray-600 italic">No organisation name set</p>
+            <p className="text-sm text-[var(--mist-500)] italic">No organisation name set</p>
           )}
 
           {/* Personal name — secondary, inline-editable */}
@@ -437,9 +437,9 @@ export default function OrganizerProfileClient({
 
           {/* Contact */}
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-0.5">
-            <p className="text-xs text-gray-500">{profile.email}</p>
+            <p className="text-xs text-[var(--mist-400)]">{profile.email}</p>
             {profile.phone_number && (
-              <p className="text-xs text-gray-600">{profile.phone_number}</p>
+              <p className="text-xs text-[var(--mist-500)]">{profile.phone_number}</p>
             )}
           </div>
         </div>
@@ -448,19 +448,19 @@ export default function OrganizerProfileClient({
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         {[
-          { label: 'Total Events',     value: events.length,  color: '#1E5EFF', bg: 'rgba(30,94,255,0.1)',   border: 'rgba(30,94,255,0.15)',  icon: <CalendarDays className="w-3.5 h-3.5" /> },
+          { label: 'Total Events',     value: events.length,  color: 'var(--brand-blue)', bg: 'rgba(30,94,255,0.1)',   border: 'rgba(30,94,255,0.15)',  icon: <CalendarDays className="w-3.5 h-3.5" /> },
           { label: 'Total Registered', value: totalGuests,    color: '#A855F7', bg: 'rgba(168,85,247,0.1)',  border: 'rgba(168,85,247,0.15)', icon: <Users className="w-3.5 h-3.5" /> },
           { label: 'Total Attended',   value: totalAttended,  color: '#10B981', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.15)', icon: <UserCheck className="w-3.5 h-3.5" /> },
-          { label: 'Avg Fill Rate',    value: `${avgFill}%`,  color: '#FFC745', bg: 'rgba(255,199,69,0.1)',  border: 'rgba(255,199,69,0.15)', icon: <TrendingUp className="w-3.5 h-3.5" /> },
+          { label: 'Avg Fill Rate',    value: `${avgFill}%`,  color: 'var(--cyan-500)', bg: 'rgba(255,199,69,0.1)',  border: 'rgba(255,199,69,0.15)', icon: <TrendingUp className="w-3.5 h-3.5" /> },
         ].map(s => (
           <div key={s.label} className="bg-brand-charcoal rounded-xl border p-3 sm:p-5 flex flex-col gap-1" style={{ borderColor: s.border }}>
             <div className="flex items-center gap-1.5 mb-0.5">
               <div style={{ width: 26, height: 26, borderRadius: 8, background: s.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <span style={{ color: s.color }}>{s.icon}</span>
               </div>
-              <p className="text-[10px] sm:text-xs text-gray-500 truncate">{s.label}</p>
+              <p className="text-[10px] sm:text-xs text-[var(--mist-400)] truncate">{s.label}</p>
             </div>
-            <p className="text-base sm:text-xl font-bold text-white truncate" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>{s.value}</p>
+            <p className="text-base sm:text-xl font-bold text-[var(--text-primary)] truncate" style={{ fontFamily: 'var(--font-display)', letterSpacing: '-0.5px' }}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -468,7 +468,7 @@ export default function OrganizerProfileClient({
       {/* Active Events */}
       {activeEvents.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-white" style={{ fontFamily: 'var(--font-display)' }}>
+          <h3 className="text-sm font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
             Active Events
           </h3>
           <div className="grid md:grid-cols-2 gap-3">
@@ -484,10 +484,10 @@ export default function OrganizerProfileClient({
             onClick={() => setShowPast(v => !v)}
             className="flex items-center gap-3 w-full"
           >
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Past Events</p>
-            <div className="flex-1 h-px bg-white/5" />
-            <span className="text-xs text-gray-600">{pastEvents.length}</span>
-            <span className={clsx('text-xs text-gray-500 transition-transform inline-block', showPast && 'rotate-180')}>▾</span>
+            <p className="text-xs font-semibold text-[var(--mist-400)] uppercase tracking-wider">Past Events</p>
+            <div className="flex-1 h-px bg-[var(--overlay-2)]" />
+            <span className="text-xs text-[var(--mist-500)]">{pastEvents.length}</span>
+            <span className={clsx('text-xs text-[var(--mist-400)] transition-transform inline-block', showPast && 'rotate-180')}>▾</span>
           </button>
 
           {showPast && (
@@ -501,9 +501,9 @@ export default function OrganizerProfileClient({
       {/* Empty state */}
       {events.length === 0 && (
         <div className="card text-center py-12">
-          <CalendarDays className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400 font-medium">No events yet</p>
-          <p className="text-gray-600 text-sm mt-1">Create your first event to build your portfolio</p>
+          <CalendarDays className="w-10 h-10 text-[var(--mist-500)] mx-auto mb-3" />
+          <p className="text-[var(--mist-400)] font-medium">No events yet</p>
+          <p className="text-[var(--mist-500)] text-sm mt-1">Create your first event to build your portfolio</p>
           <Link href="/dashboard/events/new" className="btn-primary mt-4 inline-flex mx-auto">
             Create Event
           </Link>

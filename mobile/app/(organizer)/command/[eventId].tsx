@@ -313,7 +313,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  navTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold' },
+  navTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold' },
   navSub: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular' },
   liveBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
@@ -331,7 +331,7 @@ const s = StyleSheet.create({
     borderWidth: 1,
     padding: 10, alignItems: 'center',
   },
-  statChipValue: { fontSize: 18, fontFamily: 'Poppins_700Bold' },
+  statChipValue: { fontSize: 18, fontFamily: 'Sora_700Bold' },
   statChipLabel: { color: colors.textMuted, fontSize: 10, fontFamily: 'DMSans_400Regular' },
 
   tabBar: {
@@ -355,7 +355,7 @@ const s = StyleSheet.create({
     width: 44, height: 44, borderRadius: 22,
     backgroundColor: colors.blueSubtle, alignItems: 'center', justifyContent: 'center',
   },
-  attendeeAvatarText: { color: colors.blue, fontSize: 14, fontFamily: 'Poppins_700Bold' },
+  attendeeAvatarText: { color: colors.blue, fontSize: 14, fontFamily: 'Sora_700Bold' },
   attendeeName: { color: colors.textPrimary, fontSize: 14, fontFamily: 'DMSans_500Medium' },
   attendeeEmail: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular' },
   badge: { paddingHorizontal: 7, paddingVertical: 3, borderRadius: radius.full },
@@ -402,6 +402,6 @@ const s = StyleSheet.create({
 
   empty:          { alignItems: 'center', paddingTop: 60, paddingHorizontal: 32, gap: 10 },
   emptyIconCircle:{ width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  emptyTitle:     { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold', textAlign: 'center' },
+  emptyTitle:     { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold', textAlign: 'center' },
   emptyBody:      { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
 })

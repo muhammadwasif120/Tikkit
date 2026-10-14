@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-export type AppTheme = 'noir' | 'corporate' | 'pulse'
+export type AppTheme = 'light' | 'dark'
 
 type ThemeContextValue = {
   theme: AppTheme
@@ -10,7 +10,7 @@ type ThemeContextValue = {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'noir',
+  theme: 'dark',
   setTheme: () => {},
 })
 

@@ -263,7 +263,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12,
   },
-  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
   createBtn: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
@@ -296,7 +296,7 @@ const s = StyleSheet.create({
   },
   cardImgWrap: { height: 160, overflow: 'hidden', position: 'relative' },
   cardImgCenter: { alignItems: 'center', justifyContent: 'center' },
-  cardImgInitial: { color: 'rgba(255,255,255,0.55)', fontSize: 44, fontFamily: 'Poppins_700Bold' },
+  cardImgInitial: { color: 'rgba(255,255,255,0.55)', fontSize: 44, fontFamily: 'Sora_700Bold' },
   statusBadge: {
     position: 'absolute', top: 10, right: 10,
     flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -306,7 +306,7 @@ const s = StyleSheet.create({
   statusDot: { width: 5, height: 5, borderRadius: 3 },
   statusText: { fontSize: 10, fontFamily: 'DMSans_500Medium', fontWeight: '600' },
   cardImgContent: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 12 },
-  cardTitle: { color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold', marginBottom: 4, lineHeight: 22 },
+  cardTitle: { color: colors.white, fontSize: 16, fontFamily: 'Sora_600SemiBold', marginBottom: 4, lineHeight: 22 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   metaText: { color: 'rgba(255,255,255,0.6)', fontSize: 12, fontFamily: 'DMSans_400Regular' },
   metaDot: { color: 'rgba(255,255,255,0.35)', fontSize: 12 },
@@ -327,7 +327,7 @@ const s = StyleSheet.create({
     width: 64, height: 64, borderRadius: 32,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold' },
   emptyBody: {
     color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular',
     textAlign: 'center', maxWidth: 240, lineHeight: 20,

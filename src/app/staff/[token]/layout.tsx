@@ -7,15 +7,15 @@ export const metadata: Metadata = {
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-brand-dark flex flex-col">
-      <header className="h-16 bg-brand-charcoal border-b border-white/5 flex items-center px-5 gap-2.5 shrink-0">
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--guest-bg)' }}>
+      <header className="h-16 bg-brand-charcoal border-b border-[var(--border-faint)] flex items-center px-5 gap-2.5 shrink-0">
         <div className="w-7 h-7 bg-brand-blue rounded-md flex items-center justify-center shrink-0">
-          <Ticket className="w-4 h-4 text-white" />
+          <Ticket className="w-4 h-4" style={{ color: 'var(--navy-950)' }} />
         </div>
-        <span className="text-lg font-bold text-white tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+        <span className="text-lg font-bold tracking-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>
           Tikkit
         </span>
-        <span className="ml-2 px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/25 text-[10px] font-semibold text-purple-400 uppercase tracking-wide">
+        <span className="badge-gray ml-2">
           Team
         </span>
       </header>

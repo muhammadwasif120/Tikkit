@@ -94,9 +94,13 @@ function RootNavigator() {
     const inAuthGroup = segments[0] === '(auth)'
     const inGuestGroup = segments[0] === '(guest)'
     const inOrgGroup = segments[0] === '(organizer)'
+    // Team-access links (tikkit://team/[token]) work without a Supabase
+    // session — the invite token itself is the credential — so this group
+    // is exempt from the login redirect below.
+    const inTeamGroup = segments[0] === '(team)'
 
     if (!user) {
-      if (!inAuthGroup) router.replace('/(auth)/login')
+      if (!inAuthGroup && !inTeamGroup) router.replace('/(auth)/login')
       return
     }
 
@@ -115,6 +119,10 @@ function RootNavigator() {
 
     const role = profile.role ?? ''
     const isOrganizer = ['organizer', 'staff', 'admin'].includes(role)
+
+    // A logged-in user opening a team-access link stays there — it's a
+    // distinct, self-contained flow regardless of their own account role.
+    if (inTeamGroup) return
 
     if (isOrganizer && !inOrgGroup) {
       router.replace('/(organizer)/dashboard')
@@ -143,6 +151,7 @@ function RootNavigator() {
       <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
       <Stack.Screen name="(guest)" options={{ animation: 'none' }} />
       <Stack.Screen name="(organizer)" options={{ animation: 'none' }} />
+      <Stack.Screen name="(team)" options={{ animation: 'none' }} />
     </Stack>
   )
 }

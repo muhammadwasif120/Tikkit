@@ -106,7 +106,7 @@ export default function EventActions({ event, organizerVerified }: { event: Even
           <button
             onClick={() => updateStatus('published')}
             className="btn-primary"
-            style={{ background: '#22C55E', color: 'white' }}
+            style={{ background: 'var(--mint-500)', color: 'white' }}
             disabled={loading}
           >
             <CheckCircle className="w-4 h-4" /> Publish Event
@@ -115,7 +115,7 @@ export default function EventActions({ event, organizerVerified }: { event: Even
           <button
             onClick={handleVerify}
             className="btn-primary"
-            style={{ background: '#FFC745', color: '#000' }}
+            style={{ background: 'var(--cyan-500)', color: '#000' }}
             disabled={loading}
             title="Verify your identity to publish events"
           >
@@ -137,8 +137,8 @@ export default function EventActions({ event, organizerVerified }: { event: Even
           {shareOpen && (
             <>
               <div className="fixed inset-0 z-10" onClick={() => setShareOpen(false)} />
-              <div className="absolute right-0 top-full mt-2 w-56 bg-brand-charcoal border border-white/10 rounded-lg shadow-xl z-20 overflow-hidden animate-fade-in text-left">
-                <button onClick={handleShareLink} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-white/5 transition-colors">
+              <div className="absolute right-0 top-full mt-2 w-56 bg-brand-charcoal border border-[var(--guest-border)] rounded-lg shadow-xl z-20 overflow-hidden animate-fade-in text-left">
+                <button onClick={handleShareLink} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[var(--mist-300)] hover:bg-[var(--overlay-2)] transition-colors">
                   <LinkIcon className="w-4 h-4" /> Share via Link
                 </button>
                 <button onClick={handleShareWhatsApp} className="w-full flex items-center gap-3 px-4 py-3 text-sm text-green-400 hover:bg-green-500/10 transition-colors">
@@ -175,7 +175,7 @@ export default function EventActions({ event, organizerVerified }: { event: Even
       {open && (
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-2 w-48 bg-brand-charcoal border border-white/10 rounded-lg shadow-xl z-20 overflow-hidden animate-fade-in">
+          <div className="absolute right-0 top-full mt-2 w-48 bg-brand-charcoal border border-[var(--guest-border)] rounded-lg shadow-xl z-20 overflow-hidden animate-fade-in">
 
             {event.status === 'published' && (
               <>
@@ -188,7 +188,7 @@ export default function EventActions({ event, organizerVerified }: { event: Even
                 </button>
                 <button
                   onClick={() => updateStatus('draft')}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-400 hover:bg-white/5 transition-colors"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-[var(--mist-400)] hover:bg-[var(--overlay-2)] transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                   Unpublish
@@ -204,7 +204,7 @@ export default function EventActions({ event, organizerVerified }: { event: Even
                 Cancel Event
               </button>
             )}
-            <div className="border-t border-white/5" />
+            <div className="border-t border-[var(--border-faint)]" />
             <button
               onClick={() => { setOpen(false); setConfirmDelete(true) }}
               className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 transition-colors"
@@ -220,13 +220,13 @@ export default function EventActions({ event, organizerVerified }: { event: Even
       {confirmDelete && (
         <>
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" onClick={() => setConfirmDelete(false)} />
-          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-32px)] max-w-sm bg-[#111318] border border-white/10 rounded-2xl p-6 z-50 text-center">
+          <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-32px)] max-w-sm bg-[#111318] border border-[var(--guest-border)] rounded-2xl p-6 z-50 text-center">
             <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-4">
               <Trash2 className="w-5 h-5 text-red-400" />
             </div>
-            <h3 className="text-white font-semibold mb-1" style={{ fontFamily: 'var(--font-display)' }}>Delete Event</h3>
-            <p className="text-gray-400 text-sm mb-5">
-              Are you sure? All guests and data for <span className="text-white font-medium">{event.title}</span> will be permanently removed.
+            <h3 className="text-[var(--text-primary)] font-semibold mb-1" style={{ fontFamily: 'var(--font-display)' }}>Delete Event</h3>
+            <p className="text-[var(--mist-400)] text-sm mb-5">
+              Are you sure? All guests and data for <span className="text-[var(--text-primary)] font-medium">{event.title}</span> will be permanently removed.
             </p>
             <div className="flex gap-3 justify-center">
               <button onClick={() => setConfirmDelete(false)} className="btn-secondary">Cancel</button>

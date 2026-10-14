@@ -114,7 +114,7 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
 
   if (loading) return (
     <div className="flex items-center justify-center py-10">
-      <div className="w-5 h-5 border-2 border-white/20 border-t-white/60 rounded-full animate-spin" />
+      <div className="w-5 h-5 border-2 border-[var(--guest-border-hover)] border-t-white/60 rounded-full animate-spin" />
     </div>
   )
 
@@ -123,7 +123,7 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
       {/* Lightbox */}
       {lightboxUrl && (
         <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setLightboxUrl(null)}>
-          <button className="absolute top-4 right-4 text-white/60 hover:text-white">
+          <button className="absolute top-4 right-4 text-white/60 hover:text-[var(--text-primary)]">
             <X className="w-6 h-6" />
           </button>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -134,9 +134,9 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
       {/* Reject note modal */}
       {rejectingId && (
         <div className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center p-4">
-          <div className="bg-brand-charcoal border border-white/10 rounded-2xl p-6 w-full max-w-sm space-y-4">
-            <h3 className="font-semibold text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>Reject Payment</h3>
-            <p className="text-sm text-gray-400">Optionally add a note to the guest explaining the rejection.</p>
+          <div className="bg-brand-charcoal border border-[var(--guest-border)] rounded-2xl p-6 w-full max-w-sm space-y-4">
+            <h3 className="font-semibold text-[var(--text-primary)]" style={{ fontFamily: 'Poppins, sans-serif' }}>Reject Payment</h3>
+            <p className="text-sm text-[var(--mist-400)]">Optionally add a note to the guest explaining the rejection.</p>
             <textarea
               className="input resize-none min-h-20 text-sm"
               placeholder="e.g. Screenshot is unclear, please resubmit..."
@@ -165,9 +165,9 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
       <div className="space-y-6">
         {submissions.length === 0 ? (
           <div className="text-center py-12">
-            <CreditCard className="w-10 h-10 text-gray-600 mx-auto mb-3" />
-            <p className="text-gray-400">No payment submissions yet</p>
-            <p className="text-xs text-gray-600 mt-1">They&apos;ll appear here once guests submit their screenshots</p>
+            <CreditCard className="w-10 h-10 text-[var(--mist-500)] mx-auto mb-3" />
+            <p className="text-[var(--mist-400)]">No payment submissions yet</p>
+            <p className="text-xs text-[var(--mist-500)] mt-1">They&apos;ll appear here once guests submit their screenshots</p>
           </div>
         ) : (
           <>
@@ -175,7 +175,7 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
             {pending.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Pending Review</p>
+                  <p className="text-xs font-semibold text-[var(--mist-400)] uppercase tracking-wide">Pending Review</p>
                   <span className="w-5 h-5 rounded-full bg-yellow-500 text-black text-[9px] font-bold flex items-center justify-center">
                     {pending.length}
                   </span>
@@ -196,7 +196,7 @@ export default function PaymentReviewPanel({ eventId }: { eventId: string }) {
             {/* Reviewed */}
             {reviewed.length > 0 && (
               <div className="space-y-3">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Reviewed</p>
+                <p className="text-xs font-semibold text-[var(--mist-400)] uppercase tracking-wide">Reviewed</p>
                 {reviewed.map(sub => (
                   <SubmissionCard
                     key={sub.id}
@@ -231,10 +231,10 @@ function SubmissionCard({
     <div className="card space-y-3">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-semibold text-white">{sub.registration.full_name}</p>
-          <p className="text-xs text-gray-500">{sub.registration.email}</p>
+          <p className="text-sm font-semibold text-[var(--text-primary)]">{sub.registration.full_name}</p>
+          <p className="text-xs text-[var(--mist-400)]">{sub.registration.email}</p>
           {sub.payment_account && (
-            <p className="text-xs text-gray-600 mt-0.5">Paid to: {sub.payment_account.label}</p>
+            <p className="text-xs text-[var(--mist-500)] mt-0.5">Paid to: {sub.payment_account.label}</p>
           )}
         </div>
         <span className={clsx('flex items-center gap-1.5 text-[10px] font-medium px-2 py-1 rounded-full border shrink-0', cfg.bg, cfg.color, cfg.border)}>
@@ -244,19 +244,19 @@ function SubmissionCard({
 
       <div className="flex items-center gap-2">
         <button onClick={onView}
-          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-white/20 bg-white/3 transition-colors">
+          className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-[var(--guest-border)] text-[var(--mist-400)] hover:text-[var(--text-primary)] hover:border-[var(--guest-border-hover)] bg-[var(--overlay-1)] transition-colors">
           <Eye className="w-3.5 h-3.5" /> View Screenshot
         </button>
         {sub.notes && (
-          <span className="text-xs text-gray-500 italic truncate">&quot;{sub.notes}&quot;</span>
+          <span className="text-xs text-[var(--mist-400)] italic truncate">&quot;{sub.notes}&quot;</span>
         )}
-        <span className="text-xs text-gray-600 ml-auto shrink-0">
+        <span className="text-xs text-[var(--mist-500)] ml-auto shrink-0">
           {new Date(sub.submitted_at).toLocaleDateString('en-PK', { dateStyle: 'medium' })}
         </span>
       </div>
 
       {!readonly && sub.status === 'pending' && (
-        <div className="flex gap-2 pt-1 border-t border-white/5">
+        <div className="flex gap-2 pt-1 border-t border-[var(--border-faint)]">
           <button onClick={onReject} disabled={actionLoading}
             className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg border border-red-500/20 text-red-400 hover:bg-red-500/10 text-sm font-medium transition-all">
             <XCircle className="w-4 h-4" /> Reject

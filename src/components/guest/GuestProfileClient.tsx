@@ -15,10 +15,10 @@ type GuestProfile = {
 } | null
 
 function getTier(score: number) {
-  if (score >= 1000) return { label: 'Elite',    color: '#FFC745' }
+  if (score >= 1000) return { label: 'Elite',    color: 'var(--cyan-500)' }
   if (score >= 500)  return { label: 'VIP',      color: '#A855F7' }
   if (score >= 200)  return { label: 'Regular',  color: 'var(--brand-blue)' }
-  if (score >= 50)   return { label: 'Rising',   color: '#22C55E' }
+  if (score >= 50)   return { label: 'Rising',   color: 'var(--mint-500)' }
   return               { label: 'Newcomer', color: 'var(--text-muted)' }
 }
 
@@ -159,7 +159,7 @@ function ChangePasswordSheet({ onClose }: { onClose: () => void }) {
       {done ? (
         <div style={{ textAlign: 'center', padding: '20px 0' }}>
           <div style={{ width: 48, height: 48, background: 'rgba(34,197,94,0.12)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
-            <Check size={22} color="#22C55E" />
+            <Check size={22} color="var(--mint-500)" />
           </div>
           <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 700, margin: 0 }}>Password updated!</p>
         </div>

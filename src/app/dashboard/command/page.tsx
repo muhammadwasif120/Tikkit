@@ -19,7 +19,7 @@ function getGrad(id: string) {
 }
 
 const STATUS_MAP: Record<string, { bg: string; color: string; border: string; label: string }> = {
-  published: { bg: 'rgba(34,197,94,0.1)',  color: '#22C55E', border: 'rgba(34,197,94,0.25)', label: 'LIVE'     },
+  published: { bg: 'rgba(34,197,94,0.1)',  color: 'var(--mint-500)', border: 'rgba(34,197,94,0.25)', label: 'LIVE'     },
   completed: { bg: 'rgba(75,85,99,0.1)',   color: '#6B7280', border: 'rgba(75,85,99,0.2)',   label: 'ENDED'    },
   archived:  { bg: 'rgba(75,85,99,0.06)',  color: '#4B5563', border: 'rgba(75,85,99,0.12)',  label: 'ARCHIVED' },
   draft:     { bg: 'rgba(250,204,21,0.1)', color: '#FACC15', border: 'rgba(250,204,21,0.2)', label: 'DRAFT'    },
@@ -68,8 +68,8 @@ export default async function CommandPage() {
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
           {[
-            { icon: Users,         color: '#1E5EFF', label: 'Manage Attendees',    desc: 'See every guest — approve or reject EOI & payment submissions in one click.' },
-            { icon: Shield,        color: '#22C55E', label: 'Triple Verification', desc: 'View ID & payment verification badges and Social Score for each attendee.' },
+            { icon: Users,         color: 'var(--brand-blue)', label: 'Manage Attendees',    desc: 'See every guest — approve or reject EOI & payment submissions in one click.' },
+            { icon: Shield,        color: 'var(--mint-500)', label: 'Triple Verification', desc: 'View ID & payment verification badges and Social Score for each attendee.' },
             { icon: MessageSquare, color: '#A855F7', label: 'Live Chat',           desc: 'Broadcast messages to all attendees. Purged automatically 72h after event ends.' },
           ].map(({ icon: Icon, color, label, desc }) => (
             <div key={label} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
@@ -170,7 +170,7 @@ export default async function CommandPage() {
                           background: st.bg, color: st.color, border: `1px solid ${st.border}`,
                           display: 'inline-flex', alignItems: 'center', gap: 4,
                         }}>
-                          {isLive && <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22C55E', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
+                          {isLive && <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--mint-500)', animation: 'pulse 2s infinite', display: 'inline-block' }} />}
                           {st.label}
                         </span>
                         <span style={{ display: 'flex', alignItems: 'center', gap: 4, color: 'var(--text-muted)', fontSize: 'var(--fs-xs)', fontWeight: 600 }}>

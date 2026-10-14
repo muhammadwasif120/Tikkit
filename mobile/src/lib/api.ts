@@ -410,6 +410,23 @@ export async function scanQR(token: string, eventId: string, scanType: 'entry' |
   })
 }
 
+// ─── Team access (Admin / Manager / Gate Staff via team_invites token) ───────
+// No Supabase session exists for these callers — the invite token itself is
+// the credential, validated server-side. See src/app/api/staff/scan/route.ts
+// in the web repo (shared with the web StaffScanner).
+
+export async function scanQRWithInvite(
+  inviteToken: string,
+  qrToken: string,
+  eventId: string,
+  scanType: 'entry' | 'exit' = 'entry'
+) {
+  return request<ScanResult>('/api/staff/scan', {
+    method: 'POST',
+    body: JSON.stringify({ inviteToken, qrToken, eventId, scanType }),
+  })
+}
+
 // ─── Event Detail (rich) ──────────────────────────────────────────────────────
 
 export type OrganizerEventDetail = CreateEventPayload & {

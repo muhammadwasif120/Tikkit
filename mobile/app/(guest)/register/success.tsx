@@ -167,7 +167,7 @@ const s = StyleSheet.create({
   // Copy
   copy: { alignItems: 'center', gap: 8 },
   headline: {
-    color: colors.textPrimary, fontSize: 28, fontFamily: 'Poppins_700Bold',
+    color: colors.textPrimary, fontSize: 28, fontFamily: 'Sora_700Bold',
     textAlign: 'center', letterSpacing: -0.3,
   },
   eventTitle: {
@@ -195,7 +195,7 @@ const s = StyleSheet.create({
     borderRadius: radius.md, paddingVertical: 15,
     shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 10, elevation: 6,
   },
-  primaryBtnText: { color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold', fontWeight: '700' },
+  primaryBtnText: { color: colors.white, fontSize: 16, fontFamily: 'Sora_600SemiBold', fontWeight: '700' },
   secondaryBtn: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
     borderRadius: radius.md, paddingVertical: 14,
