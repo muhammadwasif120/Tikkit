@@ -25,6 +25,11 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      // Retired landing pages. Temporary (307) until final destinations are chosen.
+      { source: '/corporate', destination: '/', permanent: false },
+      { source: '/corporate/:path*', destination: '/', permanent: false },
+      { source: '/pulse', destination: '/', permanent: false },
+      { source: '/pulse/:path*', destination: '/', permanent: false },
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'tikkitx.com' }],

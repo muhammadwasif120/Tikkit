@@ -58,8 +58,6 @@ export default function SiteFooter() {
         >
           {[
             { href: '/how-it-works', label: 'How it works' },
-            { href: '/corporate', label: 'Corporate' },
-            { href: '/pulse', label: 'Pulse' },
             { href: '/blog', label: 'Blog' },
             { href: '/contact', label: 'Contact' },
             { href: '/privacy', label: 'Privacy policy' },

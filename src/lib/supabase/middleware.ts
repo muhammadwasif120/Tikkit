@@ -1,36 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
-// Subdomains map to their landing page, authenticated portal, and protected prefix
-const SUBDOMAIN_MAP: Record<string, { landing: string; portal: string; prefix: string }> = {
-  'vendor': { landing: '/vendor/home',      portal: '/vendor/os',      prefix: '/vendor'      },
-  'venue':  { landing: '/venue/home',       portal: '/venue/os',       prefix: '/venue'       },
-}
-
-function getSubdomain(host: string): string | null {
-  // "vendor.tikkitx.com" → "vendor", "localhost:3000" → null
-  const parts = host.split('.')
-  if (parts.length >= 3) return parts[0]
-  return null
-}
-
-// Share the auth session across all *.tikkitx.com subdomains in production
+// Session cookie is scoped to the apex domain in production. Kept as-is so existing
+// sessions (set with this domain) keep working.
 const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.tikkitx.com' : undefined
 
-// Vendor X and Venues & Experiences are fully built but not
-// open yet — every route within them bounces to that module's intro/waitlist
-// page instead of the live product. Nothing else about these modules is
-// touched, so re-launching one is deleting its entry here.
+// Vendor X and the standalone venue portal are built but not open yet: every
+// route within them redirects to the home page. Nothing else about these
+// modules is touched, so re-launching one is deleting its entry here.
+// (The venue code is reworked into the organizer CRM later, see docs/LAUNCH_PLAN.md.)
 const GATED_MODULES: { prefixes: string[]; landing: string }[] = [
-  { prefixes: ['/vendor'], landing: '/vendor/home' },
-  { prefixes: ['/venue', '/venues'], landing: '/venue/home' },
+  { prefixes: ['/vendor'], landing: '/' },
+  { prefixes: ['/venue', '/venues'], landing: '/' },
 ]
 
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const host        = request.headers.get('host') ?? ''
-  const subdomain   = getSubdomain(host)
-  const subConfig   = subdomain ? SUBDOMAIN_MAP[subdomain] : null
 
   for (const mod of GATED_MODULES) {
     const inModule = mod.prefixes.some(p => pathname === p || pathname.startsWith(p + '/'))
@@ -59,13 +44,6 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-
-  // ── Subdomain root redirect ────────────────────────────────────────────────
-  // The portal is gated (see GATED_MODULES above), so root always shows the
-  // product's landing/waitlist page regardless of auth state.
-  if (subConfig && pathname === '/') {
-    return NextResponse.redirect(new URL(subConfig.landing, request.url))
-  }
 
   // ── Mandatory profile completion gate ──────────────────────────────────────
   // Guests and organizers must have phone, ID (CNIC/passport), city, and their
@@ -140,11 +118,8 @@ export async function updateSession(request: NextRequest) {
     '/guest/explore',
     '/register',
     '/organizer',
-    '/coming-soon',
     '/demo',
     '/staff',
-    '/corporate',
-    '/pulse',
     '/privacy',
     '/terms',
     '/compare',
@@ -156,22 +131,10 @@ export async function updateSession(request: NextRequest) {
     '/venues',          // Public venue browse
     '/venue',           // Public venue profile pages
     '/v',               // Public vendor profiles
-    '/vendor/home',     // Vendor X landing page
-    '/venue/home',      // Venues & Experiences landing page
     '/lp',               // Preserved landing pages (/lp/underground etc.)
     '/sentry-example-page', // Sentry verification page — not linked from nav
     '/api/sentry-example-api', // matches /api anyway, listed for clarity
   ]
-
-  // On a product subdomain, only its own routes + auth are accessible
-  // Everything else redirects to that subdomain's dashboard
-  if (subConfig) {
-    const isAuth    = pathname.startsWith('/auth')
-    const isProduct = pathname.startsWith(subConfig.prefix)
-    if (!isAuth && !isProduct) {
-      return NextResponse.redirect(new URL(subConfig.portal, request.url))
-    }
-  }
 
   const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
@@ -182,11 +145,6 @@ export async function updateSession(request: NextRequest) {
           .from('profiles').select('role').eq('id', user.id).single()
         const metaRole = user.user_metadata?.role as string | undefined
         const role = profile?.role ?? metaRole ?? 'guest'
-
-        // On a product subdomain, authenticated login always goes to that product's portal
-        if (subConfig) {
-          return NextResponse.redirect(new URL(subConfig.portal, request.url))
-        }
 
         const dest = role === 'guest'  ? '/explore'
                    : role === 'admin'  ? '/master'
