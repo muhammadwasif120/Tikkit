@@ -25,13 +25,13 @@ export default async function GuestsPage({ searchParams }: { searchParams: Promi
   }))
 
   const rows: GuestRow[] = (regs ?? []).map(r => {
-    const sub = (r.payment_submissions ?? []).filter(s => s.status === 'submitted').sort((a, b) => 0)[0]
+    const sub = (r.payment_submissions ?? []).find(s => s.status === 'submitted' && s.screenshot_path)
     const sc = scores.get(r.id)
     return {
       id: r.id, eventId: r.event_id, eventTitle: r.events?.title ?? 'Event', name: r.full_name, phone: r.phone, email: r.email,
       status: r.status, isVip: r.is_vip, ticket: r.ticket_types?.name ?? null, due: r.price_due_pkr, paid: r.price_paid_pkr,
       createdAt: r.created_at, plusOne: r.plus_one, tier: sc?.tier ?? null, idVerified: sc?.verified ?? false,
-      submission: sub ? { id: sub.id, path: sub.screenshot_path, reference: sub.reference, amount: sub.amount_pkr } : null,
+      submission: sub ? { id: sub.id, path: sub.screenshot_path!, reference: sub.reference, amount: sub.amount_pkr ?? r.price_due_pkr } : null,
     }
   })
 
