@@ -51,7 +51,7 @@ export async function ExploreView({ city, category, q, when = '', intro, heading
   return (
     <MarketingShell>
       <JsonLd data={[crumbs, ...(itemList ? [itemList] : [])]} />
-      <PageHero eyebrow="Explore" title={heading} lead={intro?.split('. ').slice(0, 2).join('. ') + (intro ? '.' : '')} />
+      <PageHero eyebrow="Explore" title={heading} lead={intro ? intro.split('. ').slice(0, 2).join('. ').replace(/\.?$/, '.') : 'Browse upcoming concerts, parties, workshops and private events.'} />
       <Container className="pb-8">
         <form action={base + (category ? `/${category}` : '')} className="mb-5 flex flex-wrap gap-3">
           <input name="q" defaultValue={q} placeholder="Search events" aria-label="Search events" className="h-11 w-full max-w-sm rounded-[10px] border border-line-strong bg-raised px-4 text-[15px] text-fg placeholder:text-subtle focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/15 sm:h-10" />
