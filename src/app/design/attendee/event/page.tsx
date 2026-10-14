@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn'
 const TICKETS = [
   { id: 'eb', name: 'Early bird', price: 1800, note: 'Ends in 1d 14h', left: 11, tone: 'warning' as const },
   { id: 'ga', name: 'General', price: 2500, note: 'Entry and one welcome drink', left: 92, tone: 'neutral' as const },
-  { id: 'vip', name: 'VIP', price: 6000, note: 'Priority entry, reserved lounge, 2 drinks', left: 6, tone: 'violet' as const },
+  { id: 'vip', name: 'VIP', price: 6000, note: 'Priority entry, reserved lounge, 2 drinks', left: 6, tone: 'magenta' as const },
 ]
 
 export default function AttendeeEventPrototype() {
@@ -66,14 +66,14 @@ export default function AttendeeEventPrototype() {
                   key={t.id} role="radio" aria-checked={sel === t.id} type="button" onClick={() => setSel(t.id)}
                   className={cn(
                     'flex w-full cursor-pointer items-center gap-4 rounded-2xl p-4 text-left transition-[box-shadow,background-color]',
-                    sel === t.id ? 'bg-accent/8 shadow-[inset_0_0_0_1.5px_rgb(var(--k-accent))]' : 'bg-surface shadow-card hover:bg-raised',
+                    sel === t.id ? (t.id === 'vip' ? 'bg-magenta/8 shadow-[inset_0_0_0_1.5px_rgb(var(--k-magenta))]' : 'bg-accent/8 shadow-[inset_0_0_0_1.5px_rgb(var(--k-accent))]') : 'bg-surface shadow-card hover:bg-raised',
                   )}
                 >
-                  <span className={cn('flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2', sel === t.id ? 'border-accent' : 'border-line-strong')}>
-                    {sel === t.id && <span className="h-2.5 w-2.5 rounded-full bg-accent" />}
+                  <span className={cn('flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2', sel === t.id ? (t.id === 'vip' ? 'border-magenta' : 'border-accent') : 'border-line-strong')}>
+                    {sel === t.id && <span className={cn('h-2.5 w-2.5 rounded-full', t.id === 'vip' ? 'bg-magenta' : 'bg-accent')} />}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-2 text-sm font-semibold text-fg">{t.name}{t.id === 'eb' && <Badge tone="warning">{t.note}</Badge>}</span>
+                    <span className="flex items-center gap-2 text-sm font-semibold text-fg">{t.name}{t.id === 'eb' && <Badge tone="warning">{t.note}</Badge>}{t.id === 'vip' && <Badge tone="magenta">{t.left} left</Badge>}</span>
                     <span className="mt-0.5 block text-[13px] text-muted">{t.id === 'eb' ? `${t.left} left at this price` : t.note}</span>
                   </span>
                   <span className="tnum text-base font-semibold text-fg">PKR {t.price.toLocaleString()}</span>

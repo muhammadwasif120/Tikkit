@@ -32,7 +32,7 @@ export default function DashboardPrototype() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Key numbers">
         <StatCard label="Tickets sold" value="312" delta={18} hint="vs last week" icon={<Ticket className="h-4 w-4" />} spark={[12, 18, 15, 24, 31, 28, 44, 52]} />
-        <StatCard label="Revenue" value="PKR 468k" delta={12} hint="approved payments" icon={<Coins className="h-4 w-4" />} spark={[8, 12, 11, 18, 22, 25, 30, 41]} />
+        <StatCard tone="magenta" label="Revenue" value="PKR 468k" delta={12} hint="approved payments" icon={<Coins className="h-4 w-4" />} spark={[8, 12, 11, 18, 22, 25, 30, 41]} />
         <StatCard label="Pending approvals" value="7" hint="oldest 3h ago" icon={<Clock className="h-4 w-4" />} spark={[3, 5, 4, 6, 9, 8, 7, 7]} />
         <StatCard label="Check-in rate" value="0%" hint="opens at 8:00 pm" icon={<QrCode className="h-4 w-4" />} />
       </section>
@@ -93,11 +93,11 @@ export default function DashboardPrototype() {
         </Card>
 
         <Card>
-          <CardHeader title="Top promoters" description="By confirmed tickets" />
+          <CardHeader title="Top promoters" description="By confirmed tickets" action={<Badge tone="magenta">Live</Badge>} />
           <CardBody className="space-y-4">
             {[['Zain Raza', 64, 'PKR 38,400'], ['Areeba N.', 41, 'PKR 24,600'], ['Hassan K.', 27, 'PKR 16,200']].map(([n, c, a], i) => (
               <div key={n as string} className="flex items-center gap-3">
-                <span className="tnum w-4 text-sm font-semibold text-subtle">{i + 1}</span>
+                <span className={'tnum w-4 text-sm font-semibold ' + (i === 0 ? 'text-magenta' : 'text-subtle')}>{i + 1}</span>
                 <Avatar name={n as string} size={32} />
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-fg">{n}</p>

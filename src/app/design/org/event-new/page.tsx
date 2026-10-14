@@ -107,7 +107,7 @@ export default function EventNewPrototype() {
                   <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
                     <Field label="Stop selling at" optional>{p => <Input {...p} type="datetime-local" value={t.ends} onChange={e => update(t.id, { ends: e.target.value })} />}</Field>
                     <label className="flex h-10 cursor-pointer items-center gap-2 text-sm text-muted">
-                      <input type="checkbox" checked={t.vip} onChange={e => update(t.id, { vip: e.target.checked })} className="h-4 w-4 accent-[rgb(var(--k-violet))]" /> VIP perks
+                      <input type="checkbox" checked={t.vip} onChange={e => update(t.id, { vip: e.target.checked })} className="h-4 w-4 accent-[rgb(var(--k-magenta))]" /> VIP perks
                     </label>
                   </div>
                 </div>

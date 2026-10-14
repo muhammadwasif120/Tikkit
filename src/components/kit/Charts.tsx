@@ -1,14 +1,14 @@
 import { cn } from '@/lib/cn'
 
 /** Tiny dependency-free sparkline. Values are plotted left to right. */
-export function Sparkline({ data, className, tone = 'accent' }: { data: number[]; className?: string; tone?: 'accent' | 'success' | 'danger' }) {
+export function Sparkline({ data, className, tone = 'accent' }: { data: number[]; className?: string; tone?: 'accent' | 'success' | 'danger' | 'magenta' }) {
   const w = 120, h = 36, pad = 2
   const min = Math.min(...data), max = Math.max(...data)
   const span = max - min || 1
   const pts = data.map((v, i) => [pad + (i / (data.length - 1)) * (w - pad * 2), h - pad - ((v - min) / span) * (h - pad * 2)] as const)
   const line = pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ')
   const area = `${line} L${pts[pts.length - 1][0]} ${h} L${pts[0][0]} ${h} Z`
-  const color = { accent: 'rgb(var(--k-accent))', success: 'rgb(var(--k-success))', danger: 'rgb(var(--k-danger))' }[tone]
+  const color = { accent: 'rgb(var(--k-accent))', success: 'rgb(var(--k-success))', danger: 'rgb(var(--k-danger))', magenta: 'rgb(var(--k-magenta))' }[tone]
   const id = `sg-${tone}`
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className={cn('h-9 w-full', className)} preserveAspectRatio="none" aria-hidden>

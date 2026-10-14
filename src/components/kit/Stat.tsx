@@ -5,8 +5,8 @@ import { Card } from './Card'
 import { Sparkline } from './Charts'
 
 export function StatCard({
-  label, value, delta, hint, icon, spark,
-}: { label: string; value: ReactNode; delta?: number; hint?: string; icon?: ReactNode; spark?: number[] }) {
+  label, value, delta, hint, icon, spark, tone = 'accent',
+}: { tone?: 'accent' | 'magenta'; label: string; value: ReactNode; delta?: number; hint?: string; icon?: ReactNode; spark?: number[] }) {
   const up = (delta ?? 0) >= 0
   return (
     <Card className="p-5">
@@ -27,7 +27,7 @@ export function StatCard({
             {hint && <span className="text-subtle">{hint}</span>}
           </div>
         </div>
-        {spark && <div className="w-24 shrink-0"><Sparkline data={spark} tone={up ? 'accent' : 'danger'} /></div>}
+        {spark && <div className="w-24 shrink-0"><Sparkline data={spark} tone={up ? tone : 'danger'} /></div>}
       </div>
     </Card>
   )

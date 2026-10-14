@@ -28,7 +28,7 @@ export default function ReferralsPrototype() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Referral totals">
         <StatCard label="Referred sales" value="144" hint="46% of all tickets" icon={<Link2 className="h-4 w-4" />} spark={[4, 9, 12, 18, 25, 33, 41]} delta={22} />
-        <StatCard label="Commission owed" value="PKR 86,400" hint="across 4 promoters" icon={<Trophy className="h-4 w-4" />} />
+        <StatCard tone="magenta" label="Commission owed" value="PKR 86,400" hint="across 4 promoters" icon={<Trophy className="h-4 w-4" />} spark={[2, 5, 8, 9, 14, 17, 21]} delta={9} />
         <StatCard label="Paid out" value="PKR 36,600" hint="42% settled" />
         <StatCard label="Conversion" value="21%" hint="clicks to tickets" delta={4} />
       </section>
@@ -45,7 +45,7 @@ export default function ReferralsPrototype() {
                   return (
                     <Tr key={p.code}>
                       <Td><div className="flex items-center gap-3"><Avatar name={p.name} size={34} /><div><p className="font-medium text-fg">{p.name}</p><p className="tnum text-xs text-muted">{p.clicks} clicks</p></div></div></Td>
-                      <Td><code className="rounded-md bg-overlay px-2 py-1 font-mono text-xs text-fg">{p.code}</code></Td>
+                      <Td><code className="rounded-md bg-magenta/12 px-2 py-1 font-mono text-xs text-magenta">{p.code}</code></Td>
                       <Td className="tnum text-right font-medium">{p.sold}</Td>
                       <Td className="text-right">
                         {owed > 0 ? <span className="tnum font-medium text-fg">PKR {owed.toLocaleString()}</span> : <Badge tone="success" dot>Settled</Badge>}
@@ -92,7 +92,7 @@ export default function ReferralsPrototype() {
             </CardBody>
           </Card>
 
-          <Card className="p-5">
+          <Card className="k-gradient-ring p-5">
             <div className="flex items-center gap-4">
               <div className="grid h-24 w-24 shrink-0 grid-cols-7 gap-px rounded-xl bg-white p-2" aria-label="Sample QR code" role="img">
                 {Array.from({ length: 49 }, (_, i) => <span key={i} className={(i * 7 + (i % 5)) % 3 === 0 || [0, 1, 7, 6, 5, 13, 42, 43, 35, 48, 47, 41].includes(i) ? 'bg-black' : 'bg-transparent'} />)}

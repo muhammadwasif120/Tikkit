@@ -24,7 +24,8 @@
 
   --k-accent:      34 211 238;    /* electric cyan */
   --k-accent-fg:   4 20 26;       /* text on accent */
-  --k-violet:      139 92 246;    /* brand secondary (the X outline) */
+  --k-violet:      139 92 246;    /* blue violet secondary (secret, regular) */
+  --k-magenta:     214 96 236;    /* brand magenta from the X outline: VIP, promoters, celebration */
 
   --k-success:     52 211 153;
   --k-warning:     251 191 36;
@@ -33,7 +34,8 @@
 
   --k-shadow-card: 0 0 0 1px rgb(var(--k-line) / 1);
   --k-shadow-pop:  0 12px 40px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(var(--k-line-strong) / 1);
-  --k-glow:        radial-gradient(60rem 28rem at 50% -8rem, rgb(var(--k-accent) / 0.10), transparent 70%);
+  --k-glow:        radial-gradient(60rem 28rem at 30% -8rem, rgb(var(--k-accent) / 0.10), transparent 70%),
+                   radial-gradient(44rem 24rem at 92% -6rem, rgb(var(--k-magenta) / 0.11), transparent 70%);
 }
 
 :root[data-theme='light'] {
@@ -53,6 +55,7 @@
   --k-accent:      8 145 178;     /* cyan 600, passes AA on white */
   --k-accent-fg:   255 255 255;
   --k-violet:      109 40 217;
+  --k-magenta:     156 39 176;
 
   --k-success:     5 150 105;
   --k-warning:     180 83 9;
@@ -61,7 +64,8 @@
 
   --k-shadow-card: 0 1px 2px rgb(15 20 36 / 0.05), 0 4px 14px rgb(15 20 36 / 0.04), 0 0 0 1px rgb(var(--k-line) / 1);
   --k-shadow-pop:  0 12px 40px rgb(15 20 36 / 0.14), 0 0 0 1px rgb(var(--k-line-strong) / 1);
-  --k-glow:        radial-gradient(60rem 28rem at 50% -8rem, rgb(var(--k-accent) / 0.07), transparent 70%);
+  --k-glow:        radial-gradient(60rem 28rem at 30% -8rem, rgb(var(--k-accent) / 0.07), transparent 70%),
+                   radial-gradient(44rem 24rem at 92% -6rem, rgb(var(--k-magenta) / 0.07), transparent 70%);
 }
 
 /* Base for any surface that opts in to the new kit. */
@@ -77,6 +81,11 @@
 }
 .kit * { border-color: rgb(var(--k-line)); }
 .kit ::selection { background: rgb(var(--k-accent) / 0.28); }
+
+/* Brand gradient text and borders (cyan, violet, magenta). */
+.k-gradient-text { background: linear-gradient(90deg, rgb(var(--k-accent)), rgb(var(--k-violet)) 55%, rgb(var(--k-magenta))); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.k-gradient-ring { position: relative; }
+.k-gradient-ring::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; background: linear-gradient(135deg, rgb(var(--k-accent)), rgb(var(--k-violet)) 50%, rgb(var(--k-magenta))); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
 
 /* Tabular figures for any number that should align (money, counts, times). */
 .tnum { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }

@@ -41,7 +41,7 @@ const config: Config = {
         // (bg-brand-blue, var(--text-primary) etc.) for anything themed.
         navy:    { 950: "#060B22", 900: "#0B1437", 800: "#132057", 700: "#1D2E78", 600: "#2B40A0" },
         cyan:    { 300: "#80F3FF", 400: "#33EBFF", 500: "#00E5FF", 600: "#00B8CC" },
-        magenta: { 400: "#E066FF", 500: "#CC00FF" },
+        magenta: { DEFAULT: "rgb(var(--k-magenta) / <alpha-value>)", 400: "#E066FF", 500: "#CC00FF" },
         sky:     { 400: "#A3C0FF", 500: "#7FA7FF" },
         mint:    { 500: "#3DD68C" },
         coral:   { 500: "#FF6B6B" },

@@ -13,7 +13,7 @@ const screens = [
   ['/design/attendee/event', 'Attendee event page', 'Mobile first, registration with codes'],
 ]
 
-const swatches = ['canvas', 'surface', 'raised', 'overlay', 'line', 'fg', 'muted', 'subtle', 'accent', 'violet', 'success', 'warning', 'danger', 'info']
+const swatches = ['canvas', 'surface', 'raised', 'overlay', 'line', 'fg', 'muted', 'subtle', 'accent', 'violet', 'magenta', 'success', 'warning', 'danger', 'info']
 
 export default function DesignHome() {
   return (
@@ -57,7 +57,7 @@ export default function DesignHome() {
           <Card>
             <CardHeader title="Badges and status" />
             <CardBody className="flex flex-wrap gap-2">
-              <Badge>Neutral</Badge><Badge tone="accent" dot>Live</Badge><Badge tone="violet">VIP</Badge><Badge tone="success" dot>Confirmed</Badge><Badge tone="warning" dot>Proof received</Badge><Badge tone="danger" dot>Rejected</Badge><Badge tone="info">Needs approval</Badge>
+              <Badge>Neutral</Badge><Badge tone="accent" dot>Live</Badge><Badge tone="violet">Regular</Badge><Badge tone="magenta">VIP</Badge><Badge tone="success" dot>Confirmed</Badge><Badge tone="warning" dot>Proof received</Badge><Badge tone="danger" dot>Rejected</Badge><Badge tone="info">Needs approval</Badge>
             </CardBody>
           </Card>
           <Card>

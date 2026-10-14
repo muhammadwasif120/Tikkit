@@ -31,7 +31,7 @@ const statusMeta: Record<Row['status'], { label: string; tone: BadgeTone }> = {
   checked_in: { label: 'Checked in', tone: 'accent' },
 }
 
-const tierMeta = { new: { label: 'New', tone: 'neutral' }, reliable: { label: 'Reliable', tone: 'info' }, regular: { label: 'Regular', tone: 'violet' }, trusted: { label: 'Trusted', tone: 'success' } } as const
+const tierMeta = { new: { label: 'New', tone: 'neutral' }, reliable: { label: 'Reliable', tone: 'info' }, regular: { label: 'Regular', tone: 'violet' }, trusted: { label: 'Trusted', tone: 'magenta' } } as const
 
 type Tab = 'review' | 'confirmed' | 'in' | 'all'
 
@@ -119,7 +119,7 @@ export default function GuestsPrototype() {
                       </div>
                     </div>
                   </Td>
-                  <Td className="whitespace-nowrap"><p className="text-fg">{r.ticket}</p><p className="tnum text-xs text-muted">PKR {r.amount.toLocaleString()}</p></Td>
+                  <Td className="whitespace-nowrap"><p className="flex items-center gap-1.5 text-fg">{r.ticket}{r.ticket === 'VIP' && <Badge tone="magenta" className="px-1.5 py-0 text-[10px]">VIP</Badge>}</p><p className="tnum text-xs text-muted">PKR {r.amount.toLocaleString()}</p></Td>
                   <Td><Badge tone={statusMeta[r.status].tone} dot>{statusMeta[r.status].label}</Badge></Td>
                   <Td className="hidden xl:table-cell"><Badge tone={tierMeta[r.tier].tone}>{tierMeta[r.tier].label}</Badge></Td>
                   <Td className="hidden text-muted 2xl:table-cell">{r.referrer ?? <span className="text-subtle">Direct</span>}</Td>

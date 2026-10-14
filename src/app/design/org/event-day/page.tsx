@@ -69,13 +69,13 @@ export default function EventDayPrototype() {
               <p className="absolute inset-x-0 bottom-4 text-center text-xs text-white/60">Hold steady, it scans automatically</p>
             </div>
 
-            <div className={cn('flex items-center gap-4 rounded-2xl p-4 ring-1', ui.bg, ui.ring)} role="status" aria-live="polite">
-              <ui.icon className={cn('h-9 w-9 shrink-0', last.result === 'admitted' ? 'text-success' : last.result === 'duplicate' ? 'text-warning' : 'text-danger')} aria-hidden />
+            <div className={cn('flex items-center gap-4 rounded-2xl p-4 ring-1', last.vip && last.result === 'admitted' ? 'bg-magenta/10 ring-magenta/40' : [ui.bg, ui.ring])} role="status" aria-live="polite">
+              <ui.icon className={cn('h-9 w-9 shrink-0', last.result === 'admitted' ? (last.vip ? 'text-magenta' : 'text-success') : last.result === 'duplicate' ? 'text-warning' : 'text-danger')} aria-hidden />
               <div className="min-w-0 flex-1">
                 <p className="text-lg font-semibold tracking-tight text-fg">{last.name}</p>
                 <p className="text-sm text-muted">{last.ticket} ticket · {ui.label}</p>
               </div>
-              {last.vip && <Badge tone="violet">VIP</Badge>}
+              {last.vip && <Badge tone="magenta">VIP</Badge>}
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
