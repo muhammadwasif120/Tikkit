@@ -145,11 +145,6 @@ export async function updateSession(request: NextRequest) {
       }
     }
 
-    if (!user && pathname.match(/^\/guest\/explore\/([^/]+)$/)) {
-      const slug = pathname.split('/guest/explore/')[1]
-      return NextResponse.redirect(new URL(`/register/${slug}`, request.url))
-    }
-
     return response
   }
 
