@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { requireOrganizer } from '@/lib/data/viewer'
+import { requireOwner } from '@/lib/data/viewer'
 import { fmtDate, pkr } from '@/lib/format'
 import PrintButton from './PrintButton'
 
@@ -7,7 +7,7 @@ export const metadata = { title: 'Invoice' }
 
 export default async function InvoicePage({ params }: { params: Promise<{ number: string }> }) {
   const { number } = await params
-  const { supabase, profile, company } = await requireOrganizer()
+  const { supabase, profile, company } = await requireOwner()
   const { data: inv } = await supabase.from('subscription_invoices').select('*').eq('number', number).eq('organizer_id', profile.id).maybeSingle()
   if (!inv) notFound()
   return (

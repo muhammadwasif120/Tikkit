@@ -2,14 +2,14 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Badge, PageHeader } from '@/components/kit'
 import RetreatBuilder, { type BDay, type BItem, type BLine, type BPerson, type BRetreat, type BTask, type BUpdate } from '@/components/retreats/RetreatBuilder'
-import { requireOrganizer } from '@/lib/data/viewer'
+import { requireOwner } from '@/lib/data/viewer'
 import { fmtDate } from '@/lib/format'
 
 export const metadata = { title: 'Retreat' }
 
 export default async function RetreatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { supabase } = await requireOrganizer()
+  const { supabase } = await requireOwner()
   const { data: retreat } = await supabase.from('retreats').select('*').eq('id', id).maybeSingle()
   if (!retreat) notFound()
 

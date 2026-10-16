@@ -14,7 +14,12 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error && user) {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-      const home = profile?.role === 'organizer' ? '/dashboard' : profile?.role === 'admin' ? '/master' : '/explore'
+      let home = profile?.role === 'organizer' ? '/dashboard' : profile?.role === 'admin' ? '/master' : '/explore'
+      if (profile?.role === 'attendee') {
+        await supabase.rpc('claim_team_invites')
+        const { data: team } = await supabase.from('organizer_team_members').select('id').eq('user_id', user.id).eq('status', 'active').limit(1).maybeSingle()
+        if (team) home = '/dashboard'
+      }
       return NextResponse.redirect(`${origin}${next ?? home}`)
     }
   }

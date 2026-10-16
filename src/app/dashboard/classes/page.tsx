@@ -2,14 +2,14 @@ import Link from 'next/link'
 import { Sparkles } from 'lucide-react'
 import { Badge, Card, EmptyState, PageHeader } from '@/components/kit'
 import { NewSeries, type Series } from '@/components/classes/ClassesOrganizer'
-import { requireOrganizer } from '@/lib/data/viewer'
+import { requireOwner } from '@/lib/data/viewer'
 import { pkr } from '@/lib/format'
 
 export const metadata = { title: 'Classes' }
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default async function ClassesPage() {
-  const { supabase, entitlements } = await requireOrganizer()
+  const { supabase, entitlements } = await requireOwner()
   const { data } = await supabase.from('class_series').select('*').order('created_at', { ascending: false })
   const list = (data ?? []) as Series[]
   const lim = entitlements?.limits.classes

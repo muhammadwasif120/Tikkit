@@ -45,7 +45,14 @@ export default function LoginClient() {
   async function landing() {
     const { data: { user } } = await supabase.auth.getUser()
     const { data: p } = user ? await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle() : { data: null }
-    router.push(dest(p?.role))
+    let role: string | undefined = p?.role
+    if (role === 'attendee') {
+      // accept any team invites sent to this email, then send managers to the dashboard
+      await supabase.rpc('claim_team_invites')
+      const { data: team } = await supabase.from('organizer_team_members').select('id').eq('status', 'active').limit(1).maybeSingle()
+      if (team) role = 'organizer'
+    }
+    router.push(dest(role))
     router.refresh()
   }
 

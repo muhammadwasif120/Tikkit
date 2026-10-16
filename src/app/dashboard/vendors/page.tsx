@@ -1,11 +1,11 @@
 import { PageHeader } from '@/components/kit'
 import VendorsClient from '@/components/vendors/VendorsClient'
-import { requireOrganizer } from '@/lib/data/viewer'
+import { requireOwner } from '@/lib/data/viewer'
 
 export const metadata = { title: 'Vendors and invoices' }
 
 export default async function VendorsPage() {
-  const { supabase, profile, entitlements } = await requireOrganizer()
+  const { supabase, profile, entitlements } = await requireOwner()
   const [{ data: vendors }, { data: invoices }, { data: events }] = await Promise.all([
     supabase.from('organizer_vendors').select('*').eq('organizer_id', profile.id).order('name'),
     supabase.from('organizer_vendor_invoices').select('id, vendor_id, amount_pkr, due_date, status, invoice_number, description, events(title), organizer_vendors(name)').eq('organizer_id', profile.id).order('due_date', { ascending: true, nullsFirst: false }),

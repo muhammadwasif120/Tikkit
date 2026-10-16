@@ -175,7 +175,11 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (role === 'attendee' && pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/explore', request.url))
+    // Team managers are attendee accounts that an organizer invited. They may use the dashboard.
+    const { data: team } = await supabase.from('organizer_team_members').select('id')
+      .eq('user_id', user.id).eq('status', 'active').limit(1).maybeSingle()
+    if (!team) return NextResponse.redirect(new URL('/explore', request.url))
+    return response
   }
 
   if (role !== 'attendee' && (pathname.startsWith('/guest') || pathname.startsWith('/explore'))) {

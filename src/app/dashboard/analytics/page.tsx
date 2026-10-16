@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { BarChart3, Lock } from 'lucide-react'
 import { Badge, BarChart, ButtonLink, Card, CardBody, CardHeader, EmptyState, PageHeader, Progress, StatCard, Table, TableWrap, Td, Th, Tr } from '@/components/kit'
-import { requireOrganizer } from '@/lib/data/viewer'
+import { requireOwner } from '@/lib/data/viewer'
 import { fmtDate, pkr, pkrShort, pkDay } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
@@ -11,7 +11,7 @@ const SOLD = ['confirmed', 'checked_in', 'no_show']
 
 export default async function AnalyticsPage({ searchParams }: { searchParams: Promise<{ event?: string }> }) {
   const { event: eventId } = await searchParams
-  const { supabase, profile, entitlements } = await requireOrganizer()
+  const { supabase, profile, entitlements } = await requireOwner()
   const full = entitlements?.limits.full_analytics === true
 
   const { data: events } = await supabase.from('events').select('id, title').eq('organizer_id', profile.id).neq('status', 'draft').order('starts_at', { ascending: false })

@@ -2,13 +2,13 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/kit'
 import { SpaceManage, type Blackout, type Hour, type SBooking, type Space } from '@/components/spaces/SpacesOrganizer'
-import { requireOrganizer } from '@/lib/data/viewer'
+import { requireOwner } from '@/lib/data/viewer'
 
 export const metadata = { title: 'Space' }
 
 export default async function SpacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { supabase } = await requireOrganizer()
+  const { supabase } = await requireOwner()
   const { data: space } = await supabase.from('spaces').select('*').eq('id', id).maybeSingle()
   if (!space) notFound()
   const [{ data: hours }, { data: blackouts }, { data: bookings }] = await Promise.all([

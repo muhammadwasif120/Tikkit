@@ -14,7 +14,7 @@ const tabs = [
   { href: '/guest/profile', label: 'Profile', icon: User },
 ] as const
 
-export default function AttendeeShell({ children, name, avatarUrl, unread }: { children: React.ReactNode; name: string; avatarUrl: string | null; unread: number }) {
+export default function AttendeeShell({ children, name, avatarUrl, unread, isManager = false }: { children: React.ReactNode; name: string; avatarUrl: string | null; unread: number; isManager?: boolean }) {
   const path = usePathname()
   const active = (h: string) => path === h || path.startsWith(h + '/')
   return (
@@ -31,7 +31,7 @@ export default function AttendeeShell({ children, name, avatarUrl, unread }: { c
               </Link>
             ))}
           </nav>
-          <div className="ml-auto flex items-center gap-2"><ThemeToggle /><Link href="/guest/profile" aria-label="Profile"><Avatar name={name} src={avatarUrl} size={34} /></Link></div>
+          <div className="ml-auto flex items-center gap-2">{isManager && <Link href="/dashboard" className="hidden rounded-lg bg-magenta/12 px-3 py-1.5 text-[13px] font-medium text-magenta hover:bg-magenta/20 sm:block">Team dashboard</Link>}<ThemeToggle /><Link href="/guest/profile" aria-label="Profile"><Avatar name={name} src={avatarUrl} size={34} /></Link></div>
         </div>
       </header>
       <main className="mx-auto w-full max-w-4xl px-4 pb-28 pt-6 sm:px-6 sm:pb-10 sm:pt-8">{children}</main>

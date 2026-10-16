@@ -1,12 +1,12 @@
 import { headers } from 'next/headers'
 import { PageHeader } from '@/components/kit'
 import ReferralsClient, { type Defaults } from '@/components/referrals/ReferralsClient'
-import { requireOrganizer } from '@/lib/data/viewer'
+import { requireOwner } from '@/lib/data/viewer'
 
 export const metadata = { title: 'Referrals' }
 
 export default async function ReferralsPage() {
-  const { supabase, profile } = await requireOrganizer()
+  const { supabase, profile } = await requireOwner()
   const h = await headers()
   const origin = `${h.get('x-forwarded-proto') ?? 'http'}://${h.get('host')}`
 

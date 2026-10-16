@@ -10,12 +10,12 @@ export const metadata = { title: 'Event Day' }
 
 export default async function EventDayPage({ searchParams }: { searchParams: Promise<{ event?: string }> }) {
   const { event: chosen } = await searchParams
-  const { supabase, profile } = await requireOrganizer()
+  const { supabase, orgId } = await requireOrganizer()
 
   // events from a day ago onwards, soonest first
   const from = new Date(Date.now() - 36 * 3_600_000).toISOString()
   const { data: events } = await supabase.from('events').select('id, title, starts_at')
-    .eq('organizer_id', profile.id).eq('status', 'published').gte('starts_at', from).order('starts_at').limit(12)
+    .eq('organizer_id', orgId).eq('status', 'published').gte('starts_at', from).order('starts_at').limit(12)
 
   const list = events ?? []
   const current = list.find(e => e.id === chosen) ?? list[0]

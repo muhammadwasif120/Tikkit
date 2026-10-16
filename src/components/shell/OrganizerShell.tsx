@@ -35,9 +35,11 @@ export type OrganizerShellProps = {
   plan: { label: string; note: string; tone?: 'accent' | 'warning' | 'danger' }
   pendingCount?: number
   notificationCount?: number
+  /** Team managers see the door and guest tools only. */
+  manager?: boolean
 }
 
-export function OrganizerShell({ base = '/design/org', routes, children, user, plan, pendingCount = 0, notificationCount = 0 }: OrganizerShellProps) {
+export function OrganizerShell({ base = '/design/org', routes, children, user, plan, pendingCount = 0, notificationCount = 0, manager = false }: OrganizerShellProps) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const r: ShellRoutes = routes ?? {
@@ -74,11 +76,13 @@ export function OrganizerShell({ base = '/design/org', routes, children, user, p
     },
   ]
 
+  const visibleGroups = manager ? groups.slice(0, 1).map(g => ({ ...g, items: g.items.filter(i => i.href !== r.referrals) })) : groups
+
   const active = (href: string) => href === r.overview ? pathname === href : pathname === href || pathname.startsWith(href + '/')
 
   const nav = (
     <nav className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-4" aria-label="Main">
-      {groups.map((g, i) => (
+      {visibleGroups.map((g, i) => (
         <div key={i}>
           {g.title && <p className="mb-1.5 px-3 text-[11px] font-medium uppercase tracking-wider text-subtle">{g.title}</p>}
           <ul className="space-y-0.5">
@@ -110,9 +114,9 @@ export function OrganizerShell({ base = '/design/org', routes, children, user, p
 
   const footer = (
     <div className="space-y-2 border-t border-line p-3">
-      <Link href={r.settings} className="flex h-10 items-center gap-3 rounded-[10px] px-3 text-sm font-medium text-muted transition-colors hover:bg-raised hover:text-fg">
+      {!manager && <Link href={r.settings} className="flex h-10 items-center gap-3 rounded-[10px] px-3 text-sm font-medium text-muted transition-colors hover:bg-raised hover:text-fg">
         <Settings className="h-[18px] w-[18px]" aria-hidden /> Settings
-      </Link>
+      </Link>}
       <a href="https://wa.me/13074434195" target="_blank" rel="noopener noreferrer" className="flex h-10 items-center gap-3 rounded-[10px] px-3 text-sm font-medium text-muted transition-colors hover:bg-raised hover:text-fg">
         <CircleHelp className="h-[18px] w-[18px]" aria-hidden /> Help on WhatsApp
       </a>
@@ -121,9 +125,9 @@ export function OrganizerShell({ base = '/design/org', routes, children, user, p
           <span className="text-[13px] font-semibold text-fg">{plan.label}</span>
           <Badge tone={plan.tone ?? 'accent'} dot>{plan.note}</Badge>
         </div>
-        <Link href={r.billing} className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline">
+        {!manager && <Link href={r.billing} className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-accent hover:underline">
           Manage plan <ChevronRight className="h-3 w-3" aria-hidden />
-        </Link>
+        </Link>}
       </div>
     </div>
   )
@@ -133,13 +137,13 @@ export function OrganizerShell({ base = '/design/org', routes, children, user, p
       {/* Desktop sidebar */}
       <aside className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col border-r border-line bg-surface/60 backdrop-blur lg:flex">
         <div className="flex h-16 items-center px-5"><Logo /></div>
-        <div className="px-3">
+        {!manager && <div className="px-3">
           <Link href={r.newEvent}>
             <span className="flex h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] bg-accent text-sm font-semibold text-accent-fg shadow-[0_0_0_1px_rgb(var(--k-accent)/0.5),0_8px_24px_-10px_rgb(var(--k-accent)/0.55)] transition-colors hover:bg-accent/90">
               <Plus className="h-4 w-4" aria-hidden /> New event
             </span>
           </Link>
-        </div>
+        </div>}
         {nav}
         {footer}
       </aside>
@@ -196,14 +200,14 @@ export function OrganizerShell({ base = '/design/org', routes, children, user, p
 
         {/* Mobile bottom navigation */}
         <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden" aria-label="Quick navigation">
-          <ul className="mx-auto grid max-w-md grid-cols-5">
+          <ul className={cn("mx-auto grid max-w-md", manager ? "grid-cols-4" : "grid-cols-5")}>
             {[
               { href: r.overview, label: 'Home', icon: LayoutDashboard },
               { href: r.events, label: 'Events', icon: CalendarDays },
               { href: r.eventDay, label: 'Door', icon: QrCode },
               { href: r.guests, label: 'Guests', icon: Users },
               { href: r.referrals, label: 'Referrals', icon: Share2 },
-            ].map(t => (
+            ].filter(t => !manager || t.href !== r.referrals).map(t => (
               <li key={t.href}>
                 <Link
                   href={t.href}

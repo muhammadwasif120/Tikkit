@@ -1,10 +1,10 @@
 import BillingClient from '@/components/settings/BillingClient'
-import { requireOrganizer } from '@/lib/data/viewer'
+import { requireOwner } from '@/lib/data/viewer'
 
 export const metadata = { title: 'Plan and billing' }
 
 export default async function BillingSettings() {
-  const { supabase, profile, entitlements: e } = await requireOrganizer()
+  const { supabase, profile, entitlements: e } = await requireOwner()
   const [{ data: plans }, { data: pays }, { data: invs }, { data: sub }] = await Promise.all([
     supabase.from('plans').select('id, name, price_pkr_month, price_pkr_year').eq('is_purchasable', true).order('sort'),
     supabase.from('subscription_payments').select('id, plan_id, period, amount_pkr, status, created_at, reject_reason').eq('organizer_id', profile.id).order('created_at', { ascending: false }),

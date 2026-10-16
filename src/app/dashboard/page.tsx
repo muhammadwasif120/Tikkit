@@ -11,12 +11,12 @@ export const metadata = { title: 'Overview' }
 const SOLD = ['confirmed', 'checked_in', 'no_show'] as const
 
 export default async function OverviewPage() {
-  const { supabase, profile, pendingCount } = await requireOrganizer()
+  const { supabase, profile, orgId, pendingCount, isManager } = await requireOrganizer()
 
   const since = new Date(Date.now() - 60 * 86_400_000).toISOString()
   const [{ data: events }, { data: sold }, { data: pending }] = await Promise.all([
     supabase.from('events').select('id, title, slug, starts_at, status, capacity, city, is_secret_venue')
-      .eq('organizer_id', profile.id).order('starts_at', { ascending: true }),
+      .eq('organizer_id', orgId).order('starts_at', { ascending: true }),
     supabase.from('registrations')
       .select('id, status, price_paid_pkr, approved_at, created_at, event_id, referrer_id, is_vip')
       .in('status', [...SOLD]).gte('created_at', since).limit(5000),
@@ -29,7 +29,8 @@ export default async function OverviewPage() {
   const now = Date.now()
   const upcoming = all.filter(e => e.status === 'published' && new Date(e.starts_at).getTime() >= now)
   const next = upcoming[0]
-  const rows = sold ?? []
+  const mine = new Set(all.map(e => e.id))
+  const rows = (sold ?? []).filter(r => mine.has(r.event_id))
 
   // last 7 days (Pakistan time) vs the 7 before
   const days: { label: string; key: string; value: number }[] = []
@@ -93,7 +94,7 @@ export default async function OverviewPage() {
         actions={
           <>
             {pendingCount > 0 && <ButtonLink href="/dashboard/guests?status=pending" variant="secondary" leading={<Users className="h-4 w-4" />}>Review {pendingCount}</ButtonLink>}
-            <ButtonLink href="/dashboard/events/new" leading={<CalendarDays className="h-4 w-4" />}>New event</ButtonLink>
+            {isManager ? null : <ButtonLink href="/dashboard/events/new" leading={<CalendarDays className="h-4 w-4" />}>New event</ButtonLink>}
           </>
         }
       />

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 const faqs: FaqItem[] = [
   { q: 'Can someone screenshot a QR ticket and share it?', a: 'No. Every TIKKIT X QR code is cryptographically signed and single use. The moment a ticket is scanned at the door it is marked as used. Any later scan of the same code, screenshot or original, is rejected.' },
-  { q: 'What happens if the internet goes down at check-in?', a: 'The scanner works offline. Your guest list is downloaded to the device before the event. Scans are recorded locally and synced when the connection returns.' },
+  { q: 'What happens if the internet goes down at check-in?', a: 'The scanner needs a mobile data or WiFi connection, because every scan is checked against your live guest list. If the connection drops, the scanner tells you right away so you can hold the guest, and you can scan again as soon as it returns. For venues with weak signal, bring a spare phone as a hotspot. You can also search guests by name or phone.' },
   { q: 'How does TIKKIT X verify JazzCash and EasyPaisa payments?', a: 'Guests upload a screenshot of their transfer receipt when they register. You verify it with one tap from your dashboard. Duplicate transaction IDs are flagged automatically so one receipt cannot register two guests.' },
   { q: 'Can I see who has and has not checked in?', a: 'Yes. Your dashboard shows live check-in status for every guest: who is inside, who has not arrived, and who was turned away.' },
   { q: 'Is guest data stored securely?', a: 'Guest data lives in an encrypted Postgres database with row level security. Only you and the team members you authorise can see your guest list.' },

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { headers } from 'next/headers'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { Eye, Lock, MapPin, QrCode, Share2, Users } from 'lucide-react'
 import { Badge, ButtonLink, Card, CardBody, CardHeader, PageHeader, Progress, StatCard } from '@/components/kit'
 import EventForm, { toLocal, type EventValues } from '@/components/events/EventForm'
@@ -19,7 +19,7 @@ const tone = { draft: 'neutral', published: 'success', completed: 'info', cancel
 export default async function EventPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
   const [{ id }, { tab = 'overview' }] = await Promise.all([params, searchParams])
   const org = await requireOrganizer()
-  const { supabase, entitlements } = org
+  const { supabase, entitlements, isManager } = org
 
   const { data: event } = await supabase.from('events').select('*').eq('id', id).maybeSingle()
   if (!event) notFound()
@@ -62,6 +62,9 @@ export default async function EventPage({ params, searchParams }: { params: Prom
     if (initial.tiers.length === 0) initial.tiers = [{ key: 'new-1', name: 'General', price: '', qty: '', ends: '', vip: false }]
   }
 
+  const tabs = isManager ? TABS.filter(t => t.id === 'overview' || t.id === 'announce') : TABS
+  if (isManager && (tab === 'details' || tab === 'door')) redirect(`/dashboard/events/${id}`)
+
   const annLimit = entitlements?.limits.announcements_per_event
   const remaining = typeof annLimit === 'number' && annLimit >= 0 ? Math.max(0, annLimit - (anns?.length ?? 0)) : null
 
@@ -82,7 +85,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
       />
 
       <nav aria-label="Event sections" className="mb-6 flex gap-1 overflow-x-auto border-b border-line">
-        {TABS.map(t => (
+        {tabs.map(t => (
           <Link key={t.id} href={`/dashboard/events/${id}?tab=${t.id}`} aria-current={tab === t.id ? 'page' : undefined}
             className={cn('-mb-px whitespace-nowrap border-b-2 px-4 py-2.5 text-sm font-medium transition-colors',
               tab === t.id ? 'border-accent text-fg' : 'border-transparent text-muted hover:text-fg')}>
@@ -102,7 +105,7 @@ export default async function EventPage({ params, searchParams }: { params: Prom
 
           <div className="grid gap-6 lg:grid-cols-3">
             <Card className="lg:col-span-2">
-              <CardHeader title="Tickets" description="Sold per type" action={<ButtonLink href={`/dashboard/events/${id}?tab=details`} variant="ghost" size="sm">Edit</ButtonLink>} />
+              <CardHeader title="Tickets" description="Sold per type" action={isManager ? undefined : <ButtonLink href={`/dashboard/events/${id}?tab=details`} variant="ghost" size="sm">Edit</ButtonLink>} />
               <CardBody className="space-y-4">
                 {perTicket.map(t => (
                   <div key={t.id}>
@@ -118,10 +121,12 @@ export default async function EventPage({ params, searchParams }: { params: Prom
             </Card>
 
             <div className="space-y-6">
-              <Card>
-                <CardHeader title="Status" />
-                <CardBody className="space-y-4"><StatusActions id={id} status={event.status} /></CardBody>
-              </Card>
+              {!isManager && (
+                <Card>
+                  <CardHeader title="Status" />
+                  <CardBody className="space-y-4"><StatusActions id={id} status={event.status} /></CardBody>
+                </Card>
+              )}
               {event.status === 'published' && publicUrl && (
                 <Card>
                   <CardHeader title="Share" action={<Share2 className="h-4 w-4 text-subtle" aria-hidden />} />

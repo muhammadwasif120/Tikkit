@@ -6,10 +6,10 @@ export const metadata = { title: 'Guests' }
 
 export default async function GuestsPage({ searchParams }: { searchParams: Promise<{ event?: string; status?: string }> }) {
   const { event = '', status = 'all' } = await searchParams
-  const { supabase, profile } = await requireOrganizer()
+  const { supabase, orgId } = await requireOrganizer()
 
   const [{ data: events }, { data: tickets }, { data: regs }] = await Promise.all([
-    supabase.from('events').select('id, title').eq('organizer_id', profile.id).neq('status', 'archived').order('starts_at', { ascending: false }),
+    supabase.from('events').select('id, title').eq('organizer_id', orgId).neq('status', 'archived').order('starts_at', { ascending: false }),
     supabase.from('ticket_types').select('id, name, event_id').order('sort'),
     supabase.from('registrations')
       .select('id, event_id, full_name, phone, email, status, is_vip, plus_one, price_due_pkr, price_paid_pkr, created_at, ticket_types(name), events(title), payment_submissions(id, screenshot_path, reference, amount_pkr, status)')

@@ -15,12 +15,12 @@ const tone = { draft: 'neutral', published: 'success', completed: 'info', cancel
 
 export default async function EventsPage({ searchParams }: { searchParams: Promise<{ show?: string }> }) {
   const { show = 'all' } = await searchParams
-  const { supabase, profile } = await requireOrganizer()
+  const { supabase, orgId } = await requireOrganizer()
 
   const { data: events } = await supabase
     .from('events')
     .select('id, title, slug, city, starts_at, status, capacity, cover_image_url, admin_status')
-    .eq('organizer_id', profile.id)
+    .eq('organizer_id', orgId)
     .order('starts_at', { ascending: false })
 
   const ids = (events ?? []).map(e => e.id)

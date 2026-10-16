@@ -2,13 +2,13 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/kit'
 import { SeriesManage, type Booking, type Product, type Series, type Session } from '@/components/classes/ClassesOrganizer'
-import { requireOrganizer } from '@/lib/data/viewer'
+import { requireOwner } from '@/lib/data/viewer'
 
 export const metadata = { title: 'Class' }
 
 export default async function ClassPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const { supabase } = await requireOrganizer()
+  const { supabase } = await requireOwner()
   const { data: series } = await supabase.from('class_series').select('*').eq('id', id).maybeSingle()
   if (!series) notFound()
   const from = new Date(Date.now() - 86_400_000).toISOString()

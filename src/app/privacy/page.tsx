@@ -121,8 +121,8 @@ export default function PrivacyPolicyPage() {
           <p>Tikkit X uses cryptographic technology (HMAC-SHA256 with HKDF key derivation) to generate and verify QR Code tickets.</p>
           <ul>
             <li><strong>QR Code Payload:</strong> Your QR Code contains your guest ID, event ID, name, ticket days, status, and timestamp. This payload is cryptographically signed but not encrypted — it is readable by any scanner with the per-event verification key.</li>
-            <li><strong>Per-Event Keys:</strong> Verification keys are derived from a master secret using event-specific parameters. Per-event keys are cached on scanner devices for offline verification. Keys are rotated per event and cannot be used to derive the master secret.</li>
-            <li><strong>Offline Verification:</strong> QR Code verification can occur without network connectivity. Scan data is stored locally on the scanner device and synchronised with the Platform when connectivity is restored.</li>
+            <li><strong>Per-Event Keys:</strong> Verification keys are derived from a master secret using event-specific parameters. Keys are rotated per event and cannot be used to derive the master secret.</li>
+            <li><strong>Live Verification:</strong> QR Code verification is checked against the Platform in real time, so a ticket cannot be admitted twice. Scan results are stored by the Platform.</li>
             <li><strong>Scan Logs:</strong> All scan events are recorded in an immutable, append-only audit log for security and compliance purposes.</li>
           </ul>
         </LegalSection>

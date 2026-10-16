@@ -28,27 +28,51 @@ export const getViewer = cache(async () => {
   return { user, profile, supabase }
 })
 
-/** For organizer pages: redirects anyone else. Includes company name, plan and pending counts. */
+/**
+ * For organizer pages. Owners (and admins) act as themselves. An active team manager acts
+ * for the organizer who invited them: orgId is that organizer, isManager is true.
+ */
 export const requireOrganizer = cache(async () => {
   const viewer = await getViewer()
   if (!viewer) redirect('/auth/login')
-  if (viewer.profile.role !== 'organizer' && viewer.profile.role !== 'admin') redirect('/guest/explore')
   const { supabase, profile } = viewer
+  const isOwner = profile.role === 'organizer' || profile.role === 'admin'
+
+  let orgId = profile.id
+  if (!isOwner) {
+    const { data: m } = await supabase.from('organizer_team_members').select('organizer_id')
+      .eq('user_id', profile.id).eq('status', 'active').limit(1).maybeSingle()
+    if (!m) redirect('/guest/explore')
+    orgId = m.organizer_id
+  }
+  const isManager = !isOwner
+
+  if (isManager) {
+    const [{ data: op }, { count: pending }] = await Promise.all([
+      supabase.from('public_organizers').select('company_name, logo_url').eq('id', orgId).maybeSingle(),
+      supabase.from('registrations').select('id, events!inner(organizer_id)', { count: 'exact', head: true })
+        .eq('events.organizer_id', orgId).in('status', ['requested', 'payment_submitted']),
+    ])
+    return { ...viewer, orgId, isManager, company: op?.company_name ?? null, logoUrl: op?.logo_url ?? null, entitlements: null as Entitlements | null, pendingCount: pending ?? 0 }
+  }
 
   const [{ data: op }, { data: ent }, { count: pending }] = await Promise.all([
     supabase.from('organizer_profiles').select('company_name, logo_url').eq('id', profile.id).maybeSingle(),
     supabase.rpc('my_entitlements'),
-    supabase.from('registrations').select('id', { count: 'exact', head: true })
-      .in('status', ['requested', 'payment_submitted']),
+    supabase.from('registrations').select('id', { count: 'exact', head: true }).in('status', ['requested', 'payment_submitted']),
   ])
-
   return {
-    ...viewer,
-    company: op?.company_name ?? null,
-    logoUrl: op?.logo_url ?? null,
-    entitlements: (ent ?? null) as Entitlements | null,
-    pendingCount: pending ?? 0,
+    ...viewer, orgId, isManager,
+    company: op?.company_name ?? null, logoUrl: op?.logo_url ?? null,
+    entitlements: (ent ?? null) as Entitlements | null, pendingCount: pending ?? 0,
   }
+})
+
+/** Owner only pages (billing, settings, referrals, new events, modules). Managers go back to the overview. */
+export const requireOwner = cache(async () => {
+  const org = await requireOrganizer()
+  if (org.isManager) redirect('/dashboard')
+  return org
 })
 
 /** For attendee pages. */
