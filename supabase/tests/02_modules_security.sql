@@ -179,9 +179,9 @@ begin
   perform tkx_test.as_root();
   perform tkx_test.t('class attendance awards score', format($q$select 1 from public.attendee_stats where id = %L and attended = 1$q$, att_x), 'rows:1');
 
+  select qr_token into v_qr from public.class_bookings where id = bk_y;   -- read as root, before switching role
   perform tkx_test.as_anon();
   perform tkx_test.t('gate scope lists the series', format($q$select 1 where jsonb_array_length(public.gate_get_scope(%L)->'classes') = 1$q$, v_gate->>'token'), 'rows:1');
-  select qr_token into v_qr from public.class_bookings where id = bk_y;
   perform tkx_test.t('gate scan of a booking that is not confirmed is not_approved',
     format($q$select 1 where public.gate_scan_any(%L, %L)->>'result' = 'not_approved'$q$, v_gate->>'token', v_qr), 'rows:1');
   perform tkx_test.t('gate scan of an unknown token is invalid',
