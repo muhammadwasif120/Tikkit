@@ -3,7 +3,6 @@ import { Sparkles } from 'lucide-react'
 import { Badge, Card, EmptyState, PageHeader } from '@/components/kit'
 import { NewSeries, type Series } from '@/components/classes/ClassesOrganizer'
 import { requireOrganizer } from '@/lib/data/viewer'
-import { fromLoose } from '@/lib/rpc'
 import { pkr } from '@/lib/format'
 
 export const metadata = { title: 'Classes' }
@@ -11,7 +10,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 export default async function ClassesPage() {
   const { supabase, entitlements } = await requireOrganizer()
-  const { data } = await fromLoose(supabase as never, 'class_series').select('*').order('created_at', { ascending: false })
+  const { data } = await supabase.from('class_series').select('*').order('created_at', { ascending: false })
   const list = (data ?? []) as Series[]
   const lim = entitlements?.limits.classes
   return (

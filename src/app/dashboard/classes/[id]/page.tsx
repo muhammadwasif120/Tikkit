@@ -3,21 +3,19 @@ import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/kit'
 import { SeriesManage, type Booking, type Product, type Series, type Session } from '@/components/classes/ClassesOrganizer'
 import { requireOrganizer } from '@/lib/data/viewer'
-import { fromLoose } from '@/lib/rpc'
 
 export const metadata = { title: 'Class' }
 
 export default async function ClassPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const { supabase } = await requireOrganizer()
-  const q = (t: string) => fromLoose(supabase as never, t)
-  const { data: series } = await q('class_series').select('*').eq('id', id).maybeSingle()
+  const { data: series } = await supabase.from('class_series').select('*').eq('id', id).maybeSingle()
   if (!series) notFound()
   const from = new Date(Date.now() - 86_400_000).toISOString()
   const [{ data: sessions }, { data: products }, { data: bookings }] = await Promise.all([
-    q('class_sessions').select('*').eq('series_id', id).gte('starts_at', from).order('starts_at').limit(60),
-    q('pass_products').select('*').eq('series_id', id).order('sort'),
-    q('class_bookings').select('id, session_id, status, pass_purchase_id, attendee_id').eq('series_id', id),
+    supabase.from('class_sessions').select('*').eq('series_id', id).gte('starts_at', from).order('starts_at').limit(60),
+    supabase.from('pass_products').select('*').eq('series_id', id).order('sort'),
+    supabase.from('class_bookings').select('id, session_id, status, pass_purchase_id, attendee_id').eq('series_id', id),
   ])
   const ids = [...new Set(((bookings ?? []) as { attendee_id: string }[]).map(b => b.attendee_id))]
   const { data: people } = ids.length ? await supabase.from('profiles').select('id, full_name').in('id', ids) : { data: [] as { id: string; full_name: string | null }[] }

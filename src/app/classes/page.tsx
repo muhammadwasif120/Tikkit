@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { MarketingShell } from '@/components/marketing/MarketingShell'
 import { Container, PageHero, Section } from '@/components/marketing/blocks'
 import { createClient } from '@/lib/supabase/server'
-import { fromLoose } from '@/lib/rpc'
 import { fmtDate, fmtTime, pkr } from '@/lib/format'
 
 export const metadata: Metadata = { title: 'Classes and workshops in Pakistan', description: 'Find weekly classes and workshops in Karachi, Lahore and Islamabad. Book a session or buy a pass.', alternates: { canonical: 'https://www.tikkitx.com/classes' } }
@@ -13,7 +12,7 @@ type R = { id: string; slug: string; title: string; city: string | null; area_la
 
 export default async function ClassesBrowse() {
   const supabase = await createClient()
-  const { data } = await fromLoose(supabase as never, 'public_class_series').select('id, slug, title, city, area_label, instructor_name, drop_in_price_pkr, next_session_at').order('next_session_at', { nullsFirst: false }).limit(60)
+  const { data } = await supabase.from('public_class_series').select('id, slug, title, city, area_label, instructor_name, drop_in_price_pkr, next_session_at').order('next_session_at', { nullsFirst: false }).limit(60)
   const list = (data ?? []) as R[]
   return (
     <MarketingShell>

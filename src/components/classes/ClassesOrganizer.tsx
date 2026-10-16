@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Plus, Trash2 } from 'lucide-react'
 import { Badge, Button, Card, CardBody, CardHeader, EmptyState, Field, Input, Modal, Select, Textarea } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
-import { fromLoose, rpcLoose } from '@/lib/rpc'
 import { fmtDate, fmtTime, pkr } from '@/lib/format'
 import { PAKISTAN_CITIES } from '@/lib/pakistanCities'
 import { cn } from '@/lib/cn'
@@ -36,8 +35,8 @@ export function SeriesForm({ open, onClose, initial, onDone }: { open: boolean; 
     if (!f.title.trim()) return setErr('Give the class a name.'); if (f.days.length === 0) return setErr('Choose at least one day.')
     setBusy(true)
     const { data: { user } } = await supabase.auth.getUser()
-    const body = { title: f.title.trim(), instructor_name: f.instructor.trim() || null, weekdays: f.days, start_time: f.time, duration_minutes: Number(f.mins) || 60, starts_on: f.starts, ends_on: f.ends || null, capacity: f.cap ? Number(f.cap) : null, drop_in_price_pkr: Number(f.price || 0), city: f.city || null, venue_name: f.venue.trim() || null, description: f.desc.trim() || null, status: f.publish ? 'published' : (s?.status === 'published' ? 'paused' : 'draft') }
-    const t = fromLoose(supabase as never, 'class_series')
+    const body = { title: f.title.trim(), instructor_name: f.instructor.trim() || null, weekdays: f.days, start_time: f.time, duration_minutes: Number(f.mins) || 60, starts_on: f.starts, ends_on: f.ends || null, capacity: f.cap ? Number(f.cap) : null, drop_in_price_pkr: Number(f.price || 0), city: f.city || null, venue_name: f.venue.trim() || null, description: f.desc.trim() || null, status: (f.publish ? 'published' : (s?.status === 'published' ? 'paused' : 'draft')) as 'published' | 'paused' | 'draft' }
+    const t = supabase.from('class_series')
     const res = s ? await t.update(body).eq('id', s.id).select('id').single() : await t.insert({ ...body, organizer_id: user!.id }).select('id').single()
     setBusy(false)
     if (res.error) return setErr(readable(res.error.message))
@@ -67,10 +66,10 @@ export function SeriesManage({ series, sessions, products, bookings, origin }: {
   const [pf, setPf] = useState({ name: '', kind: 'pack', count: '5', days: '90', price: '' })
   const refresh = () => router.refresh()
 
-  const cancel = (s: Session) => { const reason = prompt('Why is it cancelled? Booked guests are told.'); if (reason === null) return; setErr(null); start(async () => { const { error } = await rpcLoose(supabase as never, 'cancel_class_session', { p_session: s.id, p_reason: reason || null }); if (error) return setErr(readable(error.message)); refresh() }) }
+  const cancel = (s: Session) => { const reason = prompt('Why is it cancelled? Booked guests are told.'); if (reason === null) return; setErr(null); start(async () => { const { error } = await supabase.rpc('cancel_class_session', { p_session: s.id, p_reason: reason || undefined }); if (error) return setErr(readable(error.message)); refresh() }) }
   async function addProduct(e: React.FormEvent) { e.preventDefault(); setErr(null); if (!pf.name.trim() || !pf.price) return setErr('Add a name and a price.')
     const { data: { user } } = await supabase.auth.getUser()
-    const { error } = await fromLoose(supabase as never, 'pass_products').insert({ organizer_id: user!.id, series_id: series.id, name: pf.name.trim(), kind: pf.kind, sessions_count: pf.kind === 'pack' ? Number(pf.count) : null, validity_days: Number(pf.days) || 90, price_pkr: Number(pf.price) })
+    const { error } = await supabase.from('pass_products').insert({ organizer_id: user!.id, series_id: series.id, name: pf.name.trim(), kind: pf.kind as 'pack' | 'monthly', sessions_count: pf.kind === 'pack' ? Number(pf.count) : null, validity_days: Number(pf.days) || 90, price_pkr: Number(pf.price) })
     if (error) return setErr(readable(error.message)); setPm(false); setPf({ name: '', kind: 'pack', count: '5', days: '90', price: '' }); refresh() }
 
   return (
@@ -96,7 +95,7 @@ export function SeriesManage({ series, sessions, products, bookings, origin }: {
 
       {tab === 'passes' && (
         <Card><CardHeader title="Passes" description="Packs and monthly passes guests can buy for this class" action={<Button size="sm" leading={<Plus className="h-4 w-4" />} onClick={() => setPm(true)}>New pass</Button>} />
-          <CardBody>{products.length === 0 ? <p className="text-sm text-muted">No passes yet. Drop in booking still works.</p> : <ul className="divide-y divide-line">{products.map(p => <li key={p.id} className="flex items-center gap-3 py-3"><div className="min-w-0 flex-1"><p className="text-sm font-medium text-fg">{p.name}</p><p className="text-xs text-muted">{p.kind === 'pack' ? `${p.sessions_count} sessions` : 'Unlimited'} · valid {p.validity_days} days</p></div><span className="tnum text-sm text-fg">{pkr(p.price_pkr)}</span><Button size="sm" variant="ghost" onClick={() => start(async () => { await fromLoose(supabase as never, 'pass_products').update({ is_active: !p.is_active }).eq('id', p.id); refresh() })}>{p.is_active ? 'Pause' : 'Resume'}</Button><Button size="icon-sm" variant="ghost" aria-label="Delete pass" onClick={() => confirm('Delete this pass?') && start(async () => { const { error } = await fromLoose(supabase as never, 'pass_products').delete().eq('id', p.id); if (error) setErr('This pass has been bought. Pause it instead.'); refresh() })}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>}</CardBody></Card>
+          <CardBody>{products.length === 0 ? <p className="text-sm text-muted">No passes yet. Drop in booking still works.</p> : <ul className="divide-y divide-line">{products.map(p => <li key={p.id} className="flex items-center gap-3 py-3"><div className="min-w-0 flex-1"><p className="text-sm font-medium text-fg">{p.name}</p><p className="text-xs text-muted">{p.kind === 'pack' ? `${p.sessions_count} sessions` : 'Unlimited'} · valid {p.validity_days} days</p></div><span className="tnum text-sm text-fg">{pkr(p.price_pkr)}</span><Button size="sm" variant="ghost" onClick={() => start(async () => { await supabase.from('pass_products').update({ is_active: !p.is_active }).eq('id', p.id); refresh() })}>{p.is_active ? 'Pause' : 'Resume'}</Button><Button size="icon-sm" variant="ghost" aria-label="Delete pass" onClick={() => confirm('Delete this pass?') && start(async () => { const { error } = await supabase.from('pass_products').delete().eq('id', p.id); if (error) setErr('This pass has been bought. Pause it instead.'); refresh() })}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>}</CardBody></Card>
       )}
 
       <SeriesForm open={edit} onClose={() => setEdit(false)} initial={series} onDone={() => { setEdit(false); refresh() }} />

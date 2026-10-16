@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { Button, Field, Input, Modal } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
-import { fromLoose } from '@/lib/rpc'
 
 export default function NewRetreat({ locked }: { locked: boolean }) {
   const router = useRouter(); const supabase = useMemo(() => createClient(), [])
@@ -17,7 +16,7 @@ export default function NewRetreat({ locked }: { locked: boolean }) {
     if (f.end < f.start) return setErr('The retreat cannot end before it starts.')
     setBusy(true)
     const { data: { user } } = await supabase.auth.getUser()
-    const { data, error } = await fromLoose(supabase as never, 'retreats').insert({ organizer_id: user!.id, title: f.title.trim(), client_company: f.client.trim() || null, destination: f.destination.trim() || null, starts_on: f.start, ends_on: f.end, headcount_target: f.headcount ? Number(f.headcount) : null, budget_pkr: f.budget ? Number(f.budget) : null }).select('id').single()
+    const { data, error } = await supabase.from('retreats').insert({ organizer_id: user!.id, title: f.title.trim(), client_company: f.client.trim() || null, destination: f.destination.trim() || null, starts_on: f.start, ends_on: f.end, headcount_target: f.headcount ? Number(f.headcount) : null, budget_pkr: f.budget ? Number(f.budget) : null }).select('id').single()
     setBusy(false)
     if (error) return setErr((error.message.match(/^[A-Z_:a-z]+: ([\s\S]*)$/)?.[1]) ?? error.message)
     router.push(`/dashboard/retreats/${(data as { id: string }).id}`)

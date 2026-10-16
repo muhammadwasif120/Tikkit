@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import ItineraryView from '@/components/retreats/ItineraryView'
 import { createClient } from '@/lib/supabase/server'
-import { rpcLoose } from '@/lib/rpc'
 import type { RetreatDay } from '@/lib/retreats'
 
 export const metadata: Metadata = { title: 'My retreat', robots: { index: false, follow: false } }
@@ -17,7 +16,7 @@ type Mine = {
 export default async function MyItinerary({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   const supabase = await createClient()
-  const { data } = await rpcLoose(supabase as never, 'get_participant_itinerary', { p_token: token })
+  const { data } = await supabase.rpc('get_participant_itinerary', { p_token: token })
   if (!data) notFound()
   const d = data as Mine
   return (

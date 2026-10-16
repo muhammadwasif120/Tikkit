@@ -3,7 +3,6 @@ import Link from 'next/link'
 import { MarketingShell } from '@/components/marketing/MarketingShell'
 import { Container, PageHero, Section } from '@/components/marketing/blocks'
 import { createClient } from '@/lib/supabase/server'
-import { fromLoose } from '@/lib/rpc'
 import { pkr } from '@/lib/format'
 
 export const metadata: Metadata = { title: 'Rooms, courts and studios to book in Pakistan', description: 'Reserve rooms, courts, studios and tables by the slot in Karachi, Lahore and Islamabad.', alternates: { canonical: 'https://www.tikkitx.com/spaces' } }
@@ -13,7 +12,7 @@ type R = { id: string; slug: string; name: string; kind: string; city: string | 
 
 export default async function SpacesBrowse() {
   const supabase = await createClient()
-  const { data } = await fromLoose(supabase as never, 'public_spaces').select('id, slug, name, kind, city, area_label, price_pkr_per_slot, slot_minutes, photos').limit(60)
+  const { data } = await supabase.from('public_spaces').select('id, slug, name, kind, city, area_label, price_pkr_per_slot, slot_minutes, photos').limit(60)
   const list = (data ?? []) as R[]
   return (
     <MarketingShell>

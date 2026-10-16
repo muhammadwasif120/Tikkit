@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Button, Card, CardBody, CardHeader, Field, Input } from '@/components/kit'
 import PayProof from './PayProof'
 import { createClient } from '@/lib/supabase/client'
-import { rpcLoose } from '@/lib/rpc'
 import { fmtTime, pkr } from '@/lib/format'
 import { cn } from '@/lib/cn'
 
@@ -20,13 +19,13 @@ export default function SpaceBooker({ spaceId, organizerId, slug, price, capacit
   const [pay, setPay] = useState<string | null>(null); const [msg, setMsg] = useState<string | null>(null)
   const max = new Date(Date.now() + maxDays * 86_400_000).toLocaleDateString('en-CA', { timeZone: 'Asia/Karachi' })
 
-  const load = useCallback(async () => { setSlots(null); setPick(''); const { data } = await rpcLoose(supabase as never, 'space_open_slots', { p_space: spaceId, p_date: date }); setSlots((data ?? []) as Slot[]) }, [supabase, spaceId, date])
+  const load = useCallback(async () => { setSlots(null); setPick(''); const { data } = await supabase.rpc('space_open_slots', { p_space: spaceId, p_date: date }); setSlots((data ?? []) as Slot[]) }, [supabase, spaceId, date])
   useEffect(() => { load() }, [load])
 
   async function book() {
     if (!signedIn) return void (location.href = `/auth/login?next=${encodeURIComponent(`/spaces/${slug}`)}`)
     setErr(null); setBusy(true)
-    const { data, error } = await rpcLoose(supabase as never, 'book_space', { p_space: spaceId, p_starts_at: pick, p_party_size: Number(party) || 1, p_notes: notes.trim() || null })
+    const { data, error } = await supabase.rpc('book_space', { p_space: spaceId, p_starts_at: pick, p_party_size: Number(party) || 1, p_notes: notes.trim() || undefined })
     setBusy(false); if (error) { load(); return setErr(readable(error.message)) }
     if (approval) setMsg('Request sent. The host will confirm it, and you pay after approval.')
     else if (price > 0) setPay(data as string)

@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Check, Copy, Eye, EyeOff, Link2, Plus, QrCode, Trash2, Users } from 'lucide-react'
 import { Avatar, Badge, Button, Card, CardBody, CardHeader, EmptyState, Field, Input, Modal, Progress, Select, Table, TableWrap, Td, Textarea, Th, Tr, type BadgeTone } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
-import { fromLoose, rpcLoose } from '@/lib/rpc'
 import { KIND, KINDS, type ItemKind, type ItemStatus } from '@/lib/retreats'
 import { fmtDate, fmtTime, pkr } from '@/lib/format'
 import { cn } from '@/lib/cn'
@@ -34,7 +33,6 @@ export default function RetreatBuilder(p: { retreat: BRetreat; days: BDay[]; ite
   const [pending, start] = useTransition(); const [err, setErr] = useState<string | null>(null)
   const refresh = () => router.refresh()
   const run = (fn: () => PromiseLike<{ error: { message: string } | null }>) => { setErr(null); start(async () => { const { error } = await fn(); if (error) return setErr(readable(error.message)); refresh() }) }
-  const t = (name: string) => fromLoose(supabase as never, name)
 
   const est = lines.reduce((s, l) => s + l.estimated_pkr, 0), act = lines.reduce((s, l) => s + (l.actual_pkr ?? 0), 0)
   const done = items.filter(i => i.status === 'done').length, tdone = tasks.filter(x => x.is_done).length
@@ -84,7 +82,7 @@ function ItineraryTab({ retreatId, days, items, run, pending, onDone }: { retrea
                         <p className="truncate text-sm font-medium text-fg">{i.title}{i.is_internal && <EyeOff className="ml-2 inline h-3.5 w-3.5 text-subtle" aria-label="Internal" />}{i.requires_checkin && <QrCode className="ml-2 inline h-3.5 w-3.5 text-subtle" aria-label="Check in required" />}</p>
                         <p className="truncate text-xs text-muted">{[i.starts_at ? `${fmtTime(i.starts_at)}${i.ends_at ? ` to ${fmtTime(i.ends_at)}` : ''}` : 'All day', i.location_name, i.cost_pkr ? pkr(i.cost_pkr) : null].filter(Boolean).join(' · ')}</p>
                       </button>
-                      <button disabled={pending} onClick={() => run(() => fromLoose(supabase as never, 'retreat_items').update({ status: NEXT[i.status] }).eq('id', i.id))} aria-label={`Status ${i.status}, change`}><Badge tone={stTone[i.status]}>{i.status.replace('_', ' ')}</Badge></button>
+                      <button disabled={pending} onClick={() => run(() => supabase.from('retreat_items').update({ status: NEXT[i.status] }).eq('id', i.id))} aria-label={`Status ${i.status}, change`}><Badge tone={stTone[i.status]}>{i.status.replace('_', ' ')}</Badge></button>
                     </li>
                   ))}
                 </ul>
@@ -109,11 +107,11 @@ function ItemModal({ ctx, retreatId, onClose, onDone }: { ctx: { day: BDay; item
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setErr(null); if (!f.title.trim()) return setErr('Give the item a title.'); setBusy(true)
     const body = { kind: f.kind, title: f.title.trim(), description: f.description.trim() || null, starts_at: toIso(f.start), ends_at: toIso(f.end), location_name: f.location.trim() || null, location_address: f.address.trim() || null, latitude: f.lat ? Number(f.lat) : null, longitude: f.lng ? Number(f.lng) : null, cost_pkr: Number(f.cost || 0), assignee: f.assignee.trim() || null, is_internal: f.internal, requires_checkin: f.checkin, notes: f.notes.trim() || null }
-    const tbl = fromLoose(supabase as never, 'retreat_items')
+    const tbl = supabase.from('retreat_items')
     const { error } = i ? await tbl.update(body).eq('id', i.id) : await tbl.insert({ ...body, retreat_id: retreatId, day_id: ctx!.day.id })
     setBusy(false); if (error) return setErr(readable(error.message)); onDone()
   }
-  const del = async () => { if (!i || !confirm('Delete this item?')) return; await fromLoose(supabase as never, 'retreat_items').delete().eq('id', i.id); onDone() }
+  const del = async () => { if (!i || !confirm('Delete this item?')) return; await supabase.from('retreat_items').delete().eq('id', i.id); onDone() }
 
   return (
     <Modal open={!!ctx} onClose={onClose} title={i ? 'Edit item' : `Add to day ${ctx?.day.day_number}`} className="w-[min(94vw,620px)]">
@@ -139,13 +137,13 @@ function PeopleTab({ retreatId, people, origin, run, onDone }: { retreatId: stri
   const supabase = useMemo(() => createClient(), [])
   const [open, setOpen] = useState(false); const [bulk, setBulk] = useState(false); const [copied, setCopied] = useState('')
   const [f, setF] = useState({ name: '', email: '', phone: '', dept: '', diet: '', room: '' }); const [paste, setPaste] = useState(''); const [err, setErr] = useState<string | null>(null)
-  const tbl = () => fromLoose(supabase as never, 'retreat_participants')
+  const tbl = () => supabase.from('retreat_participants')
 
   async function add(e: React.FormEvent) { e.preventDefault(); setErr(null); if (!f.name.trim()) return setErr('Enter a name.')
     const { error } = await tbl().insert({ retreat_id: retreatId, full_name: f.name.trim(), email: f.email.trim() || null, phone: f.phone.trim() || null, department: f.dept.trim() || null, dietary: f.diet.trim() || null, room_label: f.room.trim() || null, status: 'confirmed' })
     if (error) return setErr(error.message.includes('duplicate') ? 'That email is already on the list.' : readable(error.message)); setF({ name: '', email: '', phone: '', dept: '', diet: '', room: '' }); setOpen(false); onDone() }
   async function importList(e: React.FormEvent) { e.preventDefault(); setErr(null)
-    const rows = paste.split('\n').map(l => l.split(/[,\t]/).map(x => x.trim())).filter(r => r[0]).map(r => ({ retreat_id: retreatId, full_name: r[0], email: r[1] || null, phone: r[2] || null, department: r[3] || null, status: 'confirmed' }))
+    const rows = paste.split('\n').map(l => l.split(/[,\t]/).map(x => x.trim())).filter(r => r[0]).map(r => ({ retreat_id: retreatId, full_name: r[0], email: r[1] || null, phone: r[2] || null, department: r[3] || null, status: 'confirmed' as const }))
     if (!rows.length) return setErr('Paste one person per line: name, email, phone, department.')
     const { error } = await tbl().insert(rows); if (error) return setErr(readable(error.message)); setPaste(''); setBulk(false); onDone() }
   const copy = async (text: string, key: string) => { await navigator.clipboard.writeText(text); setCopied(key); setTimeout(() => setCopied(''), 1500) }
@@ -160,7 +158,7 @@ function PeopleTab({ retreatId, people, origin, run, onDone }: { retreatId: stri
             <Tr key={x.id}>
               <Td><div className="flex items-center gap-3"><Avatar name={x.full_name} size={32} /><div className="min-w-0"><p className="truncate text-sm font-medium text-fg">{x.full_name}</p><p className="truncate text-xs text-muted">{x.email ?? x.phone ?? '—'}</p></div></div></Td>
               <Td className="text-sm text-muted">{x.department ?? '—'}</Td><Td className="text-sm text-muted">{x.dietary ?? '—'}</Td><Td className="text-sm text-muted">{x.room_label ?? '—'}</Td>
-              <Td><select aria-label={`Status of ${x.full_name}`} value={x.status} onChange={e => run(() => tbl().update({ status: e.target.value }).eq('id', x.id))} className="rounded-lg bg-raised px-2 py-1 text-xs text-fg"><option value="invited">Invited</option><option value="confirmed">Confirmed</option><option value="declined">Declined</option></select></Td>
+              <Td><select aria-label={`Status of ${x.full_name}`} value={x.status} onChange={e => run(() => tbl().update({ status: e.target.value as 'invited' | 'confirmed' | 'declined' }).eq('id', x.id))} className="rounded-lg bg-raised px-2 py-1 text-xs text-fg"><option value="invited">Invited</option><option value="confirmed">Confirmed</option><option value="declined">Declined</option></select></Td>
               <Td className="text-right"><Button size="icon-sm" variant="ghost" aria-label={`Copy link for ${x.full_name}`} onClick={() => copy(`${origin}/itinerary/me/${x.qr_token}`, x.id)}>{copied === x.id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}</Button><Button size="icon-sm" variant="ghost" aria-label={`Remove ${x.full_name}`} onClick={() => confirm(`Remove ${x.full_name}?`) && run(() => tbl().delete().eq('id', x.id))}><Trash2 className="h-4 w-4" /></Button></Td>
             </Tr>))}</tbody>
         </Table></TableWrap>
@@ -184,7 +182,7 @@ function PeopleTab({ retreatId, people, origin, run, onDone }: { retreatId: stri
 function BudgetTab({ retreatId, lines, budget, est, act, run, onDone }: { retreatId: string; lines: BLine[]; budget: number | null; est: number; act: number; run: Run; onDone: () => void }) {
   const supabase = useMemo(() => createClient(), [])
   const [f, setF] = useState({ category: 'Transport', label: '', est: '' }); const [err, setErr] = useState<string | null>(null)
-  const tbl = () => fromLoose(supabase as never, 'retreat_budget_lines')
+  const tbl = () => supabase.from('retreat_budget_lines')
   async function add(e: React.FormEvent) { e.preventDefault(); setErr(null); if (!f.label.trim()) return setErr('Describe the cost.')
     const { error } = await tbl().insert({ retreat_id: retreatId, category: f.category, label: f.label.trim(), estimated_pkr: Number(f.est || 0) }); if (error) return setErr(readable(error.message)); setF({ ...f, label: '', est: '' }); onDone() }
   return (
@@ -216,7 +214,7 @@ function BudgetTab({ retreatId, lines, budget, est, act, run, onDone }: { retrea
 
 function TasksTab({ retreatId, tasks, run, onDone }: { retreatId: string; tasks: BTask[]; run: Run; onDone: () => void }) {
   const supabase = useMemo(() => createClient(), [])
-  const [title, setTitle] = useState(''); const [due, setDue] = useState(''); const tbl = () => fromLoose(supabase as never, 'retreat_tasks')
+  const [title, setTitle] = useState(''); const [due, setDue] = useState(''); const tbl = () => supabase.from('retreat_tasks')
   async function add(e: React.FormEvent) { e.preventDefault(); if (!title.trim()) return; await tbl().insert({ retreat_id: retreatId, title: title.trim(), due_date: due || null }); setTitle(''); setDue(''); onDone() }
   const today = new Date().toISOString().slice(0, 10)
   return (
@@ -238,7 +236,7 @@ function TasksTab({ retreatId, tasks, run, onDone }: { retreatId: string; tasks:
 function UpdatesTab({ retreatId, updates, people, onDone }: { retreatId: string; updates: BUpdate[]; people: number; onDone: () => void }) {
   const supabase = useMemo(() => createClient(), [])
   const [body, setBody] = useState(''); const [email, setEmail] = useState(true); const [busy, setBusy] = useState(false); const [err, setErr] = useState<string | null>(null)
-  async function send() { setErr(null); setBusy(true); const { error } = await rpcLoose(supabase as never, 'post_retreat_update', { p_retreat: retreatId, p_body: body.trim(), p_send_email: email }); setBusy(false); if (error) return setErr(readable(error.message)); if (email) void flushEmails(); setBody(''); onDone() }
+  async function send() { setErr(null); setBusy(true); const { error } = await supabase.rpc('post_retreat_update', { p_retreat: retreatId, p_body: body.trim(), p_send_email: email }); setBusy(false); if (error) return setErr(readable(error.message)); if (email) void flushEmails(); setBody(''); onDone() }
   return (
     <div className="grid items-start gap-6 lg:grid-cols-[1fr_360px]">
       <Card><CardHeader title="Sent updates" />
@@ -255,7 +253,7 @@ function ShareTab({ retreat, origin, onDone }: { retreat: BRetreat; origin: stri
   const supabase = useMemo(() => createClient(), [])
   const [busy, setBusy] = useState(false); const [copied, setCopied] = useState(false)
   const url = retreat.share_token ? `${origin}/itinerary/${retreat.share_token}` : null
-  async function toggle() { setBusy(true); await rpcLoose(supabase as never, retreat.share_token ? 'disable_retreat_sharing' : 'enable_retreat_sharing', { p_retreat: retreat.id }); setBusy(false); onDone() }
+  async function toggle() { setBusy(true); await supabase.rpc(retreat.share_token ? 'disable_retreat_sharing' : 'enable_retreat_sharing', { p_retreat: retreat.id }); setBusy(false); onDone() }
   return (
     <Card><CardHeader title="Share the itinerary" description="A private, interactive page for the client. Costs, internal items and notes never appear on it." action={<Link2 className="h-5 w-5 text-subtle" aria-hidden />} />
       <CardBody className="space-y-4">

@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { Copy, Upload } from 'lucide-react'
 import { Button, Field, Input } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
-import { rpcLoose, fromLoose } from '@/lib/rpc'
 import { pkr } from '@/lib/format'
 
 type Account = { method: string; account_title: string; account_number: string; bank_name: string | null; iban: string | null; instructions: string | null }
@@ -15,7 +14,7 @@ export default function PayProof({ kind, subjectId, organizerId, amount, onDone 
   const supabase = useMemo(() => createClient(), [])
   const [accounts, setAccounts] = useState<Account[]>([]); const [file, setFile] = useState<File | null>(null); const [ref, setRef] = useState('')
   const [busy, setBusy] = useState(false); const [err, setErr] = useState<string | null>(null)
-  useEffect(() => { fromLoose(supabase as never, 'payment_accounts').select('method, account_title, account_number, bank_name, iban, instructions').eq('organizer_id', organizerId).eq('is_active', true).then(({ data }) => setAccounts((data ?? []) as Account[])) }, [supabase, organizerId])
+  useEffect(() => { supabase.from('payment_accounts').select('method, account_title, account_number, bank_name, iban, instructions').eq('organizer_id', organizerId).eq('is_active', true).then(({ data }) => setAccounts((data ?? []) as Account[])) }, [supabase, organizerId])
 
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setErr(null); if (!file) return setErr('Attach your transfer screenshot.'); setBusy(true)
@@ -23,7 +22,7 @@ export default function PayProof({ kind, subjectId, organizerId, amount, onDone 
     const path = `${user!.id}/${subjectId}/${crypto.randomUUID()}.${file.name.split('.').pop()}`
     const up = await supabase.storage.from('payment-proofs').upload(path, file, { contentType: file.type })
     if (up.error) { setBusy(false); return setErr('The screenshot could not be uploaded.') }
-    const { error } = await rpcLoose(supabase as never, 'submit_product_payment', { p_kind: kind, p_subject: subjectId, p_screenshot_path: path, p_reference: ref.trim() || null })
+    const { error } = await supabase.rpc('submit_product_payment', { p_kind: kind, p_subject: subjectId, p_screenshot_path: path, p_reference: ref.trim() || undefined })
     setBusy(false); if (error) return setErr(readable(error.message)); onDone()
   }
   return (

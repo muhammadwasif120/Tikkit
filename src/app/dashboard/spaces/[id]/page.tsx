@@ -3,19 +3,17 @@ import { notFound } from 'next/navigation'
 import { PageHeader } from '@/components/kit'
 import { SpaceManage, type Blackout, type Hour, type SBooking, type Space } from '@/components/spaces/SpacesOrganizer'
 import { requireOrganizer } from '@/lib/data/viewer'
-import { fromLoose } from '@/lib/rpc'
 
 export const metadata = { title: 'Space' }
 
 export default async function SpacePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const { supabase } = await requireOrganizer()
-  const q = (t: string) => fromLoose(supabase as never, t)
-  const { data: space } = await q('spaces').select('*').eq('id', id).maybeSingle()
+  const { data: space } = await supabase.from('spaces').select('*').eq('id', id).maybeSingle()
   if (!space) notFound()
   const [{ data: hours }, { data: blackouts }, { data: bookings }] = await Promise.all([
-    q('space_hours').select('*').eq('space_id', id), q('space_blackouts').select('*').eq('space_id', id).gte('ends_at', new Date().toISOString()).order('starts_at'),
-    q('space_bookings').select('id, attendee_id, starts_at, ends_at, party_size, status, price_due_pkr, notes').eq('space_id', id).gte('ends_at', new Date(Date.now() - 7 * 86_400_000).toISOString()).order('starts_at').limit(100),
+    supabase.from('space_hours').select('*').eq('space_id', id), supabase.from('space_blackouts').select('*').eq('space_id', id).gte('ends_at', new Date().toISOString()).order('starts_at'),
+    supabase.from('space_bookings').select('id, attendee_id, starts_at, ends_at, party_size, status, price_due_pkr, notes').eq('space_id', id).gte('ends_at', new Date(Date.now() - 7 * 86_400_000).toISOString()).order('starts_at').limit(100),
   ])
   const rows = (bookings ?? []) as { id: string; attendee_id: string; starts_at: string; ends_at: string; party_size: number; status: string; price_due_pkr: number; notes: string | null }[]
   const ids = [...new Set(rows.map(b => b.attendee_id))]

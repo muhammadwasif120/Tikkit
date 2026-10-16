@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Check, Plus, Trash2, X } from 'lucide-react'
 import { Badge, Button, Card, CardBody, CardHeader, EmptyState, Field, Input, Modal, Select, Textarea, type BadgeTone } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
-import { fromLoose, rpcLoose } from '@/lib/rpc'
 import { fmtDate, fmtTime, pkr } from '@/lib/format'
 import { PAKISTAN_CITIES } from '@/lib/pakistanCities'
 import { cn } from '@/lib/cn'
@@ -33,8 +32,8 @@ export function SpaceForm({ open, onClose, initial, onDone }: { open: boolean; o
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setErr(null); if (!f.name.trim()) return setErr('Give the space a name.'); setBusy(true)
     const { data: { user } } = await supabase.auth.getUser()
-    const body = { name: f.name.trim(), kind: f.kind, description: f.desc.trim() || null, city: f.city || null, area_label: f.area.trim() || null, address: f.address.trim() || null, capacity: f.cap ? Number(f.cap) : null, price_pkr_per_slot: Number(f.price || 0), slot_minutes: Number(f.slot) || 60, buffer_minutes: Number(f.buffer || 0), min_notice_hours: Number(f.notice || 0), max_advance_days: Number(f.adv) || 60, requires_approval: f.approval, status: f.publish ? 'published' : (s?.status === 'published' ? 'paused' : 'draft') }
-    const t = fromLoose(supabase as never, 'spaces')
+    const body = { name: f.name.trim(), kind: f.kind as 'room' | 'court' | 'studio' | 'desk' | 'table' | 'other', description: f.desc.trim() || null, city: f.city || null, area_label: f.area.trim() || null, address: f.address.trim() || null, capacity: f.cap ? Number(f.cap) : null, price_pkr_per_slot: Number(f.price || 0), slot_minutes: Number(f.slot) || 60, buffer_minutes: Number(f.buffer || 0), min_notice_hours: Number(f.notice || 0), max_advance_days: Number(f.adv) || 60, requires_approval: f.approval, status: (f.publish ? 'published' : (s?.status === 'published' ? 'paused' : 'draft')) as 'published' | 'paused' | 'draft' }
+    const t = supabase.from('spaces')
     const res = s ? await t.update(body).eq('id', s.id).select('id').single() : await t.insert({ ...body, organizer_id: user!.id }).select('id').single()
     setBusy(false); if (res.error) return setErr(readable(res.error.message)); onDone((res.data as { id: string }).id)
   }
@@ -60,11 +59,11 @@ export function SpaceManage({ space, hours, blackouts, bookings, origin }: { spa
   const [h, setH] = useState({ days: [1, 2, 3, 4, 5] as number[], opens: '09:00', closes: '18:00' }); const [bo, setBo] = useState({ from: '', to: '', reason: '' })
   const refresh = () => router.refresh()
   const run = (fn: () => PromiseLike<{ error: { message: string } | null }>) => { setErr(null); start(async () => { const { error } = await fn(); if (error) return setErr(readable(error.message)); refresh() }) }
-  const review = (b: SBooking, ok: boolean) => run(() => rpcLoose(supabase as never, 'review_space_booking', { p_booking: b.id, p_approve: ok, p_reason: ok ? null : prompt('Reason (optional)') || null }))
+  const review = (b: SBooking, ok: boolean) => run(() => supabase.rpc('review_space_booking', { p_booking: b.id, p_approve: ok, p_reason: ok ? undefined : prompt('Reason (optional)') || undefined }))
   async function addHours(e: React.FormEvent) { e.preventDefault(); setErr(null); if (!h.days.length || h.closes <= h.opens) return setErr('Choose days and a closing time after opening.')
-    const { error } = await fromLoose(supabase as never, 'space_hours').insert(h.days.map(d => ({ space_id: space.id, weekday: d, opens: h.opens, closes: h.closes }))); if (error) return setErr(error.message.includes('duplicate') ? 'Some of those hours already exist.' : readable(error.message)); refresh() }
+    const { error } = await supabase.from('space_hours').insert(h.days.map(d => ({ space_id: space.id, weekday: d, opens: h.opens, closes: h.closes }))); if (error) return setErr(error.message.includes('duplicate') ? 'Some of those hours already exist.' : readable(error.message)); refresh() }
   async function addBlackout(e: React.FormEvent) { e.preventDefault(); setErr(null); if (!bo.from || !bo.to) return setErr('Choose a start and end.')
-    const { error } = await fromLoose(supabase as never, 'space_blackouts').insert({ space_id: space.id, starts_at: new Date(bo.from + '+05:00').toISOString(), ends_at: new Date(bo.to + '+05:00').toISOString(), reason: bo.reason.trim() || null }); if (error) return setErr(readable(error.message)); setBo({ from: '', to: '', reason: '' }); refresh() }
+    const { error } = await supabase.from('space_blackouts').insert({ space_id: space.id, starts_at: new Date(bo.from + '+05:00').toISOString(), ends_at: new Date(bo.to + '+05:00').toISOString(), reason: bo.reason.trim() || null }); if (error) return setErr(readable(error.message)); setBo({ from: '', to: '', reason: '' }); refresh() }
 
   return (
     <>
@@ -79,21 +78,21 @@ export function SpaceManage({ space, hours, blackouts, bookings, origin }: { spa
             <div className="min-w-0 flex-1"><p className="text-sm font-medium text-fg">{b.name} <span className="font-normal text-muted">· {b.party_size} {b.party_size === 1 ? 'person' : 'people'}</span></p><p className="text-xs text-muted">{fmtDate(b.starts_at, { weekday: 'short', day: 'numeric', month: 'short' })} · {fmtTime(b.starts_at)} to {fmtTime(b.ends_at)} · {b.price ? pkr(b.price) : 'Free'}{b.notes ? ` · ${b.notes}` : ''}</p></div>
             <Badge tone={bTone[b.status] ?? 'neutral'}>{b.status.replace('_', ' ')}</Badge>
             {b.status === 'requested' && <><Button size="sm" leading={<Check className="h-4 w-4" />} loading={pending} onClick={() => review(b, true)}>Approve</Button><Button size="icon-sm" variant="ghost" aria-label="Decline" onClick={() => review(b, false)}><X className="h-4 w-4" /></Button></>}
-            {['awaiting_payment', 'confirmed'].includes(b.status) && <Button size="sm" variant="ghost" onClick={() => confirm('Cancel this reservation?') && run(() => rpcLoose(supabase as never, 'cancel_space_booking', { p_booking: b.id }))}>Cancel</Button>}
+            {['awaiting_payment', 'confirmed'].includes(b.status) && <Button size="sm" variant="ghost" onClick={() => confirm('Cancel this reservation?') && run(() => supabase.rpc('cancel_space_booking', { p_booking: b.id }))}>Cancel</Button>}
           </div></Card>))}</ul>
       ))}
 
       {tab === 'hours' && (
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_360px]">
           <Card><CardHeader title="Weekly hours" description="Pakistan time. Slots are created inside these hours." />
-            <CardBody>{hours.length === 0 ? <p className="text-sm text-muted">Not open yet.</p> : <ul className="divide-y divide-line">{[...hours].sort((a, b) => a.weekday - b.weekday || a.opens.localeCompare(b.opens)).map(x => <li key={x.id} className="flex items-center gap-3 py-2.5 text-sm"><span className="w-12 font-medium text-fg">{DAYS[x.weekday]}</span><span className="flex-1 text-muted">{x.opens.slice(0, 5)} to {x.closes.slice(0, 5)}</span><Button size="icon-sm" variant="ghost" aria-label="Remove" onClick={() => run(() => fromLoose(supabase as never, 'space_hours').delete().eq('id', x.id))}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>}</CardBody></Card>
+            <CardBody>{hours.length === 0 ? <p className="text-sm text-muted">Not open yet.</p> : <ul className="divide-y divide-line">{[...hours].sort((a, b) => a.weekday - b.weekday || a.opens.localeCompare(b.opens)).map(x => <li key={x.id} className="flex items-center gap-3 py-2.5 text-sm"><span className="w-12 font-medium text-fg">{DAYS[x.weekday]}</span><span className="flex-1 text-muted">{x.opens.slice(0, 5)} to {x.closes.slice(0, 5)}</span><Button size="icon-sm" variant="ghost" aria-label="Remove" onClick={() => run(() => supabase.from('space_hours').delete().eq('id', x.id))}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>}</CardBody></Card>
           <Card><CardHeader title="Add hours" /><CardBody><form onSubmit={addHours} className="space-y-4"><div className="flex flex-wrap gap-2">{DAYS.map((d, i) => { const on = h.days.includes(i); return <button type="button" key={d} aria-pressed={on} onClick={() => setH({ ...h, days: on ? h.days.filter(x => x !== i) : [...h.days, i] })} className={cn('h-9 w-12 rounded-lg text-sm font-medium ring-1', on ? 'bg-accent/12 text-accent ring-accent/40' : 'text-muted ring-line')}>{d}</button> })}</div><div className="grid grid-cols-2 gap-3"><Field label="Opens">{p => <Input {...p} type="time" value={h.opens} onChange={e => setH({ ...h, opens: e.target.value })} />}</Field><Field label="Closes">{p => <Input {...p} type="time" value={h.closes} onChange={e => setH({ ...h, closes: e.target.value })} />}</Field></div><Button type="submit" className="w-full">Add hours</Button></form></CardBody></Card>
         </div>
       )}
 
       {tab === 'blackouts' && (
         <div className="grid items-start gap-6 lg:grid-cols-[1fr_360px]">
-          <Card><CardHeader title="Closed dates" description="Holidays, maintenance, private hire" /><CardBody>{blackouts.length === 0 ? <p className="text-sm text-muted">None.</p> : <ul className="divide-y divide-line">{blackouts.map(b => <li key={b.id} className="flex items-center gap-3 py-2.5 text-sm"><span className="flex-1 text-fg">{fmtDate(b.starts_at)} {fmtTime(b.starts_at)} to {fmtDate(b.ends_at)} {fmtTime(b.ends_at)}<span className="block text-xs text-muted">{b.reason}</span></span><Button size="icon-sm" variant="ghost" aria-label="Remove" onClick={() => run(() => fromLoose(supabase as never, 'space_blackouts').delete().eq('id', b.id))}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>}</CardBody></Card>
+          <Card><CardHeader title="Closed dates" description="Holidays, maintenance, private hire" /><CardBody>{blackouts.length === 0 ? <p className="text-sm text-muted">None.</p> : <ul className="divide-y divide-line">{blackouts.map(b => <li key={b.id} className="flex items-center gap-3 py-2.5 text-sm"><span className="flex-1 text-fg">{fmtDate(b.starts_at)} {fmtTime(b.starts_at)} to {fmtDate(b.ends_at)} {fmtTime(b.ends_at)}<span className="block text-xs text-muted">{b.reason}</span></span><Button size="icon-sm" variant="ghost" aria-label="Remove" onClick={() => run(() => supabase.from('space_blackouts').delete().eq('id', b.id))}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>}</CardBody></Card>
           <Card><CardHeader title="Close the space" /><CardBody><form onSubmit={addBlackout} className="space-y-4"><Field label="From">{p => <Input {...p} type="datetime-local" value={bo.from} onChange={e => setBo({ ...bo, from: e.target.value })} />}</Field><Field label="Until">{p => <Input {...p} type="datetime-local" value={bo.to} onChange={e => setBo({ ...bo, to: e.target.value })} />}</Field><Field label="Reason" optional>{p => <Input {...p} value={bo.reason} onChange={e => setBo({ ...bo, reason: e.target.value })} />}</Field><Button type="submit" className="w-full">Close these dates</Button></form></CardBody></Card>
         </div>
       )}

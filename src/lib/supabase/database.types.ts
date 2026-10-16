@@ -135,6 +135,287 @@ export type Database = {
           },
         ]
       }
+      class_bookings: {
+        Row: {
+          approved_at: string | null
+          attendee_id: string
+          cancelled_at: string | null
+          checked_in_at: string | null
+          created_at: string
+          id: string
+          organizer_id: string
+          pass_purchase_id: string | null
+          price_due_pkr: number
+          price_paid_pkr: number | null
+          qr_token: string
+          series_id: string
+          session_id: string
+          status: Database["public"]["Enums"]["registration_status"]
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          attendee_id: string
+          cancelled_at?: string | null
+          checked_in_at?: string | null
+          created_at?: string
+          id?: string
+          organizer_id: string
+          pass_purchase_id?: string | null
+          price_due_pkr?: number
+          price_paid_pkr?: number | null
+          qr_token?: string
+          series_id: string
+          session_id: string
+          status?: Database["public"]["Enums"]["registration_status"]
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          attendee_id?: string
+          cancelled_at?: string | null
+          checked_in_at?: string | null
+          created_at?: string
+          id?: string
+          organizer_id?: string
+          pass_purchase_id?: string | null
+          price_due_pkr?: number
+          price_paid_pkr?: number | null
+          qr_token?: string
+          series_id?: string
+          session_id?: string
+          status?: Database["public"]["Enums"]["registration_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_bookings_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_bookings_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_bookings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_bookings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_bookings_pass_purchase_id_fkey"
+            columns: ["pass_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "pass_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_bookings_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "class_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_bookings_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "public_class_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_bookings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_bookings_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "public_class_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_series: {
+        Row: {
+          admin_status: Database["public"]["Enums"]["admin_status"]
+          area_label: string | null
+          capacity: number | null
+          category_id: string | null
+          city: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          drop_in_price_pkr: number
+          duration_minutes: number
+          ends_on: string | null
+          id: string
+          instructor_name: string | null
+          interval_weeks: number
+          organizer_id: string
+          published_at: string | null
+          slug: string | null
+          start_time: string
+          starts_on: string
+          status: Database["public"]["Enums"]["series_status"]
+          tags: string[]
+          title: string
+          updated_at: string
+          venue_address: string | null
+          venue_name: string | null
+          visibility: Database["public"]["Enums"]["event_visibility"]
+          weekdays: number[]
+        }
+        Insert: {
+          admin_status?: Database["public"]["Enums"]["admin_status"]
+          area_label?: string | null
+          capacity?: number | null
+          category_id?: string | null
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          drop_in_price_pkr?: number
+          duration_minutes?: number
+          ends_on?: string | null
+          id?: string
+          instructor_name?: string | null
+          interval_weeks?: number
+          organizer_id: string
+          published_at?: string | null
+          slug?: string | null
+          start_time: string
+          starts_on: string
+          status?: Database["public"]["Enums"]["series_status"]
+          tags?: string[]
+          title: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_name?: string | null
+          visibility?: Database["public"]["Enums"]["event_visibility"]
+          weekdays?: number[]
+        }
+        Update: {
+          admin_status?: Database["public"]["Enums"]["admin_status"]
+          area_label?: string | null
+          capacity?: number | null
+          category_id?: string | null
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          drop_in_price_pkr?: number
+          duration_minutes?: number
+          ends_on?: string | null
+          id?: string
+          instructor_name?: string | null
+          interval_weeks?: number
+          organizer_id?: string
+          published_at?: string | null
+          slug?: string | null
+          start_time?: string
+          starts_on?: string
+          status?: Database["public"]["Enums"]["series_status"]
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          venue_address?: string | null
+          venue_name?: string | null
+          visibility?: Database["public"]["Enums"]["event_visibility"]
+          weekdays?: number[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_series_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "event_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_series_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_series_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_sessions: {
+        Row: {
+          cancel_reason: string | null
+          capacity: number | null
+          created_at: string
+          ends_at: string
+          id: string
+          notes: string | null
+          series_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["session_status"]
+        }
+        Insert: {
+          cancel_reason?: string | null
+          capacity?: number | null
+          created_at?: string
+          ends_at: string
+          id?: string
+          notes?: string | null
+          series_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["session_status"]
+        }
+        Update: {
+          cancel_reason?: string | null
+          capacity?: number | null
+          created_at?: string
+          ends_at?: string
+          id?: string
+          notes?: string | null
+          series_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["session_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "class_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_sessions_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "public_class_series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       commissions: {
         Row: {
           amount_pkr: number
@@ -271,6 +552,78 @@ export type Database = {
           },
         ]
       }
+      door_scans: {
+        Row: {
+          gate_link_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["scan_kind"]
+          note: string | null
+          organizer_id: string
+          result: Database["public"]["Enums"]["scan_result"]
+          scanned_at: string
+          scanned_by: string | null
+          subject_id: string | null
+        }
+        Insert: {
+          gate_link_id?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["scan_kind"]
+          note?: string | null
+          organizer_id: string
+          result: Database["public"]["Enums"]["scan_result"]
+          scanned_at?: string
+          scanned_by?: string | null
+          subject_id?: string | null
+        }
+        Update: {
+          gate_link_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["scan_kind"]
+          note?: string | null
+          organizer_id?: string
+          result?: Database["public"]["Enums"]["scan_result"]
+          scanned_at?: string
+          scanned_by?: string | null
+          subject_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "door_scans_gate_link_fk"
+            columns: ["gate_link_id"]
+            isOneToOne: false
+            referencedRelation: "gate_staff_links"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "door_scans_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "door_scans_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "door_scans_scanned_by_fkey"
+            columns: ["scanned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "door_scans_scanned_by_fkey"
+            columns: ["scanned_by"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_outbox: {
         Row: {
           attempts: number
@@ -389,6 +742,53 @@ export type Database = {
           sort?: number
         }
         Relationships: []
+      }
+      event_favourites: {
+        Row: {
+          created_at: string
+          event_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_favourites_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_favourites_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_favourites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_favourites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       event_payment_accounts: {
         Row: {
@@ -583,6 +983,7 @@ export type Database = {
       }
       gate_staff_links: {
         Row: {
+          class_series_ids: string[]
           created_at: string
           event_ids: string[]
           expires_at: string
@@ -590,10 +991,13 @@ export type Database = {
           label: string
           last_used_at: string | null
           organizer_id: string
+          retreat_ids: string[]
           revoked_at: string | null
+          space_ids: string[]
           token_hash: string
         }
         Insert: {
+          class_series_ids?: string[]
           created_at?: string
           event_ids: string[]
           expires_at: string
@@ -601,10 +1005,13 @@ export type Database = {
           label: string
           last_used_at?: string | null
           organizer_id: string
+          retreat_ids?: string[]
           revoked_at?: string | null
+          space_ids?: string[]
           token_hash: string
         }
         Update: {
+          class_series_ids?: string[]
           created_at?: string
           event_ids?: string[]
           expires_at?: string
@@ -612,7 +1019,9 @@ export type Database = {
           label?: string
           last_used_at?: string | null
           organizer_id?: string
+          retreat_ids?: string[]
           revoked_at?: string | null
+          space_ids?: string[]
           token_hash?: string
         }
         Relationships: [
@@ -898,6 +1307,85 @@ export type Database = {
           },
         ]
       }
+      organizer_team_members: {
+        Row: {
+          accepted_at: string | null
+          email: string
+          id: string
+          invited_at: string
+          invited_by: string | null
+          organizer_id: string
+          role: Database["public"]["Enums"]["team_role"]
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          email: string
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          organizer_id: string
+          role?: Database["public"]["Enums"]["team_role"]
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          email?: string
+          id?: string
+          invited_at?: string
+          invited_by?: string | null
+          organizer_id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizer_team_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_team_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_team_members_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_team_members_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizer_vendor_invoices: {
         Row: {
           amount_pkr: number
@@ -1029,6 +1517,210 @@ export type Database = {
             columns: ["organizer_id"]
             isOneToOne: false
             referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pass_products: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["pass_kind"]
+          name: string
+          organizer_id: string
+          price_pkr: number
+          series_id: string | null
+          sessions_count: number | null
+          sort: number
+          validity_days: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["pass_kind"]
+          name: string
+          organizer_id: string
+          price_pkr: number
+          series_id?: string | null
+          sessions_count?: number | null
+          sort?: number
+          validity_days?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["pass_kind"]
+          name?: string
+          organizer_id?: string
+          price_pkr?: number
+          series_id?: string | null
+          sessions_count?: number | null
+          sort?: number
+          validity_days?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pass_products_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_products_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_products_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "class_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_products_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "public_class_series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pass_purchases: {
+        Row: {
+          approved_at: string | null
+          attendee_id: string
+          created_at: string
+          id: string
+          organizer_id: string
+          price_due_pkr: number
+          price_paid_pkr: number | null
+          product_id: string
+          qr_token: string
+          sessions_total: number | null
+          sessions_used: number
+          status: Database["public"]["Enums"]["pass_status"]
+          updated_at: string
+          valid_from: string | null
+          valid_until: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          attendee_id: string
+          created_at?: string
+          id?: string
+          organizer_id: string
+          price_due_pkr?: number
+          price_paid_pkr?: number | null
+          product_id: string
+          qr_token?: string
+          sessions_total?: number | null
+          sessions_used?: number
+          status?: Database["public"]["Enums"]["pass_status"]
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          attendee_id?: string
+          created_at?: string
+          id?: string
+          organizer_id?: string
+          price_due_pkr?: number
+          price_paid_pkr?: number | null
+          product_id?: string
+          qr_token?: string
+          sessions_total?: number | null
+          sessions_used?: number
+          status?: Database["public"]["Enums"]["pass_status"]
+          updated_at?: string
+          valid_from?: string | null
+          valid_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pass_purchases_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_purchases_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_purchases_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_purchases_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "pass_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_purchases_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "public_pass_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pass_redemptions: {
+        Row: {
+          booking_id: string
+          id: string
+          pass_purchase_id: string
+          redeemed_at: string
+        }
+        Insert: {
+          booking_id: string
+          id?: string
+          pass_purchase_id: string
+          redeemed_at?: string
+        }
+        Update: {
+          booking_id?: string
+          id?: string
+          pass_purchase_id?: string
+          redeemed_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pass_redemptions_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: true
+            referencedRelation: "class_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_redemptions_pass_purchase_id_fkey"
+            columns: ["pass_purchase_id"]
+            isOneToOne: false
+            referencedRelation: "pass_purchases"
             referencedColumns: ["id"]
           },
         ]
@@ -1203,6 +1895,97 @@ export type Database = {
           sort?: number
         }
         Relationships: []
+      }
+      product_payments: {
+        Row: {
+          amount_pkr: number
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["product_kind"]
+          organizer_id: string
+          payer_id: string
+          reference: string | null
+          reject_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          screenshot_path: string
+          status: Database["public"]["Enums"]["review_status"]
+          subject_id: string
+        }
+        Insert: {
+          amount_pkr: number
+          created_at?: string
+          id?: string
+          kind: Database["public"]["Enums"]["product_kind"]
+          organizer_id: string
+          payer_id: string
+          reference?: string | null
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path: string
+          status?: Database["public"]["Enums"]["review_status"]
+          subject_id: string
+        }
+        Update: {
+          amount_pkr?: number
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["product_kind"]
+          organizer_id?: string
+          payer_id?: string
+          reference?: string | null
+          reject_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          screenshot_path?: string
+          status?: Database["public"]["Enums"]["review_status"]
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_payments_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_payments_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_payments_payer_id_fkey"
+            columns: ["payer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_payments_payer_id_fkey"
+            columns: ["payer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_payments_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_payments_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_private: {
         Row: {
@@ -1665,6 +2448,547 @@ export type Database = {
           },
         ]
       }
+      retreat_budget_lines: {
+        Row: {
+          actual_pkr: number | null
+          category: string
+          created_at: string
+          estimated_pkr: number
+          id: string
+          is_paid: boolean
+          item_id: string | null
+          label: string
+          notes: string | null
+          retreat_id: string
+          vendor_id: string | null
+        }
+        Insert: {
+          actual_pkr?: number | null
+          category?: string
+          created_at?: string
+          estimated_pkr?: number
+          id?: string
+          is_paid?: boolean
+          item_id?: string | null
+          label: string
+          notes?: string | null
+          retreat_id: string
+          vendor_id?: string | null
+        }
+        Update: {
+          actual_pkr?: number | null
+          category?: string
+          created_at?: string
+          estimated_pkr?: number
+          id?: string
+          is_paid?: boolean
+          item_id?: string | null
+          label?: string
+          notes?: string | null
+          retreat_id?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retreat_budget_lines_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "retreat_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_budget_lines_retreat_id_fkey"
+            columns: ["retreat_id"]
+            isOneToOne: false
+            referencedRelation: "retreats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_budget_lines_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "organizer_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retreat_checkins: {
+        Row: {
+          checked_in_at: string
+          checked_in_by: string | null
+          id: string
+          item_id: string
+          participant_id: string
+          retreat_id: string
+        }
+        Insert: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          id?: string
+          item_id: string
+          participant_id: string
+          retreat_id: string
+        }
+        Update: {
+          checked_in_at?: string
+          checked_in_by?: string | null
+          id?: string
+          item_id?: string
+          participant_id?: string
+          retreat_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retreat_checkins_checked_in_by_fkey"
+            columns: ["checked_in_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_checkins_checked_in_by_fkey"
+            columns: ["checked_in_by"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_checkins_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "retreat_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_checkins_participant_id_fkey"
+            columns: ["participant_id"]
+            isOneToOne: false
+            referencedRelation: "retreat_participants"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_checkins_retreat_id_fkey"
+            columns: ["retreat_id"]
+            isOneToOne: false
+            referencedRelation: "retreats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retreat_days: {
+        Row: {
+          day_date: string
+          day_number: number
+          id: string
+          retreat_id: string
+          summary: string | null
+          title: string | null
+        }
+        Insert: {
+          day_date: string
+          day_number: number
+          id?: string
+          retreat_id: string
+          summary?: string | null
+          title?: string | null
+        }
+        Update: {
+          day_date?: string
+          day_number?: number
+          id?: string
+          retreat_id?: string
+          summary?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retreat_days_retreat_id_fkey"
+            columns: ["retreat_id"]
+            isOneToOne: false
+            referencedRelation: "retreats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retreat_documents: {
+        Row: {
+          created_at: string
+          id: string
+          is_shared: boolean
+          item_id: string | null
+          name: string
+          retreat_id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_shared?: boolean
+          item_id?: string | null
+          name: string
+          retreat_id: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_shared?: boolean
+          item_id?: string | null
+          name?: string
+          retreat_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retreat_documents_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "retreat_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_documents_retreat_id_fkey"
+            columns: ["retreat_id"]
+            isOneToOne: false
+            referencedRelation: "retreats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retreat_items: {
+        Row: {
+          assignee: string | null
+          cost_pkr: number
+          created_at: string
+          day_id: string
+          description: string | null
+          ends_at: string | null
+          id: string
+          is_internal: boolean
+          kind: Database["public"]["Enums"]["retreat_item_kind"]
+          latitude: number | null
+          location_address: string | null
+          location_name: string | null
+          longitude: number | null
+          notes: string | null
+          requires_checkin: boolean
+          retreat_id: string
+          sort: number
+          starts_at: string | null
+          status: Database["public"]["Enums"]["retreat_item_status"]
+          title: string
+          updated_at: string
+          vendor_id: string | null
+        }
+        Insert: {
+          assignee?: string | null
+          cost_pkr?: number
+          created_at?: string
+          day_id: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_internal?: boolean
+          kind?: Database["public"]["Enums"]["retreat_item_kind"]
+          latitude?: number | null
+          location_address?: string | null
+          location_name?: string | null
+          longitude?: number | null
+          notes?: string | null
+          requires_checkin?: boolean
+          retreat_id: string
+          sort?: number
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["retreat_item_status"]
+          title: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Update: {
+          assignee?: string | null
+          cost_pkr?: number
+          created_at?: string
+          day_id?: string
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          is_internal?: boolean
+          kind?: Database["public"]["Enums"]["retreat_item_kind"]
+          latitude?: number | null
+          location_address?: string | null
+          location_name?: string | null
+          longitude?: number | null
+          notes?: string | null
+          requires_checkin?: boolean
+          retreat_id?: string
+          sort?: number
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["retreat_item_status"]
+          title?: string
+          updated_at?: string
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retreat_items_retreat_id_day_id_fkey"
+            columns: ["retreat_id", "day_id"]
+            isOneToOne: false
+            referencedRelation: "retreat_days"
+            referencedColumns: ["retreat_id", "id"]
+          },
+          {
+            foreignKeyName: "retreat_items_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "organizer_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retreat_participants: {
+        Row: {
+          accessibility: string | null
+          attendee_id: string | null
+          created_at: string
+          department: string | null
+          dietary: string | null
+          email: string | null
+          emergency_contact: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          qr_token: string
+          retreat_id: string
+          room_label: string | null
+          status: Database["public"]["Enums"]["participant_status"]
+        }
+        Insert: {
+          accessibility?: string | null
+          attendee_id?: string | null
+          created_at?: string
+          department?: string | null
+          dietary?: string | null
+          email?: string | null
+          emergency_contact?: string | null
+          full_name: string
+          id?: string
+          phone?: string | null
+          qr_token?: string
+          retreat_id: string
+          room_label?: string | null
+          status?: Database["public"]["Enums"]["participant_status"]
+        }
+        Update: {
+          accessibility?: string | null
+          attendee_id?: string | null
+          created_at?: string
+          department?: string | null
+          dietary?: string | null
+          email?: string | null
+          emergency_contact?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          qr_token?: string
+          retreat_id?: string
+          room_label?: string | null
+          status?: Database["public"]["Enums"]["participant_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retreat_participants_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_participants_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_participants_retreat_id_fkey"
+            columns: ["retreat_id"]
+            isOneToOne: false
+            referencedRelation: "retreats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retreat_tasks: {
+        Row: {
+          assignee_name: string | null
+          created_at: string
+          done_at: string | null
+          due_date: string | null
+          id: string
+          is_done: boolean
+          retreat_id: string
+          sort: number
+          title: string
+        }
+        Insert: {
+          assignee_name?: string | null
+          created_at?: string
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          is_done?: boolean
+          retreat_id: string
+          sort?: number
+          title: string
+        }
+        Update: {
+          assignee_name?: string | null
+          created_at?: string
+          done_at?: string | null
+          due_date?: string | null
+          id?: string
+          is_done?: boolean
+          retreat_id?: string
+          sort?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retreat_tasks_retreat_id_fkey"
+            columns: ["retreat_id"]
+            isOneToOne: false
+            referencedRelation: "retreats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retreat_updates: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          retreat_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          retreat_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          retreat_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retreat_updates_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_updates_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreat_updates_retreat_id_fkey"
+            columns: ["retreat_id"]
+            isOneToOne: false
+            referencedRelation: "retreats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      retreats: {
+        Row: {
+          accent_color: string | null
+          budget_pkr: number | null
+          city: string | null
+          client_company: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          destination: string | null
+          ends_on: string
+          headcount_target: number | null
+          id: string
+          notes: string | null
+          organizer_id: string
+          share_token: string | null
+          slug: string | null
+          starts_on: string
+          status: Database["public"]["Enums"]["retreat_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          budget_pkr?: number | null
+          city?: string | null
+          client_company?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          destination?: string | null
+          ends_on: string
+          headcount_target?: number | null
+          id?: string
+          notes?: string | null
+          organizer_id: string
+          share_token?: string | null
+          slug?: string | null
+          starts_on: string
+          status?: Database["public"]["Enums"]["retreat_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          budget_pkr?: number | null
+          city?: string | null
+          client_company?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          destination?: string | null
+          ends_on?: string
+          headcount_target?: number | null
+          id?: string
+          notes?: string | null
+          organizer_id?: string
+          share_token?: string | null
+          slug?: string | null
+          starts_on?: string
+          status?: Database["public"]["Enums"]["retreat_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retreats_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retreats_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scan_logs: {
         Row: {
           event_id: string
@@ -1806,6 +3130,289 @@ export type Database = {
             columns: ["registration_id"]
             isOneToOne: false
             referencedRelation: "registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      space_blackouts: {
+        Row: {
+          ends_at: string
+          id: string
+          reason: string | null
+          space_id: string
+          starts_at: string
+        }
+        Insert: {
+          ends_at: string
+          id?: string
+          reason?: string | null
+          space_id: string
+          starts_at: string
+        }
+        Update: {
+          ends_at?: string
+          id?: string
+          reason?: string | null
+          space_id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_blackouts_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "public_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_blackouts_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      space_bookings: {
+        Row: {
+          approved_at: string | null
+          attendee_id: string
+          blocked_until: string
+          cancelled_at: string | null
+          checked_in_at: string | null
+          created_at: string
+          ends_at: string
+          id: string
+          notes: string | null
+          organizer_id: string
+          party_size: number
+          price_due_pkr: number
+          price_paid_pkr: number | null
+          qr_token: string
+          space_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["registration_status"]
+          status_reason: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          attendee_id: string
+          blocked_until: string
+          cancelled_at?: string | null
+          checked_in_at?: string | null
+          created_at?: string
+          ends_at: string
+          id?: string
+          notes?: string | null
+          organizer_id: string
+          party_size?: number
+          price_due_pkr?: number
+          price_paid_pkr?: number | null
+          qr_token?: string
+          space_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["registration_status"]
+          status_reason?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          attendee_id?: string
+          blocked_until?: string
+          cancelled_at?: string | null
+          checked_in_at?: string | null
+          created_at?: string
+          ends_at?: string
+          id?: string
+          notes?: string | null
+          organizer_id?: string
+          party_size?: number
+          price_due_pkr?: number
+          price_paid_pkr?: number | null
+          qr_token?: string
+          space_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["registration_status"]
+          status_reason?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_bookings_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_bookings_attendee_id_fkey"
+            columns: ["attendee_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_bookings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_bookings_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_bookings_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "public_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_bookings_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      space_hours: {
+        Row: {
+          closes: string
+          id: string
+          opens: string
+          space_id: string
+          weekday: number
+        }
+        Insert: {
+          closes: string
+          id?: string
+          opens: string
+          space_id: string
+          weekday: number
+        }
+        Update: {
+          closes?: string
+          id?: string
+          opens?: string
+          space_id?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_hours_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "public_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_hours_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      spaces: {
+        Row: {
+          address: string | null
+          admin_status: Database["public"]["Enums"]["admin_status"]
+          amenities: string[]
+          area_label: string | null
+          buffer_minutes: number
+          capacity: number | null
+          city: string | null
+          created_at: string
+          description: string | null
+          id: string
+          kind: Database["public"]["Enums"]["space_kind"]
+          max_advance_days: number
+          min_notice_hours: number
+          name: string
+          organizer_id: string
+          photos: string[]
+          price_pkr_per_slot: number
+          published_at: string | null
+          requires_approval: boolean
+          slot_minutes: number
+          slug: string | null
+          status: Database["public"]["Enums"]["space_status"]
+          updated_at: string
+          visibility: Database["public"]["Enums"]["event_visibility"]
+        }
+        Insert: {
+          address?: string | null
+          admin_status?: Database["public"]["Enums"]["admin_status"]
+          amenities?: string[]
+          area_label?: string | null
+          buffer_minutes?: number
+          capacity?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["space_kind"]
+          max_advance_days?: number
+          min_notice_hours?: number
+          name: string
+          organizer_id: string
+          photos?: string[]
+          price_pkr_per_slot?: number
+          published_at?: string | null
+          requires_approval?: boolean
+          slot_minutes?: number
+          slug?: string | null
+          status?: Database["public"]["Enums"]["space_status"]
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["event_visibility"]
+        }
+        Update: {
+          address?: string | null
+          admin_status?: Database["public"]["Enums"]["admin_status"]
+          amenities?: string[]
+          area_label?: string | null
+          buffer_minutes?: number
+          capacity?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["space_kind"]
+          max_advance_days?: number
+          min_notice_hours?: number
+          name?: string
+          organizer_id?: string
+          photos?: string[]
+          price_pkr_per_slot?: number
+          published_at?: string | null
+          requires_approval?: boolean
+          slot_minutes?: number
+          slug?: string | null
+          status?: Database["public"]["Enums"]["space_status"]
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["event_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spaces_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spaces_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
             referencedColumns: ["id"]
           },
         ]
@@ -2071,6 +3678,129 @@ export type Database = {
           },
         ]
       }
+      public_class_series: {
+        Row: {
+          area_label: string | null
+          capacity: number | null
+          category_id: string | null
+          city: string | null
+          cover_image_url: string | null
+          description: string | null
+          drop_in_price_pkr: number | null
+          duration_minutes: number | null
+          ends_on: string | null
+          id: string | null
+          instructor_name: string | null
+          interval_weeks: number | null
+          next_session_at: string | null
+          organizer_id: string | null
+          slug: string | null
+          start_time: string | null
+          starts_on: string | null
+          tags: string[] | null
+          title: string | null
+          venue_address: string | null
+          venue_name: string | null
+          weekdays: number[] | null
+        }
+        Insert: {
+          area_label?: string | null
+          capacity?: number | null
+          category_id?: string | null
+          city?: string | null
+          cover_image_url?: string | null
+          description?: string | null
+          drop_in_price_pkr?: number | null
+          duration_minutes?: number | null
+          ends_on?: string | null
+          id?: string | null
+          instructor_name?: string | null
+          interval_weeks?: number | null
+          next_session_at?: never
+          organizer_id?: string | null
+          slug?: string | null
+          start_time?: string | null
+          starts_on?: string | null
+          tags?: string[] | null
+          title?: string | null
+          venue_address?: string | null
+          venue_name?: string | null
+          weekdays?: number[] | null
+        }
+        Update: {
+          area_label?: string | null
+          capacity?: number | null
+          category_id?: string | null
+          city?: string | null
+          cover_image_url?: string | null
+          description?: string | null
+          drop_in_price_pkr?: number | null
+          duration_minutes?: number | null
+          ends_on?: string | null
+          id?: string | null
+          instructor_name?: string | null
+          interval_weeks?: number | null
+          next_session_at?: never
+          organizer_id?: string | null
+          slug?: string | null
+          start_time?: string | null
+          starts_on?: string | null
+          tags?: string[] | null
+          title?: string | null
+          venue_address?: string | null
+          venue_name?: string | null
+          weekdays?: number[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_series_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "event_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_series_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_series_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_class_sessions: {
+        Row: {
+          ends_at: string | null
+          id: string | null
+          notes: string | null
+          seats_left: number | null
+          series_id: string | null
+          starts_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "class_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "class_sessions_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "public_class_series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_organizers: {
         Row: {
           avatar_url: string | null
@@ -2091,6 +3821,148 @@ export type Database = {
           whatsapp: string | null
         }
         Relationships: []
+      }
+      public_pass_products: {
+        Row: {
+          id: string | null
+          kind: Database["public"]["Enums"]["pass_kind"] | null
+          name: string | null
+          organizer_id: string | null
+          price_pkr: number | null
+          series_id: string | null
+          sessions_count: number | null
+          sort: number | null
+          validity_days: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pass_products_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_products_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_products_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "class_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pass_products_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "public_class_series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_space_hours: {
+        Row: {
+          closes: string | null
+          opens: string | null
+          space_id: string | null
+          weekday: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "space_hours_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "public_spaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "space_hours_space_id_fkey"
+            columns: ["space_id"]
+            isOneToOne: false
+            referencedRelation: "spaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_spaces: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          area_label: string | null
+          capacity: number | null
+          city: string | null
+          description: string | null
+          id: string | null
+          kind: Database["public"]["Enums"]["space_kind"] | null
+          max_advance_days: number | null
+          min_notice_hours: number | null
+          name: string | null
+          organizer_id: string | null
+          photos: string[] | null
+          price_pkr_per_slot: number | null
+          requires_approval: boolean | null
+          slot_minutes: number | null
+          slug: string | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          area_label?: string | null
+          capacity?: number | null
+          city?: string | null
+          description?: string | null
+          id?: string | null
+          kind?: Database["public"]["Enums"]["space_kind"] | null
+          max_advance_days?: number | null
+          min_notice_hours?: number | null
+          name?: string | null
+          organizer_id?: string | null
+          photos?: string[] | null
+          price_pkr_per_slot?: number | null
+          requires_approval?: boolean | null
+          slot_minutes?: number | null
+          slug?: string | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          area_label?: string | null
+          capacity?: number | null
+          city?: string | null
+          description?: string | null
+          id?: string | null
+          kind?: Database["public"]["Enums"]["space_kind"] | null
+          max_advance_days?: number | null
+          min_notice_hours?: number | null
+          name?: string | null
+          organizer_id?: string | null
+          photos?: string[] | null
+          price_pkr_per_slot?: number | null
+          requires_approval?: boolean | null
+          slot_minutes?: number | null
+          slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "spaces_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "spaces_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       public_ticket_types: {
         Row: {
@@ -2145,18 +4017,58 @@ export type Database = {
         }
         Returns: undefined
       }
+      book_class_session: {
+        Args: { p_pass?: string; p_session: string }
+        Returns: string
+      }
+      book_space: {
+        Args: {
+          p_notes?: string
+          p_party_size?: number
+          p_space: string
+          p_starts_at: string
+        }
+        Returns: string
+      }
+      cancel_class_booking: { Args: { p_booking: string }; Returns: undefined }
+      cancel_class_session: {
+        Args: { p_reason?: string; p_session: string }
+        Returns: number
+      }
       cancel_registration: {
         Args: { p_registration: string }
         Returns: undefined
       }
+      cancel_space_booking: { Args: { p_booking: string }; Returns: undefined }
+      claim_retreat_invites: { Args: never; Returns: number }
+      claim_team_invites: { Args: never; Returns: number }
       create_gate_link: {
         Args: { p_event_ids: string[]; p_label: string }
+        Returns: Json
+      }
+      create_gate_link_scoped: {
+        Args: {
+          p_event_ids: string[]
+          p_label: string
+          p_retreat_ids: string[]
+          p_series_ids: string[]
+          p_space_ids: string[]
+        }
         Returns: Json
       }
       create_referrer: {
         Args: { p_email?: string; p_name: string; p_phone?: string }
         Returns: Json
       }
+      disable_retreat_sharing: {
+        Args: { p_retreat: string }
+        Returns: undefined
+      }
+      duplicate_retreat: {
+        Args: { p_new_start: string; p_retreat: string }
+        Returns: string
+      }
+      enable_retreat_sharing: { Args: { p_retreat: string }; Returns: string }
       gate_check_in: {
         Args: {
           p_event: string
@@ -2178,6 +4090,7 @@ export type Database = {
           title: string
         }[]
       }
+      gate_get_scope: { Args: { p_link_token: string }; Returns: Json }
       gate_lookup: {
         Args: { p_event: string; p_link_token: string; p_query: string }
         Returns: {
@@ -2187,6 +4100,45 @@ export type Database = {
           registration_id: string
           status: Database["public"]["Enums"]["registration_status"]
           ticket: string
+        }[]
+      }
+      gate_scan_any: {
+        Args: {
+          p_context?: string
+          p_link_token: string
+          p_offline?: boolean
+          p_token: string
+        }
+        Returns: Json
+      }
+      generate_class_sessions: {
+        Args: { p_series: string; p_weeks?: number }
+        Returns: number
+      }
+      get_class_series: {
+        Args: { p_slug: string }
+        Returns: {
+          area_label: string
+          capacity: number
+          category_id: string
+          city: string
+          cover_image_url: string
+          description: string
+          drop_in_price_pkr: number
+          duration_minutes: number
+          ends_on: string
+          id: string
+          instructor_name: string
+          interval_weeks: number
+          organizer_id: string
+          slug: string
+          start_time: string
+          starts_on: string
+          tags: string[]
+          title: string
+          venue_address: string
+          venue_name: string
+          weekdays: number[]
         }[]
       }
       get_event: {
@@ -2227,6 +4179,7 @@ export type Database = {
         }
       }
       get_event_secret: { Args: { p_event: string }; Returns: Json }
+      get_participant_itinerary: { Args: { p_token: string }; Returns: Json }
       get_registrant_scores: {
         Args: { p_event: string }
         Returns: {
@@ -2238,6 +4191,35 @@ export type Database = {
           score: number
           tier: Database["public"]["Enums"]["score_tier"]
         }[]
+      }
+      get_shared_retreat: { Args: { p_token: string }; Returns: Json }
+      get_space: {
+        Args: { p_slug: string }
+        Returns: {
+          address: string | null
+          amenities: string[] | null
+          area_label: string | null
+          capacity: number | null
+          city: string | null
+          description: string | null
+          id: string | null
+          kind: Database["public"]["Enums"]["space_kind"] | null
+          max_advance_days: number | null
+          min_notice_hours: number | null
+          name: string | null
+          organizer_id: string | null
+          photos: string[] | null
+          price_pkr_per_slot: number | null
+          requires_approval: boolean | null
+          slot_minutes: number | null
+          slug: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "public_spaces"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_top_organizers: {
         Args: { p_limit?: number }
@@ -2266,22 +4248,43 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      invite_team_member: { Args: { p_email: string }; Returns: string }
+      master_modules_overview: { Args: never; Returns: Json }
       master_overview: { Args: never; Returns: Json }
       my_entitlements: { Args: never; Returns: Json }
+      my_retreats: {
+        Args: never
+        Returns: {
+          destination: string
+          ends_on: string
+          qr_token: string
+          retreat_id: string
+          starts_on: string
+          status: Database["public"]["Enums"]["retreat_status"]
+          title: string
+        }[]
+      }
       organizer_check_in: {
         Args: { p_event: string; p_registration?: string; p_token?: string }
         Returns: Json
+      }
+      post_retreat_update: {
+        Args: { p_body: string; p_retreat: string; p_send_email?: boolean }
+        Returns: string
       }
       preview_code: {
         Args: { p_code: string; p_event: string; p_ticket_type?: string }
         Returns: Json
       }
+      process_class_sessions: { Args: never; Returns: number }
       process_no_shows: { Args: never; Returns: number }
+      process_space_bookings: { Args: never; Returns: number }
       promoter_dashboard: { Args: { p_token: string }; Returns: Json }
       publish_announcement: {
         Args: { p_body: string; p_event: string; p_send_email?: boolean }
         Returns: string
       }
+      purchase_pass: { Args: { p_product: string }; Returns: string }
       register_for_event: {
         Args: {
           p_code?: string
@@ -2296,6 +4299,12 @@ export type Database = {
         }
         Returns: string
       }
+      remove_team_member: { Args: { p_id: string }; Returns: undefined }
+      retreat_check_in: {
+        Args: { p_item: string; p_token: string }
+        Returns: Json
+      }
+      retreat_summary: { Args: { p_retreat: string }; Returns: Json }
       reveal_due_events: { Args: never; Returns: number }
       review_id_verification: {
         Args: { p_approve: boolean; p_reason?: string; p_user: string }
@@ -2305,8 +4314,16 @@ export type Database = {
         Args: { p_approve: boolean; p_reason?: string; p_submission: string }
         Returns: Database["public"]["Enums"]["registration_status"]
       }
+      review_product_payment: {
+        Args: { p_approve: boolean; p_payment: string; p_reason?: string }
+        Returns: Database["public"]["Enums"]["review_status"]
+      }
       review_registration: {
         Args: { p_approve: boolean; p_reason?: string; p_registration: string }
+        Returns: Database["public"]["Enums"]["registration_status"]
+      }
+      review_space_booking: {
+        Args: { p_approve: boolean; p_booking: string; p_reason?: string }
         Returns: Database["public"]["Enums"]["registration_status"]
       }
       review_subscription_payment: {
@@ -2315,6 +4332,15 @@ export type Database = {
       }
       revoke_gate_link: { Args: { p_id: string }; Returns: undefined }
       rotate_referrer_token: { Args: { p_referrer: string }; Returns: string }
+      scan_any: { Args: { p_context?: string; p_token: string }; Returns: Json }
+      space_open_slots: {
+        Args: { p_date: string; p_space: string }
+        Returns: {
+          is_available: boolean
+          slot_end: string
+          slot_start: string
+        }[]
+      }
       submit_id_verification: {
         Args: {
           p_expiry?: string
@@ -2329,6 +4355,15 @@ export type Database = {
           p_reference?: string
           p_registration: string
           p_screenshot_path: string
+        }
+        Returns: string
+      }
+      submit_product_payment: {
+        Args: {
+          p_kind: Database["public"]["Enums"]["product_kind"]
+          p_reference?: string
+          p_screenshot_path: string
+          p_subject: string
         }
         Returns: string
       }
@@ -2359,7 +4394,18 @@ export type Database = {
       gender: "male" | "female" | "other"
       id_status: "none" | "pending" | "verified" | "rejected"
       id_type: "cnic" | "passport"
+      participant_status: "invited" | "confirmed" | "declined"
+      pass_kind: "pack" | "monthly"
+      pass_status:
+        | "awaiting_payment"
+        | "payment_submitted"
+        | "active"
+        | "exhausted"
+        | "expired"
+        | "cancelled"
+        | "rejected"
       payment_method: "bank" | "jazzcash" | "easypaisa" | "other"
+      product_kind: "pass_purchase" | "class_booking" | "space_booking"
       registration_mode: "open" | "approval"
       registration_source: "self" | "invited" | "manual"
       registration_status:
@@ -2372,7 +4418,28 @@ export type Database = {
         | "cancelled"
         | "waitlisted"
         | "no_show"
+      retreat_item_kind:
+        | "activity"
+        | "meal"
+        | "transport"
+        | "stay"
+        | "session"
+        | "free_time"
+        | "milestone"
+      retreat_item_status:
+        | "planned"
+        | "confirmed"
+        | "in_progress"
+        | "done"
+        | "skipped"
+      retreat_status:
+        | "planning"
+        | "confirmed"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
       review_status: "submitted" | "approved" | "rejected"
+      scan_kind: "class" | "space" | "retreat"
       scan_result:
         | "admitted"
         | "duplicate"
@@ -2380,12 +4447,17 @@ export type Database = {
         | "wrong_day"
         | "invalid"
       score_tier: "new" | "reliable" | "regular" | "trusted"
+      series_status: "draft" | "published" | "paused" | "ended"
+      session_status: "scheduled" | "cancelled" | "completed"
+      space_kind: "room" | "court" | "studio" | "desk" | "table" | "other"
+      space_status: "draft" | "published" | "paused"
       subscription_status:
         | "trial"
         | "active"
         | "grace"
         | "expired"
         | "cancelled"
+      team_role: "manager"
       user_role: "organizer" | "attendee" | "admin"
     }
     CompositeTypes: {
@@ -2534,7 +4606,19 @@ export const Constants = {
       gender: ["male", "female", "other"],
       id_status: ["none", "pending", "verified", "rejected"],
       id_type: ["cnic", "passport"],
+      participant_status: ["invited", "confirmed", "declined"],
+      pass_kind: ["pack", "monthly"],
+      pass_status: [
+        "awaiting_payment",
+        "payment_submitted",
+        "active",
+        "exhausted",
+        "expired",
+        "cancelled",
+        "rejected",
+      ],
       payment_method: ["bank", "jazzcash", "easypaisa", "other"],
+      product_kind: ["pass_purchase", "class_booking", "space_booking"],
       registration_mode: ["open", "approval"],
       registration_source: ["self", "invited", "manual"],
       registration_status: [
@@ -2548,7 +4632,31 @@ export const Constants = {
         "waitlisted",
         "no_show",
       ],
+      retreat_item_kind: [
+        "activity",
+        "meal",
+        "transport",
+        "stay",
+        "session",
+        "free_time",
+        "milestone",
+      ],
+      retreat_item_status: [
+        "planned",
+        "confirmed",
+        "in_progress",
+        "done",
+        "skipped",
+      ],
+      retreat_status: [
+        "planning",
+        "confirmed",
+        "in_progress",
+        "completed",
+        "cancelled",
+      ],
       review_status: ["submitted", "approved", "rejected"],
+      scan_kind: ["class", "space", "retreat"],
       scan_result: [
         "admitted",
         "duplicate",
@@ -2557,7 +4665,12 @@ export const Constants = {
         "invalid",
       ],
       score_tier: ["new", "reliable", "regular", "trusted"],
+      series_status: ["draft", "published", "paused", "ended"],
+      session_status: ["scheduled", "cancelled", "completed"],
+      space_kind: ["room", "court", "studio", "desk", "table", "other"],
+      space_status: ["draft", "published", "paused"],
       subscription_status: ["trial", "active", "grace", "expired", "cancelled"],
+      team_role: ["manager"],
       user_role: ["organizer", "attendee", "admin"],
     },
   },

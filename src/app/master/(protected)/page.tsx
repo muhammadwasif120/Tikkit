@@ -1,13 +1,12 @@
 import { Card, PageHeader } from '@/components/kit'
 import { requireAdmin } from '@/lib/data/admin'
-import { rpcLoose } from '@/lib/rpc'
 import { pkr } from '@/lib/format'
 
 type Overview = { organizers: number; attendees: number; events_by_status: Record<string, number>; registrations_by_status: Record<string, number>; gross_ticket_sales_pkr: number; commissions_accrued_pkr: number; pending_id_reviews: number; pending_subscription_payments: number; subscriptions: Record<string, number> }
 
 export default async function MasterOverview() {
   const { supabase } = await requireAdmin()
-  const [{ data }, mods] = await Promise.all([supabase.rpc('master_overview'), rpcLoose(supabase as never, 'master_modules_overview')])
+  const [{ data }, mods] = await Promise.all([supabase.rpc('master_overview'), supabase.rpc('master_modules_overview')])
   const o = (data ?? {}) as unknown as Overview
   const m = (mods.data ?? null) as Record<string, unknown> | null
   const kv = (r: Record<string, number> | undefined) => Object.entries(r ?? {}).map(([k, v]) => `${k.replace('_', ' ')} ${v}`).join(' · ') || 'none'

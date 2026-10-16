@@ -4,7 +4,6 @@ import { MapPin, Users } from 'lucide-react'
 import { MarketingShell } from '@/components/marketing/MarketingShell'
 import SpaceBooker from '@/components/booking/SpaceBooker'
 import { createClient } from '@/lib/supabase/server'
-import { rpcLoose, fromLoose } from '@/lib/rpc'
 import { pkr } from '@/lib/format'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -13,7 +12,7 @@ const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
 async function load(slug: string) {
   const supabase = await createClient()
-  const { data } = await rpcLoose(supabase as never, 'get_space', { p_slug: slug })
+  const { data } = await supabase.rpc('get_space', { p_slug: slug })
   const s = (data as S[] | null)?.[0]
   return s ? { supabase, s } : null
 }
@@ -25,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SpacePage({ params }: Props) {
   const d = await load((await params).slug); if (!d) notFound()
   const { supabase, s } = d
-  const [{ data: hours }, { data: { user } }] = await Promise.all([fromLoose(supabase as never, 'public_space_hours').select('weekday, opens, closes').eq('space_id', s.id).order('weekday'), supabase.auth.getUser()])
+  const [{ data: hours }, { data: { user } }] = await Promise.all([supabase.from('public_space_hours').select('weekday, opens, closes').eq('space_id', s.id).order('weekday'), supabase.auth.getUser()])
   const { data: me } = user ? await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle() : { data: null }
   return (
     <MarketingShell>

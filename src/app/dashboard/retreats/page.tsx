@@ -3,7 +3,6 @@ import { Lock, Mountain } from 'lucide-react'
 import { Badge, ButtonLink, Card, EmptyState, PageHeader } from '@/components/kit'
 import NewRetreat from '@/components/retreats/NewRetreat'
 import { requireOrganizer } from '@/lib/data/viewer'
-import { fromLoose } from '@/lib/rpc'
 import { fmtDate } from '@/lib/format'
 
 export const metadata = { title: 'Retreats' }
@@ -13,7 +12,7 @@ type R = { id: string; title: string; client_company: string | null; destination
 export default async function RetreatsPage() {
   const { supabase, entitlements } = await requireOrganizer()
   const allowed = entitlements?.limits.retreats !== 0 && entitlements?.limits.retreats !== undefined
-  const { data } = await fromLoose(supabase as never, 'retreats').select('id, title, client_company, destination, starts_on, ends_on, status').order('starts_on', { ascending: false })
+  const { data } = await supabase.from('retreats').select('id, title, client_company, destination, starts_on, ends_on, status').order('starts_on', { ascending: false })
   const list = (data ?? []) as R[]
 
   return (

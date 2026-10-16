@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { Mail, UserPlus, X } from 'lucide-react'
 import { Avatar, Badge, Button, Card, CardBody, CardHeader, Field, Input } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
-import { rpcLoose } from '@/lib/rpc'
 import { fmtDate } from '@/lib/format'
 import { flushEmails } from '@/app/actions/emailActions'
 
@@ -18,8 +17,8 @@ export default function TeamAccess({ members, limit }: { members: Member[]; limi
   const active = members.filter(m => m.status !== 'removed')
 
   const invite = (e: React.FormEvent) => { e.preventDefault(); setErr(null); setOk(false)
-    start(async () => { const { error } = await rpcLoose(supabase as never, 'invite_team_member', { p_email: email }); if (error) return setErr(readable(error.message)); void flushEmails(); setEmail(''); setOk(true); router.refresh() }) }
-  const remove = (m: Member) => confirm(`Remove ${m.email} from your team?`) && start(async () => { await rpcLoose(supabase as never, 'remove_team_member', { p_id: m.id }); router.refresh() })
+    start(async () => { const { error } = await supabase.rpc('invite_team_member', { p_email: email }); if (error) return setErr(readable(error.message)); void flushEmails(); setEmail(''); setOk(true); router.refresh() }) }
+  const remove = (m: Member) => confirm(`Remove ${m.email} from your team?`) && start(async () => { await supabase.rpc('remove_team_member', { p_id: m.id }); router.refresh() })
 
   return (
     <div className="grid items-start gap-6 xl:grid-cols-[1fr_340px]">

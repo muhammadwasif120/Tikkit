@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { Badge, Button, Card, CardBody, CardHeader } from '@/components/kit'
 import PayProof from './PayProof'
 import { createClient } from '@/lib/supabase/client'
-import { rpcLoose } from '@/lib/rpc'
 import { fmtDate, fmtTime, pkr } from '@/lib/format'
 
 export type PubSession = { id: string; starts_at: string; seats_left: number | null }
@@ -23,7 +22,7 @@ export default function ClassBooker({ organizerId, price, sessions, passes, myPa
   async function book(s: PubSession) {
     if (!signedIn) return void (location.href = login)
     setErr(null); setBusy(s.id)
-    const { data, error } = await rpcLoose(supabase as never, 'book_class_session', { p_session: s.id, p_pass: usePass || null })
+    const { data, error } = await supabase.rpc('book_class_session', { p_session: s.id, p_pass: usePass || undefined })
     setBusy(''); if (error) return setErr(readable(error.message))
     if (!usePass && price > 0) return setPay({ kind: 'class_booking', id: data as string, amount: price })
     setDone(`Booked ${fmtDate(s.starts_at)} at ${fmtTime(s.starts_at)}.`); router.refresh()
@@ -31,7 +30,7 @@ export default function ClassBooker({ organizerId, price, sessions, passes, myPa
   async function buy(p: PubPass) {
     if (!signedIn) return void (location.href = login)
     setErr(null); setBusy(p.id)
-    const { data, error } = await rpcLoose(supabase as never, 'purchase_pass', { p_product: p.id }); setBusy('')
+    const { data, error } = await supabase.rpc('purchase_pass', { p_product: p.id }); setBusy('')
     if (error) return setErr(readable(error.message))
     if (p.price_pkr > 0) setPay({ kind: 'pass_purchase', id: data as string, amount: p.price_pkr }); else { setDone('Pass added.'); router.refresh() }
   }

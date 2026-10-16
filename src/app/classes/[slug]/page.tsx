@@ -5,7 +5,6 @@ import { MarketingShell } from '@/components/marketing/MarketingShell'
 import { JsonLd } from '@/components/marketing/blocks'
 import ClassBooker, { type MyPass, type PubPass, type PubSession } from '@/components/booking/ClassBooker'
 import { createClient } from '@/lib/supabase/server'
-import { fromLoose, rpcLoose } from '@/lib/rpc'
 import { pkr } from '@/lib/format'
 
 type Props = { params: Promise<{ slug: string }> }
@@ -14,7 +13,7 @@ type S = { id: string; slug: string; title: string; description: string | null; 
 
 async function load(slug: string) {
   const supabase = await createClient()
-  const { data } = await rpcLoose(supabase as never, 'get_class_series', { p_slug: slug })
+  const { data } = await supabase.rpc('get_class_series', { p_slug: slug })
   const s = (data as S[] | null)?.[0]
   return s ? { supabase, s } : null
 }
@@ -29,14 +28,14 @@ export default async function ClassPage({ params }: Props) {
   const d = await load((await params).slug); if (!d) notFound()
   const { supabase, s } = d
   const [{ data: sessions }, { data: passes }, { data: { user } }] = await Promise.all([
-    fromLoose(supabase as never, 'public_class_sessions').select('id, starts_at, seats_left').eq('series_id', s.id).order('starts_at').limit(24),
-    fromLoose(supabase as never, 'public_pass_products').select('id, name, kind, sessions_count, validity_days, price_pkr').eq('organizer_id', s.organizer_id).or(`series_id.eq.${s.id},series_id.is.null`).order('sort'),
+    supabase.from('public_class_sessions').select('id, starts_at, seats_left').eq('series_id', s.id).order('starts_at').limit(24),
+    supabase.from('public_pass_products').select('id, name, kind, sessions_count, validity_days, price_pkr').eq('organizer_id', s.organizer_id).or(`series_id.eq.${s.id},series_id.is.null`).order('sort'),
     supabase.auth.getUser(),
   ])
   const { data: me } = user ? await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle() : { data: null }
   let mine: MyPass[] = []
   if (user && me?.role === 'attendee') {
-    const { data } = await fromLoose(supabase as never, 'pass_purchases').select('id, sessions_total, sessions_used, pass_products(name)').eq('attendee_id', user.id).eq('organizer_id', s.organizer_id).eq('status', 'active')
+    const { data } = await supabase.from('pass_purchases').select('id, sessions_total, sessions_used, pass_products(name)').eq('attendee_id', user.id).eq('organizer_id', s.organizer_id).eq('status', 'active')
     mine = ((data ?? []) as unknown as { id: string; sessions_total: number | null; sessions_used: number; pass_products: { name: string } | null }[]).map(p => ({ id: p.id, name: p.pass_products?.name ?? 'Pass', left: p.sessions_total === null ? 'unlimited' : `${p.sessions_total - p.sessions_used} left` }))
   }
   return (

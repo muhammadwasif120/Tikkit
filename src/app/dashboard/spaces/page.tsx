@@ -3,14 +3,13 @@ import { Building2 } from 'lucide-react'
 import { Badge, Card, EmptyState, PageHeader } from '@/components/kit'
 import { NewSpace, type Space } from '@/components/spaces/SpacesOrganizer'
 import { requireOrganizer } from '@/lib/data/viewer'
-import { fromLoose } from '@/lib/rpc'
 import { pkr } from '@/lib/format'
 
 export const metadata = { title: 'Spaces' }
 
 export default async function SpacesPage() {
   const { supabase, entitlements } = await requireOrganizer()
-  const { data } = await fromLoose(supabase as never, 'spaces').select('*').order('created_at', { ascending: false })
+  const { data } = await supabase.from('spaces').select('*').order('created_at', { ascending: false })
   const list = (data ?? []) as Space[]
   return (
     <div className="k-fade-up">
