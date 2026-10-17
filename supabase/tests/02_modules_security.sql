@@ -65,17 +65,17 @@ declare
   v_share text; v_ptoken text; v_qr text; v_gate jsonb; v_res jsonb;
 begin
   -- ---------- setup as root ----------
-  insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, created_at, updated_at) values
+  insert into auth.users (id, instance_id, aud, role, email, raw_user_meta_data, created_at, updated_at, email_confirmed_at) values
     (org_a, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'org-a@test.local',
-     '{"role":"organizer","full_name":"Org A","company_name":"A Events","phone":"03001111111","city":"Karachi"}', now(), now()),
+     '{"role":"organizer","full_name":"Org A","company_name":"A Events","phone":"03001111111","city":"Karachi"}', now(), now(), now()),
     (org_b, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'org-b@test.local',
-     '{"role":"organizer","full_name":"Org B","company_name":"B Events","phone":"03002222222","city":"Lahore"}', now(), now()),
+     '{"role":"organizer","full_name":"Org B","company_name":"B Events","phone":"03002222222","city":"Lahore"}', now(), now(), now()),
     (att_x, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'x@test.local',
-     '{"role":"attendee","full_name":"Attendee X","phone":"03003333333","city":"Karachi","gender":"male","date_of_birth":"1995-05-05"}', now(), now()),
+     '{"role":"attendee","full_name":"Attendee X","phone":"03003333333","city":"Karachi","gender":"male","date_of_birth":"1995-05-05"}', now(), now(), now()),
     (att_y, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'y@test.local',
-     '{"role":"attendee","full_name":"Attendee Y","phone":"03004444444","city":"Karachi","gender":"female","date_of_birth":"1996-06-06"}', now(), now()),
+     '{"role":"attendee","full_name":"Attendee Y","phone":"03004444444","city":"Karachi","gender":"female","date_of_birth":"1996-06-06"}', now(), now(), now()),
     (att_z, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'z@test.local',
-     '{"role":"attendee","full_name":"Attendee Z","phone":"03005555555","city":"Karachi","gender":"male","date_of_birth":"1997-07-07"}', now(), now());
+     '{"role":"attendee","full_name":"Attendee Z","phone":"03005555555","city":"Karachi","gender":"male","date_of_birth":"1997-07-07"}', now(), now(), now());
   update public.profile_private set id_status = 'verified' where id in (org_a, org_b);
   update public.organizer_subscriptions set plan_id = 'pro', status = 'active', current_period_end = now() + interval '30 days'
    where organizer_id = org_a;
@@ -289,6 +289,11 @@ begin
   perform tkx_test.t('owner invites a team member', $q$select public.invite_team_member('org-b@test.local')$q$, 'ok');
   perform tkx_test.t('duplicate invite rejected', $q$select public.invite_team_member('org-b@test.local')$q$, 'error:ALREADY_INVITED');
   perform tkx_test.as_root();
+  update auth.users set email_confirmed_at = null where id = org_b;
+  perform tkx_test.as_user(org_b);
+  perform tkx_test.t('an unconfirmed email cannot claim the invite', $q$select 1 where public.claim_team_invites() = 1$q$, 'rows:0');
+  perform tkx_test.as_root();
+  update auth.users set email_confirmed_at = now() where id = org_b;
   perform tkx_test.as_user(org_b);
   perform tkx_test.t('invited person claims the invite', $q$select 1 where public.claim_team_invites() = 1$q$, 'rows:1');
   perform tkx_test.t('team manager can now read the series', format($q$select 1 from public.class_series where id = %L$q$, ser), 'rows:1');
