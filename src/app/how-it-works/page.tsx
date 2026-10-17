@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { HowSteps } from '@/components/marketing/home/HowSteps'
 import { SplitWords } from '@/components/marketing/home/motion'
+import { Skyline, Stars } from '@/components/marketing/home/scenes'
 import { GUEST_STEPS } from '@/lib/howSteps'
 import { ArrowRight, ShieldCheck } from 'lucide-react'
 import { ButtonLink } from '@/components/kit'
@@ -30,7 +31,12 @@ export default function HowItWorksPage() {
   return (
     <MarketingShell>
       <JsonLd data={[howTo, faqJsonLd(faqs)]} />
-      <section className="pb-6 pt-16 text-center sm:pt-24" aria-labelledby="how-title">
+      <section className="k-night relative isolate overflow-hidden pb-32 pt-20 text-center sm:pb-48 sm:pt-28" aria-labelledby="how-title">
+        <div aria-hidden className="absolute inset-0 -z-10" style={{ background: 'radial-gradient(120% 90% at 50% 0%, #1a1245 0%, #0b0c1c 50%, #070911 85%)' }} />
+        <div aria-hidden className="k-aurora absolute -left-[15%] top-[-20%] -z-10 h-[70vh] w-[80vw]" style={{ background: 'radial-gradient(closest-side, rgb(34 211 238 / 0.26), transparent)' }} />
+        <div aria-hidden className="k-aurora absolute -right-[15%] top-[-10%] -z-10 h-[65vh] w-[70vw]" style={{ animationDelay: '-6s', background: 'radial-gradient(closest-side, rgb(214 96 236 / 0.26), transparent)' }} />
+        <Stars className="absolute inset-0 -z-10" count={28} />
+        <Skyline className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-24 w-full sm:h-40" />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">How it works</p>
           <h1 id="how-title" className="mt-4 text-balance text-5xl font-semibold tracking-tight text-fg sm:text-6xl"><SplitWords text="From first idea" /> <br /><SplitWords text="to last scan." wordClassName="k-gradient-text" delay={0.3} /></h1>
