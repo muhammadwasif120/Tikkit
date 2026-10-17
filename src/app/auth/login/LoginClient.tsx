@@ -50,6 +50,7 @@ export default function LoginClient() {
     if (role === 'attendee') {
       // accept any team invites sent to this email, then send managers to the dashboard
       await supabase.rpc('claim_team_invites')
+      await supabase.rpc('claim_registrations')
       const { data: team } = await supabase.from('organizer_team_members').select('id').eq('status', 'active').limit(1).maybeSingle()
       if (team) role = 'organizer'
     }

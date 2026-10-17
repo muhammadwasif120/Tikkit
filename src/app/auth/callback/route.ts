@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
       let home = profile?.role === 'organizer' ? '/dashboard' : profile?.role === 'admin' ? '/master' : '/explore'
       if (profile?.role === 'attendee') {
         await supabase.rpc('claim_team_invites')
+        await supabase.rpc('claim_registrations')
         const { data: team } = await supabase.from('organizer_team_members').select('id').eq('user_id', user.id).eq('status', 'active').limit(1).maybeSingle()
         if (team) home = '/dashboard'
       }

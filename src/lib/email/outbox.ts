@@ -24,6 +24,7 @@ async function render(row: Row, admin: ReturnType<typeof createAdminClient>): Pr
       ? { subject: `${p.event_title}: new update`, html: layout(String(p.event_title), esc(p.body), { href, label: 'Open event' }) }
       : { subject: `${p.event_title}: the location is revealed`, html: layout('The location is revealed', 'Open your ticket to see the address and any notes from the organizer.', { href: `${SITE}/guest/tickets`, label: 'Open my ticket' }) }
   }
+  if (row.template === 'guest_invite') return { subject: `You are on the list for ${p.event_title}`, html: layout(`You are on the list for ${p.event_title}`, `Hi ${esc(p.name)}, the organizer added you to the guest list. Create a free TIKKIT X account with this email address to get your QR ticket.`, { href: `${SITE}/auth/login`, label: 'Get my ticket' }) }
   if (row.template === 'team_invite') return { subject: 'You were invited to manage events on TIKKIT X', html: layout('You are invited', 'An organizer invited you to help manage their events. Sign in with this email address to accept.', { href: `${SITE}/auth/login`, label: 'Sign in' }) }
   if (row.template === 'retreat_update') return { subject: `${p.title}: new update`, html: layout(String(p.title), esc(p.body), { href: `${SITE}/guest/tickets`, label: 'See my schedule' }) }
   return null
