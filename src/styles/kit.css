@@ -114,3 +114,51 @@
   .k-fade-up, .k-pop { animation: none; }
   .kit * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+ * Scoped scenes for the home page. .k-night always renders as Midnight and
+ * .k-day always renders as Daylight, whatever theme the visitor chose.
+ * ───────────────────────────────────────────────────────────────────────── */
+.k-night {
+  color-scheme: dark;
+  --k-canvas: 7 9 15; --k-surface: 13 16 25; --k-raised: 19 23 35; --k-overlay: 27 32 48;
+  --k-line: 36 42 60; --k-line-strong: 54 62 86;
+  --k-fg: 237 240 247; --k-muted: 150 159 183; --k-subtle: 104 113 138;
+  --k-accent: 34 211 238; --k-accent-fg: 4 20 26; --k-violet: 139 92 246; --k-magenta: 214 96 236;
+  --k-success: 52 211 153; --k-warning: 251 191 36; --k-danger: 248 113 113; --k-info: 96 165 250;
+  --k-shadow-card: 0 0 0 1px rgb(var(--k-line) / 1);
+  background-color: rgb(var(--k-canvas)); color: rgb(var(--k-fg));
+}
+.k-day {
+  color-scheme: light;
+  --k-canvas: 255 250 241; --k-surface: 255 255 255; --k-raised: 250 245 236; --k-overlay: 243 236 224;
+  --k-line: 234 225 209; --k-line-strong: 214 202 182;
+  --k-fg: 28 25 23; --k-muted: 87 83 78; --k-subtle: 120 113 108;
+  --k-accent: 8 145 178; --k-accent-fg: 255 255 255; --k-violet: 109 40 217; --k-magenta: 156 39 176;
+  --k-success: 5 150 105; --k-warning: 180 83 9; --k-danger: 220 38 38; --k-info: 37 99 235;
+  --k-shadow-card: 0 1px 2px rgb(60 40 10 / 0.05), 0 6px 20px rgb(60 40 10 / 0.06), 0 0 0 1px rgb(var(--k-line) / 1);
+  --k-shadow-pop: 0 14px 44px rgb(60 40 10 / 0.16), 0 0 0 1px rgb(var(--k-line-strong) / 1);
+  background-color: rgb(var(--k-canvas)); color: rgb(var(--k-fg));
+}
+.k-night *, .k-day * { border-color: rgb(var(--k-line)); }
+
+@keyframes k-aurora { 0% { transform: translate3d(-8%, 0, 0) rotate(-8deg) scale(1); opacity: .55 } 50% { transform: translate3d(8%, -4%, 0) rotate(6deg) scale(1.15); opacity: .9 } 100% { transform: translate3d(-8%, 0, 0) rotate(-8deg) scale(1); opacity: .55 } }
+@keyframes k-twinkle { 0%, 100% { opacity: .25 } 50% { opacity: 1 } }
+@keyframes k-float { 0%, 100% { transform: translate3d(0, 0, 0) } 50% { transform: translate3d(0, -12px, 0) } }
+@keyframes k-marquee { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+@keyframes k-beam { 0% { opacity: 0; transform: rotate(var(--r0)) } 50% { opacity: .7 } 100% { opacity: 0; transform: rotate(var(--r1)) } }
+@keyframes k-scan { 0% { top: 8% } 50% { top: 88% } 100% { top: 8% } }
+@keyframes k-pop-in { 0% { opacity: 0; transform: translateY(10px) scale(.96) } 100% { opacity: 1; transform: none } }
+
+.k-marquee { display: flex; width: max-content; animation: k-marquee 38s linear infinite; }
+.k-marquee:hover { animation-play-state: paused; }
+.k-aurora { animation: k-aurora 14s ease-in-out infinite; will-change: transform, opacity; }
+.k-twinkle { animation: k-twinkle var(--d, 4s) ease-in-out infinite; animation-delay: var(--delay, 0s); }
+.k-floaty { animation: k-float var(--d, 7s) ease-in-out infinite; animation-delay: var(--delay, 0s); }
+.k-beam { transform-origin: 50% 100%; animation: k-beam var(--d, 6s) ease-in-out infinite; animation-delay: var(--delay, 0s); }
+.k-scanline { animation: k-scan 3.2s ease-in-out infinite; }
+.k-pop-in { animation: k-pop-in .35s cubic-bezier(.2,.7,.2,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .k-marquee, .k-aurora, .k-twinkle, .k-floaty, .k-beam, .k-scanline, .k-pop-in { animation: none !important; }
+}
