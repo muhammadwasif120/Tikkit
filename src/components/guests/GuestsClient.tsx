@@ -106,7 +106,9 @@ export default function GuestsClient({ rows, events, initialEvent, initialFilter
   function exportCsv() {
     const head = ['Name', 'Phone', 'Email', 'Event', 'Ticket', 'Status', 'VIP', 'Paid PKR', 'Registered']
     const body = visible.map(r => [r.name, r.phone ?? '', r.email ?? '', r.eventTitle, r.ticket ?? '', r.status, r.isVip ? 'yes' : '', String(r.paid ?? 0), r.createdAt])
-    const csv = [head, ...body].map(l => l.map(c => `"${c.replace(/"/g, '""')}"`).join(',')).join('\n')
+    // a leading = + - @ would run as a formula in Excel, so neutralise it
+    const cell = (c: string) => `"${(/^[=+\-@\t\r]/.test(c) ? `'${c}` : c).replace(/"/g, '""')}"`
+    const csv = [head, ...body].map(l => l.map(cell).join(',')).join('\n')
     const a = document.createElement('a')
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'guests.csv'; a.click()
   }

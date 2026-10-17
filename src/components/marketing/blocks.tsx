@@ -76,8 +76,12 @@ export function faqJsonLd(items: FaqItem[]) {
   }
 }
 
+/** Escapes the characters that could close the script tag, so user text in the data cannot inject HTML. */
+const safeJson = (data: unknown) =>
+  JSON.stringify(data).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026').replace(/\u2028/g, '\\u2028').replace(/\u2029/g, '\\u2029')
+
 export function JsonLd({ data }: { data: object | object[] }) {
-  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJson(data) }} />
 }
 
 export function CtaBand({

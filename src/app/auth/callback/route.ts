@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-const safeNext = (n: string | null) => (n && n.startsWith('/') && !n.startsWith('//') ? n : null)
+const safeNext = (n: string | null) => (n && /^\/(?![\/\\])[^\u0000-\u001f\\]*$/.test(n) ? n : null)
 
 /** Email confirmation, password recovery and Google sign in all land here with a code. */
 export async function GET(request: NextRequest) {

@@ -12,7 +12,8 @@ import { PAKISTAN_CITIES } from '@/lib/pakistanCities'
 type Mode = 'login' | 'signup'
 type Role = 'attendee' | 'organizer'
 
-const safeNext = (n: string | null) => (n && n.startsWith('/') && !n.startsWith('//') ? n : null)
+/** Only same-site paths. Rejects //host, /\\host and control characters. */
+const safeNext = (n: string | null) => (n && /^\/(?![\/\\])[^\u0000-\u001f\\]*$/.test(n) ? n : null)
 
 function friendly(msg: string) {
   const m = msg.toLowerCase()
