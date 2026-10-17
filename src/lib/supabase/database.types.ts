@@ -4040,6 +4040,7 @@ export type Database = {
         Returns: undefined
       }
       cancel_space_booking: { Args: { p_booking: string }; Returns: undefined }
+      claim_registrations: { Args: never; Returns: number }
       claim_retreat_invites: { Args: never; Returns: number }
       claim_team_invites: { Args: never; Returns: number }
       create_gate_link: {
