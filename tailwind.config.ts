@@ -8,6 +8,8 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // the new kit uses these soft steps (bg-accent/12, bg-magenta/14 ...) which are not in Tailwind's default scale
+      opacity: { 6: '0.06', 8: '0.08', 12: '0.12', 14: '0.14' },
       colors: {
         // TIKKIT X kit tokens (see src/styles/kit.css)
         canvas:  "rgb(var(--k-canvas) / <alpha-value>)",
