@@ -1,27 +1,12 @@
 import Link from 'next/link'
-import { ArrowRight, Bell, CalendarPlus, CheckCircle2, CreditCard, QrCode, ScanLine, Search, ShieldCheck, Share2, Star, Upload } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { HowSteps } from '@/components/marketing/home/HowSteps'
+import { SplitWords } from '@/components/marketing/home/motion'
+import { Stars } from '@/components/marketing/home/scenes'
+import { GUEST_STEPS } from '@/lib/howSteps'
+import { ArrowRight, ShieldCheck } from 'lucide-react'
 import { ButtonLink } from '@/components/kit'
 import { MarketingShell } from '@/components/marketing/MarketingShell'
-import { CtaBand, Faq, JsonLd, PageHero, Section, SectionHead, faqJsonLd, type FaqItem } from '@/components/marketing/blocks'
-
-type Step = { icon: LucideIcon; title: string; body: string }
-
-const organizer: Step[] = [
-  { icon: CalendarPlus, title: 'Create your event', body: 'Add the details, cover image and ticket types. Choose open, approval only or invite only, and hide the venue if you like.' },
-  { icon: Share2, title: 'Share and recruit promoters', body: 'Send your event link on WhatsApp and Instagram. Give each promoter their own link, code and QR so every sale is tracked.' },
-  { icon: CheckCircle2, title: 'Approve guests', body: 'Guests pay you directly and upload a receipt. Check the payment and their guest score, then approve in one tap.' },
-  { icon: Bell, title: 'Keep everyone in the loop', body: 'Post announcements to every registered guest, and reveal a secret location at the exact time you choose.' },
-  { icon: ScanLine, title: 'Run the door', body: 'Send your door team a scanner link. Scan QR tickets, watch the live count and look up anyone by name.' },
-]
-
-const guest: Step[] = [
-  { icon: Search, title: 'Find an event', body: 'Browse by city and category, or open a link from an organizer or promoter.' },
-  { icon: CreditCard, title: 'Pay the organizer', body: 'Send the ticket price by bank transfer, JazzCash or EasyPaisa using the organizer\'s details.' },
-  { icon: Upload, title: 'Upload your receipt', body: 'Add a screenshot of the transfer. The organizer checks it and approves your ticket.' },
-  { icon: QrCode, title: 'Get your QR ticket', body: 'Your signed QR ticket appears in My tickets. Show it at the door.' },
-  { icon: Star, title: 'Build your score', body: 'Every event you attend raises your guest score, which helps you get approved for the best nights.' },
-]
+import { CtaBand, Faq, JsonLd, Section, SectionHead, faqJsonLd, type FaqItem } from '@/components/marketing/blocks'
 
 const faqs: FaqItem[] = [
   { q: 'How do I sell tickets for my event in Pakistan?', a: 'Sign up, create your event page, set your ticket prices in PKR and share the link. Guests register, pay you directly and upload a receipt. You approve each one and a signed QR ticket is issued.' },
@@ -39,41 +24,29 @@ const howTo = {
   '@type': 'HowTo',
   name: 'How to book tickets on TIKKIT X',
   description: 'Find an event, pay the organizer, upload your receipt and receive a signed QR ticket.',
-  step: guest.slice(0, 4).map(s => ({ '@type': 'HowToStep', name: s.title, text: s.body })),
-}
-
-function Track({ eyebrow, title, steps, tone }: { eyebrow: string; title: string; steps: Step[]; tone?: 'magenta' }) {
-  return (
-    <Section className="pt-0">
-      <SectionHead eyebrow={eyebrow} title={title} tone={tone} />
-      <ol className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {steps.map((s, i) => (
-          <li key={s.title} className="relative rounded-2xl bg-surface p-6 shadow-card">
-            <div className="flex items-center justify-between">
-              <span className={`grid h-10 w-10 place-items-center rounded-xl ${tone === 'magenta' ? 'bg-magenta/12 text-magenta' : 'bg-accent/12 text-accent'}`}><s.icon className="h-5 w-5" aria-hidden /></span>
-              <span className="tnum text-sm font-semibold text-subtle">{String(i + 1).padStart(2, '0')}</span>
-            </div>
-            <h3 className="mt-5 text-base font-semibold text-fg">{s.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
-          </li>
-        ))}
-      </ol>
-    </Section>
-  )
+  step: GUEST_STEPS.slice(0, 4).map(s => ({ '@type': 'HowToStep', name: s.title, text: s.body })),
 }
 
 export default function HowItWorksPage() {
   return (
     <MarketingShell>
       <JsonLd data={[howTo, faqJsonLd(faqs)]} />
-      <PageHero eyebrow="How it works" title="From first idea to last scan" lead="One flow for the people who host, and one for the people who come." >
-        <div className="flex flex-wrap gap-3">
-          <ButtonLink href="/auth/login?flow=organizer-signup" trailing={<ArrowRight className="h-4 w-4" />}>Start free trial</ButtonLink>
-          <ButtonLink href="/explore" variant="secondary">Browse events</ButtonLink>
+      <section className="k-night relative isolate overflow-hidden pb-16 pt-20 text-center sm:pb-24 sm:pt-28" aria-labelledby="how-title">
+        <div aria-hidden className="absolute inset-0 -z-10" style={{ background: 'radial-gradient(120% 90% at 50% 0%, #1a1245 0%, #0b0c1c 50%, #070911 85%)' }} />
+        <div aria-hidden className="k-aurora absolute -left-[15%] top-[-20%] -z-10 h-[70vh] w-[80vw]" style={{ background: 'radial-gradient(closest-side, rgb(34 211 238 / 0.26), transparent)' }} />
+        <div aria-hidden className="k-aurora absolute -right-[15%] top-[-10%] -z-10 h-[65vh] w-[70vw]" style={{ animationDelay: '-6s', background: 'radial-gradient(closest-side, rgb(214 96 236 / 0.26), transparent)' }} />
+        <Stars className="absolute inset-0 -z-10" count={28} />
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-accent">How it works</p>
+          <h1 id="how-title" className="mt-4 text-balance text-5xl font-semibold tracking-tight text-fg sm:text-6xl"><SplitWords text="From first idea" /> <br /><SplitWords text="to last scan." wordClassName="k-gradient-text" delay={0.3} /></h1>
+          <p className="mx-auto mt-5 max-w-xl text-lg text-muted">One flow for the people who host, and one for the people who come.</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <ButtonLink href="/auth/login?flow=organizer-signup" trailing={<ArrowRight className="h-4 w-4" />}>Start free trial</ButtonLink>
+            <ButtonLink href="/explore" variant="secondary">Browse events</ButtonLink>
+          </div>
         </div>
-      </PageHero>
-      <Track eyebrow="For organizers" title="Host an event in five steps" steps={organizer} />
-      <Track eyebrow="For guests" title="Get into an event in five steps" steps={guest} tone="magenta" />
+      </section>
+      <Section><HowSteps /></Section>
       <Section className="pt-0">
         <div className="flex items-start gap-4 rounded-2xl bg-surface p-6 shadow-card sm:p-8">
           <ShieldCheck className="mt-0.5 h-6 w-6 shrink-0 text-accent" aria-hidden />
