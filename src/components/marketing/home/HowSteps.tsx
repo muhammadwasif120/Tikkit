@@ -4,7 +4,6 @@ import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTra
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Bell, CalendarPlus, CheckCircle2, CreditCard, QrCode, ScanLine, Search, Share2, Star, Upload, type LucideIcon } from 'lucide-react'
 import { ORGANIZER_STEPS, GUEST_STEPS } from '@/lib/howSteps'
-import { Stars, Sun, Hills } from './scenes'
 import { AnnounceVisual, ApproveVisual, CreateVisual, DoorVisual, FindVisual, PayVisual, ScoreVisual, ShareVisual, TicketVisual, UploadVisual } from './HowVisuals'
 import { cn } from '@/lib/cn'
 
@@ -15,12 +14,11 @@ const VISUALS: Record<Who, ReactNode[]> = {
   guest: [<FindVisual key="a" />, <PayVisual key="b" />, <UploadVisual key="c" />, <TicketVisual key="d" />, <ScoreVisual key="e" />],
 }
 
-/** The stage: organizers see it after dark, guests in daylight. The illustration crossfades with the active step. */
+/** The stage: the illustration for the active step, with a soft glow in the track colour (cyan for organizers, magenta for guests). */
 function Stage({ who, active }: { who: Who; active: number }) {
-  const night = who === 'organizer'
+  const glow = who === 'organizer' ? '34 211 238' : '214 96 236'
   return (
-    <div className={cn('relative grid h-[440px] place-items-center overflow-hidden rounded-3xl shadow-card ring-1 ring-line transition-colors duration-700', night ? 'k-night' : 'k-day')} style={{ background: night ? 'radial-gradient(120% 90% at 50% 0%, #1a1245, #0b0c1c 60%, #070911)' : 'linear-gradient(#ffe7bd, #fff4de 55%, #fffaf1)' }}>
-      {night ? <Stars className="absolute inset-0" count={26} /> : <><Sun className="absolute -right-10 -top-10 h-56 w-56" /><Hills className="absolute inset-x-0 bottom-0 h-24 w-full" far="#f6d9a8" near="#efc88f" /></>}
+    <div className="relative grid h-[440px] place-items-center overflow-hidden rounded-3xl bg-surface shadow-card ring-1 ring-line" style={{ backgroundImage: `radial-gradient(70% 55% at 50% 0%, rgb(${glow} / 0.16), transparent 70%)` }}>
       <AnimatePresence mode="wait">
         <motion.div key={`${who}-${active}`} initial={{ opacity: 0, y: 14, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -10, scale: 0.98 }} transition={{ duration: 0.35 }} className="relative z-10 flex w-full justify-center px-6">
           {VISUALS[who][active]}
@@ -51,8 +49,8 @@ function StepCard({ index, who, title, body, onActive, active }: { index: number
 }
 
 function MobileVisual({ who, index }: { who: Who; index: number }) {
-  const night = who === 'organizer'
-  return <div className={cn('grid place-items-center overflow-hidden rounded-3xl py-8 ring-1 ring-line', night ? 'k-night' : 'k-day')} style={{ background: night ? 'radial-gradient(120% 90% at 50% 0%, #1a1245, #070911)' : 'linear-gradient(#ffe7bd, #fffaf1)' }}>{VISUALS[who][index]}</div>
+  const glow = who === 'organizer' ? '34 211 238' : '214 96 236'
+  return <div className="grid place-items-center overflow-hidden rounded-3xl bg-surface py-8 shadow-card ring-1 ring-line" style={{ backgroundImage: `radial-gradient(70% 60% at 50% 0%, rgb(${glow} / 0.14), transparent 70%)` }}>{VISUALS[who][index]}</div>
 }
 
 function Steps({ who }: { who: Who }) {
