@@ -12,20 +12,20 @@ type Step = TourStep & { path?: string; pathFrom?: string }
 
 const nav = (href: string) => `header nav a[href="${href}"], nav[aria-label="Quick navigation"] a[href="${href}"], a[href="${href}"]`
 const STEPS: Step[] = [
-  { path: '/explore', title: 'Welcome to the attendee demo', body: 'You are Noor, a guest with tickets, a class pass and a retreat invite. Click anything. Nothing is emailed.' },
-  { path: '/explore', target: 'input[name="q"]', title: 'Find something to go to', body: 'Search events by name, then narrow by when and category. City pages keep it local.' },
-  { path: '/explore', target: '[aria-label="Category"]', title: 'Filter by category', body: 'Music, wellness, business, comedy and more. Everything here is a real event page.' },
-  { path: '/explore', target: 'a[href^="/events/"]', title: 'Open an event', body: 'Each card shows the date, the area and the lowest price. Open one to see the details and book.' },
-  { pathFrom: 'a[href^="/events/"]', target: 'main h1, h1', title: 'The event page', body: 'Ticket types, the organizer, and the venue. Secret venues show the area first and reveal the address before the night.' },
-  { pathFrom: 'a[href^="/events/"]', target: 'input[aria-label="Promo or referral code"]', title: 'Book and pay', body: 'Pick a ticket and pay the organizer by bank, JazzCash or EasyPaisa. Upload the receipt and wait for approval. A promoter code goes here.' },
+  { path: '/guest/tickets', title: 'Welcome to the attendee demo', body: 'You are Noor, a guest with tickets, a class pass and a retreat invite. This is her account. Click anything. Nothing is emailed.' },
   { path: '/guest/tickets', target: nav('/guest/tickets'), title: 'My tickets', body: 'Every ticket in one place: tonight, requests waiting on approval, and past nights.' },
   { path: '/guest/tickets', target: 'main h2', title: 'Your QR ticket', body: 'Open a ticket to show its signed QR at the door. It works once and only for you, so a screenshot cannot get a friend in.' },
   { path: '/guest/tickets', target: 'a[href^="/itinerary/"]', title: 'Passes, classes and itineraries', body: 'Class passes, reservations and retreat itineraries sit below your event tickets, each with its own QR.', isNew: true },
   { path: '/guest/score', target: nav('/guest/score'), title: 'Your score', body: 'Showing up builds a tier that organizers see when you ask to join. No shows cost points.' },
   { path: '/guest/notifications', target: nav('/guest/notifications'), title: 'Alerts', body: 'Approvals, announcements, location reveals and class reminders.' },
   { path: '/guest/profile', target: nav('/guest/profile'), title: 'Profile and ID', body: 'Your details, ID verification for verified-only events, and the light or dark theme.' },
+  { path: '/explore', target: 'input[name="q"]', title: 'Find something to go to', body: 'Search events by name, then narrow by when and category. City pages keep it local.' },
+  { path: '/explore', target: '[aria-label="Category"]', title: 'Filter by category', body: 'Music, wellness, business, comedy and more.' },
+  { path: '/explore', target: 'a[href^="/events/"]', title: 'Open an event', body: 'Each card shows the date, the area and the lowest price. Open one to see the details and book.' },
+  { pathFrom: 'a[href^="/events/"]', target: 'main h1, h1', title: 'The event page', body: 'Ticket types, the organizer, and the venue. Secret venues show the area first and reveal the address before the night.' },
+  { pathFrom: 'a[href^="/events/"]', target: 'input[aria-label="Promo or referral code"]', title: 'Book and pay', body: 'Pick a ticket and pay the organizer by bank, JazzCash or EasyPaisa. Upload the receipt and wait for approval. A promoter code goes here.' },
   { path: '/classes', target: 'main h1, h1', title: 'Classes and spaces', body: 'Book drop-in classes, buy a pass, or reserve a studio or court by the hour from the Classes and Spaces pages.', isNew: true },
-  { path: '/explore', title: 'That is the tour', body: 'Want to host your own events? Start a 14 day free trial, or look at the organizer demo.' },
+  { path: '/guest/tickets', title: 'That is the tour', body: 'Want to host your own events? Start a 14 day free trial, or look at the organizer demo.' },
 ]
 
 const KEY = 'tkx-att-tour'
