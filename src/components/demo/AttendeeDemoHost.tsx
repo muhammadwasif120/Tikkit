@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Play, RotateCcw } from 'lucide-react'
 import { Badge, Button } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
@@ -33,12 +33,14 @@ const KEY = 'tkx-att-tour'
 /** Floating controls and spotlight tour for the attendee demo. Lives in the root layout so the tour survives page changes. */
 export function AttendeeDemoHost() {
   const router = useRouter()
+  const pathname = usePathname()
   const [on, setOn] = useState(false)
   const [step, setStep] = useState<number | null>(null)
   const [msg, setMsg] = useState<string | null>(null)
   const [pending, start] = useTransition()
 
   useEffect(() => {
+    if (on) return
     let live = true
     createClient().auth.getSession().then(({ data }) => {
       const u = data.session?.user
@@ -51,7 +53,7 @@ export function AttendeeDemoHost() {
       } catch {}
     })
     return () => { live = false }
-  }, [])
+  }, [pathname, on])
 
   const go = useCallback((i: number) => {
     const n = Math.max(0, Math.min(STEPS.length - 1, i))
