@@ -10,7 +10,7 @@ const points = [
 ]
 
 /** Split screen frame for every auth page. The brand panel is hidden on small screens. */
-export function AuthFrame({ children, title, lead }: { children: ReactNode; title: string; lead?: string }) {
+export function AuthFrame({ children, title, lead, aside }: { children: ReactNode; title: string; lead?: string; aside?: ReactNode }) {
   return (
     <div className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
       <div className="flex flex-col px-4 py-6 sm:px-10">
@@ -28,6 +28,7 @@ export function AuthFrame({ children, title, lead }: { children: ReactNode; titl
       <aside aria-hidden className="relative hidden overflow-hidden border-l border-line bg-surface lg:block">
         <div className="absolute inset-0" style={{ backgroundImage: 'var(--k-glow)' }} />
         <div className="absolute -right-24 top-1/3 h-96 w-96 rounded-full opacity-40 blur-3xl" style={{ background: 'rgb(var(--k-magenta))' }} />
+        {aside ? <div className="relative flex h-full flex-col items-center justify-center px-10 xl:px-16">{aside}</div> : (
         <div className="relative flex h-full flex-col justify-center px-14 xl:px-20">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Made for organizers in Pakistan</p>
           <p className="mt-4 max-w-md text-balance text-4xl font-semibold leading-tight tracking-tight text-fg">
@@ -41,6 +42,7 @@ export function AuthFrame({ children, title, lead }: { children: ReactNode; titl
             ))}
           </ul>
         </div>
+        )}
       </aside>
     </div>
   )

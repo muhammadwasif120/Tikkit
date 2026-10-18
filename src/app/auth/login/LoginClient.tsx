@@ -8,6 +8,7 @@ import { Button, Field, Input, Segmented, Select } from '@/components/kit'
 import { AuthFrame, Divider, GoogleIcon } from '@/components/auth/AuthFrame'
 import { createClient } from '@/lib/supabase/client'
 import { PAKISTAN_CITIES } from '@/lib/pakistanCities'
+import { SignupJourney } from './SignupJourney'
 
 type Mode = 'login' | 'signup'
 type Role = 'attendee' | 'organizer'
@@ -107,6 +108,14 @@ export default function LoginClient() {
   }
 
   const isSignup = mode === 'signup'
+
+  if (isSignup) {
+    return (
+      <SignupJourney f={f} set={set} role={role} setRole={setRole} busy={busy} error={error} setError={setError} notice={notice}
+        showPw={showPw} setShowPw={setShowPw} onSubmit={submit} onGoogle={google}
+        onLogin={() => { setMode('login'); setError(null); setNotice(null) }} startAtYou={params.get('flow') === 'organizer-signup'} />
+    )
+  }
 
   return (
     <AuthFrame
