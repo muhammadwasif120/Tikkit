@@ -35,8 +35,8 @@ function Aside({ role, step, index, total }: { role: Role; step: StepId; index: 
   const key = `${role}:${step}` as const
   const fallback = !SCENES[key]
   return (
-    <div className="w-full max-w-sm text-center">
-      <div className="relative grid h-[340px] place-items-center overflow-hidden rounded-3xl bg-surface/80 shadow-card ring-1 ring-line backdrop-blur" style={{ backgroundImage: 'radial-gradient(70% 55% at 50% 0%, rgb(34 211 238 / 0.16), transparent 70%)' }}>
+    <div className="w-full text-center">
+      <div className="relative grid h-[300px] place-items-center overflow-hidden rounded-3xl bg-surface/80 shadow-card ring-1 ring-line backdrop-blur" style={{ backgroundImage: 'radial-gradient(70% 55% at 50% 0%, rgb(34 211 238 / 0.16), transparent 70%)' }}>
         {fallback && (
           <div className="k-fade-up px-8">
             <PartyPopper className="mx-auto h-10 w-10 text-accent" aria-hidden />

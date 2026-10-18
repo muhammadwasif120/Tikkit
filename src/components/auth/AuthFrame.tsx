@@ -3,47 +3,51 @@ import type { ReactNode } from 'react'
 import { Check } from 'lucide-react'
 import { Logo } from '@/components/kit'
 
-const points = [
-  'QR tickets that cannot be shared',
-  'One guest list for requests, payments and the door',
-  'Promoter links and commissions, tracked for you',
+/** Small floating proof chips that drift around the card on wide screens. Purely decorative. */
+const CHIPS: { text: string; sub: string; tone: string; pos: string; d: number; delay: number }[] = [
+  { text: 'VIP admitted', sub: 'Mehreen Q. at the door', tone: 'bg-magenta/14 text-magenta', pos: 'left-[5%] top-[16%]', d: 7, delay: 0 },
+  { text: 'PKR 1,800', sub: 'Early bird sold', tone: 'bg-accent/14 text-accent', pos: 'left-[9%] top-[62%]', d: 8, delay: -2 },
+  { text: 'ZAIN10', sub: '64 sales from this promoter', tone: 'bg-violet/14 text-violet', pos: 'right-[5%] top-[12%]', d: 9, delay: -4 },
+  { text: 'Receipt approved', sub: 'QR ticket sent', tone: 'bg-success/14 text-success', pos: 'right-[7%] top-[70%]', d: 7.5, delay: -1 },
 ]
 
-/** Split screen frame for every auth page. The brand panel is hidden on small screens. */
+function Floaters({ hasAside }: { hasAside: boolean }) {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 hidden lg:block">
+      {CHIPS.map(c => (
+        <div key={c.text} className={`k-floaty absolute ${c.pos} ${hasAside && c.pos.includes('right') ? 'xl:hidden' : ''}`} style={{ ['--d' as string]: `${c.d}s`, ['--delay' as string]: `${c.delay}s` }}>
+          <div className="flex items-center gap-3 rounded-2xl bg-surface/80 px-4 py-3 shadow-card ring-1 ring-line backdrop-blur">
+            <span className={`grid h-9 w-9 place-items-center rounded-full ${c.tone}`}><Check className="h-4 w-4" /></span>
+            <div><p className="text-sm font-semibold text-fg">{c.text}</p><p className="text-xs text-muted">{c.sub}</p></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+/** Centered frame for every auth page. On wide screens the card floats over a glowing backdrop with
+ *  drifting chips around it; `aside` (the journey's tour scene) sits to the right from xl up. */
 export function AuthFrame({ children, title, lead, aside }: { children: ReactNode; title: string; lead?: string; aside?: ReactNode }) {
   return (
-    <div className="grid min-h-screen lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)]">
-      <div className="flex flex-col px-4 py-6 sm:px-10">
-        <Link href="/" aria-label="TIKKIT X home"><Logo /></Link>
-        <div className="mx-auto flex w-full max-w-[420px] flex-1 flex-col justify-center py-10">
+    <div className="relative isolate flex min-h-screen flex-col overflow-hidden">
+      <div aria-hidden className="absolute inset-0 -z-20 hidden lg:block" style={{ backgroundImage: 'var(--k-glow)' }} />
+      <div aria-hidden className="k-aurora absolute -left-[10%] top-[-15%] -z-10 hidden h-[60vh] w-[55vw] lg:block" style={{ background: 'radial-gradient(closest-side, rgb(34 211 238 / 0.16), transparent)' }} />
+      <div aria-hidden className="k-aurora absolute -right-[10%] bottom-[-15%] -z-10 hidden h-[60vh] w-[55vw] lg:block" style={{ animationDelay: '-6s', background: 'radial-gradient(closest-side, rgb(214 96 236 / 0.16), transparent)' }} />
+      <Floaters hasAside={!!aside} />
+      {aside && <div className="absolute right-[3%] top-1/2 z-0 hidden w-[300px] -translate-y-1/2 xl:block">{aside}</div>}
+
+      <header className="px-4 py-6 sm:px-10 lg:flex lg:justify-center"><Link href="/" aria-label="TIKKIT X home"><Logo className="lg:h-8" /></Link></header>
+      <div className="flex flex-1 items-center justify-center px-4 pb-6 sm:px-10">
+        <div className="w-full max-w-[440px] lg:rounded-3xl lg:bg-surface/85 lg:p-10 lg:shadow-card lg:ring-1 lg:ring-line lg:backdrop-blur-xl">
           <h1 className="text-3xl font-semibold tracking-tight text-fg">{title}</h1>
           {lead && <p className="mt-2 text-[15px] text-muted">{lead}</p>}
           <div className="mt-8">{children}</div>
         </div>
-        <p className="text-center text-xs text-subtle">
-          By continuing you agree to the <Link href="/terms" className="underline underline-offset-2 hover:text-fg">Terms</Link> and <Link href="/privacy" className="underline underline-offset-2 hover:text-fg">Privacy Policy</Link>.
-        </p>
       </div>
-
-      <aside aria-hidden className="relative hidden overflow-hidden border-l border-line bg-surface lg:block">
-        <div className="absolute inset-0" style={{ backgroundImage: 'var(--k-glow)' }} />
-        <div className="absolute -right-24 top-1/3 h-96 w-96 rounded-full opacity-40 blur-3xl" style={{ background: 'rgb(var(--k-magenta))' }} />
-        {aside ? <div className="relative flex h-full flex-col items-center justify-center px-10 xl:px-16">{aside}</div> : (
-        <div className="relative flex h-full flex-col justify-center px-14 xl:px-20">
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">Made for organizers in Pakistan</p>
-          <p className="mt-4 max-w-md text-balance text-4xl font-semibold leading-tight tracking-tight text-fg">
-            Sell tickets. Run the door. <span className="k-gradient-text">Know your crowd.</span>
-          </p>
-          <ul className="mt-10 space-y-4">
-            {points.map(p => (
-              <li key={p} className="flex items-center gap-3 text-[15px] text-muted">
-                <span className="grid h-6 w-6 place-items-center rounded-full bg-accent/12 text-accent"><Check className="h-3.5 w-3.5" /></span>{p}
-              </li>
-            ))}
-          </ul>
-        </div>
-        )}
-      </aside>
+      <p className="px-4 pb-6 text-center text-xs text-subtle">
+        By continuing you agree to the <Link href="/terms" className="underline underline-offset-2 hover:text-fg">Terms</Link> and <Link href="/privacy" className="underline underline-offset-2 hover:text-fg">Privacy Policy</Link>.
+      </p>
     </div>
   )
 }
