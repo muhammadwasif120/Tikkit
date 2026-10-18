@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { ArrowRight, Check, Crown } from 'lucide-react'
 import { ButtonLink } from '@/components/kit'
+import { cn } from '@/lib/cn'
 import { SplitWords } from './motion'
 import { Skyline, Stars } from './scenes'
 
@@ -16,6 +17,31 @@ const FEED = [
   { name: 'Danish A.', note: 'VIP', tone: 'magenta' },
   { name: 'Sana F.', note: 'General', tone: 'success' },
 ] as const
+
+const PILL = ['Tickets that cannot be faked', 'Guest lists you control', 'Promoters tracked to the sale', 'A door that never stalls']
+
+function Pill() {
+  const reduce = useReducedMotion()
+  const [i, setI] = useState(0)
+  useEffect(() => {
+    if (reduce) return
+    const t = setInterval(() => setI(n => (n + 1) % PILL.length), 2600)
+    return () => clearInterval(t)
+  }, [reduce])
+  return (
+    <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mx-auto inline-flex items-center gap-2.5 rounded-full bg-surface/60 px-4 py-2 text-sm font-medium text-fg ring-1 ring-line backdrop-blur">
+      <span aria-hidden className="relative flex h-2 w-2">
+        <span className="absolute inset-0 animate-ping rounded-full bg-accent opacity-60 motion-reduce:hidden" />
+        <span className="relative h-2 w-2 rounded-full bg-accent" />
+      </span>
+      <span className="grid text-center">
+        {PILL.map((t, n) => (
+          <span key={t} aria-hidden={n !== i} className={cn('col-start-1 row-start-1 whitespace-nowrap transition-all duration-300 motion-reduce:transition-none', n === i ? 'translate-y-0 opacity-100' : n === (i + PILL.length - 1) % PILL.length ? '-translate-y-1.5 opacity-0' : 'translate-y-1.5 opacity-0')}>{t}</span>
+        ))}
+      </span>
+    </motion.p>
+  )
+}
 
 function Stage() {
   const reduce = useReducedMotion()
@@ -92,9 +118,7 @@ export function HomeHero() {
       <Skyline className="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-32 w-full sm:h-48" />
 
       <div className="mx-auto max-w-6xl px-4 text-center sm:px-6">
-        <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mx-auto inline-flex items-center gap-2 rounded-full bg-surface/70 px-4 py-1.5 text-[13px] font-medium text-accent ring-1 ring-line backdrop-blur">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />Built for organizers in Pakistan
-        </motion.p>
+        <Pill />
         <h1 id="hero-title" className="mt-7 text-balance text-5xl font-semibold leading-[1.02] tracking-tight text-fg sm:text-7xl lg:text-8xl">
           <SplitWords text="Sell the night." delay={0.1} />
           <br />
