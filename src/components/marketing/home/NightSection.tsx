@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, useInView, useReducedMotion } from 'motion/react'
+import { useInView, useReducedMotion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { Check, Crown, Lock, LockOpen, MapPin, ShieldCheck } from 'lucide-react'

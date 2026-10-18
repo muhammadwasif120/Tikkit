@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Phone, Plus, Receipt, Trash2, Users } from 'lucide-react'
-import { Avatar, Badge, Button, Card, CardBody, CardHeader, EmptyState, Field, Input, Modal, Select, Table, TableWrap, Td, Textarea, Th, Tr } from '@/components/kit'
+import { Avatar, Badge, Button, Card, CardHeader, EmptyState, Field, Input, Modal, Select, Table, TableWrap, Td, Textarea, Th, Tr } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
 import { fmtDate, pkr } from '@/lib/format'
 
@@ -15,7 +15,7 @@ const CATS = ['Sound and lights', 'Security', 'Catering', 'Decor', 'Photography'
 export default function VendorsClient({ vendors, invoices, events, limit }: { vendors: Vendor[]; invoices: Invoice[]; events: { id: string; title: string }[]; limit: number | null }) {
   const router = useRouter(); const supabase = useMemo(() => createClient(), [])
   const [modal, setModal] = useState<null | 'vendor' | 'invoice'>(null); const [edit, setEdit] = useState<Vendor | null>(null)
-  const [err, setErr] = useState<string | null>(null); const [pending, start] = useTransition()
+  const [err] = useState<string | null>(null); const [pending, start] = useTransition()
   const owed = invoices.filter(i => i.status === 'pending').reduce((s, i) => s + i.amount, 0)
   const overdue = invoices.filter(i => i.status === 'pending' && i.due && new Date(i.due) < new Date()).length
 

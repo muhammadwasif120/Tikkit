@@ -42,7 +42,7 @@ export async function loadTickets(supabase: Supa, userId: string): Promise<Ticke
   const now = Date.now()
   const upcoming: UpcomingTicket[] = []
   const collection: Collectible[] = []
-  const closed: (ClosedRow & { sort: number })[] = []
+  const closed: ClosedRow[] = []
 
   for (const r of regs) {
     const e = r.events as unknown as EventJoin
@@ -50,7 +50,7 @@ export async function loadTickets(supabase: Supa, userId: string): Promise<Ticke
     const ended = new Date(endsAt).getTime() < now
     const where = e.is_secret_venue ? `Secret location · ${e.area_label ?? e.city ?? ''}` : [e.venue_name, e.area_label ?? e.city].filter(Boolean).join(', ')
     const ticket = (r.ticket_types as unknown as { name: string } | null)?.name ?? null
-    const close = (label: string, detail: string, tone: BadgeTone) => closed.push({ id: r.id, title: e.title, slug: e.slug, startsAt: e.starts_at, where, ticket, label, detail, tone, sort: new Date(e.starts_at).getTime() })
+    const close = (label: string, detail: string, tone: BadgeTone) => closed.push({ id: r.id, title: e.title, slug: e.slug, startsAt: e.starts_at, where, ticket, label, detail, tone })
 
     if (r.status === 'checked_in') {
       const s = serial.get(r.id)
@@ -73,8 +73,8 @@ export async function loadTickets(supabase: Supa, userId: string): Promise<Ticke
   }
   upcoming.sort((a, b) => +new Date(a.event.startsAt) - +new Date(b.event.startsAt))
   collection.sort((a, b) => +new Date(b.startsAt) - +new Date(a.startsAt))
-  closed.sort((a, b) => b.sort - a.sort)
-  return { upcoming, collection, closed: closed.map(({ sort: _s, ...c }) => c) }
+  closed.sort((a, b) => +new Date(b.startsAt) - +new Date(a.startsAt))
+  return { upcoming, collection, closed }
 }
 
 export type Bookings = { rows: ModRow[]; retreats: RetreatLink[] }

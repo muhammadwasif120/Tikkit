@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Landmark, Plus, Smartphone, Trash2 } from 'lucide-react'
-import { Badge, Button, Card, CardBody, CardHeader, EmptyState, Field, Input, Modal, Select, Textarea } from '@/components/kit'
+import { Badge, Button, Card, CardHeader, EmptyState, Field, Input, Modal, Select, Textarea } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
 
 export type Account = { id: string; method: 'bank' | 'jazzcash' | 'easypaisa' | 'other'; title: string; number: string; bank: string | null; iban: string | null; instructions: string | null; active: boolean; label: string | null }

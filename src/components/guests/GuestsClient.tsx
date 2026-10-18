@@ -169,7 +169,7 @@ export default function GuestsClient({ rows, events, initialEvent, initialFilter
                 const reviewable = ['requested', 'payment_submitted'].includes(r.status)
                 return (
                   <Tr key={r.id}>
-                    <Td><input type="checkbox" aria-label={`Select ${r.name}`} checked={sel.has(r.id)} onChange={() => setSel(s => { const n = new Set(s); n.has(r.id) ? n.delete(r.id) : n.add(r.id); return n })} className="h-4 w-4 accent-[rgb(var(--k-accent))]" /></Td>
+                    <Td><input type="checkbox" aria-label={`Select ${r.name}`} checked={sel.has(r.id)} onChange={() => setSel(s => { const n = new Set(s); if (n.has(r.id)) n.delete(r.id); else n.add(r.id); return n })} className="h-4 w-4 accent-[rgb(var(--k-accent))]" /></Td>
                     <Td>
                       <div className="flex items-center gap-3">
                         <Avatar name={r.name} size={36} />

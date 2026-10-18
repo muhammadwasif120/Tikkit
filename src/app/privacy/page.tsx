@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { LegalPage, LegalSection, SubSection, LegalTable, ContactBox } from '@/components/marketing/legal'
 
 export const metadata: Metadata = {

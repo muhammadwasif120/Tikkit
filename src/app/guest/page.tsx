@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, CalendarClock, Layers, Trophy, Wallet } from 'lucide-react'
-import { Badge, Card, CardBody, CardHeader, PageHeader } from '@/components/kit'
+import { Badge, Card, CardBody, PageHeader } from '@/components/kit'
 import { NextUpCard, type NextUp } from '@/components/attendee/NextUpCard'
 import { CollectibleCard } from '@/components/attendee/CollectibleCard'
 import { PickCard } from '@/components/attendee/DiscoverFeed'
@@ -20,8 +20,6 @@ function until(iso: string) {
   const d = Math.round(h / 24)
   return d === 1 ? 'Tomorrow' : `In ${d} days`
 }
-
-const TIER_ORDER = ['new', 'reliable', 'regular', 'trusted']
 
 export default async function TodayPage() {
   const { supabase, profile } = await requireAttendee()

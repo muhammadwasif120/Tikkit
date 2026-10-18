@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- the root layout may be what crashed, so a plain link is the safe way home */
 'use client'
 
 import { useEffect } from 'react'

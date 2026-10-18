@@ -28,7 +28,7 @@ const toLocal = (iso: string | null) => (iso ? new Date(iso).toLocaleString('sv-
 
 export default function RetreatBuilder(p: { retreat: BRetreat; days: BDay[]; items: BItem[]; people: BPerson[]; lines: BLine[]; tasks: BTask[]; updates: BUpdate[]; origin: string }) {
   const { retreat, days, items, people, lines, tasks, updates, origin } = p
-  const router = useRouter(); const supabase = useMemo(() => createClient(), [])
+  const router = useRouter()
   const [tab, setTab] = useState<Tab>('itinerary')
   const [pending, start] = useTransition(); const [err, setErr] = useState<string | null>(null)
   const refresh = () => router.refresh()

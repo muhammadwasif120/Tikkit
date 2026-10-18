@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { useState } from 'react'
-import { ArrowRight, Briefcase, Building2, CalendarDays, Check, ChevronDown, Mountain, Sparkles } from 'lucide-react'
+import { ArrowRight, Briefcase, Building2, Check, ChevronDown, Sparkles } from 'lucide-react'
 import { ButtonLink } from '@/components/kit'
 import { Marquee, Reveal } from './motion'
 import { cn } from '@/lib/cn'

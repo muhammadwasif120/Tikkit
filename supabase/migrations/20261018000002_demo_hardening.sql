@@ -132,4 +132,33 @@ alter table public.organizer_profiles drop constraint if exists organizer_profil
 alter table public.organizer_profiles add constraint organizer_profiles_website_http
   check (website is null or website ~* '^https?://[^[:space:]]+$');
 
+-- ---------------------------------------------------------------------------
+-- 6. Receipt and proof paths: a signed in user may only point at files in their own folder.
+--    (Imports and the demo seed run without a user and are not affected.)
+-- ---------------------------------------------------------------------------
+create or replace function private.check_proof_path()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is not null and new.screenshot_path is not null
+     and (new.screenshot_path not like (auth.uid()::text || '/%') or new.screenshot_path like '%..%') then
+    raise exception 'PROOF_PATH: that receipt file is not yours.' using errcode = 'check_violation';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists payment_submissions_proof_path on public.payment_submissions;
+create trigger payment_submissions_proof_path before insert on public.payment_submissions
+  for each row execute function private.check_proof_path();
+drop trigger if exists product_payments_proof_path on public.product_payments;
+create trigger product_payments_proof_path before insert on public.product_payments
+  for each row execute function private.check_proof_path();
+drop trigger if exists subscription_payments_proof_path on public.subscription_payments;
+create trigger subscription_payments_proof_path before insert on public.subscription_payments
+  for each row execute function private.check_proof_path();
+
 commit;
