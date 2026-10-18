@@ -47,6 +47,10 @@ async function ensure(email, user_metadata, app_metadata) {
 const org = await ensure(ORGANIZER_EMAIL, { role: 'organizer', full_name: 'Areeba Malik', company_name: 'Neon District Events', city: 'Lahore' }, { demo: true })
 console.log('organizer', org.id)
 
+// An organizer counts as complete only with a phone, city and company, otherwise the app asks them to finish their profile.
+const { error: ph } = await admin.from('profile_private').update({ phone: '03001234567' }).eq('id', org.id)
+if (ph) throw ph
+
 for (let i = 0; i < GUESTS.length; i++) {
   const n = String(i + 1).padStart(2, '0')
   await ensure(`demo.guest${n}@demo.tikkitx.com`, { role: 'attendee', full_name: GUESTS[i], city: 'Lahore' }, {})

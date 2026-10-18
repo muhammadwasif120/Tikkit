@@ -50,7 +50,7 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
       )}
       <Section className={live ? 'pt-0' : 'pt-0'}>
         {live && <SectionHead align="center" eyebrow="Preview" title="Or take a quick look first" />}
-        <div className={live ? 'mt-8' : ''}><DemoWorkspace /></div>
+        <div className={live ? 'mt-8' : ''}><DemoWorkspace autoStart={!live} /></div>
       </Section>
       <CtaBand />
     </MarketingShell>

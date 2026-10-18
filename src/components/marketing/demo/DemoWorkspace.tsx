@@ -257,7 +257,7 @@ function Tour({ step, onNext, onPrev, onClose }: { step: number; onNext: () => v
 }
 
 /* ── workspace ────────────────────────────────────────────── */
-export function DemoWorkspace() {
+export function DemoWorkspace({ autoStart = true }: { autoStart?: boolean }) {
   const [section, setSection] = useState<Section>('overview')
   const [step, setStep] = useState<number | null>(null)
   const frame = useRef<HTMLDivElement>(null)
@@ -265,8 +265,8 @@ export function DemoWorkspace() {
   useEffect(() => {
     const h = window.location.hash.slice(1) as Section
     if (NAV.some(n => n.id === h)) setSection(h)
-    else { const t = setTimeout(() => { frame.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); setStep(0) }, 900); return () => clearTimeout(t) }
-  }, [])
+    else if (autoStart) { const t = setTimeout(() => { frame.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }); setStep(0) }, 900); return () => clearTimeout(t) }
+  }, [autoStart])
 
   const go = useCallback((n: number) => {
     const i = Math.max(0, Math.min(STEPS.length - 1, n))
