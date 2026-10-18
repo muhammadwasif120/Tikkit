@@ -39,6 +39,14 @@ export async function processOutbox(limit = 40) {
   let sent = 0, failed = 0
   for (const row of (data ?? []) as Row[]) {
     try {
+      // Organizer updates can be switched off in the guest's profile. Tickets, payments and invites always send.
+      if (['announcement', 'location_revealed', 'retreat_update'].includes(row.template)) {
+        const { data: pp } = await admin.from('profile_private').select('notification_prefs').eq('email', row.to_email).maybeSingle()
+        if ((pp?.notification_prefs as { email_updates?: boolean } | null)?.email_updates === false) {
+          await admin.from('email_outbox').update({ status: 'sent', sent_at: new Date().toISOString(), last_error: 'skipped: guest turned off organizer update emails', attempts: row.attempts + 1 }).eq('id', row.id)
+          continue
+        }
+      }
       const msg = await render(row, admin)
       if (!msg) throw new Error(`unknown template ${row.template}`)
       const res = await fetch('https://api.resend.com/emails', { method: 'POST', headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ from: FROM, to: [row.to_email], subject: msg.subject, html: msg.html }) })

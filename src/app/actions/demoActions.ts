@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 
 const EMAILS = { organizer: 'demo.organizer@demo.tikkitx.com', attendee: 'demo.attendee@demo.tikkitx.com' } as const
-const HOME = { organizer: '/dashboard', attendee: '/guest/tickets' } as const
+const HOME = { organizer: '/dashboard', attendee: '/guest' } as const
 
 /** Signs the visitor into a shared demo account with a one time link. No password exists for those accounts. */
 export async function startDemo(formData: FormData) {

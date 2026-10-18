@@ -7,7 +7,7 @@ import { Badge, Button, Card, CardBody, CardHeader, Field, Input, Select } from 
 import { createClient } from '@/lib/supabase/client'
 import { submitIdVerification } from '@/app/dashboard/settings/verification/actions'
 
-export default function VerificationForm({ status, reason, optionalNote }: { status: 'none' | 'pending' | 'verified' | 'rejected'; reason: string | null; optionalNote?: string }) {
+export default function VerificationForm({ status, reason, optionalNote, audience = 'organizer' }: { status: 'none' | 'pending' | 'verified' | 'rejected'; reason: string | null; optionalNote?: string; audience?: 'organizer' | 'attendee' }) {
   const router = useRouter(); const supabase = useMemo(() => createClient(), [])
   const [f, setF] = useState({ type: 'cnic', number: '', expiry: '' }); const [file, setFile] = useState<File | null>(null)
   const [busy, setBusy] = useState(false); const [err, setErr] = useState<string | null>(null)
@@ -28,10 +28,10 @@ export default function VerificationForm({ status, reason, optionalNote }: { sta
   }
 
   const banner = {
-    verified: { icon: <BadgeCheck className="h-6 w-6 text-success" />, title: 'Your ID is verified', body: 'You can publish events and your guests see the verified check.', tone: 'success' as const },
+    verified: { icon: <BadgeCheck className="h-6 w-6 text-success" />, title: 'Your ID is verified', body: audience === 'attendee' ? 'Organizers see the verified check next to your name, and you can join verified-only events.' : 'You can publish events and your guests see the verified check.', tone: 'success' as const },
     pending: { icon: <Clock className="h-6 w-6 text-warning" />, title: 'Under review', body: 'We review every ID by hand, usually within one working day.', tone: 'warning' as const },
     rejected: { icon: <ShieldAlert className="h-6 w-6 text-danger" />, title: 'We could not verify your ID', body: reason ?? 'Please submit a clearer photo.', tone: 'danger' as const },
-    none: { icon: <ShieldAlert className="h-6 w-6 text-subtle" />, title: 'Not verified yet', body: 'Verify your identity to publish events. It takes two minutes.', tone: 'neutral' as const },
+    none: { icon: <ShieldAlert className="h-6 w-6 text-subtle" />, title: 'Not verified yet', body: audience === 'attendee' ? 'Verify your ID to get the check next to your name and join verified-only events. It takes two minutes.' : 'Verify your identity to publish events. It takes two minutes.', tone: 'neutral' as const },
   }[status]
 
   return (
