@@ -62,7 +62,7 @@ function Tour({ step, onNext, onPrev, onClose }: { step: number; onNext: () => v
     : undefined
 
   return (
-    <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Product tour">
+    <div className="fixed inset-0 z-[9500]" role="dialog" aria-modal="true" aria-label="Product tour">
       <div className="absolute inset-0" onClick={onClose} />
       {rect ? <div className="pointer-events-none absolute rounded-xl ring-2 ring-accent transition-all duration-300" style={{ top: rect.top - 4, left: rect.left - 4, width: rect.width + 8, height: rect.height + 8, boxShadow: '0 0 0 9999px rgb(3 5 10 / 0.7), 0 0 28px rgb(var(--k-accent) / 0.5)' }} />
             : <div className="pointer-events-none absolute inset-0 bg-[rgb(3_5_10/0.7)]" />}

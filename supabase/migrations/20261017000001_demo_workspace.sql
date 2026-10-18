@@ -261,8 +261,9 @@ begin
            now() - i * interval '3 hours'
     from generate_series(1, 8) i;
 
-    insert into public.payment_submissions (registration_id, reference, amount_pkr, status)
-    select r.id, 'TXN' || (480000 + row_number() over ())::text, 2500, 'submitted'
+    -- the shared sample receipt image is uploaded by scripts/setup_demo.mjs to this fixed path inside the organizer's own folder
+    insert into public.payment_submissions (registration_id, screenshot_path, reference, amount_pkr, status)
+    select r.id, org::text || '/demo/receipt.png', 'TXN' || (480000 + row_number() over ())::text, 2500, 'submitted'
     from public.registrations r where r.event_id = e_live and r.status = 'payment_submitted';
 
     -- the launch event: invite only, a few asking to come

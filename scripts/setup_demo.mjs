@@ -6,6 +6,7 @@
 
 import { randomBytes } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
+import sharp from 'sharp'
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -56,6 +57,22 @@ for (let i = 0; i < GUESTS.length; i++) {
   await ensure(`demo.guest${n}@demo.tikkitx.com`, { role: 'attendee', full_name: GUESTS[i], city: 'Lahore' }, {})
 }
 console.log(`${GUESTS.length} sample guests ready`)
+
+// One sample payment receipt, shared by every pending payment in the demo. It lives in the organizer's own folder so
+// the demo session can read it, and its path is fixed so nightly rebuilds keep working.
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="420" height="720" viewBox="0 0 420 720">
+  <rect width="420" height="720" fill="#f4f6fb"/><rect x="20" y="20" width="380" height="680" rx="22" fill="#ffffff"/>
+  <circle cx="210" cy="108" r="36" fill="#16a34a"/><path d="M193 108l12 12 24-26" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="210" y="190" font-family="Arial, sans-serif" font-size="24" font-weight="700" text-anchor="middle" fill="#111827">Transfer successful</text>
+  <text x="210" y="232" font-family="Arial, sans-serif" font-size="38" font-weight="700" text-anchor="middle" fill="#111827">PKR 2,500</text>
+  <line x1="50" y1="276" x2="370" y2="276" stroke="#e5e7eb"/>
+  <g font-family="Arial, sans-serif" font-size="16" fill="#6b7280"><text x="50" y="318">To</text><text x="50" y="372">Bank</text><text x="50" y="426">Reference</text><text x="50" y="480">Date</text></g>
+  <g font-family="Arial, sans-serif" font-size="17" font-weight="600" text-anchor="end" fill="#111827"><text x="370" y="318">Neon District Events</text><text x="370" y="372">Meezan Bank</text><text x="370" y="426">TXN480001</text><text x="370" y="480">Sample receipt</text></g>
+  <text x="210" y="650" font-family="Arial, sans-serif" font-size="13" text-anchor="middle" fill="#9ca3af">Demo data. Not a real payment.</text></svg>`
+const png = await sharp(Buffer.from(svg)).png().toBuffer()
+const { error: up } = await admin.storage.from('payment-proofs').upload(`${org.id}/demo/receipt.png`, png, { contentType: 'image/png', upsert: true })
+if (up) throw up
+console.log('sample receipt uploaded')
 
 const { error: cfg } = await admin.from('demo_config').upsert({ id: true, organizer_id: org.id })
 if (cfg) throw cfg
