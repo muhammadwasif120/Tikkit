@@ -16,6 +16,7 @@ from information_schema.role_table_grants g
 join pg_class c on c.relname = g.table_name
 join pg_namespace n on n.oid = c.relnamespace and n.nspname = g.table_schema
 where g.grantee = 'anon' and g.table_schema = 'public' and c.relkind = 'r'
+  and g.table_name not in ('plans', 'plan_limits', 'event_categories')  -- public reference data, by design
 group by g.table_name
 
 union all
@@ -46,6 +47,7 @@ from (values
   ('commissions', 'status'), ('payment_submissions', 'status')
 ) as v(t, c)
 where has_column_privilege('authenticated', ('public.' || v.t)::regclass, v.c, 'UPDATE')
+  and (v.t, v.c) <> ('commissions', 'status')  -- organizers mark commissions paid; row policy and a trigger guard it
 
 union all
 -- ===== PROBLEM: tables a signed in user must not write to directly (changes go through checked functions) =====
@@ -118,6 +120,11 @@ union all
 -- ===== REVIEW: storage buckets =====
 select 'REVIEW_bucket', b.id::text, ('public=' || b.public::text || ' size_limit=' || coalesce(b.file_size_limit::text, 'none') || ' types=' || coalesce(array_to_string(b.allowed_mime_types, ','), 'any'))
 from storage.buckets b
+
+union all
+-- ===== REVIEW: every storage policy (who can touch files) =====
+select 'REVIEW_storage_policy', p.policyname::text, (p.cmd || ' ' || p.roles::text)
+from pg_policies p where p.schemaname = 'storage' and p.tablename = 'objects'
 
 union all
 -- ===== REVIEW: scheduled jobs =====

@@ -1,6 +1,7 @@
 -- Generated from supabase/migrations by scripts/gen_verify_sql.py. Do not edit by hand.
 -- Run: supabase db query --linked -f supabase/tests/04_verify_applied.sql
--- Every row returned is a PROBLEM. No rows means every migration is fully applied.
+-- missing_* rows are PROBLEMS (a migration is not fully applied). EXTRA_* rows are objects that exist in the database but that no
+-- migration creates: leftovers from the old app. Review each one; they are candidates to drop.
 
 with expected_tables(schema_name, name) as (values
     ('public','admin_audit_log'),
@@ -427,4 +428,17 @@ select 'missing_policy', e.schema_name || '.' || e.table_name || ' / ' || e.name
 union all
 select 'missing_cron_job', e.name from expected_cron e
   where not exists (select 1 from cron.job j where j.jobname = e.name)
+union all
+select 'EXTRA_table_not_in_migrations', c.relname::text from pg_class c join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public' and c.relkind in ('r','p') and not exists (select 1 from expected_tables e where e.schema_name = 'public' and e.name = c.relname)
+union all
+select 'EXTRA_policy_not_in_migrations', (p.schemaname || '.' || p.tablename || ' / ' || p.policyname)::text from pg_policies p
+  where p.schemaname in ('public','storage') and not exists (select 1 from expected_policies e where e.schema_name = p.schemaname and e.table_name = p.tablename and e.name = p.policyname)
+union all
+select 'EXTRA_function_not_in_migrations', (n.nspname || '.' || p.proname)::text from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+  where n.nspname in ('public','private') and p.prokind = 'f' and not exists (select 1 from pg_depend d where d.objid = p.oid and d.deptype = 'e')
+    and not exists (select 1 from expected_functions e where e.schema_name = n.nspname and e.name = p.proname)
+union all
+select 'EXTRA_trigger_not_in_migrations', (c.relname || ' / ' || t.tgname)::text from pg_trigger t join pg_class c on c.oid = t.tgrelid join pg_namespace n on n.oid = c.relnamespace
+  where n.nspname = 'public' and not t.tgisinternal and not exists (select 1 from expected_triggers e where e.schema_name = 'public' and e.table_name = c.relname and e.name = t.tgname)
 order by 1, 2;
