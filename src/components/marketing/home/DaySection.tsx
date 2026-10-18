@@ -110,7 +110,7 @@ export function DaySection() {
         </div>
         <div className="mt-14 grid gap-5 md:grid-cols-3">
           <Tile eyebrow="Classes" title="Recurring, with passes" body="Weekly classes, drop in booking and pass packs your regulars actually buy." delay={0}><ClassSchedule /></Tile>
-          <Tile eyebrow="Spaces" title="Rooms that book themselves" body="Open hours, live slots and no double booking. Guests pick a time and pay by proof." delay={0.1}><SpaceSlots /></Tile>
+          <Tile eyebrow="Spaces" title="Rooms that book themselves" body="Open hours, live slots and no double booking. Guests pick a time and pay by proof." pro delay={0.1}><SpaceSlots /></Tile>
           <Tile eyebrow="Retreats" title="Multi day trips, planned live" body="Itinerary, people, budget and a shareable schedule for company offsites." pro delay={0.2}><RetreatDays /></Tile>
         </div>
 
@@ -119,7 +119,7 @@ export function DaySection() {
             points={['Approval lists and verified-ID-only events', 'Company retreats with a shareable itinerary (Pro)', 'Team managers who can approve guests and run the door', 'White label tickets and pages for agencies (Pro)']}
             cta={{ href: '/auth/login?flow=organizer-signup', label: 'Plan a corporate event' }} />
           <Segment icon={Building2} tone="accent" title="Venue management" lead="Fill your room, court or studio, slot by slot, and know who walks in."
-            points={['Opening hours and a live slot grid', 'Approve requests or confirm instantly', 'Payments by proof, QR check in at the door', 'Closed dates and no double booking']}
+            points={['Part of the Pro plan', 'Opening hours and a live slot grid', 'Approve requests or confirm instantly', 'Payments by proof, QR check in at the door', 'Closed dates and no double booking']}
             cta={{ href: '/spaces', label: 'See bookable spaces' }} />
         </div>
       </div>

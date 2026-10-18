@@ -1,3 +1,4 @@
+import ReportButton from '@/components/reports/ReportButton'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -94,6 +95,10 @@ export default async function EventPage({ params, searchParams }: Props) {
                 <div className="min-w-0 flex-1"><p className="text-xs text-subtle">Hosted by</p><p className="flex items-center gap-2 truncate font-semibold text-fg">{org.company_name ?? org.full_name}{org.is_verified && <ShieldCheck className="h-4 w-4 text-success" aria-label="Verified organizer" />}</p>{org.bio && <p className="truncate text-sm text-muted">{org.bio}</p>}</div>
               </Link>
             )}
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
+              <ReportButton kind="event" subjectId={ev.id!} subjectName={ev.title ?? 'This event'} />
+              {org?.id && <ReportButton kind="organizer" subjectId={org.id} subjectName={org.company_name ?? org.full_name ?? 'This organizer'} />}
+            </div>
           </div>
           <aside className="lg:sticky lg:top-24">
             <RegisterPanel eventId={ev.id!} slug={ev.slug!} tiers={tierRows} approval={ev.registration_mode === 'approval'} signedIn={!!user} role={me?.role ?? null} isSecret={isSecret} initialRef={ref} soldOut={soldOut} ended={ended} />
