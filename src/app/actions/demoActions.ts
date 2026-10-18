@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit'
 
 const EMAILS = { organizer: 'demo.organizer@demo.tikkitx.com', attendee: 'demo.attendee@demo.tikkitx.com' } as const
 const HOME = { organizer: '/dashboard', attendee: '/guest' } as const
@@ -11,6 +12,8 @@ const HOME = { organizer: '/dashboard', attendee: '/guest' } as const
 export async function startDemo(formData: FormData) {
   const role = formData.get('role') === 'attendee' ? 'attendee' : 'organizer'
   if (process.env.DEMO_ENABLED !== '1') redirect('/demo?demo=unavailable')
+  // 20 demo sign-ins per visitor per 10 minutes. Each one asks the auth service for a one time link.
+  if (!(await checkRateLimit(`demo:${await getClientIp()}`, 20))) redirect('/demo?demo=busy')
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

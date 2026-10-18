@@ -2,6 +2,7 @@
 
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { decrypt } from '@/lib/encrypt'
+import { checkRateLimit } from '@/lib/rateLimit'
 
 /** Reveals one ID number to an admin. Checked against profiles.role and written to the audit log. */
 export async function revealIdNumber(userId: string) {
@@ -11,6 +12,7 @@ export async function revealIdNumber(userId: string) {
   const { data: me } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
   if (me?.role !== 'admin') return { error: 'Forbidden' }
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return { error: 'Not found' }
+  if (!(await checkRateLimit(`reveal:${user.id}`, 30, 600_000))) return { error: 'Too many reveals. Wait a few minutes.' }
   const { data } = await supabase.from('profile_private').select('id_number_enc, id_type').eq('id', userId).maybeSingle()
   if (!data?.id_number_enc) return { error: 'No number on file' }
   // Every reveal is logged before the number is returned. If the log cannot be written, nothing is revealed.

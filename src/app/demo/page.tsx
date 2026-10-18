@@ -24,6 +24,7 @@ const try_ = [
 const notes: Record<string, string> = {
   unavailable: 'The live demo is not available right now. Try the preview below.',
   loggedin: 'You are logged in to your own account. Log out first to try the demo.',
+  busy: 'Too many attempts. Wait a few minutes and try again.',
 }
 
 export default async function DemoPage({ searchParams }: { searchParams: Promise<{ demo?: string }> }) {
