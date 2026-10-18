@@ -133,7 +133,7 @@ const dm = StyleSheet.create({
     backgroundColor: colors.surface, borderRadius: radius.xl,
     borderWidth: 1, borderColor: colors.border, padding: 24, gap: 12, alignItems: 'center',
   },
-  title: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_700Bold' },
+  title: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_700Bold' },
   body: { color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
   btn: { width: '100%', alignItems: 'center', paddingVertical: 13, borderRadius: radius.md },
   danger: { backgroundColor: colors.error },
@@ -440,8 +440,8 @@ const s = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
-  avatarText: { fontSize: 30, fontFamily: 'Poppins_700Bold' },
-  heroName: { color: colors.textPrimary, fontSize: 22, fontFamily: 'Poppins_700Bold', marginTop: 6 },
+  avatarText: { fontSize: 30, fontFamily: 'Sora_700Bold' },
+  heroName: { color: colors.textPrimary, fontSize: 22, fontFamily: 'Sora_700Bold', marginTop: 6 },
   heroUsername: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular' },
   tierBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
@@ -452,7 +452,7 @@ const s = StyleSheet.create({
 
   statsRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border, padding: 16 },
   stat: { flex: 1, alignItems: 'center', gap: 4 },
-  statNum: { color: colors.textPrimary, fontSize: 22, fontFamily: 'Poppins_700Bold' },
+  statNum: { color: colors.textPrimary, fontSize: 22, fontFamily: 'Sora_700Bold' },
   statLabel: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular' },
   statDiv: { width: 1, height: 36, backgroundColor: colors.border },
 

@@ -398,8 +398,8 @@ const s = StyleSheet.create({
 
   hero: { alignItems: 'center', paddingVertical: 28 },
   avatar: { width: 80, height: 80, borderRadius: 40, backgroundColor: colors.blueSubtle, borderWidth: 2, borderColor: colors.blue, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  avatarInitial: { color: colors.blue, fontSize: 32, fontFamily: 'Poppins_700Bold' },
-  name: { color: colors.textPrimary, fontSize: 20, fontFamily: 'Poppins_600SemiBold' },
+  avatarInitial: { color: colors.blue, fontSize: 32, fontFamily: 'Sora_700Bold' },
+  name: { color: colors.textPrimary, fontSize: 20, fontFamily: 'Sora_600SemiBold' },
   username: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
   email: { color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
   roleBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: colors.blueSubtle, borderRadius: radius.full, paddingHorizontal: 12, paddingVertical: 5, marginTop: 10, borderWidth: 1, borderColor: colors.blueBorder },

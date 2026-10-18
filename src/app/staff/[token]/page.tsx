@@ -1,46 +1,44 @@
+import Link from 'next/link'
+import { Clock, ShieldX } from 'lucide-react'
+import { Card, EmptyState } from '@/components/kit'
 import { createClient } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
-import StaffScanner from '@/components/staff/StaffScanner'
-import OrganizerView from '@/components/staff/OrganizerView'
+import { fmtDateTime } from '@/lib/format'
+import { cn } from '@/lib/cn'
+import GateDoor from '@/components/door/GateDoor'
 
-export default async function StaffPage({ params }: { params: Promise<{ token: string }> }) {
-  const { token } = await params
+export default async function StaffPage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ event?: string }> }) {
+  const [{ token }, { event }] = await Promise.all([params, searchParams])
   const supabase = await createClient()
+  const { data: events, error } = await supabase.rpc('gate_get_events', { p_link_token: token })
 
-  const { data: invite } = await supabase
-    .from('team_invites')
-    .select('*')
-    .eq('token', token)
-    .eq('revoked', false)
-    .single()
-
-  if (!invite) notFound()
-
-  if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+  if (error || !events) {
+    const expired = error?.message.includes('LINK_INVALID')
     return (
-      <div className="flex-1 flex items-start justify-center p-6">
-        <div className="max-w-md w-full text-center py-20">
-          <div className="text-4xl mb-4">⏰</div>
-          <h2 className="text-xl font-bold text-white mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Link Expired
-          </h2>
-          <p className="text-gray-400 text-sm">This access link has expired. Ask your organizer for a new one.</p>
-        </div>
-      </div>
+      <Card>
+        <EmptyState icon={expired ? <Clock className="h-6 w-6" /> : <ShieldX className="h-6 w-6" />} title="This link is not valid"
+          description="It may have expired or been revoked. Ask your organizer for a new one." />
+      </Card>
     )
   }
 
-  const { data: events } = await supabase
-    .from('events')
-    .select('id, title, date_start, status')
-    .eq('organizer_id', invite.organizer_id)
-    .in('status', ['published', 'draft'])
-    .order('date_start', { ascending: false })
+  const current = events.find(e => e.id === event) ?? events[0]
+  if (!current) return <Card><EmptyState icon={<Clock className="h-6 w-6" />} title="No events on this link" /></Card>
 
-  if (invite.role === 'organizer') {
-    return <OrganizerView invite={invite} events={events ?? []} />
-  }
-
-  // Staff: StaffScanner owns its own p-6 wrapper
-  return <StaffScanner invite={invite} events={events ?? []} />
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-accent">{fmtDateTime(current.starts_at)}</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{current.title}</h1>
+      </div>
+      {events.length > 1 && (
+        <nav aria-label="Choose event" className="flex gap-2 overflow-x-auto">
+          {events.map(e => (
+            <Link key={e.id} href={`/staff/${token}?event=${e.id}`} aria-current={e.id === current.id ? 'page' : undefined}
+              className={cn('whitespace-nowrap rounded-full px-4 py-1.5 text-[13px] font-medium ring-1', e.id === current.id ? 'bg-accent/12 text-accent ring-accent/40' : 'text-muted ring-line')}>{e.title}</Link>
+          ))}
+        </nav>
+      )}
+      <GateDoor key={current.id} linkToken={token} eventId={current.id} />
+    </div>
+  )
 }

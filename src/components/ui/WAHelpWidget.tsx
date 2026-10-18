@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { X } from 'lucide-react'
 
-const WA_NUMBER   = '13074434195'
+import { SUPPORT_WHATSAPP_NUMBER as WA_NUMBER } from '@/lib/contact'
 const SESSION_KEY = 'wa-popup-shown'   // auto-pop shown this session
 const DISMISS_KEY = 'wa-popup-closed'  // user explicitly closed — don't auto-pop on nav
 const AUTO_CLOSE_MS = 10_000           // 10 s idle → minimize
@@ -16,8 +16,6 @@ function getContext(pathname: string) {
     return { heading: 'Questions about Vendor X?',          sub: 'Deals, invoices, cross-hires — we reply in 30 mins.', cta: 'Chat on WhatsApp' }
   if (pathname.startsWith('/venue/os'))
     return { heading: 'Questions about your venue?',        sub: 'Listings, bookings, spot maps — we reply in 30 mins.', cta: 'Chat on WhatsApp' }
-  if (pathname.startsWith('/artist-mgmt/os'))
-    return { heading: 'Questions about Artist Management?', sub: 'Rosters, enquiries, bookings — we reply in 30 mins.', cta: 'Chat on WhatsApp' }
   if (pathname.startsWith('/guest') || pathname.startsWith('/explore'))
     return { heading: 'Having trouble?',                    sub: "Can't find your ticket or pass? We reply in 30 mins.", cta: 'Get help now' }
   if (pathname.startsWith('/auth'))

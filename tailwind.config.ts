@@ -8,23 +8,60 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // the new kit uses these soft steps (bg-accent/12, bg-magenta/14 ...) which are not in Tailwind's default scale
+      opacity: { 6: '0.06', 8: '0.08', 12: '0.12', 14: '0.14' },
       colors: {
+        // TIKKIT X kit tokens (see src/styles/kit.css)
+        canvas:  "rgb(var(--k-canvas) / <alpha-value>)",
+        surface: "rgb(var(--k-surface) / <alpha-value>)",
+        raised:  "rgb(var(--k-raised) / <alpha-value>)",
+        overlay: "rgb(var(--k-overlay) / <alpha-value>)",
+        line:    { DEFAULT: "rgb(var(--k-line) / <alpha-value>)", strong: "rgb(var(--k-line-strong) / <alpha-value>)" },
+        fg:      "rgb(var(--k-fg) / <alpha-value>)",
+        muted:   "rgb(var(--k-muted) / <alpha-value>)",
+        subtle:  "rgb(var(--k-subtle) / <alpha-value>)",
+        accent:  { DEFAULT: "rgb(var(--k-accent) / <alpha-value>)", fg: "rgb(var(--k-accent-fg) / <alpha-value>)" },
+        violet:  { DEFAULT: "rgb(var(--k-violet) / <alpha-value>)" },
+        success: "rgb(var(--k-success) / <alpha-value>)",
+        warning: "rgb(var(--k-warning) / <alpha-value>)",
+        danger:  "rgb(var(--k-danger) / <alpha-value>)",
+        info:    "rgb(var(--k-info) / <alpha-value>)",
         brand: {
           // Use RGB CSS vars so Tailwind opacity modifiers work (bg-brand-blue/10 etc.)
+          // Repointed at the cyan accent — see globals.css design tokens.
           blue: "rgb(var(--brand-blue-rgb) / <alpha-value>)",
           "blue-dark": "rgb(var(--brand-blue-dark-rgb) / <alpha-value>)",
           "blue-light": "rgb(var(--brand-blue-light-rgb) / <alpha-value>)",
-          gold: "#FFC745",
-          "gold-dark": "#E5A800",
           // CSS vars for surface colors (no opacity modifier needed)
           charcoal: "var(--brand-charcoal)",
           "charcoal-light": "var(--brand-charcoal-light)",
           muted: "#6B7280",
-        }
+        },
+        // Navy Glass palette — see globals.css for the CSS custom properties
+        // these mirror. Use these when a component needs a fixed value that
+        // shouldn't shift between light/dark (rare); prefer the CSS vars
+        // (bg-brand-blue, var(--text-primary) etc.) for anything themed.
+        navy:    { 950: "#060B22", 900: "#0B1437", 800: "#132057", 700: "#1D2E78", 600: "#2B40A0" },
+        cyan:    { 300: "#80F3FF", 400: "#33EBFF", 500: "#00E5FF", 600: "#00B8CC" },
+        magenta: { DEFAULT: "rgb(var(--k-magenta) / <alpha-value>)", 400: "#E066FF", 500: "#CC00FF" },
+        sky:     { 400: "#A3C0FF", 500: "#7FA7FF" },
+        mint:    { 500: "#3DD68C" },
+        coral:   { 500: "#FF6B6B" },
+        mist:    { 300: "#C3CAE0", 400: "#8C97B8", 500: "#66708F" },
       },
       fontFamily: {
-        display: ["var(--font-syne)", "sans-serif"],
+        display: ["var(--font-sora)", "sans-serif"],
         body: ["var(--font-dm-sans)", "sans-serif"],
+        sans: ["var(--font-geist-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
+      },
+      boxShadow: {
+        card: "var(--k-shadow-card)",
+        pop: "var(--k-shadow-pop)",
+      },
+      borderRadius: {
+        panel: "18px",
+        hero: "28px",
       },
       backgroundImage: {
         "grid-pattern": "linear-gradient(rgba(30,94,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(30,94,255,0.05) 1px, transparent 1px)",

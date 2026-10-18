@@ -1,168 +1,74 @@
-import { Suspense } from 'react'
-import { notFound } from 'next/navigation'
+import { safeHttpUrl, safeInstagram } from '@/lib/url'
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
+import { Globe, Instagram, MessageCircle, ShieldCheck, Mail } from 'lucide-react'
+import { Avatar, ButtonLink } from '@/components/kit'
+import { MarketingShell } from '@/components/marketing/MarketingShell'
+import { JsonLd } from '@/components/marketing/blocks'
+import { EventCard } from '@/components/explore/EventCard'
 import { createClient } from '@/lib/supabase/server'
-import PublicOrganizerProfile, {
-  type PublicProfile,
-  type PublicEvent,
-} from '@/components/organizer/PublicOrganizerProfile'
-import SkeletonEventDetail from '@/components/guest/SkeletonEventDetail'
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ username: string }>
-}): Promise<Metadata> {
-  const { username } = await params
+type Props = { params: Promise<{ username: string }> }
+export const revalidate = 300
+
+async function load(username: string) {
   const supabase = await createClient()
-
-  const { data: rows } = await (supabase as any)
-    .rpc('get_public_organizer_profile', { p_lookup: username })
-  const profile = (rows as any[])?.[0] ?? null
-  if (!profile) return { title: 'Organizer Not Found — Tikkit' }
-
-  const displayName = profile.company_name || profile.full_name || username
-  const canonicalUrl = `https://www.tikkitx.com/organizer/${username}`
-  const description = `Discover events hosted by ${displayName} on Tikkit — Pakistan's premier event platform.`
-
-  return {
-    title: `${displayName} — Events on Tikkit`,
-    description,
-    alternates: { canonical: canonicalUrl },
-    openGraph: {
-      title: `${displayName} — Events on Tikkit`,
-      description,
-      url: canonicalUrl,
-      images: profile.logo_url || profile.cover_image_url
-        ? [{ url: profile.logo_url || profile.cover_image_url, alt: displayName }]
-        : [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Tikkit Event Organizer' }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: `${displayName} — Events on Tikkit`,
-      description,
-      images: profile.logo_url || profile.cover_image_url
-        ? [profile.logo_url || profile.cover_image_url]
-        : ['/og-image.jpg'],
-    },
-  }
+  const { data: org } = await supabase.from('public_organizers').select('*').eq('username', username.toLowerCase()).maybeSingle()
+  if (!org) return null
+  const { data: events } = await supabase.from('event_listings')
+    .select('id, slug, title, cover_image_url, city, area_label, venue_name, is_secret_venue, starts_at, min_price_pkr, registration_mode, capacity, seats_taken')
+    .eq('organizer_id', org.id!).gte('ends_at', new Date().toISOString()).order('starts_at').limit(30)
+  return { org, events: events ?? [] }
 }
 
-async function OrganizerData({ username }: { username: string }) {
-  const supabase = await createClient()
-
-  // 1. Fetch profile via SECURITY DEFINER RPC — bypasses RLS for public reads.
-  //    Accepts either a username slug or a UUID (ID fallback for organizers
-  //    who haven't set a username yet).
-  const { data: rows } = await (supabase as any)
-    .rpc('get_public_organizer_profile', { p_lookup: username })
-
-  const profile = (rows as any[])?.[0] ?? null
-  if (!profile) notFound()
-
-  // 2. Check if the current user already follows this organizer
-  const { data: { user } } = await supabase.auth.getUser()
-  let isFavourite = false
-  if (user) {
-    const { data: fav } = await (supabase as any)
-      .from('organizer_favourites')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('organizer_id', profile.id)
-      .maybeSingle()
-    isFavourite = !!fav
-  }
-
-  // 3. Fetch published + completed events
-  const { data: eventsData } = await supabase
-    .from('events')
-    .select('id, slug, title, date_start, cover_image_url, venue_name, capacity, status')
-    .eq('organizer_id', profile.id)
-    .in('status', ['published', 'completed'])
-    .order('date_start', { ascending: false })
-
-  const events = eventsData ?? []
-  const eventIds = events.map(e => e.id)
-
-  // 3. Batch guest counts via security-definer RPC (bypasses RLS safely)
-  //    Falls back to 0 gracefully if the function hasn't been created yet.
-  const guestCountMap: Record<string, number> = {}
-  if (eventIds.length > 0) {
-    try {
-      const { data: counts } = await supabase
-        .rpc('get_public_event_guest_counts', { p_event_ids: eventIds })
-      for (const row of (counts ?? [])) {
-        guestCountMap[row.event_id] = Number(row.guest_count)
-      }
-    } catch {
-      // RPC not yet available — fill bars will render empty
-    }
-  }
-
-  const enrichedEvents: PublicEvent[] = events.map(ev => ({
-    id:              ev.id,
-    slug:            (ev as any).slug   ?? null,
-    title:           ev.title,
-    date_start:      ev.date_start,
-    cover_image_url: ev.cover_image_url ?? null,
-    venue_name:      ev.venue_name      ?? null,
-    capacity:        ev.capacity,
-    status:          ev.status,
-    guest_count:     guestCountMap[ev.id] ?? 0,
-  }))
-
-  const publicProfile: PublicProfile = {
-    id:              profile.id,
-    full_name:       profile.full_name       ?? null,
-    email:           profile.email,
-    phone_number:    profile.phone_number    ?? null,
-    company_name:    profile.company_name    ?? null,
-    cover_image_url: profile.cover_image_url ?? null,
-    logo_url:        profile.logo_url        ?? null,
-    username:        profile.username        ?? null,
-    created_at:      profile.created_at,
-  }
-
-  const displayName = publicProfile.company_name || publicProfile.full_name || username
-  const canonicalUrl = `https://www.tikkitx.com/organizer/${username}`
-
-  const profileSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'ProfilePage',
-    '@id': canonicalUrl,
-    url: canonicalUrl,
-    name: `${displayName} on Tikkit`,
-    mainEntity: {
-      '@type': 'Organization',
-      '@id': `${canonicalUrl}#organizer`,
-      name: displayName,
-      url: canonicalUrl,
-      ...(publicProfile.logo_url ? { logo: publicProfile.logo_url } : {}),
-      ...(publicProfile.cover_image_url ? { image: publicProfile.cover_image_url } : {}),
-      memberOf: { '@id': 'https://www.tikkitx.com/#organization' },
-    },
-  }
-
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(profileSchema) }}
-      />
-      <PublicOrganizerProfile profile={publicProfile} events={enrichedEvents} isFavourite={isFavourite} isAuthenticated={!!user} />
-    </>
-  )
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username } = await params
+  const d = await load(username)
+  if (!d) return { title: 'Organizer not found' }
+  const name = d.org.company_name ?? d.org.full_name ?? username
+  const url = `https://www.tikkitx.com/organizer/${username}`
+  const description = d.org.bio?.slice(0, 155) ?? `Upcoming events by ${name} on TIKKIT X. Register and get your QR ticket.`
+  return { title: `${name}: Events on Tikkit`, description, alternates: { canonical: url }, openGraph: { title: `${name}: Events on Tikkit`, description, url, images: [{ url: d.org.cover_url ?? d.org.logo_url ?? '/og-image.jpg', width: 1200, height: 630, alt: name }] }, twitter: { card: 'summary_large_image', title: `${name}: Events on Tikkit`, description } }
 }
 
-export default async function OrganizerProfilePage({
-  params,
-}: {
-  params: Promise<{ username: string }>
-}) {
+export default async function OrganizerPage({ params }: Props) {
   const { username } = await params
+  const d = await load(username)
+  if (!d) notFound()
+  const { org, events } = d
+  const name = org.company_name ?? org.full_name ?? username
+  const url = `https://www.tikkitx.com/organizer/${username}`
+
   return (
-    <Suspense fallback={<SkeletonEventDetail />}>
-      <OrganizerData username={username} />
-    </Suspense>
+    <MarketingShell>
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': 'ProfilePage', '@id': url, mainEntity: { '@type': 'Organization', name, url, description: org.bio ?? undefined, logo: org.logo_url ?? undefined, sameAs: [org.instagram ? `https://instagram.com/${org.instagram.replace('@', '')}` : null, org.website].filter(Boolean) } }} />
+      <div className="mx-auto max-w-6xl px-4 pb-24 pt-6 sm:px-6">
+        <div className="overflow-hidden rounded-3xl bg-surface">
+          {org.cover_url
+            // eslint-disable-next-line @next/next/no-img-element
+            ? <img src={org.cover_url} alt="" className="h-40 w-full object-cover sm:h-56" />
+            : <div className="h-32 w-full sm:h-44" style={{ backgroundImage: 'var(--k-glow)' }} />}
+          <div className="flex flex-wrap items-end gap-5 px-6 pb-6">
+            <div className="-mt-10 rounded-full ring-4 ring-surface"><Avatar name={name} src={org.logo_url ?? org.avatar_url} size={84} /></div>
+            <div className="min-w-0 flex-1 pt-3">
+              <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-fg sm:text-3xl">{name}{org.is_verified && <ShieldCheck className="h-5 w-5 text-success" aria-label="Verified organizer" />}</h1>
+              <p className="text-sm text-muted">{[org.city, `${org.upcoming_event_count ?? 0} upcoming`].filter(Boolean).join(' · ')}</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {org.whatsapp && <ButtonLink href={`https://wa.me/${org.whatsapp.replace(/\D/g, '')}`} variant="secondary" size="sm" target="_blank" rel="noopener noreferrer" leading={<MessageCircle className="h-4 w-4" />}>WhatsApp</ButtonLink>}
+              {org.contact_email && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(org.contact_email) && <ButtonLink href={`mailto:${org.contact_email}`} variant="secondary" size="sm" leading={<Mail className="h-4 w-4" />}>Email</ButtonLink>}
+              {safeInstagram(org.instagram) && <ButtonLink href={`https://instagram.com/${safeInstagram(org.instagram)}`} variant="ghost" size="sm" target="_blank" rel="noopener noreferrer" leading={<Instagram className="h-4 w-4" />}>Instagram</ButtonLink>}
+              {safeHttpUrl(org.website) && <ButtonLink href={safeHttpUrl(org.website)!} variant="ghost" size="sm" target="_blank" rel="noopener noreferrer" leading={<Globe className="h-4 w-4" />}>Website</ButtonLink>}
+            </div>
+          </div>
+          {org.bio && <p className="max-w-3xl whitespace-pre-line px-6 pb-6 text-[15px] leading-relaxed text-muted">{org.bio}</p>}
+        </div>
+
+        <h2 className="mb-5 mt-10 text-xl font-semibold tracking-tight text-fg">Upcoming events</h2>
+        {events.length === 0 ? <p className="text-muted">No upcoming events right now.</p> : (
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{events.map(e => <li key={e.id}><EventCard e={e} /></li>)}</ul>
+        )}
+      </div>
+    </MarketingShell>
   )
 }

@@ -358,7 +358,7 @@ const s = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
     backgroundColor: colors.surface2,
   },
-  heroInitial: { color: colors.white, fontSize: 72, fontFamily: 'Poppins_700Bold' },
+  heroInitial: { color: colors.white, fontSize: 72, fontFamily: 'Sora_700Bold' },
   heroOverlay: { ...StyleSheet.absoluteFillObject },
 
   topBar: {
@@ -403,7 +403,7 @@ const s = StyleSheet.create({
 
   // Title
   title: {
-    color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold',
+    color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold',
     lineHeight: 32, letterSpacing: -0.3,
   },
 
@@ -424,7 +424,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.blueBorder,
     alignItems: 'center', justifyContent: 'center',
   },
-  orgAvatarInitial: { color: colors.blue, fontSize: 16, fontFamily: 'Poppins_700Bold' },
+  orgAvatarInitial: { color: colors.blue, fontSize: 16, fontFamily: 'Sora_700Bold' },
   orgName: { color: colors.textPrimary, fontSize: 14, fontFamily: 'DMSans_500Medium' },
   orgUsername: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 1 },
   orgLabel: {
@@ -458,9 +458,9 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border, padding: 16,
   },
   priceLabel: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular', marginBottom: 4 },
-  price: { fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  price: { fontSize: 26, fontFamily: 'Sora_700Bold' },
   regInfo: { alignItems: 'flex-end' },
-  regCount: { color: colors.textPrimary, fontSize: 20, fontFamily: 'Poppins_700Bold' },
+  regCount: { color: colors.textPrimary, fontSize: 20, fontFamily: 'Sora_700Bold' },
   regLabel: { color: colors.textMuted, fontSize: 11, fontFamily: 'DMSans_400Regular' },
   capTrack: {
     width: 80, height: 4, backgroundColor: colors.surface2,
@@ -515,6 +515,6 @@ const s = StyleSheet.create({
     elevation: 8,
   },
   registerBtnText: {
-    color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold', fontWeight: '700',
+    color: colors.white, fontSize: 16, fontFamily: 'Sora_600SemiBold', fontWeight: '700',
   },
 })

@@ -1,27 +1,19 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import DashboardShell from '@/components/layout/DashboardShell'
+import { OrganizerShell, APP_ROUTES } from '@/components/shell/OrganizerShell'
+import { DemoBar } from '@/components/demo/DemoBar'
+import { planLabel, requireOrganizer } from '@/lib/data/viewer'
 
-import { getUnreadSupportMessageCount } from '@/app/actions/supportActions'
-
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) redirect('/auth/login')
-
-  const [{ data: profile }, unreadSupportCount] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    getUnreadSupportMessageCount(),
-  ])
-
+export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { user, profile, company, logoUrl, entitlements, pendingCount, isManager } = await requireOrganizer()
   return (
-    <DashboardShell profile={profile} unreadSupportCount={unreadSupportCount}>
+    <OrganizerShell
+      routes={APP_ROUTES}
+      user={{ name: profile.full_name ?? 'Organizer', company: company ?? undefined, avatarUrl: logoUrl ?? profile.avatar_url }}
+      plan={isManager ? { label: 'Team member', note: 'Manager', tone: 'accent' } : planLabel(entitlements)}
+      manager={isManager}
+      pendingCount={pendingCount}
+    >
+      {user.app_metadata?.demo === true && <DemoBar />}
       {children}
-    </DashboardShell>
+    </OrganizerShell>
   )
 }

@@ -57,8 +57,6 @@ const urlList = [
   `https://${HOST}/`,
   `https://${HOST}/explore`,
   `https://${HOST}/how-it-works`,
-  `https://${HOST}/corporate`,
-  `https://${HOST}/pulse`,
   `https://${HOST}/blog`,
   ...BLOG_SLUGS.map(slug => `https://${HOST}/blog/${slug}`),
 ]

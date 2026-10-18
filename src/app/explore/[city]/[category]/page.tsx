@@ -1,148 +1,33 @@
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
+import { ExploreView } from '@/components/explore/ExploreView'
+import { CATEGORY_DB_SLUG, titleCase } from '@/lib/exploreContent'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
-import PublicExploreClient from '@/components/public/PublicExploreClient'
 
 export const revalidate = 120
-
-type Props = {
-  params: Promise<{ city: string; category: string }>
-}
+type Props = { params: Promise<{ city: string; category: string }>; searchParams: Promise<{ q?: string; when?: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const resolvedParams = await params
-  const cityStr = resolvedParams.city
-  const catStr = resolvedParams.category
-  const city = cityStr.replace(/-/g, ' ')
+  const { city, category } = await params
+  const [cityName, catName] = [titleCase(city), titleCase(category)]
 
-  const formattedCity = cityStr.charAt(0).toUpperCase() + cityStr.slice(1).replace(/-/g, ' ')
-  const formattedCat = catStr.charAt(0).toUpperCase() + catStr.slice(1).replace(/-/g, ' ')
-
-  // Noindex pages with no live events — prevents thin content from suppressing ranked pages
-  const admin = createAdminClient()
-  const { data: cats } = await admin
-    .from('event_categories')
-    .select('id')
-    .ilike('name', catStr)
-    .limit(1)
-  const catId = cats?.[0]?.id
-  const { count } = catId
-    ? await admin
-        .from('events')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', 'published')
-        .eq('is_private', false)
-        .eq('category_id', catId)
-        .gte('date_start', new Date().toISOString())
-        .or(`venue_name.ilike.%${city}%,title.ilike.%${city}%`)
+  // Pages with no live events stay out of the index so thin pages do not hurt ranked ones.
+  const supabase = await createClient()
+  const { data: cat } = await supabase.from('event_categories').select('id').eq('slug', CATEGORY_DB_SLUG[category] ?? category).maybeSingle()
+  const { count } = cat
+    ? await supabase.from('event_listings').select('id', { count: 'exact', head: true }).eq('category_id', cat.id).ilike('city', cityName).gte('ends_at', new Date().toISOString())
     : { count: 0 }
-  const hasEvents = (count ?? 0) > 0
 
   return {
-    title: `${formattedCat} Events & Tickets in ${formattedCity}`,
-    description: `Buy tickets for upcoming ${formattedCat.toLowerCase()} events in ${formattedCity}. Browse exclusive events and reserve your spot on Tikkit.`,
-    alternates: { canonical: `https://www.tikkitx.com/explore/${cityStr}/${catStr}` },
-    robots: hasEvents ? undefined : { index: false, follow: true },
-    openGraph: {
-      title: `${formattedCat} Events in ${formattedCity} | Tikkit`,
-      description: `Secure tickets for ${formattedCat.toLowerCase()} events in ${formattedCity}.`,
-      url: `https://www.tikkitx.com/explore/${cityStr}/${catStr}`,
-    },
+    title: `${catName} Events & Tickets in ${cityName}`,
+    description: `Buy tickets for upcoming ${catName.toLowerCase()} events in ${cityName}. Browse exclusive events and reserve your spot on Tikkit.`,
+    alternates: { canonical: `https://www.tikkitx.com/explore/${city}/${category}` },
+    robots: (count ?? 0) > 0 ? undefined : { index: false, follow: true },
+    openGraph: { title: `${catName} Events in ${cityName} | Tikkit`, description: `Secure tickets for ${catName.toLowerCase()} events in ${cityName}.`, url: `https://www.tikkitx.com/explore/${city}/${category}` },
   }
 }
 
-export default async function CityCategoryExplorePage({ params }: Props) {
-  const resolvedParams = await params
-  const city = resolvedParams.city.replace(/-/g, ' ')
-  const categorySlug = resolvedParams.category.replace(/-/g, ' ')
-
-  const supabase = await createClient()
-  const admin = createAdminClient()
-
-  // Find category ID based on name match
-  const { data: categories } = await admin
-    .from('event_categories')
-    .select('id, name, icon, color')
-    .order('name', { ascending: true })
-    
-  const targetCat = categories?.find(c => c.name.toLowerCase() === categorySlug.toLowerCase())
-
-  const [
-    { data: { user } },
-    { data: rawEvents },
-  ] = await Promise.all([
-    supabase.auth.getUser(),
-    admin
-      .from('events')
-      .select(`
-        id, title, date_start, cover_image_url, venue_name,
-        ticket_price, registration_mode, category_id,
-        capacity, organizer_id,
-        organizer:profiles!events_organizer_id_fkey(
-          full_name, company_name, username, logo_url, is_id_verified
-        )
-      `)
-      .eq('status', 'published')
-      .eq('is_private', false)
-      .eq(targetCat ? 'category_id' : 'id', targetCat ? targetCat.id : '00000000-0000-0000-0000-000000000000') // hack to return 0 if cat not found
-      .gte('date_start', new Date().toISOString())
-      .or(`venue_name.ilike.%${city}%,title.ilike.%${city}%`)
-      .order('date_start', { ascending: true })
-      .limit(50),
-  ])
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles').select('role').eq('id', user.id).single()
-    const role = (profile as any)?.role ?? 'guest'
-    redirect(role === 'guest' ? `/guest/explore` : '/dashboard')
-  }
-
-  // Only show events from verified organizers on the public explore page
-  const verifiedEvents = (rawEvents ?? []).filter((e: any) => e.organizer?.is_id_verified === true)
-
-  const regCounts: Record<string, number> = {}
-  const events = verifiedEvents
-  if (events.length > 0) {
-    const { data: regRows } = await admin
-      .from('public_registrations')
-      .select('event_id')
-      .in('event_id', events.map((e: any) => e.id))
-      .neq('status', 'rejected')
-
-    for (const row of regRows ?? []) {
-      regCounts[row.event_id] = (regCounts[row.event_id] ?? 0) + 1
-    }
-  }
-
-  const enrichedEvents = events.map((e: any) => ({
-    ...e,
-    registered_count: regCounts[e.id] ?? 0,
-  }))
-
-  const catName = targetCat ? targetCat.name : categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)
-  const cityName = city.charAt(0).toUpperCase() + city.slice(1)
-
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.tikkitx.com' },
-      { '@type': 'ListItem', position: 2, name: 'Explore Events', item: 'https://www.tikkitx.com/explore' },
-      { '@type': 'ListItem', position: 3, name: `Events in ${cityName}`, item: `https://www.tikkitx.com/explore/${resolvedParams.city}` },
-      { '@type': 'ListItem', position: 4, name: `${catName} in ${cityName}`, item: `https://www.tikkitx.com/explore/${resolvedParams.city}/${resolvedParams.category}` },
-    ],
-  }
-
-  return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
-      <PublicExploreClient
-        events={enrichedEvents}
-        categories={categories ?? []}
-        titleOverride={`${catName} in ${cityName}`}
-      />
-    </>
-  )
+export default async function CityCategoryPage({ params, searchParams }: Props) {
+  const [{ city, category }, { q, when }] = await Promise.all([params, searchParams])
+  const [cityName, catName] = [titleCase(city), titleCase(category)]
+  return <ExploreView city={city} category={category} q={q} when={when} heading={`${catName} events in ${cityName}`} breadcrumb={[{ name: 'Explore Events', url: 'https://www.tikkitx.com/explore' }, { name: `Events in ${cityName}`, url: `https://www.tikkitx.com/explore/${city}` }, { name: `${catName} events`, url: `https://www.tikkitx.com/explore/${city}/${category}` }]} />
 }

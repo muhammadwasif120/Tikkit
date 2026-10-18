@@ -1,30 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
-// Subdomains map to their landing page, authenticated portal, and protected prefix
-const SUBDOMAIN_MAP: Record<string, { landing: string; portal: string; prefix: string }> = {
-  'vendor': { landing: '/vendor/home',      portal: '/vendor/os',      prefix: '/vendor'      },
-  'venue':  { landing: '/venue/home',       portal: '/venue/os',       prefix: '/venue'       },
-  'artist': { landing: '/artist-mgmt/home', portal: '/artist-mgmt/os', prefix: '/artist-mgmt' },
-}
-
-function getSubdomain(host: string): string | null {
-  // "vendor.tikkitx.com" → "vendor", "localhost:3000" → null
-  const parts = host.split('.')
-  if (parts.length >= 3) return parts[0]
-  return null
-}
-
-// Share the auth session across all *.tikkitx.com subdomains in production
+// Session cookie is scoped to the apex domain in production. Kept as-is so existing
+// sessions (set with this domain) keep working.
 const COOKIE_DOMAIN = process.env.NODE_ENV === 'production' ? '.tikkitx.com' : undefined
+
+// Vendor X is built but not open yet: every route within it redirects to the home
+// page. Re-launching it is deleting its entry here. (Venues became the Spaces module.)
+const GATED_MODULES: { prefixes: string[]; landing: string }[] = [
+  { prefixes: ['/vendor'], landing: '/' },
+]
 
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const host        = request.headers.get('host') ?? ''
-  const subdomain   = getSubdomain(host)
-  const subConfig   = subdomain ? SUBDOMAIN_MAP[subdomain] : null
 
-  let response = NextResponse.next({ request })
+  if (pathname === '/venues' || pathname.startsWith('/venue/') || pathname === '/venue') {
+    return NextResponse.redirect(new URL('/spaces', request.url), 308)
+  }
+
+  for (const mod of GATED_MODULES) {
+    const inModule = mod.prefixes.some(p => pathname === p || pathname.startsWith(p + '/'))
+    if (inModule && pathname !== mod.landing) {
+      return NextResponse.redirect(new URL(mod.landing, request.url))
+    }
+  }
+
+  const response = NextResponse.next({ request })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -44,14 +45,6 @@ export async function updateSession(request: NextRequest) {
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-
-  // ── Subdomain root redirect ────────────────────────────────────────────────
-  // Logged-in  → go straight to the portal
-  // Logged-out → show the product landing page
-  if (subConfig && pathname === '/') {
-    const dest = user ? subConfig.portal : subConfig.landing
-    return NextResponse.redirect(new URL(dest, request.url))
-  }
 
   // ── Mandatory profile completion gate ──────────────────────────────────────
   // Guests and organizers must have phone, ID (CNIC/passport), city, and their
@@ -73,42 +66,22 @@ export async function updateSession(request: NextRequest) {
   // shows up in latency, switch to a single denormalised profiles.profile_complete
   // boolean kept in sync by a trigger.
   const completionExempt = [
-    '/auth', '/api', '/master',
+    '/auth', '/api', '/master', '/design',
     '/privacy', '/terms', '/security', '/about', '/contact', '/how-it-works',
   ]
   const isCompletionExempt = completionExempt.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (user && !isCompletionExempt) {
-    const { data: roleProfile } = await supabase
+    // profiles.is_complete is maintained by the database: attendees need phone, date of
+    // birth, city and gender; organizers need company, phone and city.
+    const { data: gate } = await supabase
       .from('profiles')
-      .select('role, phone_number, city, cnic_number, passport_number, company_name')
+      .select('role, is_complete')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    const gateRole = roleProfile?.role
-    if (gateRole === 'guest' || gateRole === 'organizer') {
-      let complete = !!(
-        roleProfile?.phone_number &&
-        roleProfile?.city &&
-        (roleProfile?.cnic_number || roleProfile?.passport_number)
-      )
-
-      if (complete && gateRole === 'organizer') {
-        complete = !!roleProfile?.company_name
-      }
-
-      if (complete && gateRole === 'guest') {
-        const { data: gp } = await supabase
-          .from('guest_profiles')
-          .select('date_of_birth, gender')
-          .eq('id', user.id)
-          .maybeSingle()
-        complete = !!((gp as any)?.date_of_birth && (gp as any)?.gender)
-      }
-
-      if (!complete) {
-        return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
-      }
+    if ((gate?.role === 'attendee' || gate?.role === 'organizer') && gate.is_complete === false) {
+      return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
     }
   }
 
@@ -123,14 +96,14 @@ export async function updateSession(request: NextRequest) {
     '/',
     '/how-it-works',
     '/explore',
-    '/guest/explore',
     '/register',
     '/organizer',
-    '/coming-soon',
     '/demo',
     '/staff',
-    '/corporate',
-    '/pulse',
+    '/promoter',
+    '/itinerary',
+    '/classes',
+    '/spaces',
     '/privacy',
     '/terms',
     '/compare',
@@ -139,44 +112,22 @@ export async function updateSession(request: NextRequest) {
     '/pricing',
     '/about',
     '/security',
-    '/venues',          // Public venue browse
-    '/venue',           // Public venue profile pages
-    '/v',               // Public vendor profiles
-    '/artists',         // Public artist directory + profiles
-    '/vendor/home',     // Vendor X landing page
-    '/venue/home',      // Venues & Experiences landing page
-    '/artist-mgmt/home', // Artist Management landing page
     '/lp',               // Preserved landing pages (/lp/underground etc.)
-    '/sentry-example-page', // Sentry verification page — not linked from nav
-    '/api/sentry-example-api', // matches /api anyway, listed for clarity
+    '/design',           // internal design review (404s in production)
   ]
 
-  // On a product subdomain, only its own routes + auth are accessible
-  // Everything else redirects to that subdomain's dashboard
-  if (subConfig) {
-    const isAuth    = pathname.startsWith('/auth')
-    const isProduct = pathname.startsWith(subConfig.prefix)
-    if (!isAuth && !isProduct) {
-      return NextResponse.redirect(new URL(subConfig.portal, request.url))
-    }
-  }
-
-  const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
+  // Old links to /guest/explore/<id> still redirect to the event page. The For you feed itself needs a login.
+  const isLegacyEventLink = /^\/guest\/explore\/[^/]+$/.test(pathname)
+  const isPublic = isLegacyEventLink || publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (isPublic) {
     if (user && request.method === 'GET') {
       if (pathname === '/auth/login') {
         const { data: profile } = await supabase
           .from('profiles').select('role').eq('id', user.id).single()
-        const metaRole = user.user_metadata?.role as string | undefined
-        const role = profile?.role ?? metaRole ?? 'guest'
+        const role = profile?.role ?? 'attendee'
 
-        // On a product subdomain, authenticated login always goes to that product's portal
-        if (subConfig) {
-          return NextResponse.redirect(new URL(subConfig.portal, request.url))
-        }
-
-        const dest = role === 'guest'  ? '/explore'
+        const dest = role === 'attendee' ? '/guest'
                    : role === 'admin'  ? '/master'
                    : '/dashboard'
         return NextResponse.redirect(new URL(dest, request.url))
@@ -194,11 +145,6 @@ export async function updateSession(request: NextRequest) {
       }
     }
 
-    if (!user && pathname.match(/^\/guest\/explore\/([^/]+)$/)) {
-      const slug = pathname.split('/guest/explore/')[1]
-      return NextResponse.redirect(new URL(`/register/${slug}`, request.url))
-    }
-
     return response
   }
 
@@ -209,15 +155,13 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
-  const metaRole = user.user_metadata?.role as string | undefined
-
   // Authoritative role comes from the trigger-protected profiles.role column.
   // Never gate access on user_metadata.role — it is writable by the user via
   // supabase.auth.updateUser, so using it for authorization would let anyone
-  // self-elevate to admin. metaRole is only a cosmetic fallback for display.
+  // self-elevate to admin.
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
-  const role = profile?.role ?? metaRole ?? 'guest'
+  const role = profile?.role ?? 'attendee'
 
   if (pathname.startsWith('/master')) {
     if (role !== 'admin') {
@@ -226,11 +170,15 @@ export async function updateSession(request: NextRequest) {
     return response
   }
 
-  if (role === 'guest' && pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/explore', request.url))
+  if (role === 'attendee' && pathname.startsWith('/dashboard')) {
+    // Team managers are attendee accounts that an organizer invited. They may use the dashboard.
+    const { data: team } = await supabase.from('organizer_team_members').select('id')
+      .eq('user_id', user.id).eq('status', 'active').limit(1).maybeSingle()
+    if (!team) return NextResponse.redirect(new URL('/guest', request.url))
+    return response
   }
 
-  if (role !== 'guest' && (pathname.startsWith('/guest') || pathname.startsWith('/explore'))) {
+  if (role !== 'attendee' && (pathname.startsWith('/guest') || pathname.startsWith('/explore'))) {
     const home = role === 'admin' ? '/master' : '/dashboard'
     return NextResponse.redirect(new URL(home, request.url))
   }

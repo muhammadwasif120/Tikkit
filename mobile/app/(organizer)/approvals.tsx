@@ -388,7 +388,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.pageBg },
 
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
-  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.warning, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   tabsScroll: { flexGrow: 0, marginBottom: 8 },
@@ -417,7 +417,7 @@ const s = StyleSheet.create({
     width: 38, height: 38, borderRadius: 19,
     backgroundColor: colors.blueSubtle, alignItems: 'center', justifyContent: 'center',
   },
-  avatarLetter: { color: colors.blue, fontSize: 16, fontFamily: 'Poppins_700Bold' },
+  avatarLetter: { color: colors.blue, fontSize: 16, fontFamily: 'Sora_700Bold' },
   cardName: { color: colors.textPrimary, fontSize: 14, fontFamily: 'DMSans_500Medium' },
   cardEmail: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular', marginTop: 1 },
   cardEvent: { color: colors.blue, fontSize: 11, fontFamily: 'DMSans_400Regular', marginTop: 2 },
@@ -432,7 +432,7 @@ const s = StyleSheet.create({
     width: 64, height: 64, borderRadius: 32,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold' },
   emptyText: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', maxWidth: 240, lineHeight: 20 },
 
   // Modal
@@ -446,7 +446,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  modalTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  modalTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
   modalContent: { padding: 16, gap: 12, paddingBottom: 40 },
 
   detailCard: {

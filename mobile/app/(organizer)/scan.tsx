@@ -293,7 +293,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface,
     alignItems: 'center', justifyContent: 'center', marginBottom: 8,
   },
-  permTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  permTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_600SemiBold' },
   permText: { color: colors.textSecondary, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center' },
   permBtn: {
     backgroundColor: colors.blue, borderRadius: radius.md,
@@ -352,7 +352,7 @@ const s = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   resultContent: { alignItems: 'center', gap: 10 },
-  resultName: { color: colors.white, fontSize: 22, fontFamily: 'Poppins_700Bold' },
+  resultName: { color: colors.white, fontSize: 22, fontFamily: 'Sora_700Bold' },
   resultStatus: { color: colors.white, fontSize: 16, fontFamily: 'DMSans_500Medium' },
   vipBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 4,
@@ -403,7 +403,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.border,
     alignSelf: 'center', marginBottom: 16,
   },
-  sheetTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold', marginBottom: 16 },
+  sheetTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_600SemiBold', marginBottom: 16 },
   sheetRow: {
     flexDirection: 'row', alignItems: 'center',
     paddingVertical: 14,

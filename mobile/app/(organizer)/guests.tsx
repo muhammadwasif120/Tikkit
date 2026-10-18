@@ -360,7 +360,7 @@ function Toggle({ label, value, onChange, color }: { label: string; value: boole
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.pageBg },
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 4 },
-  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   tabsScroll: { flexGrow: 0, marginBottom: 8 },
@@ -391,7 +391,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.blueSubtle, borderWidth: 1, borderColor: colors.blueBorder,
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarLetter: { color: colors.blue, fontSize: 16, fontFamily: 'Poppins_700Bold' },
+  avatarLetter: { color: colors.blue, fontSize: 16, fontFamily: 'Sora_700Bold' },
   cardBody: { flex: 1 },
   cardTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 },
   cardName: { color: colors.textPrimary, fontSize: 14, fontFamily: 'DMSans_500Medium', flex: 1, marginRight: 8 },
@@ -406,7 +406,7 @@ const s = StyleSheet.create({
 
   empty:          { alignItems: 'center', paddingTop: 64, paddingHorizontal: 32, gap: 10 },
   emptyIconCircle:{ width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  emptyTitle:     { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold', textAlign: 'center' },
+  emptyTitle:     { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold', textAlign: 'center' },
   emptyBody:      { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
 
   // Modal shared
@@ -420,7 +420,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  modalTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  modalTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
   saveBtn: { backgroundColor: colors.blue, borderRadius: radius.md, paddingHorizontal: 16, paddingVertical: 8 },
   saveBtnText: { color: colors.white, fontSize: 14, fontFamily: 'DMSans_500Medium', fontWeight: '700' },
   modalContent: { padding: 16, gap: 12, paddingBottom: 40 },
@@ -447,7 +447,7 @@ const s = StyleSheet.create({
     backgroundColor: '#FFF', borderRadius: radius.lg, padding: 24,
     shadowColor: '#000', shadowOpacity: 0.12, shadowRadius: 20, shadowOffset: { width: 0, height: 4 }, elevation: 8,
   },
-  qrName: { color: colors.textPrimary, fontSize: 20, fontFamily: 'Poppins_600SemiBold' },
+  qrName: { color: colors.textPrimary, fontSize: 20, fontFamily: 'Sora_600SemiBold' },
   qrEmail: { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular' },
   vipBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,

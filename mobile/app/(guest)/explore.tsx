@@ -641,13 +641,13 @@ const s = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
     paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12,
   },
-  headerTitle: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  headerTitle: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   headerSub: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
   logoMark: {
     width: 36, height: 36, borderRadius: radius.sm,
     backgroundColor: colors.blue, alignItems: 'center', justifyContent: 'center',
   },
-  logoLetter: { color: colors.white, fontSize: 18, fontFamily: 'Poppins_700Bold' },
+  logoLetter: { color: colors.white, fontSize: 18, fontFamily: 'Sora_700Bold' },
 
   // Search
   searchRow: { paddingHorizontal: 16, marginBottom: 10 },
@@ -712,7 +712,7 @@ const s = StyleSheet.create({
   },
   carouselModeText: { fontSize: 9, fontFamily: 'DMSans_500Medium', fontWeight: '700', letterSpacing: 0.5 },
   carouselTitle: {
-    color: colors.white, fontSize: 22, fontFamily: 'Poppins_700Bold',
+    color: colors.white, fontSize: 22, fontFamily: 'Sora_700Bold',
     lineHeight: 28, letterSpacing: -0.3,
   },
   carouselOrg: {
@@ -723,7 +723,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 2,
   },
   carouselDate: { color: 'rgba(255,255,255,0.55)', fontSize: 12, fontFamily: 'DMSans_400Regular' },
-  carouselPrice: { fontSize: 14, fontFamily: 'Poppins_600SemiBold' },
+  carouselPrice: { fontSize: 14, fontFamily: 'Sora_600SemiBold' },
 
   // Dots
   dots: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 5, paddingTop: 10 },
@@ -738,7 +738,7 @@ const s = StyleSheet.create({
   },
   mySectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   mySectionTitle: {
-    color: colors.textPrimary, fontSize: 15, fontFamily: 'Poppins_600SemiBold',
+    color: colors.textPrimary, fontSize: 15, fontFamily: 'Sora_600SemiBold',
   },
   mySeeAll: { color: colors.blue, fontSize: 12, fontFamily: 'DMSans_500Medium' },
   myScroll: { paddingHorizontal: 16, gap: 10 },
@@ -794,7 +794,7 @@ const s = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center', justifyContent: 'center',
   },
-  cardImgInitial: { color: 'rgba(255,255,255,0.7)', fontSize: 56, fontFamily: 'Poppins_700Bold' },
+  cardImgInitial: { color: 'rgba(255,255,255,0.7)', fontSize: 56, fontFamily: 'Sora_700Bold' },
 
   cardTopLeft: {
     position: 'absolute', top: 12, left: 12,
@@ -826,7 +826,7 @@ const s = StyleSheet.create({
     padding: 14, gap: 3,
   },
   cardTitle: {
-    color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold', lineHeight: 21,
+    color: colors.white, fontSize: 16, fontFamily: 'Sora_600SemiBold', lineHeight: 21,
   },
   cardOrganizer: {
     color: 'rgba(255,255,255,0.5)', fontSize: 11,
@@ -850,6 +850,6 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
   emptyText: { color: colors.textMuted, fontSize: 14, fontFamily: 'DMSans_400Regular' },
 })

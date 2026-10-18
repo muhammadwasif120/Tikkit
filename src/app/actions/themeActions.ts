@@ -3,9 +3,9 @@
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 
-export type AppTheme = 'noir' | 'corporate' | 'pulse'
+export type AppTheme = 'light' | 'dark'
 
-const VALID_THEMES: AppTheme[] = ['noir', 'corporate', 'pulse']
+const VALID_THEMES: AppTheme[] = ['light', 'dark']
 
 export async function updateTheme(theme: AppTheme) {
   if (!VALID_THEMES.includes(theme)) return { error: 'Invalid theme' }

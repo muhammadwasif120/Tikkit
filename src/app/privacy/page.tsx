@@ -1,8 +1,5 @@
-import Link from 'next/link'
-import { TikkitXLogo } from '@/components/ui/TikkitXLogo'
-import SiteFooter from '@/components/SiteFooter'
-
 import type { Metadata } from 'next'
+import { LegalPage, LegalSection, SubSection, LegalTable, ContactBox } from '@/components/marketing/legal'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy — Tikkit X',
@@ -24,33 +21,12 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div style={{ background: '#080A10', minHeight: '100vh', color: '#E8EAF0' }}>
-      {/* Nav */}
-      <nav style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', maxWidth: 1100, margin: '0 auto' }}>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <TikkitXLogo size="sm" />
-        </Link>
-        <Link href="/terms" style={{ fontSize: 13, color: '#7A8494', textDecoration: 'none' }}>
-          Terms &amp; Conditions →
-        </Link>
-      </nav>
-
-      {/* Content */}
-      <main style={{ maxWidth: 760, margin: '0 auto', padding: '60px 24px 100px' }}>
-        {/* Header */}
-        <div style={{ marginBottom: 48 }}>
-          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', color: '#00C2FF', textTransform: 'uppercase', marginBottom: 12 }}>Legal</p>
-          <h1 style={{ fontSize: 40, fontWeight: 800, color: '#fff', letterSpacing: '-0.03em', lineHeight: 1.1, marginBottom: 16 }}>Privacy Policy</h1>
-          <p style={{ fontSize: 14, color: '#7A8494', lineHeight: 1.6 }}>
-            Effective Date: 1 April 2026 &nbsp;|&nbsp; Last Updated: 1 April 2026
-          </p>
-          <div style={{ marginTop: 24, padding: '16px 20px', background: 'rgba(0,194,255,0.06)', border: '1px solid rgba(0,194,255,0.15)', borderRadius: 10, fontSize: 14, color: '#9AAAB8', lineHeight: 1.7 }}>
-            Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X ("Tikkit X," "we," "us," or "our"), is committed to protecting your privacy. This policy explains how we collect, use, store, and protect your personal information when you use the Tikkit X platform.
-          </div>
-        </div>
-
-        {/* Sections */}
-        <LegalSection number="1" title="Introduction">
+    <LegalPage
+      title="Privacy Policy"
+      effective="Effective Date: 1 April 2026 | Last Updated: 1 April 2026"
+      intro={`Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X ("Tikkit X," "we," "us," or "our"), is committed to protecting your privacy. This policy explains how we collect, use, store, and protect your personal information when you use the Tikkit X platform.`}
+    >
+      <LegalSection number="1" title="Introduction">
           <p>Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X ("Tikkit X," "we," "us," or "our"), is committed to protecting the privacy and security of your personal data. This Privacy Policy explains how we collect, use, store, share, and protect your personal information when you use the Tikkit X platform, including our website at tikkitx.com, our mobile applications, and all related services (the "Platform").</p>
           <p>This Privacy Policy should be read together with our Terms and Conditions. By using the Platform, you consent to the collection and use of your personal data as described in this Policy.</p>
         </LegalSection>
@@ -144,8 +120,8 @@ export default function PrivacyPolicyPage() {
           <p>Tikkit X uses cryptographic technology (HMAC-SHA256 with HKDF key derivation) to generate and verify QR Code tickets.</p>
           <ul>
             <li><strong>QR Code Payload:</strong> Your QR Code contains your guest ID, event ID, name, ticket days, status, and timestamp. This payload is cryptographically signed but not encrypted — it is readable by any scanner with the per-event verification key.</li>
-            <li><strong>Per-Event Keys:</strong> Verification keys are derived from a master secret using event-specific parameters. Per-event keys are cached on scanner devices for offline verification. Keys are rotated per event and cannot be used to derive the master secret.</li>
-            <li><strong>Offline Verification:</strong> QR Code verification can occur without network connectivity. Scan data is stored locally on the scanner device and synchronised with the Platform when connectivity is restored.</li>
+            <li><strong>Per-Event Keys:</strong> Verification keys are derived from a master secret using event-specific parameters. Keys are rotated per event and cannot be used to derive the master secret.</li>
+            <li><strong>Live Verification:</strong> QR Code verification is checked against the Platform in real time, so a ticket cannot be admitted twice. Scan results are stored by the Platform.</li>
             <li><strong>Scan Logs:</strong> All scan events are recorded in an immutable, append-only audit log for security and compliance purposes.</li>
           </ul>
         </LegalSection>
@@ -193,11 +169,11 @@ export default function PrivacyPolicyPage() {
             <li><strong>Right to Object:</strong> You may object to the processing of your personal data where we rely on legitimate interests as the legal basis.</li>
             <li><strong>Right to Withdraw Consent:</strong> Where processing is based on your consent, you may withdraw that consent at any time without affecting the lawfulness of prior processing.</li>
           </ul>
-          <p>To exercise any of these rights, please contact us at <a href="mailto:admin@tikkitx.com" style={{ color: '#00C2FF' }}>admin@tikkitx.com</a>. We will respond within 30 days.</p>
+          <p>To exercise any of these rights, please contact us at <a href="mailto:admin@tikkitx.com">admin@tikkitx.com</a>. We will respond within 30 days.</p>
         </LegalSection>
 
         <LegalSection number="12" title="Children's Privacy">
-          <p>The Platform is not intended for use by individuals under the age of 18. We do not knowingly collect personal data from children under 18. If we become aware that we have collected personal data from a child under 18, we will take steps to delete that data promptly. If you believe that a child under 18 has provided us with personal data, please contact us at <a href="mailto:admin@tikkitx.com" style={{ color: '#00C2FF' }}>admin@tikkitx.com</a>.</p>
+          <p>The Platform is not intended for use by individuals under the age of 18. We do not knowingly collect personal data from children under 18. If we become aware that we have collected personal data from a child under 18, we will take steps to delete that data promptly. If you believe that a child under 18 has provided us with personal data, please contact us at <a href="mailto:admin@tikkitx.com">admin@tikkitx.com</a>.</p>
         </LegalSection>
 
         <LegalSection number="13" title="Cookies and Tracking Technologies">
@@ -227,71 +203,6 @@ export default function PrivacyPolicyPage() {
           <ContactBox />
           <p>For data protection enquiries from the United Kingdom or European Economic Area, you may also contact the relevant supervisory authority in your jurisdiction.</p>
         </LegalSection>
-      </main>
-
-      <style>{`
-        main p { font-size: 15px; line-height: 1.75; color: #9AAAB8; margin-bottom: 14px; }
-        main ul { padding-left: 20px; margin-bottom: 14px; }
-        main ul li { font-size: 15px; line-height: 1.75; color: #9AAAB8; margin-bottom: 8px; }
-        main strong { color: #C8D0DC; font-weight: 600; }
-      `}</style>
-      <SiteFooter />
-    </div>
-  )
-}
-
-function LegalSection({ number, title, children }: { number: string; title: string; children: React.ReactNode }) {
-  return (
-    <section style={{ marginBottom: 48, paddingBottom: 48, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 20 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#00C2FF', opacity: 0.6, minWidth: 24 }}>{number}.</span>
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#E8EAF0', letterSpacing: '-0.02em' }}>{title}</h2>
-      </div>
-      <div style={{ paddingLeft: 36 }}>{children}</div>
-    </section>
-  )
-}
-
-function SubSection({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: 20 }}>
-      <h3 style={{ fontSize: 14, fontWeight: 600, color: '#C8D0DC', marginBottom: 10 }}>{title}</h3>
-      {children}
-    </div>
-  )
-}
-
-function LegalTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
-  return (
-    <div style={{ overflowX: 'auto', marginBottom: 16 }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13, lineHeight: 1.6 }}>
-        <thead>
-          <tr>
-            {headers.map(h => (
-              <th key={h} style={{ textAlign: 'left', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', color: '#C8D0DC', fontWeight: 600, borderBottom: '1px solid rgba(255,255,255,0.08)', whiteSpace: 'nowrap' }}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-              {row.map((cell, j) => (
-                <td key={j} style={{ padding: '10px 14px', color: '#9AAAB8', verticalAlign: 'top' }}>{cell}</td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-function ContactBox() {
-  return (
-    <div style={{ margin: '14px 0', padding: '14px 18px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 8, fontSize: 14, color: '#9AAAB8', lineHeight: 1.8 }}>
-      <strong style={{ color: '#C8D0DC', display: 'block' }}>Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X</strong>
-      Email: <a href="mailto:admin@tikkitx.com" style={{ color: '#00C2FF' }}>admin@tikkitx.com</a><br />
-      Website: <a href="https://tikkitx.com" style={{ color: '#00C2FF' }}>https://tikkitx.com</a>
-    </div>
+    </LegalPage>
   )
 }

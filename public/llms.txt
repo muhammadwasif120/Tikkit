@@ -1,34 +1,42 @@
-# Tikkit X
+# TIKKIT X
 
-> Pakistan's #1 event ticketing and management platform — discover, register, and host exclusive events across Lahore, Karachi, Islamabad, and nationwide.
+> Event ticketing, guest lists and door control for organizers in Pakistan. QR tickets, approval lists, referral tracking and a door scanner, for events in Karachi, Lahore and Islamabad.
 
-## About Tikkit X
+## About TIKKIT X
 
-Tikkit (stylized as Tikkit X) is a dedicated event ticketing, RSVP, and guest management platform built specifically for the Pakistani market. Founded in Lahore, Tikkit serves event organizers and attendees across Pakistan's major cities including Lahore, Karachi, Islamabad, Rawalpindi, and Faisalabad.
+TIKKIT X (also written Tikkit) is built by Two Bit Digital Ltd in Karachi. Organizers sell QR tickets, approve guests, track promoters and run the door from one workspace. Guests create an account, register, pay the organizer directly by bank transfer, JazzCash or EasyPaisa, upload a receipt, and receive a signed single use QR ticket once approved.
 
-Tikkit is not a generic ticketing platform — it is purpose-built for curated, managed events: private parties, corporate conferences, music concerts, art exhibitions, wellness retreats, sports events, and more.
+## What organizers get
 
-## What Makes Tikkit Different
+- **Tickets**: tiers, VIP, free and early bird tickets with caps and cutoffs
+- **One guest list**: requests, payments, approvals and check ins in a single view
+- **Event Day**: a QR scanner and live count, with temporary scanner links for door staff
+- **Referrals**: promoter links, codes and QR with commission tracking
+- **Secret locations**: hide the venue and reveal it to confirmed guests at a set time
+- **Guest score**: attendance history and verified ID checks for every guest
+- **Classes and spaces**: recurring classes with pass packs, and bookable spaces with time slots
+- **Retreats** (Pro): multi day itineraries for companies, with participants, budget and a shareable live schedule
 
-- **Dynamic QR Technology**: Proprietary QR codes that refresh every 15 seconds, eliminating ticket fraud and screenshot abuse
-- **Guest List Management**: Full approval workflows — organizers approve/reject/waitlist attendees individually
-- **Instant Payouts**: Organizers receive funds directly without multi-week settlement delays
-- **Zero Setup Cost**: No subscription fees; organizers launch event pages in under 2 minutes
-- **Dual-Side Platform**: Serves both event organizers (dashboard, analytics, QR scanner) and attendees (discovery, booking, digital ticket)
-- **Pakistan-First**: Payment support for local methods; PKR pricing throughout
+## Pricing
 
-## Core Platform Links
+Flat monthly plans in PKR after a 14 day free trial: Starter 2,999, Growth 7,999 and Pro 12,999 per month (annual billing pays for 10 months). TIKKIT X does not take a percentage of ticket sales. Guests pay organizers directly.
 
-- [Homepage](https://www.tikkitx.com): Main platform landing
-- [Explore Events](https://www.tikkitx.com/explore): Browse all upcoming public events in Pakistan
-- [Events in Lahore](https://www.tikkitx.com/explore/lahore): Upcoming events in Lahore
-- [Events in Karachi](https://www.tikkitx.com/explore/karachi): Upcoming events in Karachi
-- [Events in Islamabad](https://www.tikkitx.com/explore/islamabad): Upcoming events in Islamabad
-- [How it Works](https://www.tikkitx.com/how-it-works): Guide for organizers on selling tickets
-- [Corporate Events](https://www.tikkitx.com/corporate): Enterprise and B2B event solutions
-- [Wellness & Retreat Events](https://www.tikkitx.com/pulse): Wellness, yoga, and retreat events
-- [Blog](https://www.tikkitx.com/blog): Event planning guides, how-tos, and Pakistan event scene insights
-- [Sitemap](https://www.tikkitx.com/sitemap.xml): Full index of all active event URLs
+## Core links
+
+- [Homepage](https://www.tikkitx.com)
+- [Pricing](https://www.tikkitx.com/pricing)
+- [How it works](https://www.tikkitx.com/how-it-works)
+- [Explore events](https://www.tikkitx.com/explore)
+- [Events in Karachi](https://www.tikkitx.com/explore/karachi)
+- [Events in Lahore](https://www.tikkitx.com/explore/lahore)
+- [Events in Islamabad](https://www.tikkitx.com/explore/islamabad)
+- [Classes](https://www.tikkitx.com/classes)
+- [Spaces](https://www.tikkitx.com/spaces)
+- [Security](https://www.tikkitx.com/security)
+- [About](https://www.tikkitx.com/about)
+- [Contact](https://www.tikkitx.com/contact)
+- [Blog](https://www.tikkitx.com/blog)
+- [Sitemap](https://www.tikkitx.com/sitemap.xml)
 
 ## Blog & Knowledge Articles
 

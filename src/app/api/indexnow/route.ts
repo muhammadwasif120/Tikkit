@@ -1,151 +1,46 @@
+import { timingSafeEqual } from 'node:crypto'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAllPosts } from '@/lib/blog'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const INDEX_NOW_KEY = '2aac1ba3120f5fcd7e8ec88cc63f7355'
 const BASE_URL = 'https://www.tikkitx.com'
+const STATIC_URLS = ['/', '/explore', '/how-it-works', '/pricing', '/classes', '/spaces', '/blog', '/privacy', '/terms'].map(p => `${BASE_URL}${p}`)
 
-// Static URLs to always submit
-const STATIC_URLS = [
-  `${BASE_URL}/`,
-  `${BASE_URL}/explore`,
-  `${BASE_URL}/how-it-works`,
-  `${BASE_URL}/corporate`,
-  `${BASE_URL}/pulse`,
-  `${BASE_URL}/venue/home`,
-  `${BASE_URL}/venues`,
-  `${BASE_URL}/blog`,
-  `${BASE_URL}/privacy`,
-  `${BASE_URL}/terms`,
-]
+const same = (a: string, b: string) => { const x = Buffer.from(a), y = Buffer.from(b); return x.length === y.length && timingSafeEqual(x, y) }
 
-/** Pull published event + organizer URLs from DB */
-async function getDynamicUrls(): Promise<string[]> {
-  try {
-    const admin = createAdminClient()
-    const now = new Date().toISOString()
-
-    // Upcoming + recent past events (6 months back)
-    const sixMonthsAgo = new Date()
-    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
-
-    const [eventsRes, organizersRes, venuesRes] = await Promise.all([
-      admin
-        .from('events')
-        .select('id, slug')
-        .eq('status', 'published')
-        .eq('is_private', false)
-        .gte('date_start', sixMonthsAgo.toISOString())
-        .order('date_start', { ascending: false })
-        .limit(500),
-      admin
-        .from('profiles')
-        .select('username')
-        .eq('role', 'organizer')
-        .not('username', 'is', null)
-        .neq('username', '')
-        .limit(500),
-      (admin as any)
-        .from('venues')
-        .select('slug')
-        .eq('active', true)
-        .not('slug', 'is', null)
-        .limit(500),
-    ])
-
-    const eventUrls = (eventsRes.data ?? []).map((ev: any) =>
-      `${BASE_URL}/guest/explore/${ev.slug || ev.id}`
-    )
-    const organizerUrls = (organizersRes.data ?? []).map((org: any) =>
-      `${BASE_URL}/organizer/${org.username}`
-    )
-    const venueUrls = (venuesRes.data ?? []).map((v: any) =>
-      `${BASE_URL}/venue/${v.slug}`
-    )
-
-    return [...eventUrls, ...organizerUrls, ...venueUrls]
-  } catch {
-    return []
-  }
+/** Public listings only: events, classes, spaces and organizers that are already on the public site. */
+async function dynamicUrls(): Promise<string[]> {
+  const admin = createAdminClient()
+  const since = new Date(Date.now() - 180 * 86_400_000).toISOString()
+  const [events, classes, spaces, orgs] = await Promise.all([
+    admin.from('event_listings').select('slug').gte('ends_at', since).limit(500),
+    admin.from('public_class_series').select('slug').limit(300),
+    admin.from('public_spaces').select('slug').limit(300),
+    admin.from('public_organizers').select('username').not('username', 'is', null).limit(500),
+  ])
+  return [
+    ...(events.data ?? []).filter(e => e.slug).map(e => `${BASE_URL}/events/${e.slug}`),
+    ...(classes.data ?? []).filter(c => c.slug).map(c => `${BASE_URL}/classes/${c.slug}`),
+    ...(spaces.data ?? []).filter(s => s.slug).map(s => `${BASE_URL}/spaces/${s.slug}`),
+    ...(orgs.data ?? []).filter(o => o.username).map(o => `${BASE_URL}/organizer/${o.username}`),
+  ]
 }
 
-/**
- * POST /api/indexnow
- * Submits all blog, event, and organizer URLs to Bing IndexNow for instant crawl.
- * Protect with a secret header: x-indexnow-secret
- *
- * Example: curl -X POST https://www.tikkitx.com/api/indexnow \
- *   -H "x-indexnow-secret: <INDEXNOW_SECRET>"
- *
- * IndexNow propagates to Bing, Yandex, and Seznam simultaneously.
- * Limit: 10,000 URLs per request.
- */
+/** POST /api/indexnow with header x-indexnow-secret. Submits the public URLs to IndexNow. */
 export async function POST(req: NextRequest) {
-  // Auth gate — INDEXNOW_SECRET must be set in Vercel env vars
   const secret = process.env.INDEXNOW_SECRET
-  if (!secret) {
-    console.error('INDEXNOW_SECRET env var is not set')
-    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
-  }
-  const provided = req.headers.get('x-indexnow-secret')
-  if (provided !== secret) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  if (!secret) return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+  if (!same(req.headers.get('x-indexnow-secret') ?? '', secret)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const blogPosts = getAllPosts()
-  const blogUrls = blogPosts.map(p => `${BASE_URL}/blog/${p.slug}`)
-  const dynamicUrls = await getDynamicUrls()
-
-  const urlList = [...STATIC_URLS, ...blogUrls, ...dynamicUrls]
-
-  const body = {
-    host: 'www.tikkitx.com',
-    key: INDEX_NOW_KEY,
-    keyLocation: `${BASE_URL}/${INDEX_NOW_KEY}.txt`,
-    urlList,
-  }
-
+  const urlList = [...STATIC_URLS, ...getAllPosts().map(p => `${BASE_URL}/blog/${p.slug}`), ...(await dynamicUrls())]
   try {
     const res = await fetch('https://api.indexnow.org/indexnow', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json; charset=utf-8' },
-      body: JSON.stringify(body),
+      method: 'POST', headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({ host: 'www.tikkitx.com', key: INDEX_NOW_KEY, keyLocation: `${BASE_URL}/${INDEX_NOW_KEY}.txt`, urlList }),
     })
-
-    const statusText = res.ok ? 'OK' : await res.text()
-
-    return NextResponse.json({
-      submitted: urlList.length,
-      breakdown: {
-        static: STATIC_URLS.length,
-        blog: blogUrls.length,
-        dynamic: dynamicUrls.length,
-      },
-      bingStatus: res.status,
-      bingResponse: statusText,
-    })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    return NextResponse.json({ submitted: urlList.length, status: res.status })
+  } catch {
+    return NextResponse.json({ error: 'Submission failed' }, { status: 502 })
   }
-}
-
-/**
- * GET /api/indexnow
- * Returns the list of URLs that would be submitted — dry run, no Bing call.
- */
-export async function GET() {
-  const blogPosts = getAllPosts()
-  const blogUrls = blogPosts.map(p => `${BASE_URL}/blog/${p.slug}`)
-  const dynamicUrls = await getDynamicUrls()
-  const urlList = [...STATIC_URLS, ...blogUrls, ...dynamicUrls]
-
-  return NextResponse.json({
-    count: urlList.length,
-    breakdown: {
-      static: STATIC_URLS.length,
-      blog: blogUrls.length,
-      dynamic: dynamicUrls.length,
-    },
-    urls: urlList,
-  })
 }

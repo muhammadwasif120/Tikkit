@@ -1,6 +1,9 @@
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { Badge, ButtonLink, type BadgeTone } from '@/components/kit'
+import { MarketingShell } from '@/components/marketing/MarketingShell'
+import { JsonLd } from '@/components/marketing/blocks'
 import { marked } from 'marked'
 import { getPostBySlug, getAllPosts, CATEGORY_LABELS } from '@/lib/blog'
 import { HOWTO_STEPS } from '@/lib/howto-steps'
@@ -43,12 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-const CATEGORY_BADGE: Record<string, { bg: string; text: string }> = {
-  'how-to':    { bg: 'rgba(30,94,255,0.12)',   text: '#1E5EFF' },
-  'corporate': { bg: 'rgba(99,179,237,0.12)',  text: '#63B3ED' },
-  'pulse':     { bg: 'rgba(124,154,126,0.15)', text: '#7C9A7E' },
-  'pakistan':  { bg: 'rgba(255,199,69,0.15)',  text: '#FFC745' },
-}
+const CATEGORY_TONE: Record<string, BadgeTone> = { 'how-to': 'accent', corporate: 'info', pulse: 'success', pakistan: 'magenta' }
 
 // Configure marked for clean, safe output
 marked.setOptions({ breaks: false, gfm: true })
@@ -59,7 +57,6 @@ export default async function ArticlePage({ params }: Props) {
   if (!post) notFound()
 
   const htmlContent = await marked(post.content)
-  const badge = CATEGORY_BADGE[post.category]
 
   const publishDate = new Date(post.publishedAt).toLocaleDateString('en-PK', {
     year: 'numeric', month: 'long', day: 'numeric',
@@ -115,311 +112,47 @@ export default async function ArticlePage({ params }: Props) {
   ]
 
   return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+    <MarketingShell>
+      <JsonLd data={jsonLd} />
+      <div className="mx-auto max-w-3xl px-4 pb-24 pt-10 sm:px-6">
+        <nav aria-label="Breadcrumb" className="text-[13px] text-subtle">
+          <Link href="/" className="hover:text-fg">Home</Link> / <Link href="/blog" className="hover:text-fg">Blog</Link> / <span>{CATEGORY_LABELS[post.category]}</span>
+        </nav>
 
-      <style>{`
-        .blog-prose h2 {
-          font-family: var(--font-display);
-          font-size: clamp(20px, 2.5vw, 26px);
-          font-weight: 700;
-          line-height: 1.3;
-          color: var(--foreground);
-          margin-top: 44px;
-          margin-bottom: 14px;
-        }
-        .blog-prose h3 {
-          font-size: 18px;
-          font-weight: 700;
-          line-height: 1.35;
-          color: var(--foreground);
-          margin-top: 32px;
-          margin-bottom: 10px;
-        }
-        .blog-prose p {
-          font-size: 16px;
-          line-height: 1.8;
-          color: var(--foreground);
-          opacity: 0.85;
-          margin-bottom: 20px;
-        }
-        .blog-prose ul {
-          margin-bottom: 24px;
-          padding-left: 0;
-          list-style: none;
-        }
-        .blog-prose ul li {
-          font-size: 16px;
-          line-height: 1.75;
-          color: var(--foreground);
-          opacity: 0.85;
-          margin-bottom: 8px;
-          padding-left: 20px;
-          position: relative;
-        }
-        .blog-prose ul li::before {
-          content: '';
-          position: absolute;
-          left: 0;
-          top: 10px;
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          background: #1E5EFF;
-        }
-        .blog-prose ol {
-          margin-bottom: 24px;
-          padding-left: 24px;
-        }
-        .blog-prose ol li {
-          font-size: 16px;
-          line-height: 1.75;
-          color: var(--foreground);
-          opacity: 0.85;
-          margin-bottom: 8px;
-        }
-        .blog-prose strong {
-          font-weight: 700;
-          color: var(--foreground);
-          opacity: 1;
-        }
-        .blog-prose em { font-style: italic; }
-        .blog-prose blockquote {
-          border-left: 3px solid #1E5EFF;
-          padding-left: 20px;
-          margin: 28px 0;
-          opacity: 0.75;
-          font-style: italic;
-        }
-        .blog-prose code {
-          background: rgba(30,94,255,0.1);
-          border: 1px solid rgba(30,94,255,0.2);
-          border-radius: 4px;
-          padding: 2px 7px;
-          font-size: 13px;
-          font-family: monospace;
-          color: #1E5EFF;
-        }
-        .blog-prose pre {
-          background: rgba(30,94,255,0.06);
-          border: 1px solid rgba(30,94,255,0.15);
-          border-radius: 10px;
-          padding: 20px;
-          overflow-x: auto;
-          margin-bottom: 28px;
-        }
-        .blog-prose pre code {
-          background: none;
-          border: none;
-          padding: 0;
-          font-size: 14px;
-          color: var(--foreground);
-          opacity: 0.85;
-        }
-        .blog-prose hr {
-          border: none;
-          border-top: 1px solid rgba(255,255,255,0.08);
-          margin: 40px 0;
-        }
-        .blog-prose a {
-          color: #1E5EFF;
-          text-decoration: underline;
-          text-underline-offset: 3px;
-        }
-        .blog-prose table {
-          width: 100%;
-          border-collapse: collapse;
-          font-size: 14px;
-          margin-bottom: 28px;
-        }
-        .blog-prose th {
-          text-align: left;
-          padding: 10px 14px;
-          border-bottom: 1px solid rgba(255,255,255,0.1);
-          font-weight: 700;
-          font-size: 12px;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: var(--foreground);
-          opacity: 0.5;
-        }
-        .blog-prose td {
-          padding: 10px 14px;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-          color: var(--foreground);
-          opacity: 0.8;
-          line-height: 1.5;
-        }
-      `}</style>
-
-      <main style={{ minHeight: '100vh', background: 'var(--background)', paddingBottom: '100px' }}>
-
-        {/* Breadcrumb */}
-        <div style={{ maxWidth: '760px', margin: '0 auto', padding: '28px 24px 0' }}>
-          <nav style={{ fontSize: '13px', color: 'var(--foreground)', opacity: 0.4 }}>
-            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>Home</Link>
-            {' / '}
-            <Link href="/blog" style={{ color: 'inherit', textDecoration: 'none' }}>Blog</Link>
-            {' / '}
-            <span>{CATEGORY_LABELS[post.category]}</span>
-          </nav>
-        </div>
-
-        {/* Article header */}
-        <header style={{ maxWidth: '760px', margin: '0 auto', padding: '32px 24px 0' }}>
-          <span style={{
-            display: 'inline-block',
-            padding: '3px 10px',
-            borderRadius: '20px',
-            fontSize: '11px',
-            fontWeight: 700,
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-            background: badge.bg,
-            color: badge.text,
-            marginBottom: '20px',
-          }}>
-            {CATEGORY_LABELS[post.category]}
-          </span>
-
-          <h1 style={{
-            fontSize: 'clamp(26px, 4vw, 42px)',
-            fontWeight: 800,
-            lineHeight: 1.2,
-            color: 'var(--foreground)',
-            fontFamily: 'var(--font-display)',
-            marginBottom: '20px',
-          }}>
-            {post.title}
-          </h1>
-
-          <p style={{
-            fontSize: '18px',
-            lineHeight: 1.65,
-            color: 'var(--foreground)',
-            opacity: 0.65,
-            marginBottom: '28px',
-          }}>
-            {post.description}
-          </p>
-
-          <div style={{
-            display: 'flex',
-            gap: '20px',
-            flexWrap: 'wrap',
-            fontSize: '13px',
-            color: 'var(--foreground)',
-            opacity: 0.45,
-            paddingBottom: '32px',
-            borderBottom: '1px solid rgba(255,255,255,0.07)',
-            marginBottom: '48px',
-          }}>
-            <span>By {post.author}</span>
-            <span>·</span>
+        <header className="mt-8">
+          <Badge tone={CATEGORY_TONE[post.category] ?? 'neutral'}>{CATEGORY_LABELS[post.category]}</Badge>
+          <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.12] tracking-tight text-fg sm:text-5xl">{post.title}</h1>
+          <p className="mt-5 text-pretty text-lg leading-relaxed text-muted">{post.description}</p>
+          <p className="mt-6 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-line pb-8 text-[13px] text-subtle">
+            <span>By {post.author}</span><span aria-hidden>·</span>
             <span>{publishDate}</span>
-            {updatedDate && <><span>·</span><span>Updated {updatedDate}</span></>}
-            <span>·</span>
-            <span>{post.readingTime} min read</span>
-          </div>
+            {updatedDate && <><span aria-hidden>·</span><span>Updated {updatedDate}</span></>}
+            <span aria-hidden>·</span><span>{post.readingTime} min read</span>
+          </p>
         </header>
 
-        {/* Article body */}
-        <article
-          className="blog-prose"
-          style={{ maxWidth: '760px', margin: '0 auto', padding: '0 24px' }}
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
-        />
+        <article className="mt-10 [&_a]:text-accent [&_a]:underline [&_a]:underline-offset-4 [&_blockquote]:my-7 [&_blockquote]:border-l-2 [&_blockquote]:border-accent [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:text-muted [&_code]:rounded [&_code]:bg-raised [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:text-[13px] [&_code]:text-accent [&_h2]:mb-3.5 [&_h2]:mt-11 [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:leading-tight [&_h2]:tracking-tight [&_h2]:text-fg [&_h3]:mb-2.5 [&_h3]:mt-8 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-fg [&_hr]:my-10 [&_hr]:border-line [&_li]:mb-2 [&_li]:leading-8 [&_ol]:mb-6 [&_ol]:list-decimal [&_ol]:pl-6 [&_p]:mb-5 [&_p]:text-[16px] [&_p]:leading-8 [&_p]:text-muted [&_pre]:mb-7 [&_pre]:overflow-x-auto [&_pre]:rounded-xl [&_pre]:bg-surface [&_pre]:p-5 [&_pre_code]:bg-transparent [&_pre_code]:text-fg [&_strong]:font-semibold [&_strong]:text-fg [&_table]:mb-7 [&_table]:w-full [&_table]:text-sm [&_td]:border-b [&_td]:border-line [&_td]:px-3.5 [&_td]:py-2.5 [&_td]:text-muted [&_th]:border-b [&_th]:border-line-strong [&_th]:px-3.5 [&_th]:py-2.5 [&_th]:text-left [&_th]:text-xs [&_th]:uppercase [&_th]:tracking-wider [&_th]:text-subtle [&_ul]:mb-6 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:marker:text-accent [&_li]:text-muted" dangerouslySetInnerHTML={{ __html: htmlContent }} />
 
-        {/* Author bio */}
-        <div style={{ maxWidth: '760px', margin: '56px auto 0', padding: '0 24px' }}>
-          <div style={{
-            display: 'flex', gap: 20, alignItems: 'flex-start',
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 16, padding: '24px 24px',
-          }}>
-            <div style={{
-              width: 48, height: 48, borderRadius: 14, flexShrink: 0,
-              background: 'linear-gradient(135deg, #1E5EFF, #A855F7)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 800, color: '#fff',
-            }}>
-              {post.author.split(' ').map(n => n[0]).join('').slice(0, 2)}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
-                <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--foreground)' }}>{post.author}</span>
-                <span style={{ fontSize: 12, color: 'var(--foreground)', opacity: 0.4 }}>{post.authorTitle}</span>
-              </div>
-              <p style={{ fontSize: 13, lineHeight: 1.65, color: 'var(--foreground)', opacity: 0.55, margin: 0 }}>
-                Muhammad built Tikkit X after watching Pakistani organisers run events on WhatsApp threads and Google Sheets.
-                He writes about event management, ticketing, and building products for Pakistan.
-              </p>
-              <Link href="/about" style={{ display: 'inline-block', marginTop: 10, fontSize: 12, color: '#1E5EFF', textDecoration: 'none', fontWeight: 600 }}>
-                About the author →
-              </Link>
-            </div>
+        <aside className="mt-14 flex items-start gap-5 rounded-2xl bg-surface p-6 shadow-card">
+          <span aria-hidden className="grid h-12 w-12 shrink-0 place-items-center rounded-xl text-base font-bold text-accent-fg" style={{ background: 'linear-gradient(135deg, rgb(var(--k-accent)), rgb(var(--k-magenta)))' }}>
+            {post.author.split(' ').map(n => n[0]).join('').slice(0, 2)}
+          </span>
+          <div className="min-w-0">
+            <p className="flex flex-wrap items-baseline gap-x-3"><span className="font-semibold text-fg">{post.author}</span><span className="text-xs text-subtle">{post.authorTitle}</span></p>
+            <p className="mt-1.5 text-sm leading-relaxed text-muted">Muhammad built Tikkit X after watching Pakistani organisers run events on WhatsApp threads and Google Sheets. He writes about event management, ticketing, and building products for Pakistan.</p>
+            <Link href="/about" className="mt-2 inline-block text-xs font-semibold text-accent hover:underline">About the author</Link>
+          </div>
+        </aside>
+
+        <div className="k-gradient-ring mt-12 rounded-2xl bg-surface p-8 text-center sm:p-10">
+          <p className="text-xl font-semibold tracking-tight text-fg">Ready to run your next event?</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted">Start a 14 day free trial and launch your first event in about ten minutes.</p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <ButtonLink href="/auth/login?flow=organizer-signup">Start free trial</ButtonLink>
+            <ButtonLink href="/blog" variant="secondary">More articles</ButtonLink>
           </div>
         </div>
-
-        {/* Footer CTA */}
-        <div style={{ maxWidth: '760px', margin: '64px auto 0', padding: '0 24px' }}>
-          <div style={{
-            background: 'rgba(30,94,255,0.06)',
-            border: '1px solid rgba(30,94,255,0.2)',
-            borderRadius: '16px',
-            padding: '36px',
-            textAlign: 'center',
-          }}>
-            <p style={{
-              fontSize: '20px',
-              fontWeight: 700,
-              color: 'var(--foreground)',
-              fontFamily: 'var(--font-display)',
-              marginBottom: '10px',
-            }}>
-              Ready to run your next event?
-            </p>
-            <p style={{ fontSize: '14px', color: 'var(--foreground)', opacity: 0.55, marginBottom: '24px' }}>
-              Create your free organiser account and launch your first event in under 10 minutes.
-            </p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link
-                href="/auth/login?flow=organizer-signup"
-                style={{
-                  padding: '12px 28px',
-                  background: '#1E5EFF',
-                  color: '#fff',
-                  borderRadius: '10px',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: 700,
-                }}
-              >
-                Get started free
-              </Link>
-              <Link
-                href="/blog"
-                style={{
-                  padding: '12px 28px',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  color: 'var(--foreground)',
-                  borderRadius: '10px',
-                  textDecoration: 'none',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  opacity: 0.7,
-                }}
-              >
-                More articles
-              </Link>
-            </div>
-          </div>
-        </div>
-      </main>
-    </>
+      </div>
+    </MarketingShell>
   )
 }

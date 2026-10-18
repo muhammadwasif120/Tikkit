@@ -200,7 +200,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12,
   },
-  navTitle: { color: colors.textPrimary, fontSize: 22, fontFamily: 'Poppins_700Bold' },
+  navTitle: { color: colors.textPrimary, fontSize: 22, fontFamily: 'Sora_700Bold' },
   navSub: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular', marginTop: 2 },
   supportBadge: {
     flexDirection: 'row', alignItems: 'center', gap: 5,
@@ -223,7 +223,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.blueSubtle, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.blueBorder,
   },
-  introTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold' },
+  introTitle: { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold' },
   introDesc: {
     color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular',
     lineHeight: 20, textAlign: 'center',

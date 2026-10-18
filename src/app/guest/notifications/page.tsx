@@ -1,29 +1,16 @@
-import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import GuestNotificationsClient from '@/components/guest/GuestNotificationsClient'
-import GuestLoader from '@/components/guest/GuestLoader'
+import { PageHeader } from '@/components/kit'
+import NotificationsClient from '@/components/attendee/NotificationsClient'
+import { requireAttendee } from '@/lib/data/viewer'
 
-async function NotificationsData() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+export const metadata = { title: 'Notifications' }
 
-  const { data: registrations } = await supabase
-    .from('public_registrations')
-    .select('id, status, payment_status, reviewed_at, created_at, event:events(id, title, cover_image_url, date_start)')
-    .eq('email', user.email!)
-    .not('status', 'eq', 'pending')
-    .order('reviewed_at', { ascending: false })
-    .limit(30)
-
-  return <GuestNotificationsClient registrations={(registrations ?? []).map((r: any) => ({ ...r, status: r.status ?? 'pending' }))} />
-}
-
-export default function GuestNotificationsPage() {
+export default async function NotificationsPage() {
+  const { supabase, profile } = await requireAttendee()
+  const { data } = await supabase.from('notifications').select('id, type, title, body, read_at, created_at, events(slug)').eq('user_id', profile.id).order('created_at', { ascending: false }).limit(60)
   return (
-    <Suspense fallback={<GuestLoader />}>
-      <NotificationsData />
-    </Suspense>
+    <div className="k-fade-up">
+      <PageHeader title="Notifications" description="Updates from organizers and your tickets." />
+      <NotificationsClient notes={(data ?? []).map(n => ({ id: n.id, type: n.type, title: n.title, body: n.body, readAt: n.read_at, createdAt: n.created_at, href: n.events?.slug ? `/events/${n.events.slug}` : '/guest/tickets' }))} />
+    </div>
   )
 }

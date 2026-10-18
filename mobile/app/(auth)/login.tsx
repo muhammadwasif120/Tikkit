@@ -9,6 +9,7 @@ import { StatusBar } from 'expo-status-bar'
 import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import * as SecureStore from 'expo-secure-store'
+import { useRouter } from 'expo-router'
 import { useAuth } from '@/contexts/AuthContext'
 import { supabase } from '@/lib/supabase'
 import { colors, radius } from '@/theme'
@@ -175,13 +176,14 @@ const cta = StyleSheet.create({
     elevation: 6,
   },
   disabled: { opacity: 0.55, shadowOpacity: 0, elevation: 0 },
-  text: { color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold', fontWeight: '700' },
+  text: { color: colors.white, fontSize: 16, fontFamily: 'Sora_600SemiBold', fontWeight: '700' },
 })
 
 /* ─── Main screen ─────────────────────────────────────────────────────────── */
 export default function AuthScreen() {
   const { signIn, signUp } = useAuth()
   const insets = useSafeAreaInsets()
+  const router = useRouter()
 
   const [screen, setScreen]       = useState<Screen>('welcome')
   const [role,   setRole]         = useState<Role>('attendee')
@@ -473,6 +475,14 @@ export default function AuthScreen() {
               <Text style={[a.switchLink, { color: accent }]}>Create account</Text>
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            style={a.teamAccessBtn}
+            onPress={() => router.push('/(team)/enter')}
+          >
+            <Ionicons name="key-outline" size={14} color={colors.textMuted} />
+            <Text style={a.teamAccessText}>Have a team access link?</Text>
+          </TouchableOpacity>
         </View>
       </AuthShell>
     )
@@ -894,7 +904,7 @@ const w = StyleSheet.create({
   },
   logo: { width: 72, height: 72, borderRadius: 16 },
   wordmark: {
-    color: colors.textPrimary, fontSize: 36, fontFamily: 'Poppins_700Bold',
+    color: colors.textPrimary, fontSize: 36, fontFamily: 'Sora_700Bold',
     letterSpacing: 6, marginBottom: 6,
   },
   tagline: {
@@ -920,7 +930,7 @@ const a = StyleSheet.create({
   roleBadgeText: { fontSize: 10, fontFamily: 'DMSans_500Medium', letterSpacing: 1.2 },
 
   headline: {
-    color: colors.textPrimary, fontSize: 28, fontFamily: 'Poppins_700Bold',
+    color: colors.textPrimary, fontSize: 28, fontFamily: 'Sora_700Bold',
     letterSpacing: -0.5, marginBottom: 6,
   },
   subtext: {
@@ -936,6 +946,8 @@ const a = StyleSheet.create({
   switchRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 4 },
   switchText: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular' },
   switchLink: { fontSize: 13, fontFamily: 'DMSans_500Medium', fontWeight: '600' },
+  teamAccessBtn: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 14 },
+  teamAccessText: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular' },
 
   skipBtn: { alignItems: 'center', paddingVertical: 4 },
   skipText: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textDecorationLine: 'underline' },
@@ -1042,7 +1054,7 @@ const rc = StyleSheet.create({
     borderWidth: 1, alignItems: 'center', justifyContent: 'center', flexShrink: 0,
   },
   tagline: { fontSize: 10, fontFamily: 'DMSans_500Medium', letterSpacing: 1.5, marginBottom: 3 },
-  title: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold', marginBottom: 4 },
+  title: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold', marginBottom: 4 },
   desc: { color: colors.textSecondary, fontSize: 12, fontFamily: 'DMSans_400Regular', lineHeight: 17 },
   btnRow: {
     flexDirection: 'row', gap: 10,
@@ -1062,7 +1074,7 @@ const rc = StyleSheet.create({
     shadowRadius: 8,
     elevation: 5,
   },
-  joinText: { color: colors.white, fontSize: 14, fontFamily: 'Poppins_600SemiBold' },
+  joinText: { color: colors.white, fontSize: 14, fontFamily: 'Sora_600SemiBold' },
 })
 
 // Scene / interest selection
@@ -1100,7 +1112,7 @@ const ve = StyleSheet.create({
     alignItems: 'center', justifyContent: 'center',
   },
   headline: {
-    color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold', textAlign: 'center',
+    color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold', textAlign: 'center',
   },
   body: { color: colors.textSecondary, fontSize: 14, fontFamily: 'DMSans_400Regular', textAlign: 'center' },
   email: {
@@ -1120,7 +1132,7 @@ const ve = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-  btnText: { color: colors.white, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+  btnText: { color: colors.white, fontSize: 15, fontFamily: 'Sora_600SemiBold' },
 })
 
 // Forgot password
@@ -1131,7 +1143,7 @@ const fg = StyleSheet.create({
     backgroundColor: colors.blueSubtle, borderWidth: 1, borderColor: colors.blueBorder,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  sentTitle: { color: colors.textPrimary, fontSize: 24, fontFamily: 'Poppins_700Bold', textAlign: 'center' },
+  sentTitle: { color: colors.textPrimary, fontSize: 24, fontFamily: 'Sora_700Bold', textAlign: 'center' },
   sentBody: {
     color: colors.textSecondary, fontSize: 14, fontFamily: 'DMSans_400Regular',
     textAlign: 'center', lineHeight: 21,

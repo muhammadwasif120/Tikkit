@@ -314,7 +314,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
     borderWidth: 1, borderColor: colors.border,
   },
-  navTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  navTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
   navSub:   { color: colors.textMuted,   fontSize: 12, fontFamily: 'DMSans_400Regular'   },
   pendingBadge: {
     backgroundColor: colors.warningSubtle,
@@ -381,6 +381,6 @@ const s = StyleSheet.create({
 
   emptyWrap:       { alignItems: 'center', paddingTop: 64, paddingHorizontal: 32, gap: 10 },
   emptyIconCircle: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  emptyTitle:      { color: colors.textPrimary, fontSize: 16, fontFamily: 'Poppins_600SemiBold', textAlign: 'center' },
+  emptyTitle:      { color: colors.textPrimary, fontSize: 16, fontFamily: 'Sora_600SemiBold', textAlign: 'center' },
   emptyBody:       { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 20 },
 })

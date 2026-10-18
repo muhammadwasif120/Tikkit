@@ -1,38 +1,19 @@
-import type { Metadata } from 'next'
 import Link from 'next/link'
+import { MarketingShell } from '@/components/marketing/MarketingShell'
+import { ButtonLink } from '@/components/kit'
 
-export const metadata: Metadata = {
-  title: 'Page Not Found — Tikkit',
-  description: 'The page you are looking for does not exist. Browse upcoming events in Pakistan on Tikkit.',
-  robots: { index: false, follow: true },
-}
+export const metadata = { title: 'Page not found' }
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center" style={{ background: 'var(--guest-bg, #080A10)' }}>
-      <p className="text-6xl font-black mb-4" style={{ color: 'var(--brand-cyan, #00E5FF)' }}>404</p>
-      <h1 className="text-2xl font-bold mb-3" style={{ color: 'var(--guest-text-primary, #F0F4FF)' }}>
-        Page not found
-      </h1>
-      <p className="mb-8 max-w-sm" style={{ color: 'var(--guest-text-muted, #8892A4)' }}>
-        The page you&apos;re looking for doesn&apos;t exist or has been moved.
-      </p>
-      <div className="flex gap-4 flex-wrap justify-center">
-        <Link
-          href="/explore"
-          className="rounded-full px-6 py-3 text-sm font-semibold text-black"
-          style={{ background: 'var(--brand-cyan, #00E5FF)' }}
-        >
-          Explore Events
-        </Link>
-        <Link
-          href="/"
-          className="rounded-full px-6 py-3 text-sm font-semibold border"
-          style={{ color: 'var(--guest-text-primary, #F0F4FF)', borderColor: 'var(--guest-border, #1E2535)' }}
-        >
-          Go Home
-        </Link>
+    <MarketingShell>
+      <div className="mx-auto flex min-h-[60vh] max-w-xl flex-col items-center justify-center px-4 text-center">
+        <p className="k-gradient-text text-7xl font-semibold tracking-tight">404</p>
+        <h1 className="mt-4 text-2xl font-semibold tracking-tight text-fg">We could not find that page</h1>
+        <p className="mt-2 text-muted">It may have moved, or the event may have ended.</p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3"><ButtonLink href="/">Go home</ButtonLink><ButtonLink href="/explore" variant="secondary">Explore events</ButtonLink></div>
+        <p className="mt-6 text-sm text-subtle">Need help? <Link href="/contact" className="text-accent hover:underline">Contact us</Link></p>
       </div>
-    </main>
+    </MarketingShell>
   )
 }

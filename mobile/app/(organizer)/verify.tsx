@@ -268,7 +268,7 @@ const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.pageBg },
 
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 12 },
-  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   scroll: { padding: 16, gap: 16, paddingBottom: 48 },
@@ -282,7 +282,7 @@ const s = StyleSheet.create({
     width: 60, height: 60, borderRadius: 30,
     alignItems: 'center', justifyContent: 'center',
   },
-  statusLabel: { fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  statusLabel: { fontSize: 18, fontFamily: 'Sora_600SemiBold' },
   statusDesc: {
     color: colors.textSecondary, fontSize: 13, fontFamily: 'DMSans_400Regular',
     lineHeight: 20, textAlign: 'center',
@@ -329,7 +329,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.blueSubtle, borderWidth: 1, borderColor: colors.blueBorder,
     alignItems: 'center', justifyContent: 'center',
   },
-  stepNumText: { color: colors.blue, fontSize: 13, fontFamily: 'Poppins_700Bold' },
+  stepNumText: { color: colors.blue, fontSize: 13, fontFamily: 'Sora_700Bold' },
   stepTitle: { color: colors.textPrimary, fontSize: 13, fontFamily: 'DMSans_500Medium', marginBottom: 2 },
   stepDesc: { color: colors.textMuted, fontSize: 12, fontFamily: 'DMSans_400Regular', lineHeight: 17 },
 
@@ -337,7 +337,7 @@ const s = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
     gap: 8, backgroundColor: colors.blue, borderRadius: radius.md, paddingVertical: 15,
   },
-  ctaText: { color: colors.white, fontSize: 15, fontFamily: 'Poppins_600SemiBold' },
+  ctaText: { color: colors.white, fontSize: 15, fontFamily: 'Sora_600SemiBold' },
 
   pendingBanner: {
     flexDirection: 'row', alignItems: 'flex-start', gap: 10,

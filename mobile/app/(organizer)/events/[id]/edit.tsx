@@ -349,7 +349,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center',
   },
-  navTitle: { flex: 1, color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  navTitle: { flex: 1, color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
   saveBtn: {
     backgroundColor: colors.blue, borderRadius: radius.md,
     paddingHorizontal: 16, paddingVertical: 8,
@@ -412,5 +412,5 @@ const s = StyleSheet.create({
     borderRadius: radius.md, paddingVertical: 15,
     borderWidth: 1, borderColor: colors.blueBorder,
   },
-  createBtnText: { color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold', fontWeight: '700' },
+  createBtnText: { color: colors.white, fontSize: 16, fontFamily: 'Sora_600SemiBold', fontWeight: '700' },
 })

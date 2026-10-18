@@ -1,54 +1,19 @@
-import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import TicketsClient from '@/components/guest/TicketsClient'
-import GuestLoader from '@/components/guest/GuestLoader'
+import { PageHeader } from '@/components/kit'
+import TicketsClient from '@/components/attendee/TicketsClient'
+import ModuleBookings from '@/components/attendee/ModuleBookings'
+import { loadBookings, loadTickets } from '@/lib/attendee'
+import { requireAttendee } from '@/lib/data/viewer'
 
-async function TicketsData() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/auth/login')
+export const metadata = { title: 'My tickets' }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name')
-    .eq('id', user.id)
-    .single()
-
-  const { data: guestsData } = await supabase
-    .from('guests')
-    .select(`
-      id, status, qr_code, checked_in_at, event_id,
-      event:events (
-        id, title, date_start, venue_name, secret_venue, venue_reveal_at, cover_image_url
-      )
-    `)
-    .eq('email', user.email!)
-    .in('status', ['confirmed', 'registered', 'checked_in'])
-    .order('created_at', { ascending: false })
-
-  const tickets = (guestsData ?? []).map((gst: any) => ({
-    registrationId: gst.id,
-    eventId:        gst.event?.id ?? '',
-    eventTitle:     gst.event?.title ?? 'Event',
-    eventDate:      gst.event?.date_start ?? new Date().toISOString(),
-    eventVenue:     gst.event?.venue_name ?? null,
-    secretVenue:    gst.event?.secret_venue ?? false,
-    venueRevealAt:  gst.event?.venue_reveal_at ?? null,
-    guestName:      profile?.full_name ?? user.email ?? 'Guest',
-    ticketCode:     gst.qr_code,
-    status:         gst.status as 'confirmed' | 'registered',
-    checkedIn:      gst.status === 'checked_in' || !!gst.checked_in_at,
-    checkInTime:    gst.checked_in_at ?? null,
-  }))
-
-  return <TicketsClient tickets={tickets} />
-}
-
-export default function TicketsPage() {
+export default async function TicketsPage() {
+  const { supabase, profile } = await requireAttendee()
+  const [t, b] = await Promise.all([loadTickets(supabase, profile.id), loadBookings(supabase, profile.id)])
   return (
-    <Suspense fallback={<GuestLoader />}>
-      <TicketsData />
-    </Suspense>
+    <div className="k-fade-up">
+      <PageHeader title="My tickets" description="Live tickets, your collection and the nights you missed." />
+      <TicketsClient upcoming={t.upcoming} collection={t.collection} closed={t.closed} />
+      <ModuleBookings rows={b.rows} retreats={b.retreats} />
+    </div>
   )
 }

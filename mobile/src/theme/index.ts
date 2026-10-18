@@ -1,49 +1,62 @@
-// Tikkit design tokens — matches web app exactly
+// Tikkit design tokens — "Navy Glass": dark navy base, cyan as the single
+// loud accent (standing in for the reference system's gold), magenta as a
+// rare secondary highlight. Mirrors the CSS custom properties in the web
+// app's globals.css (no code sharing between the two, so kept in sync by
+// hand) — dark mode only for now; mobile doesn't have a light/dark toggle.
 
 export const colors = {
-  // Page backgrounds
-  pageBg: '#080A10',
-  surface: '#0C0E16',
-  surface2: '#13151E',
-  surface3: '#1A1D2A',
+  // Navy base
+  navy950: '#060B22',
+  navy900: '#0B1437',
+  navy800: '#132057',
+  navy700: '#1D2E78',
+  navy600: '#2B40A0',
 
-  // Brand
-  blue: '#1E5EFF',
-  blueHover: '#1448CC',
-  blueLight: '#4D82FF',
-  blueSubtle: 'rgba(30,94,255,0.1)',
-  blueBorder: 'rgba(30,94,255,0.3)',
+  // Page backgrounds (aliases onto the navy scale, kept for call-site compat)
+  pageBg: '#060B22',
+  surface: '#0E1638',
+  surface2: '#132057',
+  surface3: '#1D2E78',
 
-  gold: '#FFC745',
-  goldHover: '#E5A800',
-  goldSubtle: 'rgba(255,199,69,0.15)',
-  goldBorder: 'rgba(255,199,69,0.3)',
+  // Brand accent — cyan takes gold's role, used sparingly by design
+  blue: '#00E5FF',
+  blueHover: '#33EBFF',
+  blueLight: '#80F3FF',
+  blueSubtle: 'rgba(0,229,255,0.1)',
+  blueBorder: 'rgba(0,229,255,0.3)',
 
-  indigo: '#818CF8',
-  indigoSubtle: 'rgba(129,140,248,0.15)',
-  indigoBorder: 'rgba(129,140,248,0.3)',
+  // Secondary accent — magenta, rare highlight only
+  gold: '#CC00FF',
+  goldHover: '#E066FF',
+  goldSubtle: 'rgba(204,0,255,0.12)',
+  goldBorder: 'rgba(204,0,255,0.3)',
 
-  // Text
-  textPrimary: '#F3F4F6',
-  textSecondary: '#9CA3AF',
-  textMuted: '#6B7280',
-  textDisabled: '#4B5563',
+  // Data / status — sky (secondary data), same role as web's --sky-500
+  indigo: '#7FA7FF',
+  indigoSubtle: 'rgba(127,167,255,0.15)',
+  indigoBorder: 'rgba(127,167,255,0.3)',
+
+  // Text — mist scale
+  textPrimary: '#E8ECF8',
+  textSecondary: '#C3CAE0',
+  textMuted: '#8C97B8',
+  textDisabled: '#66708F',
 
   // Borders
-  border: 'rgba(255,255,255,0.06)',
-  borderHover: 'rgba(255,255,255,0.12)',
-  borderStrong: 'rgba(255,255,255,0.18)',
+  border: 'rgba(255,255,255,0.10)',
+  borderHover: 'rgba(255,255,255,0.18)',
+  borderStrong: 'rgba(255,255,255,0.24)',
 
   // Status
-  success: '#10B981',
-  successSubtle: 'rgba(16,185,129,0.15)',
-  successBorder: 'rgba(16,185,129,0.3)',
-  warning: '#EAB308',
-  warningSubtle: 'rgba(234,179,8,0.15)',
-  warningBorder: 'rgba(234,179,8,0.3)',
-  error: '#EF4444',
-  errorSubtle: 'rgba(239,68,68,0.15)',
-  errorBorder: 'rgba(239,68,68,0.3)',
+  success: '#3DD68C',
+  successSubtle: 'rgba(61,214,140,0.15)',
+  successBorder: 'rgba(61,214,140,0.3)',
+  warning: '#7FA7FF',
+  warningSubtle: 'rgba(127,167,255,0.15)',
+  warningBorder: 'rgba(127,167,255,0.3)',
+  error: '#FF6B6B',
+  errorSubtle: 'rgba(255,107,107,0.15)',
+  errorBorder: 'rgba(255,107,107,0.3)',
 
   // White/black
   white: '#FFFFFF',
@@ -52,11 +65,11 @@ export const colors = {
 }
 
 export const typography = {
-  // Display / headings — Clash Display (Poppins substitute)
-  displayXL: { fontFamily: 'Poppins_700Bold', fontSize: 32, letterSpacing: -0.5 },
-  displayLG: { fontFamily: 'Poppins_700Bold', fontSize: 24, letterSpacing: -0.3 },
-  displayMD: { fontFamily: 'Poppins_600SemiBold', fontSize: 20, letterSpacing: -0.2 },
-  displaySM: { fontFamily: 'Poppins_600SemiBold', fontSize: 16, letterSpacing: -0.1 },
+  // Display / headings — Sora
+  displayXL: { fontFamily: 'Sora_700Bold', fontSize: 32, letterSpacing: -0.5 },
+  displayLG: { fontFamily: 'Sora_700Bold', fontSize: 24, letterSpacing: -0.3 },
+  displayMD: { fontFamily: 'Sora_600SemiBold', fontSize: 20, letterSpacing: -0.2 },
+  displaySM: { fontFamily: 'Sora_600SemiBold', fontSize: 16, letterSpacing: -0.1 },
 
   // Body — DM Sans
   bodyLG: { fontFamily: 'DMSans_400Regular', fontSize: 16 },

@@ -218,7 +218,7 @@ function TicketCard({ ticket, onPress }: { ticket: Ticket; onPress: () => void }
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.pageBg },
   header: { paddingHorizontal: 16, paddingTop: 8, paddingBottom: 16 },
-  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Poppins_700Bold' },
+  heading: { color: colors.textPrimary, fontSize: 26, fontFamily: 'Sora_700Bold' },
   subheading: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', marginTop: 2 },
 
   skeletonList: { paddingHorizontal: 16, gap: 16 },
@@ -239,7 +239,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface2,
     alignItems: 'center', justifyContent: 'center',
   },
-  heroInitial: { color: colors.white, fontSize: 42, fontFamily: 'Poppins_700Bold', opacity: 0.9 },
+  heroInitial: { color: colors.white, fontSize: 42, fontFamily: 'Sora_700Bold', opacity: 0.9 },
   heroScrim: {
     position: 'absolute', bottom: 0, left: 0, right: 0, height: 90,
   },
@@ -254,7 +254,7 @@ const s = StyleSheet.create({
   heroBadgeText: { fontSize: 11, fontFamily: 'DMSans_500Medium', fontWeight: '600' },
   heroTitle: {
     position: 'absolute', bottom: 12, left: 14, right: 80,
-    color: colors.white, fontSize: 16, fontFamily: 'Poppins_600SemiBold',
+    color: colors.white, fontSize: 16, fontFamily: 'Sora_600SemiBold',
     textShadowColor: 'rgba(0,0,0,0.5)', textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 3,
   },
 
@@ -301,7 +301,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 18, fontFamily: 'Sora_600SemiBold' },
   emptyText: { color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular', textAlign: 'center', lineHeight: 19 },
   emptyBtn: {
     backgroundColor: colors.blue, borderRadius: radius.md,

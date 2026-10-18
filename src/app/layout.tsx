@@ -1,10 +1,12 @@
 import type { Metadata, Viewport } from 'next'
-import { DM_Sans } from 'next/font/google'
+import { DM_Sans, Sora, Geist, Geist_Mono } from 'next/font/google'
 import { cookies } from 'next/headers'
 import './globals.css'
+import '../styles/kit.css'
 import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
 import WAHelpWidget from '@/components/ui/WAHelpWidget'
 import { Analytics } from '@vercel/analytics/react'
+import { AttendeeDemoHost } from '@/components/demo/AttendeeDemoHost'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GoogleAnalytics } from '@next/third-parties/google'
 
@@ -12,6 +14,25 @@ const dmSans = DM_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   variable: '--font-dm-sans',
+  display: 'swap',
+})
+
+const geist = Geist({
+  subsets: ['latin'],
+  variable: '--font-geist-sans',
+  display: 'swap',
+})
+
+const geistMono = Geist_Mono({
+  subsets: ['latin'],
+  variable: '--font-geist-mono',
+  display: 'swap',
+})
+
+const sora = Sora({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-sora',
   display: 'swap',
 })
 
@@ -84,15 +105,17 @@ export const metadata: Metadata = {
   },
 }
 
-const VALID_THEMES: AppTheme[] = ['noir', 'corporate', 'pulse']
+const VALID_THEMES: AppTheme[] = ['light', 'dark']
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
-  const raw = cookieStore.get('tikkit-theme')?.value ?? 'noir'
-  const theme: AppTheme = VALID_THEMES.includes(raw as AppTheme) ? (raw as AppTheme) : 'noir'
+  const rawCookie = cookieStore.get('tikkit-theme')?.value
+  const hasCookie = VALID_THEMES.includes(rawCookie as AppTheme)
+  // Dark is the default until the user picks light in Settings.
+  const theme: AppTheme = hasCookie ? (rawCookie as AppTheme) : 'dark'
 
   return (
-    <html lang="en-PK" className={dmSans.variable} data-theme={theme}>
+    <html lang="en-PK" className={`${dmSans.variable} ${sora.variable} ${geist.variable} ${geistMono.variable}`} data-theme={theme}>
       <head>
         <script
           type="application/ld+json"
@@ -168,7 +191,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             })
           }}
         />
-        {/* Fonts */}
+        {/* Clash Display / Cabinet Grotesk — used only by the marketing
+            landing pages (HomeClient, coming-soon, corporate, pulse, the
+            vendor/venue/artist landers), which hardcode the font-family
+            inline rather than going through --font-display. Sora (below,
+            via next/font) is the CRM/guest display font. */}
         <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://api.fontshare.com" />
         <link
@@ -192,6 +219,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider initialTheme={theme}>
           {children}
           <WAHelpWidget />
+          <AttendeeDemoHost />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

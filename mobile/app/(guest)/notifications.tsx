@@ -197,7 +197,7 @@ const s = StyleSheet.create({
     borderWidth: 1, borderColor: colors.border,
   },
   navTitle: {
-    color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold', textAlign: 'center',
+    color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold', textAlign: 'center',
   },
   navSub: {
     color: colors.blue, fontSize: 11, fontFamily: 'DMSans_500Medium', textAlign: 'center', marginTop: 1,
@@ -240,7 +240,7 @@ const s = StyleSheet.create({
     backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border,
     alignItems: 'center', justifyContent: 'center', marginBottom: 4,
   },
-  emptyTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Poppins_600SemiBold' },
+  emptyTitle: { color: colors.textPrimary, fontSize: 17, fontFamily: 'Sora_600SemiBold' },
   emptyText: {
     color: colors.textMuted, fontSize: 13, fontFamily: 'DMSans_400Regular',
     textAlign: 'center', lineHeight: 20,
