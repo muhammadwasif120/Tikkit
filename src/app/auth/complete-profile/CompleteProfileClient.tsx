@@ -42,7 +42,7 @@ export default function CompleteProfileClient({ role, initial }: { role: 'organi
     const failed = results.find(r => r.error)
     if (failed?.error) { setBusy(false); return setError('We could not save your details. Please try again.') }
 
-    router.push(role === 'organizer' ? '/dashboard' : '/explore')
+    router.push(role === 'organizer' ? '/dashboard' : '/guest')
     router.refresh()
   }
 
