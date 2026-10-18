@@ -6,10 +6,11 @@ import { LogOut } from 'lucide-react'
 import { Button, Card, CardBody, CardHeader, Field, Input, Select, ThemeToggle } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
 import { PAKISTAN_CITIES } from '@/lib/pakistanCities'
+import AvatarUpload from './AvatarUpload'
 
 export type AttendeeValues = { name: string; city: string; phone: string; gender: string; dob: string; email: string }
 
-export default function AttendeeProfile({ initial }: { initial: AttendeeValues }) {
+export default function AttendeeProfile({ initial, avatarUrl = null }: { initial: AttendeeValues; avatarUrl?: string | null }) {
   const router = useRouter(); const supabase = useMemo(() => createClient(), [])
   const [v, setV] = useState(initial); const [busy, setBusy] = useState(false); const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null)
   const set = (k: keyof AttendeeValues) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setV(p => ({ ...p, [k]: e.target.value }))
@@ -31,6 +32,7 @@ export default function AttendeeProfile({ initial }: { initial: AttendeeValues }
 
   return (
     <div className="space-y-6">
+      <Card><CardBody><AvatarUpload name={initial.name} url={avatarUrl} /></CardBody></Card>
       <form onSubmit={save}><Card>
         <CardHeader title="Your details" description="Organizers see your name and phone only for events you register for." />
         <CardBody className="space-y-4">
