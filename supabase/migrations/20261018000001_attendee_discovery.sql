@@ -22,6 +22,23 @@ create policy attendee_interests_own on public.attendee_interests for all to aut
 grant select, insert, delete on public.attendee_interests to authenticated;
 
 -- ---------------------------------------------------------------------------
+-- A guest can read the class, session, pass and space behind a booking they hold.
+-- Until now only the organizer could, so a guest's own tickets showed generic titles and no times.
+-- ---------------------------------------------------------------------------
+drop policy if exists class_series_attendee_select on public.class_series;
+create policy class_series_attendee_select on public.class_series for select to authenticated
+  using (exists (select 1 from public.class_bookings b where b.series_id = class_series.id and b.attendee_id = auth.uid()));
+drop policy if exists class_sessions_attendee_select on public.class_sessions;
+create policy class_sessions_attendee_select on public.class_sessions for select to authenticated
+  using (exists (select 1 from public.class_bookings b where b.session_id = class_sessions.id and b.attendee_id = auth.uid()));
+drop policy if exists pass_products_attendee_select on public.pass_products;
+create policy pass_products_attendee_select on public.pass_products for select to authenticated
+  using (exists (select 1 from public.pass_purchases p where p.product_id = pass_products.id and p.attendee_id = auth.uid()));
+drop policy if exists spaces_attendee_select on public.spaces;
+create policy spaces_attendee_select on public.spaces for select to authenticated
+  using (exists (select 1 from public.space_bookings b where b.space_id = spaces.id and b.attendee_id = auth.uid()));
+
+-- ---------------------------------------------------------------------------
 -- Collectibles: one per checked in registration. Serial is the order guests were admitted.
 -- ---------------------------------------------------------------------------
 create or replace function public.my_collectibles()
