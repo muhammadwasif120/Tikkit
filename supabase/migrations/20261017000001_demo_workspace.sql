@@ -420,7 +420,7 @@ begin
     where a.id = v.id;
   end if;
 
-  update public.demo_config set last_reset = now();
+  update public.demo_config set last_reset = now() where id;
 end;
 $$;
 
