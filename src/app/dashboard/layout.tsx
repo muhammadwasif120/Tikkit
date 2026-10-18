@@ -1,8 +1,9 @@
 import { OrganizerShell, APP_ROUTES } from '@/components/shell/OrganizerShell'
+import { DemoBar } from '@/components/demo/DemoBar'
 import { planLabel, requireOrganizer } from '@/lib/data/viewer'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { profile, company, logoUrl, entitlements, pendingCount, isManager } = await requireOrganizer()
+  const { user, profile, company, logoUrl, entitlements, pendingCount, isManager } = await requireOrganizer()
   return (
     <OrganizerShell
       routes={APP_ROUTES}
@@ -11,6 +12,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       manager={isManager}
       pendingCount={pendingCount}
     >
+      {user.app_metadata?.demo === true && <DemoBar />}
       {children}
     </OrganizerShell>
   )
