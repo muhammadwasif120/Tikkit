@@ -41,6 +41,11 @@ const nextConfig = {
   async headers() {
     return [
       {
+        // The service worker file must always be re-checked, or updates never reach phones.
+        source: '/sw.js',
+        headers: [{ key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' }, { key: 'Service-Worker-Allowed', value: '/' }],
+      },
+      {
         // Apply security headers to all routes
         source: '/(.*)',
         headers: [

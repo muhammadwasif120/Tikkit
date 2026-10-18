@@ -7,6 +7,9 @@ import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
 import WAHelpWidget from '@/components/ui/WAHelpWidget'
 import { Analytics } from '@vercel/analytics/react'
 import { AttendeeDemoHost } from '@/components/demo/AttendeeDemoHost'
+import PwaRegister from '@/components/pwa/PwaRegister'
+import InstallPrompt from '@/components/pwa/InstallPrompt'
+import OfflineBanner from '@/components/pwa/OfflineBanner'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GoogleAnalytics } from '@next/third-parties/google'
 
@@ -37,7 +40,7 @@ const sora = Sora({
 })
 
 export const viewport: Viewport = {
-  themeColor: '#1E5EFF',
+  themeColor: '#070911',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
@@ -207,12 +210,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
         {/* iOS Web App */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="Tikkit" />
+        <meta name="apple-mobile-web-app-title" content="TIKKIT X" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
         {/* Android / legacy */}
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#1E5EFF" />
+        <meta name="msapplication-TileColor" content="#070911" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body className="antialiased">
@@ -220,6 +223,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           {children}
           <WAHelpWidget />
           <AttendeeDemoHost />
+          <PwaRegister />
+          <InstallPrompt />
+          <OfflineBanner />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

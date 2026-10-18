@@ -42,7 +42,10 @@ export default function WAHelpWidget() {
 
   // On dashboard routes FloatingChat occupies bottom-right — sit above it
   // Sit at the corner. Where a bottom tab bar is showing (organizer app below 1024px, guest app below 640px) float just above it.
-  const navBreak = pathname.startsWith('/dashboard') ? 1023 : pathname.startsWith('/guest') ? 639 : 0
+  // Decided after mount, so the server and the first browser render are identical (no hydration mismatch).
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const navBreak = !mounted ? 0 : pathname.startsWith('/dashboard') ? 1023 : pathname.startsWith('/guest') ? 639 : 0
   const btnBottom = 20
   const popupBottom = 82
 

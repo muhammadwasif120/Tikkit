@@ -1,6 +1,7 @@
 'use client'
 
 import { SignOutButton } from '@/components/auth/SignOutButton'
+import InstallAppButton from '@/components/pwa/InstallAppButton'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useState, type ReactNode } from 'react'
@@ -121,6 +122,7 @@ export function OrganizerShell({ base = '/design/org', routes, children, user, p
       <a href="https://wa.me/13074434195" target="_blank" rel="noopener noreferrer" className="flex h-10 items-center gap-3 rounded-[10px] px-3 text-sm font-medium text-muted transition-colors hover:bg-raised hover:text-fg">
         <CircleHelp className="h-[18px] w-[18px]" aria-hidden /> Help on WhatsApp
       </a>
+      <InstallAppButton />
       <SignOutButton />
       <div className="rounded-xl bg-raised p-3 shadow-[inset_0_0_0_1px_rgb(var(--k-line))]">
         <div className="flex items-center justify-between">

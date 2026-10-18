@@ -66,7 +66,7 @@ export async function updateSession(request: NextRequest) {
   // shows up in latency, switch to a single denormalised profiles.profile_complete
   // boolean kept in sync by a trigger.
   const completionExempt = [
-    '/auth', '/api', '/master', '/design', '/suspended',
+    '/auth', '/api', '/master', '/design', '/suspended', '/offline', '/open',
     '/privacy', '/terms', '/security', '/about', '/contact', '/how-it-works',
   ]
   const isCompletionExempt = completionExempt.some(p => pathname === p || pathname.startsWith(p + '/'))
@@ -116,6 +116,8 @@ export async function updateSession(request: NextRequest) {
     '/about',
     '/security',
     '/suspended',
+    '/offline',
+    '/open',
     '/lp',               // Preserved landing pages (/lp/underground etc.)
     '/design',           // internal design review (404s in production)
   ]
