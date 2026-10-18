@@ -24,6 +24,8 @@ self.addEventListener('activate', event => {
   event.waitUntil((async () => {
     const keep = new Set([STATIC_CACHE, PAGES_CACHE])
     for (const k of await caches.keys()) if (!keep.has(k)) await caches.delete(k)
+    // The offline page must always be on hand, even if the cache was cleared after install.
+    try { const c = await caches.open(STATIC_CACHE); if (!(await c.match(OFFLINE_URL))) await c.add(OFFLINE_URL) } catch {}
     await self.clients.claim()
   })())
 })
