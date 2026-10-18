@@ -4,25 +4,27 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 
-const DEMO_EMAIL = 'demo.organizer@demo.tikkitx.com'
+const EMAILS = { organizer: 'demo.organizer@demo.tikkitx.com', attendee: 'demo.attendee@demo.tikkitx.com' } as const
+const HOME = { organizer: '/dashboard', attendee: '/explore' } as const
 
-/** Signs the visitor into the shared demo organizer with a one time link. No password exists for that account. */
-export async function startDemo() {
+/** Signs the visitor into a shared demo account with a one time link. No password exists for those accounts. */
+export async function startDemo(formData: FormData) {
+  const role = formData.get('role') === 'attendee' ? 'attendee' : 'organizer'
   if (process.env.DEMO_ENABLED !== '1') redirect('/demo?demo=unavailable')
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (user && user.app_metadata?.demo !== true) redirect('/demo?demo=loggedin')
-  if (user) redirect('/dashboard')
+  if (user && user.email === EMAILS[role]) redirect(HOME[role])
 
   const admin = createAdminClient()
-  const { data, error } = await admin.auth.admin.generateLink({ type: 'magiclink', email: DEMO_EMAIL })
+  const { data, error } = await admin.auth.admin.generateLink({ type: 'magiclink', email: EMAILS[role] })
   const hash = data?.properties?.hashed_token
   if (error || !hash) redirect('/demo?demo=unavailable')
 
   const { error: verr } = await supabase.auth.verifyOtp({ type: 'magiclink', token_hash: hash })
   if (verr) redirect('/demo?demo=unavailable')
-  redirect('/dashboard')
+  redirect(HOME[role])
 }
 
 /** Rebuilds the sample data. Only a demo session may call it, and the database enforces a one minute cooldown. */

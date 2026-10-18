@@ -52,6 +52,10 @@ console.log('organizer', org.id)
 const { error: ph } = await admin.from('profile_private').update({ phone: '03001234567' }).eq('id', org.id)
 if (ph) throw ph
 
+const attendee = await ensure('demo.attendee@demo.tikkitx.com',
+  { role: 'attendee', full_name: 'Noor Fatima', city: 'Lahore', phone: '03005550123', gender: 'female', date_of_birth: '1996-04-12' }, { demo: true })
+console.log('attendee', attendee.id)
+
 for (let i = 0; i < GUESTS.length; i++) {
   const n = String(i + 1).padStart(2, '0')
   await ensure(`demo.guest${n}@demo.tikkitx.com`, { role: 'attendee', full_name: GUESTS[i], city: 'Lahore' }, {})

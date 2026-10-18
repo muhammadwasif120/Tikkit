@@ -6,6 +6,7 @@ import '../styles/kit.css'
 import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
 import WAHelpWidget from '@/components/ui/WAHelpWidget'
 import { Analytics } from '@vercel/analytics/react'
+import { AttendeeDemoHost } from '@/components/demo/AttendeeDemoHost'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GoogleAnalytics } from '@next/third-parties/google'
 
@@ -218,6 +219,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <ThemeProvider initialTheme={theme}>
           {children}
           <WAHelpWidget />
+          <AttendeeDemoHost />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

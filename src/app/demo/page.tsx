@@ -31,12 +31,13 @@ export default async function DemoPage({ searchParams }: { searchParams: Promise
   const live = process.env.DEMO_ENABLED === '1'
   return (
     <MarketingShell>
-      <PageHero eyebrow={live ? 'Live demo' : 'Product tour'} title={live ? 'Try the real thing' : 'See it in action'} lead={live ? 'Step into a working organizer workspace with sample events, guests, promoters, classes, spaces and a retreat. Nothing is emailed, and the data resets every night.' : 'A clickable preview of the organizer workspace with a guided tour.'} />
+      <PageHero eyebrow={live ? 'Live demo' : 'Product tour'} title={live ? 'Try the real thing' : 'See it in action'} lead={live ? 'Step into the real software with sample data, as an organizer running events or as a guest with tickets, passes and a retreat invite. Nothing is emailed, and the data resets every night.' : 'A clickable preview of the organizer workspace with a guided tour.'} />
       {live && (
         <Container className="pb-12">
           <div className="mx-auto flex max-w-xl flex-col items-center gap-3 text-center">
-            <form action={startDemo}>
-              <Button type="submit" size="lg" trailing={<ArrowRight className="h-4 w-4" />}>Open the live demo</Button>
+            <form action={startDemo} className="flex flex-col items-stretch gap-3 sm:flex-row">
+              <Button type="submit" name="role" value="organizer" size="lg" trailing={<ArrowRight className="h-4 w-4" />}>Demo as an organizer</Button>
+              <Button type="submit" name="role" value="attendee" size="lg" variant="secondary" trailing={<ArrowRight className="h-4 w-4" />}>Demo as an attendee</Button>
             </form>
             <p className="text-sm text-subtle">No sign up. A guided tour starts when you arrive.</p>
             {demo && notes[demo] && <p role="status" className="rounded-xl bg-warning/10 px-4 py-3 text-sm text-warning">{notes[demo]}</p>}
