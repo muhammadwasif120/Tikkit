@@ -73,6 +73,7 @@ export async function buildDiscovery(supabase: Supa, userId: string, city: strin
     if (!cur || w > cur.w) history.set(cat, { title, w })
   }
   const going = new Set<string>()
+  const takingClass = new Set<string>()
   type EvJoin = { title: string | null; category_id: string | null; tags: string[] | null; organizer_id: string } | null
   for (const r of regs.data ?? []) {
     const w = REG_WEIGHT[r.status] ?? 0
@@ -87,6 +88,7 @@ export async function buildDiscovery(supabase: Supa, userId: string, city: strin
   for (const b of books.data ?? []) {
     const w = BOOK_WEIGHT[b.status] ?? 0
     const s = b.class_series as unknown as SerJoin
+    if (b.series_id && w > 0) takingClass.add(b.series_id)
     if (!s || w === 0) continue
     bump(affinity, s.category_id, w)
     for (const t of s.tags ?? []) bump(tagAff, t, w * 0.5)
@@ -150,7 +152,7 @@ export async function buildDiscovery(supabase: Supa, userId: string, city: strin
       where: [s.venue_name, s.area_label ?? s.city].filter(Boolean).join(', '), price: s.drop_in_price_pkr, priceNote: 'Drop in', category: c?.name ?? null,
       categoryIcon: c?.icon ?? null, color: c?.color ?? null, cover: s.cover_image_url, organizer: orgName.get(s.organizer_id ?? '') ?? null,
       organizerId: s.organizer_id, eventId: null, saved: false, following: followed.has(s.organizer_id ?? ''),
-      reason: reasonFor(s.category_id, s.tags, s.organizer_id, a), score,
+      reason: takingClass.has(s.id) ? 'A class you already take' : reasonFor(s.category_id, s.tags, s.organizer_id, a), score,
     })
   }
   for (const sp of spaces.data ?? []) {
