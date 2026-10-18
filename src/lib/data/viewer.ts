@@ -42,7 +42,7 @@ export const requireOrganizer = cache(async () => {
   if (!isOwner) {
     const { data: m } = await supabase.from('organizer_team_members').select('organizer_id')
       .eq('user_id', profile.id).eq('status', 'active').limit(1).maybeSingle()
-    if (!m) redirect('/guest/explore')
+    if (!m) redirect('/guest')
     orgId = m.organizer_id
   }
   const isManager = !isOwner
