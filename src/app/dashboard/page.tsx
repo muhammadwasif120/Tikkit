@@ -1,3 +1,4 @@
+import { loadGuestAvatars } from '@/lib/data/guestAvatars'
 import Link from 'next/link'
 import { ArrowRight, CalendarDays, Clock, Coins, MapPin, Megaphone, QrCode, Ticket, Users } from 'lucide-react'
 import {
@@ -21,10 +22,11 @@ export default async function OverviewPage() {
       .select('id, status, price_paid_pkr, approved_at, created_at, event_id, referrer_id, is_vip')
       .in('status', [...SOLD]).gte('created_at', since).limit(5000),
     supabase.from('registrations')
-      .select('id, full_name, status, created_at, ticket_types(name), events(title)')
+      .select('id, attendee_id, full_name, status, created_at, ticket_types(name), events(title)')
       .in('status', ['requested', 'payment_submitted']).order('created_at', { ascending: true }).limit(6),
   ])
 
+  const avatars = await loadGuestAvatars(supabase)
   const all = events ?? []
   const now = Date.now()
   const upcoming = all.filter(e => e.status === 'published' && new Date(e.starts_at).getTime() >= now)
@@ -154,7 +156,7 @@ export default async function OverviewPage() {
               {pending.map(r => (
                 <li key={r.id}>
                   <Link href="/dashboard/guests?status=pending" className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-raised">
-                    <Avatar name={r.full_name} size={38} />
+                    <Avatar name={r.full_name} src={r.attendee_id ? avatars.get(r.attendee_id) : null} size={38} />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-fg">{r.full_name}</p>
                       <p className="truncate text-xs text-muted">{r.ticket_types?.name ?? 'Ticket'} · {r.events?.title}</p>

@@ -1,3 +1,4 @@
+import { loadGuestAvatars } from '@/lib/data/guestAvatars'
 import { PageHeader } from '@/components/kit'
 import GuestsClient, { type GuestRow } from '@/components/guests/GuestsClient'
 import { requireOrganizer } from '@/lib/data/viewer'
@@ -12,9 +13,11 @@ export default async function GuestsPage({ searchParams }: { searchParams: Promi
     supabase.from('events').select('id, title').eq('organizer_id', orgId).neq('status', 'archived').order('starts_at', { ascending: false }),
     supabase.from('ticket_types').select('id, name, event_id').order('sort'),
     supabase.from('registrations')
-      .select('id, event_id, full_name, phone, email, status, is_vip, plus_one, price_due_pkr, price_paid_pkr, created_at, ticket_types(name), events(title), payment_submissions(id, screenshot_path, reference, amount_pkr, status)')
+      .select('id, event_id, attendee_id, full_name, phone, email, status, is_vip, plus_one, price_due_pkr, price_paid_pkr, created_at, ticket_types(name), events(title), payment_submissions(id, screenshot_path, reference, amount_pkr, status)')
       .order('created_at', { ascending: false }).limit(1000),
   ])
+
+  const avatars = await loadGuestAvatars(supabase)
 
   // trust signals per event (plan aware: tier only on Starter, full detail on Growth and Pro)
   const eventIds = [...new Set((regs ?? []).map(r => r.event_id))].slice(0, 8)
@@ -30,7 +33,7 @@ export default async function GuestsPage({ searchParams }: { searchParams: Promi
     return {
       id: r.id, eventId: r.event_id, eventTitle: r.events?.title ?? 'Event', name: r.full_name, phone: r.phone, email: r.email,
       status: r.status, isVip: r.is_vip, ticket: r.ticket_types?.name ?? null, due: r.price_due_pkr, paid: r.price_paid_pkr,
-      createdAt: r.created_at, plusOne: r.plus_one, tier: sc?.tier ?? null, idVerified: sc?.verified ?? false,
+      createdAt: r.created_at, plusOne: r.plus_one, tier: sc?.tier ?? null, idVerified: sc?.verified ?? false, avatar: r.attendee_id ? avatars.get(r.attendee_id) ?? null : null,
       submission: sub ? { id: sub.id, path: sub.screenshot_path!, reference: sub.reference, amount: sub.amount_pkr ?? r.price_due_pkr } : null,
     }
   })

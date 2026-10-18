@@ -74,7 +74,7 @@ export default function AvatarUpload({ name, url }: { name: string; url: string 
         </div>
         <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" aria-label="Choose a profile photo"
           onChange={e => { const f = e.target.files?.[0]; if (f) pick(f); e.target.value = '' }} />
-        <p className="mt-1.5 text-xs text-subtle">Shown on your account. Cropped to a square. Photos are stored on a public link, so pick one you are happy to share.</p>
+        <p className="mt-1.5 text-xs text-subtle">Cropped to a square. Organizers of events you register for can see it, and it is stored on a public link, so pick one you are happy to share.</p>
         {msg && <p role={msg.ok ? 'status' : 'alert'} className={`mt-1.5 text-sm ${msg.ok ? 'text-success' : 'text-danger'}`}>{msg.t}</p>}
       </div>
     </div>

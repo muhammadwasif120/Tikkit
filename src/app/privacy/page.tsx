@@ -43,6 +43,7 @@ export default function PrivacyPolicyPage() {
               headers={['Category', 'Data Elements', 'Purpose']}
               rows={[
                 ['Account Registration', 'Full name, email address, phone number, username, password (hashed)', 'Account creation, authentication, communication'],
+                ['Profile Photo (optional)', 'A photo you choose to upload', 'Shown on your account and to Organisers of events you register for. It is stored at a public link, so only upload a photo you are happy to share'],
                 ['Identity Verification', 'CNIC number, passport number, identity document images, facial photograph (where applicable)', 'Identity verification, fraud prevention, compliance with anti-scalping obligations'],
                 ['Payment Information', 'Payment method, transaction ID, payment screenshots (where applicable), bank/wallet details for Organiser payouts', 'Payment processing, transaction verification, refunds'],
                 ['Event Registration', 'Event preferences, EOI submissions, ticket selections, dietary or accessibility requirements (if provided)', 'Event registration, Guest List management, event delivery'],

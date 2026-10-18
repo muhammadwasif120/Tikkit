@@ -13,7 +13,7 @@ import { cn } from '@/lib/cn'
 export type GuestRow = {
   id: string; eventId: string; eventTitle: string; name: string; phone: string | null; email: string | null
   status: string; isVip: boolean; ticket: string | null; due: number; paid: number | null; createdAt: string
-  plusOne: boolean; tier: string | null; idVerified: boolean
+  plusOne: boolean; tier: string | null; idVerified: boolean; avatar?: string | null
   submission: { id: string; path: string; reference: string | null; amount: number } | null
 }
 export type EventOpt = { id: string; title: string; tickets: { id: string; name: string }[] }
@@ -172,7 +172,7 @@ export default function GuestsClient({ rows, events, initialEvent, initialFilter
                     <Td><input type="checkbox" aria-label={`Select ${r.name}`} checked={sel.has(r.id)} onChange={() => setSel(s => { const n = new Set(s); if (n.has(r.id)) n.delete(r.id); else n.add(r.id); return n })} className="h-4 w-4 accent-[rgb(var(--k-accent))]" /></Td>
                     <Td>
                       <div className="flex items-center gap-3">
-                        <Avatar name={r.name} size={36} />
+                        <Avatar name={r.name} src={r.avatar} size={36} />
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium text-fg">{r.name}{r.plusOne && <span className="ml-1.5 text-xs text-muted">+1</span>}</p>
                           <p className="truncate text-xs text-muted">{r.phone ?? r.email ?? '—'} · {r.eventTitle}</p>

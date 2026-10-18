@@ -184,6 +184,7 @@ expected_functions(schema_name, name) as (values
     ('public','master_overview'),
     ('public','my_collectibles'),
     ('public','my_entitlements'),
+    ('public','my_guest_avatars'),
     ('public','my_retreats'),
     ('public','organizer_check_in'),
     ('public','post_retreat_update'),
