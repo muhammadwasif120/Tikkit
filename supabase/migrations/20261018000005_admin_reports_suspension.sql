@@ -501,4 +501,26 @@ begin
 end;
 $$;
 
+-- ---------------------------------------------------------------------------
+-- Who may call what. Admin functions check the caller's role inside as well; this keeps them off the anonymous API too.
+-- ---------------------------------------------------------------------------
+revoke execute on function public.admin_set_account_status(uuid, boolean, text) from public, anon;
+revoke execute on function public.admin_update_report(uuid, text, text) from public, anon;
+revoke execute on function public.admin_dashboard() from public, anon;
+revoke execute on function public.admin_upcoming_events(integer, integer) from public, anon;
+revoke execute on function public.admin_list_organizers(text) from public, anon;
+revoke execute on function public.admin_list_attendees(text, integer, integer) from public, anon;
+revoke execute on function public.admin_user_detail(uuid) from public, anon;
+revoke execute on function public.admin_list_reports(text) from public, anon;
+revoke execute on function public.submit_report(text, uuid, text, text, uuid) from public, anon;
+grant execute on function public.admin_set_account_status(uuid, boolean, text) to authenticated;
+grant execute on function public.admin_update_report(uuid, text, text) to authenticated;
+grant execute on function public.admin_dashboard() to authenticated;
+grant execute on function public.admin_upcoming_events(integer, integer) to authenticated;
+grant execute on function public.admin_list_organizers(text) to authenticated;
+grant execute on function public.admin_list_attendees(text, integer, integer) to authenticated;
+grant execute on function public.admin_user_detail(uuid) to authenticated;
+grant execute on function public.admin_list_reports(text) to authenticated;
+grant execute on function public.submit_report(text, uuid, text, text, uuid) to authenticated;
+
 commit;
