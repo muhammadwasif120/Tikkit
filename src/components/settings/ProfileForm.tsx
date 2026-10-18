@@ -36,12 +36,18 @@ export default function ProfileForm({ initial, publicUrl }: { initial: ProfileVa
     if (!user) return
     const username = v.username.trim().toLowerCase()
     if (username && !/^[a-z0-9_]{3,24}$/.test(username)) { setBusy(false); return setMsg({ ok: false, text: 'The username can use letters, numbers and underscore, 3 to 24 characters.' }) }
+    // Websites must be http(s). Add the scheme when it was left off, refuse anything else.
+    let website = v.website.trim()
+    if (website && !/^[a-z][a-z0-9+.-]*:/i.test(website)) website = `https://${website}`
+    if (website && !/^https?:\/\/[^\s]+$/i.test(website)) { setBusy(false); return setMsg({ ok: false, text: 'The website must start with http:// or https://.' }) }
+    const handle = v.instagram.trim().replace(/^@/, '')
+    if (handle && !/^[A-Za-z0-9._]{1,30}$/.test(handle)) { setBusy(false); return setMsg({ ok: false, text: 'The Instagram handle can use letters, numbers, dots and underscores.' }) }
     const [a, b] = await Promise.all([
       supabase.from('profiles').update({ full_name: v.fullName.trim(), username: username || null, city: v.city || null }).eq('id', user.id),
       supabase.from('organizer_profiles').update({
         company_name: v.company.trim() || null, bio: v.bio.trim() || null, logo_url: v.logoUrl || null, cover_url: v.coverUrl || null,
-        whatsapp: v.whatsapp.trim() || null, contact_email: v.contactEmail.trim() || null, instagram: v.instagram.trim() || null,
-        website: v.website.trim() || null, public_contact: v.publicContact,
+        whatsapp: v.whatsapp.trim() || null, contact_email: v.contactEmail.trim() || null, instagram: handle || null,
+        website: website || null, public_contact: v.publicContact,
       }).eq('id', user.id),
     ])
     setBusy(false)

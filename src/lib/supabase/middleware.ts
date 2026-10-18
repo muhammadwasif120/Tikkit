@@ -96,7 +96,6 @@ export async function updateSession(request: NextRequest) {
     '/',
     '/how-it-works',
     '/explore',
-    '/guest/explore',
     '/register',
     '/organizer',
     '/demo',
@@ -113,16 +112,13 @@ export async function updateSession(request: NextRequest) {
     '/pricing',
     '/about',
     '/security',
-    '/venues',          // Public venue browse
-    '/venue',           // Public venue profile pages
-    '/v',               // Public vendor profiles
     '/lp',               // Preserved landing pages (/lp/underground etc.)
     '/design',           // internal design review (404s in production)
-    '/sentry-example-page', // Sentry verification page — not linked from nav
-    '/api/sentry-example-api', // matches /api anyway, listed for clarity
   ]
 
-  const isPublic = publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
+  // Old links to /guest/explore/<id> still redirect to the event page. The For you feed itself needs a login.
+  const isLegacyEventLink = /^\/guest\/explore\/[^/]+$/.test(pathname)
+  const isPublic = isLegacyEventLink || publicPaths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   if (isPublic) {
     if (user && request.method === 'GET') {
@@ -131,7 +127,7 @@ export async function updateSession(request: NextRequest) {
           .from('profiles').select('role').eq('id', user.id).single()
         const role = profile?.role ?? 'attendee'
 
-        const dest = role === 'attendee' ? '/explore'
+        const dest = role === 'attendee' ? '/guest'
                    : role === 'admin'  ? '/master'
                    : '/dashboard'
         return NextResponse.redirect(new URL(dest, request.url))
@@ -178,7 +174,7 @@ export async function updateSession(request: NextRequest) {
     // Team managers are attendee accounts that an organizer invited. They may use the dashboard.
     const { data: team } = await supabase.from('organizer_team_members').select('id')
       .eq('user_id', user.id).eq('status', 'active').limit(1).maybeSingle()
-    if (!team) return NextResponse.redirect(new URL('/explore', request.url))
+    if (!team) return NextResponse.redirect(new URL('/guest', request.url))
     return response
   }
 

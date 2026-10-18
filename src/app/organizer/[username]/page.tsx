@@ -1,3 +1,4 @@
+import { safeHttpUrl, safeInstagram } from '@/lib/url'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { Globe, Instagram, MessageCircle, ShieldCheck, Mail } from 'lucide-react'
@@ -55,9 +56,9 @@ export default async function OrganizerPage({ params }: Props) {
             </div>
             <div className="flex flex-wrap gap-2">
               {org.whatsapp && <ButtonLink href={`https://wa.me/${org.whatsapp.replace(/\D/g, '')}`} variant="secondary" size="sm" target="_blank" rel="noopener noreferrer" leading={<MessageCircle className="h-4 w-4" />}>WhatsApp</ButtonLink>}
-              {org.contact_email && <ButtonLink href={`mailto:${org.contact_email}`} variant="secondary" size="sm" leading={<Mail className="h-4 w-4" />}>Email</ButtonLink>}
-              {org.instagram && <ButtonLink href={`https://instagram.com/${org.instagram.replace('@', '')}`} variant="ghost" size="sm" target="_blank" rel="noopener noreferrer" leading={<Instagram className="h-4 w-4" />}>Instagram</ButtonLink>}
-              {org.website && <ButtonLink href={org.website} variant="ghost" size="sm" target="_blank" rel="noopener noreferrer" leading={<Globe className="h-4 w-4" />}>Website</ButtonLink>}
+              {org.contact_email && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(org.contact_email) && <ButtonLink href={`mailto:${org.contact_email}`} variant="secondary" size="sm" leading={<Mail className="h-4 w-4" />}>Email</ButtonLink>}
+              {safeInstagram(org.instagram) && <ButtonLink href={`https://instagram.com/${safeInstagram(org.instagram)}`} variant="ghost" size="sm" target="_blank" rel="noopener noreferrer" leading={<Instagram className="h-4 w-4" />}>Instagram</ButtonLink>}
+              {safeHttpUrl(org.website) && <ButtonLink href={safeHttpUrl(org.website)!} variant="ghost" size="sm" target="_blank" rel="noopener noreferrer" leading={<Globe className="h-4 w-4" />}>Website</ButtonLink>}
             </div>
           </div>
           {org.bio && <p className="max-w-3xl whitespace-pre-line px-6 pb-6 text-[15px] leading-relaxed text-muted">{org.bio}</p>}

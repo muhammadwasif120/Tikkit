@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error && user) {
       const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-      let home = profile?.role === 'organizer' ? '/dashboard' : profile?.role === 'admin' ? '/master' : '/explore'
+      let home = profile?.role === 'organizer' ? '/dashboard' : profile?.role === 'admin' ? '/master' : '/guest'
       if (profile?.role === 'attendee') {
         await supabase.rpc('claim_team_invites')
         await supabase.rpc('claim_registrations')

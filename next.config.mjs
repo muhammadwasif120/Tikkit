@@ -49,6 +49,16 @@ const nextConfig = {
             value: 'nosniff',
           },
           {
+            // No inline-script restrictions here (Next and the JSON-LD blocks use inline scripts); these stop framing,
+            // base tag injection, plugin content and cross-site form posts.
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self'; base-uri 'self'; object-src 'none'; form-action 'self'",
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin-allow-popups',
+          },
+          {
             key: 'X-Frame-Options',
             value: 'SAMEORIGIN',
           },

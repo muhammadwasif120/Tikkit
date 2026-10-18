@@ -73,7 +73,6 @@ const testimonials = [
   { quote: "The guest list curation is what got me. Not everyone gets in. That's the whole point. Finally something built around that logic.",                                 handle: 'Private events · Tokyo' },
   { quote: "We don't publicise our events and we don't want to. Tikkit lets us run tight, keep it quiet, and still have everything organised from one place.",                 handle: 'Underground collective · London' },
   { quote: 'First time using it in Karachi. Fifty people, rooftop, no issues at the door. Every scan went through cleanly. No one got in who wasn\'t supposed to.',           handle: 'Organiser · Karachi' },
-  { quote: 'We were in a basement with no signal. The offline QR check-in still worked. That was the moment I knew this was built by people who actually run events.',         handle: 'Event host · Amsterdam' },
 ]
 
 const heroCards = [

@@ -42,7 +42,7 @@ export default function LoginClient() {
   const [f, setF] = useState({ name: '', email: '', password: '', phone: '', city: '', company: '', gender: '', dob: '' })
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setF(p => ({ ...p, [k]: e.target.value }))
 
-  const dest = (r: string | undefined) => next ?? (r === 'organizer' ? '/dashboard' : r === 'admin' ? '/master' : '/explore')
+  const dest = (r: string | undefined) => next ?? (r === 'organizer' ? '/dashboard' : r === 'admin' ? '/master' : '/guest')
 
   async function landing() {
     const { data: { user } } = await supabase.auth.getUser()

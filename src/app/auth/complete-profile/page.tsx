@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: 'Finish your profile', robots: { inde
 export default async function CompleteProfilePage() {
   const viewer = await getViewer()
   if (!viewer) redirect('/auth/login')
-  if (viewer.profile.is_complete) redirect(viewer.profile.role === 'organizer' ? '/dashboard' : '/explore')
+  if (viewer.profile.is_complete) redirect(viewer.profile.role === 'organizer' ? '/dashboard' : '/guest')
 
   const [{ data: priv }, { data: op }] = await Promise.all([
     viewer.supabase.from('profile_private').select('phone, date_of_birth, gender').eq('id', viewer.profile.id).maybeSingle(),
