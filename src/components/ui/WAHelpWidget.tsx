@@ -41,9 +41,10 @@ export default function WAHelpWidget() {
   const ctx = getContext(pathname)
 
   // On dashboard routes FloatingChat occupies bottom-right — sit above it
-  const hasChatBubble = pathname.startsWith('/dashboard')
-  const btnBottom = hasChatBubble ? 88 : 24
-  const popupBottom = hasChatBubble ? 152 : 86
+  // Sit at the corner. Where a bottom tab bar is showing (organizer app below 1024px, guest app below 640px) float just above it.
+  const navBreak = pathname.startsWith('/dashboard') ? 1023 : pathname.startsWith('/guest') ? 639 : 0
+  const btnBottom = 20
+  const popupBottom = 82
 
   // ── Auto-close timer ─────────────────────────────────────────────────────
   const startTimer = useCallback(() => {
@@ -95,8 +96,9 @@ export default function WAHelpWidget() {
   const handleMouseLeave = () => { setPaused(false); startTimer() }
 
   return (
-    <div style={{ '--wa-btn-bottom': `${btnBottom}px`, '--wa-popup-bottom': `${popupBottom}px` } as React.CSSProperties}>
+    <div className="wa-root" style={{ '--wa-btn-bottom': `${btnBottom}px`, '--wa-popup-bottom': `${popupBottom}px` } as React.CSSProperties}>
       <style>{`
+        ${navBreak ? `@media (max-width:${navBreak}px){ .wa-root{ --wa-btn-bottom: calc(76px + env(safe-area-inset-bottom)) !important; --wa-popup-bottom: calc(138px + env(safe-area-inset-bottom)) !important; } }` : ''}
         @keyframes waSlideUp {
           from { opacity:0; transform:translateY(14px) scale(.97); }
           to   { opacity:1; transform:none; }
@@ -110,7 +112,7 @@ export default function WAHelpWidget() {
           to   { width:0%; }
         }
         .wa-widget-btn {
-          position:fixed; bottom:var(--wa-btn-bottom,24px); right:24px; z-index:9000;
+          position:fixed; bottom:var(--wa-btn-bottom,24px); right:20px; z-index:9000;
           width:52px; height:52px; border-radius:50%;
           background:#25D366; color:#000; border:none; cursor:pointer;
           display:flex; align-items:center; justify-content:center;
@@ -122,7 +124,7 @@ export default function WAHelpWidget() {
         .wa-widget-btn.wa-hidden { opacity:0; pointer-events:none; }
 
         .wa-popup {
-          position:fixed; bottom:var(--wa-popup-bottom,86px); right:24px; z-index:9001;
+          position:fixed; bottom:var(--wa-popup-bottom,86px); right:20px; z-index:9001;
           width:296px;
           background:#0D0D18;
           border:1px solid rgba(255,255,255,.1); border-radius:20px;
