@@ -66,7 +66,7 @@ export async function updateSession(request: NextRequest) {
   // shows up in latency, switch to a single denormalised profiles.profile_complete
   // boolean kept in sync by a trigger.
   const completionExempt = [
-    '/auth', '/api', '/master', '/design',
+    '/auth', '/api', '/master', '/design', '/suspended',
     '/privacy', '/terms', '/security', '/about', '/contact', '/how-it-works',
   ]
   const isCompletionExempt = completionExempt.some(p => pathname === p || pathname.startsWith(p + '/'))
@@ -76,9 +76,12 @@ export async function updateSession(request: NextRequest) {
     // birth, city and gender; organizers need company, phone and city.
     const { data: gate } = await supabase
       .from('profiles')
-      .select('role, is_complete')
+      .select('role, is_complete, suspended_at')
       .eq('id', user.id)
       .maybeSingle()
+
+    // A suspended account can only see the suspended page and sign out.
+    if (gate?.suspended_at && !pathname.startsWith('/suspended')) return NextResponse.redirect(new URL('/suspended', request.url))
 
     if ((gate?.role === 'attendee' || gate?.role === 'organizer') && gate.is_complete === false) {
       return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
@@ -112,6 +115,7 @@ export async function updateSession(request: NextRequest) {
     '/pricing',
     '/about',
     '/security',
+    '/suspended',
     '/lp',               // Preserved landing pages (/lp/underground etc.)
     '/design',           // internal design review (404s in production)
   ]

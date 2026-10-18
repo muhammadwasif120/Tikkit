@@ -18,6 +18,7 @@ const safeNext = (n: string | null) => (n && /^\/(?![\/\\])[^\u0000-\u001f\\]*$/
 
 function friendly(msg: string) {
   const m = msg.toLowerCase()
+  if (m.includes('banned') || m.includes('suspended')) return 'This account has been suspended. Message us on WhatsApp if you think this is a mistake.'
   if (m.includes('invalid login')) return 'That email and password do not match.'
   if (m.includes('already registered') || m.includes('already been registered')) return 'An account with this email already exists. Try logging in.'
   if (m.includes('email not confirmed')) return 'Confirm your email first. We sent you a link.'
