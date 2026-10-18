@@ -45,9 +45,9 @@ export default function PrivacyPolicyPage() {
                 ['Account Registration', 'Full name, email address, phone number, username, password (hashed)', 'Account creation, authentication, communication'],
                 ['Profile Photo (optional)', 'A photo you choose to upload', 'Shown on your account and to Organisers of events you register for. It is stored at a public link, so only upload a photo you are happy to share'],
                 ['Identity Verification', 'CNIC number, passport number, identity document images, facial photograph (where applicable)', 'Identity verification, fraud prevention, compliance with anti-scalping obligations'],
-                ['Payment Information', 'Payment method, transaction ID, payment screenshots (where applicable), bank/wallet details for Organiser payouts', 'Payment processing, transaction verification, refunds'],
+                ['Payment Information', 'Payment method, transaction reference and payment receipt images that an Attendee uploads for an Organiser to review. Organisers may show bank or wallet details to Attendees', 'Letting the Organiser confirm a payment made directly between the Attendee and the Organiser. Tikkit X does not process or hold ticket payments'],
                 ['Event Registration', 'Event preferences, EOI submissions, ticket selections, dietary or accessibility requirements (if provided)', 'Event registration, Guest List management, event delivery'],
-                ['Organiser Information', 'Company/brand name, event details, venue information, vendor relationships, payout bank details', 'Event listing, payout processing, platform operations'],
+                ['Organiser Information', 'Company/brand name, event details, venue information, vendor relationships, and the bank or wallet details the Organiser chooses to show Attendees', 'Event listing, showing Attendees where to pay, platform operations'],
                 ['Vendor Information', 'Business name, service descriptions, portfolio images, pricing, availability', 'Marketplace listing, booking facilitation, verified profile display'],
                 ['Communications', 'Messages sent through in-app chat, support enquiries, feedback', 'Customer support, dispute resolution, platform improvement'],
               ]}
@@ -70,7 +70,7 @@ export default function PrivacyPolicyPage() {
           <LegalTable
             headers={['Legal Basis', 'Applicable Processing Activities']}
             rows={[
-              ['Contractual Necessity', 'Processing necessary to perform our contract with you, including account management, ticket issuance, QR code generation, payment processing, and event delivery.'],
+              ['Contractual Necessity', 'Processing necessary to perform our contract with you, including account management, ticket issuance, QR code generation, payment receipt handling between you and the Organiser, and event delivery.'],
               ['Consent', 'Processing based on your explicit consent, including identity verification (CNIC/biometric), marketing communications, and optional profile features. You may withdraw consent at any time by contacting admin@tikkitx.com.'],
               ['Legitimate Interests', 'Processing necessary for our legitimate interests, including fraud prevention, platform security, analytics for service improvement, and enforcement of our Terms.'],
               ['Legal Obligation', 'Processing required to comply with applicable laws, including the Prevention of Electronic Crimes Act 2016 (PECA), tax reporting obligations, and responses to lawful requests from law enforcement or regulatory authorities.'],
