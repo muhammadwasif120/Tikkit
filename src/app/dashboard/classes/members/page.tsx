@@ -31,7 +31,7 @@ export default async function MembersPage() {
     if (r.kind === 'class_booking') { const c = (classes as Any[] | null)?.find(x => x.id === r.subject_id); return { title: c?.class_series?.title ?? 'Class', note: 'Class drop in' } }
     const sp = (spaces as Any[] | null)?.find(x => x.id === r.subject_id); return { title: sp?.spaces?.name ?? 'Space', note: 'Space reservation' }
   }
-  const pending: Pending[] = rows.map(r => ({ id: r.id, name: (people as { id: string; full_name: string | null }[] | null)?.find(p => p.id === r.payer_id)?.full_name ?? 'Guest', ...what(r), amount: r.amount_pkr, path: r.screenshot_path, reference: r.reference, at: r.created_at }))
+  const pending: Pending[] = rows.map(r => ({ id: r.id, name: (people as { id: string; full_name: string | null }[] | null)?.find(p => p.id === r.payer_id)?.full_name ?? (roster as { attendee_id: string; full_name: string | null }[] | null)?.find(m => m.attendee_id === r.payer_id)?.full_name ?? 'Guest', ...what(r), amount: r.amount_pkr, path: r.screenshot_path, reference: r.reference, at: r.created_at }))
   const h = await headers(); const origin = `${h.get('x-forwarded-proto') ?? 'http'}://${h.get('host')}`
   return (
     <div className="k-fade-up">

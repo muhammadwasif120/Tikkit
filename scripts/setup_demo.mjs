@@ -58,7 +58,9 @@ console.log('attendee', attendee.id)
 
 for (let i = 0; i < GUESTS.length; i++) {
   const n = String(i + 1).padStart(2, '0')
-  await ensure(`demo.guest${n}@demo.tikkitx.com`, { role: 'attendee', full_name: GUESTS[i], city: 'Lahore' }, {})
+  const g = await ensure(`demo.guest${n}@demo.tikkitx.com`, { role: 'attendee', full_name: GUESTS[i], city: 'Lahore' }, {})
+  // fake numbers so the organizer demo's WhatsApp reminder button works
+  await admin.from('profile_private').update({ phone: `0300555${String(1000 + i).padStart(4, '0')}` }).eq('id', g.id)
 }
 console.log(`${GUESTS.length} sample guests ready`)
 
