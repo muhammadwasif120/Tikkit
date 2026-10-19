@@ -29,7 +29,7 @@ export default async function ClassPage({ params }: Props) {
   const { supabase, s } = d
   const [{ data: sessions }, { data: passes }, { data: { user } }] = await Promise.all([
     supabase.from('public_class_sessions').select('id, starts_at, seats_left').eq('series_id', s.id).order('starts_at').limit(24),
-    supabase.from('public_pass_products').select('id, name, kind, sessions_count, validity_days, price_pkr').eq('organizer_id', s.organizer_id).or(`series_id.eq.${s.id},series_id.is.null`).order('sort'),
+    supabase.from('public_pass_products').select('id, name, kind, sessions_count, validity_days, price_pkr, billing_period, period_sessions').eq('organizer_id', s.organizer_id).or(`series_id.eq.${s.id},series_id.is.null`).order('sort'),
     supabase.auth.getUser(),
   ])
   const { data: me } = user ? await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle() : { data: null }

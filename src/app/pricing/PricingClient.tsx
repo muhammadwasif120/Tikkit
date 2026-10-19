@@ -37,6 +37,7 @@ const rows: { group: string; items: { label: string; v: [Cell, Cell, Cell] }[] }
   ] },
   { group: 'Beyond events', items: [
     { label: 'Classes and passes', v: ['1 series', '5 series', 'Unlimited'] },
+    { label: 'Weekly and monthly memberships', v: [false, true, true] },
     { label: 'Spaces and reservations', v: [false, false, true] },
     { label: 'Retreat planning for companies', v: [false, false, true] },
   ] },

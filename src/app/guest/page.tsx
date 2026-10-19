@@ -36,8 +36,13 @@ export default async function TodayPage() {
   const attention = [
     ...t.upcoming.filter(u => ['awaiting_payment', 'payment_submitted', 'requested'].includes(u.status)).map(u => ({ key: u.id, title: u.event.title, note: u.status === 'awaiting_payment' ? 'Send payment and upload your receipt' : u.status === 'payment_submitted' ? 'Your receipt is being checked' : 'Waiting for the organizer to approve', cta: u.status === 'awaiting_payment' ? 'Pay now' : 'View', href: u.status === 'awaiting_payment' && u.event.slug ? `/events/${u.event.slug}` : '/guest/tickets', tone: u.status === 'awaiting_payment' ? 'warning' as const : 'info' as const })),
     ...b.rows.filter(r => !r.past && ['awaiting_payment', 'payment_submitted', 'requested'].includes(r.status)).map(r => ({ key: r.id, title: r.title, note: r.status === 'awaiting_payment' ? 'Payment due' : r.status === 'payment_submitted' ? 'Payment under review' : 'Waiting for approval', cta: 'View', href: '/guest/tickets', tone: r.status === 'awaiting_payment' ? 'warning' as const : 'info' as const })),
+    ...b.rows.filter(r => r.kind === 'pass_purchase' && r.period && r.mstate && ['due_soon', 'overdue', 'lapsed'].includes(r.mstate)).map(r => ({
+      key: r.id, title: r.title,
+      note: r.mstate === 'lapsed' ? 'Membership lapsed. Pay to book classes again' : r.mstate === 'overdue' ? `Payment overdue since ${fmtDate(r.validUntil ?? new Date().toISOString(), { day: 'numeric', month: 'short' })}` : `Next payment due ${fmtDate(r.validUntil ?? new Date().toISOString(), { day: 'numeric', month: 'short' })}`,
+      cta: 'Pay', href: '/guest/tickets', tone: r.mstate === 'due_soon' ? 'info' as const : 'warning' as const,
+    })),
   ]
-  const passes = b.rows.filter(r => r.kind === 'pass_purchase' && r.status === 'active')
+  const passes = b.rows.filter(r => r.kind === 'pass_purchase' && r.status === 'active' && !r.period)
   const tier = stats.data?.tier ?? 'new'
   const first_name = (profile.full_name ?? 'there').split(' ')[0]
   const hour = Number(new Intl.DateTimeFormat('en-GB', { hour: 'numeric', hour12: false, timeZone: 'Asia/Karachi' }).format(new Date()))

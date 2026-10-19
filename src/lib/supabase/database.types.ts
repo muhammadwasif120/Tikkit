@@ -1534,6 +1534,9 @@ export type Database = {
           sessions_count: number | null
           sort: number
           validity_days: number
+          billing_period: string | null
+          grace_days: number
+          period_sessions: number | null
         }
         Insert: {
           created_at?: string
@@ -1547,6 +1550,9 @@ export type Database = {
           sessions_count?: number | null
           sort?: number
           validity_days?: number
+          billing_period?: string | null
+          grace_days?: number
+          period_sessions?: number | null
         }
         Update: {
           created_at?: string
@@ -1560,6 +1566,9 @@ export type Database = {
           sessions_count?: number | null
           sort?: number
           validity_days?: number
+          billing_period?: string | null
+          grace_days?: number
+          period_sessions?: number | null
         }
         Relationships: [
           {
@@ -1609,6 +1618,13 @@ export type Database = {
           updated_at: string
           valid_from: string | null
           valid_until: string | null
+          billing_period: string | null
+          cycles_paid: number
+          grace_days: number
+          last_reminded_at: string | null
+          notice_for: string | null
+          notice_stage: number
+          reminder_count: number
         }
         Insert: {
           approved_at?: string | null
@@ -1626,6 +1642,13 @@ export type Database = {
           updated_at?: string
           valid_from?: string | null
           valid_until?: string | null
+          billing_period?: string | null
+          cycles_paid?: number
+          grace_days?: number
+          last_reminded_at?: string | null
+          notice_for?: string | null
+          notice_stage?: number
+          reminder_count?: number
         }
         Update: {
           approved_at?: string | null
@@ -1643,6 +1666,13 @@ export type Database = {
           updated_at?: string
           valid_from?: string | null
           valid_until?: string | null
+          billing_period?: string | null
+          cycles_paid?: number
+          grace_days?: number
+          last_reminded_at?: string | null
+          notice_for?: string | null
+          notice_stage?: number
+          reminder_count?: number
         }
         Relationships: [
           {
@@ -3824,6 +3854,8 @@ export type Database = {
       }
       public_pass_products: {
         Row: {
+          billing_period: string | null
+          period_sessions: number | null
           id: string | null
           kind: Database["public"]["Enums"]["pass_kind"] | null
           name: string | null
@@ -4277,6 +4309,32 @@ export type Database = {
         Args: { p_code: string; p_event: string; p_ticket_type?: string }
         Returns: Json
       }
+      membership_roster: {
+        Args: never
+        Returns: {
+          attendee_id: string
+          billing_period: string
+          cycles_paid: number
+          full_name: string | null
+          grace_days: number
+          id: string
+          last_reminded_at: string | null
+          pending_payment_id: string | null
+          phone: string | null
+          price_pkr: number
+          product_name: string
+          reminder_count: number
+          sessions_total: number | null
+          sessions_used: number
+          state: string
+          status: string
+          valid_until: string | null
+        }[]
+      }
+      mark_membership_reminded: { Args: { p_pass: string }; Returns: undefined }
+      record_membership_payment: { Args: { p_pass: string; p_note?: string }; Returns: undefined }
+      stop_membership: { Args: { p_pass: string }; Returns: undefined }
+      process_memberships: { Args: never; Returns: number }
       process_class_sessions: { Args: never; Returns: number }
       process_no_shows: { Args: never; Returns: number }
       process_space_bookings: { Args: never; Returns: number }

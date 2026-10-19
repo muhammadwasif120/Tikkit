@@ -14,7 +14,7 @@ const readable = (m: string) => (m.match(/^[A-Z_]+(?::[a-z_]+)?: ([\s\S]*)$/)?.[
 
 export type Series = { id: string; title: string; instructor_name: string | null; weekdays: number[]; start_time: string; duration_minutes: number; capacity: number | null; drop_in_price_pkr: number; status: string; starts_on: string; ends_on: string | null; city: string | null; venue_name: string | null; description: string | null; slug: string | null }
 export type Session = { id: string; starts_at: string; ends_at: string; status: string; capacity: number | null; booked: number; notes: string | null }
-export type Product = { id: string; name: string; kind: 'pack' | 'monthly'; sessions_count: number | null; validity_days: number; price_pkr: number; is_active: boolean }
+export type Product = { id: string; name: string; kind: 'pack' | 'monthly'; sessions_count: number | null; validity_days: number; price_pkr: number; is_active: boolean; billing_period?: 'weekly' | 'monthly' | null; grace_days?: number; period_sessions?: number | null; series_id?: string | null }
 export type Booking = { id: string; session_id: string; name: string; status: string; via_pass: boolean }
 
 export function NewSeries({ locked }: { locked: boolean }) {
@@ -63,14 +63,16 @@ export function SeriesManage({ series, sessions, products, bookings, origin }: {
   const router = useRouter(); const supabase = useMemo(() => createClient(), [])
   const [tab, setTab] = useState<'sessions' | 'passes' | 'details'>('sessions'); const [pending, start] = useTransition(); const [err, setErr] = useState<string | null>(null)
   const [edit, setEdit] = useState(false); const [openS, setOpenS] = useState<string | null>(null); const [pm, setPm] = useState(false)
-  const [pf, setPf] = useState({ name: '', kind: 'pack', count: '5', days: '90', price: '' })
+  const blankPf = { name: '', kind: 'pack', count: '5', days: '90', price: '', period: 'monthly', grace: '3', cap: '', all: false }
+  const [pf, setPf] = useState(blankPf)
   const refresh = () => router.refresh()
 
   const cancel = (s: Session) => { const reason = prompt('Why is it cancelled? Booked guests are told.'); if (reason === null) return; setErr(null); start(async () => { const { error } = await supabase.rpc('cancel_class_session', { p_session: s.id, p_reason: reason || undefined }); if (error) return setErr(readable(error.message)); refresh() }) }
   async function addProduct(e: React.FormEvent) { e.preventDefault(); setErr(null); if (!pf.name.trim() || !pf.price) return setErr('Add a name and a price.')
     const { data: { user } } = await supabase.auth.getUser()
-    const { error } = await supabase.from('pass_products').insert({ organizer_id: user!.id, series_id: series.id, name: pf.name.trim(), kind: pf.kind as 'pack' | 'monthly', sessions_count: pf.kind === 'pack' ? Number(pf.count) : null, validity_days: Number(pf.days) || 90, price_pkr: Number(pf.price) })
-    if (error) return setErr(readable(error.message)); setPm(false); setPf({ name: '', kind: 'pack', count: '5', days: '90', price: '' }); refresh() }
+    const member = pf.kind === 'membership'
+    const { error } = await supabase.from('pass_products').insert({ organizer_id: user!.id, series_id: pf.all ? null : series.id, name: pf.name.trim(), kind: pf.kind === 'pack' ? 'pack' : 'monthly', sessions_count: pf.kind === 'pack' ? Number(pf.count) : null, validity_days: member ? (pf.period === 'weekly' ? 7 : 30) : Number(pf.days) || 90, price_pkr: Number(pf.price), ...(member ? { billing_period: pf.period as 'weekly' | 'monthly', grace_days: Math.min(Number(pf.grace) || 0, 14), period_sessions: pf.cap ? Number(pf.cap) : null } : {}) })
+    if (error) return setErr(readable(error.message)); setPm(false); setPf(blankPf); refresh() }
 
   return (
     <>
@@ -94,17 +96,23 @@ export function SeriesManage({ series, sessions, products, bookings, origin }: {
       ))}
 
       {tab === 'passes' && (
-        <Card><CardHeader title="Passes" description="Packs and monthly passes guests can buy for this class" action={<Button size="sm" leading={<Plus className="h-4 w-4" />} onClick={() => setPm(true)}>New pass</Button>} />
-          <CardBody>{products.length === 0 ? <p className="text-sm text-muted">No passes yet. Drop in booking still works.</p> : <ul className="divide-y divide-line">{products.map(p => <li key={p.id} className="flex items-center gap-3 py-3"><div className="min-w-0 flex-1"><p className="text-sm font-medium text-fg">{p.name}</p><p className="text-xs text-muted">{p.kind === 'pack' ? `${p.sessions_count} sessions` : 'Unlimited'} · valid {p.validity_days} days</p></div><span className="tnum text-sm text-fg">{pkr(p.price_pkr)}</span><Button size="sm" variant="ghost" onClick={() => start(async () => { await supabase.from('pass_products').update({ is_active: !p.is_active }).eq('id', p.id); refresh() })}>{p.is_active ? 'Pause' : 'Resume'}</Button><Button size="icon-sm" variant="ghost" aria-label="Delete pass" onClick={() => confirm('Delete this pass?') && start(async () => { const { error } = await supabase.from('pass_products').delete().eq('id', p.id); if (error) setErr('This pass has been bought. Pause it instead.'); refresh() })}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>}</CardBody></Card>
+        <Card><CardHeader title="Passes and memberships" description="Packs, monthly passes and memberships that renew every week or month" action={<Button size="sm" leading={<Plus className="h-4 w-4" />} onClick={() => setPm(true)}>New pass</Button>} />
+          <CardBody>{products.length === 0 ? <p className="text-sm text-muted">No passes yet. Drop in booking still works.</p> : <ul className="divide-y divide-line">{products.map(p => <li key={p.id} className="flex items-center gap-3 py-3"><div className="min-w-0 flex-1"><p className="text-sm font-medium text-fg">{p.name}</p><p className="text-xs text-muted">{p.billing_period ? `Membership · ${p.period_sessions ? `${p.period_sessions} sessions a ${p.billing_period === 'weekly' ? 'week' : 'month'}` : 'unlimited'} · every ${p.billing_period === 'weekly' ? 'week' : 'month'}${p.series_id ? '' : ' · all classes'}` : `${p.kind === 'pack' ? `${p.sessions_count} sessions` : 'Unlimited'} · valid ${p.validity_days} days`}</p></div><span className="tnum text-sm text-fg">{pkr(p.price_pkr)}{p.billing_period ? ` / ${p.billing_period === 'weekly' ? 'wk' : 'mo'}` : ''}</span><Button size="sm" variant="ghost" onClick={() => start(async () => { await supabase.from('pass_products').update({ is_active: !p.is_active }).eq('id', p.id); refresh() })}>{p.is_active ? 'Pause' : 'Resume'}</Button><Button size="icon-sm" variant="ghost" aria-label="Delete pass" onClick={() => confirm('Delete this pass?') && start(async () => { const { error } = await supabase.from('pass_products').delete().eq('id', p.id); if (error) setErr('This pass has been bought. Pause it instead.'); refresh() })}><Trash2 className="h-4 w-4" /></Button></li>)}</ul>}</CardBody></Card>
       )}
 
       <SeriesForm open={edit} onClose={() => setEdit(false)} initial={series} onDone={() => { setEdit(false); refresh() }} />
-      <Modal open={pm} onClose={() => setPm(false)} title="New pass">
+      <Modal open={pm} onClose={() => setPm(false)} title="New pass or membership">
         <form onSubmit={addProduct} className="space-y-4">
           <Field label="Name">{p => <Input {...p} value={pf.name} onChange={e => setPf({ ...pf, name: e.target.value })} placeholder="10 class pack" />}</Field>
-          <div className="grid gap-4 sm:grid-cols-2"><Field label="Type">{p => <Select {...p} value={pf.kind} onChange={e => setPf({ ...pf, kind: e.target.value })}><option value="pack">Pack of sessions</option><option value="monthly">Monthly unlimited</option></Select>}</Field>{pf.kind === 'pack' && <Field label="Sessions">{p => <Input {...p} inputMode="numeric" value={pf.count} onChange={e => setPf({ ...pf, count: e.target.value.replace(/\D/g, '') })} />}</Field>}</div>
-          <div className="grid gap-4 sm:grid-cols-2"><Field label="Valid for (days)">{p => <Input {...p} inputMode="numeric" value={pf.days} onChange={e => setPf({ ...pf, days: e.target.value.replace(/\D/g, '') })} />}</Field><Field label="Price (PKR)">{p => <Input {...p} inputMode="numeric" value={pf.price} onChange={e => setPf({ ...pf, price: e.target.value.replace(/\D/g, '') })} />}</Field></div>
-          {err && <p role="alert" className="text-sm text-danger">{err}</p>}<div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setPm(false)}>Cancel</Button><Button type="submit">Create pass</Button></div>
+          <div className="grid gap-4 sm:grid-cols-2"><Field label="Type">{p => <Select {...p} value={pf.kind} onChange={e => setPf({ ...pf, kind: e.target.value })}><option value="pack">Pack of sessions</option><option value="monthly">Monthly unlimited (one time)</option><option value="membership">Membership (renews)</option></Select>}</Field>{pf.kind === 'pack' && <Field label="Sessions">{p => <Input {...p} inputMode="numeric" value={pf.count} onChange={e => setPf({ ...pf, count: e.target.value.replace(/\D/g, '') })} />}</Field>}{pf.kind === 'membership' && <Field label="Pays every">{p => <Select {...p} value={pf.period} onChange={e => setPf({ ...pf, period: e.target.value })}><option value="monthly">Month</option><option value="weekly">Week</option></Select>}</Field>}</div>
+          {pf.kind === 'membership' ? (
+            <>
+              <div className="grid gap-4 sm:grid-cols-3"><Field label={`Price each ${pf.period === 'weekly' ? 'week' : 'month'} (PKR)`}>{p => <Input {...p} inputMode="numeric" value={pf.price} onChange={e => setPf({ ...pf, price: e.target.value.replace(/\D/g, '') })} />}</Field><Field label="Grace days" hint="Days after the due date before it lapses">{p => <Input {...p} inputMode="numeric" value={pf.grace} onChange={e => setPf({ ...pf, grace: e.target.value.replace(/\D/g, '') })} />}</Field><Field label="Sessions per period" optional>{p => <Input {...p} inputMode="numeric" placeholder="Unlimited" value={pf.cap} onChange={e => setPf({ ...pf, cap: e.target.value.replace(/\D/g, '') })} />}</Field></div>
+              <label className="flex cursor-pointer items-center gap-2 text-sm text-muted"><input type="checkbox" checked={pf.all} onChange={e => setPf({ ...pf, all: e.target.checked })} className="h-4 w-4 accent-[rgb(var(--k-accent))]" /> Works for all my classes, not just this one</label>
+              <p className="text-xs text-muted">Members pay you directly and upload a screenshot each time. You approve it in Members. TIKKIT X never handles the money.</p>
+            </>
+          ) : <div className="grid gap-4 sm:grid-cols-2"><Field label="Valid for (days)">{p => <Input {...p} inputMode="numeric" value={pf.days} onChange={e => setPf({ ...pf, days: e.target.value.replace(/\D/g, '') })} />}</Field><Field label="Price (PKR)">{p => <Input {...p} inputMode="numeric" value={pf.price} onChange={e => setPf({ ...pf, price: e.target.value.replace(/\D/g, '') })} />}</Field></div>}
+          {err && <p role="alert" className="text-sm text-danger">{err}</p>}<div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setPm(false)}>Cancel</Button><Button type="submit">{pf.kind === 'membership' ? 'Create membership' : 'Create pass'}</Button></div>
         </form>
       </Modal>
     </>

@@ -14,7 +14,7 @@ export default async function ClassPage({ params }: { params: Promise<{ id: stri
   const from = new Date(Date.now() - 86_400_000).toISOString()
   const [{ data: sessions }, { data: products }, { data: bookings }] = await Promise.all([
     supabase.from('class_sessions').select('*').eq('series_id', id).gte('starts_at', from).order('starts_at').limit(60),
-    supabase.from('pass_products').select('*').eq('series_id', id).order('sort'),
+    supabase.from('pass_products').select('*').or(`series_id.eq.${id},series_id.is.null`).order('sort'),
     supabase.from('class_bookings').select('id, session_id, status, pass_purchase_id, attendee_id').eq('series_id', id),
   ])
   const ids = [...new Set(((bookings ?? []) as { attendee_id: string }[]).map(b => b.attendee_id))]

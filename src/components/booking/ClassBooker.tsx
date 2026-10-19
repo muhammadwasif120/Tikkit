@@ -7,9 +7,10 @@ import { Badge, Button, Card, CardBody, CardHeader } from '@/components/kit'
 import PayProof from './PayProof'
 import { createClient } from '@/lib/supabase/client'
 import { fmtDate, fmtTime, pkr } from '@/lib/format'
+import { PERIOD_WORD } from '@/lib/membership'
 
 export type PubSession = { id: string; starts_at: string; seats_left: number | null }
-export type PubPass = { id: string; name: string; kind: string; sessions_count: number | null; validity_days: number; price_pkr: number }
+export type PubPass = { id: string; name: string; kind: string; sessions_count: number | null; validity_days: number; price_pkr: number; billing_period?: 'weekly' | 'monthly' | null; period_sessions?: number | null }
 export type MyPass = { id: string; name: string; left: string }
 const readable = (m: string) => (m.match(/^[A-Z_]+(?::[a-z_]+)?: ([\s\S]*)$/)?.[1]) ?? m
 
@@ -51,8 +52,8 @@ export default function ClassBooker({ organizerId, price, sessions, passes, myPa
               <Button size="sm" loading={busy === s.id} disabled={s.seats_left === 0 || (signedIn && !isAttendee)} onClick={() => book(s)}>Book</Button></li>))}</ul>}
         </CardBody></Card>
 
-      {passes.length > 0 && <Card><CardHeader title="Passes" description="Save when you come often" /><CardBody><ul className="grid gap-3 sm:grid-cols-2">{passes.map(p => (
-        <li key={p.id} className="rounded-xl bg-raised p-4 shadow-[inset_0_0_0_1px_rgb(var(--k-line))]"><p className="text-sm font-semibold text-fg">{p.name}</p><p className="mt-1 text-xs text-muted">{p.kind === 'pack' ? `${p.sessions_count} sessions` : 'Unlimited sessions'} · valid {p.validity_days} days</p><p className="mt-3 tnum text-lg font-semibold text-fg">{p.price_pkr ? pkr(p.price_pkr) : 'Free'}</p><Button size="sm" variant="secondary" className="mt-3 w-full" loading={busy === p.id} disabled={signedIn && !isAttendee} onClick={() => buy(p)}>Buy pass</Button></li>))}</ul></CardBody></Card>}
+      {passes.length > 0 && <Card><CardHeader title="Passes and memberships" description="Save when you come often" /><CardBody><ul className="grid gap-3 sm:grid-cols-2">{passes.map(p => (
+        <li key={p.id} className="rounded-xl bg-raised p-4 shadow-[inset_0_0_0_1px_rgb(var(--k-line))]"><p className="text-sm font-semibold text-fg">{p.name}</p>{p.billing_period ? <p className="mt-1 text-xs text-muted">Membership · {p.period_sessions ? `${p.period_sessions} sessions a ${PERIOD_WORD[p.billing_period]}` : 'Unlimited sessions'} · pay every {PERIOD_WORD[p.billing_period]}</p> : <p className="mt-1 text-xs text-muted">{p.kind === 'pack' ? `${p.sessions_count} sessions` : 'Unlimited sessions'} · valid {p.validity_days} days</p>}<p className="mt-3 tnum text-lg font-semibold text-fg">{p.price_pkr ? pkr(p.price_pkr) : 'Free'}{p.billing_period && p.price_pkr ? <span className="text-sm font-normal text-muted"> / {PERIOD_WORD[p.billing_period]}</span> : null}</p><Button size="sm" variant="secondary" className="mt-3 w-full" loading={busy === p.id} disabled={signedIn && !isAttendee} onClick={() => buy(p)}>{p.billing_period ? 'Join' : 'Buy pass'}</Button></li>))}</ul></CardBody></Card>}
     </div>
   )
 }

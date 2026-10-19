@@ -127,6 +127,9 @@ export default function TermsPage() {
             </ul>
             <p>Attendees should keep their proof of payment and their communication with the Organiser. If an Organiser does not meet these obligations, you may report them (see section 13.1) and you keep whatever rights you have against the Organiser under applicable law. Tikkit X may share relevant records with the parties or with the authorities where the law requires it.</p>
           </SubSection>
+          <SubSection title="6.6 Memberships and Repeat Payments">
+            <p>Some Organisers offer memberships that are paid every week or every month. Tikkit X never charges, debits or collects these payments. Nothing renews automatically and no card or account is stored. Each time a payment is due, the Member pays the Organiser directly and may upload proof for the Organiser to review. The Organiser decides whether the payment was received, sets the price, the due dates and the grace period, and may stop or pause a membership. Reminders, including WhatsApp messages, are sent by the Organiser, not by Tikkit X, and a Member can stop a membership at any time from their account. Missed payments, access to classes and any refund for an unused period are matters between the Member and the Organiser.</p>
+          </SubSection>
         </LegalSection>
 
         <LegalSection number="7" title="Terms for Event Organisers">
