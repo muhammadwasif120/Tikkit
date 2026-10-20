@@ -22,6 +22,9 @@ const CITIES = [
 export default function UndergroundPage() {
   return (
     <>
+      {/* Only this legacy page uses Clash Display, so only this page loads it (React hoists these into <head>). */}
+      <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="anonymous" />
+      <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet" precedence="default" />
       <UndergroundHomeClient />
       <section
         aria-label="Browse events by city"

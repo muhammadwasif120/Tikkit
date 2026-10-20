@@ -24,7 +24,7 @@ export default function TermsPage() {
   return (
     <LegalPage
       title="Terms &amp; Conditions"
-      effective="Effective Date: 1 April 2026 | Last Updated: 1 April 2026"
+      effective="Effective Date: 1 April 2026 | Last Updated: 18 October 2026"
       intro={`These Terms and Conditions constitute a legally binding agreement between you and Two Bit Digital (SMC-PVT) LTD, trading as Tikkit X, governing your access to and use of the Tikkit X platform. By using the Platform, you agree to be bound by these Terms.`}
     >
       <LegalSection number="1" title="Introduction and Acceptance">
@@ -101,28 +101,34 @@ export default function TermsPage() {
               <li>Use any automated software, bot, macro, or similar tool to purchase Tickets or circumvent any purchase limitations.</li>
               <li>Advertise or list Tickets for sale on any third-party platform, social media, or marketplace.</li>
             </ul>
-            <p>Violation of this clause will result in immediate account suspension, cancellation of all associated Tickets without refund, and may result in a permanent ban from the Platform. Tikkit X reserves the right to pursue legal remedies for any losses arising from scalping activities.</p>
+            <p>Violation of this clause will result in immediate account suspension, cancellation of all associated Tickets (any refund being a matter between the Attendee and the Organiser), and may result in a permanent ban from the Platform. Tikkit X reserves the right to pursue legal remedies for any losses arising from scalping activities.</p>
           </SubSection>
         </LegalSection>
 
-        <LegalSection number="6" title="Payments and Fees">
-          <SubSection title="6.1 Ticket Pricing">
-            <p>Ticket prices are set by Event Organisers. Tikkit X may charge a service fee and/or payment processing fee in addition to the ticket price. All applicable fees will be clearly displayed before you complete your purchase.</p>
+        <LegalSection number="6" title="Payments, Refunds and Responsibility">
+          <SubSection title="6.1 Tikkit X Does Not Handle Your Money">
+            <p>Tikkit X is a technology platform. Tikkit X does not receive, hold, process, transfer or have access to any money that Attendees pay to Organisers. Tikkit X is not a bank, a payment service provider, an escrow agent, or the agent of either the Organiser or the Attendee for any payment. Every payment for a Ticket is made directly between the Attendee and the Organiser, for example by bank transfer, JazzCash, EasyPaisa or another method the Organiser chooses to offer.</p>
           </SubSection>
-          <SubSection title="6.2 Payment Methods">
-            <p>The Platform supports payment methods as available in your jurisdiction, which may include bank transfer (IBFT), mobile wallets (JazzCash, EasyPaisa), card payments, and other methods integrated through our payment processing partners. You agree to comply with the terms of your payment provider in addition to these Terms.</p>
+          <SubSection title="6.2 The Sale Is Between Attendee and Organiser">
+            <p>When you register for or buy a Ticket, the sale contract is between you and the Organiser only. Tikkit X is not a party to it. The Organiser alone decides the ticket price, who is admitted, and the terms of sale, and is solely responsible for delivering the Event and for the accuracy of the Event listing.</p>
           </SubSection>
-          <SubSection title="6.3 Payment Verification">
-            <p>Where payment is made via screenshot submission or manual transfer, Tikkit X and/or the Organiser will verify receipt before confirming your Ticket. Tikkit X is not responsible for delays or failures in payment verification caused by incomplete payment information, banking errors, or third-party payment provider issues.</p>
+          <SubSection title="6.3 Fees">
+            <p>Tikkit X does not add a service fee, commission or processing fee to Ticket prices and does not take a share of ticket sales. Tikkit X charges Organisers a subscription fee for use of the Platform, as set out on the pricing page. Subscription fees are paid by Organisers to Tikkit X, are non-refundable except where required by applicable law, and are separate from any amount an Attendee pays an Organiser.</p>
           </SubSection>
-          <SubSection title="6.4 Refund Policy">
-            <p>Refund policies are determined by individual Event Organisers and will be displayed on the Event listing. Unless otherwise stated by the Organiser:</p>
+          <SubSection title="6.4 Payment Verification">
+            <p>The Platform lets an Attendee upload proof of payment, such as a screenshot or transfer reference, for the Organiser to review. The Organiser alone decides whether a payment has been received and whether to approve or decline a registration. Tikkit X does not verify, guarantee or take responsibility for any payment, and is not responsible for delays, banking errors, mistaken or fraudulent proof, or the failure of any payment method.</p>
+          </SubSection>
+          <SubSection title="6.5 Refunds Are the Organiser's Responsibility">
+            <p>Any refund is a matter between the Attendee and the Organiser. The Organiser is solely liable for refunds, including where an Event is cancelled, postponed in a way that the Attendee cannot attend, materially changed, or not delivered as described. Tikkit X does not issue refunds, cannot reverse or recover a transfer made to an Organiser, and is not liable to any person if an Organiser does not refund. Unless the Organiser states a different policy on the Event listing, and subject to applicable law:</p>
             <ul>
               <li>Tickets are generally non-refundable once confirmed.</li>
-              <li>If an Event is cancelled by the Organiser, you are entitled to a full refund of the ticket price (excluding service fees) within 30 days of cancellation.</li>
-              <li>If an Event is rescheduled, your Ticket will remain valid for the new date. If you cannot attend the rescheduled Event, you may request a refund from the Organiser, subject to their refund policy.</li>
-              <li>Tikkit X service fees are non-refundable except where required by applicable law.</li>
+              <li>If an Event is cancelled by the Organiser, the Organiser must refund the full ticket price to each Attendee within 30 days of the cancellation.</li>
+              <li>If an Event is rescheduled, your Ticket remains valid for the new date. If you cannot attend the new date, you may ask the Organiser for a refund under the Organiser's refund policy.</li>
             </ul>
+            <p>Attendees should keep their proof of payment and their communication with the Organiser. If an Organiser does not meet these obligations, you may report them (see section 13.1) and you keep whatever rights you have against the Organiser under applicable law. Tikkit X may share relevant records with the parties or with the authorities where the law requires it.</p>
+          </SubSection>
+          <SubSection title="6.6 Memberships and Repeat Payments">
+            <p>Some Organisers offer memberships that are paid every week or every month. Tikkit X never charges, debits or collects these payments. Nothing renews automatically and no card or account is stored. Each time a payment is due, the Member pays the Organiser directly and may upload proof for the Organiser to review. The Organiser decides whether the payment was received, sets the price, the due dates and the grace period, and may stop or pause a membership. Reminders, including WhatsApp messages, are sent by the Organiser, not by Tikkit X, and a Member can stop a membership at any time from their account. Missed payments, access to classes and any refund for an unused period are matters between the Member and the Organiser.</p>
           </SubSection>
         </LegalSection>
 
@@ -141,8 +147,8 @@ export default function TermsPage() {
           <SubSection title="7.2 Guest List Ownership">
             <p>Organisers own the Guest List data for their Events and may manage approvals, rejections, and communications with Attendees through the Platform. Tikkit X processes Guest List data on behalf of the Organiser and will not share Guest List data with third parties except as required to provide the Platform's services or as required by law.</p>
           </SubSection>
-          <SubSection title="7.3 Organiser Fees and Payouts">
-            <p>Tikkit X will remit ticket sale proceeds to Organisers in accordance with the payout schedule and terms agreed at the time of Event creation, less any applicable Tikkit X service fees. Tikkit X reserves the right to withhold payouts in cases of suspected fraud, chargebacks, or breach of these Terms, pending investigation.</p>
+          <SubSection title="7.3 Organiser Payments and Refund Liability">
+            <p>As an Organiser you receive ticket payments directly from Attendees. Tikkit X does not collect, hold, remit or withhold those funds. You are solely responsible for providing accurate payment details, confirming receipt of each payment, issuing every refund you owe, resolving payment disputes with Attendees, and for any taxes and records that apply to your sales. You are liable to Attendees for refunds, and Tikkit X is not. Your own subscription fee to Tikkit X is separate and is described in section 6.3.</p>
           </SubSection>
         </LegalSection>
 
@@ -183,7 +189,7 @@ export default function TermsPage() {
 
         <LegalSection number="11" title="Limitation of Liability">
           <SubSection title="11.1 Platform Role">
-            <p>Tikkit X operates as a technology platform connecting Event Organisers, Attendees, and Vendors. Tikkit X is not the organiser, host, or producer of any Event listed on the Platform. Tikkit X does not guarantee the quality, safety, legality, or suitability of any Event, Organiser, or Vendor.</p>
+            <p>Tikkit X operates as a technology platform connecting Event Organisers, Attendees, and Vendors. Tikkit X is not the organiser, host, or producer of any Event listed on the Platform. Tikkit X does not guarantee the quality, safety, legality, or suitability of any Event, Organiser, or Vendor. Tikkit X is not a party to any transaction between an Attendee and an Organiser and has no liability for any payment, non-payment, refund, chargeback, cancellation or non-delivery of an Event, all of which are the responsibility of the Organiser as set out in section 6.</p>
           </SubSection>
           <SubSection title="11.2 Disclaimer of Warranties">
             <p>The Platform is provided on an "as is" and "as available" basis, without warranties of any kind, whether express, implied, or statutory. Tikkit X does not warrant that the Platform will be uninterrupted, error-free, secure, or free of viruses or other harmful components.</p>
@@ -216,6 +222,9 @@ export default function TermsPage() {
             <li>Tikkit X is required to do so by law or regulatory authority.</li>
           </ul>
           <p>You may terminate your account at any time by contacting <a href="mailto:admin@tikkitx.com">admin@tikkitx.com</a>. Termination does not relieve you of any obligations incurred prior to termination, including any outstanding payment obligations.</p>
+          <SubSection title="13.1 Reports and Moderation">
+            <p>Any signed-in user can report an Organiser, an Attendee or an Event for fraud, a refund that is owed and not given, fake events, harassment, impersonation, inappropriate content or safety concerns. Tikkit X reviews reports, and may remove an Event, suspend an account, end its sessions and hide its listings, with or without notice, while it investigates or afterwards. A suspended account cannot sign in. Reports must be made in good faith: knowingly false or repeated abusive reports are themselves a breach of these Terms. Tikkit X will decide what action, if any, to take, is under no obligation to take any particular action, and cannot refund money or compel an Organiser to refund it.</p>
+          </SubSection>
         </LegalSection>
 
         <LegalSection number="14" title="Dispute Resolution">

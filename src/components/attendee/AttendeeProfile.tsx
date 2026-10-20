@@ -6,10 +6,13 @@ import { LogOut } from 'lucide-react'
 import { Button, Card, CardBody, CardHeader, Field, Input, Select, ThemeToggle } from '@/components/kit'
 import { createClient } from '@/lib/supabase/client'
 import { PAKISTAN_CITIES } from '@/lib/pakistanCities'
+import { clearPrivateCaches } from '@/lib/pwa'
+import InstallAppButton from '@/components/pwa/InstallAppButton'
+import AvatarUpload from './AvatarUpload'
 
 export type AttendeeValues = { name: string; city: string; phone: string; gender: string; dob: string; email: string }
 
-export default function AttendeeProfile({ initial }: { initial: AttendeeValues }) {
+export default function AttendeeProfile({ initial, avatarUrl = null }: { initial: AttendeeValues; avatarUrl?: string | null }) {
   const router = useRouter(); const supabase = useMemo(() => createClient(), [])
   const [v, setV] = useState(initial); const [busy, setBusy] = useState(false); const [msg, setMsg] = useState<{ ok: boolean; t: string } | null>(null)
   const set = (k: keyof AttendeeValues) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setV(p => ({ ...p, [k]: e.target.value }))
@@ -27,10 +30,11 @@ export default function AttendeeProfile({ initial }: { initial: AttendeeValues }
     if (a.error || b.error) return setMsg({ ok: false, t: 'We could not save your details.' })
     setMsg({ ok: true, t: 'Saved.' }); router.refresh()
   }
-  async function signOut() { await supabase.auth.signOut(); router.push('/'); router.refresh() }
+  async function signOut() { await clearPrivateCaches(); await supabase.auth.signOut(); router.push('/'); router.refresh() }
 
   return (
     <div className="space-y-6">
+      <Card><CardBody><AvatarUpload name={initial.name} url={avatarUrl} /></CardBody></Card>
       <form onSubmit={save}><Card>
         <CardHeader title="Your details" description="Organizers see your name and phone only for events you register for." />
         <CardBody className="space-y-4">
@@ -47,6 +51,7 @@ export default function AttendeeProfile({ initial }: { initial: AttendeeValues }
         </CardBody>
       </Card></form>
       <Card><CardBody className="flex items-center justify-between"><div><p className="text-sm font-medium text-fg">Appearance</p><p className="text-[13px] text-muted">Midnight or Daylight.</p></div><ThemeToggle /></CardBody></Card>
+      <InstallAppButton className="rounded-2xl bg-surface p-1 shadow-card ring-1 ring-line" />
       <Button variant="secondary" leading={<LogOut className="h-4 w-4" />} onClick={signOut}>Sign out</Button>
     </div>
   )

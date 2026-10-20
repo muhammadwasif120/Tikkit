@@ -1,5 +1,6 @@
 'use client'
 
+import ReportButton from '@/components/reports/ReportButton'
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check, Download, ExternalLink, Search, ShieldCheck, Star, UserPlus, X } from 'lucide-react'
@@ -13,7 +14,7 @@ import { cn } from '@/lib/cn'
 export type GuestRow = {
   id: string; eventId: string; eventTitle: string; name: string; phone: string | null; email: string | null
   status: string; isVip: boolean; ticket: string | null; due: number; paid: number | null; createdAt: string
-  plusOne: boolean; tier: string | null; idVerified: boolean
+  plusOne: boolean; tier: string | null; idVerified: boolean; avatar?: string | null; attendeeId?: string | null
   submission: { id: string; path: string; reference: string | null; amount: number } | null
 }
 export type EventOpt = { id: string; title: string; tickets: { id: string; name: string }[] }
@@ -172,7 +173,7 @@ export default function GuestsClient({ rows, events, initialEvent, initialFilter
                     <Td><input type="checkbox" aria-label={`Select ${r.name}`} checked={sel.has(r.id)} onChange={() => setSel(s => { const n = new Set(s); if (n.has(r.id)) n.delete(r.id); else n.add(r.id); return n })} className="h-4 w-4 accent-[rgb(var(--k-accent))]" /></Td>
                     <Td>
                       <div className="flex items-center gap-3">
-                        <Avatar name={r.name} size={36} />
+                        <Avatar name={r.name} src={r.avatar} size={36} />
                         <div className="min-w-0">
                           <p className="truncate text-sm font-medium text-fg">{r.name}{r.plusOne && <span className="ml-1.5 text-xs text-muted">+1</span>}</p>
                           <p className="truncate text-xs text-muted">{r.phone ?? r.email ?? '—'} · {r.eventTitle}</p>
@@ -195,6 +196,7 @@ export default function GuestsClient({ rows, events, initialEvent, initialFilter
                     </Td>
                     <Td className="text-right">
                       <div className="flex justify-end gap-1.5">
+                        {r.attendeeId && <ReportButton kind="attendee" subjectId={r.attendeeId} subjectName={r.name} icon />}
                         {r.status === 'payment_submitted' && r.submission && <Button size="sm" variant="ghost" onClick={() => openProof(r)} leading={<ExternalLink className="h-3.5 w-3.5" />}>Proof</Button>}
                         {reviewable && <Button size="sm" onClick={() => approve(r)} loading={pending}>Approve</Button>}
                         {reviewable && <Button size="sm" variant="ghost" aria-label={`Decline ${r.name}`} onClick={() => reject(r)}><X className="h-4 w-4" /></Button>}

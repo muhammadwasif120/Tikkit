@@ -16,7 +16,7 @@ const plans = [
 const highlights: Record<string, string[]> = {
   starter: ['3 events a month', '150 guests per event', 'QR tickets and the door scanner', '2 gate staff links'],
   growth: ['10 events a month', '1,000 guests per event', 'Unlimited promoters and coupons', 'Your logo, full analytics'],
-  pro: ['Unlimited events and guests', 'Commission statements', 'White label with your accent', 'Named contact and onboarding'],
+  pro: ['Unlimited events and guests', 'Spaces, retreats and commission statements', 'White label with your accent', 'Named contact and onboarding'],
 }
 
 const rows: { group: string; items: { label: string; v: [Cell, Cell, Cell] }[] }[] = [
@@ -34,6 +34,12 @@ const rows: { group: string; items: { label: string; v: [Cell, Cell, Cell] }[] }
     { label: 'Coupon codes and QR links', v: [false, true, true] },
     { label: 'Commission statements (PDF)', v: [false, false, true] },
     { label: 'Email blasts per month', v: [false, '2,000', '10,000'] },
+  ] },
+  { group: 'Beyond events', items: [
+    { label: 'Classes and passes', v: ['1 series', '5 series', 'Unlimited'] },
+    { label: 'Weekly and monthly memberships', v: [false, true, true] },
+    { label: 'Spaces and reservations', v: [false, false, true] },
+    { label: 'Retreat planning for companies', v: [false, false, true] },
   ] },
   { group: 'Insight', items: [
     { label: 'Guest score', v: ['Band badge', 'Full history', 'History and repeat guest insights'] },

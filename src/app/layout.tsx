@@ -1,12 +1,14 @@
 import type { Metadata, Viewport } from 'next'
 import { DM_Sans, Sora, Geist, Geist_Mono } from 'next/font/google'
-import { cookies } from 'next/headers'
 import './globals.css'
 import '../styles/kit.css'
-import { ThemeProvider, type AppTheme } from '@/components/theme/ThemeProvider'
+import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import WAHelpWidget from '@/components/ui/WAHelpWidget'
 import { Analytics } from '@vercel/analytics/react'
 import { AttendeeDemoHost } from '@/components/demo/AttendeeDemoHost'
+import PwaRegister from '@/components/pwa/PwaRegister'
+import InstallPrompt from '@/components/pwa/InstallPrompt'
+import OfflineBanner from '@/components/pwa/OfflineBanner'
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { GoogleAnalytics } from '@next/third-parties/google'
 
@@ -37,7 +39,7 @@ const sora = Sora({
 })
 
 export const viewport: Viewport = {
-  themeColor: '#1E5EFF',
+  themeColor: '#070911',
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
@@ -105,18 +107,16 @@ export const metadata: Metadata = {
   },
 }
 
-const VALID_THEMES: AppTheme[] = ['light', 'dark']
+// Dark is the default until the visitor picks light.
+const THEME_SCRIPT = "try{var m=document.cookie.match(/(?:^|; )tikkit-theme=([^;]+)/);var t=m&&decodeURIComponent(m[1]);if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}"
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies()
-  const rawCookie = cookieStore.get('tikkit-theme')?.value
-  const hasCookie = VALID_THEMES.includes(rawCookie as AppTheme)
-  // Dark is the default until the user picks light in Settings.
-  const theme: AppTheme = hasCookie ? (rawCookie as AppTheme) : 'dark'
-
+  // The saved theme is applied by the tiny script below, before the first paint. Reading the cookie on the server
+  // would make every page in the app dynamic, so the public pages could never be served from the edge cache.
   return (
-    <html lang="en-PK" className={`${dmSans.variable} ${sora.variable} ${geist.variable} ${geistMono.variable}`} data-theme={theme}>
+    <html lang="en-PK" className={`${dmSans.variable} ${sora.variable} ${geist.variable} ${geistMono.variable}`} data-theme="dark" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -191,35 +191,26 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             })
           }}
         />
-        {/* Clash Display / Cabinet Grotesk — used only by the marketing
-            landing pages (HomeClient, coming-soon, corporate, pulse, the
-            vendor/venue/artist landers), which hardcode the font-family
-            inline rather than going through --font-display. Sora (below,
-            via next/font) is the CRM/guest display font. */}
-        <link rel="preconnect" href="https://api.fontshare.com" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://api.fontshare.com" />
-        <link
-          href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=cabinet-grotesk@400,500,700,800&display=swap"
-          rel="stylesheet"
-        />
-
         {/* PWA manifest handled natively by app/manifest.ts */}
 
         {/* iOS Web App */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-title" content="Tikkit" />
+        <meta name="apple-mobile-web-app-title" content="TIKKIT X" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
         {/* Android / legacy */}
         <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="msapplication-TileColor" content="#1E5EFF" />
+        <meta name="msapplication-TileColor" content="#070911" />
         <meta name="msapplication-tap-highlight" content="no" />
       </head>
       <body className="antialiased">
-        <ThemeProvider initialTheme={theme}>
+        <ThemeProvider>
           {children}
           <WAHelpWidget />
           <AttendeeDemoHost />
+          <PwaRegister />
+          <InstallPrompt />
+          <OfflineBanner />
         </ThemeProvider>
         <Analytics />
         <SpeedInsights />

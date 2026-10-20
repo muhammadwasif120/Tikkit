@@ -44,7 +44,21 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // The token is verified here against the project's public keys, with no round trip to the auth server
+  // (and it is refreshed when it has expired). Data access is still checked by the database on every query.
+  const { data: claimsData } = await supabase.auth.getClaims()
+  const user = claimsData?.claims?.sub ? { id: claimsData.claims.sub } : null
+
+  // One read of the profile serves the completion gate, the suspension check and the role checks below.
+  type Gate = { role: string | null; is_complete: boolean | null; suspended_at: string | null } | null
+  let gateRead: Promise<Gate> | null = null
+  const loadGate = (): Promise<Gate> => {
+    gateRead ??= (async () => {
+      const { data } = await supabase.from('profiles').select('role, is_complete, suspended_at').eq('id', user!.id).maybeSingle()
+      return data as Gate
+    })()
+    return gateRead
+  }
 
   // ── Mandatory profile completion gate ──────────────────────────────────────
   // Guests and organizers must have phone, ID (CNIC/passport), city, and their
@@ -66,7 +80,7 @@ export async function updateSession(request: NextRequest) {
   // shows up in latency, switch to a single denormalised profiles.profile_complete
   // boolean kept in sync by a trigger.
   const completionExempt = [
-    '/auth', '/api', '/master', '/design',
+    '/auth', '/api', '/master', '/design', '/suspended', '/offline', '/open',
     '/privacy', '/terms', '/security', '/about', '/contact', '/how-it-works',
   ]
   const isCompletionExempt = completionExempt.some(p => pathname === p || pathname.startsWith(p + '/'))
@@ -74,11 +88,10 @@ export async function updateSession(request: NextRequest) {
   if (user && !isCompletionExempt) {
     // profiles.is_complete is maintained by the database: attendees need phone, date of
     // birth, city and gender; organizers need company, phone and city.
-    const { data: gate } = await supabase
-      .from('profiles')
-      .select('role, is_complete')
-      .eq('id', user.id)
-      .maybeSingle()
+    const gate = await loadGate()
+
+    // A suspended account can only see the suspended page and sign out.
+    if (gate?.suspended_at && !pathname.startsWith('/suspended')) return NextResponse.redirect(new URL('/suspended', request.url))
 
     if ((gate?.role === 'attendee' || gate?.role === 'organizer') && gate.is_complete === false) {
       return NextResponse.redirect(new URL('/auth/complete-profile', request.url))
@@ -112,6 +125,9 @@ export async function updateSession(request: NextRequest) {
     '/pricing',
     '/about',
     '/security',
+    '/suspended',
+    '/offline',
+    '/open',
     '/lp',               // Preserved landing pages (/lp/underground etc.)
     '/design',           // internal design review (404s in production)
   ]
@@ -123,8 +139,7 @@ export async function updateSession(request: NextRequest) {
   if (isPublic) {
     if (user && request.method === 'GET') {
       if (pathname === '/auth/login') {
-        const { data: profile } = await supabase
-          .from('profiles').select('role').eq('id', user.id).single()
+        const profile = await loadGate()
         const role = profile?.role ?? 'attendee'
 
         const dest = role === 'attendee' ? '/guest'
@@ -136,8 +151,7 @@ export async function updateSession(request: NextRequest) {
       if (pathname === '/master/login') {
         // Authoritative check against profiles.role (not user_metadata, which is
         // user-writable) — also prevents a redirect loop with the /master gate.
-        const { data: profile } = await supabase
-          .from('profiles').select('role').eq('id', user.id).single()
+        const profile = await loadGate()
         if (profile?.role === 'admin') {
           return NextResponse.redirect(new URL('/master', request.url))
         }
@@ -159,8 +173,7 @@ export async function updateSession(request: NextRequest) {
   // Never gate access on user_metadata.role — it is writable by the user via
   // supabase.auth.updateUser, so using it for authorization would let anyone
   // self-elevate to admin.
-  const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
+  const profile = await loadGate()
   const role = profile?.role ?? 'attendee'
 
   if (pathname.startsWith('/master')) {

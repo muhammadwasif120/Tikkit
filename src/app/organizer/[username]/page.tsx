@@ -1,3 +1,4 @@
+import ReportButton from '@/components/reports/ReportButton'
 import { safeHttpUrl, safeInstagram } from '@/lib/url'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -61,6 +62,7 @@ export default async function OrganizerPage({ params }: Props) {
               {safeHttpUrl(org.website) && <ButtonLink href={safeHttpUrl(org.website)!} variant="ghost" size="sm" target="_blank" rel="noopener noreferrer" leading={<Globe className="h-4 w-4" />}>Website</ButtonLink>}
             </div>
           </div>
+          <div className="px-6 pb-4"><ReportButton kind="organizer" subjectId={org.id!} subjectName={name} /></div>
           {org.bio && <p className="max-w-3xl whitespace-pre-line px-6 pb-6 text-[15px] leading-relaxed text-muted">{org.bio}</p>}
         </div>
 

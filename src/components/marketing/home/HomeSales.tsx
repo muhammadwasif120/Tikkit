@@ -33,8 +33,8 @@ export function ToolsStrip() {
 
 const PLANS = [
   { id: 'starter', name: 'Starter', month: 2999, year: 29990, note: 'Your first events', points: ['3 events a month', '150 guests per event', '2 door team links'] },
-  { id: 'growth', name: 'Growth', month: 7999, year: 79990, note: 'Most organizers pick this', featured: true, points: ['10 events a month', '1,000 guests per event', 'Automatic location reveal', 'Unlimited promoters', 'Classes and spaces'] },
-  { id: 'pro', name: 'Pro', month: 12999, year: 129990, note: 'Agencies, companies and venues', points: ['Unlimited events and guests', 'Retreat itineraries for companies', 'White label tickets and pages', 'Commission statements'] },
+  { id: 'growth', name: 'Growth', month: 7999, year: 79990, note: 'Most organizers pick this', featured: true, points: ['10 events a month', '1,000 guests per event', 'Automatic location reveal', 'Unlimited promoters', 'Classes, passes and memberships'] },
+  { id: 'pro', name: 'Pro', month: 12999, year: 129990, note: 'Agencies, companies and venues', points: ['Unlimited events and guests', 'Spaces and reservations', 'Retreat itineraries for companies', 'White label tickets and pages', 'Commission statements'] },
 ]
 const fmt = (n: number) => n.toLocaleString('en-PK')
 

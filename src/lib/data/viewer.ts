@@ -12,11 +12,21 @@ export type Entitlements = {
   usage: Record<string, number>
 }
 
-/** Signed in user with their profile. Cached per request. */
+/** The parts of the signed in user that pages use. Read from the verified token, no network call. */
+export type ViewerUser = { id: string; email: string | undefined; app_metadata: Record<string, unknown> }
+
+/**
+ * Signed in user with their profile. Cached per request.
+ * The token's signature and expiry are checked locally against the project's public keys (getClaims), which saves a
+ * round trip to the auth server on every page. Anything that changes data still goes through the database, which
+ * checks the same token, so this is not a weaker check for data access.
+ */
 export const getViewer = cache(async () => {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
+  const { data } = await supabase.auth.getClaims()
+  const c = data?.claims
+  if (!c?.sub) return null
+  const user: ViewerUser = { id: c.sub, email: c.email as string | undefined, app_metadata: (c.app_metadata ?? {}) as Record<string, unknown> }
 
   const { data: profile } = await supabase
     .from('profiles')

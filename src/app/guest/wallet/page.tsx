@@ -4,6 +4,7 @@ import { Badge, Card, CardBody, CardHeader, EmptyState, PageHeader, Progress, ty
 import { loadBookings } from '@/lib/attendee'
 import { requireAttendee } from '@/lib/data/viewer'
 import { fmtDate, pkr } from '@/lib/format'
+import { PERIOD_WORD, STATE_LABEL, STATE_TONE } from '@/lib/membership'
 
 export const metadata = { title: 'Wallet' }
 
@@ -42,9 +43,10 @@ export default async function WalletPage() {
           <ul className="grid gap-3 sm:grid-cols-2">
             {passes.map(p => (
               <li key={p.id} className="rounded-2xl bg-surface p-5 shadow-card ring-1 ring-line">
-                <div className="flex items-center justify-between gap-2"><p className="font-semibold text-fg">{p.title}</p><Badge tone={p.status === 'active' ? 'success' : 'warning'}>{p.status.replace('_', ' ')}</Badge></div>
-                {p.total ? <><div className="mt-4"><Progress value={Math.round(((p.total - (p.left ?? 0)) / p.total) * 100)} /></div><p className="mt-2 text-sm text-muted"><span className="font-semibold text-fg tnum">{p.left}</span> of {p.total} sessions left</p></> : <p className="mt-4 text-sm text-muted">Unlimited sessions</p>}
-                {p.validUntil && <p className="mt-1 text-xs text-subtle">Valid until {fmtDate(p.validUntil)}</p>}
+                <div className="flex items-center justify-between gap-2"><p className="font-semibold text-fg">{p.title}</p>{p.mstate ? <Badge tone={STATE_TONE[p.mstate]}>{STATE_LABEL[p.mstate]}</Badge> : <Badge tone={p.status === 'active' ? 'success' : 'warning'}>{p.status.replace('_', ' ')}</Badge>}</div>
+                {p.period && <p className="mt-1 text-xs text-muted">Membership · {pkr(p.due)} / {PERIOD_WORD[p.period]}{p.mstate && ['due_soon', 'overdue', 'lapsed'].includes(p.mstate) ? <> · <Link href="/guest/tickets" className="font-medium text-accent hover:underline">Pay now</Link></> : null}</p>}
+                {p.total ? <><div className="mt-4"><Progress value={Math.round(((p.total - (p.left ?? 0)) / p.total) * 100)} /></div><p className="mt-2 text-sm text-muted"><span className="font-semibold text-fg tnum">{p.left}</span> of {p.total} sessions left{p.period ? ` this ${PERIOD_WORD[p.period]}` : ''}</p></> : <p className="mt-4 text-sm text-muted">Unlimited sessions</p>}
+                {p.validUntil && <p className="mt-1 text-xs text-subtle">{p.period ? 'Paid until' : 'Valid until'} {fmtDate(p.validUntil)}</p>}
               </li>
             ))}
           </ul>

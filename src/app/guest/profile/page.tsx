@@ -27,7 +27,7 @@ export default async function ProfilePage() {
           <li key={l.href}><Link href={l.href} className="flex h-full flex-col rounded-2xl bg-surface p-4 shadow-card ring-1 ring-line transition-colors hover:bg-raised"><l.icon className="h-5 w-5 text-accent" aria-hidden /><span className="mt-3 text-sm font-semibold text-fg">{l.label}</span><span className="text-xs text-muted">{l.note}</span></Link></li>
         ))}
       </ul>
-      <AttendeeProfile initial={{ name: profile.full_name ?? '', city: profile.city ?? '', phone: priv?.phone ?? '', gender: priv?.gender ?? '', dob: priv?.date_of_birth ?? '', email: user.email ?? '' }} />
+      <AttendeeProfile avatarUrl={profile.avatar_url} initial={{ name: profile.full_name ?? '', city: profile.city ?? '', phone: priv?.phone ?? '', gender: priv?.gender ?? '', dob: priv?.date_of_birth ?? '', email: user.email ?? '' }} />
       <EmailPrefs initial={emailUpdates} />
       <section id="verify" className="space-y-4">
         <h2 className="text-lg font-semibold tracking-tight text-fg">Verify your ID</h2>

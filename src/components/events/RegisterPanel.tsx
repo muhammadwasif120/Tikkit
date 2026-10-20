@@ -94,6 +94,7 @@ export default function RegisterPanel({ eventId, slug, tiers, approval, signedIn
         {s === 'awaiting_payment' && (
           <>
             <Status icon={<Upload className="h-6 w-6 text-accent" />} title={`Pay ${pkr(reg.price_due_pkr)}`} body="Send the amount, then upload the screenshot." />
+            <p className="rounded-xl bg-raised px-3.5 py-2.5 text-xs leading-relaxed text-muted">You pay the organizer directly. TIKKIT X does not receive or hold this money, and any refund is the organizer's responsibility.</p>
             {accounts.map((a, i) => (
               <div key={i} className="rounded-xl bg-raised p-3.5 text-sm shadow-[inset_0_0_0_1px_rgb(var(--k-line))]">
                 <p className="font-medium text-fg">{a.bank_name ?? a.method} <span className="font-normal text-muted">· {a.account_title}</span></p>

@@ -12,31 +12,6 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.1"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
       admin_audit_log: {
@@ -78,6 +53,46 @@ export type Database = {
           {
             foreignKeyName: "admin_audit_log_actor_id_fkey"
             columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attendee_interests: {
+        Row: {
+          category_id: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendee_interests_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "event_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendee_interests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendee_interests_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "public_organizers"
             referencedColumns: ["id"]
@@ -548,6 +563,39 @@ export type Database = {
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      demo_config: {
+        Row: {
+          id: boolean
+          last_reset: string | null
+          organizer_id: string
+        }
+        Insert: {
+          id?: boolean
+          last_reset?: string | null
+          organizer_id: string
+        }
+        Update: {
+          id?: boolean
+          last_reset?: string | null
+          organizer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "demo_config_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "demo_config_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
             referencedColumns: ["id"]
           },
         ]
@@ -1523,12 +1571,15 @@ export type Database = {
       }
       pass_products: {
         Row: {
+          billing_period: string | null
           created_at: string
+          grace_days: number
           id: string
           is_active: boolean
           kind: Database["public"]["Enums"]["pass_kind"]
           name: string
           organizer_id: string
+          period_sessions: number | null
           price_pkr: number
           series_id: string | null
           sessions_count: number | null
@@ -1536,12 +1587,15 @@ export type Database = {
           validity_days: number
         }
         Insert: {
+          billing_period?: string | null
           created_at?: string
+          grace_days?: number
           id?: string
           is_active?: boolean
           kind: Database["public"]["Enums"]["pass_kind"]
           name: string
           organizer_id: string
+          period_sessions?: number | null
           price_pkr: number
           series_id?: string | null
           sessions_count?: number | null
@@ -1549,12 +1603,15 @@ export type Database = {
           validity_days?: number
         }
         Update: {
+          billing_period?: string | null
           created_at?: string
+          grace_days?: number
           id?: string
           is_active?: boolean
           kind?: Database["public"]["Enums"]["pass_kind"]
           name?: string
           organizer_id?: string
+          period_sessions?: number | null
           price_pkr?: number
           series_id?: string | null
           sessions_count?: number | null
@@ -1596,13 +1653,20 @@ export type Database = {
         Row: {
           approved_at: string | null
           attendee_id: string
+          billing_period: string | null
           created_at: string
+          cycles_paid: number
+          grace_days: number
           id: string
+          last_reminded_at: string | null
+          notice_for: string | null
+          notice_stage: number
           organizer_id: string
           price_due_pkr: number
           price_paid_pkr: number | null
           product_id: string
           qr_token: string
+          reminder_count: number
           sessions_total: number | null
           sessions_used: number
           status: Database["public"]["Enums"]["pass_status"]
@@ -1613,13 +1677,20 @@ export type Database = {
         Insert: {
           approved_at?: string | null
           attendee_id: string
+          billing_period?: string | null
           created_at?: string
+          cycles_paid?: number
+          grace_days?: number
           id?: string
+          last_reminded_at?: string | null
+          notice_for?: string | null
+          notice_stage?: number
           organizer_id: string
           price_due_pkr?: number
           price_paid_pkr?: number | null
           product_id: string
           qr_token?: string
+          reminder_count?: number
           sessions_total?: number | null
           sessions_used?: number
           status?: Database["public"]["Enums"]["pass_status"]
@@ -1630,13 +1701,20 @@ export type Database = {
         Update: {
           approved_at?: string | null
           attendee_id?: string
+          billing_period?: string | null
           created_at?: string
+          cycles_paid?: number
+          grace_days?: number
           id?: string
+          last_reminded_at?: string | null
+          notice_for?: string | null
+          notice_stage?: number
           organizer_id?: string
           price_due_pkr?: number
           price_paid_pkr?: number | null
           product_id?: string
           qr_token?: string
+          reminder_count?: number
           sessions_total?: number | null
           sessions_used?: number
           status?: Database["public"]["Enums"]["pass_status"]
@@ -2083,6 +2161,8 @@ export type Database = {
           id: string
           is_complete: boolean
           role: Database["public"]["Enums"]["user_role"]
+          suspended_at: string | null
+          suspended_reason: string | null
           ui_theme: string
           updated_at: string
           username: string | null
@@ -2096,6 +2176,8 @@ export type Database = {
           id: string
           is_complete?: boolean
           role?: Database["public"]["Enums"]["user_role"]
+          suspended_at?: string | null
+          suspended_reason?: string | null
           ui_theme?: string
           updated_at?: string
           username?: string | null
@@ -2109,6 +2191,8 @@ export type Database = {
           id?: string
           is_complete?: boolean
           role?: Database["public"]["Enums"]["user_role"]
+          suspended_at?: string | null
+          suspended_reason?: string | null
           ui_theme?: string
           updated_at?: string
           username?: string | null
@@ -2444,6 +2528,94 @@ export type Database = {
             columns: ["ticket_type_id"]
             isOneToOne: false
             referencedRelation: "ticket_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          admin_notes: string | null
+          category: string
+          created_at: string
+          details: string
+          event_id: string | null
+          id: string
+          reporter_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          subject_id: string
+          subject_kind: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          category: string
+          created_at?: string
+          details: string
+          event_id?: string | null
+          id?: string
+          reporter_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          subject_id: string
+          subject_kind: string
+        }
+        Update: {
+          admin_notes?: string | null
+          category?: string
+          created_at?: string
+          details?: string
+          event_id?: string | null
+          id?: string
+          reporter_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          subject_id?: string
+          subject_kind?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "event_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reports_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "public_organizers"
             referencedColumns: ["id"]
           },
         ]
@@ -3824,10 +3996,12 @@ export type Database = {
       }
       public_pass_products: {
         Row: {
+          billing_period: string | null
           id: string | null
           kind: Database["public"]["Enums"]["pass_kind"] | null
           name: string | null
           organizer_id: string | null
+          period_sessions: number | null
           price_pkr: number | null
           series_id: string | null
           sessions_count: number | null
@@ -4010,6 +4184,17 @@ export type Database = {
         }
         Returns: string
       }
+      admin_dashboard: { Args: never; Returns: Json }
+      admin_list_attendees: {
+        Args: { p_limit?: number; p_offset?: number; p_search?: string }
+        Returns: Json
+      }
+      admin_list_organizers: { Args: { p_search?: string }; Returns: Json }
+      admin_list_reports: { Args: { p_status?: string }; Returns: Json }
+      admin_set_account_status: {
+        Args: { p_reason?: string; p_suspend: boolean; p_user: string }
+        Returns: Json
+      }
       admin_set_event_status: {
         Args: {
           p_event: string
@@ -4017,6 +4202,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_upcoming_events: {
+        Args: { p_days?: number; p_limit?: number }
+        Returns: Json
+      }
+      admin_update_report: {
+        Args: { p_notes?: string; p_report: string; p_status: string }
+        Returns: undefined
+      }
+      admin_user_detail: { Args: { p_user: string }; Returns: Json }
       book_class_session: {
         Args: { p_pass?: string; p_session: string }
         Returns: string
@@ -4061,6 +4255,7 @@ export type Database = {
         Args: { p_email?: string; p_name: string; p_phone?: string }
         Returns: Json
       }
+      demo_reseed: { Args: { p_force?: boolean }; Returns: boolean }
       disable_retreat_sharing: {
         Args: { p_retreat: string }
         Returns: undefined
@@ -4250,9 +4445,47 @@ export type Database = {
         }
       }
       invite_team_member: { Args: { p_email: string }; Returns: string }
+      mark_membership_reminded: { Args: { p_pass: string }; Returns: undefined }
       master_modules_overview: { Args: never; Returns: Json }
       master_overview: { Args: never; Returns: Json }
+      membership_roster: {
+        Args: never
+        Returns: {
+          attendee_id: string
+          billing_period: string
+          cycles_paid: number
+          full_name: string
+          grace_days: number
+          id: string
+          last_reminded_at: string
+          pending_payment_id: string
+          phone: string
+          price_pkr: number
+          product_name: string
+          reminder_count: number
+          sessions_total: number
+          sessions_used: number
+          state: string
+          status: string
+          valid_until: string
+        }[]
+      }
+      my_collectibles: {
+        Args: never
+        Returns: {
+          attended_total: number
+          registration_id: string
+          serial: number
+        }[]
+      }
       my_entitlements: { Args: never; Returns: Json }
+      my_guest_avatars: {
+        Args: never
+        Returns: {
+          attendee_id: string
+          avatar_url: string
+        }[]
+      }
       my_retreats: {
         Args: never
         Returns: {
@@ -4278,6 +4511,7 @@ export type Database = {
         Returns: Json
       }
       process_class_sessions: { Args: never; Returns: number }
+      process_memberships: { Args: never; Returns: number }
       process_no_shows: { Args: never; Returns: number }
       process_space_bookings: { Args: never; Returns: number }
       promoter_dashboard: { Args: { p_token: string }; Returns: Json }
@@ -4286,6 +4520,10 @@ export type Database = {
         Returns: string
       }
       purchase_pass: { Args: { p_product: string }; Returns: string }
+      record_membership_payment: {
+        Args: { p_note?: string; p_pass: string }
+        Returns: undefined
+      }
       register_for_event: {
         Args: {
           p_code?: string
@@ -4342,6 +4580,7 @@ export type Database = {
           slot_start: string
         }[]
       }
+      stop_membership: { Args: { p_pass: string }; Returns: undefined }
       submit_id_verification: {
         Args: {
           p_expiry?: string
@@ -4364,6 +4603,16 @@ export type Database = {
           p_kind: Database["public"]["Enums"]["product_kind"]
           p_reference?: string
           p_screenshot_path: string
+          p_subject: string
+        }
+        Returns: string
+      }
+      submit_report: {
+        Args: {
+          p_category: string
+          p_details: string
+          p_event?: string
+          p_kind: string
           p_subject: string
         }
         Returns: string
@@ -4585,9 +4834,6 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
     Enums: {
       admin_status: ["live", "flagged", "suspended"],

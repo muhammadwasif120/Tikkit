@@ -5,6 +5,7 @@ import type { BadgeTone } from '@/components/kit'
 import type { ClosedRow, TicketRow } from '@/components/attendee/TicketsClient'
 import type { Collectible } from '@/components/attendee/CollectibleCard'
 import type { ModRow, RetreatLink } from '@/components/attendee/ModuleBookings'
+import { membershipState, type Period } from '@/lib/membership'
 
 type Supa = SupabaseClient<Database>
 
@@ -82,12 +83,15 @@ export type Bookings = { rows: ModRow[]; retreats: RetreatLink[] }
 /** Classes, passes, reservations and retreat invites. */
 export async function loadBookings(supabase: Supa, userId: string): Promise<Bookings> {
   const now = Date.now()
-  const [cb, sb, pp, rt] = await Promise.all([
+  const [cb, sb, pp, rt, pay] = await Promise.all([
     supabase.from('class_bookings').select('id, status, qr_token, price_due_pkr, organizer_id, class_sessions(starts_at, ends_at), class_series(title, venue_name, area_label, city)').eq('attendee_id', userId).not('status', 'in', '(rejected)').order('created_at', { ascending: false }).limit(30),
     supabase.from('space_bookings').select('id, status, qr_token, price_due_pkr, organizer_id, starts_at, ends_at, spaces(name, address, area_label, city)').eq('attendee_id', userId).not('status', 'in', '(rejected)').order('starts_at', { ascending: false }).limit(30),
-    supabase.from('pass_purchases').select('id, status, qr_token, price_due_pkr, organizer_id, sessions_total, sessions_used, valid_until, pass_products(name)').eq('attendee_id', userId).in('status', ['awaiting_payment', 'payment_submitted', 'active']).limit(20),
+    supabase.from('pass_purchases').select('id, status, qr_token, price_due_pkr, organizer_id, sessions_total, sessions_used, valid_until, billing_period, grace_days, pass_products(name)').eq('attendee_id', userId)
+      .or('status.in.(awaiting_payment,payment_submitted,active),and(billing_period.not.is.null,status.in.(expired,exhausted))').limit(20),
     supabase.rpc('my_retreats'),
+    supabase.from('product_payments').select('subject_id').eq('payer_id', userId).eq('kind', 'pass_purchase').eq('status', 'submitted'),
   ])
+  const waiting = new Set(((pay.data ?? []) as { subject_id: string }[]).map(x => x.subject_id))
   type A = Record<string, unknown>
   const isPast = (w: string | null) => !!w && new Date(w).getTime() < now
   const place = (a: A | null, ...keys: string[]) => keys.map(k => a?.[k] as string | null).filter(Boolean).join(', ')
@@ -97,11 +101,17 @@ export async function loadBookings(supabase: Supa, userId: string): Promise<Book
       return { id: r.id as string, kind: 'class_booking' as const, title: ((r.class_series as A | null)?.title as string) ?? 'Class', when, end: (s?.ends_at as string) ?? null, where: place(r.class_series as A | null, 'venue_name', 'area_label'), status: r.status as string, token: r.qr_token as string, due: r.price_due_pkr as number, organizerId: r.organizer_id as string, past: isPast(when) }
     }),
     ...((sb.data ?? []) as unknown as A[]).map(r => ({ id: r.id as string, kind: 'space_booking' as const, title: ((r.spaces as A | null)?.name as string) ?? 'Space', when: r.starts_at as string, end: r.ends_at as string, where: place(r.spaces as A | null, 'address', 'area_label'), status: r.status as string, token: r.qr_token as string, due: r.price_due_pkr as number, organizerId: r.organizer_id as string, past: isPast(r.starts_at as string) })),
-    ...((pp.data ?? []) as unknown as A[]).map(r => ({
-      id: r.id as string, kind: 'pass_purchase' as const, title: ((r.pass_products as A | null)?.name as string) ?? 'Pass', when: null, status: r.status as string, token: r.qr_token as string, due: r.price_due_pkr as number, organizerId: r.organizer_id as string,
-      note: r.sessions_total === null ? 'Unlimited sessions' : `${(r.sessions_total as number) - (r.sessions_used as number)} sessions left`,
-      left: r.sessions_total === null ? null : (r.sessions_total as number) - (r.sessions_used as number), total: (r.sessions_total as number | null) ?? null, validUntil: (r.valid_until as string) ?? null,
-    })),
+    ...((pp.data ?? []) as unknown as A[]).map(r => {
+      const period = (r.billing_period as Period | null) ?? null
+      const validUntil = (r.valid_until as string) ?? null
+      const mstate = period ? membershipState({ status: r.status as string, validUntil, period, pending: waiting.has(r.id as string) }) : undefined
+      return {
+        id: r.id as string, kind: 'pass_purchase' as const, title: ((r.pass_products as A | null)?.name as string) ?? 'Pass', when: null, status: r.status as string, token: r.qr_token as string, due: r.price_due_pkr as number, organizerId: r.organizer_id as string,
+        note: r.sessions_total === null ? 'Unlimited sessions' : `${(r.sessions_total as number) - (r.sessions_used as number)} sessions left`,
+        left: r.sessions_total === null ? null : (r.sessions_total as number) - (r.sessions_used as number), total: (r.sessions_total as number | null) ?? null, validUntil,
+        period: period ?? undefined, graceDays: period ? (r.grace_days as number) : undefined, mstate,
+      }
+    }),
   ]
   const retreats = ((rt.data ?? []) as { retreat_id: string; title: string; destination: string | null; starts_on: string; ends_on: string; qr_token: string }[])
     .map(r => ({ id: r.retreat_id, title: r.title, destination: r.destination, starts_on: r.starts_on, ends_on: r.ends_on, qr_token: r.qr_token }))

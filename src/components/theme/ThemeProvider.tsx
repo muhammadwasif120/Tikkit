@@ -14,19 +14,14 @@ const ThemeContext = createContext<ThemeContextValue>({
   setTheme: () => {},
 })
 
-export function ThemeProvider({
-  children,
-  initialTheme,
-}: {
-  children: React.ReactNode
-  initialTheme: AppTheme
-}) {
-  const [theme, setThemeState] = useState<AppTheme>(initialTheme)
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // The page itself is theme-neutral HTML; a script in <head> has already put the saved theme on <html> before paint.
+  const [theme, setThemeState] = useState<AppTheme>('dark')
 
-  // Sync to DOM immediately — avoids flash of wrong theme on hydration
   useEffect(() => {
-    document.documentElement.dataset.theme = initialTheme
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    const t = document.documentElement.dataset.theme
+    if (t === 'light' || t === 'dark') setThemeState(t)
+  }, [])
 
   const setTheme = (t: AppTheme) => {
     setThemeState(t)

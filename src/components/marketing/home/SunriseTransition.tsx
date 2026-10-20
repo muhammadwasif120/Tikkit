@@ -49,17 +49,18 @@ export function SunriseTransition() {
   const reduce = useReducedMotion()
   const { scrollYProgress: p } = useScroll({ target: ref, offset: ['start start', 'end end'] })
 
-  // 0 to 0.32: a night timeline lights up on the dark sky. 0.32 to 1: dawn takes over.
+  // 0 to 0.3: a night timeline lights up on the dark sky. From 0.3 the headline and the dawn take over and stay.
   const bg = useTransform(p, [0, 0.32, 0.5, 0.68, 0.84, 0.94, 1], ['#070911', '#0d0b22', '#6d2c63', '#f08a6b', '#ffd9a0', '#fff1d8', '#fffaf1'])
   const starsOpacity = useTransform(p, [0.28, 0.5], [1, 0])
   const sunY = useTransform(p, [0.36, 0.92], ['120%', '8%'])
   const sunScale = useTransform(p, [0.36, 0.92], [0.7, 1.15])
   const hillsOpacity = useTransform(p, [0.42, 0.7], [0, 1])
-  const textOpacity = useTransform(p, [0.5, 0.6, 0.8, 0.9], [0, 1, 1, 0])
-  const textY = useTransform(p, [0.5, 0.6], [24, 0])
-  const textColor = useTransform(p, [0.5, 0.76, 0.9], ['#f4f0ff', '#fff7ec', '#3b2a1a'])
-  const timelineOpacity = useTransform(p, [0, 0.04, 0.27, 0.34], [0, 1, 1, 0])
-  const timelineY = useTransform(p, [0.27, 0.34], [0, -30])
+  // The headline takes over from the timeline with no empty stretch, and stays until the section scrolls away.
+  const textOpacity = useTransform(p, [0.29, 0.38], [0, 1])
+  const textY = useTransform(p, [0.29, 0.38], [24, 0])
+  const textColor = useTransform(p, [0.29, 0.6, 0.72], ['#f4f0ff', '#fff7ec', '#3b2a1a'])
+  const timelineOpacity = useTransform(p, [0, 0.04, 0.25, 0.31], [0, 1, 1, 0])
+  const timelineY = useTransform(p, [0.25, 0.31], [0, -30])
 
   if (reduce) {
     return (
